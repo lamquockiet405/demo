@@ -427,7 +427,7 @@ Lưu ý: Mỗi mã chỉ có giá trị sử dụng 01 lần duy nhất khi bạ
             </div>
           ) : (
             <>
-              {/* ─── TAB 1: THÔNG TIN CÁ NHÂN ──────────────────────────────── */}
+              {/* ─── TAB 1: THÔNG TIN CÁ NHÂN (UC05: View Profile & UC06: Edit Profile) ── */}
               {activeTab === 'profile' && (
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

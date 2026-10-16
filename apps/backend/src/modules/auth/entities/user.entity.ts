@@ -7,7 +7,6 @@ import {
   JoinTable,
 } from 'typeorm';
 import { Role } from './role.entity';
-import { BigIntTransformer } from '../../../database/base.entity';
 
 @Entity('users')
 export class User {

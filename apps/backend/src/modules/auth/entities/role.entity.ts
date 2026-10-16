@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { User } from './user.entity';
-import { BigIntTransformer } from '../../../database/base.entity';
 
 @Entity('roles')
 export class Role {
