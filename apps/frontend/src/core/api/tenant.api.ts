@@ -60,7 +60,7 @@ export interface UploadLogoInput {
 
 export const tenantApi = {
   /**
-   * Lấy cấu hình trường mầm non & pháp lý ATTP
+   * UC07: Lấy cấu hình trường mầm non & pháp lý ATTP (Configure School Information)
    */
   getProfile: async (): Promise<TenantProfile> => {
     const res = await apiClient.get<TenantProfile>('/tenant/profile');
@@ -68,7 +68,7 @@ export const tenantApi = {
   },
 
   /**
-   * Cập nhật thông tin trường mầm non
+   * UC07: Cập nhật thông tin trường mầm non & pháp lý ATTP
    */
   updateProfile: async (data: UpdateTenantProfileInput): Promise<TenantProfile> => {
     const res = await apiClient.patch<TenantProfile>('/tenant/profile', data);
@@ -76,7 +76,7 @@ export const tenantApi = {
   },
 
   /**
-   * Tải lên Logo trường học (kiểm soát định dạng & dung lượng tối đa 2MB)
+   * UC07: Tải lên Logo trường học (kiểm soát định dạng & dung lượng tối đa 2MB)
    */
   uploadLogo: async (data: UploadLogoInput) => {
     const res = await apiClient.post('/tenant/upload-logo', data);
@@ -84,7 +84,7 @@ export const tenantApi = {
   },
 
   /**
-   * Đồng bộ dữ liệu với Cơ sở dữ liệu ngành của Bộ GD&ĐT
+   * UC07: Đồng bộ dữ liệu với Cơ sở dữ liệu ngành của Bộ GD&ĐT
    */
   syncEducationDb: async () => {
     const res = await apiClient.post('/tenant/sync-education-db');

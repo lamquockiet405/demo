@@ -9,6 +9,9 @@ interface ParentAppPreviewModalProps {
   schoolName: string;
 }
 
+/**
+ * UC07: Modal xem trước giao diện phụ huynh theo cấu hình nhận diện thương hiệu trường
+ */
 export const ParentAppPreviewModal: React.FC<ParentAppPreviewModalProps> = ({
   isOpen,
   onClose,
