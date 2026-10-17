@@ -3,6 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
   ManyToMany,
   JoinTable,
 } from 'typeorm';
@@ -10,34 +12,59 @@ import { Role } from './role.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn({ type: 'bigint' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: any;
 
-  @Column({ length: 255, unique: true })
+  @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
+  tenantId: string | null;
+
+  @Column({ type: 'varchar', length: 255 })
   email: string;
 
-  @Column({ name: 'password_hash', length: 255 })
+  @Column({ type: 'varchar', length: 255, name: 'password_hash', select: false })
   passwordHash: string;
 
-  @Column({ name: 'full_name', length: 150 })
+  @Column({ type: 'varchar', length: 255, name: 'full_name' })
   fullName: string;
 
-  @Column({ length: 20, nullable: true })
-  phone: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  phone: string | null;
 
-  @Column({ length: 500, nullable: true })
-  avatar: string;
+  @Column({ type: 'text', name: 'avatar_url', nullable: true })
+  avatarUrl: string | null;
 
-  @Column({ length: 20, default: 'ACTIVE' })
+  get avatar(): string | null {
+    return this.avatarUrl;
+  }
+  set avatar(val: string | null) {
+    this.avatarUrl = val;
+  }
+
+  @Column({ type: 'varchar', length: 50, default: 'ACTIVE' })
   status: string;
 
-  @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
-  lastLoginAt: Date;
+  @Column({ type: 'boolean', name: 'two_factor_enabled', default: false })
+  twoFactorEnabled: boolean;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @Column({ type: 'varchar', length: 255, name: 'two_factor_secret', nullable: true, select: false })
+  twoFactorSecret: string | null;
+
+  @Column({ type: 'text', array: true, name: 'two_factor_recovery_codes', nullable: true, select: false })
+  twoFactorRecoveryCodes: string[] | null;
+
+  @Column({ type: 'timestamptz', name: 'last_login_at', nullable: true })
+  lastLoginAt: Date | null;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 
-  @ManyToMany(() => Role, (role) => role.users, { eager: true, cascade: false })
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
+  deletedAt: Date | null;
+
+  @ManyToMany(() => Role, { eager: true, cascade: false })
   @JoinTable({
     name: 'user_roles',
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },

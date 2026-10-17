@@ -27,6 +27,9 @@ interface StaffDrawerProps {
   onSubmit: (payload: CreateStaffPayload | UpdateStaffPayload, staffId?: string) => Promise<void>;
 }
 
+/**
+ * UC09 & UC10: Drawer tạo mới và cập nhật tài khoản nhân sự
+ */
 export const StaffDrawer: React.FC<StaffDrawerProps> = ({
   isOpen,
   staff,
