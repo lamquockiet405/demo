@@ -10,6 +10,9 @@ interface SoftDeleteConfirmModalProps {
   onConfirm: () => void;
 }
 
+/**
+ * UC08 - UC11: Modal xác nhận lưu trữ / xóa mềm tài khoản nhân sự
+ */
 export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
   isOpen,
   staff,
