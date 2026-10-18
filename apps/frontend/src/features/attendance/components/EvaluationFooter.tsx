@@ -6,7 +6,7 @@ export const EvaluationFooter: React.FC = () => {
       <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
         <div className="flex items-center gap-2">
           <span className="font-bold text-teal-700">KidMeal</span>
-          <span>© 2025 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.</span>
+          <span>© 2026 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-4 text-slate-500">

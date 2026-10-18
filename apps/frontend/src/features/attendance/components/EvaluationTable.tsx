@@ -174,9 +174,8 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                 return (
                   <tr
                     key={child.id}
-                    className={`hover:bg-slate-50/80 transition ${
-                      isSelected ? 'bg-teal-50/30' : ''
-                    } ${child.isAbsent ? 'opacity-60 bg-slate-50/50' : ''}`}
+                    className={`hover:bg-slate-50/80 transition ${isSelected ? 'bg-teal-50/30' : ''
+                      } ${child.isAbsent ? 'opacity-60 bg-slate-50/50' : ''}`}
                   >
                     {/* Checkbox */}
                     <td className="py-3.5 px-4 text-center">
@@ -236,11 +235,10 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                           <button
                             type="button"
                             onClick={() => onUpdatePortion(child.id, 'ALL')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${
-                              child.portionConsumed === 'ALL'
-                                ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
-                            }`}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'ALL'
+                              ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
+                              }`}
                           >
                             <Smile className="w-3.5 h-3.5" />
                             <span>Ăn hết suất</span>
@@ -250,11 +248,10 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                           <button
                             type="button"
                             onClick={() => onUpdatePortion(child.id, 'HALF')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${
-                              child.portionConsumed === 'HALF'
-                                ? 'bg-amber-700 text-white shadow-sm ring-2 ring-amber-700/20'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
-                            }`}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'HALF'
+                              ? 'bg-amber-700 text-white shadow-sm ring-2 ring-amber-700/20'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
+                              }`}
                           >
                             <Meh className="w-3.5 h-3.5" />
                             <span>Một nửa</span>
@@ -264,11 +261,10 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                           <button
                             type="button"
                             onClick={() => onUpdatePortion(child.id, 'NONE')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${
-                              child.portionConsumed === 'NONE'
-                                ? 'bg-rose-700 text-white shadow-sm ring-2 ring-rose-700/20'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
-                            }`}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'NONE'
+                              ? 'bg-rose-700 text-white shadow-sm ring-2 ring-rose-700/20'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
+                              }`}
                           >
                             <Frown className="w-3.5 h-3.5" />
                             <span>Ăn ít</span>
@@ -291,11 +287,10 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                     <td className="py-3.5 px-3 text-center">
                       <button
                         onClick={() => onEditNote(child)}
-                        className={`p-2 rounded-xl border transition ${
-                          child.teacherNote
-                            ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                            : 'bg-slate-50 text-slate-400 border-slate-200 hover:text-slate-700 hover:bg-slate-100'
-                        }`}
+                        className={`p-2 rounded-xl border transition ${child.teacherNote
+                          ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                          : 'bg-slate-50 text-slate-400 border-slate-200 hover:text-slate-700 hover:bg-slate-100'
+                          }`}
                         title={child.teacherNote || 'Thêm ghi chú của cô'}
                       >
                         <MessageSquare className="w-4 h-4" />
@@ -362,11 +357,10 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                 <button
                   key={p}
                   onClick={() => onPageChange(p)}
-                  className={`w-7 h-7 rounded-lg text-xs font-bold transition ${
-                    p === pagination.currentPage
-                      ? 'bg-teal-700 text-white'
-                      : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
-                  }`}
+                  className={`w-7 h-7 rounded-lg text-xs font-bold transition ${p === pagination.currentPage
+                    ? 'bg-teal-700 text-white'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
+                    }`}
                 >
                   {p}
                 </button>
