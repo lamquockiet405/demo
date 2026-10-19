@@ -25,6 +25,10 @@ import { tenantApi, TenantProfile, SchoolBranding } from '../../../core/api/tena
 import { EditSchoolInfoModal } from '../components/EditSchoolInfoModal';
 import { ParentAppPreviewModal } from '../components/ParentAppPreviewModal';
 
+/**
+ * UC07: Configure School Information (Iteration 1 - Low)
+ * Quản lý thông tin cơ sở trường học, pháp lý ATTP, nhận diện thương hiệu & đồng bộ CSDL Ngành
+ */
 export const SchoolSettingsPage: React.FC = () => {
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [loading, setLoading] = useState(true);
