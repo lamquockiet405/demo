@@ -10,33 +10,17 @@ import {
 } from 'typeorm';
 import { Role } from './role.entity';
 
-/**
- * User Entity — Mapping chính xác bảng `users` trong PostgreSQL.
- *
- * Performance Notes:
- * - password_hash và two_factor_secret KHÔNG BAO GIỜ trả về client (dùng select: false)
- * - Index composite (tenant_id, status) WHERE deleted_at IS NULL cho query nhanh
- * - Index trên email cho login lookup O(log n)
- * - ManyToMany roles: LAZY — chỉ JOIN khi cần (login flow), không eager load
- * - two_factor_recovery_codes dùng text[] PostgreSQL array, cũng select: false
- */
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: any;
 
-  /** NULL = superadmin toàn hệ thống, UUID = user thuộc tenant cụ thể */
   @Column({ type: 'uuid', name: 'tenant_id', nullable: true })
   tenantId: string | null;
 
-  /** Email đăng nhập — UNIQUE per tenant (composite constraint uq_users_tenant_email) */
   @Column({ type: 'varchar', length: 255 })
   email: string;
 
-  /**
-   * Bcrypt hash ($2a$12$...) — KHÔNG trả về client.
-   * select: false đảm bảo TypeORM không load cột này trừ khi addSelect() rõ ràng.
-   */
   @Column({ type: 'varchar', length: 255, name: 'password_hash', select: false })
   passwordHash: string;
 
@@ -49,18 +33,22 @@ export class User {
   @Column({ type: 'text', name: 'avatar_url', nullable: true })
   avatarUrl: string | null;
 
-  /** ACTIVE | INACTIVE | BLOCKED | INVITED */
+  get avatar(): string | null {
+    return this.avatarUrl;
+  }
+  set avatar(val: string | null) {
+    this.avatarUrl = val;
+  }
+
   @Column({ type: 'varchar', length: 50, default: 'ACTIVE' })
   status: string;
 
   @Column({ type: 'boolean', name: 'two_factor_enabled', default: false })
   twoFactorEnabled: boolean;
 
-  /** TOTP secret — KHÔNG trả về client */
   @Column({ type: 'varchar', length: 255, name: 'two_factor_secret', nullable: true, select: false })
   twoFactorSecret: string | null;
 
-  /** Recovery codes — KHÔNG trả về client */
   @Column({ type: 'text', array: true, name: 'two_factor_recovery_codes', nullable: true, select: false })
   twoFactorRecoveryCodes: string[] | null;
 
@@ -76,13 +64,7 @@ export class User {
   @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  /**
-   * Quan hệ ManyToMany với Role qua bảng trung gian `user_roles`.
-   * 
-   * KHÔNG dùng eager: true — chỉ load khi controller cần (leftJoinAndSelect).
-   * JoinTable mapping chính xác tên bảng và cột FK trong schema.sql.
-   */
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, { eager: true, cascade: false })
   @JoinTable({
     name: 'user_roles',
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },

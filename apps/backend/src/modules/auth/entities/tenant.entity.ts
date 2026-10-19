@@ -8,28 +8,23 @@ import {
 } from 'typeorm';
 
 /**
- * Tenant Entity — Mapping chính xác bảng `tenants` trong PostgreSQL.
- * Mỗi tenant đại diện cho 1 trường mầm non trong hệ thống Multi-tenant.
- * 
- * Performance Notes:
- * - Chỉ SELECT các cột cần thiết khi query (dùng QueryBuilder.select())
- * - Index trên `status` (WHERE deleted_at IS NULL) đã có sẵn trong schema.sql
- * - Index GIN trên `settings` JSONB cho full-text search cấu hình
+ * Tenant Entity — Mapping bảng `tenants` trong PostgreSQL.
+ * Mỗi tenant đại diện cho 1 trường mầm non trong hệ thống (UC07: Configure School Information).
  */
 @Entity('tenants')
 export class Tenant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  /** Mã trường duy nhất (e.g. 'MN_HOAMAI') — UNIQUE constraint */
+  /** Mã trường duy nhất (e.g. 'MN_SAOMAI') */
   @Column({ type: 'varchar', length: 50, unique: true })
   code: string;
 
-  /** Tên đầy đủ trường (e.g. 'Trường Mầm Non Hoa Mai') */
+  /** Tên đầy đủ trường mầm non */
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  /** Subdomain riêng (e.g. 'hoamai.kidsnutri.vn') — UNIQUE, nullable */
+  /** Subdomain riêng */
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   domain: string | null;
 
@@ -53,7 +48,7 @@ export class Tenant {
   @Column({ type: 'int', name: 'max_children', default: 500 })
   maxChildren: number;
 
-  /** JSONB cấu hình: meal_times, food_retention_hours, who_zscore_auto_calc, etc. */
+  /** JSONB cấu hình: legal_representative, food_safety_license, branding, etc. */
   @Column({ type: 'jsonb', default: () => `'{"meal_times":["BREAKFAST","LUNCH","AFTERNOON_SNACK"],"standard_weekly_cycle_length":4,"food_retention_hours":24,"who_zscore_auto_calc":true}'` })
   settings: Record<string, any>;
 
@@ -65,4 +60,31 @@ export class Tenant {
 
   @DeleteDateColumn({ type: 'timestamptz', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
+}
+
+/**
+ * SchoolTenant Entity — Alias cho auth module tương thích ngược
+ */
+@Entity('schools')
+export class SchoolTenant {
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
+
+  @Column({ length: 200 })
+  name: string;
+
+  @Column({ type: 'text', nullable: true })
+  address: string;
+
+  @Column({ length: 20, nullable: true })
+  phone: string;
+
+  @Column({ length: 255, nullable: true })
+  email: string;
+
+  @Column({ name: 'principal_name', length: 150, nullable: true })
+  principalName: string;
+
+  @Column({ length: 500, nullable: true })
+  logo: string;
 }

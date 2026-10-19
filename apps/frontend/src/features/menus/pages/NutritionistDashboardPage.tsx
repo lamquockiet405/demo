@@ -30,7 +30,8 @@ export const NutritionistDashboardPage: React.FC = () => {
     ])
       .then(([statsRes, menusRes]) => {
         setStats(statsRes);
-        setRecentMenus(menusRes.slice(0, 4));
+        const list = Array.isArray(menusRes) ? menusRes : ((menusRes as any)?.items || (menusRes as any)?.data || []);
+        setRecentMenus(list.slice(0, 4));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -39,7 +40,10 @@ export const NutritionistDashboardPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Banner chào mừng & Thông điệp chuyên môn */}
-      <div className="bg-linear-to-r from-emerald-900 via-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+      <div 
+        style={{ backgroundColor: '#064e3b' }}
+        className="bg-emerald-950 bg-gradient-to-r from-emerald-950 via-emerald-850 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden"
+      >
         <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 max-w-2xl">
@@ -101,7 +105,7 @@ export const NutritionistDashboardPage: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {recentMenus.map((menu) => (
+            {(Array.isArray(recentMenus) ? recentMenus : []).map((menu) => (
               <div
                 key={menu.id}
                 className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-emerald-200 transition flex flex-wrap items-center justify-between gap-3"

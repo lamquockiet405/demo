@@ -38,6 +38,10 @@ import { StaffDrawer } from '../components/StaffDrawer';
 import { SoftDeleteConfirmModal } from '../components/SoftDeleteConfirmModal';
 import { useAuthStore } from '../../../core/stores/auth.store';
 
+/**
+ * UC08 - UC11: View/Create/Update/Search Staff Accounts (Iteration 1 - Low/Medium)
+ * Quản lý danh sách, tìm kiếm, lọc, tạo mới, chỉnh sửa và phân quyền tài khoản nhân sự
+ */
 export const StaffManagementPage: React.FC = () => {
   const { user: currentUser } = useAuthStore();
 

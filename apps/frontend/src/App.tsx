@@ -10,9 +10,11 @@ import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage';
 import { WeeklyMenuManagementPage } from './features/menus/pages/WeeklyMenuManagementPage';
 import { NutritionistDashboardPage } from './features/menus/pages/NutritionistDashboardPage';
 import { NutritionRulesPage } from './features/menus/pages/NutritionRulesPage';
+import { NutritionistAllergyManagementPage } from './features/menus/pages/NutritionistAllergyManagementPage';
 import { SchoolSettingsPage } from './features/tenant/pages/SchoolSettingsPage';
 import { StaffManagementPage } from './features/staff/pages/StaffManagementPage';
 import { PrincipalMenuApprovalPage } from './features/menus/pages/PrincipalMenuApprovalPage';
+import { MenuPlanningPage } from './features/menus/pages/MenuPlanningPage';
 import { TeacherTabletPage } from './features/attendance/pages/TeacherTabletPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
@@ -149,7 +151,7 @@ export const App: React.FC = () => {
           <Route path="dashboard" element={<NutritionistDashboardPage />} />
           <Route path="menus" element={<WeeklyMenuManagementPage />} />
           <Route path="rules" element={<NutritionRulesPage />} />
-          <Route path="allergens" element={<NutritionRulesPage />} />
+          <Route path="allergens" element={<NutritionistAllergyManagementPage />} />
           <Route path="foods" element={<NutritionRulesPage />} />
           <Route path="dishes" element={<NutritionRulesPage />} />
           <Route path="children" element={<NutritionistDashboardPage />} />
@@ -191,6 +193,7 @@ export const App: React.FC = () => {
           <Route path="/staff" element={<StaffManagementPage />} />
           <Route path="/inventory" element={<NutritionRulesPage />} />
           <Route path="/menu-approval" element={<PrincipalMenuApprovalPage />} />
+          <Route path="/menu-planning" element={<MenuPlanningPage />} />
           <Route path="/services" element={<WeeklyMenuManagementPage />} />
           <Route path="/food-safety" element={<WeeklyMenuManagementPage />} />
           <Route path="/finances" element={<WeeklyMenuManagementPage />} />

@@ -73,7 +73,7 @@ export interface QueryStaffParams {
 
 export const staffApi = {
   /**
-   * Lấy danh sách nhân sự kèm tìm kiếm, lọc và phân trang
+   * UC08 & UC11: Lấy danh sách nhân sự kèm tìm kiếm, lọc và phân trang
    */
   async getStaffList(params?: QueryStaffParams): Promise<StaffListResponse> {
     const res = await apiClient.get<StaffListResponse>('/users/staff', { params });
@@ -97,7 +97,7 @@ export const staffApi = {
   },
 
   /**
-   * Xem thông tin chi tiết 1 nhân sự
+   * UC08: Xem thông tin chi tiết 1 nhân sự
    */
   async getStaffById(id: string): Promise<StaffUser> {
     const res = await apiClient.get<StaffUser>(`/users/staff/${id}`);
@@ -105,7 +105,7 @@ export const staffApi = {
   },
 
   /**
-   * Tạo mới nhân sự và gán vai trò
+   * UC09: Tạo mới nhân sự và gán vai trò
    */
   async createStaff(payload: CreateStaffPayload): Promise<StaffUser & { initialPassword?: string }> {
     const res = await apiClient.post<StaffUser & { initialPassword?: string }>('/users/staff', payload);
@@ -113,7 +113,7 @@ export const staffApi = {
   },
 
   /**
-   * Cập nhật thông tin và vai trò nhân sự
+   * UC10: Cập nhật thông tin và vai trò nhân sự
    */
   async updateStaff(id: string, payload: UpdateStaffPayload): Promise<StaffUser> {
     const res = await apiClient.put<StaffUser>(`/users/staff/${id}`, payload);

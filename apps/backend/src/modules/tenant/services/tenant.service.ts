@@ -15,7 +15,7 @@ export class TenantService {
   ) {}
 
   /**
-   * Lấy thông tin cấu hình chi tiết của Trường Mầm non (Tenant).
+   * UC07: Lấy thông tin cấu hình chi tiết của Trường Mầm non (Tenant).
    * Tự động bổ sung các trường mặc định nếu tenant chưa khởi tạo đầy đủ.
    */
   async getTenantProfile(tenantId: string) {
@@ -66,7 +66,7 @@ export class TenantService {
   }
 
   /**
-   * Cập nhật thông tin cơ sở trường, địa chỉ, hotline, giấy phép ATTP & nhận diện
+   * UC07: Cập nhật thông tin cơ sở trường, địa chỉ, hotline, giấy phép ATTP & nhận diện
    */
   async updateTenantProfile(tenantId: string, dto: UpdateTenantProfileDto) {
     const tenant = await this.tenantRepository.findOne({
@@ -123,7 +123,7 @@ export class TenantService {
   }
 
   /**
-   * Xử lý tải lên Logo thương hiệu cho trường.
+   * UC07: Xử lý tải lên Logo thương hiệu cho trường.
    * Ràng buộc nghiệp vụ theo đúng thiết kế BGH:
    * - Chỉ chấp nhận định dạng: PNG, JPG/JPEG, SVG.
    * - Dung lượng tối đa: không quá 2MB (2 * 1024 * 1024 bytes).
@@ -186,7 +186,7 @@ export class TenantService {
   }
 
   /**
-   * Giả lập đồng bộ thông tin pháp lý với Cơ sở dữ liệu ngành của Bộ GD&ĐT
+   * UC07: Giả lập đồng bộ thông tin pháp lý với Cơ sở dữ liệu ngành của Bộ GD&ĐT
    */
   async syncEducationDb(tenantId: string) {
     const tenant = await this.tenantRepository.findOne({
