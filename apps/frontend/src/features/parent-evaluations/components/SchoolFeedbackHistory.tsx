@@ -12,15 +12,16 @@ import {
 import { ParentHistoryItem } from '../types';
 
 interface SchoolFeedbackHistoryProps {
-  history: ParentHistoryItem[];
-  parentName: string;
+  history?: ParentHistoryItem[];
+  parentName?: string;
 }
 
 export const SchoolFeedbackHistory: React.FC<SchoolFeedbackHistoryProps> = ({
-  history,
-  parentName,
+  history = [],
+  parentName = 'mẹ Hoàng Yến',
 }) => {
-  const respondedCount = history.filter(
+  const safeHistory = Array.isArray(history) ? history : [];
+  const respondedCount = safeHistory.filter(
     (h) => h.status === 'RESPONDED' || h.status === 'RESOLVED'
   ).length;
 
@@ -49,7 +50,7 @@ export const SchoolFeedbackHistory: React.FC<SchoolFeedbackHistoryProps> = ({
 
       {/* History Items List */}
       <div className="space-y-5">
-        {history.map((item) => {
+        {safeHistory.map((item) => {
           const isResolved = item.status === 'RESOLVED';
           const isPending = item.status === 'PENDING';
           const isFoodCategory =
@@ -64,11 +65,10 @@ export const SchoolFeedbackHistory: React.FC<SchoolFeedbackHistoryProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   <span
-                    className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] ${
-                      isFoodCategory
+                    className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] ${isFoodCategory
                         ? 'bg-sky-100 text-sky-800'
                         : 'bg-amber-100 text-amber-800'
-                    }`}
+                      }`}
                   >
                     {item.category || 'Món ăn & Dinh dưỡng'}
                   </span>

@@ -96,11 +96,10 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
           <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
             <button
               onClick={() => onMealTypeChange('LUNCH')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                selectedMealType === 'LUNCH'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${selectedMealType === 'LUNCH'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
             >
               <Utensils className="w-3.5 h-3.5" />
               <span>Bữa Trưa (10:30 - 11:30)</span>
@@ -108,11 +107,10 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
 
             <button
               onClick={() => onMealTypeChange('AFTERNOON_SNACK')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                selectedMealType === 'AFTERNOON_SNACK'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${selectedMealType === 'AFTERNOON_SNACK'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
             >
               <Coffee className="w-3.5 h-3.5" />
               <span>Bữa Xế (14:15 - 15:00)</span>

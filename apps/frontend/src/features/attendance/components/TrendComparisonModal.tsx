@@ -127,9 +127,8 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
               </h4>
               <p className="text-[11px] text-slate-500">So sánh chỉ số thực tế với mục tiêu chuẩn 80%</p>
             </div>
-            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
-              currentEatenRate >= 80 ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'
-            }`}>
+            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${currentEatenRate >= 80 ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'
+              }`}>
               {currentEatenRate >= 80 ? 'Xu hướng tích cực' : 'Cần cải thiện'}
             </span>
           </div>
