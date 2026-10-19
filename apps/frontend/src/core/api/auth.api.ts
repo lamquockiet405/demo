@@ -1,5 +1,5 @@
 import { apiClient } from './axios';
-import type { AuthUser, TenantInfo } from '../../stores/auth.store';
+import type { AuthUser, TenantInfo } from '../stores/auth.store';
 
 // ─── Request/Response Types ────────────────────────────────────────────────────
 
