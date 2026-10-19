@@ -4,7 +4,7 @@ export default () => ({
   corsOrigin: process.env.CORS_ORIGIN || '*',
   database: {
     host: process.env.POSTGRES_HOST || 'localhost',
-    port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
+    port: parseInt(process.env.POSTGRES_PORT, 10) || 5433,
     username: process.env.POSTGRES_USER || 'postgres',
     password: process.env.POSTGRES_PASSWORD || 'postgres',
     database: process.env.POSTGRES_DB || 'kidsnutrijournal_dev',
@@ -25,5 +25,13 @@ export default () => ({
     hashSecret: process.env.VNPAY_HASH_SECRET || 'SECRETSECRETSECRETSECRETSECRET123',
     url: process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
     returnUrl: process.env.VNPAY_RETURN_URL || 'http://localhost:5173/payments/vnpay-return',
+  },
+  mail: {
+    host: process.env.MAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.MAIL_PORT, 10) || 587,
+    secure: process.env.MAIL_SECURE === 'true',
+    user: process.env.MAIL_USER || 'lamquockiet240321@gmail.com',
+    pass: process.env.MAIL_PASS || 'luvzjmhyvuohzjb',
+    from: process.env.MAIL_FROM || '"KidMeal - Hệ thống Quản trị Bán trú Mầm non" <lamquockiet240321@gmail.com>',
   },
 });
