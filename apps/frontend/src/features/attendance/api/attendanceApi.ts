@@ -1,19 +1,21 @@
-import axios from 'axios';
-import { AttendanceResponse, ClassItem, MealOption, MealEvaluationResponse, PortionType } from '../types';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'x-tenant-id': 'a0000000-0000-0000-0000-000000000001',
-  },
-});
+import { apiClient } from '../../../core/api/axios';
+import {
+  AttendanceResponse,
+  ClassItem,
+  MealOption,
+  MealEvaluationResponse,
+  PortionType,
+  SchoolHeadcountSummaryResponse
+} from '../types';
 
 export const attendanceApi = {
   getClasses: async (): Promise<ClassItem[]> => {
-    const res = await api.get('/attendance/classes');
+    const res = await apiClient.get('/attendance/classes');
+    return Array.isArray(res.data) ? res.data : (res.data?.items || res.data?.data || []);
+  },
+
+  getSchoolHeadcountSummary: async (date?: string): Promise<SchoolHeadcountSummaryResponse> => {
+    const res = await apiClient.get('/attendance/school-summary', { params: { date } });
     return res.data;
   },
 
@@ -25,7 +27,7 @@ export const attendanceApi = {
     page?: number;
     limit?: number;
   }): Promise<AttendanceResponse> => {
-    const res = await api.get('/attendance', { params });
+    const res = await apiClient.get('/attendance', { params });
     return res.data;
   },
 
@@ -37,7 +39,7 @@ export const attendanceApi = {
       notes?: string;
     },
   ) => {
-    const res = await api.put(`/attendance/child/${childId}`, data);
+    const res = await apiClient.put(`/attendance/child/${childId}`, data);
     return res.data;
   },
 
@@ -46,7 +48,7 @@ export const attendanceApi = {
     date: string;
     mealOption?: MealOption;
   }) => {
-    const res = await api.post('/attendance/mark-all', data);
+    const res = await apiClient.post('/attendance/mark-all', data);
     return res.data;
   },
 
@@ -54,7 +56,7 @@ export const attendanceApi = {
     classId: string;
     date: string;
   }) => {
-    const res = await api.post('/attendance/sync-morning', data);
+    const res = await apiClient.post('/attendance/sync-morning', data);
     return res.data;
   },
 
@@ -63,7 +65,7 @@ export const attendanceApi = {
     date: string;
     notes?: string;
   }) => {
-    const res = await api.post('/attendance/lock-kitchen', data);
+    const res = await apiClient.post('/attendance/lock-kitchen', data);
     return res.data;
   },
 
@@ -79,7 +81,7 @@ export const attendanceApi = {
     page?: number;
     limit?: number;
   }): Promise<MealEvaluationResponse> => {
-    const res = await api.get('/attendance/evaluation', { params });
+    const res = await apiClient.get('/attendance/evaluation', { params });
     return res.data;
   },
 
@@ -94,7 +96,7 @@ export const attendanceApi = {
       syncStatus?: string;
     },
   ) => {
-    const res = await api.put(`/attendance/evaluation/child/${childId}`, data);
+    const res = await apiClient.put(`/attendance/evaluation/child/${childId}`, data);
     return res.data;
   },
 
@@ -105,7 +107,7 @@ export const attendanceApi = {
     childIds?: string[];
     portionConsumed: PortionType;
   }) => {
-    const res = await api.post('/attendance/evaluation/batch', data);
+    const res = await apiClient.post('/attendance/evaluation/batch', data);
     return res.data;
   },
 
@@ -120,7 +122,7 @@ export const attendanceApi = {
     chefFeedback?: string;
     isLocked?: boolean;
   }) => {
-    const res = await api.put('/attendance/evaluation/sensory', data);
+    const res = await apiClient.put('/attendance/evaluation/sensory', data);
     return res.data;
   },
 
@@ -130,7 +132,7 @@ export const attendanceApi = {
     mealType?: string;
     chefFeedback?: string;
   }) => {
-    const res = await api.post('/attendance/evaluation/lock', data);
+    const res = await apiClient.post('/attendance/evaluation/lock', data);
     return res.data;
   },
 
@@ -149,7 +151,7 @@ export const attendanceApi = {
     page?: number;
     limit?: number;
   }) => {
-    const res = await api.get('/attendance/history', { params });
+    const res = await apiClient.get('/attendance/history', { params });
     return res.data;
   },
 
@@ -166,7 +168,7 @@ export const attendanceApi = {
     page?: number;
     limit?: number;
   }) => {
-    const res = await api.get('/snack-roster', { params });
+    const res = await apiClient.get('/snack-roster', { params });
     return res.data;
   },
 
@@ -175,18 +177,48 @@ export const attendanceApi = {
   // =========================================================================
 
   getKitchenKdsData: async (date?: string) => {
-    const res = await api.get('/attendance/kitchen-kds', { params: { date } });
+    const res = await apiClient.get('/attendance/kitchen-kds', { params: { date } });
     return res.data;
   },
 
   updateKitchenStatus: async (data: {
     classId: string;
-    status: 'SYNCED' | 'PREPARING' | 'COMPLETED';
+    status: 'WAITING' | 'PREPARING' | 'PORTIONING' | 'READY_DELIVERY' | 'DELIVERED' | 'COMPLETED';
     actorName?: string;
   }) => {
-    const res = await api.post('/attendance/kitchen/status', data);
+    const res = await apiClient.post('/attendance/kitchen/status', data);
+    return res.data;
+  },
+
+  // =========================================================================
+  // FOOD SAFETY 3-STEP INSPECTION & 24H SAMPLE RETENTION APIS
+  // =========================================================================
+
+  getFoodSafetyLogs: async () => {
+    const res = await apiClient.get('/attendance/food-safety-logs');
+    return res.data;
+  },
+
+  createFoodSafetyLog: async (data: any) => {
+    const res = await apiClient.post('/attendance/food-safety-logs', data);
+    return res.data;
+  },
+
+  getSampleRetentionRecords: async () => {
+    const res = await apiClient.get('/attendance/sample-retention-records');
+    return res.data;
+  },
+
+  createSampleRetentionRecord: async (data: any) => {
+    const res = await apiClient.post('/attendance/sample-retention-records', data);
+    return res.data;
+  },
+
+  disposeSampleRetentionRecord: async (id: string) => {
+    const res = await apiClient.post(`/attendance/sample-retention-records/${id}/dispose`);
     return res.data;
   },
 };
+
 
 
