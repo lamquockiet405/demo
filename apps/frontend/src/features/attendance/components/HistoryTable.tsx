@@ -127,8 +127,8 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       const presentCount = entry.totalMeals - entry.absentCount;
       const avg = presentCount > 0
         ? Math.round(
-            entry.meals.reduce((acc, m) => acc + (m.consumptionPercentage || 0), 0) / presentCount
-          )
+          entry.meals.reduce((acc, m) => acc + (m.consumptionPercentage || 0), 0) / presentCount
+        )
         : 0;
       return { ...entry, averagePercent: avg };
     });
@@ -159,22 +159,20 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
           <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs font-bold">
             <button
               onClick={() => onViewModeChange('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
-                viewMode === 'table'
-                  ? 'bg-white text-teal-800 shadow-sm font-extrabold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${viewMode === 'table'
+                ? 'bg-white text-teal-800 shadow-sm font-extrabold'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               <Table2 className="w-3.5 h-3.5 text-teal-600" />
               <span>Dạng bảng</span>
             </button>
             <button
               onClick={() => onViewModeChange('by_child')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
-                viewMode === 'by_child'
-                  ? 'bg-white text-teal-800 shadow-sm font-extrabold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${viewMode === 'by_child'
+                ? 'bg-white text-teal-800 shadow-sm font-extrabold'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               <Users2 className="w-3.5 h-3.5 text-teal-600" />
               <span>Theo từng bé</span>
@@ -252,13 +250,12 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                 </div>
                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      entry.averagePercent >= 80
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
-                        : entry.averagePercent >= 50
+                    className={`h-full rounded-full transition-all duration-500 ${entry.averagePercent >= 80
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                      : entry.averagePercent >= 50
                         ? 'bg-gradient-to-r from-amber-400 to-amber-500'
                         : 'bg-gradient-to-r from-rose-400 to-rose-500'
-                    }`}
+                      }`}
                     style={{ width: `${entry.averagePercent}%` }}
                   />
                 </div>
@@ -317,9 +314,8 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                 return (
                   <tr
                     key={item.id}
-                    className={`hover:bg-slate-50/70 transition-colors ${
-                      isAbsent ? 'bg-slate-50/40 text-slate-500' : ''
-                    }`}
+                    className={`hover:bg-slate-50/70 transition-colors ${isAbsent ? 'bg-slate-50/40 text-slate-500' : ''
+                      }`}
                   >
                     {/* Col 1: Date & Session */}
                     <td className="py-3 px-4">
@@ -388,11 +384,10 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                         {item.dishesServed.map((dish, dIdx) => (
                           <p
                             key={dIdx}
-                            className={`text-xs ${
-                              isAbsent
-                                ? 'text-slate-400 italic line-through'
-                                : 'text-slate-800 font-medium'
-                            }`}
+                            className={`text-xs ${isAbsent
+                              ? 'text-slate-400 italic line-through'
+                              : 'text-slate-800 font-medium'
+                              }`}
                           >
                             {dish}
                           </p>
@@ -401,11 +396,10 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                         {item.dietaryBadge && (
                           <div className="pt-0.5">
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                                item.dietaryBadge.type === 'allergy'
-                                  ? 'bg-amber-100/90 text-amber-900 border border-amber-300'
-                                  : 'bg-purple-100 text-purple-900 border border-purple-300'
-                              }`}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${item.dietaryBadge.type === 'allergy'
+                                ? 'bg-amber-100/90 text-amber-900 border border-amber-300'
+                                : 'bg-purple-100 text-purple-900 border border-purple-300'
+                                }`}
                             >
                               <ShieldAlert className="w-3 h-3" />
                               <span>{item.dietaryBadge.text}</span>
@@ -429,20 +423,19 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                               {percentage === 100
                                 ? 'Hết suất'
                                 : percentage && percentage >= 50
-                                ? 'Ăn 1/2'
-                                : 'Ăn ít / Bỏ'}
+                                  ? 'Ăn 1/2'
+                                  : 'Ăn ít / Bỏ'}
                             </span>
                           </div>
 
                           <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
                             <div
-                              className={`h-full rounded-full transition-all duration-300 ${
-                                (percentage ?? 100) >= 80
-                                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
-                                  : (percentage ?? 100) >= 50
+                              className={`h-full rounded-full transition-all duration-300 ${(percentage ?? 100) >= 80
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                                : (percentage ?? 100) >= 50
                                   ? 'bg-gradient-to-r from-amber-400 to-amber-500'
                                   : 'bg-gradient-to-r from-rose-400 to-rose-500'
-                              }`}
+                                }`}
                               style={{ width: `${percentage ?? 100}%` }}
                             />
                           </div>
@@ -488,13 +481,12 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
 
                       {item.parentStatus && (
                         <div
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            item.parentStatus.type === 'RESPONDED'
-                              ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                              : item.parentStatus.type === 'RECONCILED'
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.parentStatus.type === 'RESPONDED'
+                            ? 'bg-sky-50 text-sky-700 border border-sky-200'
+                            : item.parentStatus.type === 'RECONCILED'
                               ? 'bg-purple-50 text-purple-700 border border-purple-200'
                               : 'bg-slate-100 text-slate-600 border border-slate-200'
-                          }`}
+                            }`}
                         >
                           {item.parentStatus.type === 'RESPONDED' ? (
                             <MessageSquare className="w-2.5 h-2.5 text-sky-600" />
@@ -588,11 +580,10 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
               <button
                 key={`page-${p}`}
                 onClick={() => onPageChange(Number(p))}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition ${
-                  isCurrent
-                    ? 'bg-teal-600 text-white shadow-sm font-extrabold'
-                    : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
+                className={`w-8 h-8 rounded-lg text-xs font-bold transition ${isCurrent
+                  ? 'bg-teal-600 text-white shadow-sm font-extrabold'
+                  : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
               >
                 {p}
               </button>

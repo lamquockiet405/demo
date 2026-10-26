@@ -18,6 +18,7 @@ export const ClassList = () => {
   });
 
   const { data, isLoading, isError, refetch } = useClasses(filters);
+  const classItems = Array.isArray(data) ? data : (data?.items || []);
 
   const handleFilterChange = (key: keyof ClassFilters, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
@@ -201,7 +202,7 @@ export const ClassList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {data?.items?.length === 0 ? (
+              {classItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-16 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-4">
@@ -212,7 +213,7 @@ export const ClassList = () => {
                   </td>
                 </tr>
               ) : (
-                data?.items?.map((item: any, index: number) => {
+                classItems.map((item: any, index: number) => {
                   const isMushroom = index % 2 === 0;
                   const isChhoi = item.gradeLevel?.includes('4_5Y');
                   
@@ -226,7 +227,7 @@ export const ClassList = () => {
                           <div>
                             <h4 className="font-bold text-slate-800 text-base mb-0.5">{item.name}</h4>
                             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                              <span>Mã: <strong className="text-slate-700">{item.id.substring(0, 4).toUpperCase()}24</strong></span>
+                              <span>Mã: <strong className="text-slate-700">{item.id ? item.id.substring(0, 4).toUpperCase() : 'LOP'}24</strong></span>
                               <span>• {item.roomNumber || 'Chưa xếp phòng'}</span>
                             </div>
                           </div>

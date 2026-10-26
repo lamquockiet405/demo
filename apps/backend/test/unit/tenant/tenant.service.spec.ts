@@ -4,7 +4,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TenantService } from '../../../src/modules/tenant/services/tenant.service';
 import { Tenant } from '../../../src/modules/auth/entities/tenant.entity';
 
-describe('TenantService', () => {
+describe('TenantService (UC07: Configure School Information)', () => {
   let service: TenantService;
   let tenantRepo: any;
 

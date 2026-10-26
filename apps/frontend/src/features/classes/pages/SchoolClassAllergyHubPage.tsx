@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { classesApi } from '../api/classes';
 import { childrenApi, ChildItem, AllergenCatalogItem } from '../../children/api/children.api';
+
 import { attendanceApi } from '../../attendance/api/attendanceApi';
 import { SchoolHeadcountSummaryResponse } from '../../attendance/types';
 import { ClassData, GradeLevel, ClassStatus } from '../types';
@@ -31,6 +32,7 @@ import { ClassStudentExcelImport } from '../components/ClassStudentExcelImport';
  *    - Tra cứu phác đồ xử trí khẩn cấp và thông tin liên hệ phụ huynh.
  * 3. HỖ TRỢ PHỤ HUYNH KHAI BÁO (Tab 'parent-form'):
  *    - Cho phép cán bộ y tế trường hoặc GVCN nhập hộ khai báo cho phụ huynh khi có chỉ định bác sĩ.
+
  * 4. KẾT NỐI BẾP BÁN TRÚ (Tab 'kitchen'):
  *    - Tích hợp trực tiếp màn hình Bếp (Kitchen Display System), hỗ trợ rà soát món ăn và gắn Tem Đỏ cho khay ăn riêng.
  */
@@ -43,7 +45,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
   const [children, setChildren] = useState<ChildItem[]>([]);
   const [teachers, setTeachers] = useState<StaffUser[]>([]);
   const [allergenCatalogs, setAllergenCatalogs] = useState<AllergenCatalogItem[]>([]);
+
   const [headcountSummary, setHeadcountSummary] = useState<SchoolHeadcountSummaryResponse | null>(null);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedClassId, setSelectedClassId] = useState<string>('all');
   const [allergySearch, setAllergySearch] = useState<string>('');
@@ -121,11 +125,13 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+
       const [classesRes, childrenRes, catalogsRes, headcountRes, staffRes] = await Promise.all([
         classesApi.getClasses({ limit: 50 }),
         childrenApi.getChildren({ limit: 200 }),
         childrenApi.getAllergenCatalogs().catch(() => []),
         attendanceApi.getSchoolHeadcountSummary().catch(() => null),
+
         staffApi.getStaffList({ roleCode: 'TEACHER', limit: 100 }).catch(() => ({ data: [] } as any)),
       ]);
 
@@ -173,9 +179,11 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
       );
       setTeachers(validTeachers.length > 0 ? validTeachers : teacherList);
       setAllergenCatalogs(catalogsRes || []);
+
       if (headcountRes) {
         setHeadcountSummary(headcountRes);
       }
+
 
       if (childList.length > 0 && !parentFormChildId) {
         setParentFormChildId(childList[0].id);
@@ -631,7 +639,6 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
           <FileSignature className="w-4 h-4" />
           Cổng Khai Báo & Cam Kết Dành Cho Phụ Huynh
         </button>
-
         <button
           onClick={() => setActiveTab('kitchen')}
           className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${
@@ -643,6 +650,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
           <Utensils className="w-4 h-4" />
           Bộ Lọc Suất Ăn Dành Cho Nhà Bếp
         </button>
+
       </div>
 
       {/* 4. Tab 1: Module Quản trị Lớp học & Sĩ số */}
@@ -705,7 +713,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                     <th className="py-3.5 px-4">Giáo Viên Chủ Nhiệm (GVCN)</th>
                     <th className="py-3.5 px-4">Sĩ Số Thực Tế vs Tối Đa</th>
                     <th className="py-3.5 px-4">Tỷ Lệ Lấp Đầy</th>
+
                     <th className="py-3.5 px-4">Điểm Danh Hôm Nay</th>
+
                     <th className="py-3.5 px-4">Hồ Sơ Dị Ứng</th>
                     <th className="py-3.5 px-4 text-center">Thao Tác Admin</th>
                   </tr>
@@ -713,7 +723,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {filteredClasses.length === 0 ? (
                     <tr>
+
                       <td colSpan={8} className="py-12 text-center text-slate-400">
+
                         <GraduationCap className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="font-semibold text-slate-600">Không tìm thấy lớp học nào phù hợp</p>
                         <p className="text-[11px] text-slate-400 mt-0.5">Vui lòng thay đổi từ khóa tìm kiếm hoặc chọn khối mầm non khác.</p>
@@ -725,6 +737,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                       const maxCap = cls.maxCapacity || (cls.gradeLevel.includes('INFANT') ? 20 : 30);
                       const fillPercent = Math.round((actualCount / maxCap) * 100);
                       const classAllergyCount = children.filter(c => c.classId === cls.id && c.allergies && c.allergies.length > 0).length;
+
                       const attClass = headcountSummary?.classes?.find((c) => c.id === cls.id);
 
                       return (
@@ -792,6 +805,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                             </div>
                           </td>
 
+
                           <td className="py-4 px-4">
                             {attClass ? (
                               <div>
@@ -818,6 +832,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                               <span className="text-slate-400 italic text-[11px]">Chưa điểm danh</span>
                             )}
                           </td>
+
 
                           <td className="py-4 px-4">
                             {classAllergyCount > 0 ? (

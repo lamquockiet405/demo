@@ -9,6 +9,9 @@ interface EditSchoolInfoModalProps {
   onSaved: (updated: TenantProfile) => void;
 }
 
+/**
+ * UC07: Modal chỉnh sửa thông tin trường mầm non & pháp lý ATTP
+ */
 export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
   isOpen,
   onClose,

@@ -21,6 +21,7 @@ export class AttendanceService {
     private readonly childRepo: Repository<Child>,
   ) {}
 
+
   async getClasses() {
     const classes = await this.classRepo.find({ order: { name: 'ASC' } });
     return Promise.all(
@@ -86,12 +87,15 @@ export class AttendanceService {
             : nameLower.includes('chồi') || nameLower.includes('choi')
             ? 'CHOI'
             : 'LA';
+
         const gradeName =
           gradeLevel === 'MAM'
             ? 'Khối Mầm (3-4T)'
             : gradeLevel === 'CHOI'
+
             ? 'Khối Chồi (4-5T)'
             : 'Khối Lá (5-6T)';
+
         return {
           id: String(cls.id),
           name: cls.name,
@@ -490,6 +494,7 @@ export class AttendanceService {
             : isHalf
             ? 'Bé ăn được 1/2 phần, uống hết canh'
             : 'Bé ăn hết suất, tự giác xúc cơm',
+
           needSpecialAttention: isAllergic || isHalf,
           teacherName: currentClass?.homeroomTeacher?.fullName || 'Lê Thị Hương Giang',
           parentStatus: {
