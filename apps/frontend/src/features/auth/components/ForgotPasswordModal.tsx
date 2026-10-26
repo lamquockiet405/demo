@@ -108,17 +108,17 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     setLoading(true);
     try {
       const res = await forgotPasswordApi({ email: cleanEmail });
+      setOtpValues(['', '', '', '', '', '']);
       setInfoMessage(res.message || 'Mã xác thực OTP đã được gửi đến email của bạn.');
       setStep('OTP');
       setCountdown(60);
       setCanResend(false);
-      // Focus first OTP box on next tick
       setTimeout(() => {
         otpInputRefs.current[0]?.focus();
       }, 150);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Không thể gửi mã xác thực. Vui lòng thử lại.';
-      setError(typeof msg === 'string' ? msg : msg[0]);
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     newOtp[index] = digit;
     setOtpValues(newOtp);
 
-    // Auto move to next input if filled
     if (digit && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
     }
@@ -179,7 +178,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       setStep('NEW_PASSWORD');
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Mã OTP không chính xác hoặc đã hết hạn.';
-      setError(typeof msg === 'string' ? msg : msg[0]);
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
     }
@@ -238,7 +237,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       setStep('SUCCESS');
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.';
-      setError(typeof msg === 'string' ? msg : msg[0]);
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
     }
@@ -315,7 +314,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             <form onSubmit={handleRequestOtp} className="space-y-4">
               <div className="text-center sm:text-left mb-2">
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Nhập địa chỉ email tài khoản KidMeal của bạn. Chúng tôi sẽ gửi mã OTP gồm 6 chữ số để xác thực việc đổi mật khẩu.
+                  Nhập địa chỉ email tài khoản KidMeal của bạn. Hệ thống sẽ gửi mã OTP gồm 6 chữ số để xác thực việc đặt lại mật khẩu.
                 </p>
               </div>
 
@@ -329,7 +328,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ví dụ: hieutruong@saomai.edu.vn"
+                    placeholder="ví dụ: hieutruong@huongduong.edu.vn"
                     required
                     autoFocus
                     className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition outline-none"
@@ -369,7 +368,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
           {/* ─── STEP 2: NHẬP OTP 6 SỐ ────────────────────────────────────── */}
           {step === 'OTP' && (
-            <div className="space-y-5">
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
               <div className="text-center">
                 <span className="inline-block p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl mb-2">
                   <Shield className="w-6 h-6" />
@@ -427,8 +426,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
               <div className="pt-2">
                 <button
-                  type="button"
-                  onClick={() => handleVerifyOtp()}
+                  type="submit"
                   disabled={loading || otpValues.join('').length !== 6}
                   className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
@@ -442,7 +440,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   )}
                 </button>
               </div>
-            </div>
+            </form>
           )}
 
           {/* ─── STEP 3: MẬT KHẨU MỚI ──────────────────────────────────────── */}

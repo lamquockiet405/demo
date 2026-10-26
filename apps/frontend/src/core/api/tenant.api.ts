@@ -19,6 +19,19 @@ export interface SchoolBranding {
   primaryColor: 'TEAL' | 'YELLOW' | 'ORANGE';
 }
 
+export interface OperationalSettings {
+  mealTimes: string[];
+  standardWeeklyCycleLength: number;
+  foodRetentionHours: number;
+  whoZscoreAutoCalc: boolean;
+}
+
+export interface SchoolStats {
+  totalClasses: number;
+  totalChildren: number;
+  totalStaff: number;
+}
+
 export interface TenantProfile {
   id: string;
   code: string;
@@ -33,22 +46,32 @@ export interface TenantProfile {
   educationDepartmentCode: string;
   schoolIdentifierSgd: string;
   isEducationDbSynced: boolean;
-  syncedAt: string;
+  syncedAt: string | null;
   foodSafetyLicense: FoodSafetyLicense;
   legalRepresentative: LegalRepresentative;
   branding: SchoolBranding;
+  operationalSettings?: OperationalSettings;
+  stats?: SchoolStats;
   updatedAt?: string;
 }
 
 export interface UpdateTenantProfileInput {
+  name?: string;
+  code?: string;
+  domain?: string;
   address?: string;
   phone?: string;
   contactEmail?: string;
+  email?: string;
+  principalName?: string;
+  logo?: string;
+  maxChildren?: number;
   educationDepartmentCode?: string;
   schoolIdentifierSgd?: string;
   foodSafetyLicense?: Partial<FoodSafetyLicense>;
   legalRepresentative?: Partial<LegalRepresentative>;
   branding?: Partial<SchoolBranding>;
+  operationalSettings?: Partial<OperationalSettings>;
 }
 
 export interface UploadLogoInput {
@@ -60,7 +83,7 @@ export interface UploadLogoInput {
 
 export const tenantApi = {
   /**
-   * UC07: Lấy cấu hình trường mầm non & pháp lý ATTP (Configure School Information)
+   * UC07: Lấy cấu hình trường mầm non & pháp lý ATTP thực tế từ CSDL (Configure School Information)
    */
   getProfile: async (): Promise<TenantProfile> => {
     const res = await apiClient.get<TenantProfile>('/tenant/profile');
@@ -68,7 +91,7 @@ export const tenantApi = {
   },
 
   /**
-   * UC07: Cập nhật thông tin trường mầm non & pháp lý ATTP
+   * UC07: Cập nhật thông tin trường mầm non, pháp lý ATTP & cấu hình vận hành vào CSDL
    */
   updateProfile: async (data: UpdateTenantProfileInput): Promise<TenantProfile> => {
     const res = await apiClient.patch<TenantProfile>('/tenant/profile', data);
