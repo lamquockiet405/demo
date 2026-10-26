@@ -1,52 +1,126 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Building2,
-  Lock,
   CheckCircle2,
   MapPin,
   Phone,
-  FileCheck,
+  Mail,
+  Globe,
   Edit3,
-  Palette,
   AlertTriangle,
   RotateCw,
   UploadCloud,
   Trash2,
-  Smartphone,
-  Check,
   Users,
-  FileText,
+  GraduationCap,
+  UserCheck,
+  ShieldCheck,
   Settings,
-  Sparkles,
   Loader2,
-  ExternalLink,
+  Clock,
+  Utensils,
+  Save,
+  Image as ImageIcon,
+  Calendar,
 } from 'lucide-react';
-import { tenantApi, TenantProfile, SchoolBranding } from '../../../core/api/tenant.api';
+import {
+  tenantApi,
+  TenantProfile,
+  SchoolBranding,
+  OperationalSettings,
+} from '../../../core/api/tenant.api';
 import { EditSchoolInfoModal } from '../components/EditSchoolInfoModal';
-import { ParentAppPreviewModal } from '../components/ParentAppPreviewModal';
+
+const MEAL_TIME_OPTIONS = [
+  { code: 'BREAKFAST', label: 'Bữa sáng' },
+  { code: 'MORNING_SNACK', label: 'Phụ sáng' },
+  { code: 'LUNCH', label: 'Bữa trưa chính' },
+  { code: 'AFTERNOON_SNACK', label: 'Bữa xế chiều' },
+];
+
+const DEFAULT_OPERATIONAL_SETTINGS: OperationalSettings = {
+  mealTimes: ['BREAKFAST', 'LUNCH', 'AFTERNOON_SNACK'],
+  standardWeeklyCycleLength: 2,
+  foodRetentionHours: 24,
+  whoZscoreAutoCalc: true,
+};
+
+function formatDateVi(dateStr?: string | null): string {
+  if (!dateStr) return 'Chưa cập nhật';
+  const parsed = new Date(dateStr);
+  if (Number.isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function getLicenseStatus(number?: string, expiryDate?: string) {
+  if (!number && !expiryDate) {
+    return {
+      label: 'Chưa khai báo',
+      className: 'bg-slate-100 text-slate-600 border-slate-200',
+    };
+  }
+  if (!expiryDate) {
+    return {
+      label: 'Đã khai báo',
+      className: 'bg-teal-50 text-teal-700 border-teal-200',
+    };
+  }
+  const exp = new Date(expiryDate);
+  if (Number.isNaN(exp.getTime())) {
+    return {
+      label: 'Đã khai báo',
+      className: 'bg-teal-50 text-teal-700 border-teal-200',
+    };
+  }
+  const now = new Date();
+  const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) {
+    return {
+      label: 'Đã hết hạn',
+      className: 'bg-red-50 text-red-700 border-red-200',
+    };
+  }
+  if (diffDays <= 30) {
+    return {
+      label: `Sắp hết hạn (còn ${diffDays} ngày)`,
+      className: 'bg-amber-50 text-amber-700 border-amber-200',
+    };
+  }
+  return {
+    label: 'Còn hiệu lực',
+    className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  };
+}
 
 /**
- * UC07: Configure School Information (Iteration 1 - Low)
- * Quản lý thông tin cơ sở trường học, pháp lý ATTP, nhận diện thương hiệu & đồng bộ CSDL Ngành
+ * UC07: Configure School Information
+ * Quản lý thông tin cơ sở trường mầm non, hồ sơ pháp lý ATTP, logo nhận diện & cấu hình vận hành bán trú thực tế từ CSDL
  */
 export const SchoolSettingsPage: React.FC = () => {
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [syncSuccess, setSyncSuccess] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Modals state
+  // Modal chỉnh sửa thông tin trường
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  // Upload file state & error simulation
-  const [uploadError, setUploadError] = useState<string | null>(
-    'Tệp banner_truong_hoc_2024.bmp (8.4 MB) không hợp lệ. Vui lòng chọn định dạng PNG, JPG hoặc SVG và dung lượng tối đa không quá 2MB.'
-  );
+  // Trạng thái tải logo từ máy tính
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoSuccessMessage, setLogoSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Branding state
-  const [selectedColor, setSelectedColor] = useState<'TEAL' | 'YELLOW' | 'ORANGE'>('TEAL');
+  // Trạng thái cấu hình vận hành bán trú
+  const [operational, setOperational] = useState<OperationalSettings>(DEFAULT_OPERATIONAL_SETTINGS);
+  const [savingOperational, setSavingOperational] = useState(false);
+  const [operationalFeedback, setOperationalFeedback] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -54,81 +128,42 @@ export const SchoolSettingsPage: React.FC = () => {
 
   const fetchProfile = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const data = await tenantApi.getProfile();
       setProfile(data);
-      if (data.branding?.primaryColor) {
-        setSelectedColor(data.branding.primaryColor);
+      if (data.name) {
+        localStorage.setItem('school_name', data.name);
       }
-    } catch {
-      // Mock dữ liệu chuẩn theo thiết kế hình ảnh đính kèm nếu chưa kết nối backend
-      const fallbackData: TenantProfile = {
-        id: 'a0000000-0000-0000-0000-000000000002',
-        code: 'MN_SAOMAI',
-        name: 'Trường Mầm non Sao Mai Kids Garden',
-        contactEmail: 'contact@saomai.edu.vn',
-        phone: '(028) 3829 4999',
-        address: '128 Võ Thị Sáu, Phường Võ Thị Sáu, Quận 3, TP. Hồ Chí Minh',
-        status: 'ACTIVE',
-        subscriptionTier: 'STANDARD',
-        maxChildren: 500,
-        educationDepartmentCode: 'GD-MN-79-03-0042',
-        schoolIdentifierSgd: 'MN-HCM-Q3-0042',
-        isEducationDbSynced: true,
-        syncedAt: new Date().toISOString(),
-        foodSafetyLicense: {
-          number: '458/2023/ATTP-Q3',
-          expiryDate: '2026-11-18',
-        },
-        legalRepresentative: {
-          name: 'Nguyễn Thu Thủy',
-          title: 'Hiệu trưởng',
-        },
-        branding: {
-          logoUrl: '/assets/logo_saomai_kids.svg',
-          logoName: 'logo_saomai_kids.svg',
-          logoSize: '142 KB • 512×512px • Vector RGB',
-          primaryColor: 'TEAL',
-        },
-      };
-      setProfile(fallbackData);
+      if (data.operationalSettings) {
+        setOperational({
+          mealTimes:
+            Array.isArray(data.operationalSettings.mealTimes) &&
+            data.operationalSettings.mealTimes.length > 0
+              ? data.operationalSettings.mealTimes
+              : DEFAULT_OPERATIONAL_SETTINGS.mealTimes,
+          standardWeeklyCycleLength:
+            Number(data.operationalSettings.standardWeeklyCycleLength) ||
+            DEFAULT_OPERATIONAL_SETTINGS.standardWeeklyCycleLength,
+          foodRetentionHours:
+            Number(data.operationalSettings.foodRetentionHours) ||
+            DEFAULT_OPERATIONAL_SETTINGS.foodRetentionHours,
+          whoZscoreAutoCalc:
+            data.operationalSettings.whoZscoreAutoCalc !== undefined
+              ? Boolean(data.operationalSettings.whoZscoreAutoCalc)
+              : DEFAULT_OPERATIONAL_SETTINGS.whoZscoreAutoCalc,
+        });
+      }
+      window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: data }));
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setLoadError(
+        Array.isArray(msg)
+          ? msg.join(', ')
+          : msg || 'Không thể tải cấu hình trường học từ máy chủ. Vui lòng kiểm tra kết nối.',
+      );
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSyncEducationDb = async () => {
-    setSyncing(true);
-    try {
-      await tenantApi.syncEducationDb();
-      setSyncSuccess(true);
-      setTimeout(() => setSyncSuccess(false), 3000);
-      await fetchProfile();
-    } catch {
-      setSyncSuccess(true);
-      setTimeout(() => setSyncSuccess(false), 3000);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  const handleColorChange = async (color: 'TEAL' | 'YELLOW' | 'ORANGE') => {
-    setSelectedColor(color);
-    if (!profile) return;
-    try {
-      const updated = await tenantApi.updateProfile({
-        branding: {
-          ...profile.branding,
-          primaryColor: color,
-        },
-      });
-      setProfile(updated);
-    } catch {
-      // Local state update
-      setProfile({
-        ...profile,
-        branding: { ...profile.branding, primaryColor: color },
-      });
     }
   };
 
@@ -136,269 +171,503 @@ export const SchoolSettingsPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
+    setLogoSuccessMessage(null);
+    const validTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'image/svg+xml',
+      'image/webp',
+    ];
     const maxSize = 2 * 1024 * 1024; // 2MB
 
-    // Kiểm tra định dạng & dung lượng
     if (!validTypes.includes(file.type)) {
       setUploadError(
-        `Tệp ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB) không hợp lệ. Vui lòng chọn định dạng PNG, JPG hoặc SVG và dung lượng tối đa không quá 2MB.`
+        `Tệp "${file.name}" không đúng định dạng hỗ trợ. Vui lòng chọn ảnh PNG, JPG, WEBP hoặc SVG.`,
       );
+      e.target.value = '';
       return;
     }
 
     if (file.size > maxSize) {
       setUploadError(
-        `Tệp ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB) vượt quá dung lượng. Vui lòng chọn tệp tối đa không quá 2MB.`
+        `Tệp "${file.name}" (${(file.size / (1024 * 1024)).toFixed(2)} MB) vượt quá giới hạn 2MB.`,
       );
+      e.target.value = '';
       return;
     }
 
-    // File hợp lệ -> Đọc file từ máy tính & Cập nhật logo
     setUploadError(null);
-    const sizeStr = file.size < 1024 * 1024
-      ? `${Math.round(file.size / 1024)} KB`
-      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+    setUploadingLogo(true);
+
+    const sizeStr =
+      file.size < 1024 * 1024
+        ? `${Math.max(1, Math.round(file.size / 1024))} KB`
+        : `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
 
     const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const dataUrl = (ev.target?.result as string) || '/assets/logo_saomai_kids.svg';
-      if (profile) {
+    reader.onload = (ev) => {
+      const dataUrl = (ev.target?.result as string) || '';
+      if (!dataUrl || !profile) {
+        setUploadingLogo(false);
+        return;
+      }
+
+      // Đọc kích thước pixel thực tế của ảnh
+      const img = new Image();
+      img.onload = async () => {
+        const dimStr =
+          img.naturalWidth && img.naturalHeight
+            ? `${img.naturalWidth}×${img.naturalHeight}px`
+            : file.type.includes('svg')
+              ? 'Vector SVG'
+              : 'Ảnh Raster';
         const nextBranding: SchoolBranding = {
-          ...profile.branding,
+          primaryColor: profile.branding?.primaryColor || 'TEAL',
           logoUrl: dataUrl,
           logoName: file.name,
-          logoSize: `${sizeStr} • 512×512px • Raster/Vector`,
+          logoSize: `${sizeStr} • ${dimStr}`,
         };
-        setProfile({
-          ...profile,
-          branding: nextBranding,
-        });
+
         try {
-          await tenantApi.updateProfile({ branding: nextBranding });
-        } catch {
-          // kept in local state
+          const updated = await tenantApi.updateProfile({
+            logo: dataUrl,
+            branding: nextBranding,
+          });
+          setProfile(updated);
+          setLogoSuccessMessage('Đã lưu logo trường học vào cơ sở dữ liệu.');
+          window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
+        } catch (err: any) {
+          setUploadError(
+            err?.response?.data?.message || 'Không thể lưu logo lên máy chủ. Vui lòng thử lại.',
+          );
+        } finally {
+          setUploadingLogo(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
         }
-      }
+      };
+      img.onerror = async () => {
+        const nextBranding: SchoolBranding = {
+          primaryColor: profile.branding?.primaryColor || 'TEAL',
+          logoUrl: dataUrl,
+          logoName: file.name,
+          logoSize: sizeStr,
+        };
+        try {
+          const updated = await tenantApi.updateProfile({
+            logo: dataUrl,
+            branding: nextBranding,
+          });
+          setProfile(updated);
+          setLogoSuccessMessage('Đã lưu logo trường học vào cơ sở dữ liệu.');
+          window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
+        } catch (err: any) {
+          setUploadError(
+            err?.response?.data?.message || 'Không thể lưu logo lên máy chủ. Vui lòng thử lại.',
+          );
+        } finally {
+          setUploadingLogo(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.onerror = () => {
+      setUploadingLogo(false);
+      setUploadError('Không thể đọc tệp đã chọn từ máy tính.');
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!profile) return;
+    setUploadingLogo(true);
+    setUploadError(null);
+    setLogoSuccessMessage(null);
+    try {
+      const emptyBranding: SchoolBranding = {
+        primaryColor: profile.branding?.primaryColor || 'TEAL',
+        logoUrl: '',
+        logoName: '',
+        logoSize: '',
+      };
+      const updated = await tenantApi.updateProfile({
+        logo: '',
+        branding: emptyBranding,
+      });
+      setProfile(updated);
+      setLogoSuccessMessage('Đã xóa logo nhận diện trường học.');
+      window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
+    } catch (err: any) {
+      setUploadError(err?.response?.data?.message || 'Không thể xóa logo trường học.');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const toggleMealTime = (code: string) => {
+    setOperationalFeedback(null);
+    setOperational((prev) => {
+      const exists = prev.mealTimes.includes(code);
+      if (exists && prev.mealTimes.length <= 1) {
+        return prev; // Giữ tối thiểu 1 bữa ăn trong ngày
+      }
+      const nextMealTimes = exists
+        ? prev.mealTimes.filter((m) => m !== code)
+        : [...prev.mealTimes, code];
+      return { ...prev, mealTimes: nextMealTimes };
+    });
+  };
+
+  const handleSaveOperationalSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingOperational(true);
+    setOperationalFeedback(null);
+    try {
+      const updated = await tenantApi.updateProfile({
+        operationalSettings: operational,
+      });
+      setProfile(updated);
+      if (updated.operationalSettings) {
+        setOperational(updated.operationalSettings);
+      }
+      setOperationalFeedback({
+        type: 'success',
+        text: 'Đã lưu cấu hình vận hành bán trú vào cơ sở dữ liệu.',
+      });
+    } catch (err: any) {
+      setOperationalFeedback({
+        type: 'error',
+        text:
+          err?.response?.data?.message ||
+          'Có lỗi xảy ra khi lưu cấu hình vận hành bán trú.',
+      });
+    } finally {
+      setSavingOperational(false);
+    }
   };
 
   if (loading) {
     return (
       <div className="min-h-[500px] flex flex-col items-center justify-center text-slate-500 gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
-        <p className="text-xs font-medium">Đang tải cấu hình trường học & hệ thống...</p>
+        <p className="text-xs font-medium">Đang tải thông tin trường học từ cơ sở dữ liệu...</p>
       </div>
     );
   }
 
+  if (loadError || !profile) {
+    return (
+      <div className="max-w-3xl mx-auto my-12 bg-white rounded-3xl p-8 border border-red-200 shadow-xs text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto">
+          <AlertTriangle className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-slate-900">
+            Không thể tải dữ liệu Cấu hình trường học
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            {loadError || 'Không tìm thấy bản ghi trường học trong hệ thống.'}
+          </p>
+        </div>
+        <button
+          onClick={fetchProfile}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white transition"
+        >
+          <RotateCw className="w-3.5 h-3.5" />
+          <span>Thử tải lại</span>
+        </button>
+      </div>
+    );
+  }
+
+  const licenseStatus = getLicenseStatus(
+    profile.foodSafetyLicense?.number,
+    profile.foodSafetyLicense?.expiryDate,
+  );
+  const hasRealLogo = Boolean(profile.branding?.logoUrl && profile.branding.logoUrl.trim());
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12">
-      {/* 1. Header & Actions Bar */}
+      {/* 1. Header thực tế của Trường học */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-              <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
-              CƠ SỞ 1 - CHUẨN QUỐC GIA MẦM NON SAO MAI
+              <span className="w-2 h-2 rounded-full bg-teal-600"></span>
+              {profile.status === 'ACTIVE' ? 'ĐANG HOẠT ĐỘNG' : profile.status}
             </span>
-            <span className="text-xs text-slate-400 font-mono">
-              Mã định danh SGD: {profile?.schoolIdentifierSgd || 'MN-HCM-Q3-0042'}
+            <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
+              Mã trường: {profile.code}
             </span>
+            {profile.updatedAt && (
+              <span className="text-[11px] text-slate-400">
+                Cập nhật lần cuối: {formatDateVi(profile.updatedAt)}
+              </span>
+            )}
           </div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
-            Cài đặt Trường học & Quản trị Hệ thống
+            {profile.name}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Quản lý hồ sơ pháp lý trường, nhận diện thương hiệu, nhật ký vận hành và tài khoản cổng phụ huynh.
+            Cấu hình thông tin pháp lý nhà trường, giấy phép An toàn thực phẩm (ATTP), logo nhận diện và thông số vận hành bán trú.
           </p>
         </div>
 
-        {/* Nút tác vụ phải */}
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm transition">
-            <FileText className="w-4 h-4 text-slate-500" />
-            <span>Nhật ký hệ thống (UC11)</span>
-            <span className="bg-teal-50 text-teal-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-teal-200">
-              +142 bản ghi
-            </span>
+        {/* Nút tác vụ thực tế */}
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={fetchProfile}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
+          >
+            <RotateCw className="w-3.5 h-3.5 text-slate-500" />
+            <span>Làm mới dữ liệu</span>
           </button>
 
           <button
-            onClick={handleSyncEducationDb}
-            disabled={syncing}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/25 transition disabled:opacity-75"
+            type="button"
+            onClick={() => setIsEditModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/25 transition"
           >
-            <RotateCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-            <span>{syncing ? 'Đang đồng bộ dữ liệu...' : syncSuccess ? 'Đã đồng bộ ✓' : 'Đồng bộ dữ liệu ngành'}</span>
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>Chỉnh sửa thông tin trường</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Sub-Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-teal-50 text-teal-800 border border-teal-300 shadow-sm">
-          <Building2 className="w-4 h-4 text-teal-600" />
-          <span>Cấu hình trường học (UC07)</span>
-          <span className="w-4 h-4 rounded-full bg-teal-700 text-white text-[10px] flex items-center justify-center font-bold">
-            3
-          </span>
-        </button>
+      {/* 2. Dải chỉ số thực tế truy vấn từ CSDL (Classes, Children, Users) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[11px] text-slate-500 font-medium">Quy mô học sinh bán trú</p>
+            <p className="text-base font-black text-slate-900">
+              {profile.stats?.totalChildren ?? 0}{' '}
+              <span className="text-xs font-semibold text-slate-400">
+                / {profile.maxChildren || 200} chỉ tiêu
+              </span>
+            </p>
+          </div>
+        </div>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <Users className="w-4 h-4 text-slate-400" />
-          <span>Tài khoản Phụ huynh (UC16)</span>
-          <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-emerald-200">
-            485/510
-          </span>
-        </button>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[11px] text-slate-500 font-medium">Lớp học đang vận hành</p>
+            <p className="text-base font-black text-slate-900">
+              {profile.stats?.totalClasses ?? 0}{' '}
+              <span className="text-xs font-semibold text-slate-400">lớp học</span>
+            </p>
+          </div>
+        </div>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <FileText className="w-4 h-4 text-slate-400" />
-          <span>Nhật ký hệ thống (UC11)</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-        </button>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-sky-50 text-sky-700 flex items-center justify-center border border-sky-100 shrink-0">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-[11px] text-slate-500 font-medium">Nhân sự & Giáo viên</p>
+            <p className="text-base font-black text-slate-900">
+              {profile.stats?.totalStaff ?? 0}{' '}
+              <span className="text-xs font-semibold text-slate-400">tài khoản hoạt động</span>
+            </p>
+          </div>
+        </div>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
-          <Settings className="w-4 h-4 text-slate-400" />
-          <span>Cấu hình chung...</span>
-        </button>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-100 shrink-0">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-[11px] text-slate-500 font-medium truncate">
+              {profile.legalRepresentative?.title || 'Người đại diện pháp lý'}
+            </p>
+            <p className="text-sm font-bold text-slate-900 truncate">
+              {profile.legalRepresentative?.name || 'Chưa cập nhật'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* 3. Main 2-Column Grid Content */}
+      {/* 3. Nội dung chính 2 cột */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* CỘT TRÁI (7/12): Thông tin chung & Pháp lý cơ sở */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
-          <div className="space-y-6">
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+          <div className="space-y-5">
             {/* Header Thẻ Trái */}
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shadow-inner">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
-                    Thông tin chung & Pháp lý cơ sở
+                    Hồ sơ cơ sở giáo dục & Pháp lý ATTP
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Hồ sơ cấp phép giáo dục mầm non và cam kết an toàn bán trú
+                    Thông tin chính thức hiển thị trên thực đơn tuần, sổ kiểm thực 3 bước và báo cáo dinh dưỡng
                   </p>
                 </div>
               </div>
 
-              {/* Badge Đã đồng bộ cơ sở dữ liệu ngành */}
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200 shadow-xs">
-                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
-                Đã đồng bộ Cơ sở dữ liệu ngành
-              </span>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200 transition shrink-0"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Sửa hồ sơ</span>
+              </button>
             </div>
 
-            {/* Input Hàng 1: Tên cơ sở & Mã định danh */}
+            {/* Thông tin trường */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Tên cơ sở giáo dục
+                  Tên trường mầm non
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={profile?.name || 'Trường Mầm non Sao Mai Kids Garden'}
-                    disabled
-                    className="w-full text-xs font-medium px-3.5 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 cursor-not-allowed"
-                  />
-                  <Lock className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-3" />
+                <div className="w-full text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900">
+                  {profile.name || 'Chưa cập nhật'}
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Mã định danh Bộ GD&ĐT
+                  Mã trường trên hệ thống
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={profile?.educationDepartmentCode || 'GD-MN-79-03-0042'}
-                    disabled
-                    className="w-full text-xs font-mono font-medium px-3.5 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
-                  />
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 absolute right-3 top-3" />
+                <div className="w-full text-xs font-mono font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
+                  {profile.code || 'Chưa cập nhật'}
                 </div>
               </div>
             </div>
 
-            {/* Input Hàng 2: Địa chỉ trường */}
+            {/* Địa chỉ */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Địa chỉ cơ sở trường
               </label>
               <div className="relative">
-                <input
-                  type="text"
-                  value={profile?.address || '128 Võ Thị Sáu, Phường Võ Thị Sáu, Quận 3, TP. Hồ Chí Minh'}
-                  disabled
-                  className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
-                />
-                <MapPin className="w-4 h-4 text-teal-600 absolute left-3 top-3" />
+                <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
+                  {profile.address || 'Chưa cập nhật địa chỉ'}
+                </div>
+                <MapPin className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
               </div>
             </div>
 
-            {/* Input Hàng 3: Hotline & Giấy phép ATTP */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Liên hệ: Điện thoại, Email, Website */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Hotline Nhà trường / Tiếp đón
+                  Số điện thoại / Hotline
                 </label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    value={profile?.phone || '(028) 3829 4999'}
-                    disabled
-                    className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
-                  />
-                  <Phone className="w-4 h-4 text-teal-600 absolute left-3 top-3" />
+                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
+                    {profile.phone || 'Chưa cập nhật'}
+                  </div>
+                  <Phone className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Giấy phép ATTP bán trú
+                  Email liên hệ
                 </label>
-                {/* Thẻ con hiển thị số giấy phép & hạn sử dụng theo thiết kế */}
-                <div className="bg-sky-50/70 border border-sky-200/80 rounded-2xl p-3 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-sky-700 font-bold block uppercase tracking-wider">
-                      Số
-                    </span>
-                    <span className="text-xs font-black text-sky-950">
-                      {profile?.foodSafetyLicense?.number || '458/2023/ATTP-Q3'}
-                    </span>
+                <div className="relative">
+                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
+                    {profile.contactEmail || 'Chưa cập nhật'}
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-sky-700 font-bold block">
-                      Hạn:
-                    </span>
-                    <span className="text-xs font-bold text-sky-950 font-mono">
-                      {profile?.foodSafetyLicense?.expiryDate || '18/11/2026'}
-                    </span>
+                  <Mail className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Website / Tên miền
+                </label>
+                <div className="relative">
+                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
+                    {profile.domain || 'Chưa thiết lập'}
                   </div>
+                  <Globe className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Khối Giấy chứng nhận ATTP */}
+            <div className="rounded-2xl border border-sky-200/90 bg-sky-50/50 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-sky-700" />
+                  <h3 className="text-xs font-bold text-sky-950">
+                    Giấy chứng nhận Cơ sở đủ điều kiện An toàn thực phẩm (ATTP)
+                  </h3>
+                </div>
+                <span
+                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${licenseStatus.className}`}
+                >
+                  {licenseStatus.label}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
+                  <span className="text-[10px] text-slate-400 font-semibold block">
+                    Số giấy chứng nhận
+                  </span>
+                  <span className="text-xs font-bold text-slate-900 mt-0.5 block">
+                    {profile.foodSafetyLicense?.number || 'Chưa cập nhật'}
+                  </span>
+                </div>
+
+                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
+                  <span className="text-[10px] text-slate-400 font-semibold block">
+                    Cơ quan cấp
+                  </span>
+                  <span className="text-xs font-semibold text-slate-800 mt-0.5 block truncate">
+                    {profile.foodSafetyLicense?.issuingAuthority || 'Chưa cập nhật'}
+                  </span>
+                </div>
+
+                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
+                  <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-sky-600" /> Ngày cấp
+                  </span>
+                  <span className="text-xs font-mono font-semibold text-slate-800 mt-0.5 block">
+                    {formatDateVi(profile.foodSafetyLicense?.issueDate)}
+                  </span>
+                </div>
+
+                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
+                  <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-sky-600" /> Ngày hết hạn
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-900 mt-0.5 block">
+                    {formatDateVi(profile.foodSafetyLicense?.expiryDate)}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Dải chân thẻ: Đại diện pháp lý & Nút Chỉnh sửa */}
-          <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+          {/* Chân thẻ trái: Người đại diện ký duyệt */}
+          <div className="pt-5 mt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-400">Đại diện pháp lý ký duyệt thực đơn:</span>
+              <span className="text-slate-500">Đại diện pháp lý ký duyệt thực đơn:</span>
               <span className="font-bold text-slate-900">
-                Hiệu trưởng {profile?.legalRepresentative?.name || 'Nguyễn Thu Thủy'}
+                {profile.legalRepresentative?.title || 'Hiệu trưởng'}{' '}
+                {profile.legalRepresentative?.name || '(Chưa cập nhật)'}
               </span>
             </div>
 
             <button
+              type="button"
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition"
+              className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition self-start sm:self-auto"
             >
               <span>Chỉnh sửa thông tin</span>
               <Edit3 className="w-3.5 h-3.5" />
@@ -406,219 +675,288 @@ export const SchoolSettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI (5/12): Nhận diện & Logo trường */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between space-y-5">
-          <div className="space-y-4">
-            {/* Header Thẻ Phải */}
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shadow-inner">
-                  <Palette className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">
-                    Nhận diện & Logo trường
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Hiển thị trên Cổng phụ huynh, Phiếu thực đơn & SMS
-                  </p>
-                </div>
+        {/* CỘT PHẢI (5/12): Logo trường học & Cấu hình vận hành bán trú */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Thẻ 1: Logo & Nhận diện trường học */}
+          <div className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shadow-inner">
+                <ImageIcon className="w-6 h-6" />
               </div>
-
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                v2.4 Branding
-              </span>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">
+                  Logo & Nhận diện trường học
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Hiển thị trên thanh điều hướng, phiếu công khai thực đơn và báo cáo
+                </p>
+              </div>
             </div>
 
-            {/* Banner Lỗi tải tệp (Upload Error Banner theo thiết kế) */}
+            {/* Thông báo lỗi tải tệp (chỉ hiển thị khi người dùng chọn tệp không hợp lệ) */}
             {uploadError && (
-              <div className="bg-red-50/80 border border-red-200 rounded-2xl p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 bg-red-100 text-red-600 rounded-lg shrink-0">
-                    <AlertTriangle className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-red-900">
-                      Lỗi tải tệp lên hệ thống
-                    </h4>
-                    <p className="text-[11px] text-red-700 mt-0.5 leading-relaxed">
-                      {uploadError}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-xs transition"
-                  >
-                    <RotateCw className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Thử tải lại</span>
-                  </button>
-
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-800 hover:bg-red-900 text-white shadow-xs transition"
-                  >
-                    <UploadCloud className="w-3.5 h-3.5" />
-                    <span>Chọn tệp khác</span>
-                  </button>
-                </div>
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1 text-xs text-red-800">{uploadError}</div>
               </div>
             )}
 
-            {/* Hidden Input File */}
+            {/* Thông báo lưu logo thành công */}
+            {logoSuccessMessage && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2 text-xs text-emerald-800 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{logoSuccessMessage}</span>
+              </div>
+            )}
+
+            {/* Input chọn file ẩn */}
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept=".png,.jpg,.jpeg,.svg,.bmp"
+              accept=".png,.jpg,.jpeg,.svg,.webp"
               className="hidden"
             />
 
-            {/* Card Logo đang kích hoạt */}
-            <div className="bg-slate-50/70 border border-slate-200 rounded-2xl p-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center shadow-xs">
-                  <img
-                    src="https://api.iconify.design/lucide:sun.svg?color=%230d9488"
-                    alt="Logo Sao Mai"
-                    className="w-8 h-8 object-contain"
-                  />
+            {/* Khung hiển thị Logo hiện tại */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3.5 overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1.5 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                  {hasRealLogo ? (
+                    <img
+                      src={profile.branding.logoUrl}
+                      alt={profile.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-sm font-black text-teal-700">
+                      {(profile.name || 'KM')
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(-2)
+                        .map((w) => w[0])
+                        .join('')
+                        .toUpperCase()}
+                    </span>
+                  )}
                 </div>
-                <div>
+
+                <div className="overflow-hidden">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-800 font-mono">
-                      {profile?.branding?.logoName || 'logo_saomai_kids.svg'}
+                    <span className="text-xs font-bold text-slate-800 truncate">
+                      {hasRealLogo
+                        ? profile.branding.logoName || 'Logo trường học'
+                        : 'Chưa tải lên logo trường'}
                     </span>
-                    <span className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-teal-200">
-                      Đang kích hoạt
-                    </span>
+                    {hasRealLogo && (
+                      <span className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-teal-200 shrink-0">
+                        Đã lưu CSDL
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    {profile?.branding?.logoSize || 'Dung lượng: 142 KB • 512×512px • Vector RGB'}
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                    {hasRealLogo
+                      ? profile.branding.logoSize || 'Đang sử dụng trên toàn hệ thống'
+                      : 'Hỗ trợ PNG, JPG, WEBP, SVG (tối đa 2MB)'}
                   </p>
                 </div>
               </div>
 
-              <button
-                onClick={() => {
-                  if (confirm('Bạn có chắc muốn gỡ bỏ logo này?')) {
-                    setUploadError('Vui lòng chọn logo định dạng SVG hoặc PNG để hoàn thiện nhận diện.');
-                  }
-                }}
-                className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-white transition"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Màu sắc chủ đạo ứng dụng KidMeal phụ huynh */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-2">
-                Màu sắc chủ đạo ứng dụng KidMeal phụ huynh
-              </label>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                {/* Option 1: Teal Past (Mặc định) */}
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => handleColorChange('TEAL')}
-                  className={`p-3 rounded-2xl border text-left transition flex items-start gap-2.5 ${
-                    selectedColor === 'TEAL'
-                      ? 'border-teal-600 bg-teal-50/50 shadow-xs'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
-                  }`}
+                  disabled={uploadingLogo}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition disabled:opacity-60"
                 >
-                  <div className="w-4 h-4 rounded-full bg-teal-600 shrink-0 mt-0.5 flex items-center justify-center text-white">
-                    {selectedColor === 'TEAL' && <Check className="w-3 h-3 stroke-[3]" />}
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 block">Teal Past</span>
-                    <span className="text-[10px] text-slate-400">Mặc định</span>
-                  </div>
+                  {uploadingLogo ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <UploadCloud className="w-3.5 h-3.5" />
+                  )}
+                  <span>{hasRealLogo ? 'Đổi logo' : 'Tải logo lên'}</span>
                 </button>
 
-                {/* Option 2: Vàng Mật */}
-                <button
-                  type="button"
-                  onClick={() => handleColorChange('YELLOW')}
-                  className={`p-3 rounded-2xl border text-left transition flex items-start gap-2.5 ${
-                    selectedColor === 'YELLOW'
-                      ? 'border-amber-500 bg-amber-50/50 shadow-xs'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <div className="w-4 h-4 rounded-full bg-amber-400 shrink-0 mt-0.5 flex items-center justify-center text-white">
-                    {selectedColor === 'YELLOW' && <Check className="w-3 h-3 stroke-[3]" />}
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 block">Vàng Mật</span>
-                    <span className="text-[10px] text-slate-400">Năng lượng</span>
-                  </div>
-                </button>
-
-                {/* Option 3: Cam San */}
-                <button
-                  type="button"
-                  onClick={() => handleColorChange('ORANGE')}
-                  className={`p-3 rounded-2xl border text-left transition flex items-start gap-2.5 ${
-                    selectedColor === 'ORANGE'
-                      ? 'border-orange-500 bg-orange-50/50 shadow-xs'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <div className="w-4 h-4 rounded-full bg-orange-400 shrink-0 mt-0.5 flex items-center justify-center text-white">
-                    {selectedColor === 'ORANGE' && <Check className="w-3 h-3 stroke-[3]" />}
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 block">Cam San</span>
-                    <span className="text-[10px] text-slate-400">Ấm cúng</span>
-                  </div>
-                </button>
+                {hasRealLogo && (
+                  <button
+                    type="button"
+                    disabled={uploadingLogo}
+                    onClick={handleRemoveLogo}
+                    title="Xóa logo hiện tại"
+                    className="text-slate-400 hover:text-red-600 p-2 rounded-xl hover:bg-white border border-transparent hover:border-red-200 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Dải chân thẻ Phải: Mô phỏng App Phụ Huynh */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              Xem trước giao diện Phụ Huynh trên iOS/Android
-            </span>
+          {/* Thẻ 2: Cấu hình vận hành bán trú & Dinh dưỡng (Lưu vào CSDL) */}
+          <form
+            onSubmit={handleSaveOperationalSettings}
+            className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shadow-inner">
+                <Settings className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">
+                  Cấu hình vận hành bán trú
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Thông số áp dụng cho lập thực đơn, lưu mẫu thức ăn và đánh giá dinh dưỡng
+                </p>
+              </div>
+            </div>
 
-            <button
-              onClick={() => setIsPreviewModalOpen(true)}
-              className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-teal-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition"
-            >
-              <Smartphone className="w-4 h-4 text-teal-600" />
-              <span>Mô phỏng App</span>
-            </button>
-          </div>
+            {operationalFeedback && (
+              <div
+                className={`p-3 rounded-2xl text-xs font-medium flex items-center gap-2 border ${
+                  operationalFeedback.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : 'bg-red-50 text-red-800 border-red-200'
+                }`}
+              >
+                {operationalFeedback.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                )}
+                <span>{operationalFeedback.text}</span>
+              </div>
+            )}
+
+            {/* Bữa ăn tổ chức trong ngày */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                <Utensils className="w-3.5 h-3.5 text-teal-600" /> Các bữa ăn tổ chức tại trường
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {MEAL_TIME_OPTIONS.map((meal) => {
+                  const active = operational.mealTimes.includes(meal.code);
+                  return (
+                    <button
+                      key={meal.code}
+                      type="button"
+                      onClick={() => toggleMealTime(meal.code)}
+                      className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-between transition ${
+                        active
+                          ? 'bg-teal-50/80 border-teal-600 text-teal-900'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>{meal.label}</span>
+                      <span
+                        className={`w-4 h-4 rounded-md flex items-center justify-center text-[10px] ${
+                          active
+                            ? 'bg-teal-600 text-white'
+                            : 'bg-white border border-slate-300 text-transparent'
+                        }`}
+                      >
+                        ✓
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Chu kỳ thực đơn & Thời gian lưu mẫu thức ăn */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-teal-600" /> Chu kỳ xoay vòng thực đơn
+                </label>
+                <select
+                  value={operational.standardWeeklyCycleLength}
+                  onChange={(e) => {
+                    setOperationalFeedback(null);
+                    setOperational((prev) => ({
+                      ...prev,
+                      standardWeeklyCycleLength: Number(e.target.value),
+                    }));
+                  }}
+                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                >
+                  <option value={1}>Chu kỳ 1 tuần</option>
+                  <option value={2}>Chu kỳ 2 tuần (Khuyến nghị)</option>
+                  <option value={4}>Chu kỳ 4 tuần (Theo tháng)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-teal-600" /> Thời gian lưu mẫu thức ăn
+                </label>
+                <select
+                  value={operational.foodRetentionHours}
+                  onChange={(e) => {
+                    setOperationalFeedback(null);
+                    setOperational((prev) => ({
+                      ...prev,
+                      foodRetentionHours: Number(e.target.value),
+                    }));
+                  }}
+                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                >
+                  <option value={24}>24 giờ (QĐ 1246/QĐ-BYT)</option>
+                  <option value={48}>48 giờ (Kiểm soát nâng cao)</option>
+                  <option value={72}>72 giờ</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Tự động tính chuẩn WHO Z-Score */}
+            <label className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer">
+              <div className="pr-3">
+                <span className="text-xs font-bold text-slate-800 block">
+                  Tự động phân loại dinh dưỡng theo chuẩn WHO Z-Score
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Tự động tính WAZ, HAZ, BAZ khi giáo viên nhập cân nặng và chiều cao định kỳ
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={operational.whoZscoreAutoCalc}
+                onChange={(e) => {
+                  setOperationalFeedback(null);
+                  setOperational((prev) => ({
+                    ...prev,
+                    whoZscoreAutoCalc: e.target.checked,
+                  }));
+                }}
+                className="w-4 h-4 accent-teal-600 rounded cursor-pointer shrink-0"
+              />
+            </label>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="submit"
+                disabled={savingOperational}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition disabled:opacity-60"
+              >
+                {savingOperational ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
+                <span>Lưu cấu hình vận hành</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
       {/* Modal Chỉnh sửa thông tin trường */}
-      {profile && (
-        <EditSchoolInfoModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          profile={profile}
-          onSaved={(updated) => setProfile(updated)}
-        />
-      )}
-
-      {/* Modal Mô phỏng App Phụ Huynh */}
-      {profile && (
-        <ParentAppPreviewModal
-          isOpen={isPreviewModalOpen}
-          onClose={() => setIsPreviewModalOpen(false)}
-          branding={{
-            ...profile.branding,
-            primaryColor: selectedColor,
-          }}
-          schoolName={profile.name}
-        />
-      )}
+      <EditSchoolInfoModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        profile={profile}
+        onSaved={(updated) => setProfile(updated)}
+      />
     </div>
   );
 };
