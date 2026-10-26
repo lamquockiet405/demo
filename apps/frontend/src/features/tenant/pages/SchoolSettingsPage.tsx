@@ -154,22 +154,34 @@ export const SchoolSettingsPage: React.FC = () => {
       return;
     }
 
-    // File hợp lệ -> Cập nhật logo
+    // File hợp lệ -> Đọc file từ máy tính & Cập nhật logo
     setUploadError(null);
     const sizeStr = file.size < 1024 * 1024
       ? `${Math.round(file.size / 1024)} KB`
       : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
 
-    if (profile) {
-      setProfile({
-        ...profile,
-        branding: {
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const dataUrl = (ev.target?.result as string) || '/assets/logo_saomai_kids.svg';
+      if (profile) {
+        const nextBranding: SchoolBranding = {
           ...profile.branding,
+          logoUrl: dataUrl,
           logoName: file.name,
           logoSize: `${sizeStr} • 512×512px • Raster/Vector`,
-        },
-      });
-    }
+        };
+        setProfile({
+          ...profile,
+          branding: nextBranding,
+        });
+        try {
+          await tenantApi.updateProfile({ branding: nextBranding });
+        } catch {
+          // kept in local state
+        }
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (loading) {

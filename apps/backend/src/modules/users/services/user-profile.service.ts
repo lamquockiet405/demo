@@ -51,6 +51,9 @@ export class UserProfileService {
     if (dto.avatar !== undefined) user.avatar = dto.avatar;
     if (dto.avatarUrl !== undefined) user.avatar = dto.avatarUrl;
 
+    // Tránh TypeORM re-insert vào bảng user_roles gây duplicate key user_roles_pkey
+    delete (user as any).roles;
+
     await this.userRepo.save(user);
     return this.getProfile(userId);
   }
