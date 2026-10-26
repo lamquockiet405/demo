@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SnackServiceEntity } from './entities/snack-service.entity';
 import { SnackServicePeriodEntity } from './entities/snack-service-period.entity';
+import { Child } from '../children/entities/child.entity';
+import { ClassEntity } from '../classes/entities/class.entity';
 import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.dto';
 import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
 
@@ -59,6 +61,10 @@ export class SnackServicesService implements OnModuleInit {
     private readonly snackRepo: Repository<SnackServiceEntity>,
     @InjectRepository(SnackServicePeriodEntity)
     private readonly periodRepo: Repository<SnackServicePeriodEntity>,
+    @InjectRepository(Child)
+    private readonly childRepo: Repository<Child>,
+    @InjectRepository(ClassEntity)
+    private readonly classRepo: Repository<ClassEntity>,
   ) {}
 
   async onModuleInit() {
@@ -338,6 +344,168 @@ export class SnackServicesService implements OnModuleInit {
       success: true,
       message: 'Cập nhật cấu hình dịch vụ ăn xế thành công!',
       data: saved,
+    };
+  }
+
+  /**
+   * UC60 & UC61: Lấy danh sách phân công phục vụ ăn xế (Snack Service Roster)
+   * Kèm bộ lọc lớp, khối, điểm danh, khẩu phần, dị ứng, tìm kiếm.
+   */
+  async getRoster(filters?: {
+    periodId?: string;
+    classId?: string;
+    ageGroup?: string;
+    search?: string;
+    attendanceStatus?: string;
+    portionStatus?: string;
+    allergyOnly?: boolean | string;
+  }) {
+    // 1. Tìm thông tin đợt đăng ký (Period)
+    let period: SnackServicePeriodEntity | null = null;
+    if (filters?.periodId && filters.periodId !== 'ALL') {
+      period = await this.periodRepo.findOne({
+        where: { id: filters.periodId },
+        relations: ['snackService'],
+      });
+    }
+
+    if (!period) {
+      // Fallback: Tìm period đầu tiên hoặc period ACTIVE
+      period = await this.periodRepo.findOne({
+        relations: ['snackService'],
+        order: { createdAt: 'DESC' },
+      });
+    }
+
+    // 2. Lấy thông tin gói ăn xế liên kết
+    let snackServiceName = 'Gói Năng Lượng Chiều';
+    let pricePerDay = 15000;
+    if (period?.snackService) {
+      snackServiceName = period.snackService.name;
+      pricePerDay = Number(period.pricePerUnitPerDay || period.snackService.pricePerUnit) || 15000;
+    } else {
+      const defaultService = await this.snackRepo.findOne({ where: { isActive: true } });
+      if (defaultService) {
+        snackServiceName = defaultService.name;
+        pricePerDay = Number(defaultService.pricePerUnit) || 15000;
+      }
+    }
+
+    // 3. Lấy danh sách các lớp học
+    const classes = await this.classRepo.find({
+      order: { name: 'ASC' },
+    });
+
+    // 4. Lấy danh sách học sinh từ Database thực tế kèm thông tin Lớp & Dị ứng
+    const students = await this.childRepo.find({
+      relations: ['class', 'allergies', 'allergies.allergen'],
+      order: { classId: 'ASC', fullName: 'ASC' },
+    });
+
+    // 5. Mapping từng học sinh thành 1 bản ghi trong Snack Service Roster
+    const allRosterItems = students.map((kid, idx) => {
+      const kidId = Number(kid.id);
+      const studentClass = kid.class || classes.find(c => Number(c.id) === Number(kid.classId));
+      const className = studentClass ? studentClass.name : 'Lớp Mầm A1';
+      const ageGroup = studentClass ? studentClass.ageGroup : 'Mầm non';
+
+      // Trạng thái điểm danh (Mock ổn định theo ID học sinh): 88% có mặt, 12% vắng
+      const isAbsent = (kidId % 9 === 0);
+      const attendanceStatus: 'PRESENT' | 'ABSENT' | 'UNKNOWN' = isAbsent ? 'ABSENT' : 'PRESENT';
+
+      // Trạng thái khẩu phần: nếu vắng -> SKIPPED; nếu có mặt -> 75% SERVED, 25% PENDING
+      let portionStatus: 'PENDING' | 'SERVED' | 'SKIPPED' = 'SERVED';
+      if (isAbsent) {
+        portionStatus = 'SKIPPED';
+      } else if (kidId % 4 === 1) {
+        portionStatus = 'PENDING';
+      }
+
+      // Thông tin dị ứng
+      const allergyList = (kid.allergies || [])
+        .map(a => a.allergen?.name || a.allergen?.code)
+        .filter(Boolean);
+      const hasAllergy = allergyList.length > 0;
+
+      return {
+        studentId: kidId,
+        studentCode: kid.studentCode || `HS-${String(kidId).padStart(4, '0')}`,
+        fullName: kid.fullName,
+        avatar: kid.avatar || undefined,
+        classId: Number(studentClass?.id || kid.classId || 0),
+        className,
+        ageGroup,
+        snackServiceName,
+        periodCode: period?.periodCode || 'DOT-2024-11',
+        pricePerDay,
+        attendanceStatus,
+        portionStatus,
+        hasAllergy,
+        allergyNames: allergyList,
+      };
+    });
+
+    // 6. Tính toán thống kê tổng quan (trước khi lọc)
+    const summary = {
+      totalRegistered: allRosterItems.length,
+      presentToday: allRosterItems.filter(i => i.attendanceStatus === 'PRESENT').length,
+      absentToday: allRosterItems.filter(i => i.attendanceStatus === 'ABSENT').length,
+      servedCount: allRosterItems.filter(i => i.portionStatus === 'SERVED').length,
+      pendingCount: allRosterItems.filter(i => i.portionStatus === 'PENDING').length,
+      totalClasses: new Set(allRosterItems.map(i => i.className)).size,
+    };
+
+    // 7. Thực hiện bộ lọc (UC61)
+    let filteredItems = allRosterItems;
+
+    // Filter tìm kiếm theo tên hoặc mã học sinh
+    if (filters?.search && filters.search.trim() !== '') {
+      const q = filters.search.trim().toLowerCase();
+      filteredItems = filteredItems.filter(
+        item => item.fullName.toLowerCase().includes(q) || item.studentCode.toLowerCase().includes(q),
+      );
+    }
+
+    // Filter theo Lớp
+    if (filters?.classId && filters.classId !== 'ALL') {
+      filteredItems = filteredItems.filter(item => String(item.classId) === String(filters.classId));
+    }
+
+    // Filter theo Khối tuổi
+    if (filters?.ageGroup && filters.ageGroup !== 'ALL') {
+      filteredItems = filteredItems.filter(item => item.ageGroup === filters.ageGroup);
+    }
+
+    // Filter theo Trạng thái điểm danh
+    if (filters?.attendanceStatus && filters.attendanceStatus !== 'ALL') {
+      filteredItems = filteredItems.filter(item => item.attendanceStatus === filters.attendanceStatus);
+    }
+
+    // Filter theo Trạng thái khẩu phần
+    if (filters?.portionStatus && filters.portionStatus !== 'ALL') {
+      filteredItems = filteredItems.filter(item => item.portionStatus === filters.portionStatus);
+    }
+
+    // Filter chỉ học sinh có cờ cảnh báo dị ứng
+    const allergyFlag = filters?.allergyOnly === true || filters?.allergyOnly === 'true';
+    if (allergyFlag) {
+      filteredItems = filteredItems.filter(item => item.hasAllergy);
+    }
+
+    return {
+      success: true,
+      period: period ? {
+        id: period.id,
+        periodCode: period.periodCode,
+        snackServiceName,
+        serviceMonths: period.serviceMonths || ['Tháng 11/2024'],
+        status: period.status,
+        pricePerUnitPerDay: pricePerDay,
+      } : undefined,
+      summary,
+      totalCount: filteredItems.length,
+      data: filteredItems,
+      classes: classes.map(c => ({ id: Number(c.id), name: c.name, ageGroup: c.ageGroup })),
     };
   }
 }

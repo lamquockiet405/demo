@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Search,
   Download,
@@ -16,6 +17,7 @@ import {
   MessageSquare,
   Sparkles,
   UtensilsCrossed,
+  ClipboardList,
 } from 'lucide-react';
 import { fetchSnackServices } from '../api/snackServicesApi';
 import { SnackServiceItem, SnackServicesSummary } from '../types/snackServices';
@@ -91,6 +93,13 @@ export const SnackServicesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            to="/snack-roster"
+            className="px-4 py-2.5 bg-teal-50 border border-teal-200 rounded-xl text-xs font-bold text-teal-800 hover:bg-teal-100 shadow-sm flex items-center gap-2 transition"
+          >
+            <ClipboardList className="w-4 h-4 text-teal-600" />
+            Bảng phân công ăn xế (Roster)
+          </Link>
           <button className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition">
             <Download className="w-4 h-4 text-slate-500" />
             Xuất danh sách đăng ký Excel
