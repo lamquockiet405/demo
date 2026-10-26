@@ -19,7 +19,8 @@ export class ParentEvaluationService {
     private readonly childRepo: Repository<Child>,
     @InjectRepository(DailyMealAttendance)
     private readonly attendanceRepo: Repository<DailyMealAttendance>,
-  ) { }
+  ) {}
+
 
   private mapToItem(evalEntity: ParentEvaluation) {
     const student = evalEntity.student;
@@ -51,9 +52,10 @@ export class ParentEvaluationService {
       gradeLevelCustom: student?.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo',
       feedbackTimeLabel: evalEntity.createdAt
         ? new Date(evalEntity.createdAt).toLocaleTimeString('vi-VN', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+
         : '',
       priorityNote: evalEntity.rating <= 2 ? 'Cần xử lý gấp' : undefined,
       likesInfo: '0',
@@ -220,37 +222,38 @@ export class ParentEvaluationService {
 
     const childProfile = student
       ? {
-        id: String(student.id),
-        name: student.fullName,
-        age: 4,
-        className: student.class?.name || 'Lớp Mầm 1',
-        gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: allergyNames,
-        parentName: `Phụ huynh bé ${student.fullName}`,
-        parentRole: 'Mẹ bé',
-      }
+          id: String(student.id),
+          name: student.fullName,
+          age: 4,
+          className: student.class?.name || 'Lớp Mầm 1',
+          gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: allergyNames,
+          parentName: `Phụ huynh bé ${student.fullName}`,
+          parentRole: 'Mẹ bé',
+        }
       : {
-        id: '1',
-        name: 'Bé Nguyễn Bảo Nam',
-        age: 4,
-        className: 'Lớp Mầm 1',
-        gradeLevel: 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: 'Không',
-        parentName: 'Chị Hoàng Yến',
-        parentRole: 'Mẹ bé Bảo Nam',
-      };
+          id: '1',
+          name: 'Bé Nguyễn Bảo Nam',
+          age: 4,
+          className: 'Lớp Mầm 1',
+          gradeLevel: 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: 'Không',
+          parentName: 'Chị Hoàng Yến',
+          parentRole: 'Mẹ bé Bảo Nam',
+        };
 
     const recentEvaluations = student
       ? await this.evalRepo.find({
-        where: { studentId: student.id },
-        relations: ['student', 'student.class', 'menu', 'replies', 'replies.user'],
-        order: { createdAt: 'DESC' },
-        take: 5,
-      })
+          where: { studentId: student.id },
+          relations: ['student', 'student.class', 'menu', 'replies', 'replies.user'],
+          order: { createdAt: 'DESC' },
+          take: 5,
+        })
+
       : [];
 
     return {
@@ -326,6 +329,7 @@ export class ParentEvaluationService {
 
     const attendances = await this.attendanceRepo.find({
       where: { studentId: sId, date: targetDate },
+
     });
 
     let student = await this.childRepo.findOne({
@@ -347,29 +351,29 @@ export class ParentEvaluationService {
 
     const child = student
       ? {
-        id: String(student.id),
-        name: student.fullName,
-        age: 4,
-        className: student.class?.name || 'Lớp Mầm 1',
-        gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: allergyNames,
-        parentName: `Phụ huynh bé ${student.fullName}`,
-        parentRole: 'Mẹ bé',
-      }
+          id: String(student.id),
+          name: student.fullName,
+          age: 4,
+          className: student.class?.name || 'Lớp Mầm 1',
+          gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: allergyNames,
+          parentName: `Phụ huynh bé ${student.fullName}`,
+          parentRole: 'Mẹ bé',
+        }
       : {
-        id: '1',
-        name: 'Bé Nguyễn Bảo Nam',
-        age: 4,
-        className: 'Lớp Mầm 1',
-        gradeLevel: 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: '',
-        parentName: 'Chị Hoàng Yến',
-        parentRole: 'Mẹ bé Bảo Nam',
-      };
+          id: '1',
+          name: 'Bé Nguyễn Bảo Nam',
+          age: 4,
+          className: 'Lớp Mầm 1',
+          gradeLevel: 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: '',
+          parentName: 'Chị Hoàng Yến',
+          parentRole: 'Mẹ bé Bảo Nam',
+        };
 
     const currDate = new Date(targetDate);
     const dayOfWeek = currDate.getDay();
