@@ -117,6 +117,7 @@ export class GrowthService {
       heightClassification,
       bmiClassification,
       overallNutritionalStatus: overall,
+      healthNotes: record.healthNotes || '',
       createdAt: record.measuredDate,
     };
   }
@@ -279,16 +280,36 @@ export class GrowthService {
   }
 
   async createRecord(dto: CreateGrowthRecordDto, measurerId?: number) {
-    const studentId = Number(dto.studentId || dto.childId);
-    const measuredDate = dto.measuredDate || dto.measurementDate || new Date().toISOString().split('T')[0];
+    let studentId = Number(dto.studentId || dto.childId);
+    let child: Child | null = null;
 
-    const child = await this.childRepo.findOne({
-      where: { id: studentId },
-      relations: ['class'],
-    });
-    if (!child) {
-      throw new NotFoundException(`Child with ID ${studentId} not found`);
+    if (!isNaN(studentId) && studentId > 0) {
+      child = await this.childRepo.findOne({
+        where: { id: studentId },
+        relations: ['class'],
+      });
     }
+
+    if (!child && (dto.studentCode || dto.childId || dto.studentId)) {
+      const code = String(dto.studentCode || dto.childId || dto.studentId).trim();
+      child = await this.childRepo.findOne({
+        where: { studentCode: code },
+        relations: ['class'],
+      });
+      if (child) {
+        studentId = child.id;
+      }
+    }
+
+    if (!child) {
+      const lookupIdentifier = dto.studentCode || dto.childId || dto.studentId || 'N/A';
+      throw new NotFoundException(`Không tìm thấy hồ sơ học sinh (${lookupIdentifier}) trong hệ thống`);
+    }
+
+    const measuredDate =
+      dto.measuredDate ||
+      dto.measurementDate ||
+      new Date().toISOString().split('T')[0];
 
     const gender = (child.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
     const growth = await this.whoService.calculateChildGrowth(
@@ -299,8 +320,9 @@ export class GrowthService {
       Number(dto.weightKg),
     );
 
+    // Upsert cơ chế chống trùng lặp: Học sinh + Ngày đo
     let record = await this.growthRepo.findOne({
-      where: { studentId, measuredDate },
+      where: { studentId: child.id, measuredDate },
       relations: ['zscore'],
     });
 
@@ -308,14 +330,16 @@ export class GrowthService {
       record.heightCm = Number(dto.heightCm);
       record.weightKg = Number(dto.weightKg);
       if (measurerId) record.measuredBy = measurerId;
+      if (dto.healthNotes !== undefined) record.healthNotes = dto.healthNotes;
       await this.growthRepo.save(record);
     } else {
       record = this.growthRepo.create({
-        studentId,
+        studentId: child.id,
         measuredDate,
         heightCm: Number(dto.heightCm),
         weightKg: Number(dto.weightKg),
         measuredBy: measurerId,
+        healthNotes: dto.healthNotes,
       });
       await this.growthRepo.save(record);
     }
@@ -357,6 +381,7 @@ export class GrowthService {
 
     if (dto.heightCm != null) record.heightCm = Number(dto.heightCm);
     if (dto.weightKg != null) record.weightKg = Number(dto.weightKg);
+    if (dto.healthNotes !== undefined) record.healthNotes = dto.healthNotes;
     if (dto.measuredDate || dto.measurementDate) {
       record.measuredDate = dto.measuredDate || dto.measurementDate!;
     }
@@ -416,7 +441,8 @@ export class GrowthService {
         await this.createRecord(item, measurerId);
         importedCount++;
       } catch (err: any) {
-        errors.push(`Lỗi dòng học sinh ${item.studentId || item.childId}: ${err.message}`);
+        const iden = item.studentCode || item.studentId || item.childId || 'Dòng dữ liệu';
+        errors.push(`Lỗi dòng học sinh ${iden}: ${err.message}`);
       }
     }
 

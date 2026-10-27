@@ -66,6 +66,25 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
     healthNotes: '',
   });
 
+  // Real-time BMI calculation according to WHO LMS formula: BMI = weightKg / ((heightCm / 100)^2)
+  const previewBmi = useMemo(() => {
+    const w = Number(formData.weightKg);
+    const h = Number(formData.heightCm);
+    if (w > 0 && h > 0) {
+      const hM = h / 100;
+      return Math.round((w / (hM * hM)) * 100) / 100;
+    }
+    return 0;
+  }, [formData.weightKg, formData.heightCm]);
+
+  const getBmiStatusInfo = (bmi: number) => {
+    if (!bmi || bmi <= 0) return { label: 'Chưa có dữ liệu', color: 'text-slate-500 bg-slate-100 border-slate-200' };
+    if (bmi >= 25) return { label: 'Béo phì (OBESE, BMI ≥ 25)', color: 'text-rose-700 bg-rose-50 border-rose-200' };
+    if (bmi >= 19) return { label: 'Thừa cân (OVERWEIGHT, BMI ≥ 19)', color: 'text-amber-700 bg-amber-50 border-amber-200' };
+    if (bmi < 13.5) return { label: 'Nhẹ cân / Gầy còm (UNDERWEIGHT)', color: 'text-orange-700 bg-orange-50 border-orange-200' };
+    return { label: 'Bình thường (NORMAL)', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
+  };
+
   // Edit record state
   const [editingRecord, setEditingRecord] = useState<GrowthRecordItem | null>(null);
   const [editFormData, setEditFormData] = useState({
@@ -148,7 +167,10 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
           : 0;
 
       for (let i = startIdx; i < lines.length; i++) {
-        const parts = lines[i].split(',').map((s) => s.trim());
+        const line = lines[i].trim();
+        if (!line) continue;
+        const delimiter = line.includes('\t') ? '\t' : ',';
+        const parts = line.split(delimiter).map((s) => s.trim());
         if (parts.length >= 4) {
           items.push({
             studentCode: parts[0],
@@ -262,7 +284,18 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
   const handleCreateRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.childId) {
-      alert('Vui lòng chọn học sinh');
+      alert('Vui lòng chọn học sinh.');
+      return;
+    }
+    const weight = Number(formData.weightKg);
+    const height = Number(formData.heightCm);
+
+    if (isNaN(weight) || weight < 3 || weight > 60) {
+      alert('Cân nặng phải trong giới hạn từ 3.0 kg đến 60.0 kg.');
+      return;
+    }
+    if (isNaN(height) || height < 40 || height > 150) {
+      alert('Chiều cao phải trong giới hạn từ 40.0 cm đến 150.0 cm.');
       return;
     }
 
@@ -270,6 +303,13 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
     try {
       await growthApi.createRecord(formData);
       setIsModalOpen(false);
+      setFormData({
+        childId: '',
+        measurementDate: new Date().toISOString().split('T')[0],
+        weightKg: '' as any,
+        heightCm: '' as any,
+        healthNotes: '',
+      });
       fetchData();
       if (formData.childId === selectedChildId) {
         const hist = await growthApi.getChildHistory(formData.childId);
@@ -1220,13 +1260,34 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
               </div>
 
               {/* Real-time BMI preview */}
-              <div className="p-3 rounded-2xl bg-teal-50 border border-teal-200/60 text-xs flex items-center justify-between">
-                <span className="font-semibold text-teal-900">Chỉ số BMI dự tính:</span>
-                <span className="font-black text-teal-800 text-sm">
-                  {formData.heightCm > 0
-                    ? (formData.weightKg / ((formData.heightCm / 100) * (formData.heightCm / 100))).toFixed(2)
-                    : 0}{' '}
-                  kg/m²
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/80 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                    <span className="font-bold text-teal-900">Xem trước BMI tức thời:</span>
+                  </div>
+                  <span className="font-mono font-black text-teal-800 text-sm">
+                    {previewBmi > 0 ? `${previewBmi} kg/m²` : '--'}
+                  </span>
+                </div>
+                {previewBmi > 0 && (
+                  <div className="flex items-center justify-between pt-1 border-t border-teal-200/50 text-[11px]">
+                    <span className="text-teal-700">Thể trạng ước tính:</span>
+                    <span className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${getBmiStatusInfo(previewBmi).color}`}>
+                      {getBmiStatusInfo(previewBmi).label}
+                    </span>
+                  </div>
+                )}
+                <div className="text-[10px] text-teal-700/80 italic text-right">
+                  Công thức WHO: BMI = weightKg / ((heightCm / 100)²)
+                </div>
+              </div>
+
+              {/* Upsert duplicate prevention note */}
+              <div className="px-3 py-2 rounded-xl bg-blue-50/90 border border-blue-200/70 text-[11px] text-blue-900 flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <span className="leading-snug">
+                  <strong>Cơ chế chống trùng lặp (Upsert):</strong> Nếu học sinh đã có bản ghi trong ngày này, hệ thống sẽ tự động cập nhật số đo mới và tính lại Z-score thay vì tạo bản ghi trùng.
                 </span>
               </div>
 

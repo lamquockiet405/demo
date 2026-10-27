@@ -351,11 +351,10 @@ export const ExecutiveDashboardPage: React.FC = () => {
               <div
                 key={g.gradeLevel}
                 onClick={() => setSelectedGradeFilter(selectedGradeFilter === g.gradeLevel ? 'ALL' : g.gradeLevel)}
-                className={`p-3.5 rounded-2xl border transition cursor-pointer ${
-                  selectedGradeFilter === g.gradeLevel
+                className={`p-3.5 rounded-2xl border transition cursor-pointer ${selectedGradeFilter === g.gradeLevel
                     ? 'bg-teal-50 border-teal-500 shadow-xs ring-2 ring-teal-500/20'
                     : 'bg-white border-slate-200/80 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">{g.gradeName}</span>
@@ -422,9 +421,8 @@ export const ExecutiveDashboardPage: React.FC = () => {
                           </div>
                           <div className="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${
-                                cls.occupancyPercent >= 100 ? 'bg-rose-500' : cls.occupancyPercent >= 85 ? 'bg-amber-500' : 'bg-teal-500'
-                              }`}
+                              className={`h-full rounded-full ${cls.occupancyPercent >= 100 ? 'bg-rose-500' : cls.occupancyPercent >= 85 ? 'bg-amber-500' : 'bg-teal-500'
+                                }`}
                               style={{ width: `${Math.min(100, cls.occupancyPercent)}%` }}
                             ></div>
                           </div>
