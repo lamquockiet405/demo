@@ -129,9 +129,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
               return (
                 <tr
                   key={child.id}
-                  className={`hover:bg-slate-50/80 transition-colors ${
-                    isAbsent ? 'bg-slate-50/40 text-slate-400' : 'text-slate-800'
-                  }`}
+                  className={`hover:bg-slate-50/80 transition-colors ${isAbsent ? 'bg-slate-50/40 text-slate-400' : 'text-slate-800'
+                    }`}
                 >
                   {/* Row Checkbox */}
                   <td className="py-3.5 px-4 text-center">
@@ -168,11 +167,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       {/* Cả ngày */}
                       <button
                         onClick={() => onUpdateStatus(child.id, 'ALL_DAY')}
-                        className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1 ${
-                          child.mealOption === 'ALL_DAY'
-                            ? 'bg-teal-600 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1 ${child.mealOption === 'ALL_DAY'
+                          ? 'bg-teal-600 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                          }`}
                       >
                         {child.mealOption === 'ALL_DAY' && <Check className="w-3.5 h-3.5" />}
                         <span>Cả ngày</span>
@@ -181,11 +179,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       {/* Trưa */}
                       <button
                         onClick={() => onUpdateStatus(child.id, 'LUNCH_ONLY')}
-                        className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 ${
-                          child.mealOption === 'LUNCH_ONLY'
-                            ? 'bg-sky-700 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 ${child.mealOption === 'LUNCH_ONLY'
+                          ? 'bg-sky-700 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                          }`}
                       >
                         {child.mealOption === 'LUNCH_ONLY' && <Check className="w-3.5 h-3.5" />}
                         <span>Trưa</span>
@@ -194,11 +191,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       {/* Xế */}
                       <button
                         onClick={() => onUpdateStatus(child.id, 'SNACK_ONLY')}
-                        className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 ${
-                          child.mealOption === 'SNACK_ONLY'
-                            ? 'bg-sky-700 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 ${child.mealOption === 'SNACK_ONLY'
+                          ? 'bg-sky-700 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                          }`}
                       >
                         {child.mealOption === 'SNACK_ONLY' && <Check className="w-3.5 h-3.5" />}
                         <span>Xế</span>
@@ -207,11 +203,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       {/* Nghỉ */}
                       <button
                         onClick={() => onUpdateStatus(child.id, 'ABSENT')}
-                        className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 ${
-                          child.mealOption === 'ABSENT'
-                            ? 'bg-rose-700 text-white shadow-sm'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
+                        className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 ${child.mealOption === 'ABSENT'
+                          ? 'bg-rose-700 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                          }`}
                       >
                         <span>Nghỉ</span>
                       </button>
@@ -339,11 +334,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
               <button
                 key={p}
                 onClick={() => onPageChange(p)}
-                className={`w-7 h-7 rounded-lg text-xs font-bold transition ${
-                  p === currentPage
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
+                className={`w-7 h-7 rounded-lg text-xs font-bold transition ${p === currentPage
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                  }`}
               >
                 {p}
               </button>

@@ -7,10 +7,31 @@ import {
   loginApi,
   LoginResponse,
 } from '../../../core/api/auth.api';
+import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setAuth, setTenantId, isAuthenticated, selectedTenantId } = useAuthStore();
+  const { setAuth, setTenantId, isAuthenticated, selectedTenantId, user } = useAuthStore();
+
+  const getPortalPath = (roles?: any[]): string => {
+    if (!roles || roles.length === 0) return '/dashboard';
+    const roleStrings = roles.map((r: any) =>
+      typeof r === 'string' ? r.toUpperCase() : (r?.code || r?.name || '').toUpperCase()
+    );
+    if (roleStrings.includes('KITCHEN_STAFF') || roleStrings.includes('KITCHEN_MANAGER')) return '/kitchen';
+    if (roleStrings.includes('NUTRITIONIST')) return '/nutritionist/menus';
+    if (roleStrings.includes('TEACHER')) return '/tablet';
+    if (
+      roleStrings.includes('SCHOOL_MANAGEMENT') ||
+      roleStrings.includes('SCHOOL_MANAGER') ||
+      roleStrings.includes('PRINCIPAL') ||
+      roleStrings.includes('SUPER_ADMIN')
+    ) {
+      return '/dashboard';
+    }
+    if (roleStrings.includes('PARENT')) return '/child-menu-consumption';
+    return '/dashboard';
+  };
 
   // Form state
   const [email, setEmail] = useState('');
@@ -19,6 +40,7 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [show2Fa, setShow2Fa] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -27,26 +49,26 @@ export const LoginPage: React.FC = () => {
   // Redirect nếu đã login
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate(getPortalPath(user?.roles), { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
-  // Tự động gán tenant ngầm khi mount (Mặc định: Trường MN Sao Mai)
+  // Tự động gán tenant ngầm khi mount (Mặc định: Trường MN Hướng Dương)
   useEffect(() => {
+    if (isAuthenticated) return;
     let cancelled = false;
     fetchTenants()
       .then((data) => {
         if (!cancelled && data.length > 0) {
-          const saoMai = data.find((t) => t.code === 'MN_SAOMAI') || data[0];
-          setTenantId(saoMai.id);
+          const defaultTenant = data[0];
+          setTenantId(String(defaultTenant.id));
         }
       })
       .catch(() => {
-        // Fallback default tenant ID
-        setTenantId('a0000000-0000-0000-0000-000000000002');
+        setTenantId('1');
       });
     return () => { cancelled = true; };
-  }, [setTenantId]);
+  }, [setTenantId, isAuthenticated]);
 
   // Xử lý đăng nhập
   const handleLogin = useCallback(async (e: React.FormEvent) => {
@@ -55,24 +77,46 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const result = await loginApi({
+      const rawResult = await loginApi({
         email,
         password,
         ...(show2Fa && twoFactorCode ? { twoFactorCode } : {}),
       });
 
+      const payload: any = (rawResult as any)?.data || rawResult;
+
       // Check if 2FA is required
-      if ('require2Fa' in result) {
+      if (payload && 'require2Fa' in payload && payload.require2Fa) {
         setShow2Fa(true);
         setLoading(false);
         return;
       }
 
-      const loginResult = result as LoginResponse;
-      setAuth(loginResult.user, loginResult.accessToken, loginResult.refreshToken);
-      navigate('/', { replace: true });
+      const loginResult = payload as LoginResponse;
+      if (!loginResult || !loginResult.user || !loginResult.accessToken) {
+        throw new Error('Dữ liệu người dùng phản hồi không hợp lệ.');
+      }
+
+      const rawRoles = loginResult.user.roles || [];
+      const normalizedRoles = Array.isArray(rawRoles)
+        ? rawRoles.map((r: any) => (typeof r === 'string' ? r : r?.code || r?.name))
+        : [];
+
+      const sanitizedUser = {
+        ...loginResult.user,
+        roles: normalizedRoles,
+        tenantId: String(loginResult.user.tenantId || '1'),
+      };
+
+      setAuth(sanitizedUser, loginResult.accessToken, loginResult.refreshToken || loginResult.accessToken);
+      // Điều hướng chuyên biệt theo Role
+      navigate(getPortalPath(normalizedRoles), { replace: true });
     } catch (err: any) {
-      const message = err?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email hoặc mật khẩu.';
+      console.error('Login error:', err);
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Đăng nhập thất bại. Vui lòng kiểm tra lại email hoặc mật khẩu.';
       setError(typeof message === 'string' ? message : message[0]);
     } finally {
       setLoading(false);
@@ -219,7 +263,11 @@ export const LoginPage: React.FC = () => {
                   />
                   <span className="text-sm text-slate-600">Ghi nhớ đăng nhập</span>
                 </label>
-                <button type="button" className="text-sm text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
+                >
                   Quên mật khẩu?
                 </button>
               </div>
@@ -245,6 +293,75 @@ export const LoginPage: React.FC = () => {
               </button>
             </form>
 
+            {/* Quick Demo Role Logins */}
+            <div className="mt-6 pt-5 border-t border-slate-100">
+              <p className="text-xs font-bold text-slate-500 mb-2.5 text-center flex items-center justify-center gap-1.5">
+                <span>⚡</span> Đăng nhập nhanh kiểm tra phân quyền (Demo):
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setEmail('bep@huongduong.edu.vn'); setPassword('123456'); }}
+                  className="p-2.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100/80 text-amber-900 font-semibold text-left transition flex flex-col gap-0.5 group"
+                >
+                  <span className="font-bold flex items-center gap-1 text-amber-800 group-hover:text-amber-900">
+                    👨‍🍳 Cán bộ Bếp
+                  </span>
+                  <span className="text-[10px] text-amber-600 font-mono truncate">bep@huongduong.edu.vn</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('giaovien.mam1@huongduong.edu.vn'); setPassword('123456'); }}
+                  className="p-2.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100/80 text-teal-900 font-semibold text-left transition flex flex-col gap-0.5 group"
+                >
+                  <span className="font-bold flex items-center gap-1 text-teal-800 group-hover:text-teal-900">
+                    👩‍🏫 Giáo viên
+                  </span>
+                  <span className="text-[10px] text-teal-600 font-mono truncate">giaovien.mam1@huong...</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('dinhduong@huongduong.edu.vn'); setPassword('123456'); }}
+                  className="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-900 font-semibold text-left transition flex flex-col gap-0.5 group"
+                >
+                  <span className="font-bold flex items-center gap-1 text-emerald-800 group-hover:text-emerald-900">
+                    🥗 Dinh dưỡng
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-mono truncate">dinhduong@huong...</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('hieutruong@huongduong.edu.vn'); setPassword('123456'); }}
+                  className="p-2.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100/80 text-blue-900 font-semibold text-left transition flex flex-col gap-0.5 group"
+                >
+                  <span className="font-bold flex items-center gap-1 text-blue-800 group-hover:text-blue-900">
+                    🏫 Ban Giám Hiệu
+                  </span>
+                  <span className="text-[10px] text-blue-600 font-mono truncate">hieutruong@huong...</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('phuhuynh.huy@gmail.com'); setPassword('123456'); }}
+                  className="p-2.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100/80 text-purple-900 font-semibold text-left transition flex flex-col gap-0.5 group"
+                >
+                  <span className="font-bold flex items-center gap-1 text-purple-800 group-hover:text-purple-900">
+                    👨‍👩‍👧 Phụ huynh
+                  </span>
+                  <span className="text-[10px] text-purple-600 font-mono truncate">phuhuynh.huy@gm...</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEmail('hieupho@huongduong.edu.vn'); setPassword('123456'); }}
+                  className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100/80 text-slate-900 font-semibold text-left transition flex flex-col gap-0.5 group"
+                >
+                  <span className="font-bold flex items-center gap-1 text-slate-800 group-hover:text-slate-900">
+                    👨‍💼 Hiệu Phó
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono truncate">hieupho@huong...</span>
+                </button>
+              </div>
+            </div>
+
             {/* Security badge */}
             <div className="mt-8 text-center">
               <p className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
@@ -255,6 +372,17 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Modal Quên & Đặt lại mật khẩu (OTP Email) */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        initialEmail={email}
+        onSuccessLogin={(resetEmail) => {
+          setEmail(resetEmail);
+          setShowForgotPassword(false);
+        }}
+      />
 
       {/* ─── Footer ──────────────────────────────────────────────────────── */}
       <footer className="px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 relative z-10">

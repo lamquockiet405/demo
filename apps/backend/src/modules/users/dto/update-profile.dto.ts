@@ -1,17 +1,24 @@
-import { IsString, IsOptional, MinLength, MaxLength } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateProfileDto {
-  @IsString({ message: 'Họ và tên phải là chuỗi ký tự' })
-  @MinLength(2, { message: 'Họ và tên tối thiểu 2 ký tự' })
-  @MaxLength(100, { message: 'Họ và tên tối đa 100 ký tự' })
+  @ApiPropertyOptional({ description: 'Họ và tên người dùng' })
   @IsOptional()
+  @IsString()
   fullName?: string;
 
-  @IsString({ message: 'Số điện thoại phải là chuỗi ký tự' })
+  @ApiPropertyOptional({ description: 'Số điện thoại liên hệ' })
   @IsOptional()
+  @IsString()
   phone?: string;
 
-  @IsString({ message: 'Avatar URL phải là chuỗi ký tự' })
+  @ApiPropertyOptional({ description: 'URL ảnh đại diện' })
   @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @ApiPropertyOptional({ description: 'URL ảnh đại diện (alias avatarUrl)' })
+  @IsOptional()
+  @IsString()
   avatarUrl?: string;
 }
