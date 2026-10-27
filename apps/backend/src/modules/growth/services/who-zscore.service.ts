@@ -22,6 +22,7 @@ const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoL
       { age: 48, L: -0.198, M: 16.33,  S: 0.12500 },
       { age: 60, L: -0.238, M: 18.25,  S: 0.13280 },
       { age: 72, L: -0.280, M: 20.52,  S: 0.14200 },
+      { age: 84, L: -0.320, M: 23.00,  S: 0.15000 },
     ],
     HAZ: [
       { age: 0,  L: 1, M: 49.88, S: 0.03795 },
@@ -32,6 +33,7 @@ const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoL
       { age: 48, L: 1, M: 103.3, S: 0.04100 },
       { age: 60, L: 1, M: 110.0, S: 0.04200 },
       { age: 72, L: 1, M: 116.1, S: 0.04300 },
+      { age: 84, L: 1, M: 121.7, S: 0.04400 },
     ],
     BAZ: [
       { age: 0,  L: 0.28,  M: 13.40, S: 0.0940 },
@@ -42,6 +44,7 @@ const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoL
       { age: 48, L: -0.85, M: 15.30, S: 0.0820 },
       { age: 60, L: -0.90, M: 15.20, S: 0.0850 },
       { age: 72, L: -0.95, M: 15.30, S: 0.0880 },
+      { age: 84, L: -1.00, M: 15.50, S: 0.0920 },
     ],
   },
   FEMALE: {
@@ -54,6 +57,7 @@ const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoL
       { age: 48, L: -0.250, M: 15.80,  S: 0.13300 },
       { age: 60, L: -0.290, M: 17.70,  S: 0.14100 },
       { age: 72, L: -0.330, M: 20.00,  S: 0.15000 },
+      { age: 84, L: -0.370, M: 22.40,  S: 0.15900 },
     ],
     HAZ: [
       { age: 0,  L: 1, M: 49.14, S: 0.03790 },
@@ -64,6 +68,7 @@ const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoL
       { age: 48, L: 1, M: 102.3, S: 0.04200 },
       { age: 60, L: 1, M: 109.4, S: 0.04300 },
       { age: 72, L: 1, M: 115.5, S: 0.04400 },
+      { age: 84, L: 1, M: 120.6, S: 0.04500 },
     ],
     BAZ: [
       { age: 0,  L: 0.30,  M: 13.30, S: 0.0960 },
@@ -74,6 +79,7 @@ const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoL
       { age: 48, L: -0.87, M: 15.10, S: 0.0870 },
       { age: 60, L: -0.92, M: 15.00, S: 0.0900 },
       { age: 72, L: -0.96, M: 15.20, S: 0.0940 },
+      { age: 84, L: -1.00, M: 15.40, S: 0.0980 },
     ],
   },
 };
@@ -191,10 +197,12 @@ export class WhoZscoreService {
   ) {
     const dob = new Date(dateOfBirth);
     const mDate = new Date(measuredDate);
-    const ageInMonths = Math.max(
-      0,
-      (mDate.getFullYear() - dob.getFullYear()) * 12 + (mDate.getMonth() - dob.getMonth()),
-    );
+    let ageInMonths =
+      (mDate.getFullYear() - dob.getFullYear()) * 12 + (mDate.getMonth() - dob.getMonth());
+    if (mDate.getDate() < dob.getDate()) {
+      ageInMonths--;
+    }
+    ageInMonths = Math.min(Math.max(0, ageInMonths), 84);
 
     const heightM = heightCm / 100;
     const bmi = heightM > 0 ? Math.round((weightKg / (heightM * heightM)) * 100) / 100 : 0;

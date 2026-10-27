@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Building2, Users, AlertTriangle, ShieldAlert, HeartPulse, Search, 
-  Filter, Plus, RefreshCw, CheckCircle2, Phone, UserCheck, 
-  ChevronRight, Calendar, AlertOctagon, Utensils, FileSignature, 
+import {
+  Building2, Users, AlertTriangle, ShieldAlert, HeartPulse, Search,
+  Filter, Plus, RefreshCw, CheckCircle2, Phone, UserCheck,
+  ChevronRight, Calendar, AlertOctagon, Utensils, FileSignature,
   Sparkles, Check, ArrowRight, BookOpen, Clock, Activity, FileText,
   Pencil, Trash2, UserPlus, UserMinus, X, GraduationCap, FileSpreadsheet
 } from 'lucide-react';
@@ -135,9 +135,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
         name: c.name,
         gradeLevel: c.gradeLevel || (
           c.name?.toLowerCase().includes('mầm') ? 'KINDERGARTEN_3_4Y' :
-          c.name?.toLowerCase().includes('chồi') ? 'KINDERGARTEN_4_5Y' :
-          c.name?.toLowerCase().includes('lá') ? 'KINDERGARTEN_5_6Y' :
-          c.ageGroup === 'NHA_TRE' ? 'TODDLER_2_3Y' : 'KINDERGARTEN_3_4Y'
+            c.name?.toLowerCase().includes('chồi') ? 'KINDERGARTEN_4_5Y' :
+              c.name?.toLowerCase().includes('lá') ? 'KINDERGARTEN_5_6Y' :
+                c.ageGroup === 'NHA_TRE' ? 'TODDLER_2_3Y' : 'KINDERGARTEN_3_4Y'
         ),
         academicYear: c.academicYear || c.schoolYear || '2025-2026',
         roomNumber: c.roomNumber || `P.10${c.id}`,
@@ -167,8 +167,8 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
       setChildren(childList);
       const rawStaff = Array.isArray(staffRes) ? staffRes : (staffRes?.data || []);
       const teacherList = Array.isArray(rawStaff) ? rawStaff : [];
-      const validTeachers = teacherList.filter((t: any) => 
-        t.staffType === 'TEACHER' || 
+      const validTeachers = teacherList.filter((t: any) =>
+        t.staffType === 'TEACHER' ||
         (Array.isArray(t.roles) && t.roles.some((r: any) => (typeof r === 'string' ? r : r.code) === 'TEACHER'))
       );
       setTeachers(validTeachers.length > 0 ? validTeachers : teacherList);
@@ -212,7 +212,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
       if (allergySearch.trim()) {
         const q = allergySearch.toLowerCase();
         const matchesName = child.fullName.toLowerCase().includes(q) || child.studentCode.toLowerCase().includes(q);
-        const matchesAllergen = child.allergies?.some((a) => 
+        const matchesAllergen = child.allergies?.some((a) =>
           (a.allergen?.nameVi && a.allergen.nameVi.toLowerCase().includes(q)) ||
           (a.customAllergenName && a.customAllergenName.toLowerCase().includes(q)) ||
           (a.symptoms && a.symptoms.toLowerCase().includes(q))
@@ -228,7 +228,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
   const totalStudents = children.length;
   const totalClasses = classes.length;
   const totalAllergicStudents = children.filter((c) => c.allergies && c.allergies.length > 0).length;
-  const anaphylacticCount = children.filter((c) => 
+  const anaphylacticCount = children.filter((c) =>
     c.allergies?.some((a) => a.severity === 'ANAPHYLACTIC')
   ).length;
 
@@ -499,21 +499,21 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
             Trung Tâm Quản Lý Lớp Học & Hồ Sơ Dị Ứng Học Sinh
           </h1>
           <p className="text-sm text-slate-500 mt-1 max-w-3xl">
-            Tích hợp toàn diện Module Quản lý Nhà trường (Khối, Lớp, Phân công GVCN, Sĩ số thực tế vs Tối đa) 
+            Tích hợp toàn diện Module Quản lý Nhà trường (Khối, Lớp, Phân công GVCN, Sĩ số thực tế vs Tối đa)
             và Module Hồ sơ Dị ứng / Kiêng cử bán trú theo Quyết định 1246/QĐ-BYT.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button 
-            onClick={fetchData} 
+          <button
+            onClick={fetchData}
             disabled={isLoading}
             className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition shadow-xs"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-teal-600' : ''}`} />
             Đồng bộ Database
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('parent-form')}
             className="flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-rose-600/20 transition active:scale-95"
           >
@@ -549,8 +549,8 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               <span className="text-xs font-semibold text-slate-500">/ {totalClasses * 30} tối đa</span>
             </div>
             <div className="w-32 bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
-              <div 
-                className="bg-teal-500 h-full rounded-full transition-all duration-500" 
+              <div
+                className="bg-teal-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, (totalStudents / Math.max(1, totalClasses * 30)) * 100)}%` }}
               ></div>
             </div>
@@ -598,11 +598,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
       <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap gap-1">
         <button
           onClick={() => setActiveTab('classes')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${
-            activeTab === 'classes'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'classes'
+            ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+            : 'text-slate-600 hover:bg-slate-100'
+            }`}
         >
           <Building2 className="w-4 h-4" />
           MODULE 1: Quản Trị Lớp Học & Sĩ Số (Admin)
@@ -610,11 +609,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('allergies')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${
-            activeTab === 'allergies'
-              ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'allergies'
+            ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+            : 'text-slate-600 hover:bg-slate-100'
+            }`}
         >
           <AlertOctagon className="w-4 h-4" />
           MODULE 2: Bảng Cảnh Báo Dị Ứng (GVCN & Y Tế)
@@ -622,11 +620,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('parent-form')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${
-            activeTab === 'parent-form'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'parent-form'
+            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+            : 'text-slate-600 hover:bg-slate-100'
+            }`}
         >
           <FileSignature className="w-4 h-4" />
           Cổng Khai Báo & Cam Kết Dành Cho Phụ Huynh
@@ -634,11 +631,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('kitchen')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${
-            activeTab === 'kitchen'
-              ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'kitchen'
+            ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
+            : 'text-slate-600 hover:bg-slate-100'
+            }`}
         >
           <Utensils className="w-4 h-4" />
           Bộ Lọc Suất Ăn Dành Cho Nhà Bếp
@@ -744,11 +740,11 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                           <td className="py-4 px-4">
                             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
                               {cls.gradeLevel === 'KINDERGARTEN_3_4Y' ? 'Mầm (3-4T)' :
-                               cls.gradeLevel === 'KINDERGARTEN_4_5Y' ? 'Chồi (4-5T)' :
-                               cls.gradeLevel === 'KINDERGARTEN_5_6Y' ? 'Lá (5-6T)' :
-                               cls.gradeLevel === 'TODDLER_2_3Y' ? 'Nhà trẻ (2-3T)' :
-                               cls.gradeLevel === 'TODDLER_1_2Y' ? 'Nhà trẻ (1-2T)' :
-                               cls.gradeLevel === 'INFANT_0_1Y' ? 'Nhà trẻ (<1T)' : cls.gradeLevel}
+                                cls.gradeLevel === 'KINDERGARTEN_4_5Y' ? 'Chồi (4-5T)' :
+                                  cls.gradeLevel === 'KINDERGARTEN_5_6Y' ? 'Lá (5-6T)' :
+                                    cls.gradeLevel === 'TODDLER_2_3Y' ? 'Nhà trẻ (2-3T)' :
+                                      cls.gradeLevel === 'TODDLER_1_2Y' ? 'Nhà trẻ (1-2T)' :
+                                        cls.gradeLevel === 'INFANT_0_1Y' ? 'Nhà trẻ (<1T)' : cls.gradeLevel}
                             </span>
                           </td>
 
@@ -782,10 +778,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                                 <span className="text-slate-400">{fillPercent >= 100 ? 'Đã đủ sĩ số' : 'Còn nhận'}</span>
                               </div>
                               <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full rounded-full ${
-                                    fillPercent >= 100 ? 'bg-rose-500' : fillPercent >= 80 ? 'bg-amber-500' : 'bg-teal-500'
-                                  }`} 
+                                <div
+                                  className={`h-full rounded-full ${fillPercent >= 100 ? 'bg-rose-500' : fillPercent >= 80 ? 'bg-amber-500' : 'bg-teal-500'
+                                    }`}
                                   style={{ width: `${Math.min(100, fillPercent)}%` }}
                                 ></div>
                               </div>
@@ -943,26 +938,24 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               const highestSeverity = child.allergies?.some(a => a.severity === 'ANAPHYLACTIC')
                 ? 'ANAPHYLACTIC'
                 : child.allergies?.some(a => a.severity === 'SEVERE')
-                ? 'SEVERE'
-                : 'MODERATE';
+                  ? 'SEVERE'
+                  : 'MODERATE';
 
               return (
-                <div 
+                <div
                   key={child.id}
-                  className={`bg-white rounded-3xl p-5 border transition-all hover:shadow-md relative overflow-hidden ${
-                    highestSeverity === 'ANAPHYLACTIC' 
-                      ? 'border-rose-300 ring-2 ring-rose-500/10' 
-                      : highestSeverity === 'SEVERE'
+                  className={`bg-white rounded-3xl p-5 border transition-all hover:shadow-md relative overflow-hidden ${highestSeverity === 'ANAPHYLACTIC'
+                    ? 'border-rose-300 ring-2 ring-rose-500/10'
+                    : highestSeverity === 'SEVERE'
                       ? 'border-amber-300'
                       : 'border-slate-200'
-                  }`}
+                    }`}
                 >
                   {/* Top Badge */}
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm ${
-                        child.gender === 'FEMALE' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm ${child.gender === 'FEMALE' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
                         {child.firstName.charAt(0)}
                       </div>
                       <div>
@@ -977,15 +970,14 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                   {/* Allergy Dossiers List */}
                   <div className="space-y-2.5 my-3">
                     {child.allergies?.map((allergy) => (
-                      <div 
-                        key={allergy.id} 
-                        className={`p-3 rounded-2xl text-xs space-y-1 ${
-                          allergy.severity === 'ANAPHYLACTIC' 
-                            ? 'bg-rose-50/80 border border-rose-200/80 text-rose-900' 
-                            : allergy.severity === 'SEVERE'
+                      <div
+                        key={allergy.id}
+                        className={`p-3 rounded-2xl text-xs space-y-1 ${allergy.severity === 'ANAPHYLACTIC'
+                          ? 'bg-rose-50/80 border border-rose-200/80 text-rose-900'
+                          : allergy.severity === 'SEVERE'
                             ? 'bg-amber-50/80 border border-amber-200/80 text-amber-900'
                             : 'bg-slate-50 border border-slate-200/80 text-slate-800'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between font-bold">
                           <span className="flex items-center gap-1.5">
@@ -1018,7 +1010,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                       <p className="text-[10px] text-slate-400 font-bold uppercase">Phụ Huynh Liên Hệ</p>
                       <p className="font-bold text-slate-800">{child.emergencyContactName}</p>
                     </div>
-                    <a 
+                    <a
                       href={`tel:${child.emergencyContactPhone}`}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl transition"
                     >
@@ -1045,7 +1037,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               Đăng Ký Hồ Sơ Dị Ứng & Kiêng Cử Cho Học Sinh (Có Ký Cam Kết)
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Phụ huynh có trách nhiệm khai báo chính xác các loại thực phẩm, thuốc hoặc tác nhân gây nguy hại cho sức khỏe của trẻ. 
+              Phụ huynh có trách nhiệm khai báo chính xác các loại thực phẩm, thuốc hoặc tác nhân gây nguy hại cho sức khỏe của trẻ.
               Dữ liệu sẽ được chuyển ngay lập tức tới Giáo viên Chủ nhiệm và Bếp Bán trú.
             </p>
           </div>
@@ -1191,8 +1183,8 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                   className="mt-1 w-4 h-4 rounded text-rose-600 focus:ring-rose-500"
                 />
                 <span className="text-slate-800 font-semibold leading-relaxed">
-                  Tôi là Phụ huynh/Người giám hộ hợp pháp của học sinh. Tôi xin cam kết rằng các thông tin khai báo 
-                  về tiền sử dị ứng, phản ứng thuốc và kiêng cữ dinh dưỡng trên là hoàn toàn chính xác. 
+                  Tôi là Phụ huynh/Người giám hộ hợp pháp của học sinh. Tôi xin cam kết rằng các thông tin khai báo
+                  về tiền sử dị ứng, phản ứng thuốc và kiêng cữ dinh dưỡng trên là hoàn toàn chính xác.
                   Nhà trường và bếp ăn bán trú được quyền sử dụng thông tin này để thiết lập khẩu phần ăn an toàn cho con.
                 </span>
               </label>
@@ -1250,7 +1242,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               </p>
             </div>
 
-            <button 
+            <button
               onClick={() => window.print()}
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-2"
             >
@@ -1262,7 +1254,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {classes.map((cls) => {
               const classChildrenWithAllergy = children.filter(c => c.classId === cls.id && c.allergies && c.allergies.length > 0);
-              
+
               return (
                 <div key={cls.id} className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-2">
@@ -1629,11 +1621,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStudentModalTab('current')}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                  studentModalTab === 'current'
-                    ? 'bg-white text-emerald-800 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${studentModalTab === 'current'
+                  ? 'bg-white text-emerald-800 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 <Users className="w-4 h-4 text-emerald-600" />
                 <span>Học Sinh Trong Lớp ({classStudents.length})</span>
@@ -1642,11 +1633,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStudentModalTab('assign')}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                  studentModalTab === 'assign'
-                    ? 'bg-white text-emerald-800 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${studentModalTab === 'assign'
+                  ? 'bg-white text-emerald-800 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 <UserPlus className="w-4 h-4 text-emerald-600" />
                 <span>+ Gán Thêm Học Sinh Vào Lớp</span>
@@ -1655,11 +1645,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStudentModalTab('excel')}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                  studentModalTab === 'excel'
-                    ? 'bg-white text-emerald-800 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${studentModalTab === 'excel'
+                  ? 'bg-white text-emerald-800 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
                 <span>📥 Nhập Bằng File Excel</span>
@@ -1728,9 +1717,8 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                               <div className="font-bold text-slate-900 text-xs flex items-center gap-2">
                                 <span>{child.fullName}</span>
                                 <span className="font-mono text-[10px] text-slate-400">({child.studentCode})</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                  child.gender === 'MALE' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'
-                                }`}>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${child.gender === 'MALE' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'
+                                  }`}>
                                   {child.gender === 'MALE' ? 'Nam' : 'Nữ'}
                                 </span>
                               </div>
@@ -1825,24 +1813,22 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                               setSelectedChildIdsToAssign([...selectedChildIdsToAssign, child.id]);
                             }
                           }}
-                          className={`p-3.5 cursor-pointer transition flex items-center justify-between gap-3 ${
-                            isSelected ? 'bg-emerald-50/70' : 'hover:bg-slate-50'
-                          }`}
+                          className={`p-3.5 cursor-pointer transition flex items-center justify-between gap-3 ${isSelected ? 'bg-emerald-50/70' : 'hover:bg-slate-50'
+                            }`}
                         >
                           <div className="flex items-center gap-3">
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => {}} // handled by parent onClick
+                              onChange={() => { }} // handled by parent onClick
                               className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
                             />
                             <div>
                               <div className="font-bold text-slate-900 text-xs flex items-center gap-2">
                                 <span>{child.fullName}</span>
                                 <span className="font-mono text-[10px] text-slate-400">({child.studentCode})</span>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                  child.gender === 'MALE' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'
-                                }`}>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${child.gender === 'MALE' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'
+                                  }`}>
                                   {child.gender === 'MALE' ? 'Nam' : 'Nữ'}
                                 </span>
                               </div>

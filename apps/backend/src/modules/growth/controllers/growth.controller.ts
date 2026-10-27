@@ -56,8 +56,9 @@ export class GrowthController {
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
   async createRecord(
     @Body() dto: CreateGrowthRecordDto,
-    @CurrentUser('id') userId?: number,
+    @CurrentUser() user?: any,
   ) {
+    const userId = user?.userId ? Number(user.userId) : (user?.id ? Number(user.id) : undefined);
     return this.growthService.createRecord(dto, userId);
   }
 
@@ -83,8 +84,9 @@ export class GrowthController {
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST')
   async importRecords(
     @Body('items') items: any[],
-    @CurrentUser('id') userId?: number,
+    @CurrentUser() user?: any,
   ) {
+    const userId = user?.userId ? Number(user.userId) : (user?.id ? Number(user.id) : undefined);
     return this.growthService.importRecords(items || [], userId);
   }
 

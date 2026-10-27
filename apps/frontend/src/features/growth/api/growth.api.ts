@@ -32,8 +32,11 @@ export interface GrowthRecordItem {
 }
 
 export interface CreateGrowthDto {
-  childId: string;
-  measurementDate: string;
+  childId?: string;
+  studentId?: number;
+  studentCode?: string;
+  measurementDate?: string;
+  measuredDate?: string;
   weightKg: number;
   heightCm: number;
   healthNotes?: string;
