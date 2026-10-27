@@ -45,7 +45,8 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [kitchenResponse, setKitchenResponse] = useState('');
-  const [teacherName, setTeacherName] = useState('Cô Nguyễn Lan Anh (GVCN Chồi 1)');
+  const currentLoggedInTeacher = localStorage.getItem('user_full_name') || localStorage.getItem('user_name') || '';
+  const [teacherName, setTeacherName] = useState(currentLoggedInTeacher);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -61,7 +62,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
       setTitle(noteToEdit.title);
       setContent(noteToEdit.content);
       setKitchenResponse(noteToEdit.kitchenResponse || '');
-      setTeacherName(noteToEdit.teacherName || 'Cô Nguyễn Lan Anh (GVCN Chồi 1)');
+      setTeacherName(noteToEdit.teacherName || currentLoggedInTeacher);
     } else {
       const effectiveClassId = selectedClassId || availableClasses[0]?.id || '';
       setClassId(effectiveClassId);
@@ -74,7 +75,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
       setTitle('');
       setContent('');
       setKitchenResponse('');
-      setTeacherName('Cô Nguyễn Lan Anh (GVCN Chồi 1)');
+      setTeacherName(currentLoggedInTeacher);
     }
     setErrorMsg('');
   }, [noteToEdit, selectedClassId, availableClasses, isOpen]);
@@ -265,33 +266,30 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
                 <button
                   type="button"
                   onClick={() => setPriority('NORMAL')}
-                  className={`p-2 rounded-xl font-bold border transition text-center ${
-                    priority === 'NORMAL'
+                  className={`p-2 rounded-xl font-bold border transition text-center ${priority === 'NORMAL'
                       ? 'bg-slate-800 text-white border-slate-800 shadow-xs'
                       : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Tiêu chuẩn
                 </button>
                 <button
                   type="button"
                   onClick={() => setPriority('HIGH')}
-                  className={`p-2 rounded-xl font-bold border transition text-center ${
-                    priority === 'HIGH'
+                  className={`p-2 rounded-xl font-bold border transition text-center ${priority === 'HIGH'
                       ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
                       : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-                  }`}
+                    }`}
                 >
                   ⚠️ Quan trọng
                 </button>
                 <button
                   type="button"
                   onClick={() => setPriority('URGENT')}
-                  className={`p-2 rounded-xl font-bold border transition text-center ${
-                    priority === 'URGENT'
+                  className={`p-2 rounded-xl font-bold border transition text-center ${priority === 'URGENT'
                       ? 'bg-red-600 text-white border-red-600 shadow-xs ring-2 ring-red-500/20'
                       : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
-                  }`}
+                    }`}
                 >
                   🚨 Khẩn cấp
                 </button>

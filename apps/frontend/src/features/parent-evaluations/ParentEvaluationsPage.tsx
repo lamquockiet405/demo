@@ -176,11 +176,10 @@ export const ParentEvaluationsPage: React.FC = () => {
             <button
               key={idx}
               onClick={() => setCurrentPage(p)}
-              className={`w-8 h-8 rounded-xl font-bold text-xs transition ${
-                currentPage === p
+              className={`w-8 h-8 rounded-xl font-bold text-xs transition ${currentPage === p
                   ? 'bg-teal-600 text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
-              }`}
+                }`}
             >
               {p}
             </button>

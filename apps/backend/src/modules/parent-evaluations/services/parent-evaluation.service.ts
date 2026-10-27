@@ -21,6 +21,7 @@ export class ParentEvaluationService {
     private readonly attendanceRepo: Repository<DailyMealAttendance>,
   ) {}
 
+
   private mapToItem(evalEntity: ParentEvaluation) {
     const student = evalEntity.student;
     const hasReplies = evalEntity.replies && evalEntity.replies.length > 0;
@@ -54,6 +55,7 @@ export class ParentEvaluationService {
             hour: '2-digit',
             minute: '2-digit',
           })
+
         : '',
       priorityNote: evalEntity.rating <= 2 ? 'Cần xử lý gấp' : undefined,
       likesInfo: '0',
@@ -251,6 +253,7 @@ export class ParentEvaluationService {
           order: { createdAt: 'DESC' },
           take: 5,
         })
+
       : [];
 
     return {
@@ -326,6 +329,7 @@ export class ParentEvaluationService {
 
     const attendances = await this.attendanceRepo.find({
       where: { studentId: sId, date: targetDate },
+
     });
 
     let student = await this.childRepo.findOne({

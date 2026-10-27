@@ -1,145 +1,52 @@
 import { apiClient } from '../../../core/api/axios';
+import { ClassData, ClassFilters } from '../types';
 
-export interface AllergenCatalogItem {
-  id: string;
-  code: string;
-  nameVi: string;
-  nameEn: string;
-  commonFoods?: string;
-  description?: string;
-}
-
-export interface ChildAllergyItem {
-  id: string;
-  childId: string;
-  allergenId?: string;
-  customAllergenName?: string;
-  allergen?: AllergenCatalogItem;
-  allergyType: string;
-  severity: 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC';
-  symptoms?: string;
-  reactionTreatment?: string;
-  diagnosedDate?: string;
-  isActive: boolean;
-}
-
-export interface ChildItem {
-  id: string;
-  tenantId: string;
-  classId?: string;
-  class?: {
-    id: string;
-    name: string;
-  };
-  parentId?: string;
-  studentCode: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  dateOfBirth: string;
-  gender: 'MALE' | 'FEMALE';
-  status: string;
-  emergencyContactName: string;
-  emergencyContactPhone: string;
-  medicalNotes?: string;
-  allergies?: ChildAllergyItem[];
-}
-
-export interface ChildrenStats {
-  totalChildren: number;
-  allergicCount: number;
-  severeCount: number;
-  allergyRate: number;
-}
-
-export interface CreateChildDto {
-  classId?: string;
-  studentCode: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  gender: 'MALE' | 'FEMALE';
-  emergencyContactName: string;
-  emergencyContactPhone: string;
-  medicalNotes?: string;
-}
-
-export interface DeclareAllergyDto {
-  allergenId?: string;
-  customAllergenName?: string;
-  allergyType?: string;
-  severity: 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC';
-  symptoms?: string;
-  reactionTreatment?: string;
-  diagnosedDate?: string;
-}
-
-export const childrenApi = {
-  getChildren: async (params?: {
-    search?: string;
-    classId?: string;
-    hasAllergy?: string;
-    page?: number;
-    limit?: number;
-  }) => {
-    const res = await apiClient.get<{ items: ChildItem[]; total: number }>('/children', {
-      params,
-    });
-    return res.data;
+export const classesApi = {
+  getClasses: async (filters?: Partial<ClassFilters> & { limit?: number; page?: number; search?: string }) => {
+    const cleanedFilters = filters
+      ? Object.fromEntries(
+          Object.entries(filters).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+        )
+      : {};
+    const { data } = await apiClient.get('/classes', { params: cleanedFilters });
+    return data;
   },
 
-  getStats: async (): Promise<ChildrenStats> => {
-    const res = await apiClient.get<ChildrenStats>('/children/stats');
-    return res.data;
+  getClass: async (id: string) => {
+    const { data } = await apiClient.get(`/classes/${id}`);
+    return data;
   },
 
-  getAllergenCatalogs: async (): Promise<AllergenCatalogItem[]> => {
-    const res = await apiClient.get<AllergenCatalogItem[]>('/children/allergen-catalogs');
-    return res.data;
+  createClass: async (payload: Partial<ClassData>) => {
+    const { data } = await apiClient.post('/classes', payload);
+    return data;
   },
 
-  getChild: async (childId: string): Promise<ChildItem> => {
-    const res = await apiClient.get<ChildItem>(`/children/${childId}`);
-    return res.data;
+  updateClass: async (id: string, payload: Partial<ClassData>) => {
+    const { data } = await apiClient.patch(`/classes/${id}`, payload);
+    return data;
   },
 
-  createChild: async (dto: CreateChildDto): Promise<ChildItem> => {
-    const res = await apiClient.post<ChildItem>('/children', dto);
-    return res.data;
+  deleteClass: async (id: string) => {
+    const { data } = await apiClient.delete(`/classes/${id}`);
+    return data;
   },
 
-  declareAllergy: async (childId: string, dto: DeclareAllergyDto): Promise<ChildAllergyItem> => {
-    const res = await apiClient.post<ChildAllergyItem>(`/children/${childId}/allergies`, dto);
-    return res.data;
+  getClassStudents: async (classId: string) => {
+    const { data } = await apiClient.get(`/classes/${classId}/students`);
+    return data;
   },
 
-  updateAllergy: async (allergyId: string, dto: Partial<DeclareAllergyDto>): Promise<ChildAllergyItem> => {
-    const res = await apiClient.put<ChildAllergyItem>(`/children/allergies/${allergyId}`, dto);
-    return res.data;
+  addStudentsToClass: async (classId: string, childIds: string[]) => {
+    const { data } = await apiClient.post(`/classes/${classId}/students`, { childIds });
+    return data;
   },
 
-  deactivateAllergy: async (allergyId: string): Promise<ChildAllergyItem> => {
-    const res = await apiClient.delete<ChildAllergyItem>(`/children/allergies/${allergyId}`);
-    return res.data;
-  },
-
-  getAllergyHistory: async (childId: string): Promise<any[]> => {
-    const res = await apiClient.get<any[]>(`/children/${childId}/allergy-history`);
-    return res.data;
-  },
-
-  rescanAllergies: async (): Promise<{ success: boolean; message: string }> => {
-    const res = await apiClient.post<{ success: boolean; message: string }>('/children/rescan-allergies');
-    return res.data;
-  },
-
-  importChildren: async (items: any[]): Promise<{
-    success: boolean;
-    message: string;
-    importedCount: number;
-    errors: string[];
-  }> => {
-    const res = await apiClient.post('/children/import', { items });
-    return res.data;
+  removeStudentFromClass: async (classId: string, childId: string) => {
+    const { data } = await apiClient.delete(`/classes/${classId}/students/${childId}`);
+    return data;
   },
 };
+
+// Re-export children types and API for compatibility
+export * from '../../children/api/children.api';
