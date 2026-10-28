@@ -4,7 +4,7 @@ import {
   Filter, Plus, RefreshCw, CheckCircle2, Phone, UserCheck, 
   ChevronRight, Calendar, AlertOctagon, Utensils, FileSignature, 
   Sparkles, Check, ArrowRight, BookOpen, Clock, Activity, FileText,
-  Pencil, Trash2, UserPlus, UserMinus, X, GraduationCap, FileSpreadsheet
+  Pencil, Trash2, UserPlus, UserMinus, X, GraduationCap, FileSpreadsheet, AlertCircle
 } from 'lucide-react';
 import { classesApi } from '../api/classes';
 import { childrenApi, ChildItem, AllergenCatalogItem } from '../../children/api/children.api';
@@ -117,8 +117,14 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
     setIsLoading(true);
     try {
       const [classesRes, childrenRes, catalogsRes, staffRes] = await Promise.all([
-        classesApi.getClasses({ limit: 50 }),
-        childrenApi.getChildren({ limit: 200 }),
+        classesApi.getClasses({ limit: 50 }).catch((err) => {
+          console.error('Lỗi tải danh sách lớp học:', err);
+          return [];
+        }),
+        childrenApi.getChildren({ limit: 200 }).catch((err) => {
+          console.error('Lỗi tải danh sách học sinh:', err);
+          return { items: [] };
+        }),
         childrenApi.getAllergenCatalogs().catch(() => []),
         staffApi.getStaffList({ roleCode: 'TEACHER', limit: 100 }).catch(() => ({ data: [] } as any)),
       ]);
@@ -240,6 +246,23 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
     });
   }, [classes, gradeFilter, classSearch]);
 
+  // Kiểm tra tên lớp mới có bị trùng với lớp đã tồn tại không (case-insensitive)
+  const isDuplicateName = useMemo(() => {
+    const trimmed = createFormData.name.trim().toLowerCase();
+    if (!trimmed) return false;
+    return classes.some((cls) => cls.name.trim().toLowerCase() === trimmed);
+  }, [createFormData.name, classes]);
+
+  // Kiểm tra tên lớp chỉnh sửa có bị trùng với lớp khác không (case-insensitive)
+  const isDuplicateEditName = useMemo(() => {
+    if (!selectedClass) return false;
+    const trimmed = editFormData.name.trim().toLowerCase();
+    if (!trimmed) return false;
+    return classes.some(
+      (cls) => cls.id !== selectedClass.id && cls.name.trim().toLowerCase() === trimmed
+    );
+  }, [editFormData.name, selectedClass, classes]);
+
   // Candidates for assigning to class
   const candidateStudents = useMemo(() => {
     return children.filter((child) => {
@@ -263,6 +286,8 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!createFormData.name.trim()) return;
+    // Lớp 1 bảo vệ: kiểm tra trùng tên ngay tại frontend
+    if (isDuplicateName) return;
     setIsSubmitting(true);
     try {
       const ageGroup =
@@ -313,6 +338,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
   const handleEditClass = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedClass || !editFormData.name.trim()) return;
+    if (isDuplicateEditName) return;
     setIsSubmitting(true);
     try {
       const ageGroup =
@@ -1218,8 +1244,18 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                   placeholder="Ví dụ: Lớp Mầm 2, Lớp Chồi 3, Nhà Trẻ 1..."
                   value={createFormData.name}
                   onChange={(e) => setCreateFormData({ ...createFormData, name: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className={`w-full p-3 bg-slate-50 border rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 transition ${
+                    isDuplicateName
+                      ? 'border-rose-400 focus:ring-rose-500/20 bg-rose-50'
+                      : 'border-slate-200 focus:ring-emerald-500/20'
+                  }`}
                 />
+                {isDuplicateName && (
+                  <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    Tên lớp này đã tồn tại. Vui lòng chọn tên khác.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1297,8 +1333,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20 disabled:opacity-50 flex items-center gap-1.5"
+                  disabled={isSubmitting || isDuplicateName}
+                  title={isDuplicateName ? 'Tên lớp đã tồn tại' : undefined}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isSubmitting ? 'Đang tạo...' : 'Tạo Lớp Học'}</span>
@@ -1341,8 +1378,18 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                   required
                   value={editFormData.name}
                   onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className={`w-full p-3 bg-slate-50 border rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 transition ${
+                    isDuplicateEditName
+                      ? 'border-rose-400 focus:ring-rose-500/20 bg-rose-50'
+                      : 'border-slate-200 focus:ring-teal-500/20'
+                  }`}
                 />
+                {isDuplicateEditName && (
+                  <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    Tên lớp này đã tồn tại ở lớp khác. Vui lòng chọn tên khác.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1400,7 +1447,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                     className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                   >
                     <option value="ACTIVE">Đang Hoạt Động</option>
-                    <option value="ARCHIVED">Lưu Trữ / Đã Khóa</option>
+                    <option value="INACTIVE">Lưu Trữ / Đã Khóa</option>
                   </select>
                 </div>
               </div>
@@ -1433,8 +1480,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-teal-600/20 disabled:opacity-50"
+                  disabled={isSubmitting || isDuplicateEditName}
+                  title={isDuplicateEditName ? 'Tên lớp đã tồn tại ở lớp khác' : undefined}
+                  className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-teal-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                 </button>
