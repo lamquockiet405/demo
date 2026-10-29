@@ -6,7 +6,6 @@ import {
   Filter,
   Printer,
   Plus,
-  Ring,
   AlertTriangle,
   Layers,
   Clock,

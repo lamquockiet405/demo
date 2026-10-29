@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Building2,
   CheckCircle2,
@@ -22,6 +22,8 @@ import {
   Save,
   Image as ImageIcon,
   Calendar,
+  Smartphone,
+  RefreshCw,
 } from 'lucide-react';
 import {
   tenantApi,
@@ -30,6 +32,7 @@ import {
   OperationalSettings,
 } from '../../../core/api/tenant.api';
 import { EditSchoolInfoModal } from '../components/EditSchoolInfoModal';
+import { ParentAppPreviewModal } from '../components/ParentAppPreviewModal';
 
 const MEAL_TIME_OPTIONS = [
   { code: 'BREAKFAST', label: 'Bữa sáng' },
@@ -38,7 +41,13 @@ const MEAL_TIME_OPTIONS = [
   { code: 'AFTERNOON_SNACK', label: 'Bữa xế chiều' },
 ];
 
-const DEFAULT_OPERATIONAL_SETTINGS: OperationalSettings = {
+const COLOR_OPTIONS: Array<{ code: 'TEAL' | 'YELLOW' | 'ORANGE'; label: string; dot: string }> = [
+  { code: 'TEAL', label: 'Xanh Ngọc', dot: 'bg-teal-600' },
+  { code: 'YELLOW', label: 'Vàng Mật', dot: 'bg-amber-500' },
+  { code: 'ORANGE', label: 'Cam San', dot: 'bg-orange-500' },
+];
+
+const DEFAULT_OPERATIONAL: OperationalSettings = {
   mealTimes: ['BREAKFAST', 'LUNCH', 'AFTERNOON_SNACK'],
   standardWeeklyCycleLength: 2,
   foodRetentionHours: 24,
@@ -48,41 +57,22 @@ const DEFAULT_OPERATIONAL_SETTINGS: OperationalSettings = {
 function formatDateVi(dateStr?: string | null): string {
   if (!dateStr) return 'Chưa cập nhật';
   const parsed = new Date(dateStr);
-  if (Number.isNaN(parsed.getTime())) return dateStr;
-  return parsed.toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+  return Number.isNaN(parsed.getTime())
+    ? dateStr
+    : parsed.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function getLicenseStatus(number?: string, expiryDate?: string) {
   if (!number && !expiryDate) {
-    return {
-      label: 'Chưa khai báo',
-      className: 'bg-slate-100 text-slate-600 border-slate-200',
-    };
+    return { label: 'Chưa khai báo', className: 'bg-slate-100 text-slate-600 border-slate-200' };
   }
-  if (!expiryDate) {
-    return {
-      label: 'Đã khai báo',
-      className: 'bg-teal-50 text-teal-700 border-teal-200',
-    };
+  const exp = expiryDate ? new Date(expiryDate) : null;
+  if (!exp || Number.isNaN(exp.getTime())) {
+    return { label: 'Đã khai báo', className: 'bg-teal-50 text-teal-700 border-teal-200' };
   }
-  const exp = new Date(expiryDate);
-  if (Number.isNaN(exp.getTime())) {
-    return {
-      label: 'Đã khai báo',
-      className: 'bg-teal-50 text-teal-700 border-teal-200',
-    };
-  }
-  const now = new Date();
-  const diffDays = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil((exp.getTime() - Date.now()) / 86400000);
   if (diffDays < 0) {
-    return {
-      label: 'Đã hết hạn',
-      className: 'bg-red-50 text-red-700 border-red-200',
-    };
+    return { label: 'Đã hết hạn', className: 'bg-red-50 text-red-700 border-red-200' };
   }
   if (diffDays <= 30) {
     return {
@@ -90,191 +80,139 @@ function getLicenseStatus(number?: string, expiryDate?: string) {
       className: 'bg-amber-50 text-amber-700 border-amber-200',
     };
   }
-  return {
-    label: 'Còn hiệu lực',
-    className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  };
+  return { label: 'Còn hiệu lực', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
 }
 
-/**
- * UC07: Configure School Information
- * Quản lý thông tin cơ sở trường mầm non, hồ sơ pháp lý ATTP, logo nhận diện & cấu hình vận hành bán trú thực tế từ CSDL
- */
 export const SchoolSettingsPage: React.FC = () => {
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Modal chỉnh sửa thông tin trường
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [syncingDb, setSyncingDb] = useState(false);
 
-  // Trạng thái tải logo từ máy tính
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoSuccessMessage, setLogoSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Trạng thái cấu hình vận hành bán trú
-  const [operational, setOperational] = useState<OperationalSettings>(DEFAULT_OPERATIONAL_SETTINGS);
+  const [operational, setOperational] = useState<OperationalSettings>(DEFAULT_OPERATIONAL);
   const [savingOperational, setSavingOperational] = useState(false);
   const [operationalFeedback, setOperationalFeedback] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
 
-  useEffect(() => {
-    fetchProfile();
+  const applyProfileState = useCallback((data: TenantProfile) => {
+    setProfile(data);
+    if (data.name) localStorage.setItem('school_name', data.name);
+    if (data.operationalSettings) {
+      setOperational({
+        mealTimes: data.operationalSettings.mealTimes?.length
+          ? data.operationalSettings.mealTimes
+          : DEFAULT_OPERATIONAL.mealTimes,
+        standardWeeklyCycleLength:
+          Number(data.operationalSettings.standardWeeklyCycleLength) ||
+          DEFAULT_OPERATIONAL.standardWeeklyCycleLength,
+        foodRetentionHours:
+          Number(data.operationalSettings.foodRetentionHours) ||
+          DEFAULT_OPERATIONAL.foodRetentionHours,
+        whoZscoreAutoCalc: Boolean(
+          data.operationalSettings.whoZscoreAutoCalc ?? DEFAULT_OPERATIONAL.whoZscoreAutoCalc,
+        ),
+      });
+    }
+    window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: data }));
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     try {
       const data = await tenantApi.getProfile();
-      setProfile(data);
-      if (data.name) {
-        localStorage.setItem('school_name', data.name);
-      }
-      if (data.operationalSettings) {
-        setOperational({
-          mealTimes:
-            Array.isArray(data.operationalSettings.mealTimes) &&
-            data.operationalSettings.mealTimes.length > 0
-              ? data.operationalSettings.mealTimes
-              : DEFAULT_OPERATIONAL_SETTINGS.mealTimes,
-          standardWeeklyCycleLength:
-            Number(data.operationalSettings.standardWeeklyCycleLength) ||
-            DEFAULT_OPERATIONAL_SETTINGS.standardWeeklyCycleLength,
-          foodRetentionHours:
-            Number(data.operationalSettings.foodRetentionHours) ||
-            DEFAULT_OPERATIONAL_SETTINGS.foodRetentionHours,
-          whoZscoreAutoCalc:
-            data.operationalSettings.whoZscoreAutoCalc !== undefined
-              ? Boolean(data.operationalSettings.whoZscoreAutoCalc)
-              : DEFAULT_OPERATIONAL_SETTINGS.whoZscoreAutoCalc,
-        });
-      }
-      window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: data }));
+      applyProfileState(data);
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       setLoadError(
         Array.isArray(msg)
           ? msg.join(', ')
-          : msg || 'Không thể tải cấu hình trường học từ máy chủ. Vui lòng kiểm tra kết nối.',
+          : msg || 'Không thể tải cấu hình trường học từ máy chủ.',
       );
     } finally {
       setLoading(false);
     }
+  }, [applyProfileState]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const handleSyncEducationDb = async () => {
+    setSyncingDb(true);
+    try {
+      const res = await tenantApi.syncEducationDb();
+      setProfile((prev) =>
+        prev
+          ? { ...prev, isEducationDbSynced: true, syncedAt: res.syncedAt || new Date().toISOString() }
+          : prev,
+      );
+      setLogoSuccessMessage(res.message || 'Đã đồng bộ dữ liệu với CSDL ngành GD&ĐT.');
+    } catch (err: any) {
+      setUploadError(err?.response?.data?.message || 'Không thể đồng bộ CSDL ngành.');
+    } finally {
+      setSyncingDb(false);
+    }
+  };
+
+  const handleColorChange = async (primaryColor: 'TEAL' | 'YELLOW' | 'ORANGE') => {
+    if (!profile) return;
+    try {
+      const updated = await tenantApi.updateProfile({
+        branding: { ...profile.branding, primaryColor },
+      });
+      applyProfileState(updated);
+    } catch {}
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !profile) return;
 
     setLogoSuccessMessage(null);
-    const validTypes = [
-      'image/png',
-      'image/jpeg',
-      'image/jpg',
-      'image/svg+xml',
-      'image/webp',
-    ];
-    const maxSize = 2 * 1024 * 1024; // 2MB
-
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      setUploadError(
-        `Tệp "${file.name}" không đúng định dạng hỗ trợ. Vui lòng chọn ảnh PNG, JPG, WEBP hoặc SVG.`,
-      );
+      setUploadError(`Tệp "${file.name}" không đúng định dạng. Vui lòng chọn PNG, JPG, WEBP hoặc SVG.`);
       e.target.value = '';
       return;
     }
-
-    if (file.size > maxSize) {
-      setUploadError(
-        `Tệp "${file.name}" (${(file.size / (1024 * 1024)).toFixed(2)} MB) vượt quá giới hạn 2MB.`,
-      );
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError(`Tệp "${file.name}" vượt quá giới hạn 2MB.`);
       e.target.value = '';
       return;
     }
 
     setUploadError(null);
     setUploadingLogo(true);
-
-    const sizeStr =
-      file.size < 1024 * 1024
-        ? `${Math.max(1, Math.round(file.size / 1024))} KB`
-        : `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
-
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const dataUrl = (ev.target?.result as string) || '';
-      if (!dataUrl || !profile) {
+      try {
+        await tenantApi.uploadLogo({
+          fileName: file.name,
+          fileSizeBytes: file.size,
+          mimeType: file.type,
+          fileContentBase64: dataUrl,
+        });
+        const refreshed = await tenantApi.getProfile();
+        applyProfileState(refreshed);
+        setLogoSuccessMessage('Đã lưu logo trường học vào cơ sở dữ liệu.');
+      } catch (err: any) {
+        setUploadError(err?.response?.data?.message || 'Không thể lưu logo lên máy chủ.');
+      } finally {
         setUploadingLogo(false);
-        return;
+        if (fileInputRef.current) fileInputRef.current.value = '';
       }
-
-      // Đọc kích thước pixel thực tế của ảnh
-      const img = new Image();
-      img.onload = async () => {
-        const dimStr =
-          img.naturalWidth && img.naturalHeight
-            ? `${img.naturalWidth}×${img.naturalHeight}px`
-            : file.type.includes('svg')
-              ? 'Vector SVG'
-              : 'Ảnh Raster';
-        const nextBranding: SchoolBranding = {
-          primaryColor: profile.branding?.primaryColor || 'TEAL',
-          logoUrl: dataUrl,
-          logoName: file.name,
-          logoSize: `${sizeStr} • ${dimStr}`,
-        };
-
-        try {
-          const updated = await tenantApi.updateProfile({
-            logo: dataUrl,
-            branding: nextBranding,
-          });
-          setProfile(updated);
-          setLogoSuccessMessage('Đã lưu logo trường học vào cơ sở dữ liệu.');
-          window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
-        } catch (err: any) {
-          setUploadError(
-            err?.response?.data?.message || 'Không thể lưu logo lên máy chủ. Vui lòng thử lại.',
-          );
-        } finally {
-          setUploadingLogo(false);
-          if (fileInputRef.current) fileInputRef.current.value = '';
-        }
-      };
-      img.onerror = async () => {
-        const nextBranding: SchoolBranding = {
-          primaryColor: profile.branding?.primaryColor || 'TEAL',
-          logoUrl: dataUrl,
-          logoName: file.name,
-          logoSize: sizeStr,
-        };
-        try {
-          const updated = await tenantApi.updateProfile({
-            logo: dataUrl,
-            branding: nextBranding,
-          });
-          setProfile(updated);
-          setLogoSuccessMessage('Đã lưu logo trường học vào cơ sở dữ liệu.');
-          window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
-        } catch (err: any) {
-          setUploadError(
-            err?.response?.data?.message || 'Không thể lưu logo lên máy chủ. Vui lòng thử lại.',
-          );
-        } finally {
-          setUploadingLogo(false);
-          if (fileInputRef.current) fileInputRef.current.value = '';
-        }
-      };
-      img.src = dataUrl;
-    };
-    reader.onerror = () => {
-      setUploadingLogo(false);
-      setUploadError('Không thể đọc tệp đã chọn từ máy tính.');
     };
     reader.readAsDataURL(file);
   };
@@ -291,13 +229,9 @@ export const SchoolSettingsPage: React.FC = () => {
         logoName: '',
         logoSize: '',
       };
-      const updated = await tenantApi.updateProfile({
-        logo: '',
-        branding: emptyBranding,
-      });
-      setProfile(updated);
+      const updated = await tenantApi.updateProfile({ logo: '', branding: emptyBranding });
+      applyProfileState(updated);
       setLogoSuccessMessage('Đã xóa logo nhận diện trường học.');
-      window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
     } catch (err: any) {
       setUploadError(err?.response?.data?.message || 'Không thể xóa logo trường học.');
     } finally {
@@ -309,13 +243,11 @@ export const SchoolSettingsPage: React.FC = () => {
     setOperationalFeedback(null);
     setOperational((prev) => {
       const exists = prev.mealTimes.includes(code);
-      if (exists && prev.mealTimes.length <= 1) {
-        return prev; // Giữ tối thiểu 1 bữa ăn trong ngày
-      }
-      const nextMealTimes = exists
-        ? prev.mealTimes.filter((m) => m !== code)
-        : [...prev.mealTimes, code];
-      return { ...prev, mealTimes: nextMealTimes };
+      if (exists && prev.mealTimes.length <= 1) return prev;
+      return {
+        ...prev,
+        mealTimes: exists ? prev.mealTimes.filter((m) => m !== code) : [...prev.mealTimes, code],
+      };
     });
   };
 
@@ -324,13 +256,8 @@ export const SchoolSettingsPage: React.FC = () => {
     setSavingOperational(true);
     setOperationalFeedback(null);
     try {
-      const updated = await tenantApi.updateProfile({
-        operationalSettings: operational,
-      });
-      setProfile(updated);
-      if (updated.operationalSettings) {
-        setOperational(updated.operationalSettings);
-      }
+      const updated = await tenantApi.updateProfile({ operationalSettings: operational });
+      applyProfileState(updated);
       setOperationalFeedback({
         type: 'success',
         text: 'Đã lưu cấu hình vận hành bán trú vào cơ sở dữ liệu.',
@@ -338,9 +265,7 @@ export const SchoolSettingsPage: React.FC = () => {
     } catch (err: any) {
       setOperationalFeedback({
         type: 'error',
-        text:
-          err?.response?.data?.message ||
-          'Có lỗi xảy ra khi lưu cấu hình vận hành bán trú.',
+        text: err?.response?.data?.message || 'Có lỗi xảy ra khi lưu cấu hình vận hành bán trú.',
       });
     } finally {
       setSavingOperational(false);
@@ -363,12 +288,8 @@ export const SchoolSettingsPage: React.FC = () => {
           <AlertTriangle className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-base font-bold text-slate-900">
-            Không thể tải dữ liệu Cấu hình trường học
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            {loadError || 'Không tìm thấy bản ghi trường học trong hệ thống.'}
-          </p>
+          <h2 className="text-base font-bold text-slate-900">Không thể tải dữ liệu Cấu hình trường học</h2>
+          <p className="text-xs text-slate-500 mt-1">{loadError}</p>
         </div>
         <button
           onClick={fetchProfile}
@@ -385,44 +306,86 @@ export const SchoolSettingsPage: React.FC = () => {
     profile.foodSafetyLicense?.number,
     profile.foodSafetyLicense?.expiryDate,
   );
-  const hasRealLogo = Boolean(profile.branding?.logoUrl && profile.branding.logoUrl.trim());
+  const hasRealLogo = Boolean(profile.branding?.logoUrl?.trim());
+  const kpiCards = [
+    {
+      icon: Users,
+      color: 'bg-teal-50 text-teal-700 border-teal-100',
+      label: 'Quy mô học sinh bán trú',
+      value: `${profile.stats?.totalChildren ?? 0}`,
+      suffix: `/ ${profile.maxChildren || 200} chỉ tiêu`,
+    },
+    {
+      icon: GraduationCap,
+      color: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+      label: 'Lớp học đang vận hành',
+      value: `${profile.stats?.totalClasses ?? 0}`,
+      suffix: 'lớp học',
+    },
+    {
+      icon: UserCheck,
+      color: 'bg-sky-50 text-sky-700 border-sky-100',
+      label: 'Nhân sự & Giáo viên',
+      value: `${profile.stats?.totalStaff ?? 0}`,
+      suffix: 'tài khoản hoạt động',
+    },
+    {
+      icon: ShieldCheck,
+      color: 'bg-amber-50 text-amber-700 border-amber-100',
+      label: profile.legalRepresentative?.title || 'Người đại diện pháp lý',
+      value: profile.legalRepresentative?.name || 'Chưa cập nhật',
+      suffix: '',
+    },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12">
-      {/* 1. Header thực tế của Trường học */}
+      {/* 1. Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-              <span className="w-2 h-2 rounded-full bg-teal-600"></span>
+              <span className="w-2 h-2 rounded-full bg-teal-600" />
               {profile.status === 'ACTIVE' ? 'ĐANG HOẠT ĐỘNG' : profile.status}
             </span>
             <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
               Mã trường: {profile.code}
             </span>
+            {profile.isEducationDbSynced && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <CheckCircle2 className="w-3 h-3" /> Đã đồng bộ CSDL Bộ GD&ĐT
+              </span>
+            )}
             {profile.updatedAt && (
               <span className="text-[11px] text-slate-400">
-                Cập nhật lần cuối: {formatDateVi(profile.updatedAt)}
+                Cập nhật: {formatDateVi(profile.updatedAt)}
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
-            {profile.name}
-          </h1>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">{profile.name}</h1>
           <p className="text-xs text-slate-500 mt-1">
             Cấu hình thông tin pháp lý nhà trường, giấy phép An toàn thực phẩm (ATTP), logo nhận diện và thông số vận hành bán trú.
           </p>
         </div>
 
-        {/* Nút tác vụ thực tế */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
-            onClick={fetchProfile}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
+            onClick={handleSyncEducationDb}
+            disabled={syncingDb}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
           >
-            <RotateCw className="w-3.5 h-3.5 text-slate-500" />
-            <span>Làm mới dữ liệu</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-teal-600 ${syncingDb ? 'animate-spin' : ''}`} />
+            <span>Đồng bộ CSDL Ngành</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsPreviewOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-amber-600" />
+            <span>Mô phỏng App Phụ Huynh</span>
           </button>
 
           <button
@@ -436,73 +399,40 @@ export const SchoolSettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Dải chỉ số thực tế truy vấn từ CSDL (Classes, Children, Users) */}
+      {/* 2. KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shrink-0">
-            <Users className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] text-slate-500 font-medium">Quy mô học sinh bán trú</p>
-            <p className="text-base font-black text-slate-900">
-              {profile.stats?.totalChildren ?? 0}{' '}
-              <span className="text-xs font-semibold text-slate-400">
-                / {profile.maxChildren || 200} chỉ tiêu
-              </span>
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] text-slate-500 font-medium">Lớp học đang vận hành</p>
-            <p className="text-base font-black text-slate-900">
-              {profile.stats?.totalClasses ?? 0}{' '}
-              <span className="text-xs font-semibold text-slate-400">lớp học</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-sky-50 text-sky-700 flex items-center justify-center border border-sky-100 shrink-0">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] text-slate-500 font-medium">Nhân sự & Giáo viên</p>
-            <p className="text-base font-black text-slate-900">
-              {profile.stats?.totalStaff ?? 0}{' '}
-              <span className="text-xs font-semibold text-slate-400">tài khoản hoạt động</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-100 shrink-0">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div className="overflow-hidden">
-            <p className="text-[11px] text-slate-500 font-medium truncate">
-              {profile.legalRepresentative?.title || 'Người đại diện pháp lý'}
-            </p>
-            <p className="text-sm font-bold text-slate-900 truncate">
-              {profile.legalRepresentative?.name || 'Chưa cập nhật'}
-            </p>
-          </div>
-        </div>
+        {kpiCards.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5"
+            >
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 ${card.color}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-[11px] text-slate-500 font-medium truncate">{card.label}</p>
+                <p className="text-base font-black text-slate-900 truncate">
+                  {card.value}{' '}
+                  {card.suffix && (
+                    <span className="text-xs font-semibold text-slate-400">{card.suffix}</span>
+                  )}
+                </p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* 3. Nội dung chính 2 cột */}
+      {/* 3. Main 2 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* CỘT TRÁI (7/12): Thông tin chung & Pháp lý cơ sở */}
+        {/* Left Column (7/12): School Info & Legal */}
         <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 flex flex-col justify-between">
           <div className="space-y-5">
-            {/* Header Thẻ Trái */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shadow-inner">
+                <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
@@ -514,7 +444,6 @@ export const SchoolSettingsPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
@@ -525,32 +454,23 @@ export const SchoolSettingsPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Thông tin trường */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Tên trường mầm non
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Tên trường mầm non</label>
                 <div className="w-full text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900">
                   {profile.name || 'Chưa cập nhật'}
                 </div>
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Mã trường trên hệ thống
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Mã trường trên hệ thống</label>
                 <div className="w-full text-xs font-mono font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
                   {profile.code || 'Chưa cập nhật'}
                 </div>
               </div>
             </div>
 
-            {/* Địa chỉ */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Địa chỉ cơ sở trường
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Địa chỉ cơ sở trường</label>
               <div className="relative">
                 <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
                   {profile.address || 'Chưa cập nhật địa chỉ'}
@@ -559,12 +479,9 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Liên hệ: Điện thoại, Email, Website */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Số điện thoại / Hotline
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Số điện thoại / Hotline</label>
                 <div className="relative">
                   <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
                     {profile.phone || 'Chưa cập nhật'}
@@ -572,11 +489,8 @@ export const SchoolSettingsPage: React.FC = () => {
                   <Phone className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
                 </div>
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Email liên hệ
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email liên hệ</label>
                 <div className="relative">
                   <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
                     {profile.contactEmail || 'Chưa cập nhật'}
@@ -584,11 +498,8 @@ export const SchoolSettingsPage: React.FC = () => {
                   <Mail className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
                 </div>
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Website / Tên miền
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Website / Tên miền</label>
                 <div className="relative">
                   <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
                     {profile.domain || 'Chưa thiết lập'}
@@ -598,7 +509,22 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Khối Giấy chứng nhận ATTP */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Mã Phòng / Sở GD&ĐT</label>
+                <div className="w-full text-xs font-mono px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
+                  {profile.educationDepartmentCode || 'Chưa khai báo'}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Mã định danh CSDL Ngành (Bộ GD&ĐT)</label>
+                <div className="w-full text-xs font-mono px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
+                  {profile.schoolIdentifierSgd || 'Chưa khai báo'}
+                </div>
+              </div>
+            </div>
+
+            {/* ATTP Block */}
             <div className="rounded-2xl border border-sky-200/90 bg-sky-50/50 p-4 space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -607,32 +533,24 @@ export const SchoolSettingsPage: React.FC = () => {
                     Giấy chứng nhận Cơ sở đủ điều kiện An toàn thực phẩm (ATTP)
                   </h3>
                 </div>
-                <span
-                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${licenseStatus.className}`}
-                >
+                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${licenseStatus.className}`}>
                   {licenseStatus.label}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
                 <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
-                  <span className="text-[10px] text-slate-400 font-semibold block">
-                    Số giấy chứng nhận
-                  </span>
+                  <span className="text-[10px] text-slate-400 font-semibold block">Số giấy chứng nhận</span>
                   <span className="text-xs font-bold text-slate-900 mt-0.5 block">
                     {profile.foodSafetyLicense?.number || 'Chưa cập nhật'}
                   </span>
                 </div>
-
                 <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
-                  <span className="text-[10px] text-slate-400 font-semibold block">
-                    Cơ quan cấp
-                  </span>
+                  <span className="text-[10px] text-slate-400 font-semibold block">Cơ quan cấp</span>
                   <span className="text-xs font-semibold text-slate-800 mt-0.5 block truncate">
                     {profile.foodSafetyLicense?.issuingAuthority || 'Chưa cập nhật'}
                   </span>
                 </div>
-
                 <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
                   <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-sky-600" /> Ngày cấp
@@ -641,7 +559,6 @@ export const SchoolSettingsPage: React.FC = () => {
                     {formatDateVi(profile.foodSafetyLicense?.issueDate)}
                   </span>
                 </div>
-
                 <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
                   <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-sky-600" /> Ngày hết hạn
@@ -654,7 +571,6 @@ export const SchoolSettingsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Chân thẻ trái: Người đại diện ký duyệt */}
           <div className="pt-5 mt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
               <span className="text-slate-500">Đại diện pháp lý ký duyệt thực đơn:</span>
@@ -663,11 +579,10 @@ export const SchoolSettingsPage: React.FC = () => {
                 {profile.legalRepresentative?.name || '(Chưa cập nhật)'}
               </span>
             </div>
-
             <button
               type="button"
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition self-start sm:self-auto"
+              className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition"
             >
               <span>Chỉnh sửa thông tin</span>
               <Edit3 className="w-3.5 h-3.5" />
@@ -675,33 +590,28 @@ export const SchoolSettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI (5/12): Logo trường học & Cấu hình vận hành bán trú */}
+        {/* Right Column (5/12): Logo & Operational Settings */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Thẻ 1: Logo & Nhận diện trường học */}
           <div className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shadow-inner">
-                <ImageIcon className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">
-                  Logo & Nhận diện trường học
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Hiển thị trên thanh điều hướng, phiếu công khai thực đơn và báo cáo
-                </p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">Logo & Nhận diện trường học</h2>
+                  <p className="text-xs text-slate-500">Hiển thị trên cổng thông tin, thực đơn và báo cáo</p>
+                </div>
               </div>
             </div>
 
-            {/* Thông báo lỗi tải tệp (chỉ hiển thị khi người dùng chọn tệp không hợp lệ) */}
             {uploadError && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex items-start gap-2.5">
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-red-800">
                 <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                <div className="flex-1 text-xs text-red-800">{uploadError}</div>
+                <span>{uploadError}</span>
               </div>
             )}
 
-            {/* Thông báo lưu logo thành công */}
             {logoSuccessMessage && (
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2 text-xs text-emerald-800 font-medium">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -709,7 +619,6 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             )}
 
-            {/* Input chọn file ẩn */}
             <input
               type="file"
               ref={fileInputRef}
@@ -718,16 +627,11 @@ export const SchoolSettingsPage: React.FC = () => {
               className="hidden"
             />
 
-            {/* Khung hiển thị Logo hiện tại */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3.5 overflow-hidden">
                 <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1.5 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
                   {hasRealLogo ? (
-                    <img
-                      src={profile.branding.logoUrl}
-                      alt={profile.name}
-                      className="w-full h-full object-contain"
-                    />
+                    <img src={profile.branding.logoUrl} alt={profile.name} className="w-full h-full object-contain" />
                   ) : (
                     <span className="text-sm font-black text-teal-700">
                       {(profile.name || 'KM')
@@ -740,13 +644,10 @@ export const SchoolSettingsPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-
                 <div className="overflow-hidden">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-800 truncate">
-                      {hasRealLogo
-                        ? profile.branding.logoName || 'Logo trường học'
-                        : 'Chưa tải lên logo trường'}
+                      {hasRealLogo ? profile.branding.logoName || 'Logo trường học' : 'Chưa tải lên logo trường'}
                     </span>
                     {hasRealLogo && (
                       <span className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-teal-200 shrink-0">
@@ -755,9 +656,7 @@ export const SchoolSettingsPage: React.FC = () => {
                     )}
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                    {hasRealLogo
-                      ? profile.branding.logoSize || 'Đang sử dụng trên toàn hệ thống'
-                      : 'Hỗ trợ PNG, JPG, WEBP, SVG (tối đa 2MB)'}
+                    {hasRealLogo ? profile.branding.logoSize || 'Đang sử dụng' : 'Hỗ trợ PNG, JPG, WEBP, SVG (≤ 2MB)'}
                   </p>
                 </div>
               </div>
@@ -769,14 +668,9 @@ export const SchoolSettingsPage: React.FC = () => {
                   onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition disabled:opacity-60"
                 >
-                  {uploadingLogo ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <UploadCloud className="w-3.5 h-3.5" />
-                  )}
+                  {uploadingLogo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
                   <span>{hasRealLogo ? 'Đổi logo' : 'Tải logo lên'}</span>
                 </button>
-
                 {hasRealLogo && (
                   <button
                     type="button"
@@ -790,21 +684,43 @@ export const SchoolSettingsPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Primary Color Selector */}
+            <div className="pt-1 flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold text-slate-600">Màu nhận diện App Phụ Huynh:</span>
+              <div className="flex items-center gap-1.5">
+                {COLOR_OPTIONS.map((c) => {
+                  const active = (profile.branding?.primaryColor || 'TEAL') === c.code;
+                  return (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => handleColorChange(c.code)}
+                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 border transition ${
+                        active
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
+                      <span>{c.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          {/* Thẻ 2: Cấu hình vận hành bán trú & Dinh dưỡng (Lưu vào CSDL) */}
           <form
             onSubmit={handleSaveOperationalSettings}
             className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4"
           >
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shadow-inner">
+              <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100">
                 <Settings className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900">
-                  Cấu hình vận hành bán trú
-                </h2>
+                <h2 className="text-base font-bold text-slate-900">Cấu hình vận hành bán trú</h2>
                 <p className="text-xs text-slate-500">
                   Thông số áp dụng cho lập thực đơn, lưu mẫu thức ăn và đánh giá dinh dưỡng
                 </p>
@@ -828,7 +744,6 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             )}
 
-            {/* Bữa ăn tổ chức trong ngày */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
                 <Utensils className="w-3.5 h-3.5 text-teal-600" /> Các bữa ăn tổ chức tại trường
@@ -850,9 +765,7 @@ export const SchoolSettingsPage: React.FC = () => {
                       <span>{meal.label}</span>
                       <span
                         className={`w-4 h-4 rounded-md flex items-center justify-center text-[10px] ${
-                          active
-                            ? 'bg-teal-600 text-white'
-                            : 'bg-white border border-slate-300 text-transparent'
+                          active ? 'bg-teal-600 text-white' : 'bg-white border border-slate-300 text-transparent'
                         }`}
                       >
                         ✓
@@ -863,7 +776,6 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Chu kỳ thực đơn & Thời gian lưu mẫu thức ăn */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
@@ -873,19 +785,15 @@ export const SchoolSettingsPage: React.FC = () => {
                   value={operational.standardWeeklyCycleLength}
                   onChange={(e) => {
                     setOperationalFeedback(null);
-                    setOperational((prev) => ({
-                      ...prev,
-                      standardWeeklyCycleLength: Number(e.target.value),
-                    }));
+                    setOperational((p) => ({ ...p, standardWeeklyCycleLength: Number(e.target.value) }));
                   }}
-                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none"
                 >
                   <option value={1}>Chu kỳ 1 tuần</option>
                   <option value={2}>Chu kỳ 2 tuần (Khuyến nghị)</option>
                   <option value={4}>Chu kỳ 4 tuần (Theo tháng)</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-teal-600" /> Thời gian lưu mẫu thức ăn
@@ -894,12 +802,9 @@ export const SchoolSettingsPage: React.FC = () => {
                   value={operational.foodRetentionHours}
                   onChange={(e) => {
                     setOperationalFeedback(null);
-                    setOperational((prev) => ({
-                      ...prev,
-                      foodRetentionHours: Number(e.target.value),
-                    }));
+                    setOperational((p) => ({ ...p, foodRetentionHours: Number(e.target.value) }));
                   }}
-                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none"
                 >
                   <option value={24}>24 giờ (QĐ 1246/QĐ-BYT)</option>
                   <option value={48}>48 giờ (Kiểm soát nâng cao)</option>
@@ -908,7 +813,6 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Tự động tính chuẩn WHO Z-Score */}
             <label className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer">
               <div className="pr-3">
                 <span className="text-xs font-bold text-slate-800 block">
@@ -923,10 +827,7 @@ export const SchoolSettingsPage: React.FC = () => {
                 checked={operational.whoZscoreAutoCalc}
                 onChange={(e) => {
                   setOperationalFeedback(null);
-                  setOperational((prev) => ({
-                    ...prev,
-                    whoZscoreAutoCalc: e.target.checked,
-                  }));
+                  setOperational((p) => ({ ...p, whoZscoreAutoCalc: e.target.checked }));
                 }}
                 className="w-4 h-4 accent-teal-600 rounded cursor-pointer shrink-0"
               />
@@ -938,11 +839,7 @@ export const SchoolSettingsPage: React.FC = () => {
                 disabled={savingOperational}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition disabled:opacity-60"
               >
-                {savingOperational ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Save className="w-3.5 h-3.5" />
-                )}
+                {savingOperational ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 <span>Lưu cấu hình vận hành</span>
               </button>
             </div>
@@ -950,12 +847,18 @@ export const SchoolSettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Chỉnh sửa thông tin trường */}
       <EditSchoolInfoModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         profile={profile}
-        onSaved={(updated) => setProfile(updated)}
+        onSaved={applyProfileState}
+      />
+
+      <ParentAppPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        branding={profile.branding}
+        schoolName={profile.name}
       />
     </div>
   );

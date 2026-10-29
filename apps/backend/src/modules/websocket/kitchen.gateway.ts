@@ -51,7 +51,7 @@ export interface KitchenStatusPayload {
     origin: '*',
     credentials: true,
   },
-  namespace: 'kitchen',
+  namespace: '/kitchen',
 })
 export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -63,13 +63,16 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     client.join(`tenant_${tenantId}`);
     client.join('kitchen_global');
+    client.join('tenant:1:kitchen');
+    client.join(`tenant:${tenantId}:kitchen`);
 
     if (classId) {
       client.join(`class_${classId}`);
+      client.join(`tenant:${tenantId}:class:${classId}`);
       console.log(`[WebSocket] Client ${client.id} joined class_${classId}`);
     }
 
-    console.log(`[WebSocket] Client ${client.id} connected to Kitchen Gateway (tenant_${tenantId})`);
+    console.log(`[WebSocket] Client ${client.id} connected to Kitchen Gateway (/kitchen)`);
 
     // Gửi tín hiệu chào mừng & xác nhận kết nối
     client.emit('CONNECTION_ESTABLISHED', {
@@ -91,7 +94,8 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
   notifyPortionsSynced(tenantId: string, payload: PortionSyncPayload) {
     if (!this.server) return;
     console.log(`[WebSocket] Emitting MEAL_PORTIONS_SYNCED for class ${payload.className}: ${payload.ateLunch} lunch portions`);
-    this.server.to(`tenant_${tenantId}`).to('kitchen_global').emit('MEAL_PORTIONS_SYNCED', payload);
+    this.server.to(`tenant_${tenantId}`).to('kitchen_global').to('tenant:1:kitchen').emit('MEAL_PORTIONS_SYNCED', payload);
+    this.server.to(`tenant_${tenantId}`).to('kitchen_global').to('tenant:1:kitchen').emit('kitchen:portions-updated', payload);
   }
 
   /**
@@ -100,7 +104,8 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
   notifyAllergyAlert(tenantId: string, payload: AllergyAlertPayload) {
     if (!this.server) return;
     console.log(`[WebSocket] Emitting ALLERGY_ALERT for child ${payload.childName}`);
-    this.server.to(`tenant_${tenantId}`).to('kitchen_global').emit('ALLERGY_ALERT', payload);
+    this.server.to(`tenant_${tenantId}`).to('kitchen_global').to('tenant:1:kitchen').emit('ALLERGY_ALERT', payload);
+    this.server.to(`tenant_${tenantId}`).to('kitchen_global').to('tenant:1:kitchen').emit('safety:alert', payload);
   }
 
   /**
@@ -109,7 +114,7 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
   notifyKitchenStatus(tenantId: string, payload: KitchenStatusPayload) {
     if (!this.server) return;
     console.log(`[WebSocket] Emitting KITCHEN_PORTIONS_ACKNOWLEDGED: ${payload.className} -> ${payload.status}`);
-    this.server.to(`tenant_${tenantId}`).to('kitchen_global').emit('KITCHEN_PORTIONS_ACKNOWLEDGED', payload);
+    this.server.to(`tenant_${tenantId}`).to('kitchen_global').to('tenant:1:kitchen').emit('KITCHEN_PORTIONS_ACKNOWLEDGED', payload);
   }
 
   @SubscribeMessage('TEACHER_UPDATE_PORTIONS')
@@ -124,5 +129,12 @@ export class KitchenGateway implements OnGatewayConnection, OnGatewayDisconnect 
     const tenantId = (client.handshake.query.tenantId as string) || 'a0000000-0000-0000-0000-000000000001';
     this.notifyKitchenStatus(tenantId, payload);
     return { status: 'ACKNOWLEDGED', timestamp: new Date().toISOString() };
+  }
+
+  @SubscribeMessage('join:kitchen')
+  handleJoinKitchen(client: Socket) {
+    client.join('kitchen_global');
+    client.join('tenant:1:kitchen');
+    return { status: 'JOINED', room: 'tenant:1:kitchen' };
   }
 }
