@@ -21,57 +21,63 @@ interface EditSchoolInfoModalProps {
   onSaved: (updated: TenantProfile) => void;
 }
 
-/**
- * UC07: Modal chỉnh sửa thông tin trường mầm non & hồ sơ pháp lý ATTP (lưu trực tiếp vào CSDL)
- */
 export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
   isOpen,
   onClose,
   profile,
   onSaved,
 }) => {
-  const [name, setName] = useState(profile.name || '');
-  const [code, setCode] = useState(profile.code || '');
-  const [domain, setDomain] = useState(profile.domain || '');
-  const [maxChildren, setMaxChildren] = useState<number>(profile.maxChildren || 200);
-  const [address, setAddress] = useState(profile.address || '');
-  const [phone, setPhone] = useState(profile.phone || '');
-  const [contactEmail, setContactEmail] = useState(profile.contactEmail || '');
-  const [licenseNumber, setLicenseNumber] = useState(profile.foodSafetyLicense?.number || '');
-  const [issueDate, setIssueDate] = useState(profile.foodSafetyLicense?.issueDate || '');
-  const [expiryDate, setExpiryDate] = useState(profile.foodSafetyLicense?.expiryDate || '');
-  const [issuingAuthority, setIssuingAuthority] = useState(
-    profile.foodSafetyLicense?.issuingAuthority || '',
-  );
-  const [repName, setRepName] = useState(profile.legalRepresentative?.name || '');
-  const [repTitle, setRepTitle] = useState(profile.legalRepresentative?.title || 'Hiệu trưởng');
+  const [form, setForm] = useState({
+    name: '',
+    code: '',
+    domain: '',
+    maxChildren: 200,
+    address: '',
+    phone: '',
+    contactEmail: '',
+    educationDepartmentCode: '',
+    schoolIdentifierSgd: '',
+    licenseNumber: '',
+    issueDate: '',
+    expiryDate: '',
+    issuingAuthority: '',
+    repName: '',
+    repTitle: 'Hiệu trưởng',
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && profile) {
-      setName(profile.name || '');
-      setCode(profile.code || '');
-      setDomain(profile.domain || '');
-      setMaxChildren(profile.maxChildren || 200);
-      setAddress(profile.address || '');
-      setPhone(profile.phone || '');
-      setContactEmail(profile.contactEmail || '');
-      setLicenseNumber(profile.foodSafetyLicense?.number || '');
-      setIssueDate(profile.foodSafetyLicense?.issueDate || '');
-      setExpiryDate(profile.foodSafetyLicense?.expiryDate || '');
-      setIssuingAuthority(profile.foodSafetyLicense?.issuingAuthority || '');
-      setRepName(profile.legalRepresentative?.name || '');
-      setRepTitle(profile.legalRepresentative?.title || 'Hiệu trưởng');
+      setForm({
+        name: profile.name || '',
+        code: profile.code || '',
+        domain: profile.domain || '',
+        maxChildren: profile.maxChildren || 200,
+        address: profile.address || '',
+        phone: profile.phone || '',
+        contactEmail: profile.contactEmail || '',
+        educationDepartmentCode: profile.educationDepartmentCode || '',
+        schoolIdentifierSgd: profile.schoolIdentifierSgd || '',
+        licenseNumber: profile.foodSafetyLicense?.number || '',
+        issueDate: profile.foodSafetyLicense?.issueDate || '',
+        expiryDate: profile.foodSafetyLicense?.expiryDate || '',
+        issuingAuthority: profile.foodSafetyLicense?.issuingAuthority || '',
+        repName: profile.legalRepresentative?.name || '',
+        repTitle: profile.legalRepresentative?.title || 'Hiệu trưởng',
+      });
       setError(null);
     }
   }, [isOpen, profile]);
 
   if (!isOpen) return null;
 
+  const setField = (key: keyof typeof form, val: string | number) =>
+    setForm((prev) => ({ ...prev, [key]: val }));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    if (!form.name.trim()) {
       setError('Tên trường mầm non không được để trống.');
       return;
     }
@@ -79,45 +85,44 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
     setSaving(true);
     setError(null);
 
-    const updatePayload: UpdateTenantProfileInput = {
-      name: name.trim(),
-      code: code.trim() || undefined,
-      domain: domain.trim(),
-      maxChildren: Number(maxChildren) || 200,
-      address: address.trim(),
-      phone: phone.trim(),
-      contactEmail: contactEmail.trim(),
+    const payload: UpdateTenantProfileInput = {
+      name: form.name.trim(),
+      code: form.code.trim() || undefined,
+      domain: form.domain.trim(),
+      maxChildren: Number(form.maxChildren) || 200,
+      address: form.address.trim(),
+      phone: form.phone.trim(),
+      contactEmail: form.contactEmail.trim(),
+      educationDepartmentCode: form.educationDepartmentCode.trim(),
+      schoolIdentifierSgd: form.schoolIdentifierSgd.trim(),
       foodSafetyLicense: {
-        number: licenseNumber.trim(),
-        issueDate: issueDate.trim(),
-        expiryDate: expiryDate.trim(),
-        issuingAuthority: issuingAuthority.trim(),
+        number: form.licenseNumber.trim(),
+        issueDate: form.issueDate.trim(),
+        expiryDate: form.expiryDate.trim(),
+        issuingAuthority: form.issuingAuthority.trim(),
       },
       legalRepresentative: {
-        name: repName.trim(),
-        title: repTitle.trim() || 'Hiệu trưởng',
+        name: form.repName.trim(),
+        title: form.repTitle.trim() || 'Hiệu trưởng',
       },
     };
 
     try {
-      const updated = await tenantApi.updateProfile(updatePayload);
-      if (updated?.name) {
-        localStorage.setItem('school_name', updated.name);
-      }
+      const updated = await tenantApi.updateProfile(payload);
+      if (updated?.name) localStorage.setItem('school_name', updated.name);
       window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
       onSaved(updated);
       onClose();
     } catch (err: any) {
       const msg = err?.response?.data?.message;
-      setError(
-        Array.isArray(msg)
-          ? msg.join(', ')
-          : msg || 'Không thể lưu thông tin trường học vào cơ sở dữ liệu.',
-      );
+      setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Không thể lưu thông tin trường học.');
     } finally {
       setSaving(false);
     }
   };
+
+  const inputCls =
+    'w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
@@ -130,7 +135,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
             <div>
               <h3 className="font-bold text-base">Cập nhật thông tin Trường mầm non</h3>
               <p className="text-xs text-teal-200">
-                Chỉnh sửa thông tin cơ sở, người đại diện và giấy chứng nhận ATTP (lưu trực tiếp vào CSDL)
+                Chỉnh sửa hồ sơ cơ sở, mã định danh Bộ GD&ĐT và giấy chứng nhận ATTP
               </p>
             </div>
           </div>
@@ -150,7 +155,6 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
             </div>
           )}
 
-          {/* Tên trường & Mã trường */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
@@ -158,44 +162,41 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={form.name}
+                onChange={(e) => setField('name', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                className={inputCls}
                 placeholder="Nhập tên trường mầm non"
               />
             </div>
-
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
                 <Hash className="w-3.5 h-3.5 text-teal-600" /> Mã trường
               </label>
               <input
                 type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="VD: MN_HOAHONG"
+                value={form.code}
+                onChange={(e) => setField('code', e.target.value)}
+                className={`${inputCls} font-mono`}
+                placeholder="VD: MN_SAOMAI"
               />
             </div>
           </div>
 
-          {/* Địa chỉ cơ sở */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-teal-600" /> Địa chỉ cơ sở trường *
             </label>
             <input
               type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              value={form.address}
+              onChange={(e) => setField('address', e.target.value)}
               required
-              className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+              className={inputCls}
               placeholder="Nhập địa chỉ trường học"
             />
           </div>
 
-          {/* Điện thoại, Email, Website & Quy mô */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
@@ -203,11 +204,10 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </label>
               <input
                 type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={form.phone}
+                onChange={(e) => setField('phone', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Nhập số điện thoại nhà trường"
+                className={inputCls}
               />
             </div>
             <div>
@@ -216,11 +216,10 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </label>
               <input
                 type="email"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
+                value={form.contactEmail}
+                onChange={(e) => setField('contactEmail', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Nhập email liên hệ"
+                className={inputCls}
               />
             </div>
             <div>
@@ -229,10 +228,10 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </label>
               <input
                 type="text"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="VD: mnhoahong.kidmeal.vn"
+                value={form.domain}
+                onChange={(e) => setField('domain', e.target.value)}
+                className={inputCls}
+                placeholder="VD: saomai.kidsnutri.vn"
               />
             </div>
             <div>
@@ -243,26 +242,48 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 type="number"
                 min={1}
                 max={5000}
-                value={maxChildren}
-                onChange={(e) => setMaxChildren(Number(e.target.value))}
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                value={form.maxChildren}
+                onChange={(e) => setField('maxChildren', Number(e.target.value))}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Mã Phòng / Sở GD&ĐT
+              </label>
+              <input
+                type="text"
+                value={form.educationDepartmentCode}
+                onChange={(e) => setField('educationDepartmentCode', e.target.value)}
+                className={`${inputCls} font-mono`}
+                placeholder="VD: GD-MN-79-03-0042"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Mã định danh CSDL Ngành (Bộ GD&ĐT)
+              </label>
+              <input
+                type="text"
+                value={form.schoolIdentifierSgd}
+                onChange={(e) => setField('schoolIdentifierSgd', e.target.value)}
+                className={`${inputCls} font-mono`}
+                placeholder="VD: MN-HCM-Q3-0042"
               />
             </div>
           </div>
 
-          {/* Người đại diện pháp lý / Hiệu trưởng */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <UserCheck className="w-3.5 h-3.5 text-teal-600" /> Hiệu trưởng / Người đại diện pháp lý *
+                <UserCheck className="w-3.5 h-3.5 text-teal-600" /> Người đại diện pháp lý *
               </label>
               <input
                 type="text"
-                value={repName}
-                onChange={(e) => setRepName(e.target.value)}
+                value={form.repName}
+                onChange={(e) => setField('repName', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Họ và tên Hiệu trưởng"
+                className={inputCls}
               />
             </div>
             <div>
@@ -271,19 +292,17 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </label>
               <input
                 type="text"
-                value={repTitle}
-                onChange={(e) => setRepTitle(e.target.value)}
+                value={form.repTitle}
+                onChange={(e) => setField('repTitle', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Hiệu trưởng"
+                className={inputCls}
               />
             </div>
           </div>
 
-          {/* Giấy chứng nhận cơ sở đủ điều kiện An toàn thực phẩm (ATTP) */}
           <div className="p-4 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-3">
             <h4 className="text-xs font-bold text-teal-900 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-teal-600" /> Giấy chứng nhận Cơ sở đủ điều kiện An toàn thực phẩm (ATTP)
+              <ShieldCheck className="w-4 h-4 text-teal-600" /> Giấy chứng nhận Cơ sở đủ điều kiện ATTP
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
@@ -292,10 +311,9 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={licenseNumber}
-                  onChange={(e) => setLicenseNumber(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                  placeholder="Nhập số giấy phép ATTP (nếu có)"
+                  value={form.licenseNumber}
+                  onChange={(e) => setField('licenseNumber', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
                 />
               </div>
               <div>
@@ -304,10 +322,9 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={issuingAuthority}
-                  onChange={(e) => setIssuingAuthority(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                  placeholder="VD: Ban Quản lý ATTP / Chi cục ATVSTP"
+                  value={form.issuingAuthority}
+                  onChange={(e) => setField('issuingAuthority', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
                 />
               </div>
               <div>
@@ -316,9 +333,9 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 </label>
                 <input
                   type="date"
-                  value={issueDate}
-                  onChange={(e) => setIssueDate(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  value={form.issueDate}
+                  onChange={(e) => setField('issueDate', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
                 />
               </div>
               <div>
@@ -327,9 +344,9 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 </label>
                 <input
                   type="date"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  value={form.expiryDate}
+                  onChange={(e) => setField('expiryDate', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
                 />
               </div>
             </div>
@@ -348,7 +365,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               disabled={saving}
               className="px-5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
             >
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Lưu thay đổi vào CSDL
             </button>
           </div>
