@@ -16,10 +16,11 @@ import { StaffManagementPage } from './features/staff/pages/StaffManagementPage'
 import { PrincipalMenuApprovalPage } from './features/menus/pages/PrincipalMenuApprovalPage';
 import { MenuPlanningPage } from './features/menus/pages/MenuPlanningPage';
 import { TeacherTabletPage } from './features/attendance/pages/TeacherTabletPage';
+import { ChildGrowthMonitoringPage } from './features/growth/pages/ChildGrowthMonitoringPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
-import { ChefHat, Tablet, LayoutDashboard, Sparkles, LogOut, Users, Scale, UtensilsCrossed } from 'lucide-react';
+import { ChefHat, Tablet, LayoutDashboard, Sparkles, LogOut, Users, Scale, UtensilsCrossed, TrendingUp } from 'lucide-react';
 
 /**
  * Component điều hướng thông minh theo Role người dùng khi vào trang chủ "/"
@@ -156,7 +157,7 @@ export const App: React.FC = () => {
           <Route path="dishes" element={<NutritionRulesPage />} />
           <Route path="children" element={<NutritionistDashboardPage />} />
           <Route path="food-safety" element={<NutritionistDashboardPage />} />
-          <Route path="growth" element={<NutritionistDashboardPage />} />
+          <Route path="growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="reports" element={<NutritionistDashboardPage />} />
         </Route>
 
@@ -178,11 +179,10 @@ export const App: React.FC = () => {
           }
         />
 
-        {/* ─── 2. PHÂN HỆ CỔNG BAN GIÁM HIỆU / ADMIN (CHỈ CHO ROLE PRINCIPAL / SUPER_ADMIN) ─── */}
-        {/* Chuyên gia dinh dưỡng KHÔNG vào được giao diện này (Sẽ bị ProtectedRoute chặn và đẩy về /nutritionist/menus) */}
+        {/* ─── 2. PHÂN HỆ CỔNG BAN GIÁM HIỆU / ADMIN (CHỈ CHO ROLE PRINCIPAL / SUPER_ADMIN / SCHOOL_MANAGEMENT / TEACHER) ─── */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={['PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT']}>
+            <ProtectedRoute allowedRoles={['PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT', 'TEACHER']}>
               <AdminDashboardLayout />
             </ProtectedRoute>
           }
@@ -198,8 +198,9 @@ export const App: React.FC = () => {
           <Route path="/food-safety" element={<WeeklyMenuManagementPage />} />
           <Route path="/finances" element={<WeeklyMenuManagementPage />} />
           <Route path="/children" element={<WeeklyMenuManagementPage />} />
-          <Route path="/growth" element={<WeeklyMenuManagementPage />} />
+          <Route path="/growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="/payments" element={<WeeklyMenuManagementPage />} />
+        </Route>
 
 
         {/* ─── 3. PHÂN HỆ TABLET GIÁO VIÊN ─── */}
