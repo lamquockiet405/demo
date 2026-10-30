@@ -57,7 +57,7 @@ export interface TwoFactorEnableResponse {
 
 export const userProfileApi = {
   /**
-   * UC05: Lấy hồ sơ cá nhân của người dùng hiện tại (View Profile - áp dụng cho mọi role)
+   * Lấy hồ sơ cá nhân của người dùng hiện tại (áp dụng cho mọi role)
    */
   getMyProfile: async (): Promise<UserProfile> => {
     const res = await apiClient.get<UserProfile>('/users/profile');
@@ -65,7 +65,7 @@ export const userProfileApi = {
   },
 
   /**
-   * UC06: Cập nhật thông tin cá nhân (Edit Profile: họ tên, số điện thoại, avatar)
+   * Cập nhật thông tin cá nhân (họ tên, số điện thoại, avatar)
    */
   updateMyProfile: async (data: UpdateProfileInput): Promise<UserProfile> => {
     const res = await apiClient.patch<UserProfile>('/users/profile', data);

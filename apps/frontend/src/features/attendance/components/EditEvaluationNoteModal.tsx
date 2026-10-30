@@ -97,11 +97,10 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
                   key={opt}
                   type="button"
                   onClick={() => setWaterIntake(opt)}
-                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition ${
-                    waterIntake === opt
-                      ? 'bg-teal-600 text-white border-teal-600'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                  }`}
+                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition ${waterIntake === opt
+                    ? 'bg-teal-600 text-white border-teal-600'
+                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
                 >
                   {opt}
                 </button>
@@ -134,33 +133,30 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
               <button
                 type="button"
                 onClick={() => setSyncStatus('SENT')}
-                className={`py-2 px-3 text-xs font-bold rounded-xl border transition text-center ${
-                  syncStatus === 'SENT'
-                    ? 'bg-teal-50 border-teal-500 text-teal-700 ring-2 ring-teal-500/20'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
+                className={`py-2 px-3 text-xs font-bold rounded-xl border transition text-center ${syncStatus === 'SENT'
+                  ? 'bg-teal-50 border-teal-500 text-teal-700 ring-2 ring-teal-500/20'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
               >
                 Đã gửi bình thường
               </button>
               <button
                 type="button"
                 onClick={() => setSyncStatus('PENDING')}
-                className={`py-2 px-3 text-xs font-bold rounded-xl border transition text-center ${
-                  syncStatus === 'PENDING'
-                    ? 'bg-amber-50 border-amber-500 text-amber-700 ring-2 ring-amber-500/20'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
+                className={`py-2 px-3 text-xs font-bold rounded-xl border transition text-center ${syncStatus === 'PENDING'
+                  ? 'bg-amber-50 border-amber-500 text-amber-700 ring-2 ring-amber-500/20'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
               >
                 Chờ gửi duyệt
               </button>
               <button
                 type="button"
                 onClick={() => setSyncStatus('URGENT_PARENT')}
-                className={`py-2 px-3 text-xs font-bold rounded-xl border transition text-center ${
-                  syncStatus === 'URGENT_PARENT'
-                    ? 'bg-rose-50 border-rose-500 text-rose-700 ring-2 ring-rose-500/20'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
+                className={`py-2 px-3 text-xs font-bold rounded-xl border transition text-center ${syncStatus === 'URGENT_PARENT'
+                  ? 'bg-rose-50 border-rose-500 text-rose-700 ring-2 ring-rose-500/20'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
               >
                 Báo phụ huynh gấp
               </button>

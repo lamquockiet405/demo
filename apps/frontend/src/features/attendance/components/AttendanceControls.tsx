@@ -97,31 +97,28 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
         <div className="flex items-center bg-slate-100/90 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
           <button
             onClick={() => onMealFilterChange('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl transition ${
-              mealFilter === 'ALL'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3.5 py-1.5 rounded-xl transition ${mealFilter === 'ALL'
+              ? 'bg-teal-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Cả ngày (Trưa + Xế)
           </button>
           <button
             onClick={() => onMealFilterChange('LUNCH')}
-            className={`px-3.5 py-1.5 rounded-xl transition ${
-              mealFilter === 'LUNCH'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3.5 py-1.5 rounded-xl transition ${mealFilter === 'LUNCH'
+              ? 'bg-teal-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Chỉ ăn trưa
           </button>
           <button
             onClick={() => onMealFilterChange('SNACK')}
-            className={`px-3.5 py-1.5 rounded-xl transition ${
-              mealFilter === 'SNACK'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-3.5 py-1.5 rounded-xl transition ${mealFilter === 'SNACK'
+              ? 'bg-teal-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Chỉ ăn xế
           </button>
