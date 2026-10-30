@@ -11,15 +11,22 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+interface FoodCategory {
+  id: string;
+  name: string;
+}
+
 export const CreateFoodPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [isAllergyMonitored, setIsAllergyMonitored] = useState(true);
 
   const [formData, setFormData] = useState({
     code: `NL-2025-AUTO${Math.floor(Math.random() * 9000) + 1000}`,
     name: '',
-    category: 'MEAT_POULTRY',
+    categoryId: '',
+    category: '',
     defaultUnit: 'gram',
     supplier: '', // UI only
     description: '', // UI only
@@ -33,6 +40,22 @@ export const CreateFoodPage: React.FC = () => {
     allergens: [] as string[],
     imageUrl: '',
   });
+
+  React.useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await apiClient.get('/foods/categories');
+        const raw = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.items || []);
+        setCategories(raw);
+        if (raw.length > 0) {
+          setFormData(prev => ({ ...prev, categoryId: String(raw[0].id) }));
+        }
+      } catch (err) {
+        console.error('Error fetching categories in CreateFoodPage:', err);
+      }
+    };
+    fetchCats();
+  }, []);
 
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -93,21 +116,16 @@ export const CreateFoodPage: React.FC = () => {
     try {
       setLoading(true);
       const payload = {
-        code: formData.code,
         name: formData.name,
-        category: formData.category,
-        defaultUnit: formData.defaultUnit,
-        energyKcal: formData.energyKcal,
-        proteinG: formData.proteinG,
-        fatG: formData.fatG,
-        carbG: formData.carbG,
-        calciumMg: formData.calciumMg,
-        ironMg: formData.ironMg,
-        zincMg: formData.zincMg,
-        allergens: isAllergyMonitored ? formData.allergens : [],
-        imageUrl: formData.imageUrl,
-        supplier: formData.supplier,
-        description: formData.description,
+        categoryId: formData.categoryId ? Number(formData.categoryId) : undefined,
+        unit: formData.defaultUnit === 'gram' ? 'g' : formData.defaultUnit,
+        energyKcal100g: Number(formData.energyKcal) || 0,
+        proteinG: Number(formData.proteinG) || 0,
+        fatG: Number(formData.fatG) || 0,
+        carbG: Number(formData.carbG) || 0,
+        calciumMg: Number(formData.calciumMg) || 0,
+        ironMg: Number(formData.ironMg) || 0,
+        zincMg: Number(formData.zincMg) || 0,
         status: 'ACTIVE',
       };
       await apiClient.post('/foods', payload);
@@ -195,20 +213,17 @@ export const CreateFoodPage: React.FC = () => {
                 <label className="block text-sm font-bold text-slate-700 mb-1">Nhóm thực phẩm *</label>
                 <select 
                   required
-                  name="category"
-                  value={formData.category}
+                  name="categoryId"
+                  value={formData.categoryId}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm font-medium text-slate-800"
                 >
-                  <option value="MEAT_POULTRY">Nhóm giàu chất đạm (Thịt, cá, trứng, đậu đỗ)</option>
-                  <option value="SEAFOOD">Thủy hải sản</option>
-                  <option value="EGGS">Trứng</option>
-                  <option value="DAIRY">Sữa & Chế phẩm</option>
-                  <option value="CEREAL_GRAINS">Ngũ cốc & Tinh bột</option>
-                  <option value="VEGETABLES">Rau củ</option>
-                  <option value="FRUITS">Trái cây</option>
-                  <option value="FATS_OILS">Chất béo & Dầu</option>
-                  <option value="NUTS_SEEDS">Hạt & Đậu</option>
+                  <option value="">-- Chọn nhóm thực phẩm ({categories.length} nhóm) --</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
                 <p className="text-[10px] text-slate-400 mt-1.5">Dùng để phân bổ tỷ lệ cơ cấu bữa ăn theo quy định dinh dưỡng.</p>
               </div>
@@ -517,7 +532,7 @@ export const CreateFoodPage: React.FC = () => {
             <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-6 flex gap-3">
                <ShieldCheck className="w-5 h-5 text-blue-500 flex-shrink-0" />
                <div>
-                  <h4 className="font-bold text-blue-900 text-sm">NutriKid chỉ quản lý thông tin dinh dưỡng, không quản lý tồn kho nguyên liệu.</h4>
+                  <h4 className="font-bold text-blue-900 text-sm">KidMeal chỉ quản lý thông tin dinh dưỡng, không quản lý tồn kho nguyên liệu.</h4>
                   <p className="text-xs text-blue-700/80 mt-1 leading-relaxed">
                     Dữ liệu khai báo tại biểu mẫu này phục vụ tính toán định lượng calo, cân đối tỷ lệ P:L:C, giám sát vi chất và rà soát dị nguyên cho học sinh toàn trường. Các nghiệp vụ xuất nhập kho, kiểm kê tài chính thực phẩm được xử lý trên hệ thống Kế toán Bán trú liên kết.
                   </p>
