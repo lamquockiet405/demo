@@ -34,6 +34,9 @@ export class GrowthRecord {
   @Column({ name: 'measured_by', type: 'bigint', transformer: BigIntTransformer, nullable: true })
   measuredBy: number;
 
+  @Column({ name: 'health_notes', type: 'text', nullable: true })
+  healthNotes?: string;
+
   @ManyToOne(() => Child, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'student_id' })
   student: Child;

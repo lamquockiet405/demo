@@ -351,11 +351,10 @@ export const ExecutiveDashboardPage: React.FC = () => {
               <div
                 key={g.gradeLevel}
                 onClick={() => setSelectedGradeFilter(selectedGradeFilter === g.gradeLevel ? 'ALL' : g.gradeLevel)}
-                className={`p-3.5 rounded-2xl border transition cursor-pointer ${
-                  selectedGradeFilter === g.gradeLevel
+                className={`p-3.5 rounded-2xl border transition cursor-pointer ${selectedGradeFilter === g.gradeLevel
                     ? 'bg-teal-50 border-teal-500 shadow-xs ring-2 ring-teal-500/20'
                     : 'bg-white border-slate-200/80 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">{g.gradeName}</span>
@@ -422,9 +421,8 @@ export const ExecutiveDashboardPage: React.FC = () => {
                           </div>
                           <div className="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${
-                                cls.occupancyPercent >= 100 ? 'bg-rose-500' : cls.occupancyPercent >= 85 ? 'bg-amber-500' : 'bg-teal-500'
-                              }`}
+                              className={`h-full rounded-full ${cls.occupancyPercent >= 100 ? 'bg-rose-500' : cls.occupancyPercent >= 85 ? 'bg-amber-500' : 'bg-teal-500'
+                                }`}
                               style={{ width: `${Math.min(100, cls.occupancyPercent)}%` }}
                             ></div>
                           </div>
@@ -690,11 +688,16 @@ export const ExecutiveDashboardPage: React.FC = () => {
               {/* Stunted */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-slate-700">Thấp còi (HAZ &lt; -2 SD)</span>
-                  <span className="text-amber-600">{growth?.stuntedPercent || 5}%</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-700">Thấp còi (HAZ &lt; -2 SD)</span>
+                    <span className="text-[10px] text-amber-700 font-semibold bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                      Trẻ cần can thiệp vi chất
+                    </span>
+                  </div>
+                  <span className="text-amber-600">{growth?.stuntedPercent || 0}% ({growth?.stuntedCount || 0} trẻ)</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-amber-500 h-full rounded-full" style={{ width: `${growth?.stuntedPercent || 5}%` }}></div>
+                  <div className="bg-amber-500 h-full rounded-full" style={{ width: `${growth?.stuntedPercent || 0}%` }}></div>
                 </div>
               </div>
 
@@ -702,21 +705,26 @@ export const ExecutiveDashboardPage: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-slate-700">Nhẹ cân (WAZ &lt; -2 SD)</span>
-                  <span className="text-amber-600">{growth?.underweightPercent || 4}%</span>
+                  <span className="text-orange-600">{growth?.underweightPercent || 0}% ({growth?.underweightCount || 0} trẻ)</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-amber-500 h-full rounded-full" style={{ width: `${growth?.underweightPercent || 4}%` }}></div>
+                  <div className="bg-orange-500 h-full rounded-full" style={{ width: `${growth?.underweightPercent || 0}%` }}></div>
                 </div>
               </div>
 
               {/* Overweight */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
-                  <span className="text-slate-700">Thừa cân / Béo phì (BMI &gt; +2 SD)</span>
-                  <span className="text-rose-600">{growth?.overweightPercent || 6}%</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-700">Thừa cân / Béo phì (BMI &gt; +2 SD)</span>
+                    <span className="text-[10px] text-rose-700 font-semibold bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
+                      Trẻ cần giảm chất béo/ngọt
+                    </span>
+                  </div>
+                  <span className="text-rose-600">{growth?.overweightPercent || 0}% ({growth?.overweightCount || 0} trẻ)</span>
                 </div>
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-rose-500 h-full rounded-full" style={{ width: `${growth?.overweightPercent || 6}%` }}></div>
+                  <div className="bg-rose-500 h-full rounded-full" style={{ width: `${growth?.overweightPercent || 0}%` }}></div>
                 </div>
               </div>
             </div>
