@@ -23,18 +23,9 @@ import {
   Trash2,
   UploadCloud,
   Download,
+  Lock,
 } from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ReferenceLine,
-} from 'recharts';
+import { WhoGrowthChart } from '../components/WhoGrowthChart';
 import { growthApi, GrowthRecordItem, CreateGrowthDto } from '../api/growth.api';
 import { apiClient } from '../../../core/api/axios';
 
@@ -53,7 +44,6 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [childHistory, setChildHistory] = useState<GrowthRecordItem[]>([]);
   const [selectedChildInfo, setSelectedChildInfo] = useState<any>(null);
-  const [chartMetric, setChartMetric] = useState<'WEIGHT' | 'HEIGHT' | 'BMI'>('BMI');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -66,7 +56,64 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
     healthNotes: '',
   });
 
-  // Edit record state
+  // Real-time BMI calculation according to WHO LMS formula: BMI = weightKg / ((heightCm / 100)^2)
+  const previewBmi = useMemo(() => {
+    const w = Number(formData.weightKg);
+    const h = Number(formData.heightCm);
+    if (w > 0 && h > 0) {
+      const hM = h / 100;
+      return Math.round((w / (hM * hM)) * 100) / 100;
+    }
+    return 0;
+  }, [formData.weightKg, formData.heightCm]);
+
+  const getBmiStatusInfo = (bmi: number) => {
+    if (!bmi || bmi <= 0) {
+      return {
+        label: 'Chưa có dữ liệu',
+        color: 'text-slate-500 bg-slate-100 border-slate-200',
+        containerStyle: 'bg-slate-50/80 border-slate-200 text-slate-700',
+        alertLevel: 'NONE',
+        alertMessage: 'Vui lòng nhập chiều cao và cân nặng để hệ thống đánh giá thể lực.',
+      };
+    }
+    if (bmi >= 25) {
+      return {
+        label: 'Béo phì (OBESE, BMI ≥ 25)',
+        color: 'text-rose-800 bg-rose-100 border-rose-300 font-black',
+        containerStyle: 'bg-rose-50/95 border-rose-300 text-rose-950 shadow-rose-100/50',
+        alertLevel: 'RED',
+        alertMessage: '🚨 Cảnh báo đỏ: Trẻ béo phì - Cần giảm chất béo/đường ngọt, tăng cường vận động.',
+      };
+    }
+    if (bmi >= 19) {
+      return {
+        label: 'Thừa cân (OVERWEIGHT, BMI ≥ 19)',
+        color: 'text-amber-800 bg-amber-100 border-amber-300 font-bold',
+        containerStyle: 'bg-amber-50/95 border-amber-300 text-amber-950 shadow-amber-100/50',
+        alertLevel: 'AMBER',
+        alertMessage: '⚠️ Cảnh báo vàng cam: Trẻ thừa cân - Cần điều chỉnh khẩu phần và tăng cường vận động.',
+      };
+    }
+    if (bmi < 13.5) {
+      return {
+        label: 'Nhẹ cân / Gầy còm (UNDERWEIGHT)',
+        color: 'text-orange-800 bg-orange-100 border-orange-300 font-bold',
+        containerStyle: 'bg-orange-50/95 border-orange-300 text-orange-950 shadow-orange-100/50',
+        alertLevel: 'ORANGE',
+        alertMessage: '⚠️ Cảnh báo cam: Trẻ nhẹ cân / gầy còm - Cần bổ sung vi chất và khẩu phần dinh dưỡng.',
+      };
+    }
+    return {
+      label: 'Bình thường (NORMAL)',
+      color: 'text-emerald-800 bg-emerald-100 border-emerald-300 font-bold',
+      containerStyle: 'bg-emerald-50/90 border-emerald-200 text-emerald-950 shadow-emerald-100/30',
+      alertLevel: 'GREEN',
+      alertMessage: '✨ Đạt chuẩn thể lực WHO: Trẻ phát triển cân đối và khỏe mạnh.',
+    };
+  };
+
+  // Edit record state (UC-74)
   const [editingRecord, setEditingRecord] = useState<GrowthRecordItem | null>(null);
   const [editFormData, setEditFormData] = useState({
     measurementDate: '',
@@ -74,11 +121,24 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
     heightCm: 0,
     healthNotes: '',
   });
+  const [successNotification, setSuccessNotification] = useState<string | null>(null);
+
+  // Real-time estimated new BMI for editing modal
+  const previewEditBmi = useMemo(() => {
+    const w = Number(editFormData.weightKg);
+    const h = Number(editFormData.heightCm);
+    if (w > 0 && h > 0) {
+      const hM = h / 100;
+      return Math.round((w / (hM * hM)) * 100) / 100;
+    }
+    return 0;
+  }, [editFormData.weightKg, editFormData.heightCm]);
 
   // Import modal state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [importResult, setImportResult] = useState<{ count: number; errors: string[] } | null>(null);
 
   const sampleGrowthCsv = `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú
@@ -99,17 +159,41 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
   const handleUpdateRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingRecord) return;
+
+    const w = Number(editFormData.weightKg);
+    const h = Number(editFormData.heightCm);
+    if (isNaN(w) || w < 3 || w > 60) {
+      alert('Cân nặng phải trong khoảng từ 3.0 kg đến 60.0 kg.');
+      return;
+    }
+    if (isNaN(h) || h < 40 || h > 150) {
+      alert('Chiều cao phải trong khoảng từ 40.0 cm đến 150.0 cm.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await growthApi.updateRecord(editingRecord.id, editFormData);
-      alert('Cập nhật chỉ số phát triển thành công!');
+      const targetChildId = editingRecord.childId || selectedChildId;
       setEditingRecord(null);
-      fetchData();
-      if (selectedChildId) {
-        growthApi.getChildHistory(selectedChildId).then((res) => {
-          setChildHistory(res.history || []);
-        });
+
+      // 1. Làm mới danh sách bản ghi và tính lại KPI toàn trường / lớp
+      await fetchData();
+
+      // 2. Vẽ lại đường cong tăng trưởng WHO của học sinh đang chọn
+      if (targetChildId) {
+        setSelectedChildId(targetChildId);
+        const hist = await growthApi.getChildHistory(targetChildId);
+        setChildHistory(hist.history || []);
+        if (hist.child) {
+          setSelectedChildInfo(hist.child);
+        }
       }
+
+      setSuccessNotification(
+        'Cập nhật chỉ số thể chất thành công! Toàn bộ Z-score (WAZ, HAZ, BAZ) và biểu đồ WHO đã được tính toán lại theo số liệu mới.'
+      );
+      setTimeout(() => setSuccessNotification(null), 6000);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Có lỗi khi cập nhật số liệu.');
     } finally {
@@ -148,7 +232,10 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
           : 0;
 
       for (let i = startIdx; i < lines.length; i++) {
-        const parts = lines[i].split(',').map((s) => s.trim());
+        const line = lines[i].trim();
+        if (!line) continue;
+        const delimiter = line.includes('\t') ? '\t' : ',';
+        const parts = line.split(delimiter).map((s) => s.trim());
         if (parts.length >= 4) {
           items.push({
             studentCode: parts[0],
@@ -177,6 +264,8 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
   };
 
   const handleExportReport = async () => {
+    if (exporting) return;
+    setExporting(true);
     try {
       const res = await growthApi.exportReport(selectedClass !== 'ALL' ? selectedClass : undefined);
       if (!res.items || res.items.length === 0) {
@@ -184,36 +273,92 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
         return;
       }
 
-      // Convert items to CSV
-      const headers = ['Mã học sinh', 'Họ và tên', 'Giới tính', 'Lớp', 'Ngày đo', 'Tuổi (tháng)', 'Cân nặng (kg)', 'Chiều cao (cm)', 'WAZ', 'HAZ', 'BAZ', 'Thể lực', 'Tình trạng', 'Ghi chú'];
-      const rows = res.items.map((it: any) => [
-        it.studentCode,
-        it.childName,
-        it.gender,
-        it.className,
-        it.measurementDate,
-        it.ageInMonths,
-        it.weightKg,
-        it.heightCm,
-        it.waz,
-        it.haz,
-        it.baz,
-        it.weightStatus,
-        it.overallStatus,
-        `"${it.notes.replace(/"/g, '""')}"`,
-      ]);
+      // Convert items to CSV with 14 standard columns according to UC-80
+      const headers = [
+        'Mã học sinh',
+        'Họ và tên',
+        'Giới tính',
+        'Lớp',
+        'Ngày đo',
+        'Tuổi (tháng)',
+        'Cân nặng (kg)',
+        'Chiều cao (cm)',
+        'WAZ',
+        'HAZ',
+        'BAZ',
+        'Thể lực',
+        'Tình trạng',
+        'Ghi chú',
+      ];
 
-      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
+      const escapeField = (val: any) => {
+        if (val === null || val === undefined) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const escapeNotes = (notes: any) => {
+        const str = notes == null ? '' : String(notes);
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const rows = res.items.map((it: any) => {
+        const studentCode = it.studentCode ?? it.child?.studentCode ?? '';
+        const childName = it.childName ?? it.child?.fullName ?? '';
+        let gender = it.gender ?? it.child?.gender ?? '';
+        if (gender === 'MALE' || gender === 'male') gender = 'Nam';
+        else if (gender === 'FEMALE' || gender === 'female') gender = 'Nữ';
+        const className = it.className ?? it.child?.class?.name ?? '';
+        const measurementDate = it.measurementDate ? String(it.measurementDate).split('T')[0] : '';
+        const ageInMonths = it.ageInMonths ?? '';
+        const weightKg = it.weightKg ?? '';
+        const heightCm = it.heightCm ?? '';
+        const waz = it.waz != null ? Number(it.waz).toFixed(2) : '';
+        const haz = it.haz != null ? Number(it.haz).toFixed(2) : '';
+        const baz = it.baz != null ? Number(it.baz).toFixed(2) : '';
+        const weightStatus = it.weightStatus ?? it.weightClassification ?? '';
+        const overallStatus = it.overallStatus ?? it.overallNutritionalStatus ?? '';
+        const notes = it.notes ?? it.healthNotes ?? '';
+
+        return [
+          escapeField(studentCode),
+          escapeField(childName),
+          escapeField(gender),
+          escapeField(className),
+          escapeField(measurementDate),
+          ageInMonths,
+          weightKg,
+          heightCm,
+          waz,
+          haz,
+          baz,
+          escapeField(weightStatus),
+          escapeField(overallStatus),
+          escapeNotes(notes),
+        ];
+      });
+
+      // Gắn tiền tố \uFEFF (Byte Order Mark) vào đầu file để Microsoft Excel nhận diện đúng bảng mã Tiếng Việt UTF-8
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\r\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Bao_Cao_Phat_Trien_The_Luc_${new Date().toISOString().split('T')[0]}.csv`);
+      const today = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `Bao_Cao_Phat_Trien_The_Luc_${today}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSuccessNotification(`Xuất báo cáo phát triển thể chất thành công! Tệp Bao_Cao_Phat_Trien_The_Luc_${today}.csv đã được tải xuống (${res.items.length} bản ghi).`);
     } catch (err: any) {
-      alert('Không thể xuất báo cáo: ' + err.message);
+      alert('Không thể xuất báo cáo: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -221,9 +366,9 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
     setLoading(true);
     try {
       const [recRes, classRes, childRes] = await Promise.all([
-        growthApi.getRecords({ limit: 50 }),
+        growthApi.getRecords({ limit: 500 }),
         apiClient.get('/classes').catch(() => ({ data: [] })),
-        apiClient.get('/children?limit=100').catch(() => ({ data: [] })),
+        apiClient.get('/children?limit=200').catch(() => ({ data: [] })),
       ]);
 
       setRecords(recRes.items || []);
@@ -262,7 +407,18 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
   const handleCreateRecord = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.childId) {
-      alert('Vui lòng chọn học sinh');
+      alert('Vui lòng chọn học sinh.');
+      return;
+    }
+    const weight = Number(formData.weightKg);
+    const height = Number(formData.heightCm);
+
+    if (isNaN(weight) || weight < 3 || weight > 60) {
+      alert('Cân nặng phải trong giới hạn từ 3.0 kg đến 60.0 kg.');
+      return;
+    }
+    if (isNaN(height) || height < 40 || height > 150) {
+      alert('Chiều cao phải trong giới hạn từ 40.0 cm đến 150.0 cm.');
       return;
     }
 
@@ -270,6 +426,13 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
     try {
       await growthApi.createRecord(formData);
       setIsModalOpen(false);
+      setFormData({
+        childId: '',
+        measurementDate: new Date().toISOString().split('T')[0],
+        weightKg: '' as any,
+        heightCm: '' as any,
+        healthNotes: '',
+      });
       fetchData();
       if (formData.childId === selectedChildId) {
         const hist = await growthApi.getChildHistory(formData.childId);
@@ -364,20 +527,35 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
     setExpandedClasses(next);
   };
 
-  // Calculate summary stats
-  const totalEvaluated = records.length;
-  const normalCount = records.filter(
+  // Calculate summary stats for whole school or selected class (UC-74)
+  const summaryRecords = useMemo(() => {
+    if (selectedClass === 'ALL') return records;
+    return records.filter((r) => {
+      const clsId = (r.child as any)?.classId || r.child?.class?.id;
+      const clsName = r.child?.class?.name;
+      return String(clsId) === String(selectedClass) || clsName === selectedClass;
+    });
+  }, [records, selectedClass]);
+
+  const selectedClassName = useMemo(() => {
+    if (selectedClass === 'ALL') return 'Toàn trường';
+    const c = classes.find((item) => String(item.id) === String(selectedClass));
+    return c ? c.name : 'Lớp đã chọn';
+  }, [selectedClass, classes]);
+
+  const totalEvaluated = summaryRecords.length;
+  const normalCount = summaryRecords.filter(
     (r) =>
       r.overallNutritionalStatus === 'NORMAL' ||
       r.overallNutritionalStatus === 'BINH_THUONG' ||
       r.overallNutritionalStatus?.toLowerCase().includes('bình thường')
   ).length;
-  const stuntedCount = records.filter(
+  const stuntedCount = summaryRecords.filter(
     (r) =>
       r.heightClassification?.includes('STUNTED') ||
       r.heightClassification?.toLowerCase().includes('thấp còi')
   ).length;
-  const overweightCount = records.filter(
+  const overweightCount = summaryRecords.filter(
     (r) =>
       r.bmiClassification?.includes('OVERWEIGHT') ||
       r.bmiClassification === 'OBESE' ||
@@ -385,230 +563,9 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
       r.bmiClassification?.toLowerCase().includes('béo phì')
   ).length;
 
-  // Generate continuous WHO Growth Curve Reference (24 to 60 months)
-  const isFemale = selectedChildInfo?.gender === 'FEMALE';
-  const referenceAges = [24, 30, 36, 42, 48, 54, 60];
-  const childAges = childHistory.map((h) => h.ageInMonths);
-  const allMonths = Array.from(new Set([...referenceAges, ...childAges])).sort((a, b) => a - b);
-
-  // Max measured values for dynamic Y-axis scaling
-  const maxWeightMeasured = Math.max(0, ...childHistory.map((h) => Number(h.weightKg) || 0));
-  const maxHeightMeasured = Math.max(0, ...childHistory.map((h) => Number(h.heightCm) || 0));
-  const maxBmiMeasured = Math.max(0, ...childHistory.map((h) => Number(h.bmi) || 0));
-
-  const chartData = allMonths.map((m) => {
-    // 1. Weight (kg) - WHO WAZ
-    const medianWeight = isFemale
-      ? Number((11.5 + (m - 24) * ((17.7 - 11.5) / 36)).toFixed(1))
-      : Number((12.2 + (m - 24) * ((18.3 - 12.2) / 36)).toFixed(1));
-    const plus2SdWeight = isFemale
-      ? Number((14.2 + (m - 24) * ((23.0 - 14.2) / 36)).toFixed(1))
-      : Number((14.8 + (m - 24) * ((23.2 - 14.8) / 36)).toFixed(1));
-    const minus2SdWeight = isFemale
-      ? Number((9.4 + (m - 24) * ((13.5 - 9.4) / 36)).toFixed(1))
-      : Number((10.1 + (m - 24) * ((13.9 - 10.1) / 36)).toFixed(1));
-
-    // 2. Height (cm) - WHO HAZ
-    const medianHeight = isFemale
-      ? Number((86.4 + (m - 24) * ((109.4 - 86.4) / 36)).toFixed(1))
-      : Number((87.8 + (m - 24) * ((110.0 - 87.8) / 36)).toFixed(1));
-    const plus2SdHeight = isFemale
-      ? Number((93.5 + (m - 24) * ((118.8 - 93.5) / 36)).toFixed(1))
-      : Number((94.8 + (m - 24) * ((119.0 - 94.8) / 36)).toFixed(1));
-    const minus2SdHeight = isFemale
-      ? Number((79.3 + (m - 24) * ((100.1 - 79.3) / 36)).toFixed(1))
-      : Number((80.8 + (m - 24) * ((101.0 - 80.8) / 36)).toFixed(1));
-
-    // 3. BMI (kg/m²) - WHO BAZ
-    const medianBmi = isFemale
-      ? Number((15.7 - (m - 24) * ((15.7 - 15.0) / 36)).toFixed(1))
-      : Number((16.0 - (m - 24) * ((16.0 - 15.2) / 36)).toFixed(1));
-    const plus2SdBmi = isFemale
-      ? Number((18.2 - (m - 24) * ((18.2 - 18.0) / 36)).toFixed(1))
-      : Number((18.2 - (m - 24) * ((18.2 - 18.0) / 36)).toFixed(1));
-    const plus3SdBmi = isFemale
-      ? Number((19.8 - (m - 24) * ((19.8 - 19.7) / 36)).toFixed(1))
-      : Number((19.8 - (m - 24) * ((19.8 - 19.6) / 36)).toFixed(1));
-    const minus2SdBmi = isFemale
-      ? Number((13.7 - (m - 24) * ((13.7 - 13.0) / 36)).toFixed(1))
-      : Number((14.0 - (m - 24) * ((14.0 - 13.2) / 36)).toFixed(1));
-
-    const measuredRecord = childHistory.find((h) => h.ageInMonths === m);
-
-    return {
-      month: `${m} thg`,
-      ageMonth: m,
-      medianWeight,
-      plus2SdWeight,
-      minus2SdWeight,
-      actualWeight: measuredRecord ? Number(measuredRecord.weightKg) : null,
-      medianHeight,
-      plus2SdHeight,
-      minus2SdHeight,
-      actualHeight: measuredRecord ? Number(measuredRecord.heightCm) : null,
-      medianBmi,
-      plus2SdBmi,
-      plus3SdBmi,
-      minus2SdBmi,
-      actualBmi: measuredRecord ? Number(measuredRecord.bmi) : null,
-    };
-  });
-
-  // Custom Tooltip luôn hiển thị dòng số liệu học sinh rõ ràng ở vị trí đầu tiên
-  const CustomGrowthTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null;
-
-    const currentData = chartData.find((d) => d.month === label);
-    const ageMonth = currentData?.ageMonth || parseInt(String(label).replace(/[^\d]/g, ''), 10);
-
-    const recordAtMonth = childHistory.find((h) => h.ageInMonths === ageMonth);
-    const latestRecord = childHistory.length > 0 ? childHistory[childHistory.length - 1] : null;
-
-    const unit = chartMetric === 'BMI' ? ' kg/m²' : chartMetric === 'WEIGHT' ? ' kg' : ' cm';
-    const metricTitle =
-      chartMetric === 'BMI' ? 'Chỉ số BMI' : chartMetric === 'WEIGHT' ? 'Cân nặng' : 'Chiều cao';
-
-    let actualVal: number | null = null;
-    if (recordAtMonth) {
-      actualVal =
-        chartMetric === 'BMI'
-          ? Number(recordAtMonth.bmi)
-          : chartMetric === 'WEIGHT'
-          ? Number(recordAtMonth.weightKg)
-          : Number(recordAtMonth.heightCm);
-    }
-
-    let latestVal: number | null = null;
-    if (latestRecord) {
-      latestVal =
-        chartMetric === 'BMI'
-          ? Number(latestRecord.bmi)
-          : chartMetric === 'WEIGHT'
-          ? Number(latestRecord.weightKg)
-          : Number(latestRecord.heightCm);
-    }
-
-    const medianVal =
-      chartMetric === 'BMI'
-        ? currentData?.medianBmi
-        : chartMetric === 'WEIGHT'
-        ? currentData?.medianWeight
-        : currentData?.medianHeight;
-
-    const diffFromMedian =
-      actualVal != null && medianVal != null ? (actualVal - medianVal).toFixed(1) : null;
-
-    return (
-      <div className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-slate-200 text-xs min-w-[270px] max-w-xs space-y-2.5">
-        <div className="border-b border-slate-100 pb-1.5 flex items-center justify-between">
-          <span className="font-extrabold text-slate-900 text-sm">📅 Mốc: {label}</span>
-          <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
-            Chuẩn WHO 2006
-          </span>
-        </div>
-
-        {/* ─── DÒNG SỐ LIỆU HỌC SINH (LUÔN LUÔN HIỂN THỊ ĐẦU TIÊN) ─── */}
-        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl p-2.5 shadow-xs">
-          <div className="flex items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5 font-bold text-teal-950 truncate">
-              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shrink-0" />
-              <span className="truncate">Bé: {selectedChildInfo?.fullName || 'Học sinh'}</span>
-            </div>
-            {recordAtMonth && (
-              <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                  recordAtMonth.overallNutritionalStatus?.includes('OBESE') ||
-                  recordAtMonth.bmiClassification === 'OBESE' ||
-                  recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('béo phì')
-                    ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                    : recordAtMonth.overallNutritionalStatus?.includes('OVERWEIGHT') ||
-                      recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('thừa cân')
-                    ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                    : recordAtMonth.overallNutritionalStatus?.includes('STUNTED') ||
-                      recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('thấp còi') ||
-                      recordAtMonth.overallNutritionalStatus?.includes('WASTED')
-                    ? 'bg-orange-100 text-orange-700 border border-orange-200'
-                    : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                }`}
-              >
-                {recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('béo phì') ||
-                recordAtMonth.bmiClassification === 'OBESE'
-                  ? 'Béo phì'
-                  : recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('thừa cân')
-                  ? 'Thừa cân'
-                  : recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('thấp còi')
-                  ? 'Thấp còi'
-                  : 'Bình thường'}
-              </span>
-            )}
-          </div>
-
-          {recordAtMonth ? (
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <div>
-                <span className="text-[11px] text-teal-700 font-semibold">{metricTitle}: </span>
-                <span className="text-base font-black text-teal-950">
-                  {actualVal}
-                  {unit}
-                </span>
-              </div>
-              {diffFromMedian && (
-                <span
-                  className={`text-[10px] font-bold ${
-                    Number(diffFromMedian) > 0 ? 'text-amber-700' : 'text-slate-600'
-                  }`}
-                >
-                  {Number(diffFromMedian) > 0 ? `+${diffFromMedian}` : diffFromMedian}
-                  {unit} vs Median
-                </span>
-              )}
-            </div>
-          ) : (
-            <div className="mt-1 space-y-0.5 text-slate-500">
-              <div className="text-[11px] font-semibold text-amber-700 flex items-center gap-1">
-                <span>⚠️ Chưa ghi nhận lần đo tại mốc {label}</span>
-              </div>
-              {latestRecord && (
-                <div className="text-[10px] text-slate-600">
-                  Lần đo gần nhất:{' '}
-                  <strong className="text-teal-900 font-bold">
-                    {latestVal}
-                    {unit}
-                  </strong>{' '}
-                  (lúc {latestRecord.ageInMonths} thg • {new Date(latestRecord.measurementDate).toLocaleDateString('vi-VN')})
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ─── CÁC ĐƯỜNG CHUẨN WHO THEO TUỔI ─── */}
-        <div className="space-y-1.5 pt-0.5 text-[11px]">
-          <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-            Các ngưỡng quy chuẩn WHO:
-          </div>
-          {payload.map((entry: any, index: number) => {
-            if (entry.dataKey.startsWith('actual')) return null;
-            return (
-              <div key={`item-${index}`} className="flex items-center justify-between text-slate-600">
-                <div className="flex items-center gap-1.5 truncate">
-                  <span
-                    className="w-2.5 h-1 rounded-full shrink-0"
-                    style={{ backgroundColor: entry.stroke || entry.color }}
-                  />
-                  <span className="truncate">{entry.name}:</span>
-                </div>
-                <span className="font-bold text-slate-800 ml-2 shrink-0">
-                  {entry.value}
-                  {unit}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+  const normalPercent = totalEvaluated > 0 ? Math.round((normalCount / totalEvaluated) * 100) : 0;
+  const stuntedPercent = totalEvaluated > 0 ? Math.round((stuntedCount / totalEvaluated) * 100) : 0;
+  const overweightPercent = totalEvaluated > 0 ? Math.round((overweightCount / totalEvaluated) * 100) : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -630,11 +587,12 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
               onClick={handleExportReport}
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-              title="Xuất file CSV báo cáo thể lực học sinh"
+              disabled={exporting}
+              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              title="Xuất file CSV báo cáo thể lực học sinh (UC-80)"
             >
-              <Download className="w-4 h-4" />
-              <span>Xuất Báo Cáo</span>
+              <Download className={`w-4 h-4 ${exporting ? 'animate-bounce' : ''}`} />
+              <span>{exporting ? 'Đang xuất...' : 'Xuất Báo Cáo'}</span>
             </button>
             <button
               onClick={() => {
@@ -659,197 +617,67 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
         </div>
       </div>
 
-      {/* ─── 2. SUMMARY KPI STATS ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã Đánh Giá</div>
-          <div className="text-2xl font-black text-slate-900">{totalEvaluated} <span className="text-sm font-semibold text-slate-400">lượt</span></div>
-          <div className="text-xs text-slate-400">Dữ liệu cân đo định kỳ</div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-          <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Bình Thường</div>
-          <div className="text-2xl font-black text-emerald-700">
-            {totalEvaluated ? Math.round((normalCount / totalEvaluated) * 100) : 85}%
+      {/* ─── SUCCESS TOAST NOTIFICATION (UC-74) ─── */}
+      {successNotification && (
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-3 rounded-2xl flex items-center justify-between shadow-md animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2.5 text-xs font-bold">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span>{successNotification}</span>
           </div>
-          <div className="text-xs text-emerald-600 font-semibold">{normalCount} học sinh đạt chuẩn WHO</div>
+          <button
+            onClick={() => setSuccessNotification(null)}
+            className="text-emerald-700 hover:text-emerald-950 p-1 rounded-lg hover:bg-emerald-100 transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
+      )}
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-          <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">Thấp Còi (HAZ &lt; -2 SD)</div>
-          <div className="text-2xl font-black text-amber-700">
-            {totalEvaluated ? Math.round((stuntedCount / totalEvaluated) * 100) : 5}%
-          </div>
-          <div className="text-xs text-amber-600 font-semibold">{stuntedCount} trẻ cần can thiệp vi chất</div>
+      {/* ─── 2. SUMMARY KPI STATS (TOÀN TRƯỜNG / THEO LỚP) ─── */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+          <span>Thống kê dinh dưỡng: <strong className="text-teal-800">{selectedClassName}</strong></span>
+          <span className="text-[11px] font-normal text-slate-400">Tự động tính toán lại khi cập nhật số liệu cân đo</span>
         </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-          <div className="text-xs font-bold text-rose-600 uppercase tracking-wider">Thừa Cân / Béo Phì</div>
-          <div className="text-2xl font-black text-rose-700">
-            {totalEvaluated ? Math.round((overweightCount / totalEvaluated) * 100) : 6}%
-          </div>
-          <div className="text-xs text-rose-600 font-semibold">{overweightCount} trẻ cần giảm chất béo/ngọt</div>
-        </div>
-      </div>
-
-      {/* ─── 3. INTERACTIVE WHO GROWTH CHART SECTION ─── */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-          <div>
-            <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-teal-600" />
-              Biểu Đồ Đường Cong Tăng Trưởng WHO Chuẩn Theo Từng Bé
-            </h3>
-            <p className="text-xs text-slate-500">
-              {selectedChildInfo ? (
-                <span>
-                  Học sinh: <strong className="text-slate-800">{selectedChildInfo.fullName}</strong> ({selectedChildInfo.gender === 'FEMALE' ? 'Bé gái 👧' : 'Bé trai 👦'} • {selectedChildInfo.studentCode} • {selectedChildInfo.class?.name || 'Mầm non'})
-                </span>
-              ) : (
-                'Chọn học sinh trong danh sách để xem biểu đồ chi tiết'
-              )}
-            </p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã Đánh Giá ({selectedClassName})</div>
+            <div className="text-2xl font-black text-slate-900">{totalEvaluated} <span className="text-sm font-semibold text-slate-400">lượt</span></div>
+            <div className="text-xs text-slate-400">Dữ liệu cân đo thể lực định kỳ</div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Metric Mode Switcher */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200">
-              <button
-                type="button"
-                onClick={() => setChartMetric('BMI')}
-                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
-                  chartMetric === 'BMI'
-                    ? 'bg-white text-rose-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                📊 Chỉ Số BMI (kg/m²)
-              </button>
-              <button
-                type="button"
-                onClick={() => setChartMetric('WEIGHT')}
-                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
-                  chartMetric === 'WEIGHT'
-                    ? 'bg-white text-teal-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                ⚖️ Cân Nặng (kg)
-              </button>
-              <button
-                type="button"
-                onClick={() => setChartMetric('HEIGHT')}
-                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${
-                  chartMetric === 'HEIGHT'
-                    ? 'bg-white text-sky-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                📏 Chiều Cao (cm)
-              </button>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+            <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Bình Thường</div>
+            <div className="text-2xl font-black text-emerald-700">
+              {normalPercent}%
             </div>
+            <div className="text-xs text-emerald-600 font-semibold">{normalCount} học sinh đạt chuẩn WHO</div>
+          </div>
 
-            {childHistory.length > 0 && (
-              <div className="text-xs font-bold bg-teal-50 text-teal-800 px-3 py-1.5 rounded-2xl border border-teal-200">
-                Lần đo gần nhất: {childHistory[childHistory.length - 1].weightKg} kg • {childHistory[childHistory.length - 1].heightCm} cm • BMI: {childHistory[childHistory.length - 1].bmi}
-              </div>
-            )}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+            <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">Thấp Còi (HAZ &lt; -2 SD)</div>
+            <div className="text-2xl font-black text-amber-700">
+              {stuntedPercent}%
+            </div>
+            <div className="text-xs text-amber-600 font-semibold">{stuntedCount} trẻ cần can thiệp vi chất</div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+            <div className="text-xs font-bold text-rose-600 uppercase tracking-wider">Thừa Cân / Béo Phì</div>
+            <div className="text-2xl font-black text-rose-700">
+              {overweightPercent}%
+            </div>
+            <div className="text-xs text-rose-600 font-semibold">{overweightCount} trẻ cần giảm chất béo/ngọt</div>
           </div>
         </div>
-
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              {chartMetric === 'BMI' && (
-                <YAxis
-                  unit=" kg/m²"
-                  tick={{ fontSize: 12 }}
-                  domain={[11, Math.max(24, Math.ceil(maxBmiMeasured + 3))]}
-                />
-              )}
-              {chartMetric === 'WEIGHT' && (
-                <YAxis
-                  unit=" kg"
-                  tick={{ fontSize: 12 }}
-                  domain={[8, Math.max(26, Math.ceil(maxWeightMeasured + 3))]}
-                />
-              )}
-              {chartMetric === 'HEIGHT' && (
-                <YAxis
-                  unit=" cm"
-                  tick={{ fontSize: 12 }}
-                  domain={[75, Math.max(120, Math.ceil(maxHeightMeasured + 4))]}
-                />
-              )}
-
-              <Tooltip content={<CustomGrowthTooltip />} />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-
-              {/* Đường chuẩn ngang ReferenceLine định vị số liệu học sinh */}
-              {childHistory.length > 0 && (
-                <ReferenceLine
-                  y={
-                    chartMetric === 'BMI'
-                      ? Number(childHistory[childHistory.length - 1].bmi)
-                      : chartMetric === 'WEIGHT'
-                      ? Number(childHistory[childHistory.length - 1].weightKg)
-                      : Number(childHistory[childHistory.length - 1].heightCm)
-                  }
-                  stroke={chartMetric === 'BMI' ? '#e11d48' : chartMetric === 'WEIGHT' ? '#0d9488' : '#0284c7'}
-                  strokeDasharray="4 4"
-                  strokeWidth={2}
-                  label={{
-                    value: `👤 ${selectedChildInfo?.fullName || 'Bé'}: ${
-                      chartMetric === 'BMI'
-                        ? childHistory[childHistory.length - 1].bmi + ' kg/m²'
-                        : chartMetric === 'WEIGHT'
-                        ? childHistory[childHistory.length - 1].weightKg + ' kg'
-                        : childHistory[childHistory.length - 1].heightCm + ' cm'
-                    }`,
-                    fill: chartMetric === 'BMI' ? '#be123c' : chartMetric === 'WEIGHT' ? '#0f766e' : '#0369a1',
-                    fontSize: 11,
-                    fontWeight: 'bold',
-                    position: 'insideTopRight',
-                  }}
-                />
-              )}
-
-              {chartMetric === 'BMI' && (
-                <>
-                  <Line type="monotone" dataKey="plus3SdBmi" name="+3 SD (Béo phì nặng)" stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="plus2SdBmi" name="+2 SD (Nguy cơ thừa cân)" stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="medianBmi" name="Chuẩn Trung vị WHO (Median)" stroke="#10b981" strokeWidth={2.5} dot={false} />
-                  <Line type="monotone" dataKey="minus2SdBmi" name="-2 SD (Nguy cơ gầy còm)" stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="actualBmi" name="Chỉ số BMI thực tế của bé (kg/m²)" stroke="#e11d48" strokeWidth={3.5} dot={{ r: 6, fill: '#e11d48', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
-                </>
-              )}
-
-              {chartMetric === 'WEIGHT' && (
-                <>
-                  <Line type="monotone" dataKey="plus2SdWeight" name="+2 SD (Nguy cơ thừa cân)" stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="medianWeight" name="Chuẩn Trung vị WHO (Median)" stroke="#10b981" strokeWidth={2.5} dot={false} />
-                  <Line type="monotone" dataKey="minus2SdWeight" name="-2 SD (Nguy cơ nhẹ cân)" stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="actualWeight" name="Cân nặng thực tế của bé (kg)" stroke="#0d9488" strokeWidth={3.5} dot={{ r: 6, fill: '#0d9488', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
-                </>
-              )}
-
-              {chartMetric === 'HEIGHT' && (
-                <>
-                  <Line type="monotone" dataKey="plus2SdHeight" name="+2 SD (Chiều cao vượt trội)" stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="medianHeight" name="Chuẩn Chiều cao WHO (Median)" stroke="#10b981" strokeWidth={2.5} dot={false} />
-                  <Line type="monotone" dataKey="minus2SdHeight" name="-2 SD (Nguy cơ thấp còi)" stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                  <Line type="monotone" dataKey="actualHeight" name="Chiều cao thực tế của bé (cm)" stroke="#0284c7" strokeWidth={3.5} dot={{ r: 6, fill: '#0284c7', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
-                </>
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
       </div>
+
+      {/* ─── 3. INTERACTIVE WHO GROWTH CHART SECTION (UC-78) ─── */}
+      <WhoGrowthChart
+        child={selectedChildInfo}
+        history={childHistory}
+        onEditRecord={handleOpenEdit}
+      />
 
       {/* ─── 4. SEARCH & FILTER BAR ─── */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -908,15 +736,26 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
             const isExpanded = expandedClasses[group.className] !== false;
             const stuntedInClass = group.items.filter(
               (r) =>
+                Number(r.haz) < -2.0 ||
                 r.heightClassification?.includes('STUNTED') ||
                 r.heightClassification?.toLowerCase().includes('thấp còi')
             ).length;
             const overweightInClass = group.items.filter(
               (r) =>
+                Number(r.baz) > 2.0 ||
+                Number(r.bmi) >= 19 ||
                 r.bmiClassification?.includes('OVERWEIGHT') ||
                 r.bmiClassification === 'OBESE' ||
                 r.bmiClassification?.toLowerCase().includes('thừa cân') ||
                 r.bmiClassification?.toLowerCase().includes('béo phì')
+            ).length;
+            const underweightInClass = group.items.filter(
+              (r) =>
+                Number(r.waz) < -2.0 ||
+                Number(r.baz) < -2.0 ||
+                r.weightClassification?.includes('UNDERWEIGHT') ||
+                r.bmiClassification === 'WASTED' ||
+                r.bmiClassification === 'SEVERELY_WASTED'
             ).length;
 
             return (
@@ -955,17 +794,22 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                         {group.items.length} học sinh
                       </span>
                       {stuntedInClass > 0 && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                           {stuntedInClass} thấp còi
                         </span>
                       )}
                       {overweightInClass > 0 && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
                           {overweightInClass} thừa cân/béo phì
                         </span>
                       )}
-                      {stuntedInClass === 0 && overweightInClass === 0 && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {underweightInClass > 0 && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800 border border-orange-300">
+                          {underweightInClass} nhẹ cân/gầy còm
+                        </span>
+                      )}
+                      {stuntedInClass === 0 && overweightInClass === 0 && underweightInClass === 0 && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300">
                           100% chuẩn thể lực
                         </span>
                       )}
@@ -1019,18 +863,69 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {group.items.map((r) => {
-                          const isNormal =
-                            r.overallNutritionalStatus === 'NORMAL' ||
-                            r.overallNutritionalStatus === 'BINH_THUONG' ||
-                            r.overallNutritionalStatus?.toLowerCase().includes('bình thường');
-                          const isStunted =
-                            r.heightClassification?.includes('STUNTED') ||
-                            r.heightClassification?.toLowerCase().includes('thấp còi');
-                          const isOverweight =
-                            r.bmiClassification?.includes('OVERWEIGHT') ||
-                            r.bmiClassification === 'OBESE' ||
-                            r.bmiClassification?.toLowerCase().includes('thừa cân') ||
-                            r.bmiClassification?.toLowerCase().includes('béo phì');
+                          const wVal = Number(r.waz);
+                          const hVal = Number(r.haz);
+                          const bVal = Number(r.baz);
+                          const bmiVal = Number(r.bmi);
+
+                          const wClass =
+                            wVal < -3.0
+                              ? 'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                              : wVal < -2.0
+                              ? 'bg-orange-100 text-orange-800 border-orange-300 font-bold'
+                              : wVal > 3.0
+                              ? 'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                              : wVal > 2.0
+                              ? 'bg-amber-100 text-amber-800 border-amber-300 font-bold'
+                              : 'bg-slate-100 text-slate-700 border-slate-200';
+
+                          const hClass =
+                            hVal < -3.0
+                              ? 'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                              : hVal < -2.0
+                              ? 'bg-amber-100 text-amber-800 border-amber-300 font-bold'
+                              : 'bg-slate-100 text-slate-700 border-slate-200';
+
+                          const bClass =
+                            bVal > 3.0 || bmiVal >= 25
+                              ? 'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                              : bVal > 2.0 || bmiVal >= 19
+                              ? 'bg-amber-100 text-amber-800 border-amber-300 font-bold'
+                              : bVal < -3.0
+                              ? 'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                              : bVal < -2.0
+                              ? 'bg-orange-100 text-orange-800 border-orange-300 font-bold'
+                              : 'bg-slate-100 text-slate-700 border-slate-200';
+
+                          const st = (r.overallNutritionalStatus || '').toUpperCase();
+                          let statusLabel = 'Bình thường';
+                          let statusColor = 'bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold';
+
+                          if (st === 'OBESE' || st.includes('BÉO PHÌ') || r.bmiClassification === 'OBESE') {
+                            statusLabel = 'Béo phì';
+                            statusColor = 'bg-rose-100 text-rose-800 border border-rose-300 font-black';
+                          } else if (st === 'OVERWEIGHT' || st.includes('THỪA CÂN') || r.bmiClassification === 'OVERWEIGHT') {
+                            statusLabel = 'Thừa cân';
+                            statusColor = 'bg-amber-100 text-amber-800 border border-amber-300 font-bold';
+                          } else if (st === 'SEVERELY_STUNTED' || st.includes('THẤP CÒI NẶNG') || r.heightClassification === 'SEVERELY_STUNTED') {
+                            statusLabel = 'Thấp còi nặng';
+                            statusColor = 'bg-rose-100 text-rose-800 border border-rose-300 font-black';
+                          } else if (st === 'STUNTED' || st.includes('THẤP CÒI') || r.heightClassification === 'STUNTED') {
+                            statusLabel = 'Thấp còi';
+                            statusColor = 'bg-amber-100 text-amber-800 border border-amber-300 font-bold';
+                          } else if (st === 'SEVERELY_WASTED' || st.includes('GẦY CÒM NẶNG') || r.bmiClassification === 'SEVERELY_WASTED') {
+                            statusLabel = 'Gầy còm nặng';
+                            statusColor = 'bg-rose-100 text-rose-800 border border-rose-300 font-black';
+                          } else if (st === 'WASTED' || st.includes('GẦY CÒM') || r.bmiClassification === 'WASTED') {
+                            statusLabel = 'Gầy còm';
+                            statusColor = 'bg-orange-100 text-orange-800 border border-orange-300 font-bold';
+                          } else if (st === 'SEVERELY_UNDERWEIGHT' || st.includes('NHẸ CÂN NẶNG') || r.weightClassification === 'SEVERELY_UNDERWEIGHT') {
+                            statusLabel = 'Nhẹ cân nặng';
+                            statusColor = 'bg-rose-100 text-rose-800 border border-rose-300 font-black';
+                          } else if (st === 'UNDERWEIGHT' || st.includes('NHẸ CÂN') || r.weightClassification === 'UNDERWEIGHT') {
+                            statusLabel = 'Nhẹ cân';
+                            statusColor = 'bg-orange-100 text-orange-800 border border-orange-300 font-bold';
+                          }
 
                           return (
                             <tr
@@ -1055,60 +950,45 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                               <td className="py-3.5 px-3 font-semibold text-slate-700">{r.bmi}</td>
                               <td className="py-3.5 px-3">
                                 <div className="flex items-center gap-1.5 font-mono text-[11px]">
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold" title="Cân nặng theo tuổi (WAZ)">
+                                  <span className={`px-1.5 py-0.5 rounded border ${wClass}`} title="Cân nặng theo tuổi (WAZ)">
                                     W: {r.waz > 0 ? `+${r.waz}` : r.waz}
                                   </span>
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold" title="Chiều cao theo tuổi (HAZ)">
+                                  <span className={`px-1.5 py-0.5 rounded border ${hClass}`} title="Chiều cao theo tuổi (HAZ)">
                                     H: {r.haz > 0 ? `+${r.haz}` : r.haz}
                                   </span>
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold" title="BMI theo tuổi (BAZ)">
+                                  <span className={`px-1.5 py-0.5 rounded border ${bClass}`} title="BMI theo tuổi (BAZ)">
                                     B: {r.baz > 0 ? `+${r.baz}` : r.baz}
                                   </span>
                                 </div>
                               </td>
                               <td className="py-3.5 px-3">
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                                    isNormal
-                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                      : isStunted
-                                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                      : isOverweight
-                                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                      : 'bg-slate-100 text-slate-700'
-                                  }`}
-                                >
-                                  {isNormal
-                                    ? 'Bình thường'
-                                    : isStunted
-                                    ? 'Thấp còi'
-                                    : isOverweight
-                                    ? (r.bmiClassification === 'OBESE' ? 'Béo phì' : 'Thừa cân')
-                                    : r.overallNutritionalStatus}
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] ${statusColor}`}>
+                                  {statusLabel}
                                 </span>
                               </td>
                               <td className="py-3.5 px-4 text-right">
                                 <div className="flex items-center justify-end gap-1.5">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleOpenEdit(r);
-                                    }}
-                                    title="Sửa số liệu đo"
-                                    className="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition"
-                                  >
-                                    <Edit3 className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteRecord(r.id, r.child?.fullName || 'học sinh');
-                                    }}
-                                    title="Xóa bản ghi sai sót"
-                                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenEdit(r);
+                                      }}
+                                      title="Sửa số liệu đo (UC-74)"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg border border-teal-200 transition shadow-2xs"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5 text-teal-600" />
+                                      <span>Sửa số liệu đo</span>
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteRecord(r.id, r.child?.fullName || 'học sinh');
+                                      }}
+                                      title="Xóa bản ghi sai sót"
+                                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -1219,14 +1099,45 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                 </div>
               </div>
 
-              {/* Real-time BMI preview */}
-              <div className="p-3 rounded-2xl bg-teal-50 border border-teal-200/60 text-xs flex items-center justify-between">
-                <span className="font-semibold text-teal-900">Chỉ số BMI dự tính:</span>
-                <span className="font-black text-teal-800 text-sm">
-                  {formData.heightCm > 0
-                    ? (formData.weightKg / ((formData.heightCm / 100) * (formData.heightCm / 100))).toFixed(2)
-                    : 0}{' '}
-                  kg/m²
+              {/* Real-time BMI preview with dynamic alert styling (UC-79) */}
+              {(() => {
+                const createBmiStatus = getBmiStatusInfo(previewBmi);
+                return (
+                  <div className={`p-3.5 rounded-2xl border transition-all duration-300 space-y-2 ${createBmiStatus.containerStyle}`}>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Xem trước BMI tức thời:</span>
+                      </div>
+                      <span className="font-mono font-black text-sm">
+                        {previewBmi > 0 ? `${previewBmi} kg/m²` : '--'}
+                      </span>
+                    </div>
+                    {previewBmi > 0 && (
+                      <>
+                        <div className="flex items-center justify-between pt-1 border-t border-current/10 text-[11px]">
+                          <span>Thể trạng ước tính:</span>
+                          <span className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${createBmiStatus.color}`}>
+                            {createBmiStatus.label}
+                          </span>
+                        </div>
+                        <div className="text-[11px] font-semibold pt-1 border-t border-current/10 flex items-center gap-1.5">
+                          <span>{createBmiStatus.alertMessage}</span>
+                        </div>
+                      </>
+                    )}
+                    <div className="text-[10px] opacity-75 italic text-right">
+                      Công thức WHO: BMI = weightKg / ((heightCm / 100)²)
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Upsert duplicate prevention note */}
+              <div className="px-3 py-2 rounded-xl bg-blue-50/90 border border-blue-200/70 text-[11px] text-blue-900 flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <span className="leading-snug">
+                  <strong>Cơ chế chống trùng lặp (Upsert):</strong> Nếu học sinh đã có bản ghi trong ngày này, hệ thống sẽ tự động cập nhật số đo mới và tính lại Z-score thay vì tạo bản ghi trùng.
                 </span>
               </div>
 
@@ -1262,110 +1173,216 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
         </div>
       )}
 
-      {/* ─── 7. EDIT RECORD MODAL ─── */}
-      {editingRecord && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-teal-50 text-teal-600">
-                  <Edit3 className="w-5 h-5" />
+      {/* ─── 7. EDIT RECORD MODAL (UC-74: Cập Nhật Chỉ Số Chiều Cao & Cân Nặng) ─── */}
+      {editingRecord && (() => {
+        const bmiStatus = getBmiStatusInfo(previewEditBmi);
+        const prevBmi = Number(editingRecord.bmi) || 0;
+        const diffBmi = previewEditBmi > 0 && prevBmi > 0 ? Number((previewEditBmi - prevBmi).toFixed(2)) : 0;
+
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 border border-slate-100 max-h-[90vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white flex items-center justify-center shadow-md">
+                    <Edit3 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        UC-74
+                      </span>
+                      <h3 className="font-black text-slate-900 text-sm">Cập Nhật Chỉ Số Chiều Cao & Cân Nặng</h3>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Chỉnh sửa số liệu đo khi có sai sót & tự động tính toán lại BMI, Z-score (WHO)
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 text-sm">Chỉnh Sửa Chỉ Số Thể Lực</h3>
-                  <p className="text-[11px] text-slate-400">
-                    {editingRecord.child?.fullName} ({editingRecord.child?.studentCode})
-                  </p>
-                </div>
-              </div>
-              <button onClick={() => setEditingRecord(null)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateRecord} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">Ngày Đo *</label>
-                <input
-                  type="date"
-                  required
-                  value={editFormData.measurementDate}
-                  onChange={(e) => setEditFormData({ ...editFormData, measurementDate: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1">Cân Nặng (kg) *</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="3"
-                    max="60"
-                    required
-                    value={editFormData.weightKg || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, weightKg: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1">Chiều Cao (cm) *</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="40"
-                    max="150"
-                    required
-                    value={editFormData.heightCm || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, heightCm: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-bold"
-                  />
-                </div>
-              </div>
-
-              {/* BMI preview */}
-              <div className="p-3 rounded-2xl bg-teal-50 border border-teal-200/60 text-xs flex items-center justify-between">
-                <span className="font-semibold text-teal-900">BMI mới ước tính:</span>
-                <span className="font-black text-teal-800 text-sm">
-                  {editFormData.heightCm > 0
-                    ? (editFormData.weightKg / ((editFormData.heightCm / 100) * (editFormData.heightCm / 100))).toFixed(2)
-                    : 0}{' '}
-                  kg/m²
-                </span>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">Ghi Chú Sức Khỏe</label>
-                <textarea
-                  rows={2}
-                  value={editFormData.healthNotes}
-                  onChange={(e) => setEditFormData({ ...editFormData, healthNotes: e.target.value })}
-                  placeholder="Ghi chú điều chỉnh..."
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                ></textarea>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setEditingRecord(null)}
-                  className="px-4 py-2 font-bold rounded-xl text-slate-600 hover:bg-slate-100 transition"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                  title="Đóng modal"
                 >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 font-bold rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-md transition disabled:opacity-50"
-                >
-                  {submitting ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              {/* Thông tin học sinh cố định (Không cho phép đổi học sinh theo yêu cầu UC-74) */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Học sinh bản ghi đang sửa
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full shadow-2xs">
+                    <Lock className="w-3 h-3 text-slate-400" /> Cố định trên tiêu đề
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-extrabold text-slate-900 text-sm">
+                      {editingRecord.child?.fullName || 'Học sinh'}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-mono">
+                      Mã: {editingRecord.child?.studentCode} • {editingRecord.child?.class?.name || (editingRecord as any).childClassName || 'Lớp mầm non'}
+                    </p>
+                  </div>
+                  <div className="text-right text-[11px]">
+                    <span className="font-bold text-slate-700">
+                      {editingRecord.child?.gender === 'FEMALE' ? '👧 Bé gái' : '👦 Bé trai'}
+                    </span>
+                    {editingRecord.child?.dateOfBirth && (
+                      <div className="text-[10px] text-slate-400">
+                        Sinh: {new Date(editingRecord.child.dateOfBirth).toLocaleDateString('vi-VN')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[10px] text-amber-700/90 italic">
+                  * Ghi chú nghiệp vụ: Thông tin học sinh được cố định, không được phép thay đổi sang học sinh khác.
+                </p>
+              </div>
+
+              <form onSubmit={handleUpdateRecord} className="space-y-4 text-xs">
+                {/* Ngày đo */}
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    Ngày Đo Mới * <span className="text-[11px] font-normal text-slate-400">(YYYY-MM-DD)</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={editFormData.measurementDate}
+                    onChange={(e) => setEditFormData({ ...editFormData, measurementDate: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 bg-white font-medium"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Thay đổi ngày đo sẽ làm thay đổi số tháng tuổi (ageInMonths) tại thời điểm đo để tra cứu chuẩn WHO.
+                  </p>
+                </div>
+
+                {/* Cân nặng & Chiều cao */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Cân Nặng Mới (kg) *</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="3"
+                      max="60"
+                      required
+                      placeholder="Ví dụ: 15.5"
+                      value={editFormData.weightKg || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, weightKg: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-black text-slate-900"
+                    />
+                    <span className="text-[10px] text-slate-400">Giới hạn: 3.0 - 60.0 kg</span>
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Chiều Cao Mới (cm) *</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="40"
+                      max="150"
+                      required
+                      placeholder="Ví dụ: 102.0"
+                      value={editFormData.heightCm || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, heightCm: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-black text-slate-900"
+                    />
+                    <span className="text-[10px] text-slate-400">Giới hạn: 40.0 - 150.0 cm</span>
+                  </div>
+                </div>
+
+                {/* Xem trước BMI mới ước tính theo thời gian thực (UC-79) */}
+                <div className={`p-3.5 rounded-2xl border transition-all duration-300 shadow-xs space-y-2 ${bmiStatus.containerStyle}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      BMI Mới Ước Tính (Thời gian thực):
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${bmiStatus.color}`}>
+                      {bmiStatus.label}
+                    </span>
+                  </div>
+
+                  <div className="flex items-baseline justify-between pt-1">
+                    <div>
+                      <span className="text-2xl font-black">{previewEditBmi}</span>
+                      <span className="text-xs font-bold ml-1">kg/m²</span>
+                    </div>
+                    <div className="text-right text-[11px] text-slate-600">
+                      <span>BMI cũ: <strong className="font-mono">{editingRecord.bmi}</strong></span>
+                      {diffBmi !== 0 && (
+                        <span className={`ml-1.5 font-bold ${diffBmi > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                          ({diffBmi > 0 ? `+${diffBmi}` : diffBmi})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {previewEditBmi > 0 && (
+                    <div className="text-[11px] font-semibold py-1.5 px-3 rounded-xl bg-white/70 border border-current/10">
+                      {bmiStatus.alertMessage}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-current/10 text-[11px] opacity-80">
+                    <div>
+                      <span>Chiều cao: </span>
+                      <span className="line-through mr-1">{editingRecord.heightCm}</span>
+                      <strong className="font-bold">{editFormData.heightCm || 0} cm</strong>
+                    </div>
+                    <div>
+                      <span>Cân nặng: </span>
+                      <span className="line-through mr-1">{editingRecord.weightKg}</span>
+                      <strong className="font-bold">{editFormData.weightKg || 0} kg</strong>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] opacity-75 leading-tight">
+                    ⚡ Hệ thống sẽ tự động gọi WhoZscoreService để tính toán lại toàn bộ chỉ số Z-Score (WAZ, HAZ, BAZ) và phân loại dinh dưỡng ngay khi lưu.
+                  </p>
+                </div>
+
+                {/* Ghi chú điều chỉnh */}
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Ghi Chú Điều Chỉnh (healthNotes)</label>
+                  <textarea
+                    rows={2}
+                    value={editFormData.healthNotes}
+                    onChange={(e) => setEditFormData({ ...editFormData, healthNotes: e.target.value })}
+                    placeholder="Lý do điều chỉnh (sai sót nhập liệu, kiểm tra lại thước đo, tái cân...)"
+                    className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                  ></textarea>
+                </div>
+
+                {/* Modal Footer Actions */}
+                <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setEditingRecord(null)}
+                    className="px-4 py-2 font-bold rounded-xl text-slate-600 hover:bg-slate-100 transition text-xs"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-5 py-2.5 font-bold rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-md transition disabled:opacity-50 text-xs flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{submitting ? 'Đang lưu & tính lại WHO...' : 'Lưu Thay Đổi & Tính Lại WHO'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ─── 8. IMPORT MEASUREMENTS MODAL ─── */}
       {isImportModalOpen && (

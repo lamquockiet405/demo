@@ -73,6 +73,7 @@ export const AdminDashboardLayout: React.FC = () => {
   const navItems = [
     { label: 'Dashboard Tổng quan', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
+    { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
     { label: 'Dịch vụ bán trú', path: '/services', icon: Coffee },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
@@ -83,6 +84,7 @@ export const AdminDashboardLayout: React.FC = () => {
   ];
 
   const getBreadcrumbTitle = () => {
+    if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';

@@ -17,7 +17,9 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CurrentTenant } from '../../../common/decorators/current-tenant.decorator';
 import { GrowthService } from '../services/growth.service';
+import { WhoLmsEntry, WhoStandardsResult } from '../services/who-zscore.service';
 import { CreateGrowthRecordDto } from '../dto/create-growth-record.dto';
+import { UpdateGrowthRecordDto } from '../dto/update-growth-record.dto';
 import { QueryGrowthRecordsDto } from '../dto/query-growth-records.dto';
 
 @ApiTags('Growth & Health Monitoring')
@@ -35,6 +37,16 @@ export class GrowthController {
     @CurrentTenant() schoolId?: number,
   ) {
     return this.growthService.findAll(query, schoolId);
+  }
+
+  @Get('standards')
+  @ApiOperation({ summary: 'Lấy bộ tham số đường chuẩn WHO 2006 (LMS)' })
+  @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER', 'PARENT')
+  async getStandards(
+    @Query('gender') gender?: 'MALE' | 'FEMALE',
+    @Query('indicator') indicator?: 'WAZ' | 'HAZ' | 'BAZ',
+  ): Promise<WhoStandardsResult> {
+    return this.growthService.getStandards(gender || 'MALE', indicator);
   }
 
   @Get('child/:childId')
@@ -56,17 +68,18 @@ export class GrowthController {
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
   async createRecord(
     @Body() dto: CreateGrowthRecordDto,
-    @CurrentUser('id') userId?: number,
+    @CurrentUser() user?: any,
   ) {
+    const userId = user?.userId ? Number(user.userId) : (user?.id ? Number(user.id) : undefined);
     return this.growthService.createRecord(dto, userId);
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật chỉ số thể chất' })
+  @ApiOperation({ summary: 'Cập nhật chỉ số thể chất (UC-74)' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
   async updateRecord(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: Partial<CreateGrowthRecordDto>,
+    @Body() dto: UpdateGrowthRecordDto,
   ) {
     return this.growthService.updateRecord(id, dto);
   }
@@ -83,15 +96,20 @@ export class GrowthController {
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST')
   async importRecords(
     @Body('items') items: any[],
-    @CurrentUser('id') userId?: number,
+    @CurrentUser() user?: any,
   ) {
+    const userId = user?.userId ? Number(user.userId) : (user?.id ? Number(user.id) : undefined);
     return this.growthService.importRecords(items || [], userId);
   }
 
   @Get('export')
-  @ApiOperation({ summary: 'Xuất báo cáo tăng trưởng' })
+  @ApiOperation({ summary: 'Xuất báo cáo phát triển thể chất (UC-80)' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
-  async exportReport(@Query('classId') classId?: string) {
-    return this.growthService.exportReport(classId);
+  async exportReport(
+    @Query('classId') classId?: string,
+    @CurrentUser() user?: any,
+  ) {
+    const schoolId = user?.tenantId ? Number(user.tenantId) : undefined;
+    return this.growthService.exportReport(classId, schoolId);
   }
 }
