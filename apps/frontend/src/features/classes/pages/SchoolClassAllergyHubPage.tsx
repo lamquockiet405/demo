@@ -126,7 +126,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
     setIsLoading(true);
     try {
 
-      const [classesRes, childrenRes, catalogsRes, staffRes] = await Promise.all([
+      const [classesRes, childrenRes, catalogsRes, headcountRes, staffRes] = await Promise.all([
         classesApi.getClasses({ limit: 50 }).catch((err) => {
           console.error('Lỗi tải danh sách lớp học:', err);
           return [];

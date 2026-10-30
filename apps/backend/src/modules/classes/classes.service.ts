@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { ClassEntity } from './entities/class.entity';
@@ -94,23 +94,13 @@ export class ClassesService {
       ageGroup = name.includes('nhà trẻ') || name.includes('nha tre') ? 'NHA_TRE' : 'MAU_GIAO';
     }
 
-    const schoolYear = dto.schoolYear || dto.academicYear || '2026-2027';
-    let homeroomTeacherId: number | null = null;
-    const rawTeacherId = dto.homeroomTeacherId !== undefined ? dto.homeroomTeacherId : dto.mainTeacherId;
-    if (rawTeacherId && Number(rawTeacherId) > 0) {
-      homeroomTeacherId = Number(rawTeacherId);
-    }
-
-    // Lớp 2 bảo vệ: kiểm tra trùng tên lớp (case-insensitive) trước khi INSERT
-    const existing = await this.classRepo
-      .createQueryBuilder('c')
-      .where('LOWER(c.name) = LOWER(:name)', { name: dto.name.trim() })
-      .getOne();
-    if (existing) {
-      throw new ConflictException(
-        `Tên lớp "${dto.name.trim()}" đã tồn tại. Vui lòng chọn tên khác.`
-      );
-    }
+    const schoolYear = dto.schoolYear || dto.academicYear || '2025-2026';
+    const homeroomTeacherId =
+      dto.homeroomTeacherId !== undefined
+        ? dto.homeroomTeacherId
+        : dto.mainTeacherId
+        ? Number(dto.mainTeacherId)
+        : null;
 
     const cls = this.classRepo.create({
       schoolId: 1,
@@ -120,11 +110,7 @@ export class ClassesService {
       homeroomTeacherId,
       status: dto.status || 'ACTIVE',
     });
-    const saved = await this.classRepo.save(cls);
-    return this.classRepo.findOne({
-      where: { id: saved.id },
-      relations: ['homeroomTeacher'],
-    });
+    return this.classRepo.save(cls);
   }
 
   async update(id: number, dto: UpdateClassDto) {
@@ -142,33 +128,20 @@ export class ClassesService {
     }
 
     const schoolYear = dto.schoolYear || dto.academicYear;
-    if (dto.homeroomTeacherId !== undefined || dto.mainTeacherId !== undefined) {
-      const rawTeacherId = dto.homeroomTeacherId !== undefined ? dto.homeroomTeacherId : dto.mainTeacherId;
-      cls.homeroomTeacherId = rawTeacherId && Number(rawTeacherId) > 0 ? Number(rawTeacherId) : null;
-    }
+    const homeroomTeacherId =
+      dto.homeroomTeacherId !== undefined
+        ? dto.homeroomTeacherId
+        : dto.mainTeacherId
+        ? Number(dto.mainTeacherId)
+        : undefined;
 
-    if (dto.name !== undefined) {
-      const trimmedName = dto.name.trim();
-      const existing = await this.classRepo
-        .createQueryBuilder('c')
-        .where('LOWER(c.name) = LOWER(:name) AND c.id != :id', { name: trimmedName, id })
-        .getOne();
-      if (existing) {
-        throw new ConflictException(
-          `Tên lớp "${trimmedName}" đã tồn tại. Vui lòng chọn tên khác.`
-        );
-      }
-      cls.name = trimmedName;
-    }
+    if (dto.name !== undefined) cls.name = dto.name;
     if (ageGroup !== undefined) cls.ageGroup = ageGroup;
     if (schoolYear !== undefined) cls.schoolYear = schoolYear;
+    if (homeroomTeacherId !== undefined) cls.homeroomTeacherId = homeroomTeacherId;
     if (dto.status !== undefined) cls.status = dto.status;
 
-    const updated = await this.classRepo.save(cls);
-    return this.classRepo.findOne({
-      where: { id: updated.id },
-      relations: ['homeroomTeacher'],
-    });
+    return this.classRepo.save(cls);
   }
 
   async remove(id: number) {

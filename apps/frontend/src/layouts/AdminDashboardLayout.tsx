@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Bell,
   UtensilsCrossed,
+  Scale,
 } from 'lucide-react';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 import { useAuthStore } from '../core/stores/auth.store';

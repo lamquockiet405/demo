@@ -2,7 +2,7 @@ import { IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class SnackRosterQueryDto {
+export class QueryAuditLogsDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -11,30 +11,30 @@ export class SnackRosterQueryDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  gradeLevel?: string;
+  action?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  classId?: string;
+  targetEntity?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  date?: string;
+  startDate?: string;
 
-  @ApiPropertyOptional({ enum: ['PAID', 'PENDING', 'CANCELLED'] })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  paymentStatus?: string;
+  endDate?: string;
 
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiPropertyOptional({ default: 50 })
+  @ApiPropertyOptional({ default: 20 })
   @IsOptional()
   @Type(() => Number)
-  limit?: number = 50;
+  limit?: number = 20;
 }

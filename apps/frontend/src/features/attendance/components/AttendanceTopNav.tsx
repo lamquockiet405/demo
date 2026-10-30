@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { School, Search, Bell, ChevronDown, UtensilsCrossed, User } from 'lucide-react';
 import { useAuthStore } from '../../../core/stores/auth.store';
 import { UserProfileModal } from '../../auth/components/UserProfileModal';
+import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 
 
 interface AttendanceTopNavProps {
@@ -11,6 +12,7 @@ interface AttendanceTopNavProps {
 export const AttendanceTopNav: React.FC<AttendanceTopNavProps> = ({ onSearch }) => {
   const { user } = useAuthStore();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const schoolBranding = useSchoolBranding();
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-6 py-2.5">

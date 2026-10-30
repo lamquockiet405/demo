@@ -51,27 +51,15 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<User> {
     const targetEmail = this.resolveEmail(email);
 
-    let user = await this.userRepository
-      .createQueryBuilder('u')
-      .addSelect('u.passwordHash')
-      .leftJoinAndSelect('u.roles', 'r')
-      .where('LOWER(u.email) = :email', { email: targetEmail })
-      .getOne();
-
-    if (!user) {
-      user = await this.userRepository
-        .createQueryBuilder('u')
-        .addSelect('u.passwordHash')
-        .leftJoinAndSelect('u.roles', 'r')
-        .where('LOWER(u.email) = :rawEmail', { rawEmail: email.trim().toLowerCase() })
-        .getOne();
-    }
+    let user = await this.userRepository.findOne({
+      where: { email: targetEmail },
+      relations: ['roles'],
+    });
 
     // If not found by exact email, try finding by phone or username prefix
     if (!user) {
       user = await this.userRepository
         .createQueryBuilder('u')
-        .addSelect('u.passwordHash')
         .leftJoinAndSelect('u.roles', 'r')
         .where('LOWER(u.email) LIKE :prefix', { prefix: `%${targetEmail.split('@')[0]}%` })
         .orWhere('u.phone = :phone', { phone: email })
@@ -90,7 +78,7 @@ export class AuthService {
     let isMatch = false;
     if (pass === '123456') {
       isMatch = true;
-    } else if (user.passwordHash) {
+    } else {
       isMatch = await bcrypt.compare(pass, user.passwordHash);
     }
 
@@ -101,14 +89,14 @@ export class AuthService {
     return user;
   }
 
-  async login(loginDto: LoginDto, tenantId: any = 1) {
+  async login(loginDto: LoginDto, tenantId: number = 1) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
 
     // Update last login timestamp
     user.lastLoginAt = new Date();
     await this.userRepository.update(user.id, { lastLoginAt: user.lastLoginAt });
 
-    return this.generateAuthResponse(user, user.tenantId || tenantId);
+    return this.generateAuthResponse(user, tenantId);
   }
 
   async quickLogin(dto: QuickLoginDto) {
@@ -122,10 +110,10 @@ export class AuthService {
     };
     const dbRoleCode = roleMapping[targetRoleCode] || targetRoleCode;
 
-    let user = await this.userRepository
+    const user = await this.userRepository
       .createQueryBuilder('u')
       .innerJoinAndSelect('u.roles', 'r')
-      .where('r.code IN (:...codes)', { codes: [targetRoleCode, dbRoleCode] })
+      .where('r.code = :code', { code: dbRoleCode })
       .andWhere("u.status = 'ACTIVE'")
       .getOne();
 
@@ -133,11 +121,11 @@ export class AuthService {
       throw new NotFoundException(`Không tìm thấy tài khoản mẫu cho vai trò: ${targetRoleCode}`);
     }
 
-    const resolvedTenantId = user.tenantId || dto.tenantId || 1;
-    return this.generateAuthResponse(user, resolvedTenantId, targetRoleCode);
+    const tenantId = Number(dto.tenantId) || 1;
+    return this.generateAuthResponse(user, tenantId, targetRoleCode);
   }
 
-  async generateAuthResponse(user: User, tenantId: any = 1, requestedRoleAlias?: string) {
+  async generateAuthResponse(user: User, tenantId: number = 1, requestedRoleAlias?: string) {
     let roles = user.roles?.map((r) => r.code) || [];
 
     // Augment with role alias for frontend route mapping
@@ -150,13 +138,11 @@ export class AuthService {
       roles.push('PRINCIPAL');
     }
 
-    const effectiveTenantId = user.tenantId || tenantId || 1;
-
     const payload = {
       sub: user.id,
       email: user.email,
       roles,
-      tenantId: effectiveTenantId,
+      tenantId,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -177,7 +163,7 @@ export class AuthService {
         phone: user.phone || null,
         avatarUrl: user.avatar || null,
         roles,
-        tenantId: String(effectiveTenantId),
+        tenantId: String(tenantId),
       },
       accessToken,
       refreshToken,
@@ -200,13 +186,13 @@ export class AuthService {
         throw new UnauthorizedException('Người dùng không còn hiệu lực');
       }
 
-      return this.generateAuthResponse(user, user.tenantId || payload.tenantId || 1);
+      return this.generateAuthResponse(user, payload.tenantId || 1);
     } catch {
       throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
     }
   }
 
-  async getMe(userId: any) {
+  async getMe(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
@@ -227,27 +213,22 @@ export class AuthService {
       fullName: user.fullName,
       phone: user.phone || null,
       avatarUrl: user.avatar || null,
-      tenantId: String(user.tenantId || '1'),
-      twoFactorEnabled: Boolean(user.twoFactorEnabled),
+      tenantId: '1',
+      twoFactorEnabled: false,
       lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
       roles,
     };
   }
 
-  async changePassword(userId: any, dto: ChangePasswordDto) {
-    const user = await this.userRepository
-      .createQueryBuilder('u')
-      .addSelect('u.passwordHash')
-      .where('u.id = :userId', { userId })
-      .getOne();
-
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('Người dùng không tồn tại');
     }
 
     const isMatch =
       dto.currentPassword === '123456' ||
-      (user.passwordHash ? await bcrypt.compare(dto.currentPassword, user.passwordHash) : false);
+      (await bcrypt.compare(dto.currentPassword, user.passwordHash));
 
     if (!isMatch) {
       throw new BadRequestException('Mật khẩu hiện tại không chính xác');
@@ -264,33 +245,30 @@ export class AuthService {
   }
 
   async getTenants() {
-    try {
-      const schools = await this.tenantRepository.find();
-      if (schools.length > 0) {
-        return {
-          tenants: schools.map((s) => ({
-            id: String(s.id),
-            code: `SCHOOL_${s.id}`,
-            name: s.name,
+    const schools = await this.tenantRepository.find();
+
+    if (schools.length === 0) {
+      return {
+        tenants: [
+          {
+            id: '1',
+            code: 'MG_HUONGDUONG',
+            name: 'Trường Mẫu Giáo Hướng Dương',
             status: 'ACTIVE',
-            logoUrl: s.logo || null,
-          })),
-        };
-      }
-    } catch {
-      // Fallback if schools table does not exist in multi-tenant UUID schema
+            logoUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80',
+          },
+        ],
+      };
     }
 
     return {
-      tenants: [
-        {
-          id: '1',
-          code: 'MG_HUONGDUONG',
-          name: 'Trường Mẫu Giáo Hướng Dương',
-          status: 'ACTIVE',
-          logoUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80',
-        },
-      ],
+      tenants: schools.map((s) => ({
+        id: String(s.id),
+        code: `SCHOOL_${s.id}`,
+        name: s.name,
+        status: 'ACTIVE',
+        logoUrl: s.logo || null,
+      })),
     };
   }
 }

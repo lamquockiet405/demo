@@ -19,4 +19,4 @@ import { ParentEvaluationsController } from './controllers/parent-evaluations.co
   providers: [ParentEvaluationService],
   exports: [ParentEvaluationService],
 })
-export class ParentEvaluationsModule { }
+export class ParentEvaluationsModule {}
