@@ -121,33 +121,30 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
           <button
             onClick={() => onPeriodChange('week')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              selectedPeriod === 'week'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedPeriod === 'week'
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+              }`}
           >
             Tuần này
           </button>
 
           <button
             onClick={() => onPeriodChange('month')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              selectedPeriod === 'month'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedPeriod === 'month'
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+              }`}
           >
             Tháng 09/2026
           </button>
 
           <button
             onClick={() => onPeriodChange('semester')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              selectedPeriod === 'semester'
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedPeriod === 'semester'
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+              }`}
           >
             Học kỳ I
           </button>
@@ -157,11 +154,10 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
               onPeriodChange('custom');
               onOpenCustomDate?.();
             }}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              selectedPeriod === 'custom'
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedPeriod === 'custom'
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+              }`}
           >
             <CalendarRange className="w-3.5 h-3.5" />
             <span>Tùy chọn ngày</span>

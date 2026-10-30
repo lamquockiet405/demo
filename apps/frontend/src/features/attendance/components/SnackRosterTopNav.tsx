@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, MessageSquare, User, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../../../core/stores/auth.store';
+import { UserProfileModal } from '../../auth/components/UserProfileModal';
 
 interface SnackRosterTopNavProps {
   onSearchChange?: (val: string) => void;
@@ -11,6 +13,8 @@ export const SnackRosterTopNav: React.FC<SnackRosterTopNavProps> = ({
   onSearchChange,
   searchValue = '',
 }) => {
+  const { user } = useAuthStore();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
       {/* Top Header Row */}
@@ -79,21 +83,35 @@ export const SnackRosterTopNav: React.FC<SnackRosterTopNavProps> = ({
           </button>
 
           {/* User Profile */}
-          <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-            <div className="text-right">
+          <button
+            type="button"
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex items-center gap-3 pl-3 border-l border-slate-200 hover:opacity-80 transition cursor-pointer text-left"
+            title="Xem & Cập nhật Hồ sơ cá nhân"
+          >
+            <div className="text-right hidden sm:block">
               <p className="text-xs font-bold text-slate-800 leading-tight">
-                Vũ Ngọc Minh
+                {user?.fullName || 'Vũ Ngọc Minh'}
               </p>
               <span className="inline-block text-[10px] font-semibold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full mt-0.5">
                 Nhân viên cấp dưỡng
               </span>
             </div>
-            <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-slate-100">
-              <User className="w-5 h-5 text-slate-200" />
+            <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-slate-100 overflow-hidden">
+              {(user as any)?.avatar ? (
+                <img src={(user as any).avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-slate-200" />
+              )}
             </div>
-          </div>
+          </button>
         </div>
       </div>
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
 
       {/* Main Navigation Tabs */}
       <div className="border-t border-slate-100 bg-white">
