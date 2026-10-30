@@ -103,9 +103,13 @@ export class GrowthController {
   }
 
   @Get('export')
-  @ApiOperation({ summary: 'Xuất báo cáo tăng trưởng' })
+  @ApiOperation({ summary: 'Xuất báo cáo phát triển thể chất (UC-80)' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
-  async exportReport(@Query('classId') classId?: string) {
-    return this.growthService.exportReport(classId);
+  async exportReport(
+    @Query('classId') classId?: string,
+    @CurrentUser() user?: any,
+  ) {
+    const schoolId = user?.tenantId ? Number(user.tenantId) : undefined;
+    return this.growthService.exportReport(classId, schoolId);
   }
 }

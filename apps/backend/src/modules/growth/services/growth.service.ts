@@ -474,16 +474,101 @@ export class GrowthService {
     };
   }
 
-  async exportReport(classId?: string) {
+  private formatWeightClassification(wc?: string): string {
+    switch (wc) {
+      case 'SEVERELY_UNDERWEIGHT':
+        return 'Nhẹ cân nặng';
+      case 'UNDERWEIGHT':
+        return 'Nhẹ cân';
+      case 'NORMAL':
+        return 'Bình thường';
+      case 'OVERWEIGHT':
+        return 'Thừa cân';
+      case 'SEVERELY_OVERWEIGHT':
+        return 'Thừa cân nặng';
+      default:
+        return wc || 'Bình thường';
+    }
+  }
+
+  private formatOverallNutritionalStatus(st?: string): string {
+    switch (st) {
+      case 'OBESE':
+        return 'Béo phì';
+      case 'OVERWEIGHT':
+        return 'Thừa cân';
+      case 'SEVERELY_STUNTED':
+        return 'Thấp còi nặng';
+      case 'STUNTED':
+        return 'Thấp còi';
+      case 'SEVERELY_WASTED':
+        return 'Gầy còm nặng';
+      case 'WASTED':
+        return 'Gầy còm';
+      case 'SEVERELY_UNDERWEIGHT':
+        return 'Nhẹ cân nặng';
+      case 'UNDERWEIGHT':
+        return 'Nhẹ cân';
+      case 'SEVERELY_OVERWEIGHT':
+        return 'Thừa cân nặng';
+      case 'NORMAL':
+        return 'Bình thường';
+      default:
+        return st || 'Bình thường';
+    }
+  }
+
+  async exportReport(classId?: string, schoolId?: number) {
     const query: QueryGrowthRecordsDto = {
       classId,
       page: 1,
       limit: 1000,
     };
-    const { items, total } = await this.findAll(query);
+    const { items, total } = await this.findAll(query, schoolId);
+
+    const formattedItems = items.map((it: any) => {
+      const studentCode = it.child?.studentCode || it.studentCode || '';
+      const childName = it.child?.fullName || it.childName || '';
+      let gender = it.child?.gender || it.gender || '';
+      if (gender === 'MALE' || gender === 'male') gender = 'Nam';
+      else if (gender === 'FEMALE' || gender === 'female') gender = 'Nữ';
+
+      const className = it.child?.class?.name || it.className || '';
+      const measurementDate = it.measurementDate ? String(it.measurementDate).split('T')[0] : '';
+      const ageInMonths = it.ageInMonths ?? 0;
+      const weightKg = it.weightKg ?? 0;
+      const heightCm = it.heightCm ?? 0;
+
+      const waz = it.waz != null ? Number(it.waz).toFixed(2) : '0.00';
+      const haz = it.haz != null ? Number(it.haz).toFixed(2) : '0.00';
+      const baz = it.baz != null ? Number(it.baz).toFixed(2) : '0.00';
+
+      const weightStatus = this.formatWeightClassification(it.weightClassification);
+      const overallStatus = this.formatOverallNutritionalStatus(it.overallNutritionalStatus);
+      const notes = it.healthNotes || it.notes || '';
+
+      return {
+        ...it,
+        studentCode,
+        childName,
+        gender,
+        className,
+        measurementDate,
+        ageInMonths,
+        weightKg,
+        heightCm,
+        waz,
+        haz,
+        baz,
+        weightStatus,
+        overallStatus,
+        notes,
+      };
+    });
+
     return {
       totalRecords: total,
-      items,
+      items: formattedItems,
     };
   }
 
