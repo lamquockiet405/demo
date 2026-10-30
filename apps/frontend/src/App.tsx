@@ -15,7 +15,8 @@ import { SchoolSettingsPage } from './features/tenant/pages/SchoolSettingsPage';
 import { StaffManagementPage } from './features/staff/pages/StaffManagementPage';
 import { PrincipalMenuApprovalPage } from './features/menus/pages/PrincipalMenuApprovalPage';
 import { MenuPlanningPage } from './features/menus/pages/MenuPlanningPage';
-import { TeacherTabletPage } from './features/attendance/pages/TeacherTabletPage';
+import { AttendancePage } from './features/attendance/AttendancePage';
+import { MealEvaluationPage } from './features/attendance/MealEvaluationPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -188,6 +189,7 @@ export const App: React.FC = () => {
           }
         >
           <Route path="/dashboard" element={<SchoolSettingsPage />} />
+          <Route path="/tenant/settings" element={<SchoolSettingsPage />} />
           <Route path="/settings" element={<SchoolSettingsPage />} />
           <Route path="/classes" element={<SchoolSettingsPage />} />
           <Route path="/staff" element={<StaffManagementPage />} />
@@ -200,6 +202,7 @@ export const App: React.FC = () => {
           <Route path="/children" element={<WeeklyMenuManagementPage />} />
           <Route path="/growth" element={<WeeklyMenuManagementPage />} />
           <Route path="/payments" element={<WeeklyMenuManagementPage />} />
+        </Route>
 
 
         {/* ─── 3. PHÂN HỆ TABLET GIÁO VIÊN ─── */}
@@ -211,8 +214,8 @@ export const App: React.FC = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<TeacherTabletPage />} />
-          <Route path="record" element={<TeacherTabletPage />} />
+          <Route index element={<AttendancePage />} />
+          <Route path="record" element={<MealEvaluationPage />} />
         </Route>
 
         {/* ─── 4. PHÂN HỆ MÀN HÌNH BẾP (KDS) ─── */}

@@ -1,5 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+
 
 export class SealSampleDto {
   @ApiProperty({ example: 'Thịt bò xào đậu cô ve' })

@@ -81,6 +81,7 @@ export const ForgotPasswordPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await forgotPasswordApi({ email: cleanEmail });
+      setOtpValues(['', '', '', '', '', '']);
       setInfoMessage(res.message || 'Mã xác thực OTP đã được gửi đến email của bạn.');
       setStep('OTP');
       setCountdown(60);
@@ -90,7 +91,7 @@ export const ForgotPasswordPage: React.FC = () => {
       }, 150);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Không thể gửi mã xác thực. Vui lòng thử lại.';
-      setError(typeof msg === 'string' ? msg : msg[0]);
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
     }
@@ -150,7 +151,7 @@ export const ForgotPasswordPage: React.FC = () => {
       setStep('NEW_PASSWORD');
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Mã OTP không chính xác hoặc đã hết hạn.';
-      setError(typeof msg === 'string' ? msg : msg[0]);
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
     }
@@ -209,7 +210,7 @@ export const ForgotPasswordPage: React.FC = () => {
       setStep('SUCCESS');
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.';
-      setError(typeof msg === 'string' ? msg : msg[0]);
+      setError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
     }
@@ -222,7 +223,11 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <Link to="/login" className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md">
-              <span className="text-white font-black text-sm leading-none">Kid<br />Meal</span>
+              <span className="text-white font-black text-sm leading-none">
+                Kid
+                <br />
+                Meal
+              </span>
             </div>
             <span className="text-sm font-semibold text-slate-600">Bán trú yêu thương</span>
           </Link>
@@ -316,7 +321,7 @@ export const ForgotPasswordPage: React.FC = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="hieutruong@saomai.edu.vn"
+                      placeholder="hieutruong@huongduong.edu.vn"
                       required
                       autoFocus
                       className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition outline-none"
@@ -353,7 +358,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
             {/* ─── STEP 2: NHẬP OTP ────────────────────────────────────────── */}
             {step === 'OTP' && (
-              <div className="space-y-6">
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
                 <div className="text-center">
                   <span className="inline-block p-3 bg-emerald-50 text-emerald-600 rounded-2xl mb-2">
                     <Shield className="w-7 h-7" />
@@ -410,8 +415,7 @@ export const ForgotPasswordPage: React.FC = () => {
                 </div>
 
                 <button
-                  type="button"
-                  onClick={() => handleVerifyOtp()}
+                  type="submit"
                   disabled={loading || otpValues.join('').length !== 6}
                   className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg shadow-emerald-500/25 transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
@@ -424,7 +428,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     'Xác nhận mã OTP'
                   )}
                 </button>
-              </div>
+              </form>
             )}
 
             {/* ─── STEP 3: MẬT KHẨU MỚI ────────────────────────────────────── */}
@@ -544,7 +548,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/login', { state: { email: email.trim() } })}
                   className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg shadow-emerald-500/25 transition active:scale-[0.98]"
                 >
                   Đăng nhập ngay bây giờ

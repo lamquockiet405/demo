@@ -78,12 +78,18 @@ describe('TenantService (UC07: Configure School Information)', () => {
   });
 
   describe('updateTenantProfile', () => {
-    it('cập nhật thành công địa chỉ, hotline và giấy phép ATTP', async () => {
+    it('cập nhật thành công địa chỉ, hotline, giấy phép ATTP và cấu hình vận hành', async () => {
       const res = await service.updateTenantProfile('a0000000-0000-0000-0000-000000000002', {
         address: '130 Võ Thị Sáu, Quận 3, TP.HCM',
         phone: '02838999888',
         foodSafetyLicense: {
           number: '999/2024/ATTP-Q3',
+        },
+        operationalSettings: {
+          mealTimes: ['BREAKFAST', 'LUNCH'],
+          standardWeeklyCycleLength: 2,
+          foodRetentionHours: 48,
+          whoZscoreAutoCalc: true,
         },
       });
 
@@ -96,7 +102,7 @@ describe('TenantService (UC07: Configure School Information)', () => {
     it('chấp nhận file logo hợp lệ (SVG <= 2MB)', async () => {
       const res = await service.uploadLogo('a0000000-0000-0000-0000-000000000002', {
         fileName: 'new_logo.svg',
-        fileSizeBytes: 145000, // ~145 KB
+        fileSizeBytes: 145000,
         mimeType: 'image/svg+xml',
       });
 
@@ -108,7 +114,7 @@ describe('TenantService (UC07: Configure School Information)', () => {
       await expect(
         service.uploadLogo('a0000000-0000-0000-0000-000000000002', {
           fileName: 'banner_truong_hoc_2024.bmp',
-          fileSizeBytes: 8400000, // 8.4 MB
+          fileSizeBytes: 8400000,
           mimeType: 'image/bmp',
         }),
       ).rejects.toThrow(BadRequestException);
@@ -118,10 +124,19 @@ describe('TenantService (UC07: Configure School Information)', () => {
       await expect(
         service.uploadLogo('a0000000-0000-0000-0000-000000000002', {
           fileName: 'heavy_logo.png',
-          fileSizeBytes: 3 * 1024 * 1024, // 3MB
+          fileSizeBytes: 3 * 1024 * 1024,
           mimeType: 'image/png',
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('syncEducationDb', () => {
+    it('đồng bộ thành công dữ liệu trường với CSDL ngành Bộ GD&ĐT', async () => {
+      const res = await service.syncEducationDb('a0000000-0000-0000-0000-000000000002');
+      expect(res.status).toBe('SYNCHRONIZED');
+      expect(res.syncedAt).toBeDefined();
+      expect(tenantRepo.save).toHaveBeenCalled();
     });
   });
 });

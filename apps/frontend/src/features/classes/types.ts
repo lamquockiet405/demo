@@ -6,7 +6,7 @@ export type GradeLevel =
   | 'KINDERGARTEN_4_5Y'
   | 'KINDERGARTEN_5_6Y';
 
-export type ClassStatus = 'ACTIVE' | 'ARCHIVED';
+export type ClassStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ClassData {
   id: string;

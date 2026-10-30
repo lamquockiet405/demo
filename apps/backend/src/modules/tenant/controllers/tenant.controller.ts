@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CurrentTenant } from '../../../common/decorators/current-tenant.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 
 @ApiTags('Tenant Configuration')
 @Controller('tenant')
@@ -26,14 +27,16 @@ export class TenantController {
 
   /**
    * UC07: Xem thông tin cấu hình trường học
-   * Cho phép Hiệu trưởng, Quản trị viên, Chuyên viên Dinh dưỡng xem
+   * Cho phép tất cả tài khoản đã đăng nhập trong trường xem thông tin trường
    */
   @Get('profile')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST')
   @ApiOperation({ summary: 'UC07 - Xem thông tin cấu hình trường mầm non & pháp lý ATTP' })
   @ApiResponse({ status: 200, description: 'Lấy thông tin cấu hình trường học thành công' })
-  async getProfile(@CurrentTenant() tenantId: string) {
-    return this.tenantService.getTenantProfile(tenantId);
+  async getProfile(
+    @CurrentTenant() tenantId: string,
+    @CurrentUser() user?: any,
+  ) {
+    return this.tenantService.getTenantProfile(tenantId, user);
   }
 
   /**
@@ -41,14 +44,15 @@ export class TenantController {
    * Chỉ Hiệu trưởng / Ban Giám Hiệu và SuperAdmin được phép chỉnh sửa
    */
   @Patch('profile')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
   @ApiOperation({ summary: 'UC07 - Cập nhật thông tin trường học & pháp lý ATTP' })
   @ApiResponse({ status: 200, description: 'Cập nhật thông tin cấu hình trường học thành công' })
   async updateProfile(
     @CurrentTenant() tenantId: string,
     @Body() dto: UpdateTenantProfileDto,
+    @CurrentUser() user?: any,
   ) {
-    return this.tenantService.updateTenantProfile(tenantId, dto);
+    return this.tenantService.updateTenantProfile(tenantId, dto, user);
   }
 
   /**
@@ -56,26 +60,30 @@ export class TenantController {
    * Chỉ Hiệu trưởng / Ban Giám Hiệu được quyền cập nhật nhận diện
    */
   @Post('upload-logo')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'UC07 - Tải lên Logo nhận diện trường học (SVG/PNG/JPG <= 2MB)' })
   @ApiResponse({ status: 200, description: 'Tải lên logo thành công' })
   async uploadLogo(
     @CurrentTenant() tenantId: string,
     @Body() dto: UploadLogoDto,
+    @CurrentUser() user?: any,
   ) {
-    return this.tenantService.uploadLogo(tenantId, dto);
+    return this.tenantService.uploadLogo(tenantId, dto, user);
   }
 
   /**
    * UC07: Đồng bộ dữ liệu với Cơ sở dữ liệu ngành của Bộ GD&ĐT
    */
   @Post('sync-education-db')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'UC07 - Đồng bộ dữ liệu với CSDL ngành của Bộ GD&ĐT' })
   @ApiResponse({ status: 200, description: 'Đồng bộ dữ liệu thành công' })
-  async syncEducationDb(@CurrentTenant() tenantId: string) {
-    return this.tenantService.syncEducationDb(tenantId);
+  async syncEducationDb(
+    @CurrentTenant() tenantId: string,
+    @CurrentUser() user?: any,
+  ) {
+    return this.tenantService.syncEducationDb(tenantId, user);
   }
 }
