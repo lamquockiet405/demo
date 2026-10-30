@@ -7,6 +7,8 @@ import {
   SnackServiceDetailResponse,
   UpdateSnackServiceDto,
   UpdateSnackServiceResponse,
+  RosterResponse,
+  RosterFilters,
 } from '../types/snackServices';
 
 const API_BASE_URL = 'http://localhost:3000/api/v1';
@@ -54,4 +56,23 @@ export const updateSnackService = async (
   const response = await axios.put<UpdateSnackServiceResponse>(`${API_BASE_URL}/snack-services/${id}`, dto);
   return response.data;
 };
+
+/** UC60 & UC61: Lấy danh sách phân công phục vụ ăn xế (Roster) và lọc */
+export const fetchSnackServiceRoster = async (
+  filters?: Partial<RosterFilters> & { periodId?: string },
+): Promise<RosterResponse> => {
+  const response = await axios.get<RosterResponse>(`${API_BASE_URL}/snack-services/roster`, {
+    params: {
+      periodId: filters?.periodId !== 'ALL' ? filters?.periodId : undefined,
+      classId: filters?.classId !== 'ALL' ? filters?.classId : undefined,
+      ageGroup: filters?.ageGroup !== 'ALL' ? filters?.ageGroup : undefined,
+      search: filters?.search ? filters.search.trim() : undefined,
+      attendanceStatus: filters?.attendanceStatus !== 'ALL' ? filters?.attendanceStatus : undefined,
+      portionStatus: filters?.portionStatus !== 'ALL' ? filters?.portionStatus : undefined,
+      allergyOnly: filters?.allergyOnly ? true : undefined,
+    },
+  });
+  return response.data;
+};
+
 
