@@ -65,11 +65,10 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
               <button
                 type="button"
                 onClick={() => setFormat('excel')}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition ${
-                  format === 'excel'
-                    ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20 text-emerald-950 font-bold'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                }`}
+                className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition ${format === 'excel'
+                  ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20 text-emerald-950 font-bold'
+                  : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                  }`}
               >
                 <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
                   <FileSpreadsheet className="w-5 h-5" />
@@ -83,11 +82,10 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
               <button
                 type="button"
                 onClick={() => setFormat('pdf')}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition ${
-                  format === 'pdf'
-                    ? 'border-teal-500 bg-teal-50/50 ring-2 ring-teal-500/20 text-teal-950 font-bold'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                }`}
+                className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition ${format === 'pdf'
+                  ? 'border-teal-500 bg-teal-50/50 ring-2 ring-teal-500/20 text-teal-950 font-bold'
+                  : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                  }`}
               >
                 <div className="w-9 h-9 rounded-lg bg-red-600 text-white flex items-center justify-center">
                   <FileText className="w-5 h-5" />

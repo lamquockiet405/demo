@@ -100,9 +100,8 @@ export const KitchenResponseModal: React.FC<KitchenResponseModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`flex items-center gap-2 px-5 py-2.5 text-white font-bold rounded-xl shadow-md transition disabled:opacity-50 ${
-                isAcknowledge ? 'bg-sky-600 hover:bg-sky-700' : 'bg-emerald-600 hover:bg-emerald-700'
-              }`}
+              className={`flex items-center gap-2 px-5 py-2.5 text-white font-bold rounded-xl shadow-md transition disabled:opacity-50 ${isAcknowledge ? 'bg-sky-600 hover:bg-sky-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
             >
               {isAcknowledge ? <ChefHat className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
               <span>{isSubmitting ? 'Đang cập nhật DB...' : isAcknowledge ? 'Xác nhận tiếp nhận' : 'Hoàn tất điều phối'}</span>

@@ -1,28 +1,30 @@
-import { IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetFoodsQueryDto {
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   search?: string;
 
-  @IsOptional()
-  @IsString()
-  category?: string;
-
-  @IsOptional()
-  @IsString()
-  allergen?: string; // 'SAFE' or 'WARNING'
-
+  @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  categoryId?: number;
+
+  @ApiPropertyOptional({ enum: ['ACTIVE', 'INACTIVE'] })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
   page?: number = 1;
 
+  @ApiPropertyOptional({ default: 50 })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  limit?: number = 8;
+  limit?: number = 50;
 }

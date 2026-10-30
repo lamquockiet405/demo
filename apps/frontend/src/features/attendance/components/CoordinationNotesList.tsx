@@ -65,13 +65,12 @@ export const CoordinationNotesList: React.FC<CoordinationNotesListProps> = ({
         return (
           <div
             key={note.id}
-            className={`bg-white rounded-2xl p-5 border transition-all duration-200 hover:shadow-md ${
-              isUrgent
-                ? 'border-red-300 ring-2 ring-red-500/10 bg-gradient-to-r from-red-50/20 via-white to-white'
-                : isHigh
+            className={`bg-white rounded-2xl p-5 border transition-all duration-200 hover:shadow-md ${isUrgent
+              ? 'border-red-300 ring-2 ring-red-500/10 bg-gradient-to-r from-red-50/20 via-white to-white'
+              : isHigh
                 ? 'border-amber-300/80'
                 : 'border-slate-200/90'
-            }`}
+              }`}
           >
             {/* Header: Priority, Session, Class, Status */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
