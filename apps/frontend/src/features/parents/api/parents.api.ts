@@ -7,6 +7,7 @@ export interface LinkedChild {
   gender: string;
   dateOfBirth: string;
   className: string;
+  relationship?: string;
 }
 
 export interface ParentUser {
@@ -23,6 +24,9 @@ export interface ParentUser {
   updatedAt: string;
   deletedAt: string | null;
   isDeleted: boolean;
+  address?: string;
+  occupation?: string;
+  note?: string;
   children: LinkedChild[];
 }
 
@@ -31,6 +35,8 @@ export interface ParentStats {
   activeParents: number;
   parentsWithChildren: number;
   inactiveOrDeleted: number;
+  inactiveParents?: number;
+  verifiedParents?: number;
 }
 
 export interface ParentListResponse {
@@ -49,6 +55,9 @@ export interface CreateParentPayload {
   phone?: string;
   password?: string;
   status?: string;
+  address?: string;
+  occupation?: string;
+  note?: string;
   childIds?: string[];
 }
 
@@ -57,6 +66,9 @@ export interface UpdateParentPayload {
   phone?: string;
   status?: string;
   newPassword?: string;
+  address?: string;
+  occupation?: string;
+  note?: string;
   childIds?: string[];
 }
 
@@ -73,6 +85,11 @@ export interface QueryParentParams {
 export const parentsApi = {
   async getParents(params?: QueryParentParams): Promise<ParentListResponse> {
     const res = await apiClient.get<ParentListResponse>('/users/parents', { params });
+    return res.data;
+  },
+
+  async getParent(id: string): Promise<ParentUser> {
+    const res = await apiClient.get<ParentUser>(`/users/parents/${id}`);
     return res.data;
   },
 
