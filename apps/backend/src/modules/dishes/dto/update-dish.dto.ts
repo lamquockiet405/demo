@@ -33,10 +33,40 @@ export class UpdateDishDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  dishType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  targetAgeGroup?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cookingInstructions?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  presentationNotes?: string;
+
   @ApiPropertyOptional({ type: [RecipeIngredientInput] })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RecipeIngredientInput)
   recipes?: RecipeIngredientInput[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  recipeItems?: any[];
 }

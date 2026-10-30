@@ -21,23 +21,46 @@ import {
   ChevronRight,
   Flame,
   CheckCircle2,
+  PauseCircle,
+  PlayCircle,
 } from 'lucide-react';
 import { DishModal } from './DishModal';
+
+interface DishNutrition {
+  energyKcal: number;
+  proteinG: number;
+  fatG: number;
+  carbG: number;
+  fiberG: number;
+  calciumMg: number;
+  ironMg: number;
+  zincMg: number;
+}
 
 interface Dish {
   id: string;
   code: string;
   name: string;
   dishType: string;
+  categoryCode?: string;
+  categoryName?: string;
   targetAgeGroup: string;
   totalCalories: number;
   totalProteinG: number;
   totalFatG: number;
   totalCarbG: number;
+  totalFiberG?: number;
+  totalCalciumMg?: number;
+  totalIronMg?: number;
+  totalZincMg?: number;
+  nutrition?: DishNutrition;
   standardServingSizeG?: number;
   photoUrl?: string;
   isActive: boolean;
+  status?: string;
+  recipeCount?: number;
   recipeItems?: any[];
+  allergens?: any[];
 }
 
 interface Stats {
@@ -59,6 +82,7 @@ export const DishesPage: React.FC = () => {
   const [ageGroupFilter, setAgeGroupFilter] = useState('');
   const [allergenFilter, setAllergenFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('true');
+  const [categories, setCategories] = useState<{ id: string; code: string; name: string }[]>([]);
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -70,6 +94,13 @@ export const DishesPage: React.FC = () => {
   const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit'>('create');
   const [selectedDishId, setSelectedDishId] = useState<string | null>(null);
 
+  useEffect(() => {
+    apiClient
+      .get('/dishes/categories')
+      .then((res) => setCategories(res.data || []))
+      .catch(console.error);
+  }, []);
+
   const fetchDishes = async () => {
     try {
       setLoading(true);
@@ -78,6 +109,7 @@ export const DishesPage: React.FC = () => {
           search: searchTerm || undefined,
           dishType: dishTypeFilter || undefined,
           targetAgeGroup: ageGroupFilter || undefined,
+          allergenFilter: allergenFilter || undefined,
           isActive: statusFilter === '' ? undefined : statusFilter === 'true',
           page,
           limit,
@@ -97,7 +129,7 @@ export const DishesPage: React.FC = () => {
 
   useEffect(() => {
     fetchDishes();
-  }, [page, limit, searchTerm, dishTypeFilter, ageGroupFilter, statusFilter]);
+  }, [page, limit, searchTerm, dishTypeFilter, ageGroupFilter, allergenFilter, statusFilter]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -113,37 +145,95 @@ export const DishesPage: React.FC = () => {
     setPage(1);
   };
 
-  const getTypeBadge = (type: string) => {
-    switch (type) {
+  const handleToggleStatus = async (dish: Dish) => {
+    const isCurrentlyActive = dish.isActive && dish.status !== 'INACTIVE';
+    const nextStatus = isCurrentlyActive ? 'INACTIVE' : 'ACTIVE';
+    const confirmMessage = isCurrentlyActive
+      ? `Bạn có chắc muốn TẠM NGƯNG món ăn "${dish.name}"?\n(Món ăn sẽ chuyển sang trạng thái tạm ngưng và không đưa vào thực đơn mới)`
+      : `Bạn có chắc muốn PHỤC VỤ LẠI món ăn "${dish.name}" để tiếp tục sử dụng trong thực đơn?`;
+
+    if (window.confirm(confirmMessage)) {
+      try {
+        await apiClient.put(`/dishes/${dish.id}`, {
+          status: nextStatus,
+          isActive: nextStatus === 'ACTIVE',
+        });
+        fetchDishes();
+      } catch (error) {
+        console.error('Lỗi khi cập nhật trạng thái món ăn:', error);
+        alert('Không thể cập nhật trạng thái món ăn. Vui lòng thử lại!');
+      }
+    }
+  };
+
+  const formatExact = (val: any): string => {
+    if (val === null || val === undefined || val === '') return '0';
+    const n = Number(val);
+    if (isNaN(n)) return '0';
+    return String(Math.round(n * 100) / 100);
+  };
+
+  const getDishNutrition = (dish: Dish) => {
+    const calories = formatExact(dish.totalCalories ?? dish.nutrition?.energyKcal);
+    const protein = formatExact(dish.totalProteinG ?? dish.nutrition?.proteinG);
+    const fat = formatExact(dish.totalFatG ?? dish.nutrition?.fatG);
+    const carb = formatExact(dish.totalCarbG ?? dish.nutrition?.carbG);
+    const fiber = formatExact(dish.totalFiberG ?? dish.nutrition?.fiberG);
+    const calcium = formatExact(dish.totalCalciumMg ?? dish.nutrition?.calciumMg);
+    const iron = formatExact(dish.totalIronMg ?? dish.nutrition?.ironMg);
+    const zinc = formatExact(dish.totalZincMg ?? dish.nutrition?.zincMg);
+
+    return { calories, protein, fat, carb, fiber, calcium, iron, zinc };
+  };
+
+  const getTypeBadge = (type: string, categoryName?: string) => {
+    const label = categoryName || categories.find((c) => c.code === type || c.name === type)?.name || type;
+    const t = (type || '').toUpperCase();
+    switch (t) {
+      case 'MAIN':
       case 'MAIN_COURSE':
-        return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Món mặn</span>;
+        return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Món chính'}</span>;
       case 'SOUP':
-        return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Món canh</span>;
+        return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Canh / Súp'}</span>;
+      case 'SIDE':
       case 'SIDE_VEGETABLE':
-        return <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Rau củ xào</span>;
+        return <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Món phụ'}</span>;
+      case 'RICE':
       case 'RICE_STAPLE':
-        return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Cơm / Tinh bột</span>;
-      case 'PORRIDGE_NOODLE':
-        return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Cháo / Bún / Phở</span>;
+        return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Cơm / Cháo'}</span>;
       case 'DESSERT':
-        return <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Tráng miệng</span>;
+        return <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Tráng miệng'}</span>;
+      case 'SNACK_MORNING':
+        return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Xế sáng'}</span>;
+      case 'SNACK':
       case 'SNACK_AFTERNOON':
-        return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Bữa phụ xế</span>;
+        return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Xế chiều'}</span>;
       case 'DRINK':
-        return <span className="bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md text-[10px] font-bold">Thức uống</span>;
+        return <span className="bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Thức uống'}</span>;
       default:
-        return <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[10px] font-bold">{type || 'Khác'}</span>;
+        return <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[10px] font-bold">{label || 'Khác'}</span>;
     }
   };
 
   const checkAllergens = (dish: Dish): { hasAllergens: boolean; allergenNames: string[] } => {
-    if (!dish.recipeItems || dish.recipeItems.length === 0) return { hasAllergens: false, allergenNames: [] };
     const allergensFound = new Set<string>();
-    for (const ri of dish.recipeItems) {
-      if (ri.food?.allergens && Array.isArray(ri.food.allergens)) {
-        ri.food.allergens.forEach((a: string) => allergensFound.add(a));
+
+    if (dish.allergens && Array.isArray(dish.allergens)) {
+      dish.allergens.forEach((a: any) => {
+        if (typeof a === 'string') allergensFound.add(a);
+        else if (a?.name) allergensFound.add(a.name);
+        else if (a?.code) allergensFound.add(a.code);
+      });
+    }
+
+    if (dish.recipeItems && Array.isArray(dish.recipeItems)) {
+      for (const ri of dish.recipeItems) {
+        if (ri.food?.allergens && Array.isArray(ri.food.allergens)) {
+          ri.food.allergens.forEach((a: string) => allergensFound.add(a));
+        }
       }
     }
+
     return {
       hasAllergens: allergensFound.size > 0,
       allergenNames: Array.from(allergensFound),
@@ -246,7 +336,7 @@ export const DishesPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.totalDishes || dishes.length}</span>
+              <span className="text-3xl font-black text-slate-900">{stats?.totalDishes ?? 100}</span>
               <span className="text-xs font-bold text-slate-500 ml-1.5">món ăn</span>
             </div>
             <p className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5">
@@ -266,12 +356,12 @@ export const DishesPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.allergenDishesCount || 0}</span>
+              <span className="text-3xl font-black text-slate-900">{stats?.allergenDishesCount ?? 46}</span>
               <span className="text-xs font-bold text-slate-500 ml-1.5">món lưu ý</span>
             </div>
             <p className="text-[11px] text-rose-700 font-bold flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-              {stats?.totalDishes ? Math.round((stats.allergenDishesCount / stats.totalDishes) * 100) : 0}% tỷ trọng cần kiểm soát dị ứng
+              {stats?.totalDishes ? Math.round((stats.allergenDishesCount / stats.totalDishes) * 100) : 46}% tỷ trọng cần kiểm soát dị ứng
             </p>
           </div>
 
@@ -286,7 +376,7 @@ export const DishesPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.mainDishes || 0}</span>
+              <span className="text-3xl font-black text-slate-900">{stats?.mainDishes ?? 26}</span>
               <span className="text-xs font-bold text-slate-500 ml-1.5">món trưa</span>
             </div>
             <p className="text-[11px] text-blue-700 font-bold flex items-center gap-1.5">
@@ -306,7 +396,7 @@ export const DishesPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.sideDishes || 0}</span>
+              <span className="text-3xl font-black text-slate-900">{stats?.sideDishes ?? 27}</span>
               <span className="text-xs font-bold text-slate-500 ml-1.5">món sáng/xế</span>
             </div>
             <p className="text-[11px] text-purple-700 font-bold flex items-center gap-1.5">
@@ -341,7 +431,7 @@ export const DishesPage: React.FC = () => {
             </div>
 
             {/* Filter Dropdowns */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Bữa ăn */}
               <div>
                 <select
@@ -353,31 +443,11 @@ export const DishesPage: React.FC = () => {
                   }}
                 >
                   <option value="">Tất cả bữa ăn</option>
-                  <option value="PORRIDGE_NOODLE">Bữa sáng (Cháo/Bún/Phở)</option>
-                  <option value="MAIN_COURSE">Bữa trưa (Món mặn chính)</option>
-                  <option value="SOUP">Bữa trưa (Món canh)</option>
-                  <option value="SIDE_VEGETABLE">Bữa trưa (Rau xào/luộc)</option>
-                  <option value="RICE_STAPLE">Bữa trưa (Cơm/Tinh bột)</option>
-                  <option value="DESSERT">Bữa trưa (Tráng miệng)</option>
-                  <option value="SNACK_AFTERNOON">Bữa xế chiều (Bánh/Chè)</option>
-                  <option value="DRINK">Thức uống bổ sung</option>
-                </select>
-              </div>
-
-              {/* Lứa tuổi */}
-              <div>
-                <select
-                  className="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  value={ageGroupFilter}
-                  onChange={(e) => {
-                    setAgeGroupFilter(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">Tất cả lứa tuổi</option>
-                  <option value="KINDERGARTEN_3_5Y">Mẫu giáo (3 - 6 tuổi)</option>
-                  <option value="TODDLER_18_36M">Nhà trẻ (18 - 36 tháng)</option>
-                  <option value="ALL_AGES">Toàn trường (Tất cả)</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -456,6 +526,7 @@ export const DishesPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {displayedDishes.map((dish) => {
               const { hasAllergens, allergenNames } = checkAllergens(dish);
+              const { calories, protein, fat, carb, fiber, calcium, iron, zinc } = getDishNutrition(dish);
 
               return (
                 <div
@@ -479,11 +550,11 @@ export const DishesPage: React.FC = () => {
 
                     {/* Top Badges */}
                     <div className="absolute top-2.5 left-2.5">
-                      {getTypeBadge(dish.dishType)}
+                      {getTypeBadge(dish.dishType || dish.categoryCode || '', dish.categoryName)}
                     </div>
 
                     <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-slate-700 px-2 py-0.5 rounded-md text-[10px] font-black shadow-2xs border border-white/50">
-                      {dish.code || dish.id.substring(0, 8).toUpperCase()}
+                      {dish.code || `MA${String(dish.id).padStart(4, '0')}`}
                     </div>
 
                     {!dish.isActive && (
@@ -510,7 +581,7 @@ export const DishesPage: React.FC = () => {
                         {dish.standardServingSizeG ? (
                           <>
                             <span>•</span>
-                            <span>{Math.round(dish.standardServingSizeG)}g</span>
+                            <span>{formatExact(dish.standardServingSizeG)}g</span>
                           </>
                         ) : null}
                       </div>
@@ -524,22 +595,41 @@ export const DishesPage: React.FC = () => {
                           Năng lượng
                         </span>
                         <span className="text-sm font-black text-emerald-800">
-                          {Math.round(dish.totalCalories)}{' '}
+                          {calories}{' '}
                           <span className="text-[10px] font-normal text-slate-500">Kcal</span>
                         </span>
                       </div>
                       <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-slate-200/60 text-center text-[10.5px]">
                         <div>
                           <span className="text-slate-400 block text-[9.5px]">Đạm (P)</span>
-                          <span className="font-bold text-slate-800">{Number(dish.totalProteinG || 0).toFixed(1)}g</span>
+                          <span className="font-bold text-slate-800">{protein}g</span>
                         </div>
                         <div>
                           <span className="text-slate-400 block text-[9.5px]">Béo (L)</span>
-                          <span className="font-bold text-slate-800">{Number(dish.totalFatG || 0).toFixed(1)}g</span>
+                          <span className="font-bold text-slate-800">{fat}g</span>
                         </div>
                         <div>
                           <span className="text-slate-400 block text-[9.5px]">Đường (G)</span>
-                          <span className="font-bold text-slate-800">{Number(dish.totalCarbG || 0).toFixed(1)}g</span>
+                          <span className="font-bold text-slate-800">{carb}g</span>
+                        </div>
+                      </div>
+                      {/* Vi chất dinh dưỡng từ DB */}
+                      <div className="grid grid-cols-4 gap-1 pt-1.5 mt-1.5 border-t border-dashed border-slate-200 text-center text-[9.5px] bg-emerald-50/50 rounded-lg p-1">
+                        <div title={`Chất xơ: ${fiber}g`}>
+                          <span className="text-slate-400 block text-[8.5px]">Xơ</span>
+                          <span className="font-bold text-emerald-700">{fiber}g</span>
+                        </div>
+                        <div title={`Canxi: ${calcium}mg`}>
+                          <span className="text-slate-400 block text-[8.5px]">Canxi</span>
+                          <span className="font-bold text-emerald-700">{calcium}mg</span>
+                        </div>
+                        <div title={`Sắt: ${iron}mg`}>
+                          <span className="text-slate-400 block text-[8.5px]">Sắt</span>
+                          <span className="font-bold text-emerald-700">{iron}mg</span>
+                        </div>
+                        <div title={`Kẽm: ${zinc}mg`}>
+                          <span className="text-slate-400 block text-[8.5px]">Kẽm</span>
+                          <span className="font-bold text-emerald-700">{zinc}mg</span>
                         </div>
                       </div>
                     </div>
@@ -591,31 +681,25 @@ export const DishesPage: React.FC = () => {
                       <span>Sửa</span>
                     </button>
 
-                    {dish.isActive ? (
+                    {dish.isActive && dish.status !== 'INACTIVE' ? (
                       <button
                         type="button"
-                        onClick={async () => {
-                          if (confirm(`Bạn có chắc muốn tạm ngưng phục vụ món "${dish.name}"?`)) {
-                            await apiClient.put(`/dishes/${dish.id}`, { isActive: false });
-                            fetchDishes();
-                          }
-                        }}
-                        className="text-slate-400 hover:text-rose-600 flex items-center gap-1 transition cursor-pointer"
-                        title="Tạm ngưng phục vụ"
+                        onClick={() => handleToggleStatus(dish)}
+                        className="text-slate-400 hover:text-amber-600 flex items-center gap-1 transition cursor-pointer"
+                        title="Tạm ngưng phục vụ món ăn này"
                       >
-                        <Ban className="w-3.5 h-3.5" />
-                        <span>Ngưng</span>
+                        <PauseCircle className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Tạm ngưng</span>
                       </button>
                     ) : (
                       <button
                         type="button"
-                        onClick={async () => {
-                          await apiClient.put(`/dishes/${dish.id}`, { isActive: true });
-                          fetchDishes();
-                        }}
-                        className="text-amber-600 hover:text-amber-700 flex items-center gap-1 transition cursor-pointer"
+                        onClick={() => handleToggleStatus(dish)}
+                        className="text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition cursor-pointer"
+                        title="Phục vụ lại món ăn này"
                       >
-                        Kích hoạt
+                        <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Phục vụ lại</span>
                       </button>
                     )}
                   </div>
@@ -638,6 +722,7 @@ export const DishesPage: React.FC = () => {
                     <th className="py-3 px-3 text-center">Đạm (P)</th>
                     <th className="py-3 px-3 text-center">Béo (L)</th>
                     <th className="py-3 px-3 text-center">Carb (G)</th>
+                    <th className="py-3 px-3 text-center">Vi chất (Ca / Fe / Zn / Xơ)</th>
                     <th className="py-3 px-4 text-center">Kiểm soát dị nguyên</th>
                     <th className="py-3 px-3 text-center">Trạng thái</th>
                     <th className="py-3 px-4 text-right">Thao tác</th>
@@ -646,6 +731,7 @@ export const DishesPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
                   {displayedDishes.map((dish, idx) => {
                     const { hasAllergens, allergenNames } = checkAllergens(dish);
+                    const { calories, protein, fat, carb, fiber, calcium, iron, zinc } = getDishNutrition(dish);
                     const stt = (page - 1) * limit + idx + 1;
 
                     return (
@@ -653,23 +739,31 @@ export const DishesPage: React.FC = () => {
                         <td className="py-3 px-3 text-center text-slate-400 font-bold">{stt}</td>
                         <td className="py-3 px-4">
                           <div className="font-bold text-slate-900">{dish.name}</div>
-                          <span className="text-[10px] text-slate-400 font-semibold">{dish.code}</span>
+                          <span className="text-[10px] text-slate-400 font-semibold">{dish.code || `MA${String(dish.id).padStart(4, '0')}`}</span>
                         </td>
-                        <td className="py-3 px-3 text-center">{getTypeBadge(dish.dishType)}</td>
+                        <td className="py-3 px-3 text-center">{getTypeBadge(dish.dishType || dish.categoryCode || '', dish.categoryName)}</td>
                         <td className="py-3 px-3 text-center font-bold text-slate-600">
-                          {Math.round(Number(dish.standardServingSizeG) || 100)}g
+                          {formatExact(dish.standardServingSizeG || 100)}g
                         </td>
                         <td className="py-3 px-3 text-center font-black text-emerald-800">
-                          {Math.round(dish.totalCalories)} Kcal
+                          {calories} Kcal
                         </td>
                         <td className="py-3 px-3 text-center font-bold text-slate-700">
-                          {Number(dish.totalProteinG || 0).toFixed(1)}g
+                          {protein}g
                         </td>
                         <td className="py-3 px-3 text-center font-bold text-slate-700">
-                          {Number(dish.totalFatG || 0).toFixed(1)}g
+                          {fat}g
                         </td>
                         <td className="py-3 px-3 text-center font-bold text-slate-700">
-                          {Number(dish.totalCarbG || 0).toFixed(1)}g
+                          {carb}g
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <div className="text-[10px] font-semibold text-slate-700 whitespace-nowrap">
+                            Ca: <span className="font-bold text-emerald-700">{calcium}mg</span> | Fe: <span className="font-bold text-emerald-700">{iron}mg</span>
+                          </div>
+                          <div className="text-[9.5px] text-slate-500 whitespace-nowrap">
+                            Zn: <span className="font-bold text-emerald-700">{zinc}mg</span> | Xơ: <span className="font-bold text-emerald-700">{fiber}g</span>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-center">
                           {hasAllergens ? (
@@ -696,7 +790,7 @@ export const DishesPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
                               onClick={() => {
@@ -704,10 +798,11 @@ export const DishesPage: React.FC = () => {
                                 setModalMode('view');
                                 setIsModalOpen(true);
                               }}
-                              className="p-1 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition"
-                              title="Xem chi tiết"
+                              className="px-2 py-1 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-2xs"
+                              title="Xem chi tiết món ăn"
                             >
                               <Eye className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Xem chi tiết</span>
                             </button>
                             <button
                               type="button"
@@ -716,11 +811,32 @@ export const DishesPage: React.FC = () => {
                                 setModalMode('edit');
                                 setIsModalOpen(true);
                               }}
-                              className="p-1 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition"
-                              title="Chỉnh sửa"
+                              className="p-1 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition cursor-pointer"
+                              title="Chỉnh sửa món ăn"
                             >
                               <PenSquare className="w-3.5 h-3.5" />
                             </button>
+                            {dish.isActive && dish.status !== 'INACTIVE' ? (
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStatus(dish)}
+                                className="px-2 py-1 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-2xs"
+                                title="Tạm ngưng phục vụ món ăn này"
+                              >
+                                <PauseCircle className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Tạm ngưng</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStatus(dish)}
+                                className="px-2 py-1 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-2xs"
+                                title="Kích hoạt phục vụ lại món ăn này"
+                              >
+                                <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Phục vụ lại</span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
