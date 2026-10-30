@@ -1,5 +1,17 @@
-import React, { useState } from 'react';
-import { X, Building, Phone, Calendar, ShieldCheck, UserCheck, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  X,
+  Building,
+  Phone,
+  Mail,
+  Globe,
+  Calendar,
+  ShieldCheck,
+  UserCheck,
+  Loader2,
+  Hash,
+  Users,
+} from 'lucide-react';
 import { TenantProfile, tenantApi, UpdateTenantProfileInput } from '../../../core/api/tenant.api';
 
 interface EditSchoolInfoModalProps {
@@ -9,71 +21,126 @@ interface EditSchoolInfoModalProps {
   onSaved: (updated: TenantProfile) => void;
 }
 
-/**
- * UC07: Modal chỉnh sửa thông tin trường mầm non & pháp lý ATTP
- */
 export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
   isOpen,
   onClose,
   profile,
   onSaved,
 }) => {
-  const [address, setAddress] = useState(profile.address || '');
-  const [phone, setPhone] = useState(profile.phone || '');
-  const [contactEmail, setContactEmail] = useState(profile.contactEmail || '');
-  const [licenseNumber, setLicenseNumber] = useState(profile.foodSafetyLicense?.number || '');
-  const [expiryDate, setExpiryDate] = useState(profile.foodSafetyLicense?.expiryDate || '');
-  const [repName, setRepName] = useState(profile.legalRepresentative?.name || '');
-  const [repTitle, setRepTitle] = useState(profile.legalRepresentative?.title || 'Hiệu trưởng');
+  const [form, setForm] = useState({
+    name: '',
+    code: '',
+    domain: '',
+    maxChildren: 200,
+    address: '',
+    phone: '',
+    contactEmail: '',
+    educationDepartmentCode: '',
+    schoolIdentifierSgd: '',
+    licenseNumber: '',
+    issueDate: '',
+    expiryDate: '',
+    issuingAuthority: '',
+    repName: '',
+    repTitle: 'Hiệu trưởng',
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen && profile) {
+      setForm({
+        name: profile.name || '',
+        code: profile.code || '',
+        domain: profile.domain || '',
+        maxChildren: profile.maxChildren || 200,
+        address: profile.address || '',
+        phone: profile.phone || '',
+        contactEmail: profile.contactEmail || '',
+        educationDepartmentCode: profile.educationDepartmentCode || '',
+        schoolIdentifierSgd: profile.schoolIdentifierSgd || '',
+        licenseNumber: profile.foodSafetyLicense?.number || '',
+        issueDate: profile.foodSafetyLicense?.issueDate || '',
+        expiryDate: profile.foodSafetyLicense?.expiryDate || '',
+        issuingAuthority: profile.foodSafetyLicense?.issuingAuthority || '',
+        repName: profile.legalRepresentative?.name || '',
+        repTitle: profile.legalRepresentative?.title || 'Hiệu trưởng',
+      });
+      setError(null);
+    }
+  }, [isOpen, profile]);
+
   if (!isOpen) return null;
+
+  const setField = (key: keyof typeof form, val: string | number) =>
+    setForm((prev) => ({ ...prev, [key]: val }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.name.trim()) {
+      setError('Tên trường mầm non không được để trống.');
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
-    const updatePayload: UpdateTenantProfileInput = {
-      address,
-      phone,
-      contactEmail,
+    const payload: UpdateTenantProfileInput = {
+      name: form.name.trim(),
+      code: form.code.trim() || undefined,
+      domain: form.domain.trim(),
+      maxChildren: Number(form.maxChildren) || 200,
+      address: form.address.trim(),
+      phone: form.phone.trim(),
+      contactEmail: form.contactEmail.trim(),
+      educationDepartmentCode: form.educationDepartmentCode.trim(),
+      schoolIdentifierSgd: form.schoolIdentifierSgd.trim(),
       foodSafetyLicense: {
-        number: licenseNumber,
-        expiryDate,
+        number: form.licenseNumber.trim(),
+        issueDate: form.issueDate.trim(),
+        expiryDate: form.expiryDate.trim(),
+        issuingAuthority: form.issuingAuthority.trim(),
       },
       legalRepresentative: {
-        name: repName,
-        title: repTitle,
+        name: form.repName.trim(),
+        title: form.repTitle.trim() || 'Hiệu trưởng',
       },
     };
 
     try {
-      const updated = await tenantApi.updateProfile(updatePayload);
+      const updated = await tenantApi.updateProfile(payload);
+      if (updated?.name) localStorage.setItem('school_name', updated.name);
+      window.dispatchEvent(new CustomEvent('tenant-profile-updated', { detail: updated }));
       onSaved(updated);
       onClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin trường học.');
+      const msg = err?.response?.data?.message;
+      setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Không thể lưu thông tin trường học.');
     } finally {
       setSaving(false);
     }
   };
 
+  const inputCls =
+    'w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-150 my-8">
         <div className="bg-gradient-to-r from-teal-700 to-teal-800 text-white p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 rounded-xl">
               <Building className="w-5 h-5 text-teal-200" />
             </div>
             <div>
-              <h3 className="font-bold text-base">Chỉnh sửa thông tin cơ sở trường</h3>
-              <p className="text-xs text-teal-200">Cập nhật hồ sơ pháp lý và thông tin liên hệ nhà trường</p>
+              <h3 className="font-bold text-base">Cập nhật thông tin Trường mầm non</h3>
+              <p className="text-xs text-teal-200">
+                Chỉnh sửa hồ sơ cơ sở, mã định danh Bộ GD&ĐT và giấy chứng nhận ATTP
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition"
           >
@@ -81,99 +148,142 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
           {error && (
-            <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">
+            <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-medium">
               {error}
             </div>
           )}
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-teal-600" /> Tên trường mầm non *
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setField('name', e.target.value)}
+                required
+                className={inputCls}
+                placeholder="Nhập tên trường mầm non"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Hash className="w-3.5 h-3.5 text-teal-600" /> Mã trường
+              </label>
+              <input
+                type="text"
+                value={form.code}
+                onChange={(e) => setField('code', e.target.value)}
+                className={`${inputCls} font-mono`}
+                placeholder="VD: MN_SAOMAI"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <Building className="w-3.5 h-3.5 text-teal-600" /> Địa chỉ cơ sở trường
+              <Building className="w-3.5 h-3.5 text-teal-600" /> Địa chỉ cơ sở trường *
             </label>
             <input
               type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              value={form.address}
+              onChange={(e) => setField('address', e.target.value)}
               required
-              className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-              placeholder="128 Võ Thị Sáu, Phường Võ Thị Sáu, Quận 3, TP. Hồ Chí Minh"
+              className={inputCls}
+              placeholder="Nhập địa chỉ trường học"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-teal-600" /> Hotline tiếp đón
+                <Phone className="w-3.5 h-3.5 text-teal-600" /> Số điện thoại / Hotline *
               </label>
               <input
                 type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={form.phone}
+                onChange={(e) => setField('phone', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="(028) 3829 4999"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-teal-600" /> Email liên hệ nhà trường *
+              </label>
+              <input
+                type="email"
+                value={form.contactEmail}
+                onChange={(e) => setField('contactEmail', e.target.value)}
+                required
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-teal-600" /> Website / Tên miền
+              </label>
+              <input
+                type="text"
+                value={form.domain}
+                onChange={(e) => setField('domain', e.target.value)}
+                className={inputCls}
+                placeholder="VD: saomai.kidsnutri.vn"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-teal-600" /> Quy mô học sinh tối đa (chỗ)
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={5000}
+                value={form.maxChildren}
+                onChange={(e) => setField('maxChildren', Number(e.target.value))}
+                className={inputCls}
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Email liên hệ
+                Mã Phòng / Sở GD&ĐT
               </label>
               <input
-                type="email"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-                required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="contact@saomai.edu.vn"
+                type="text"
+                value={form.educationDepartmentCode}
+                onChange={(e) => setField('educationDepartmentCode', e.target.value)}
+                className={`${inputCls} font-mono`}
+                placeholder="VD: GD-MN-79-03-0042"
               />
             </div>
-          </div>
-
-          <div className="p-4 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-3">
-            <h4 className="text-xs font-bold text-teal-900 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-teal-600" /> Giấy phép An toàn thực phẩm (ATTP)
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-teal-950 mb-1">
-                  Số giấy phép
-                </label>
-                <input
-                  type="text"
-                  value={licenseNumber}
-                  onChange={(e) => setLicenseNumber(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                  placeholder="458/2023/ATTP-Q3"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-semibold text-teal-950 mb-1 flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-teal-600" /> Ngày hết hạn
-                </label>
-                <input
-                  type="date"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Mã định danh CSDL Ngành (Bộ GD&ĐT)
+              </label>
+              <input
+                type="text"
+                value={form.schoolIdentifierSgd}
+                onChange={(e) => setField('schoolIdentifierSgd', e.target.value)}
+                className={`${inputCls} font-mono`}
+                placeholder="VD: MN-HCM-Q3-0042"
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <UserCheck className="w-3.5 h-3.5 text-teal-600" /> Đại diện ký duyệt thực đơn
+                <UserCheck className="w-3.5 h-3.5 text-teal-600" /> Người đại diện pháp lý *
               </label>
               <input
                 type="text"
-                value={repName}
-                onChange={(e) => setRepName(e.target.value)}
+                value={form.repName}
+                onChange={(e) => setField('repName', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Nguyễn Thu Thủy"
+                className={inputCls}
               />
             </div>
             <div>
@@ -182,12 +292,63 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </label>
               <input
                 type="text"
-                value={repTitle}
-                onChange={(e) => setRepTitle(e.target.value)}
+                value={form.repTitle}
+                onChange={(e) => setField('repTitle', e.target.value)}
                 required
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Hiệu trưởng"
+                className={inputCls}
               />
+            </div>
+          </div>
+
+          <div className="p-4 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-3">
+            <h4 className="text-xs font-bold text-teal-900 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-teal-600" /> Giấy chứng nhận Cơ sở đủ điều kiện ATTP
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-teal-950 mb-1">
+                  Số giấy chứng nhận ATTP
+                </label>
+                <input
+                  type="text"
+                  value={form.licenseNumber}
+                  onChange={(e) => setField('licenseNumber', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-teal-950 mb-1">
+                  Cơ quan cấp phép
+                </label>
+                <input
+                  type="text"
+                  value={form.issuingAuthority}
+                  onChange={(e) => setField('issuingAuthority', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-teal-950 mb-1 flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-teal-600" /> Ngày cấp
+                </label>
+                <input
+                  type="date"
+                  value={form.issueDate}
+                  onChange={(e) => setField('issueDate', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-teal-950 mb-1 flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-teal-600" /> Ngày hết hạn
+                </label>
+                <input
+                  type="date"
+                  value={form.expiryDate}
+                  onChange={(e) => setField('expiryDate', e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-teal-200 bg-white focus:outline-none"
+                />
+              </div>
             </div>
           </div>
 
@@ -204,8 +365,8 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               disabled={saving}
               className="px-5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
             >
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-              Lưu thông tin pháp lý
+              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              Lưu thay đổi vào CSDL
             </button>
           </div>
         </form>

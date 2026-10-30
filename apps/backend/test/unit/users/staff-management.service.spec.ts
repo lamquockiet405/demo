@@ -1,11 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { StaffManagementService } from '../../../src/modules/users/services/staff-management.service';
 import { User } from '../../../src/modules/auth/entities/user.entity';
 import { Role } from '../../../src/modules/auth/entities/role.entity';
 
-describe('StaffManagementService', () => {
+describe('StaffManagementService (UC08 - UC11)', () => {
   let service: StaffManagementService;
   let userRepoMock: any;
   let roleRepoMock: any;
@@ -66,7 +71,7 @@ describe('StaffManagementService', () => {
     service = module.get<StaffManagementService>(StaffManagementService);
   });
 
-  describe('getStaffList', () => {
+  describe('getStaffList (UC08 & UC11)', () => {
     it('phải trả về danh sách nhân sự phân trang thành công', async () => {
       const qbMock: any = {
         leftJoinAndSelect: jest.fn().mockReturnThis(),
@@ -96,7 +101,25 @@ describe('StaffManagementService', () => {
     });
   });
 
-  describe('getStaffById', () => {
+  describe('getStaffStats', () => {
+    it('phải trả về thống kê nhân sự đồng thời bằng Promise.all', async () => {
+      const qbMock: any = {
+        withDeleted: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(4),
+      };
+      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
+
+      const stats = await service.getStaffStats(mockTenantId);
+      expect(stats.totalStaff).toBe(4);
+      expect(stats.activeStaff).toBe(4);
+      expect(stats.teachers).toBe(4);
+    });
+  });
+
+  describe('getStaffById (UC08)', () => {
     it('phải trả về chi tiết nhân sự khi tìm thấy', async () => {
       const qbMock: any = {
         withDeleted: jest.fn().mockReturnThis(),
@@ -127,12 +150,12 @@ describe('StaffManagementService', () => {
     });
   });
 
-  describe('createStaff', () => {
+  describe('createStaff (UC09)', () => {
     it('phải tạo nhân sự mới thành công và hash mật khẩu', async () => {
       const qbMock: any = {
         withDeleted: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(null), // Email chưa tồn tại
+        getOne: jest.fn().mockResolvedValue(null),
       };
       userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
 
@@ -164,6 +187,28 @@ describe('StaffManagementService', () => {
           roleCodes: ['TEACHER'],
         }),
       ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('updateStaff (UC10)', () => {
+    it('phải cập nhật thông tin nhân sự thành công', async () => {
+      const qbMock: any = {
+        addSelect: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue({ ...mockUser }),
+      };
+      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
+
+      const result = await service.updateStaff(mockTenantId, mockTargetId, {
+        fullName: 'Cô Nguyễn Thị Hoa (Tổ trưởng)',
+        phone: '0909123456',
+        roleCodes: ['TEACHER'],
+      });
+
+      expect(result.fullName).toBe('Cô Nguyễn Thị Hoa (Tổ trưởng)');
+      expect(result.phone).toBe('0909123456');
+      expect(userRepoMock.save).toHaveBeenCalled();
     });
   });
 

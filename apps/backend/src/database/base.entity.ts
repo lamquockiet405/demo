@@ -36,3 +36,7 @@ export abstract class BaseTenantEntity {
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz', nullable: true })
   deletedAt?: Date;
 }
+
+export abstract class BaseTenantTimestampedEntity extends BaseTenantEntity {}
+
+export abstract class BaseTenantSoftDeleteEntity extends BaseTenantEntity {}

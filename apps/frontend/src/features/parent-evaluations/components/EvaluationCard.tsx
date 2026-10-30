@@ -43,18 +43,17 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
   // Avatar Initials & Color
   const getAvatarInfo = (name?: string) => {
     if (!name) return { initials: 'PH', bg: 'bg-teal-600' };
-    const parts = name.trim().split(' ');
+    const parts = name.trim().split(' ').filter(Boolean);
     const initials =
       parts.length >= 2
         ? `${parts[parts.length - 2][0]}${parts[parts.length - 1][0]}`.toUpperCase()
         : name.slice(0, 2).toUpperCase();
 
-    if (name.includes('Thùy Linh')) return { initials: 'TL', bg: 'bg-teal-600' };
-    if (name.includes('Quốc Hưng')) return { initials: 'QH', bg: 'bg-blue-600' };
-    if (name.includes('Thị Tuyết')) return { initials: 'BT', bg: 'bg-amber-600' };
-    if (name.includes('Tuấn Kiệt')) return { initials: 'TK', bg: 'bg-slate-700' };
+    const colors = ['bg-teal-600', 'bg-blue-600', 'bg-indigo-600', 'bg-purple-600', 'bg-emerald-600'];
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const bg = colors[hash % colors.length];
 
-    return { initials, bg: 'bg-teal-600' };
+    return { initials, bg };
   };
 
   const avatar = getAvatarInfo(item.parentNameCustom);
@@ -101,11 +100,10 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`w-3.5 h-3.5 ${
-              star <= rating
+            className={`w-3.5 h-3.5 ${star <= rating
                 ? 'fill-amber-400 text-amber-400'
                 : 'text-slate-200 fill-slate-100'
-            }`}
+              }`}
           />
         ))}
         <span className="ml-1 text-xs font-bold text-slate-700">
@@ -219,7 +217,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               <CheckCircle className="w-4 h-4 text-teal-600" />
               <span>
                 {item.responseHeader ||
-                  'Phản hồi chính thức từ Ban Giám Hiệu trường Mầm non Sao Mai'}
+                  `Phản hồi chính thức từ Ban Giám Hiệu ${localStorage.getItem('school_name') || 'Trường Mẫu Giáo Hướng Dương'}`}
               </span>
             </div>
             <span className="text-teal-700 font-semibold text-[11px]">
@@ -303,7 +301,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               <CornerDownRight className="w-3.5 h-3.5 text-teal-600" />
               <span>
                 {item.responseHeader ||
-                  'BGH Trường Mầm non Sao Mai (Hiệu trưởng Nguyễn Thu Thủy)'}
+                  `BGH ${localStorage.getItem('school_name') || 'Trường Mẫu Giáo Hướng Dương'}`}
               </span>
             </div>
             <span className="text-[11px] text-slate-400">
