@@ -138,6 +138,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [importResult, setImportResult] = useState<{ count: number; errors: string[] } | null>(null);
 
   const sampleGrowthCsv = `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú
@@ -263,6 +264,8 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
   };
 
   const handleExportReport = async () => {
+    if (exporting) return;
+    setExporting(true);
     try {
       const res = await growthApi.exportReport(selectedClass !== 'ALL' ? selectedClass : undefined);
       if (!res.items || res.items.length === 0) {
@@ -270,36 +273,92 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
         return;
       }
 
-      // Convert items to CSV
-      const headers = ['Mã học sinh', 'Họ và tên', 'Giới tính', 'Lớp', 'Ngày đo', 'Tuổi (tháng)', 'Cân nặng (kg)', 'Chiều cao (cm)', 'WAZ', 'HAZ', 'BAZ', 'Thể lực', 'Tình trạng', 'Ghi chú'];
-      const rows = res.items.map((it: any) => [
-        it.studentCode,
-        it.childName,
-        it.gender,
-        it.className,
-        it.measurementDate,
-        it.ageInMonths,
-        it.weightKg,
-        it.heightCm,
-        it.waz,
-        it.haz,
-        it.baz,
-        it.weightStatus,
-        it.overallStatus,
-        `"${it.notes.replace(/"/g, '""')}"`,
-      ]);
+      // Convert items to CSV with 14 standard columns according to UC-80
+      const headers = [
+        'Mã học sinh',
+        'Họ và tên',
+        'Giới tính',
+        'Lớp',
+        'Ngày đo',
+        'Tuổi (tháng)',
+        'Cân nặng (kg)',
+        'Chiều cao (cm)',
+        'WAZ',
+        'HAZ',
+        'BAZ',
+        'Thể lực',
+        'Tình trạng',
+        'Ghi chú',
+      ];
 
-      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
+      const escapeField = (val: any) => {
+        if (val === null || val === undefined) return '';
+        const str = String(val);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const escapeNotes = (notes: any) => {
+        const str = notes == null ? '' : String(notes);
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const rows = res.items.map((it: any) => {
+        const studentCode = it.studentCode ?? it.child?.studentCode ?? '';
+        const childName = it.childName ?? it.child?.fullName ?? '';
+        let gender = it.gender ?? it.child?.gender ?? '';
+        if (gender === 'MALE' || gender === 'male') gender = 'Nam';
+        else if (gender === 'FEMALE' || gender === 'female') gender = 'Nữ';
+        const className = it.className ?? it.child?.class?.name ?? '';
+        const measurementDate = it.measurementDate ? String(it.measurementDate).split('T')[0] : '';
+        const ageInMonths = it.ageInMonths ?? '';
+        const weightKg = it.weightKg ?? '';
+        const heightCm = it.heightCm ?? '';
+        const waz = it.waz != null ? Number(it.waz).toFixed(2) : '';
+        const haz = it.haz != null ? Number(it.haz).toFixed(2) : '';
+        const baz = it.baz != null ? Number(it.baz).toFixed(2) : '';
+        const weightStatus = it.weightStatus ?? it.weightClassification ?? '';
+        const overallStatus = it.overallStatus ?? it.overallNutritionalStatus ?? '';
+        const notes = it.notes ?? it.healthNotes ?? '';
+
+        return [
+          escapeField(studentCode),
+          escapeField(childName),
+          escapeField(gender),
+          escapeField(className),
+          escapeField(measurementDate),
+          ageInMonths,
+          weightKg,
+          heightCm,
+          waz,
+          haz,
+          baz,
+          escapeField(weightStatus),
+          escapeField(overallStatus),
+          escapeNotes(notes),
+        ];
+      });
+
+      // Gắn tiền tố \uFEFF (Byte Order Mark) vào đầu file để Microsoft Excel nhận diện đúng bảng mã Tiếng Việt UTF-8
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\r\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Bao_Cao_Phat_Trien_The_Luc_${new Date().toISOString().split('T')[0]}.csv`);
+      const today = new Date().toISOString().split('T')[0];
+      link.setAttribute('download', `Bao_Cao_Phat_Trien_The_Luc_${today}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSuccessNotification(`Xuất báo cáo phát triển thể chất thành công! Tệp Bao_Cao_Phat_Trien_The_Luc_${today}.csv đã được tải xuống (${res.items.length} bản ghi).`);
     } catch (err: any) {
-      alert('Không thể xuất báo cáo: ' + err.message);
+      alert('Không thể xuất báo cáo: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -528,11 +587,12 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
               onClick={handleExportReport}
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-              title="Xuất file CSV báo cáo thể lực học sinh"
+              disabled={exporting}
+              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              title="Xuất file CSV báo cáo thể lực học sinh (UC-80)"
             >
-              <Download className="w-4 h-4" />
-              <span>Xuất Báo Cáo</span>
+              <Download className={`w-4 h-4 ${exporting ? 'animate-bounce' : ''}`} />
+              <span>{exporting ? 'Đang xuất...' : 'Xuất Báo Cáo'}</span>
             </button>
             <button
               onClick={() => {

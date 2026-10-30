@@ -9,19 +9,19 @@ export interface WhoLmsEntry {
 export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoLmsEntry[]>> = {
   MALE: {
     WAZ: [
-      { age: 0,  L: 0.3487, M: 3.346,  S: 0.14602 },
-      { age: 6,  L: 0.1302, M: 7.934,  S: 0.11929 },
-      { age: 12, L: -0.098, M: 9.610,  S: 0.10825 },
-      { age: 24, L: -0.135, M: 12.15,  S: 0.11100 },
-      { age: 36, L: -0.158, M: 14.34,  S: 0.11720 },
-      { age: 48, L: -0.198, M: 16.33,  S: 0.12500 },
-      { age: 60, L: -0.238, M: 18.25,  S: 0.13280 },
-      { age: 72, L: -0.280, M: 20.52,  S: 0.14200 },
-      { age: 84, L: -0.320, M: 23.00,  S: 0.15000 },
+      { age: 0, L: 0.3487, M: 3.346, S: 0.14602 },
+      { age: 6, L: 0.1302, M: 7.934, S: 0.11929 },
+      { age: 12, L: -0.098, M: 9.610, S: 0.10825 },
+      { age: 24, L: -0.135, M: 12.15, S: 0.11100 },
+      { age: 36, L: -0.158, M: 14.34, S: 0.11720 },
+      { age: 48, L: -0.198, M: 16.33, S: 0.12500 },
+      { age: 60, L: -0.238, M: 18.25, S: 0.13280 },
+      { age: 72, L: -0.280, M: 20.52, S: 0.14200 },
+      { age: 84, L: -0.320, M: 23.00, S: 0.15000 },
     ],
     HAZ: [
-      { age: 0,  L: 1, M: 49.88, S: 0.03795 },
-      { age: 6,  L: 1, M: 67.62, S: 0.03600 },
+      { age: 0, L: 1, M: 49.88, S: 0.03795 },
+      { age: 6, L: 1, M: 67.62, S: 0.03600 },
       { age: 12, L: 1, M: 75.75, S: 0.03800 },
       { age: 24, L: 1, M: 87.80, S: 0.03900 },
       { age: 36, L: 1, M: 96.14, S: 0.04010 },
@@ -31,8 +31,8 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 84, L: 1, M: 121.7, S: 0.04400 },
     ],
     BAZ: [
-      { age: 0,  L: 0.28,  M: 13.40, S: 0.0940 },
-      { age: 6,  L: -0.10, M: 17.20, S: 0.0820 },
+      { age: 0, L: 0.28, M: 13.40, S: 0.0940 },
+      { age: 6, L: -0.10, M: 17.20, S: 0.0820 },
       { age: 12, L: -0.30, M: 16.80, S: 0.0810 },
       { age: 24, L: -0.65, M: 16.00, S: 0.0790 },
       { age: 36, L: -0.80, M: 15.50, S: 0.0800 },
@@ -44,19 +44,19 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
   },
   FEMALE: {
     WAZ: [
-      { age: 0,  L: 0.3809, M: 3.232,  S: 0.14171 },
-      { age: 6,  L: 0.1400, M: 7.297,  S: 0.12300 },
-      { age: 12, L: -0.140, M: 8.950,  S: 0.11400 },
-      { age: 24, L: -0.170, M: 11.50,  S: 0.11800 },
-      { age: 36, L: -0.210, M: 13.90,  S: 0.12500 },
-      { age: 48, L: -0.250, M: 15.80,  S: 0.13300 },
-      { age: 60, L: -0.290, M: 17.70,  S: 0.14100 },
-      { age: 72, L: -0.330, M: 20.00,  S: 0.15000 },
-      { age: 84, L: -0.370, M: 22.40,  S: 0.15900 },
+      { age: 0, L: 0.3809, M: 3.232, S: 0.14171 },
+      { age: 6, L: 0.1400, M: 7.297, S: 0.12300 },
+      { age: 12, L: -0.140, M: 8.950, S: 0.11400 },
+      { age: 24, L: -0.170, M: 11.50, S: 0.11800 },
+      { age: 36, L: -0.210, M: 13.90, S: 0.12500 },
+      { age: 48, L: -0.250, M: 15.80, S: 0.13300 },
+      { age: 60, L: -0.290, M: 17.70, S: 0.14100 },
+      { age: 72, L: -0.330, M: 20.00, S: 0.15000 },
+      { age: 84, L: -0.370, M: 22.40, S: 0.15900 },
     ],
     HAZ: [
-      { age: 0,  L: 1, M: 49.14, S: 0.03790 },
-      { age: 6,  L: 1, M: 65.73, S: 0.03700 },
+      { age: 0, L: 1, M: 49.14, S: 0.03790 },
+      { age: 6, L: 1, M: 65.73, S: 0.03700 },
       { age: 12, L: 1, M: 74.02, S: 0.03900 },
       { age: 24, L: 1, M: 86.40, S: 0.04000 },
       { age: 36, L: 1, M: 95.10, S: 0.04100 },
@@ -66,8 +66,8 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 84, L: 1, M: 120.6, S: 0.04500 },
     ],
     BAZ: [
-      { age: 0,  L: 0.30,  M: 13.30, S: 0.0960 },
-      { age: 6,  L: -0.15, M: 16.80, S: 0.0850 },
+      { age: 0, L: 0.30, M: 13.30, S: 0.0960 },
+      { age: 6, L: -0.15, M: 16.80, S: 0.0850 },
       { age: 12, L: -0.35, M: 16.30, S: 0.0840 },
       { age: 24, L: -0.70, M: 15.70, S: 0.0820 },
       { age: 36, L: -0.82, M: 15.30, S: 0.0850 },
@@ -148,7 +148,7 @@ export interface ChartCurvePoint {
 
 export function generateWhoGrowthCurveData(
   gender: 'MALE' | 'FEMALE',
-  history: Array<{ ageInMonths: number; weightKg: number; heightCm: number; bmi: number; [key: string]: any }>,
+  history: Array<{ ageInMonths: number; weightKg: number; heightCm: number; bmi: number;[key: string]: any }>,
 ): ChartCurvePoint[] {
   const gKey = gender === 'FEMALE' ? 'FEMALE' : 'MALE';
   const defaultMilestones = [24, 30, 36, 42, 48, 54, 60, 66, 72];
