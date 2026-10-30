@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Search,
   Download,
@@ -16,19 +18,7 @@ import {
   MessageSquare,
   Sparkles,
   UtensilsCrossed,
-  Lock,
-  Layers,
-  CreditCard,
-  Send,
-  FileSpreadsheet,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ArrowUpRight,
-  Building,
-  Phone,
-  ShieldAlert,
-  RefreshCw,
+  ClipboardList,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../../core/api/axios';
@@ -228,27 +218,20 @@ export const SnackServicesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {activeTab === 'roster' ? (
-            <button
-              onClick={handleExportRoster}
-              className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Xuất Danh Sách Suất Ăn (CSV)
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setActiveTab('roster');
-                loadRosterData();
-              }}
-              className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
-            >
-              <Download className="w-4 h-4 text-slate-500" />
-              Xem Danh Sách Đăng Ký
-            </button>
-          )}
 
+          <Link
+            to="/snack-roster"
+            className="px-4 py-2.5 bg-teal-50 border border-teal-200 rounded-xl text-xs font-bold text-teal-800 hover:bg-teal-100 shadow-sm flex items-center gap-2 transition"
+          >
+            <ClipboardList className="w-4 h-4 text-teal-600" />
+            Bảng phân công ăn xế (Roster)
+          </Link>
+          <button className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition">
+            <Download className="w-4 h-4 text-slate-500" />
+            Xuất danh sách đăng ký Excel
+          </button>
+
+      
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
