@@ -1,6 +1,159 @@
-import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, AlertTriangle, Plus, Trash2, UploadCloud, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { X, ShieldCheck, AlertTriangle, Plus, Trash2, RefreshCw, Search, ChevronDown } from 'lucide-react';
 import { apiClient } from '@/core/api/axios';
+
+interface SearchableFoodSelectProps {
+  value: string;
+  foods: any[];
+  onChange: (foodId: string) => void;
+  disabled?: boolean;
+}
+
+const removeVietnameseTones = (str: string): string => {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
+};
+
+const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
+  value,
+  foods,
+  onChange,
+  disabled,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const selectedFood = useMemo(() => {
+    return foods.find((f) => String(f.id) === String(value));
+  }, [foods, value]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setQuery(selectedFood?.name || '');
+    }
+  }, [isOpen, selectedFood]);
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  const filteredFoods = useMemo(() => {
+    if (!query || (selectedFood && query === selectedFood.name)) {
+      return foods;
+    }
+    const qRaw = query.toLowerCase().trim();
+    const qNoTone = removeVietnameseTones(query.trim());
+    return foods.filter((f) => {
+      const name = (f.name || '').toLowerCase();
+      const nameNoTone = removeVietnameseTones(f.name || '');
+      return name.includes(qRaw) || nameNoTone.includes(qNoTone);
+    });
+  }, [foods, query, selectedFood]);
+
+  if (disabled) {
+    return <span className="font-bold text-slate-700">{selectedFood?.name || 'Nguyên liệu'}</span>;
+  }
+
+  return (
+    <div className="relative w-full min-w-[220px]" ref={wrapperRef}>
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          placeholder="Nhập chữ tìm hoặc kéo chọn..."
+          className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-lg pl-2.5 pr-14 py-1.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition"
+        />
+        <div className="absolute right-1.5 flex items-center gap-0.5 text-slate-400">
+          {query && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setQuery('');
+                onChange('');
+                setIsOpen(true);
+              }}
+              className="hover:text-slate-600 p-0.5"
+              title="Xóa lựa chọn"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="hover:text-slate-600 p-0.5"
+          >
+            <ChevronDown
+              className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180 text-emerald-600' : ''}`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
+          <div className="p-1.5 text-[10px] font-bold text-slate-400 bg-slate-50 uppercase tracking-wider flex justify-between sticky top-0 z-10 border-b border-slate-100">
+            <span>Danh sách nguyên liệu ({filteredFoods.length})</span>
+            <span className="text-emerald-600 font-normal">Kéo cuộn để xem thêm ↓</span>
+          </div>
+          {filteredFoods.length === 0 ? (
+            <div className="p-3 text-center text-xs text-slate-400 italic">
+              Không tìm thấy nguyên liệu nào khớp với "{query}"
+            </div>
+          ) : (
+            filteredFoods.map((f) => {
+              const isSelected = String(f.id) === String(value);
+              const kcal = Number(f.energyKcal100g || f.energyKcal || 0);
+              return (
+                <div
+                  key={f.id}
+                  onClick={() => {
+                    onChange(String(f.id));
+                    setQuery(f.name);
+                    setIsOpen(false);
+                  }}
+                  className={`px-3 py-2 text-xs cursor-pointer flex items-center justify-between hover:bg-emerald-50 transition ${
+                    isSelected ? 'bg-emerald-50 font-bold text-emerald-800' : 'text-slate-700'
+                  }`}
+                >
+                  <div className="flex flex-col text-left">
+                    <span className="font-semibold text-slate-800">{f.name}</span>
+                    <span className="text-[10px] text-slate-400">
+                      {kcal > 0 ? `${kcal} Kcal/100g` : ''} {f.unit ? `• Đơn vị: ${f.unit}` : ''}
+                    </span>
+                  </div>
+                  {f.allergens && (Array.isArray(f.allergens) ? f.allergens.length > 0 : Boolean(f.allergens)) && (
+                    <span className="text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold border border-rose-100 whitespace-nowrap ml-2">
+                      Dị ứng
+                    </span>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface DishModalProps {
   isOpen: boolean;
@@ -13,11 +166,14 @@ interface DishModalProps {
 export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [foods, setFoods] = useState<any[]>([]); // For ingredient search
+  const [foods, setFoods] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [foodSearches, setFoodSearches] = useState<Record<number, string>>({}); // search text per row
 
   const [formData, setFormData] = useState({
     name: '',
-    dishType: 'MAIN_COURSE',
+    categoryId: '',
+    dishType: 'MAIN',
     targetAgeGroup: 'KINDERGARTEN_3_5Y',
     photoUrl: '',
     cookingInstructions: '',
@@ -26,19 +182,79 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
     recipeItems: [] as any[],
   });
 
+  const formatExact = (val: any): string => {
+    if (val === null || val === undefined || val === '') return '0';
+    const n = Number(val);
+    if (isNaN(n)) return '0';
+    return String(Math.round(n * 100) / 100);
+  };
+
   const [nutritionTotals, setNutritionTotals] = useState({
     totalCalories: 0,
     totalProteinG: 0,
     totalFatG: 0,
     totalCarbG: 0,
+    totalFiberG: 0,
+    totalCalciumMg: 0,
+    totalIronMg: 0,
+    totalZincMg: 0,
   });
+
+  const calculateDynamicNutrition = (items: any[]) => {
+    let calories = 0;
+    let protein = 0;
+    let fat = 0;
+    let carb = 0;
+    let fiber = 0;
+    let calcium = 0;
+    let iron = 0;
+    let zinc = 0;
+
+    items.forEach(item => {
+      const food = item.food || foods.find(f => String(f.id) === String(item.foodId));
+      if (food) {
+        const ratio = (Number(item.netWeightPerPortionG) || 0) / 100;
+        calories += (Number(food.energyKcal || food.energyKcal100g) || 0) * ratio;
+        protein += (Number(food.proteinG) || 0) * ratio;
+        fat += (Number(food.fatG) || 0) * ratio;
+        carb += (Number(food.carbG) || 0) * ratio;
+        fiber += (Number(food.fiberG) || 0) * ratio;
+        calcium += (Number(food.calciumMg) || 0) * ratio;
+        iron += (Number(food.ironMg) || 0) * ratio;
+        zinc += (Number(food.zincMg) || 0) * ratio;
+      }
+    });
+
+    setNutritionTotals({
+      totalCalories: calories,
+      totalProteinG: protein,
+      totalFatG: fat,
+      totalCarbG: carb,
+      totalFiberG: fiber,
+      totalCalciumMg: calcium,
+      totalIronMg: iron,
+      totalZincMg: zinc,
+    });
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await apiClient.get('/dishes/categories');
+      setCategories(res.data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
+      fetchCategories();
+      fetchFoods();
       if (mode === 'create') {
         setFormData({
           name: '',
-          dishType: 'MAIN_COURSE',
+          categoryId: '',
+          dishType: 'MAIN',
           targetAgeGroup: 'KINDERGARTEN_3_5Y',
           photoUrl: '',
           cookingInstructions: '',
@@ -46,35 +262,59 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
           isActive: true,
           recipeItems: [],
         });
-        setNutritionTotals({ totalCalories: 0, totalProteinG: 0, totalFatG: 0, totalCarbG: 0 });
+        setNutritionTotals({
+          totalCalories: 0,
+          totalProteinG: 0,
+          totalFatG: 0,
+          totalCarbG: 0,
+          totalFiberG: 0,
+          totalCalciumMg: 0,
+          totalIronMg: 0,
+          totalZincMg: 0,
+        });
       } else if (dishId) {
         fetchDish();
       }
-      fetchFoods();
     }
   }, [isOpen, mode, dishId]);
+
+  // Tự động tính lại dinh dưỡng khi recipeItems hoặc foods thay đổi
+  useEffect(() => {
+    if (formData.recipeItems.length > 0 && foods.length > 0) {
+      calculateDynamicNutrition(formData.recipeItems);
+    }
+  }, [formData.recipeItems, foods]);
 
   const fetchDish = async () => {
     try {
       setLoading(true);
       const res = await apiClient.get(`/dishes/${dishId}`);
       const data = res.data;
+
+      const items =
+        data.recipeItems && data.recipeItems.length > 0
+          ? data.recipeItems
+          : (data.recipes || []).map((r: any) => ({
+              id: r.id,
+              foodId: String(r.ingredientId || r.foodId),
+              netWeightPerPortionG: Number(r.netWeightG || r.netWeightPerPortionG || 0),
+              grossWeightPerPortionG: Number(r.grossWeightG || r.grossWeightPerPortionG || 0),
+              note: r.note,
+              food: r.food,
+            }));
+
       setFormData({
         name: data.name,
-        dishType: data.dishType || 'MAIN_COURSE',
+        categoryId: data.categoryId ? String(data.categoryId) : (data.category?.id ? String(data.category.id) : ''),
+        dishType: data.dishType || data.categoryCode || data.category?.code || 'MAIN',
         targetAgeGroup: data.targetAgeGroup || 'KINDERGARTEN_3_5Y',
         photoUrl: data.photoUrl || '',
         cookingInstructions: data.cookingInstructions || '',
-        presentationNotes: data.presentationNotes || '',
-        isActive: data.isActive,
-        recipeItems: data.recipeItems || [],
+        presentationNotes: data.description || data.presentationNotes || '',
+        isActive: data.isActive !== false && data.status !== 'INACTIVE',
+        recipeItems: items,
       });
-      setNutritionTotals({
-        totalCalories: Number(data.totalCalories) || 0,
-        totalProteinG: Number(data.totalProteinG) || 0,
-        totalFatG: Number(data.totalFatG) || 0,
-        totalCarbG: Number(data.totalCarbG) || 0,
-      });
+      // nutrition sẽ được tự tính lại qua useEffect khi foods load xong
     } catch (error) {
       console.error(error);
     } finally {
@@ -84,37 +324,13 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
 
   const fetchFoods = async () => {
     try {
-      // Fetch some common foods for the dropdown (in real app, this should be searchable)
-      const res = await apiClient.get('/foods', { params: { limit: 100 } });
-      setFoods(res.data.items);
+      // Fetch all foods for the recipe dropdown
+      const res = await apiClient.get('/foods', { params: { limit: 500 } });
+      const items = Array.isArray(res.data) ? res.data : (res.data?.items || res.data?.data || []);
+      setFoods(items);
     } catch (error) {
       console.error(error);
     }
-  };
-
-  const calculateDynamicNutrition = (items: any[]) => {
-    let calories = 0;
-    let protein = 0;
-    let fat = 0;
-    let carb = 0;
-
-    items.forEach(item => {
-      const food = item.food || foods.find(f => f.id === item.foodId);
-      if (food) {
-        const ratio = (item.netWeightPerPortionG || 0) / 100;
-        calories += (food.energyKcal || 0) * ratio;
-        protein += (food.proteinG || 0) * ratio;
-        fat += (food.fatG || 0) * ratio;
-        carb += (food.carbG || 0) * ratio;
-      }
-    });
-
-    setNutritionTotals({
-      totalCalories: calories,
-      totalProteinG: protein,
-      totalFatG: fat,
-      totalCarbG: carb,
-    });
   };
 
   const handleRecipeItemChange = (index: number, field: string, value: any) => {
@@ -123,7 +339,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
     
     // If food changes, attach food object for calculation
     if (field === 'foodId') {
-      updatedItems[index].food = foods.find(f => f.id === value);
+      updatedItems[index].food = foods.find(f => String(f.id) === String(value));
     }
 
     setFormData(prev => ({ ...prev, recipeItems: updatedItems }));
@@ -147,14 +363,31 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
     e.preventDefault();
     try {
       setSaving(true);
+      const validItems = formData.recipeItems.filter(ri => ri.foodId && Number(ri.netWeightPerPortionG) > 0);
       const payload = {
-        ...formData,
-        recipeItems: formData.recipeItems.filter(ri => ri.foodId && ri.netWeightPerPortionG > 0).map(ri => ({
-          foodId: ri.foodId,
+        name: formData.name,
+        categoryId: formData.categoryId ? Number(formData.categoryId) : undefined,
+        dishType: formData.dishType,
+        targetAgeGroup: formData.targetAgeGroup,
+        photoUrl: formData.photoUrl,
+        cookingInstructions: formData.cookingInstructions,
+        description: formData.presentationNotes,
+        presentationNotes: formData.presentationNotes,
+        isActive: formData.isActive,
+        status: formData.isActive ? 'ACTIVE' : 'INACTIVE',
+        recipes: validItems.map(ri => ({
+          ingredientId: Number(ri.foodId),
+          netWeightG: Number(ri.netWeightPerPortionG),
+          grossWeightG: Number(ri.grossWeightPerPortionG || ri.netWeightPerPortionG),
+          note: ri.prepNotes || ri.note || null,
+        })),
+        recipeItems: validItems.map(ri => ({
+          foodId: String(ri.foodId),
+          ingredientId: Number(ri.foodId),
           netWeightPerPortionG: Number(ri.netWeightPerPortionG),
           grossWeightPerPortionG: Number(ri.grossWeightPerPortionG || ri.netWeightPerPortionG),
-          shrinkageRatio: Number(ri.shrinkageRatio || 0)
-        }))
+          shrinkageRatio: Number(ri.shrinkageRatio || 0),
+        })),
       };
 
       if (mode === 'edit' && dishId) {
@@ -202,9 +435,6 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div>
-            <div className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full inline-block mb-1">
-              CHUẨN VN-RDA 2024
-            </div>
             <h2 className="text-lg font-bold text-slate-800">
               {mode === 'view' ? 'Chi tiết món ăn' : mode === 'edit' ? 'Chỉnh sửa món ăn & Công thức' : 'Thêm mới món ăn'}
             </h2>
@@ -221,35 +451,6 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
           ) : (
             <form id="dish-form" onSubmit={handleSubmit} className="space-y-8">
               
-              {/* Ảnh món ăn */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <label className="block text-sm font-bold text-slate-700 mb-3">Hình ảnh minh họa</label>
-                {formData.photoUrl ? (
-                  <div className="relative rounded-xl overflow-hidden border border-slate-200 h-48 w-full">
-                    <img src={`http://localhost:3000${formData.photoUrl}`} alt="Dish" className="w-full h-full object-cover" />
-                    {mode !== 'view' && (
-                      <button 
-                        type="button" 
-                        onClick={() => setFormData(prev => ({ ...prev, photoUrl: '' }))}
-                        className="absolute top-2 right-2 bg-white/90 text-red-500 p-1.5 rounded-full shadow-sm hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ) : mode !== 'view' ? (
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl h-48 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 transition relative">
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" disabled={uploadingImage} />
-                    <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
-                    <p className="text-sm font-bold text-slate-600">{uploadingImage ? 'Đang tải...' : 'Tải ảnh món ăn lên'}</p>
-                  </div>
-                ) : (
-                  <div className="border border-slate-200 rounded-xl h-48 flex items-center justify-center bg-slate-50 text-slate-400">
-                    Chưa có hình ảnh
-                  </div>
-                )}
-              </div>
-
               {/* Thông tin cơ bản */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
@@ -257,8 +458,8 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                   <h3 className="font-bold text-slate-800">Thông tin món ăn</h3>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-5">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 gap-5">
+                  <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">Tên món ăn học đường *</label>
                     <input 
                       required disabled={mode === 'view'}
@@ -268,36 +469,52 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                     />
                   </div>
                   
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Loại bữa ăn</label>
-                    <select 
-                      disabled={mode === 'view'} value={formData.dishType} onChange={e => setFormData(prev => ({ ...prev, dishType: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm"
-                    >
-                      <option value="MAIN_COURSE">Món mặn (Bữa chính)</option>
-                      <option value="SOUP">Món canh</option>
-                      <option value="SIDE_VEGETABLE">Rau củ xào/luộc</option>
-                      <option value="RICE_STAPLE">Cơm / Tinh bột</option>
-                      <option value="PORRIDGE_NOODLE">Cháo / Bún / Phở</option>
-                      <option value="DESSERT">Tráng miệng / Trái cây</option>
-                      <option value="SNACK_AFTERNOON">Bữa phụ xế (Bánh/Sữa)</option>
-                      <option value="DRINK">Thức uống bổ sung</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Khối tuổi áp dụng</label>
-                    <select 
-                      disabled={mode === 'view'} value={formData.targetAgeGroup} onChange={e => setFormData(prev => ({ ...prev, targetAgeGroup: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm"
-                    >
-                      <option value="TODDLER_18_36M">Nhà trẻ (18 - 36 tháng)</option>
-                      <option value="KINDERGARTEN_3_5Y">Mẫu giáo (3 - 5 tuổi)</option>
-                      <option value="ALL_AGES">Toàn trường</option>
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Loại bữa ăn (Danh mục chuẩn) *</label>
+                      <select 
+                        disabled={mode === 'view'} 
+                        value={formData.categoryId || categories.find(c => c.code === formData.dishType)?.id || ''} 
+                        onChange={e => {
+                          const selectedId = e.target.value;
+                          const cat = categories.find(c => String(c.id) === String(selectedId));
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            categoryId: selectedId, 
+                            dishType: cat?.code || prev.dishType 
+                          }));
+                        }}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm font-semibold bg-white disabled:bg-slate-50 disabled:text-slate-700"
+                      >
+                        <option value="">-- Chọn loại bữa ăn --</option>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Trạng thái hoạt động *</label>
+                      <select 
+                        disabled={mode === 'view'} 
+                        value={formData.isActive ? 'ACTIVE' : 'INACTIVE'} 
+                        onChange={e => {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            isActive: e.target.value === 'ACTIVE' 
+                          }));
+                        }}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm font-semibold bg-white disabled:bg-slate-50 disabled:text-slate-700"
+                      >
+                        <option value="ACTIVE">Đang phục vụ</option>
+                        <option value="INACTIVE">Tạm ngưng</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="col-span-2">
+                  <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả cảm quan & dinh dưỡng</label>
                     <textarea 
                       disabled={mode === 'view'} value={formData.presentationNotes} onChange={e => setFormData(prev => ({ ...prev, presentationNotes: e.target.value }))}
@@ -321,23 +538,47 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                 <div className="grid grid-cols-4 gap-3">
                   <div className="bg-[#fff9ea] rounded-xl p-3 border border-[#fdebb4] text-center">
                     <div className="text-[10px] font-bold text-[#b58013] mb-1">NĂNG LƯỢNG</div>
-                    <div className="text-xl font-black text-slate-800">{Math.round(nutritionTotals.totalCalories)}</div>
+                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalCalories)}</div>
                     <div className="text-[10px] text-[#b58013]">kcal / suất</div>
                   </div>
                   <div className="bg-[#f0f7ff] rounded-xl p-3 border border-[#cbe1ff] text-center">
                     <div className="text-[10px] font-bold text-[#2a68c0] mb-1">ĐẠM / PROTEIN</div>
-                    <div className="text-xl font-black text-slate-800">{nutritionTotals.totalProteinG.toFixed(1)}</div>
-                    <div className="text-[10px] text-[#2a68c0]">gam ({nutritionTotals.totalCalories ? Math.round((nutritionTotals.totalProteinG * 4 / nutritionTotals.totalCalories) * 100) : 0}%)</div>
+                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalProteinG)}</div>
+                    <div className="text-[10px] text-[#2a68c0]">gam ({nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalProteinG) * 4 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
                   </div>
                   <div className="bg-[#fff0f3] rounded-xl p-3 border border-[#ffcfd8] text-center">
                     <div className="text-[10px] font-bold text-[#c93051] mb-1">BÉO / LIPID</div>
-                    <div className="text-xl font-black text-slate-800">{nutritionTotals.totalFatG.toFixed(1)}</div>
-                    <div className="text-[10px] text-[#c93051]">gam ({nutritionTotals.totalCalories ? Math.round((nutritionTotals.totalFatG * 9 / nutritionTotals.totalCalories) * 100) : 0}%)</div>
+                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalFatG)}</div>
+                    <div className="text-[10px] text-[#c93051]">gam ({nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalFatG) * 9 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
                   </div>
                   <div className="bg-[#f2fcf7] rounded-xl p-3 border border-[#c4ebd6] text-center">
                     <div className="text-[10px] font-bold text-[#1e814a] mb-1">BỘT / CARB</div>
-                    <div className="text-xl font-black text-slate-800">{nutritionTotals.totalCarbG.toFixed(1)}</div>
-                    <div className="text-[10px] text-[#1e814a]">gam ({nutritionTotals.totalCalories ? Math.round((nutritionTotals.totalCarbG * 4 / nutritionTotals.totalCalories) * 100) : 0}%)</div>
+                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalCarbG)}</div>
+                    <div className="text-[10px] text-[#1e814a]">gam ({nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalCarbG) * 4 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
+                  </div>
+                </div>
+
+                {/* Vi chất dinh dưỡng từ Database */}
+                <div className="grid grid-cols-4 gap-3 mt-3">
+                  <div className="bg-emerald-50/70 rounded-xl p-2.5 border border-emerald-100 text-center">
+                    <div className="text-[9.5px] font-bold text-emerald-800 mb-0.5">CHẤT XƠ (Fiber)</div>
+                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalFiberG)}</div>
+                    <div className="text-[9.5px] text-emerald-600">gam / suất</div>
+                  </div>
+                  <div className="bg-sky-50/70 rounded-xl p-2.5 border border-sky-100 text-center">
+                    <div className="text-[9.5px] font-bold text-sky-800 mb-0.5">CANXI (Calcium)</div>
+                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalCalciumMg)}</div>
+                    <div className="text-[9.5px] text-sky-600">mg / suất</div>
+                  </div>
+                  <div className="bg-amber-50/70 rounded-xl p-2.5 border border-amber-100 text-center">
+                    <div className="text-[9.5px] font-bold text-amber-800 mb-0.5">SẮT (Iron)</div>
+                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalIronMg)}</div>
+                    <div className="text-[9.5px] text-amber-600">mg / suất</div>
+                  </div>
+                  <div className="bg-purple-50/70 rounded-xl p-2.5 border border-purple-100 text-center">
+                    <div className="text-[9.5px] font-bold text-purple-800 mb-0.5">KẼM (Zinc)</div>
+                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalZincMg)}</div>
+                    <div className="text-[9.5px] text-purple-600">mg / suất</div>
                   </div>
                 </div>
                 <p className="text-[10px] text-slate-400 mt-3 italic text-center">
@@ -355,11 +596,11 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                   <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">{formData.recipeItems.length} nguyên liệu</span>
                 </div>
 
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <div className="border border-slate-200 rounded-xl overflow-visible">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase">
                       <tr>
-                        <th className="px-3 py-2">Nguyên liệu</th>
+                        <th className="px-3 py-2 w-72">Nguyên liệu</th>
                         <th className="px-3 py-2 text-center w-28">Định lượng (g)</th>
                         <th className="px-2 py-2 text-center">Kcal</th>
                         <th className="px-2 py-2 text-center">Protein</th>
@@ -376,20 +617,12 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                         return (
                           <tr key={idx} className="hover:bg-slate-50">
                             <td className="px-3 py-2">
-                              {mode === 'view' ? (
-                                <span className="font-bold text-slate-700">{food?.name || 'Nguyên liệu'}</span>
-                              ) : (
-                                <select 
-                                  value={item.foodId} 
-                                  onChange={e => handleRecipeItemChange(idx, 'foodId', e.target.value)}
-                                  className="w-full bg-transparent border-b border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-700 py-1"
-                                >
-                                  <option value="">-- Chọn --</option>
-                                  {foods.map(f => (
-                                    <option key={f.id} value={f.id}>{f.name}</option>
-                                  ))}
-                                </select>
-                              )}
+                              <SearchableFoodSelect
+                                value={item.foodId}
+                                foods={foods}
+                                onChange={(foodId) => handleRecipeItemChange(idx, 'foodId', foodId)}
+                                disabled={mode === 'view'}
+                              />
                             </td>
                             <td className="px-3 py-2 text-center">
                               {mode === 'view' ? (
@@ -405,10 +638,10 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                                 </div>
                               )}
                             </td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? Math.round(food.energyKcal * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? (food.proteinG * ratio).toFixed(1) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? (food.fatG * ratio).toFixed(1) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? (food.carbG * ratio).toFixed(1) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500 font-semibold">{food ? formatExact((Number(food.energyKcal || food.energyKcal100g) || 0) * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.proteinG) || 0) * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.fatG) || 0) * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.carbG) || 0) * ratio) : '-'}</td>
                             <td className="px-2 py-2 text-center">
                                {food?.allergens?.length > 0 ? (
                                  <span className="text-[9px] bg-red-50 text-red-600 border border-red-100 px-1 py-0.5 rounded">Có</span>

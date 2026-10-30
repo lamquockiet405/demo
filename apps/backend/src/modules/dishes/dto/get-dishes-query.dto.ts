@@ -1,27 +1,54 @@
-import { IsOptional, IsString, IsBooleanString, IsNumberString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetDishesQueryDto {
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  categoryId?: number;
+
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   dishType?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  categoryCode?: string;
+
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   targetAgeGroup?: string;
 
+  @ApiPropertyOptional({ enum: ['ALL', 'SAFE', 'WARNING'] })
   @IsOptional()
-  @IsBooleanString()
-  isActive?: string;
+  @IsString()
+  allergenFilter?: string;
 
+  @ApiPropertyOptional({ enum: ['ACTIVE', 'INACTIVE'] })
   @IsOptional()
-  @IsNumberString()
-  page?: string;
+  @IsString()
+  status?: string;
 
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsNumberString()
-  limit?: string;
+  isActive?: boolean | string;
+
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  limit?: number = 50;
 }

@@ -18,7 +18,8 @@ export class AttendanceService {
     private readonly classRepo: Repository<ClassEntity>,
     @InjectRepository(Child)
     private readonly childRepo: Repository<Child>,
-  ) { }
+  ) {}
+
 
   async getClasses() {
     const classes = await this.classRepo.find({ order: { name: 'ASC' } });
@@ -83,14 +84,17 @@ export class AttendanceService {
           nameLower.includes('mầm') || nameLower.includes('mam')
             ? 'MAM'
             : nameLower.includes('chồi') || nameLower.includes('choi')
-              ? 'CHOI'
-              : 'LA';
+            ? 'CHOI'
+            : 'LA';
+
         const gradeName =
           gradeLevel === 'MAM'
             ? 'Khối Mầm (3-4T)'
             : gradeLevel === 'CHOI'
-              ? 'Khối Chồi (4-5T)'
-              : 'Khối Lá (5-6T)';
+
+            ? 'Khối Chồi (4-5T)'
+            : 'Khối Lá (5-6T)';
+
         return {
           id: String(cls.id),
           name: cls.name,

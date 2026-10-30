@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Dish } from './entities/dish.entity';
+import { DishCategory } from './entities/dish-category.entity';
 import { RecipeItem } from './entities/recipe-item.entity';
+import { DishNutrition } from './entities/dish-nutrition.entity';
 import { Food } from '../foods/entities/food.entity';
 import { CreateDishDto } from './dto/create-dish.dto';
 import { UpdateDishDto } from './dto/update-dish.dto';
@@ -12,199 +14,472 @@ import { GetDishesQueryDto } from './dto/get-dishes-query.dto';
 export class DishesService {
   constructor(
     @InjectRepository(Dish)
-    private readonly dishRepository: Repository<Dish>,
+    private readonly dishRepo: Repository<Dish>,
+    @InjectRepository(DishCategory)
+    private readonly catRepo: Repository<DishCategory>,
     @InjectRepository(RecipeItem)
-    private readonly recipeItemRepository: Repository<RecipeItem>,
+    private readonly recipeRepo: Repository<RecipeItem>,
+    @InjectRepository(DishNutrition)
+    private readonly nutritionRepo: Repository<DishNutrition>,
     @InjectRepository(Food)
-    private readonly foodRepository: Repository<Food>,
+    private readonly foodRepo: Repository<Food>,
   ) {}
 
-  async findAll(tenantId: string, query: GetDishesQueryDto) {
-    const { search, dishType, targetAgeGroup, isActive, page = '1', limit = '8' } = query;
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
-    const skip = (pageNum - 1) * limitNum;
+  async findAll(query: GetDishesQueryDto) {
+    const typeFilter = query.dishType || query.categoryCode;
 
-    const queryBuilder = this.dishRepository.createQueryBuilder('dish')
-      .leftJoinAndSelect('dish.recipeItems', 'recipeItems')
-      .leftJoinAndSelect('recipeItems.food', 'food')
-      .where('dish.tenantId = :tenantId', { tenantId });
+    const applyFilters = (builder: any) => {
+      if (query.search) {
+        builder.andWhere(
+          '(LOWER(unaccent(d.name)) LIKE LOWER(unaccent(:search)) OR LOWER(unaccent(COALESCE(d.description, \'\'))) LIKE LOWER(unaccent(:search)))',
+          {
+            search: `%${query.search.trim()}%`,
+          },
+        );
+      }
 
-    if (search) {
-      queryBuilder.andWhere(
-        new Brackets((qb) => {
-          qb.where('unaccent(dish.name) ILIKE unaccent(:search)', { search: `%${search}%` });
-        }),
-      );
-    }
+      if (query.categoryId) {
+        builder.andWhere('d.categoryId = :catId', { catId: query.categoryId });
+      }
 
-    if (dishType) {
-      queryBuilder.andWhere('dish.dishType = :dishType', { dishType });
-    }
+      if (typeFilter) {
+        const typeMap: Record<string, string[]> = {
+          MAIN_COURSE: ['MAIN'],
+          SOUP: ['SOUP'],
+          SIDE_VEGETABLE: ['SIDE'],
+          RICE_STAPLE: ['RICE'],
+          PORRIDGE_NOODLE: ['RICE', 'SNACK_MORNING'],
+          DESSERT: ['DESSERT'],
+          SNACK_AFTERNOON: ['SNACK_AFTERNOON', 'SNACK_MORNING'],
+          DRINK: ['DRINK'],
+        };
+        const codes = typeMap[typeFilter] || [typeFilter];
+        builder.andWhere('cat.code IN (:...catCodes)', { catCodes: codes });
+      }
 
-    if (targetAgeGroup) {
-      queryBuilder.andWhere('dish.targetAgeGroup = :targetAgeGroup', { targetAgeGroup });
-    }
+      if (query.allergenFilter === 'WARNING') {
+        builder.andWhere('EXISTS (SELECT 1 FROM dish_allergens da_sub WHERE da_sub.dish_id = d.id)');
+      } else if (query.allergenFilter === 'SAFE') {
+        builder.andWhere('NOT EXISTS (SELECT 1 FROM dish_allergens da_sub WHERE da_sub.dish_id = d.id)');
+      }
 
-    if (isActive !== undefined) {
-      queryBuilder.andWhere('dish.isActive = :isActive', { isActive: String(isActive) === 'true' });
-    }
-
-    queryBuilder.orderBy('dish.createdAt', 'DESC');
-    queryBuilder.skip(skip).take(limitNum);
-
-    const [items, total] = await queryBuilder.getManyAndCount();
-
-    // Lấy thông tin thống kê cho UI (Optional but helpful)
-    const stats = await this.getStats(tenantId);
-
-    return {
-      items,
-      total,
-      page: pageNum,
-      limit: limitNum,
-      totalPages: Math.ceil(total / limitNum),
-      stats
+      if (query.isActive !== undefined && query.isActive !== '') {
+        const active = query.isActive === true || query.isActive === 'true';
+        builder.andWhere('d.status = :status', { status: active ? 'ACTIVE' : 'INACTIVE' });
+      } else if (query.status) {
+        builder.andWhere('d.status = :status', { status: query.status });
+      }
     };
-  }
 
-  async getStats(tenantId: string) {
-    const totalDishes = await this.dishRepository.count({ where: { tenantId } });
-    const mainDishes = await this.dishRepository.count({ where: { tenantId, dishType: In(['MAIN_COURSE', 'SOUP', 'SIDE_VEGETABLE', 'RICE_STAPLE']) } });
-    const sideDishes = await this.dishRepository.count({ where: { tenantId, dishType: In(['SNACK_AFTERNOON', 'DRINK', 'PORRIDGE_NOODLE']) } });
-    
-    // Đếm món có chứa dị nguyên (allergens > 0 in their foods)
-    const allergenDishesCount = await this.dishRepository.createQueryBuilder('dish')
-      .innerJoin('dish.recipeItems', 'ri')
-      .innerJoin('ri.food', 'food')
-      .where('dish.tenantId = :tenantId', { tenantId })
-      .andWhere('array_length(food.allergens, 1) > 0')
-      .getCount();
+    const qb = this.dishRepo
+      .createQueryBuilder('d')
+      .leftJoinAndSelect('d.category', 'cat')
+      .leftJoinAndSelect('d.nutrition', 'nutr')
+      .leftJoinAndSelect('d.recipes', 'rec')
+      .leftJoinAndSelect('rec.ingredient', 'ing')
+      .leftJoinAndSelect('d.dishAllergens', 'da')
+      .leftJoinAndSelect('da.allergen', 'allg');
 
-    return {
+    applyFilters(qb);
+
+    const page = query.page || 1;
+    const limit = query.limit || 50;
+    qb.skip((page - 1) * limit).take(limit);
+    qb.orderBy('d.id', 'ASC');
+
+    const [items, total] = await qb.getManyAndCount();
+
+    const mapped = items.map((d) => {
+      const nutr = d.nutrition || {
+        energyKcal: 0,
+        proteinG: 0,
+        fatG: 0,
+        carbG: 0,
+        fiberG: 0,
+        calciumMg: 0,
+        ironMg: 0,
+        zincMg: 0,
+      };
+
+      const energyKcal = Number(nutr.energyKcal) || 0;
+      const proteinG = Number(nutr.proteinG) || 0;
+      const fatG = Number(nutr.fatG) || 0;
+      const carbG = Number(nutr.carbG) || 0;
+      const fiberG = Number(nutr.fiberG) || 0;
+      const calciumMg = Number(nutr.calciumMg) || 0;
+      const ironMg = Number(nutr.ironMg) || 0;
+      const zincMg = Number(nutr.zincMg) || 0;
+
+      return {
+        id: String(d.id),
+        code: `MA${String(d.id).padStart(4, '0')}`,
+        name: d.name,
+        description: d.description,
+        categoryId: d.categoryId ? String(d.categoryId) : null,
+        categoryName: d.category?.name || 'Khác',
+        categoryCode: d.category?.code || 'MAIN',
+        dishType: d.category?.code || 'MAIN_COURSE',
+        targetAgeGroup: 'KINDERGARTEN_3_5Y',
+        standardServingSizeG: Number(d.standardServingSizeG) || 100,
+        status: d.status,
+        isActive: d.status === 'ACTIVE',
+        totalCalories: energyKcal,
+        totalProteinG: proteinG,
+        totalFatG: fatG,
+        totalCarbG: carbG,
+        totalFiberG: fiberG,
+        totalCalciumMg: calciumMg,
+        totalIronMg: ironMg,
+        totalZincMg: zincMg,
+        nutrition: {
+          energyKcal,
+          proteinG,
+          fatG,
+          carbG,
+          fiberG,
+          calciumMg,
+          ironMg,
+          zincMg,
+        },
+        recipeCount: (d.recipes || []).length,
+        recipeItems: (d.recipes || []).map((r) => ({
+          id: String(r.id),
+          foodId: String(r.ingredientId),
+          ingredientId: String(r.ingredientId),
+          ingredientName: r.ingredient?.name || 'Nguyên liệu',
+          unit: r.ingredient?.unit || 'g',
+          netWeightPerPortionG: Number(r.netWeightG) || 0,
+          grossWeightPerPortionG: Number(r.grossWeightG) || Number(r.netWeightG) || 0,
+          note: r.note || null,
+          food: r.ingredient
+            ? {
+                id: String(r.ingredient.id),
+                name: r.ingredient.name,
+                unit: r.ingredient.unit,
+                energyKcal: Number(r.ingredient.energyKcal100g) || 0,
+                proteinG: Number(r.ingredient.proteinG) || 0,
+                fatG: Number(r.ingredient.fatG) || 0,
+                carbG: Number(r.ingredient.carbG) || 0,
+                fiberG: Number(r.ingredient.fiberG) || 0,
+                calciumMg: Number(r.ingredient.calciumMg) || 0,
+                ironMg: Number(r.ingredient.ironMg) || 0,
+                zincMg: Number(r.ingredient.zincMg) || 0,
+              }
+            : undefined,
+        })),
+        allergens: (d.dishAllergens || []).map((da) => ({
+          id: String(da.allergenId),
+          code: da.allergen?.code || '',
+          name: da.allergen?.name || '',
+          riskLevel: da.riskLevel,
+          note: da.note || null,
+        })),
+      };
+    });
+
+    // Thống kê cố định toàn kho thực đơn (giữ nguyên cố định, không thay đổi theo tìm kiếm / lọc)
+    const [totalDishes, allergenDishesCount, mainDishes, sideDishes] = await Promise.all([
+      this.dishRepo.count(),
+      this.dishRepo
+        .createQueryBuilder('d')
+        .andWhere('EXISTS (SELECT 1 FROM dish_allergens da_sub WHERE da_sub.dish_id = d.id)')
+        .getCount(),
+      this.dishRepo
+        .createQueryBuilder('d')
+        .leftJoin('d.category', 'cat')
+        .where("cat.code = 'MAIN'")
+        .getCount(),
+      this.dishRepo
+        .createQueryBuilder('d')
+        .leftJoin('d.category', 'cat')
+        .where("cat.code IN ('SNACK_MORNING', 'SNACK_AFTERNOON', 'DRINK')")
+        .getCount(),
+    ]);
+
+    const stats = {
       totalDishes,
       mainDishes,
       sideDishes,
-      allergenDishesCount
+      allergenDishesCount,
     };
+
+    return { items: mapped, total, page, limit, stats };
   }
 
-  async findOne(id: string, tenantId: string) {
-    const dish = await this.dishRepository.findOne({
-      where: { id, tenantId },
-      relations: ['recipeItems', 'recipeItems.food'],
+  async getCategories() {
+    const categories = await this.catRepo.find({ order: { displayOrder: 'ASC' } });
+    return categories.map((c) => ({
+      id: String(c.id),
+      code: c.code,
+      name: c.name,
+      displayOrder: c.displayOrder,
+      isRequiredInMeal: c.isRequiredInMeal,
+    }));
+  }
+
+  async findOne(id: number) {
+    const dish = await this.dishRepo.findOne({
+      where: { id },
+      relations: [
+        'category',
+        'nutrition',
+        'recipes',
+        'recipes.ingredient',
+        'dishAllergens',
+        'dishAllergens.allergen',
+      ],
     });
 
     if (!dish) {
-      throw new NotFoundException(`Dish with ID ${id} not found`);
+      throw new NotFoundException(`Không tìm thấy món ăn với ID: ${id}`);
     }
-    return dish;
-  }
 
-  private async calculateNutrition(recipeItemsDto: any[], tenantId: string) {
-    let totalCalories = 0;
-    let totalProteinG = 0;
-    let totalFatG = 0;
-    let totalCarbG = 0;
-    let totalCalciumMg = 0;
-    let totalIronMg = 0;
-    let totalZincMg = 0;
+    const nutr = dish.nutrition || {
+      energyKcal: 0,
+      proteinG: 0,
+      fatG: 0,
+      carbG: 0,
+      fiberG: 0,
+      calciumMg: 0,
+      ironMg: 0,
+      zincMg: 0,
+    };
 
-    const foodIds = recipeItemsDto.map(item => item.foodId);
-    const foods = await this.foodRepository.find({
-      where: [
-        { id: In(foodIds), tenantId },
-        { id: In(foodIds), isSystem: true },
-        { id: In(foodIds), tenantId: null }
-      ]
-    });
+    const energyKcal = Number(nutr.energyKcal) || 0;
+    const proteinG = Number(nutr.proteinG) || 0;
+    const fatG = Number(nutr.fatG) || 0;
+    const carbG = Number(nutr.carbG) || 0;
+    const fiberG = Number(nutr.fiberG) || 0;
+    const calciumMg = Number(nutr.calciumMg) || 0;
+    const ironMg = Number(nutr.ironMg) || 0;
+    const zincMg = Number(nutr.zincMg) || 0;
 
-    const foodMap = new Map(foods.map(f => [f.id, f]));
-
-    for (const item of recipeItemsDto) {
-      const food = foodMap.get(item.foodId);
-      if (food) {
-        const ratio = item.netWeightPerPortionG / 100;
-        totalCalories += (food.energyKcal || 0) * ratio;
-        totalProteinG += (food.proteinG || 0) * ratio;
-        totalFatG += (food.fatG || 0) * ratio;
-        totalCarbG += (food.carbG || 0) * ratio;
-        totalCalciumMg += (food.calciumMg || 0) * ratio;
-        totalIronMg += (food.ironMg || 0) * ratio;
-        totalZincMg += (food.zincMg || 0) * ratio;
-      }
-    }
+    const recipesMapped = (dish.recipes || []).map((r) => ({
+      id: String(r.id),
+      ingredientId: String(r.ingredientId),
+      foodId: String(r.ingredientId),
+      ingredientName: r.ingredient?.name || 'Nguyên liệu',
+      unit: r.ingredient?.unit || 'g',
+      grossWeightG: Number(r.grossWeightG) || 0,
+      netWeightG: Number(r.netWeightG) || 0,
+      netWeightPerPortionG: Number(r.netWeightG) || 0,
+      grossWeightPerPortionG: Number(r.grossWeightG) || 0,
+      note: r.note,
+      food: r.ingredient
+        ? {
+            id: String(r.ingredient.id),
+            name: r.ingredient.name,
+            unit: r.ingredient.unit,
+            energyKcal: Number(r.ingredient.energyKcal100g) || 0,
+            proteinG: Number(r.ingredient.proteinG) || 0,
+            fatG: Number(r.ingredient.fatG) || 0,
+            carbG: Number(r.ingredient.carbG) || 0,
+            fiberG: Number(r.ingredient.fiberG) || 0,
+            calciumMg: Number(r.ingredient.calciumMg) || 0,
+            ironMg: Number(r.ingredient.ironMg) || 0,
+            zincMg: Number(r.ingredient.zincMg) || 0,
+          }
+        : undefined,
+    }));
 
     return {
-      totalCalories,
-      totalProteinG,
-      totalFatG,
-      totalCarbG,
-      totalCalciumMg,
-      totalIronMg,
-      totalZincMg
+      id: String(dish.id),
+      code: `MA${String(dish.id).padStart(4, '0')}`,
+      name: dish.name,
+      description: dish.description,
+      categoryId: dish.categoryId ? String(dish.categoryId) : null,
+      categoryName: dish.category?.name || null,
+      categoryCode: dish.category?.code || null,
+      dishType: dish.category?.code || 'MAIN_COURSE',
+      targetAgeGroup: 'KINDERGARTEN_3_5Y',
+      standardServingSizeG: Number(dish.standardServingSizeG) || 100,
+      status: dish.status,
+      isActive: dish.status === 'ACTIVE',
+      totalCalories: energyKcal,
+      totalProteinG: proteinG,
+      totalFatG: fatG,
+      totalCarbG: carbG,
+      totalFiberG: fiberG,
+      totalCalciumMg: calciumMg,
+      totalIronMg: ironMg,
+      totalZincMg: zincMg,
+      allergens: (dish.dishAllergens || []).map((da) => ({
+        id: String(da.allergenId),
+        code: da.allergen?.code || '',
+        name: da.allergen?.name || '',
+        riskLevel: da.riskLevel,
+        note: da.note || null,
+      })),
+      nutrition: {
+        energyKcal,
+        proteinG,
+        fatG,
+        carbG,
+        fiberG,
+        calciumMg,
+        ironMg,
+        zincMg,
+      },
+      recipes: recipesMapped,
+      recipeItems: recipesMapped,
     };
   }
 
-  async create(tenantId: string, createDishDto: CreateDishDto) {
-    const { recipeItems, ...dishData } = createDishDto;
+  async create(dto: CreateDishDto) {
+    let categoryId = dto.categoryId || null;
+    if (!categoryId && dto.dishType) {
+      const cat = await this.catRepo.findOne({ where: { code: dto.dishType } });
+      if (cat) categoryId = cat.id;
+    }
 
-    // Tính toán dinh dưỡng
-    const nutrition = await this.calculateNutrition(recipeItems, tenantId);
-
-    const newDish = this.dishRepository.create({
-      ...dishData,
-      ...nutrition,
-      tenantId: tenantId === '00000000-0000-0000-0000-000000000000' ? null : tenantId,
+    const dish = this.dishRepo.create({
+      name: dto.name,
+      categoryId,
+      description: dto.description || dto.presentationNotes || null,
+      standardServingSizeG: dto.standardServingSizeG || 100,
+      status: dto.status || (dto.isActive === false ? 'INACTIVE' : 'ACTIVE'),
     });
 
-    const savedDish = await this.dishRepository.save(newDish);
+    const savedDish = await this.dishRepo.save(dish);
 
-    // Lưu recipe items
-    if (recipeItems && recipeItems.length > 0) {
-      const itemsToSave = recipeItems.map(item => this.recipeItemRepository.create({
-        ...item,
-        dishId: savedDish.id,
-        tenantId: savedDish.tenantId
-      }));
-      await this.recipeItemRepository.save(itemsToSave);
+    const rawRecipes =
+      dto.recipes ||
+      (dto.recipeItems
+        ? dto.recipeItems.map((ri: any) => ({
+            ingredientId: Number(ri.foodId || ri.ingredientId),
+            grossWeightG: Number(
+              ri.grossWeightPerPortionG || ri.grossWeightG || ri.netWeightPerPortionG || ri.netWeightG || 0,
+            ),
+            netWeightG: Number(ri.netWeightPerPortionG || ri.netWeightG || 0),
+            note: ri.note || null,
+          }))
+        : []);
+
+    if (rawRecipes.length > 0) {
+      const items = rawRecipes.map((r) =>
+        this.recipeRepo.create({
+          dishId: savedDish.id,
+          ingredientId: r.ingredientId,
+          grossWeightG: r.grossWeightG || r.netWeightG,
+          netWeightG: r.netWeightG,
+          note: r.note || null,
+        }),
+      );
+      await this.recipeRepo.save(items);
     }
 
-    return this.findOne(savedDish.id, tenantId);
+    await this.recalculateDishNutrition(savedDish.id);
+    return this.findOne(savedDish.id);
   }
 
-  async update(id: string, tenantId: string, updateDishDto: UpdateDishDto) {
-    const dish = await this.findOne(id, tenantId);
-    
-    const { recipeItems, ...dishData } = updateDishDto;
-
-    if (recipeItems) {
-      // Xóa các recipe items cũ
-      await this.recipeItemRepository.delete({ dishId: id });
-
-      // Tính lại dinh dưỡng
-      const nutrition = await this.calculateNutrition(recipeItems, tenantId);
-      Object.assign(dishData, nutrition);
-
-      // Lưu recipe items mới
-      const itemsToSave = recipeItems.map(item => this.recipeItemRepository.create({
-        ...item,
-        dishId: id,
-        tenantId: dish.tenantId
-      }));
-      await this.recipeItemRepository.save(itemsToSave);
+  async update(id: number, dto: UpdateDishDto) {
+    const dish = await this.dishRepo.findOne({ where: { id } });
+    if (!dish) {
+      throw new NotFoundException(`Không tìm thấy món ăn với ID: ${id}`);
     }
 
-    // Merge updates
-    const updatedDish = this.dishRepository.merge(dish, dishData);
-    await this.dishRepository.save(updatedDish);
+    if (dto.name !== undefined) dish.name = dto.name;
+    if (dto.categoryId !== undefined) dish.categoryId = dto.categoryId;
+    if (!dto.categoryId && dto.dishType) {
+      const cat = await this.catRepo.findOne({ where: { code: dto.dishType } });
+      if (cat) dish.categoryId = cat.id;
+    }
+    if (dto.description !== undefined) dish.description = dto.description;
+    if (dto.presentationNotes !== undefined && !dto.description) dish.description = dto.presentationNotes;
+    if (dto.standardServingSizeG !== undefined) dish.standardServingSizeG = dto.standardServingSizeG;
+    if (dto.status !== undefined) dish.status = dto.status;
+    if (dto.isActive !== undefined) dish.status = dto.isActive ? 'ACTIVE' : 'INACTIVE';
 
-    return this.findOne(id, tenantId);
+    await this.dishRepo.save(dish);
+
+    const hasNewRecipes = dto.recipes !== undefined || dto.recipeItems !== undefined;
+    if (hasNewRecipes) {
+      await this.recipeRepo.delete({ dishId: id });
+      const rawRecipes =
+        dto.recipes ||
+        (dto.recipeItems
+          ? dto.recipeItems.map((ri: any) => ({
+              ingredientId: Number(ri.foodId || ri.ingredientId),
+              grossWeightG: Number(
+                ri.grossWeightPerPortionG || ri.grossWeightG || ri.netWeightPerPortionG || ri.netWeightG || 0,
+              ),
+              netWeightG: Number(ri.netWeightPerPortionG || ri.netWeightG || 0),
+              note: ri.note || null,
+            }))
+          : []);
+
+      if (rawRecipes.length > 0) {
+        const items = rawRecipes.map((r) =>
+          this.recipeRepo.create({
+            dishId: id,
+            ingredientId: r.ingredientId,
+            grossWeightG: r.grossWeightG || r.netWeightG,
+            netWeightG: r.netWeightG,
+            note: r.note || null,
+          }),
+        );
+        await this.recipeRepo.save(items);
+      }
+      await this.recalculateDishNutrition(id);
+    }
+
+    return this.findOne(id);
   }
 
-  async remove(id: string, tenantId: string) {
-    const dish = await this.findOne(id, tenantId);
-    dish.isActive = false;
-    return this.dishRepository.save(dish);
+  async remove(id: number) {
+    const dish = await this.dishRepo.findOne({ where: { id } });
+    if (!dish) {
+      throw new NotFoundException(`Không tìm thấy món ăn với ID: ${id}`);
+    }
+    await this.dishRepo.remove(dish);
+    return { success: true, message: 'Đã xóa món ăn' };
+  }
+
+  async recalculateDishNutrition(dishId: number) {
+    const recipes = await this.recipeRepo.find({
+      where: { dishId },
+      relations: ['ingredient'],
+    });
+
+    let energyKcal = 0;
+    let proteinG = 0;
+    let fatG = 0;
+    let carbG = 0;
+    let fiberG = 0;
+    let calciumMg = 0;
+    let ironMg = 0;
+    let zincMg = 0;
+
+    for (const r of recipes) {
+      const ing = r.ingredient;
+      if (!ing) continue;
+      const factor = (r.netWeightG || 0) / 100;
+      energyKcal += (ing.energyKcal100g || 0) * factor;
+      proteinG += (ing.proteinG || 0) * factor;
+      fatG += (ing.fatG || 0) * factor;
+      carbG += (ing.carbG || 0) * factor;
+      fiberG += (ing.fiberG || 0) * factor;
+      calciumMg += (ing.calciumMg || 0) * factor;
+      ironMg += (ing.ironMg || 0) * factor;
+      zincMg += (ing.zincMg || 0) * factor;
+    }
+
+    const round2 = (val: number) => Math.round(val * 100) / 100;
+
+    let nutrition = await this.nutritionRepo.findOne({ where: { dishId } });
+    if (!nutrition) {
+      nutrition = this.nutritionRepo.create({ dishId });
+    }
+
+    nutrition.energyKcal = round2(energyKcal);
+    nutrition.proteinG = round2(proteinG);
+    nutrition.fatG = round2(fatG);
+    nutrition.carbG = round2(carbG);
+    nutrition.fiberG = round2(fiberG);
+    nutrition.calciumMg = round2(calciumMg);
+    nutrition.ironMg = round2(ironMg);
+    nutrition.zincMg = round2(zincMg);
+
+    await this.nutritionRepo.save(nutrition);
   }
 }
