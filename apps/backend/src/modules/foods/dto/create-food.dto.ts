@@ -21,6 +21,11 @@ export class CreateFoodDto {
   @IsNumber()
   energyKcal100g?: number;
 
+  @ApiPropertyOptional({ example: 182 })
+  @IsOptional()
+  @IsNumber()
+  energyKcal?: number;
+
   @ApiPropertyOptional({ example: 21.5 })
   @IsOptional()
   @IsNumber()
