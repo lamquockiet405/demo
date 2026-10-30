@@ -5,7 +5,6 @@ import { useAuthStore } from '@/core/stores/auth.store';
 import {
   Search,
   Plus,
-  ShieldCheck,
   AlertTriangle,
   RefreshCw,
   Eye,

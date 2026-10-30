@@ -22,10 +22,13 @@ import {
   ChevronRight,
   ShieldCheck,
   Calendar,
+  User,
 } from 'lucide-react';
 import { attendanceApi } from '../features/attendance/api/attendanceApi';
 import { getKitchenSocket } from '../core/socket';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../core/stores/auth.store';
+import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 
 interface KdsSummary {
   totalLunchPortions: number;
@@ -109,6 +112,10 @@ export const KitchenDisplayLayout: React.FC = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [liveLogs, setLiveLogs] = useState<LiveLogEvent[]>([]);
   const [recentFlashClassId, setRecentFlashClassId] = useState<string | null>(null);
+
+  // Profile modal state
+  const { user } = useAuthStore();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,19 +231,27 @@ export const KitchenDisplayLayout: React.FC = () => {
 
     if (socket.connected) {
       setIsConnected(true);
+      socket.emit('join:kitchen');
     }
 
-    socket.on('connect', handleConnect);
+    socket.on('connect', () => {
+      handleConnect();
+      socket.emit('join:kitchen');
+    });
     socket.on('disconnect', handleDisconnect);
     socket.on('MEAL_PORTIONS_SYNCED', handlePortionsSynced);
+    socket.on('kitchen:portions-updated', handlePortionsSynced);
     socket.on('ALLERGY_ALERT', handleAllergyAlert);
+    socket.on('safety:alert', handleAllergyAlert);
     socket.on('KITCHEN_PORTIONS_ACKNOWLEDGED', handleKitchenStatus);
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
       socket.off('MEAL_PORTIONS_SYNCED', handlePortionsSynced);
+      socket.off('kitchen:portions-updated', handlePortionsSynced);
       socket.off('ALLERGY_ALERT', handleAllergyAlert);
+      socket.off('safety:alert', handleAllergyAlert);
       socket.off('KITCHEN_PORTIONS_ACKNOWLEDGED', handleKitchenStatus);
     };
   }, []);
@@ -390,6 +405,22 @@ export const KitchenDisplayLayout: React.FC = () => {
             <Calendar className="w-4 h-4 text-amber-400" />
             <span>{currentDate}</span>
           </div>
+
+          {/* User Profile Button */}
+          <button
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-200 transition cursor-pointer"
+            title="Xem & Cập nhật Hồ sơ cá nhân"
+          >
+            <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center font-bold text-white overflow-hidden text-xs">
+              {(user as any)?.avatar ? (
+                <img src={(user as any).avatar} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-4 h-4" />
+              )}
+            </div>
+            <span className="hidden sm:inline">{user?.fullName || 'Bếp Trưởng'}</span>
+          </button>
 
           {/* Big Clock */}
           <div className="text-2xl md:text-3xl font-black text-amber-300 bg-slate-900 px-4 py-1.5 rounded-xl border border-amber-500/30 shadow-inner font-mono">
@@ -831,6 +862,12 @@ export const KitchenDisplayLayout: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* User Profile Modal (UC05 / UC06) */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </div>
   );
 };

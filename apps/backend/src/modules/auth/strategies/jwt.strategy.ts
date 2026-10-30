@@ -7,10 +7,10 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 
 export interface JwtPayload {
-  sub: number;
+  sub: any;
   email: string;
   roles: string[];
-  tenantId: number;
+  tenantId: any;
 }
 
 @Injectable()
@@ -38,16 +38,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     const roleCodes = user.roles?.map((r) => r.code) || payload.roles || [];
+    if (roleCodes.includes('SCHOOL_MANAGER') && !roleCodes.includes('PRINCIPAL')) {
+      roleCodes.push('PRINCIPAL');
+    }
+
+    const resolvedTenantId = user.tenantId || payload.tenantId || '1';
 
     return {
       id: String(user.id),
       sub: user.id,
+      userId: String(user.id),
       email: user.email,
       fullName: user.fullName,
       phone: user.phone,
       avatarUrl: user.avatar,
       roles: roleCodes,
-      tenantId: String(payload.tenantId || 1),
+      tenantId: String(resolvedTenantId),
     };
   }
 }

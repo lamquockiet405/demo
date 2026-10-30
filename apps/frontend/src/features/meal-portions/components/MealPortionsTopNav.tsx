@@ -1,5 +1,7 @@
-import React from 'react';
-import { Calendar, ChevronDown, Bell, GraduationCap, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, ChevronDown, Bell, GraduationCap, ChevronRight, User } from 'lucide-react';
+import { useAuthStore } from '../../../core/stores/auth.store';
+import { UserProfileModal } from '../../auth/components/UserProfileModal';
 
 interface MealPortionsTopNavProps {
   weekNumber: number;
@@ -14,6 +16,8 @@ export const MealPortionsTopNav: React.FC<MealPortionsTopNavProps> = ({
   formattedDateRange,
   onWeekChange,
 }) => {
+  const { user } = useAuthStore();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   return (
     <header className="h-14 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
       {/* Breadcrumb Left */}
@@ -57,12 +61,26 @@ export const MealPortionsTopNav: React.FC<MealPortionsTopNavProps> = ({
         </button>
 
         {/* User Avatar Circle */}
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-600 to-emerald-400 p-0.5 shadow-sm cursor-pointer">
-          <div className="w-full h-full rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs">
-            NT
+        <button
+          type="button"
+          onClick={() => setIsProfileModalOpen(true)}
+          className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-600 to-emerald-400 p-0.5 shadow-sm cursor-pointer hover:scale-105 transition"
+          title="Xem & Chỉnh sửa hồ sơ cá nhân"
+        >
+          <div className="w-full h-full rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs overflow-hidden">
+            {(user as any)?.avatar ? (
+              <img src={(user as any).avatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span>{user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'NT'}</span>
+            )}
           </div>
-        </div>
+        </button>
       </div>
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </header>
   );
 };
