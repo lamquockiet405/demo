@@ -19,12 +19,18 @@ export class ParentEvaluationService {
     private readonly childRepo: Repository<Child>,
     @InjectRepository(DailyMealAttendance)
     private readonly attendanceRepo: Repository<DailyMealAttendance>,
-  ) { }
+  ) {}
+
 
   private mapToItem(evalEntity: ParentEvaluation) {
     const student = evalEntity.student;
-    const hasReplies = evalEntity.replies && evalEntity.replies.length > 0;
-    const latestReply = hasReplies ? evalEntity.replies[0] : null;
+    const sortedReplies = evalEntity.replies
+      ? [...evalEntity.replies].sort(
+          (a, b) => new Date(b.repliedAt).getTime() - new Date(a.repliedAt).getTime(),
+        )
+      : [];
+    const hasReplies = sortedReplies.length > 0;
+    const latestReply = hasReplies ? sortedReplies[0] : null;
 
     const status = hasReplies ? 'RESPONDED' : 'PENDING';
     const statusLabel = hasReplies ? 'Đã phản hồi' : 'Chờ phản hồi';
@@ -51,9 +57,10 @@ export class ParentEvaluationService {
       gradeLevelCustom: student?.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo',
       feedbackTimeLabel: evalEntity.createdAt
         ? new Date(evalEntity.createdAt).toLocaleTimeString('vi-VN', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+
         : '',
       priorityNote: evalEntity.rating <= 2 ? 'Cần xử lý gấp' : undefined,
       likesInfo: '0',
@@ -82,12 +89,12 @@ export class ParentEvaluationService {
       .leftJoinAndSelect('replies.user', 'user');
 
     if (schoolId) {
-      qb.andWhere('class.school_id = :schoolId', { schoolId });
+      qb.andWhere('class.schoolId = :schoolId', { schoolId });
     }
 
     if (params.search) {
       qb.andWhere(
-        '(eval.comment ILIKE :search OR student.full_name ILIKE :search)',
+        '(eval.comment ILIKE :search OR student.fullName ILIKE :search)',
         { search: `%${params.search}%` },
       );
     }
@@ -102,13 +109,36 @@ export class ParentEvaluationService {
 
     if (params.status && params.status !== 'ALL') {
       if (params.status === 'PENDING') {
-        qb.andWhere('replies.id IS NULL');
+        qb.andWhere(
+          'NOT EXISTS (SELECT 1 FROM evaluation_replies er WHERE er.evaluation_id = eval.id)',
+        );
       } else if (params.status === 'RESPONDED') {
-        qb.andWhere('replies.id IS NOT NULL');
+        qb.andWhere(
+          'EXISTS (SELECT 1 FROM evaluation_replies er WHERE er.evaluation_id = eval.id)',
+        );
+      } else if (params.status === 'HAS_PHOTO') {
+        qb.andWhere('1 = 0');
       }
     }
 
-    qb.orderBy('eval.created_at', 'DESC');
+    const sortBy = params.sortBy || 'NEWEST';
+    switch (sortBy) {
+      case 'OLDEST':
+        qb.orderBy('eval.createdAt', 'ASC');
+        break;
+      case 'RATING_HIGH':
+      case 'RATING_DESC':
+        qb.orderBy('eval.rating', 'DESC').addOrderBy('eval.createdAt', 'DESC');
+        break;
+      case 'RATING_LOW':
+      case 'RATING_ASC':
+        qb.orderBy('eval.rating', 'ASC').addOrderBy('eval.createdAt', 'DESC');
+        break;
+      case 'NEWEST':
+      default:
+        qb.orderBy('eval.createdAt', 'DESC');
+        break;
+    }
 
     const page = Math.max(1, params.page || 1);
     const limit = Math.max(1, params.limit || 20);
@@ -116,7 +146,7 @@ export class ParentEvaluationService {
 
     const [allEvals, total] = await qb.getManyAndCount();
 
-    // Summary stats
+    // Summary stats from DB
     const allTotal = await this.evalRepo.count();
     const allRatings = await this.evalRepo
       .createQueryBuilder('e')
@@ -124,12 +154,12 @@ export class ParentEvaluationService {
       .addSelect('COUNT(*)', 'total')
       .getRawOne();
 
-    const avgRating = allRatings?.avg ? Math.round(Number(allRatings.avg) * 10) / 10 : 4.8;
+    const avgRating = allRatings?.avg ? Math.round(Number(allRatings.avg) * 10) / 10 : 5.0;
     const positiveCount = await this.evalRepo
       .createQueryBuilder('e')
       .where('e.rating >= 4')
       .getCount();
-    const positiveRate = allTotal > 0 ? Math.round((positiveCount / allTotal) * 100) : 95;
+    const positiveRate = allTotal > 0 ? Math.round((positiveCount / allTotal) * 100) : 100;
 
     const respondedCount = await this.replyRepo
       .createQueryBuilder('r')
@@ -137,6 +167,28 @@ export class ParentEvaluationService {
       .getRawOne();
     const respCount = respondedCount?.count ? Number(respondedCount.count) : 0;
     const pendingCount = Math.max(0, allTotal - respCount);
+
+    // Pending classes count
+    const pendingClassesRaw = await this.evalRepo
+      .createQueryBuilder('e')
+      .leftJoin('e.student', 's')
+      .where('NOT EXISTS (SELECT 1 FROM evaluation_replies er WHERE er.evaluation_id = e.id)')
+      .andWhere('s.classId IS NOT NULL')
+      .select('COUNT(DISTINCT s.classId)', 'count')
+      .getRawOne();
+    const pendingClassesCount = pendingClassesRaw?.count ? Number(pendingClassesRaw.count) : 0;
+
+    // Average response time
+    const avgResponseTimeRaw = await this.evalRepo.query(`
+      SELECT AVG(EXTRACT(EPOCH FROM (r.replied_at - e.created_at))) as avg_seconds
+      FROM evaluation_replies r
+      INNER JOIN parent_evaluations e ON e.id = r.evaluation_id
+    `);
+    let avgResponseTime = '0.5 giờ';
+    if (avgResponseTimeRaw && avgResponseTimeRaw[0]?.avg_seconds != null) {
+      const avgHours = Math.round((Number(avgResponseTimeRaw[0].avg_seconds) / 3600) * 10) / 10;
+      avgResponseTime = `${avgHours} giờ`;
+    }
 
     return {
       items: allEvals.map((e) => this.mapToItem(e)),
@@ -152,9 +204,9 @@ export class ParentEvaluationService {
         positiveRate,
         pendingCount,
         respondedCount: respCount,
-        photosCount: 12,
-        pendingClassesCount: pendingCount > 0 ? 2 : 0,
-        avgResponseTime: '2.4 giờ',
+        photosCount: 0,
+        pendingClassesCount,
+        avgResponseTime,
       },
     };
   }
@@ -168,15 +220,30 @@ export class ParentEvaluationService {
       throw new NotFoundException(`Parent evaluation #${id} not found`);
     }
 
-    const reply = this.replyRepo.create({
-      evaluationId: id,
-      repliedBy: userId,
-      content: payload.responseContent,
+    let reply = await this.replyRepo.findOne({
+      where: { evaluationId: id },
     });
-    await this.replyRepo.save(reply);
 
-    evalEntity.replies = [reply];
-    return this.mapToItem(evalEntity);
+    if (reply) {
+      reply.content = payload.responseContent;
+      reply.repliedBy = userId;
+      reply.repliedAt = new Date();
+      await this.replyRepo.save(reply);
+    } else {
+      reply = this.replyRepo.create({
+        evaluationId: id,
+        repliedBy: userId,
+        content: payload.responseContent,
+      });
+      await this.replyRepo.save(reply);
+    }
+
+    const updatedEval = await this.evalRepo.findOne({
+      where: { id },
+      relations: ['student', 'student.class', 'menu', 'replies', 'replies.user'],
+    });
+
+    return this.mapToItem(updatedEval || evalEntity);
   }
 
   async updateResponse(id: number, payload: RespondEvaluationPayload, userId: number) {
@@ -220,37 +287,38 @@ export class ParentEvaluationService {
 
     const childProfile = student
       ? {
-        id: String(student.id),
-        name: student.fullName,
-        age: 4,
-        className: student.class?.name || 'Lớp Mầm 1',
-        gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: allergyNames,
-        parentName: `Phụ huynh bé ${student.fullName}`,
-        parentRole: 'Mẹ bé',
-      }
+          id: String(student.id),
+          name: student.fullName,
+          age: 4,
+          className: student.class?.name || 'Lớp Mầm 1',
+          gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: allergyNames,
+          parentName: `Phụ huynh bé ${student.fullName}`,
+          parentRole: 'Mẹ bé',
+        }
       : {
-        id: '1',
-        name: 'Bé Nguyễn Bảo Nam',
-        age: 4,
-        className: 'Lớp Mầm 1',
-        gradeLevel: 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: 'Không',
-        parentName: 'Chị Hoàng Yến',
-        parentRole: 'Mẹ bé Bảo Nam',
-      };
+          id: '1',
+          name: 'Bé Nguyễn Bảo Nam',
+          age: 4,
+          className: 'Lớp Mầm 1',
+          gradeLevel: 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: 'Không',
+          parentName: 'Chị Hoàng Yến',
+          parentRole: 'Mẹ bé Bảo Nam',
+        };
 
     const recentEvaluations = student
       ? await this.evalRepo.find({
-        where: { studentId: student.id },
-        relations: ['student', 'student.class', 'menu', 'replies', 'replies.user'],
-        order: { createdAt: 'DESC' },
-        take: 5,
-      })
+          where: { studentId: student.id },
+          relations: ['student', 'student.class', 'menu', 'replies', 'replies.user'],
+          order: { createdAt: 'DESC' },
+          take: 5,
+        })
+
       : [];
 
     return {
@@ -326,6 +394,7 @@ export class ParentEvaluationService {
 
     const attendances = await this.attendanceRepo.find({
       where: { studentId: sId, date: targetDate },
+
     });
 
     let student = await this.childRepo.findOne({
@@ -347,29 +416,29 @@ export class ParentEvaluationService {
 
     const child = student
       ? {
-        id: String(student.id),
-        name: student.fullName,
-        age: 4,
-        className: student.class?.name || 'Lớp Mầm 1',
-        gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: allergyNames,
-        parentName: `Phụ huynh bé ${student.fullName}`,
-        parentRole: 'Mẹ bé',
-      }
+          id: String(student.id),
+          name: student.fullName,
+          age: 4,
+          className: student.class?.name || 'Lớp Mầm 1',
+          gradeLevel: student.class?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: allergyNames,
+          parentName: `Phụ huynh bé ${student.fullName}`,
+          parentRole: 'Mẹ bé',
+        }
       : {
-        id: '1',
-        name: 'Bé Nguyễn Bảo Nam',
-        age: 4,
-        className: 'Lớp Mầm 1',
-        gradeLevel: 'Mẫu giáo (4–5T)',
-        weight: 16.5,
-        height: 104.2,
-        allergyWarning: '',
-        parentName: 'Chị Hoàng Yến',
-        parentRole: 'Mẹ bé Bảo Nam',
-      };
+          id: '1',
+          name: 'Bé Nguyễn Bảo Nam',
+          age: 4,
+          className: 'Lớp Mầm 1',
+          gradeLevel: 'Mẫu giáo (4–5T)',
+          weight: 16.5,
+          height: 104.2,
+          allergyWarning: '',
+          parentName: 'Chị Hoàng Yến',
+          parentRole: 'Mẹ bé Bảo Nam',
+        };
 
     const currDate = new Date(targetDate);
     const dayOfWeek = currDate.getDay();
