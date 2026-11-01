@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, ChevronDown, Utensils, ShieldAlert, Coffee, CreditCard, MessageSquare, Baby } from 'lucide-react';
-import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
+
+import { Bell, ChevronDown, Utensils, ShieldAlert, Coffee, CreditCard, MessageSquare, Baby, User } from 'lucide-react';
 import { ChildProfile } from '../types';
+import { useAuthStore } from '../../../core/stores/auth.store';
+import { UserProfileModal } from '../../auth/components/UserProfileModal';
 
 interface ParentPortalTopNavProps {
   child?: ChildProfile;
@@ -10,8 +12,9 @@ interface ParentPortalTopNavProps {
 }
 
 export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, activeTab = 'evaluation' }) => {
-  const schoolBranding = useSchoolBranding();
 
+  const { user } = useAuthStore();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -118,26 +121,46 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
             </button>
 
             {/* Parent Profile */}
-            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 p-0.5 shadow-xs">
-                <img
-                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80"
-                  alt={child?.parentName || 'Chị Hoàng Yến'}
-                  className="w-full h-full object-cover rounded-full"
-                />
+
+            <button
+              type="button"
+              onClick={() => setIsProfileModalOpen(true)}
+              className="flex items-center gap-2.5 pl-2 border-l border-slate-200 hover:opacity-80 transition cursor-pointer text-left"
+              title="Xem và chỉnh sửa hồ sơ phụ huynh"
+            >
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 p-0.5 shadow-xs overflow-hidden">
+                {(user as any)?.avatar ? (
+                  <img
+                    src={(user as any).avatar}
+                    alt={user?.fullName || child.parentName || 'Phụ huynh'}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <img
+                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80"
+                    alt={child.parentName || 'Chị Hoàng Yến'}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                )}
               </div>
               <div className="text-left hidden sm:block">
                 <p className="text-xs font-bold text-slate-800 leading-tight">
-                  {child?.parentName || 'Chị Hoàng Yến'}
+                  {user?.fullName || child.parentName || 'Chị Hoàng Yến'}
                 </p>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {child?.parentRole || 'Mẹ bé Bảo Nam'}
+                  {child.parentRole || 'Phụ huynh'}
+
                 </p>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </header>
   );
 };

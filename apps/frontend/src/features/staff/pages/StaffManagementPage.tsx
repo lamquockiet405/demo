@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users,
   UserCheck,
@@ -7,7 +7,6 @@ import {
   GraduationCap,
   ChefHat,
   Search,
-  Filter,
   RefreshCw,
   Archive,
   RotateCcw,
@@ -16,15 +15,11 @@ import {
   Unlock,
   CheckCircle2,
   AlertCircle,
-  ShieldCheck,
-  HeartPulse,
-  Apple,
   Phone,
   Calendar,
   ChevronLeft,
   ChevronRight,
   Eye,
-  EyeOff,
 } from 'lucide-react';
 import {
   staffApi,
@@ -34,25 +29,22 @@ import {
   CreateStaffPayload,
   UpdateStaffPayload,
 } from '../api/staff.api';
-import { StaffDrawer } from '../components/StaffDrawer';
+import { StaffDrawer, ROLE_META } from '../components/StaffDrawer';
 import { SoftDeleteConfirmModal } from '../components/SoftDeleteConfirmModal';
 import { useAuthStore } from '../../../core/stores/auth.store';
 
-/**
- * UC08 - UC11: View/Create/Update/Search Staff Accounts (Iteration 1 - Low/Medium)
- * Quản lý danh sách, tìm kiếm, lọc, tạo mới, chỉnh sửa và phân quyền tài khoản nhân sự
- */
 export const StaffManagementPage: React.FC = () => {
   const { user: currentUser } = useAuthStore();
+  const [schoolName, setSchoolName] = useState(
+    () => localStorage.getItem('school_name') || 'Cơ sở Mầm non',
+  );
 
-  // State danh sách & dữ liệu
   const [staffList, setStaffList] = useState<StaffUser[]>([]);
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [availableRoles, setAvailableRoles] = useState<StaffRole[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Bộ lọc & Phân trang
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
@@ -61,117 +53,101 @@ export const StaffManagementPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  // Loading states
   const [isListLoading, setIsListLoading] = useState(false);
-  const [isStatsLoading, setIsStatsLoading] = useState(false);
   const [isDrawerSubmitting, setIsDrawerSubmitting] = useState(false);
   const [isActionSubmitting, setIsActionSubmitting] = useState(false);
 
-  // Drawer & Modal states
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [editingStaff, setEditingStaff] = useState<StaffUser | null>(null);
   const [deletingStaff, setDeletingStaff] = useState<StaffUser | null>(null);
-
-  // Toast thông báo
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Debounce search input (350ms)
+  useEffect(() => {
+    const onTenantUpdate = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.name) setSchoolName(detail.name);
+    };
+    window.addEventListener('tenant-profile-updated', onTenantUpdate);
+    return () => window.removeEventListener('tenant-profile-updated', onTenantUpdate);
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setCurrentPage(1); // Reset về trang 1 khi search
-    }, 350);
+      setCurrentPage(1);
+    }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
-  const showToast = (type: 'success' | 'error', text: string) => {
+  const showToast = useCallback((type: 'success' | 'error', text: string) => {
     setToastMessage({ type, text });
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4500);
-  };
-
-  // 1. Tải danh sách roles
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const roles = await staffApi.getStaffRoles();
-        setAvailableRoles(roles);
-      } catch (err) {
-        console.error('Lỗi khi tải vai trò nhân sự:', err);
-      }
-    };
-    fetchRoles();
+    setTimeout(() => setToastMessage(null), 4000);
   }, []);
 
-  // 2. Tải thống kê KPI
-  const loadStats = async () => {
-    setIsStatsLoading(true);
+  const loadStats = useCallback(async () => {
     try {
       const data = await staffApi.getStaffStats();
       setStats(data);
-    } catch (err) {
-      console.error('Lỗi khi tải thống kê:', err);
-    } finally {
-      setIsStatsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadStats();
+    } catch {}
   }, []);
 
-  // 3. Tải danh sách nhân sự
-  const loadStaffList = async () => {
+  useEffect(() => {
+    Promise.all([
+      staffApi.getStaffRoles().then(setAvailableRoles).catch(() => {}),
+      loadStats(),
+    ]);
+  }, [loadStats]);
+
+  const loadStaffList = useCallback(async () => {
     setIsListLoading(true);
     try {
       const res = await staffApi.getStaffList({
         page: currentPage,
         limit: pageSize,
-        search: debouncedSearch,
+        search: debouncedSearch || undefined,
         roleCode: selectedRole || undefined,
         status: selectedStatus || undefined,
-        includeDeleted,
+        includeDeleted: includeDeleted || selectedStatus === 'DELETED',
         sortBy: 'createdAt',
         sortOrder: 'DESC',
       });
       setStaffList(res.data);
       setTotalCount(res.meta.total);
       setTotalPages(res.meta.totalPages || 1);
-    } catch (err) {
-      console.error('Lỗi khi tải danh sách nhân sự:', err);
+    } catch {
       showToast('error', 'Không thể kết nối đến máy chủ để tải danh sách nhân sự.');
     } finally {
       setIsListLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearch, selectedRole, selectedStatus, includeDeleted, showToast]);
 
   useEffect(() => {
     loadStaffList();
-  }, [currentPage, debouncedSearch, selectedRole, selectedStatus, includeDeleted]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadStaffList]);
 
-  // Mở Drawer Tạo Mới
-  const handleOpenCreateDrawer = () => {
-    setEditingStaff(null);
-    setIsDrawerOpen(true);
-  };
-
-  // Mở Drawer Chỉnh Sửa
-  const handleOpenEditDrawer = (staff: StaffUser) => {
+  const handleOpenDrawer = async (mode: 'create' | 'edit' | 'view', staff: StaffUser | null = null) => {
+    setDrawerMode(mode);
     setEditingStaff(staff);
     setIsDrawerOpen(true);
+    if (staff && mode === 'view') {
+      try {
+        const fresh = await staffApi.getStaffById(staff.id);
+        setEditingStaff(fresh);
+      } catch {}
+    }
   };
 
-  // Xử lý Submit Tạo Mới hoặc Chỉnh Sửa
-  const handleDrawerSubmit = async (payload: CreateStaffPayload | UpdateStaffPayload, staffId?: string) => {
+  const handleDrawerSubmit = async (
+    payload: CreateStaffPayload | UpdateStaffPayload,
+    staffId?: string,
+  ) => {
     setIsDrawerSubmitting(true);
     try {
       if (staffId) {
-        // Update
         const updated = await staffApi.updateStaff(staffId, payload as UpdateStaffPayload);
         showToast('success', `Đã cập nhật thông tin nhân sự "${updated.fullName}" thành công.`);
       } else {
-        // Create
         const created = await staffApi.createStaff(payload as CreateStaffPayload);
         showToast(
           'success',
@@ -179,36 +155,28 @@ export const StaffManagementPage: React.FC = () => {
         );
       }
       setIsDrawerOpen(false);
-      loadStaffList();
-      loadStats();
-    } catch (err: any) {
-      throw err; // Ném lỗi để Drawer hiển thị cảnh báo
+      await Promise.all([loadStaffList(), loadStats()]);
     } finally {
       setIsDrawerSubmitting(false);
     }
   };
 
-  // Xử lý Khóa / Mở Khóa nhanh
   const handleToggleStatus = async (staff: StaffUser) => {
     if (staff.id === currentUser?.id) {
-      showToast('error', 'Bạn không thể tự khóa tài khoản của chính mình.');
-      return;
+      return showToast('error', 'Bạn không thể tự khóa tài khoản của chính mình.');
     }
     setIsActionSubmitting(true);
     try {
       const res = await staffApi.toggleStaffStatus(staff.id);
       showToast('success', res.message);
-      loadStaffList();
-      loadStats();
+      await Promise.all([loadStaffList(), loadStats()]);
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Không thể đổi trạng thái tài khoản.';
-      showToast('error', msg);
+      showToast('error', err.response?.data?.message || 'Không thể đổi trạng thái tài khoản.');
     } finally {
       setIsActionSubmitting(false);
     }
   };
 
-  // Xử lý Xóa Mềm (Soft Delete)
   const handleConfirmSoftDelete = async () => {
     if (!deletingStaff) return;
     setIsActionSubmitting(true);
@@ -216,100 +184,128 @@ export const StaffManagementPage: React.FC = () => {
       const res = await staffApi.softDeleteStaff(deletingStaff.id);
       showToast('success', res.message);
       setDeletingStaff(null);
-      loadStaffList();
-      loadStats();
+      await Promise.all([loadStaffList(), loadStats()]);
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Không thể xóa mềm tài khoản này.';
-      showToast('error', msg);
+      showToast('error', err.response?.data?.message || 'Không thể xóa mềm tài khoản này.');
     } finally {
       setIsActionSubmitting(false);
     }
   };
 
-  // Xử lý Khôi Phục (Restore)
   const handleRestoreStaff = async (staff: StaffUser) => {
     setIsActionSubmitting(true);
     try {
       const res = await staffApi.restoreStaff(staff.id);
       showToast('success', res.message);
-      loadStaffList();
-      loadStats();
+      await Promise.all([loadStaffList(), loadStats()]);
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Không thể khôi phục tài khoản này.';
-      showToast('error', msg);
+      showToast('error', err.response?.data?.message || 'Không thể khôi phục tài khoản này.');
     } finally {
       setIsActionSubmitting(false);
     }
   };
 
-  // Render Role Badge
   const renderRoleBadge = (roleCode: string, roleName: string) => {
-    switch (roleCode) {
-      case 'PRINCIPAL':
-        return (
-          <span
-            key={roleCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200"
-          >
-            <ShieldCheck className="w-3 h-3 text-amber-600" />
-            {roleName}
-          </span>
-        );
-      case 'NUTRITIONIST':
-        return (
-          <span
-            key={roleCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200"
-          >
-            <Apple className="w-3 h-3 text-teal-600" />
-            {roleName}
-          </span>
-        );
-      case 'KITCHEN_MANAGER':
-        return (
-          <span
-            key={roleCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-50 text-orange-800 border border-orange-200"
-          >
-            <ChefHat className="w-3 h-3 text-orange-600" />
-            {roleName}
-          </span>
-        );
-      case 'TEACHER':
-        return (
-          <span
-            key={roleCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200"
-          >
-            <GraduationCap className="w-3 h-3 text-blue-600" />
-            {roleName}
-          </span>
-        );
-      case 'MEDICAL_STAFF':
-        return (
-          <span
-            key={roleCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200"
-          >
-            <HeartPulse className="w-3 h-3 text-rose-600" />
-            {roleName}
-          </span>
-        );
-      default:
-        return (
-          <span
-            key={roleCode}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700"
-          >
-            {roleName}
-          </span>
-        );
-    }
+    const meta = ROLE_META[roleCode];
+    const Icon = meta?.icon;
+    return (
+      <span
+        key={roleCode}
+        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+          meta?.pill || 'bg-slate-100 text-slate-700 border-slate-200'
+        }`}
+      >
+        {Icon && <Icon className="w-3 h-3" />}
+        {roleName}
+      </span>
+    );
   };
 
+  const kpiCards = [
+    {
+      label: 'Tổng Nhân Sự',
+      value: stats?.totalStaff ?? 0,
+      unit: 'người',
+      sub: 'Toàn bộ cán bộ & nhân viên',
+      icon: Users,
+      iconCls: 'bg-teal-50 text-teal-600',
+      valCls: 'text-slate-900',
+      subCls: 'text-teal-700',
+      onClick: () => {
+        setSelectedRole('');
+        setSelectedStatus('');
+        setIncludeDeleted(false);
+        setCurrentPage(1);
+      },
+    },
+    {
+      label: 'Đang Hoạt Động',
+      value: stats?.activeStaff ?? 0,
+      unit: 'tài khoản',
+      sub: 'Sẵn sàng vận hành',
+      icon: UserCheck,
+      iconCls: 'bg-emerald-50 text-emerald-600',
+      valCls: 'text-emerald-600',
+      subCls: 'text-emerald-700',
+      onClick: () => {
+        setSelectedRole('');
+        setSelectedStatus('ACTIVE');
+        setIncludeDeleted(false);
+        setCurrentPage(1);
+      },
+    },
+    {
+      label: 'Giáo Viên Chủ Nhiệm',
+      value: stats?.teachers ?? 0,
+      unit: 'cô',
+      sub: 'Điểm danh & đánh giá bữa ăn',
+      icon: GraduationCap,
+      iconCls: 'bg-blue-50 text-blue-600',
+      valCls: 'text-blue-600',
+      subCls: 'text-blue-700',
+      onClick: () => {
+        setSelectedRole('TEACHER');
+        setSelectedStatus('ACTIVE');
+        setIncludeDeleted(false);
+        setCurrentPage(1);
+      },
+    },
+    {
+      label: 'Bếp & Dinh Dưỡng',
+      value: stats?.kitchenAndNutrition ?? 0,
+      unit: 'nhân sự',
+      sub: 'Kiểm thực 3 bước & Lưu mẫu 24h',
+      icon: ChefHat,
+      iconCls: 'bg-orange-50 text-orange-600',
+      valCls: 'text-orange-600',
+      subCls: 'text-orange-700',
+      onClick: () => {
+        setSelectedRole('NUTRITIONIST');
+        setSelectedStatus('');
+        setIncludeDeleted(false);
+        setCurrentPage(1);
+      },
+    },
+    {
+      label: 'Tạm Khóa / Lưu Trữ',
+      value: stats?.inactiveOrDeleted ?? 0,
+      unit: 'hồ sơ',
+      sub: 'Bảo toàn lịch sử dữ liệu',
+      icon: Archive,
+      iconCls: 'bg-amber-50 text-amber-600',
+      valCls: 'text-slate-700',
+      subCls: 'text-amber-700',
+      onClick: () => {
+        setSelectedRole('');
+        setSelectedStatus('INACTIVE');
+        setIncludeDeleted(true);
+        setCurrentPage(1);
+      },
+    },
+  ];
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
-      {/* Toast Notification Floating */}
+    <div className="max-w-7xl mx-auto space-y-6">
       {toastMessage && (
         <div
           className={`fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 max-w-md ${
@@ -327,30 +323,26 @@ export const StaffManagementPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header Trang */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
               CỔNG BAN GIÁM HIỆU
             </span>
-            <span className="text-xs text-slate-400">• Cơ sở MN Sao Mai</span>
+            <span className="text-xs text-slate-400">• {schoolName}</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
             Quản Lý Nhân Sự & Đội Ngũ Bếp
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Quản trị tài khoản, phân công vai trò, tra cứu và bảo vệ dữ liệu với quy chuẩn xóa mềm.
+            Quản trị tài khoản, phân công vai trò, tra cứu và bảo vệ dữ liệu với quy chuẩn xóa mềm (UC08 – UC11).
           </p>
         </div>
 
-        {/* Nút Hành Động Header */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              loadStaffList();
-              loadStats();
-            }}
+            onClick={() => Promise.all([loadStaffList(), loadStats()])}
             disabled={isListLoading}
             className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition"
             title="Làm mới dữ liệu"
@@ -358,8 +350,8 @@ export const StaffManagementPage: React.FC = () => {
             <RefreshCw className={`w-4 h-4 ${isListLoading ? 'animate-spin text-teal-600' : ''}`} />
           </button>
           <button
-            onClick={handleOpenCreateDrawer}
-            className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition active:scale-98"
+            onClick={() => handleOpenDrawer('create')}
+            className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
           >
             <UserPlus className="w-4 h-4" />
             <span>Thêm Nhân Sự Mới</span>
@@ -367,112 +359,34 @@ export const StaffManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 1. CÁC Ô THỐNG KÊ Ở PHẦN ĐẦU GIAO DIỆN (TOP KPI STATISTICS CARDS)           */}
-      {/* ========================================================================= */}
+      {/* 1. KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Card 1: Tổng nhân sự */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500">Tổng Nhân Sự</span>
-            <div className="w-9 h-9 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center">
-              <Users className="w-4 h-4" />
+        {kpiCards.map((c, idx) => {
+          const Icon = c.icon;
+          return (
+            <div
+              key={idx}
+              onClick={c.onClick}
+              className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md hover:border-teal-300 cursor-pointer transition"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">{c.label}</span>
+                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center ${c.iconCls}`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-3">
+                <span className={`text-2xl font-black tracking-tight ${c.valCls}`}>{c.value}</span>
+                <span className="text-xs text-slate-400 font-medium ml-1">{c.unit}</span>
+              </div>
+              <div className={`mt-2 text-[11px] font-semibold ${c.subCls}`}>{c.sub}</div>
             </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-slate-900 tracking-tight">
-              {stats?.totalStaff ?? 0}
-            </span>
-            <span className="text-xs text-slate-400 font-medium ml-1">người</span>
-          </div>
-          <div className="mt-2 text-[11px] text-teal-700 font-semibold flex items-center gap-1">
-            <span>Toàn bộ cán bộ & nhân viên</span>
-          </div>
-        </div>
-
-        {/* Card 2: Đang hoạt động */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500">Đang Hoạt Động</span>
-            <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <UserCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-emerald-600 tracking-tight">
-              {stats?.activeStaff ?? 0}
-            </span>
-            <span className="text-xs text-slate-400 font-medium ml-1">tài khoản</span>
-          </div>
-          <div className="mt-2 text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Sẵn sàng vận hành</span>
-          </div>
-        </div>
-
-        {/* Card 3: Giáo viên đứng lớp */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500">Giáo Viên Chủ Nhiệm</span>
-            <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <GraduationCap className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-blue-600 tracking-tight">
-              {stats?.teachers ?? 0}
-            </span>
-            <span className="text-xs text-slate-400 font-medium ml-1">cô</span>
-          </div>
-          <div className="mt-2 text-[11px] text-blue-700 font-semibold">
-            <span>Điểm danh & đánh giá bữa ăn</span>
-          </div>
-        </div>
-
-        {/* Card 4: Nhà bếp & Dinh dưỡng */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500">Bếp & Dinh Dưỡng</span>
-            <div className="w-9 h-9 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center">
-              <ChefHat className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-orange-600 tracking-tight">
-              {stats?.kitchenAndNutrition ?? 0}
-            </span>
-            <span className="text-xs text-slate-400 font-medium ml-1">nhân sự</span>
-          </div>
-          <div className="mt-2 text-[11px] text-orange-700 font-semibold">
-            <span>Kiểm thực 3 bước & Lưu mẫu 24h</span>
-          </div>
-        </div>
-
-        {/* Card 5: Tạm khóa / Lưu trữ (Đã xóa mềm) */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500">Tạm Khóa / Lưu Trữ</span>
-            <div className="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Archive className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-slate-700 tracking-tight">
-              {stats?.inactiveOrDeleted ?? 0}
-            </span>
-            <span className="text-xs text-slate-400 font-medium ml-1">hồ sơ</span>
-          </div>
-          <div className="mt-2 text-[11px] text-amber-700 font-semibold flex items-center gap-1">
-            <span>Bảo toàn lịch sử dữ liệu</span>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. THANH CÔNG CỤ TÌM KIẾM & BỘ LỌC (SEARCH & FILTER TOOLBAR)               */}
-      {/* ========================================================================= */}
+      {/* 2. Search & Filter Toolbar */}
       <div className="bg-white border border-slate-200/80 rounded-3xl p-4 shadow-xs flex flex-col md:flex-row md:items-center gap-3 justify-between">
-        {/* Ô Tìm kiếm thời gian thực */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -480,7 +394,7 @@ export const StaffManagementPage: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm theo họ tên, email công việc, số điện thoại..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
+            className="w-full pl-10 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
           />
           {search && (
             <button
@@ -492,9 +406,7 @@ export const StaffManagementPage: React.FC = () => {
           )}
         </div>
 
-        {/* Các Dropdown Bộ Lọc */}
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Lọc theo Vai trò */}
           <select
             value={selectedRole}
             onChange={(e) => {
@@ -511,7 +423,6 @@ export const StaffManagementPage: React.FC = () => {
             ))}
           </select>
 
-          {/* Lọc theo Trạng thái */}
           <select
             value={selectedStatus}
             onChange={(e) => {
@@ -526,7 +437,6 @@ export const StaffManagementPage: React.FC = () => {
             <option value="DELETED">Đã xóa mềm (Lưu trữ)</option>
           </select>
 
-          {/* Bật / Tắt xem bản ghi xóa mềm */}
           <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 transition">
             <input
               type="checkbox"
@@ -542,9 +452,7 @@ export const StaffManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. BẢNG DỮ LIỆU NHÂN SỰ (STAFF DATA TABLE)                                 */}
-      {/* ========================================================================= */}
+      {/* 3. Data Table */}
       <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -562,7 +470,7 @@ export const StaffManagementPage: React.FC = () => {
               {isListLoading ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
-                    <div className="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                    <div className="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin mb-2" />
                     <p className="font-semibold">Đang tải danh sách nhân sự...</p>
                   </td>
                 </tr>
@@ -588,21 +496,21 @@ export const StaffManagementPage: React.FC = () => {
                         isSoftDeleted ? 'bg-slate-50/50 opacity-75' : ''
                       }`}
                     >
-                      {/* Cột 1: Thông tin nhân sự */}
                       <td className="py-3.5 px-5">
-                        <div className="flex items-center gap-3">
+                        <div
+                          onClick={() => handleOpenDrawer('view', staff)}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
                           <div
                             className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
-                              isSoftDeleted
-                                ? 'bg-slate-200 text-slate-600'
-                                : 'bg-teal-600 text-white'
+                              isSoftDeleted ? 'bg-slate-200 text-slate-600' : 'bg-teal-600 text-white'
                             }`}
                           >
                             {staff.fullName.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-slate-900 truncate">
+                              <span className="font-bold text-slate-900 group-hover:text-teal-700 truncate transition">
                                 {staff.fullName}
                               </span>
                               {isCurrent && (
@@ -611,14 +519,11 @@ export const StaffManagementPage: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] text-slate-400 truncate block">
-                              {staff.email}
-                            </span>
+                            <span className="text-[11px] text-slate-400 truncate block">{staff.email}</span>
                           </div>
                         </div>
                       </td>
 
-                      {/* Cột 2: Số điện thoại */}
                       <td className="py-3.5 px-4 font-mono text-slate-600">
                         {staff.phone ? (
                           <div className="flex items-center gap-1.5">
@@ -630,10 +535,9 @@ export const StaffManagementPage: React.FC = () => {
                         )}
                       </td>
 
-                      {/* Cột 3: Vai trò chuyên môn */}
                       <td className="py-3.5 px-4">
                         <div className="flex flex-wrap gap-1">
-                          {staff.roles && staff.roles.length > 0 ? (
+                          {staff.roles?.length ? (
                             staff.roles.map((r) => renderRoleBadge(r.code, r.name))
                           ) : (
                             <span className="text-slate-400 italic">Chưa phân vai trò</span>
@@ -641,7 +545,6 @@ export const StaffManagementPage: React.FC = () => {
                         </div>
                       </td>
 
-                      {/* Cột 4: Trạng thái */}
                       <td className="py-3.5 px-4">
                         {isSoftDeleted ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
@@ -650,53 +553,51 @@ export const StaffManagementPage: React.FC = () => {
                           </span>
                         ) : staff.status === 'ACTIVE' ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Hoạt động
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                             Tạm khóa
                           </span>
                         )}
                       </td>
 
-                      {/* Cột 5: Ngày tham gia */}
                       <td className="py-3.5 px-4 text-slate-500 text-[11px]">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-slate-400" />
-                          <span>
-                            {new Date(staff.createdAt).toLocaleDateString('vi-VN')}
-                          </span>
+                          <span>{new Date(staff.createdAt).toLocaleDateString('vi-VN')}</span>
                         </div>
                       </td>
 
-                      {/* Cột 6: Nút thao tác */}
                       <td className="py-3.5 px-5 text-right">
                         <div className="flex items-center justify-end gap-1">
                           {isSoftDeleted ? (
-                            /* Nút Khôi phục cho nhân sự đã xóa mềm */
                             <button
                               onClick={() => handleRestoreStaff(staff)}
                               disabled={isActionSubmitting}
                               className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs flex items-center gap-1 transition"
-                              title="Khôi phục tài khoản nhân sự"
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
                               <span>Khôi phục</span>
                             </button>
                           ) : (
                             <>
-                              {/* Nút Chỉnh sửa -> MỞ RIGHT DRAWER */}
                               <button
-                                onClick={() => handleOpenEditDrawer(staff)}
+                                onClick={() => handleOpenDrawer('view', staff)}
                                 className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                title="Chỉnh sửa nhân sự (Mở Popup bên phải)"
+                                title="Xem chi tiết nhân sự (UC08)"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleOpenDrawer('edit', staff)}
+                                className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
+                                title="Chỉnh sửa nhân sự (UC10)"
                               >
                                 <Edit3 className="w-4 h-4" />
                               </button>
-
-                              {/* Nút Khóa / Mở khóa nhanh */}
                               {!isCurrent && (
                                 <button
                                   onClick={() => handleToggleStatus(staff)}
@@ -715,8 +616,6 @@ export const StaffManagementPage: React.FC = () => {
                                   )}
                                 </button>
                               )}
-
-                              {/* Nút Xóa Mềm */}
                               {!isCurrent && (
                                 <button
                                   onClick={() => setDeletingStaff(staff)}
@@ -739,25 +638,22 @@ export const StaffManagementPage: React.FC = () => {
           </table>
         </div>
 
-        {/* Phân Trang (Pagination Footer) */}
+        {/* Pagination */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <div>
             Hiển thị{' '}
             <span className="font-bold text-slate-800">
               {staffList.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}
             </span>{' '}
-            -{' '}
-            <span className="font-bold text-slate-800">
-              {Math.min(currentPage * pageSize, totalCount)}
-            </span>{' '}
-            trên tổng số <span className="font-bold text-slate-800">{totalCount}</span> nhân sự
+            - <span className="font-bold text-slate-800">{Math.min(currentPage * pageSize, totalCount)}</span> trên
+            tổng số <span className="font-bold text-slate-800">{totalCount}</span> nhân sự
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage <= 1 || isListLoading}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -767,7 +663,7 @@ export const StaffManagementPage: React.FC = () => {
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage >= totalPages || isListLoading}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -775,21 +671,17 @@ export const StaffManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 4. POPUP BÊN PHẢI LÀM MỜ NỀN (RIGHT SLIDE-OVER DRAWER FOR CREATE & EDIT)   */}
-      {/* ========================================================================= */}
       <StaffDrawer
         isOpen={isDrawerOpen}
+        mode={drawerMode}
         staff={editingStaff}
         availableRoles={availableRoles}
         isLoading={isDrawerSubmitting}
         onClose={() => setIsDrawerOpen(false)}
+        onSwitchToEdit={() => setDrawerMode('edit')}
         onSubmit={handleDrawerSubmit}
       />
 
-      {/* ========================================================================= */}
-      {/* 5. MODAL XÁC NHẬN XÓA MỀM (SOFT DELETE CONFIRMATION DIALOG)                */}
-      {/* ========================================================================= */}
       <SoftDeleteConfirmModal
         isOpen={Boolean(deletingStaff)}
         staff={deletingStaff}

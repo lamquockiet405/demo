@@ -39,6 +39,35 @@ export class SnackServicesController {
     return this.snackServicesService.createPeriod(dto, resolvedTenantId);
   }
 
+  @Get('roster')
+  @ApiOperation({ summary: 'UC60 & UC61: Xem và lọc danh sách phân công phục vụ ăn xế (Snack Service Roster)' })
+  @ApiQuery({ name: 'periodId', required: false, description: 'ID đợt đăng ký ăn xế' })
+  @ApiQuery({ name: 'classId', required: false, description: 'ID lớp học' })
+  @ApiQuery({ name: 'ageGroup', required: false, description: 'Khối lớp (Mẫu giáo, Nhà trẻ,...)' })
+  @ApiQuery({ name: 'search', required: false, description: 'Tìm theo tên hoặc mã học sinh' })
+  @ApiQuery({ name: 'attendanceStatus', required: false, description: 'Trạng thái điểm danh (ALL, PRESENT, ABSENT)' })
+  @ApiQuery({ name: 'portionStatus', required: false, description: 'Trạng thái khẩu phần (ALL, PENDING, SERVED, SKIPPED)' })
+  @ApiQuery({ name: 'allergyOnly', required: false, description: 'Chỉ học sinh có cảnh báo dị ứng' })
+  async getRoster(
+    @Query('periodId') periodId?: string,
+    @Query('classId') classId?: string,
+    @Query('ageGroup') ageGroup?: string,
+    @Query('search') search?: string,
+    @Query('attendanceStatus') attendanceStatus?: string,
+    @Query('portionStatus') portionStatus?: string,
+    @Query('allergyOnly') allergyOnly?: boolean | string,
+  ) {
+    return this.snackServicesService.getRoster({
+      periodId,
+      classId,
+      ageGroup,
+      search,
+      attendanceStatus,
+      portionStatus,
+      allergyOnly,
+    });
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'UC57: Lấy chi tiết gói ăn xế theo ID' })
   @ApiParam({ name: 'id', description: 'ID gói dịch vụ ăn xế' })
