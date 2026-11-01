@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Optional, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { InspectionRecord } from './entities/inspection-record.entity';
 import { InspectionSampleItem } from './entities/inspection-sample-item.entity';
 import { SealSampleDto } from './dto/seal-sample.dto';
+import { AuditLogsService } from '../audit-logs/services/audit-logs.service';
 
 @Injectable()
 export class InspectionsService {
@@ -12,6 +13,7 @@ export class InspectionsService {
     private readonly inspectionRepo: Repository<InspectionRecord>,
     @InjectRepository(InspectionSampleItem)
     private readonly sampleRepo: Repository<InspectionSampleItem>,
+    @Optional() private readonly auditLogsService?: AuditLogsService,
   ) {}
 
   async getSamples() {
@@ -68,7 +70,26 @@ export class InspectionsService {
       status: 'STORED',
       note: dto.note || 'Lưu mẫu 24h theo Quyết định 1246/QĐ-BYT',
     });
-    return this.sampleRepo.save(sample);
+    const saved = await this.sampleRepo.save(sample);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: 4,
+      userName: 'Nhân viên Bếp',
+      userRole: 'KITCHEN_STAFF',
+      action: 'RETAIN_FOOD_SAMPLE',
+      targetEntity: 'FOOD_SAMPLE',
+      targetId: String(saved.id),
+      ipAddress: '127.0.0.1',
+      details: {
+        sampleCode: saved.sampleCode,
+        dishName: saved.dishName,
+        date: saved.date,
+        note: saved.note,
+      },
+    }).catch(() => {});
+
+    return saved;
   }
 
   async createStep1(data: any, inspectorId?: number) {
@@ -80,6 +101,23 @@ export class InspectionsService {
       note: data.note || 'Kiểm tra cảm quan nguyên liệu tươi sống đạt yêu cầu',
     });
     const saved = await this.inspectionRepo.save(rec);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: inspectorId || 4,
+      userName: 'Nhân viên Bếp',
+      userRole: 'KITCHEN_STAFF',
+      action: 'FOOD_INSPECTION_STEP1',
+      targetEntity: 'FOOD_INSPECTION',
+      targetId: String(saved.id),
+      ipAddress: '127.0.0.1',
+      details: {
+        step: 1,
+        stepName: 'Kiểm tra nguồn nguyên liệu trước khi chế biến',
+        result: rec.result,
+        note: rec.note,
+      },
+    }).catch(() => {});
     return {
       success: true,
       recordId: String(saved.id),

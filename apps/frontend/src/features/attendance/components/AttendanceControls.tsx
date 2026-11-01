@@ -135,7 +135,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
             >
               {classes.map((cls) => (
                 <option key={cls.id} value={cls.id}>
-                  {cls.name} ({cls.totalStudents} bé)
+                  {cls.name} ({(cls.totalStudents || (cls as any).studentCount || 0)} bé)
                 </option>
               ))}
             </select>

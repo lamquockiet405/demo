@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Optional, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GrowthRecord, GrowthZscore } from '../entities/growth-record.entity';
@@ -6,6 +6,7 @@ import { Child } from '../../children/entities/child.entity';
 import { WhoZscoreService } from './who-zscore.service';
 import { CreateGrowthRecordDto } from '../dto/create-growth-record.dto';
 import { QueryGrowthRecordsDto } from '../dto/query-growth-records.dto';
+import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
 
 @Injectable()
 export class GrowthService {
@@ -17,6 +18,7 @@ export class GrowthService {
     @InjectRepository(Child)
     private readonly childRepo: Repository<Child>,
     private readonly whoService: WhoZscoreService,
+    @Optional() private readonly auditLogsService?: AuditLogsService,
   ) {}
 
   private mapToItem(record: GrowthRecord) {
