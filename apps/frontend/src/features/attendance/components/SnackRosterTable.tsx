@@ -175,11 +175,10 @@ export const SnackRosterTable: React.FC<SnackRosterTableProps> = ({
         <button
           key={`page-${p}`}
           onClick={() => onPageChange(p as number)}
-          className={`w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center ${
-            isCurrent
-              ? 'bg-[#1b4332] text-white shadow-sm'
-              : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-          }`}
+          className={`w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center ${isCurrent
+            ? 'bg-[#1b4332] text-white shadow-sm'
+            : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+            }`}
         >
           {p}
         </button>
