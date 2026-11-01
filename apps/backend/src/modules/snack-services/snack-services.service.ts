@@ -7,6 +7,7 @@ import { Child } from '../children/entities/child.entity';
 import { ClassEntity } from '../classes/entities/class.entity';
 import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.dto';
 import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
+import { QuerySnackServiceDto } from './dto/query-snack-service.dto';
 
 @Injectable()
 export class SnackServicesService {
@@ -25,7 +26,7 @@ export class SnackServicesService {
    * UC57: Lấy danh sách các kỳ dịch vụ ăn xế / ăn sáng bán trú
    * Kèm 4 thẻ KPI thống kê tổng quan (Đợt vận hành, Tỷ lệ tham gia, Doanh thu VNPAY, Mức độ hài lòng)
    */
-  async findAll() {
+  async findAll(query?: QuerySnackServiceDto) {
     const periods = await this.periodRepo.find({
       relations: ['registrations', 'registrations.student'],
       order: { id: 'DESC' },
@@ -101,12 +102,45 @@ export class SnackServicesService {
       },
     };
 
+    // UC58: Multi-criteria filtering (search, status, grade)
+    let filteredItems = items;
+
+    if (query?.search && query.search.trim() !== '') {
+      const keyword = query.search.trim().toLowerCase();
+      const removeAccents = (str: string) =>
+        str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const rawKeyword = removeAccents(keyword);
+
+      filteredItems = filteredItems.filter((i) => {
+        const nameMatch = i.name.toLowerCase().includes(keyword) || removeAccents(i.name).includes(rawKeyword);
+        const descMatch = i.description.toLowerCase().includes(keyword) || removeAccents(i.description).includes(rawKeyword);
+        const monthMatch = i.appliedMonth.toLowerCase().includes(keyword);
+        return nameMatch || descMatch || monthMatch;
+      });
+    }
+
+    if (query?.status && query.status !== 'ALL') {
+      filteredItems = filteredItems.filter((i) => i.status === query.status);
+    }
+
+    if (query?.grade && query.grade !== 'ALL') {
+      filteredItems = filteredItems.filter((i) => {
+        if (query.grade === 'KINDERGARTEN_LARGE') {
+          return i.appliedGrade.includes('Khối Lớn') || i.appliedGrade.includes('Tất cả');
+        }
+        if (query.grade === 'TODDLER') {
+          return i.appliedGrade.includes('Nhà trẻ') || i.appliedGrade.includes('Mầm') || i.appliedGrade.includes('Tất cả');
+        }
+        return true;
+      });
+    }
+
     return {
       success: true,
-      data: items,
-      items,
+      data: filteredItems,
+      items: filteredItems,
       summary,
-      totalCount: items.length,
+      totalCount: filteredItems.length,
       activePeriod: items.find((i) => i.status === 'OPEN') || items[0] || null,
     };
   }

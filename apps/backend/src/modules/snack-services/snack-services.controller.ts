@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SnackServicesService } from './snack-services.service';
 import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.dto';
 import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
+import { QuerySnackServiceDto } from './dto/query-snack-service.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -26,16 +28,16 @@ export class SnackServicesController {
 
   @Get()
   @Roles('SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN', 'PARENT')
-  @ApiOperation({ summary: 'UC57: Lấy danh sách các kỳ dịch vụ ăn xế / ăn sáng bán trú' })
-  async findAll() {
-    return this.snackService.findAll();
+  @ApiOperation({ summary: 'UC57 & UC58: Lấy danh sách các kỳ dịch vụ ăn xế / ăn sáng bán trú có bộ lọc' })
+  async findAll(@Query() query: QuerySnackServiceDto) {
+    return this.snackService.findAll(query);
   }
 
   @Get('list')
   @Roles('SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN', 'PARENT')
-  @ApiOperation({ summary: 'Lấy danh sách rút gọn các kỳ dịch vụ ăn xế' })
-  async getList() {
-    return this.snackService.findAll();
+  @ApiOperation({ summary: 'Lấy danh sách rút gọn các kỳ dịch vụ ăn xế có bộ lọc' })
+  async getList(@Query() query: QuerySnackServiceDto) {
+    return this.snackService.findAll(query);
   }
 
   @Get('dayboarding')
