@@ -33,6 +33,7 @@ export const NutritionistLayout: React.FC = () => {
     { label: 'Nguyên liệu', path: '/nutritionist/foods' },
     { label: 'Món ăn & Công thức', path: '/nutritionist/dishes' },
     { label: 'Quy tắc dinh dưỡng', path: '/nutritionist/rules' },
+    { label: 'Quy tắc Tần suất & Món', path: '/nutritionist/food-group-rules' },
     { label: 'Thực đơn', path: '/nutritionist/menus' },
     { label: 'Kiểm thực', path: '/nutritionist/food-safety' },
     { label: 'Tăng trưởng', path: '/nutritionist/growth' },
@@ -156,7 +157,7 @@ export const NutritionistLayout: React.FC = () => {
                       onClick={() => {
                         setIsUserDropdownOpen(false);
                         logout();
-                        navigate('/login');
+                        navigate('/home');
                       }}
                       className="w-full text-left px-4 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition border-t border-slate-100"
                     >
