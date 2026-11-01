@@ -27,7 +27,7 @@ import { QueryGrowthRecordsDto } from '../dto/query-growth-records.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('growth')
 export class GrowthController {
-  constructor(private readonly growthService: GrowthService) {}
+  constructor(private readonly growthService: GrowthService) { }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách hồ sơ tăng trưởng & Z-score' })
@@ -95,15 +95,16 @@ export class GrowthController {
   @ApiOperation({ summary: 'Nhập dữ liệu đo thể chất hàng loạt từ Excel/CSV' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST')
   async importRecords(
-    @Body('items') items: any[],
+    @Body() body: any,
     @CurrentUser() user?: any,
   ) {
     const userId = user?.userId ? Number(user.userId) : (user?.id ? Number(user.id) : undefined);
-    return this.growthService.importRecords(items || [], userId);
+    const items = Array.isArray(body) ? body : (body?.items || []);
+    return this.growthService.importRecords(items, userId);
   }
 
   @Get('export')
-  @ApiOperation({ summary: 'Xuất báo cáo phát triển thể chất (UC-80)' })
+  @ApiOperation({ summary: 'Xuất báo cáo phát triển thể chất' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
   async exportReport(
     @Query('classId') classId?: string,

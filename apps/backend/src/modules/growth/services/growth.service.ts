@@ -318,13 +318,27 @@ export class GrowthService {
       dto.measurementDate ||
       new Date().toISOString().split('T')[0];
 
+    if (isNaN(new Date(measuredDate).getTime())) {
+      throw new BadRequestException(`Ngày đo "${measuredDate}" không hợp lệ (định dạng chuẩn YYYY-MM-DD)`);
+    }
+
+    const heightCm = Number(dto.heightCm);
+    const weightKg = Number(dto.weightKg);
+
+    if (isNaN(heightCm) || heightCm < 40 || heightCm > 150) {
+      throw new BadRequestException('Chiều cao phải là số trong khoảng từ 40 đến 150 cm');
+    }
+    if (isNaN(weightKg) || weightKg < 3 || weightKg > 60) {
+      throw new BadRequestException('Cân nặng phải là số trong khoảng từ 3 đến 60 kg');
+    }
+
     const gender = (child.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
     const growth = await this.whoService.calculateChildGrowth(
       gender,
       child.dateOfBirth,
       measuredDate,
-      Number(dto.heightCm),
-      Number(dto.weightKg),
+      heightCm,
+      weightKg,
     );
 
     // Upsert cơ chế chống trùng lặp: Học sinh + Ngày đo

@@ -139,12 +139,18 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   const [importText, setImportText] = useState('');
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ count: number; errors: string[] } | null>(null);
+    const [importResult, setImportResult] = useState<{ count: number; errors: string[] } | null>(null);
+  const [importWarning, setImportWarning] = useState<string | null>(null);
 
-  const sampleGrowthCsv = `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú
-HS-2026-0001, 2026-10-01, 15.2, 98.5, Khám sức khỏe định kỳ
-HS-2026-0002, 2026-10-01, 14.8, 96.0, Thể lực bình thường
-HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
+  const sampleGrowthCsv = useMemo(() => {
+    if (childrenList && childrenList.length >= 2) {
+      const c1 = childrenList[0];
+      const c2 = childrenList[1];
+      const today = new Date().toISOString().split('T')[0];
+      return `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú\n${c1.studentCode || 'HD-2023-01'}, ${today}, 15.2, 98.5, Khám sức khỏe định kỳ\n${c2.studentCode || 'HD-2023-02'}, ${today}, 14.8, 96.0, Thể lực bình thường\nHS-2026-9999, ${today}, 12.0, 92.0, Dữ liệu kiểm tra mã học sinh không tồn tại`;
+    }
+    return `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú\nHD-2023-01, 2026-10-01, 15.2, 98.5, Khám sức khỏe định kỳ\nHD-2023-02, 2026-10-01, 14.8, 96.0, Thể lực bình thường\nHS-2026-0001, 2026-10-01, 12.0, 92.0, Dữ liệu mẫu kiểm thử`;
+  }, [childrenList]);
 
   const handleOpenEdit = (r: GrowthRecordItem) => {
     setEditingRecord(r);
@@ -221,43 +227,70 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
     if (!importText.trim()) return;
     setImporting(true);
     setImportResult(null);
+    setImportWarning(null);
     try {
-      const lines = importText.trim().split('\n');
-      const items = [];
-      const startIdx =
-        lines[0].toLowerCase().includes('mã') ||
-        lines[0].toLowerCase().includes('student') ||
-        lines[0].toLowerCase().includes('ngày')
-          ? 1
-          : 0;
+      const lines = importText.trim().split(/\r?\n/);
+      if (lines.length === 0) {
+        setImportWarning('Vui lòng dán dữ liệu cân đo trước khi bắt đầu.');
+        setImporting(false);
+        return;
+      }
 
+      // 1. Tự động nhận diện và bỏ qua dòng tiêu đề (Header)
+      const firstLineNorm = lines[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const hasHeader =
+        firstLineNorm.includes('ma') ||
+        firstLineNorm.includes('student') ||
+        firstLineNorm.includes('ngay');
+      const startIdx = hasHeader ? 1 : 0;
+
+      const items = [];
       for (let i = startIdx; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
+
+        // 2. Tự động nhận diện ký tự phân tách: Tab (\t) hoặc dấu phẩy (,)
         const delimiter = line.includes('\t') ? '\t' : ',';
         const parts = line.split(delimiter).map((s) => s.trim());
-        if (parts.length >= 4) {
+
+        // 3. Kiểm tra tối thiểu 4 cột bắt buộc (studentCode, measurementDate, weightKg, heightCm)
+        if (parts.length >= 4 && parts[0] && parts[1]) {
+          const rawWeight = parts[2].replace(',', '.');
+          const rawHeight = parts[3].replace(',', '.');
+          const weightKg = parseFloat(rawWeight);
+          const heightCm = parseFloat(rawHeight);
+
           items.push({
             studentCode: parts[0],
             measurementDate: parts[1],
-            weightKg: parseFloat(parts[2]),
-            heightCm: parseFloat(parts[3]),
+            weightKg: isNaN(weightKg) ? parts[2] : weightKg,
+            heightCm: isNaN(heightCm) ? parts[3] : heightCm,
             healthNotes: parts[4] || undefined,
           });
         }
       }
 
       if (items.length === 0) {
-        alert('Không tìm thấy dòng dữ liệu cân đo hợp lệ.');
+        setImportWarning('Không tìm thấy dòng dữ liệu cân đo hợp lệ. Mỗi dòng cần tối thiểu 4 cột: Mã học sinh, Ngày đo, Cân nặng, Chiều cao.');
         setImporting(false);
         return;
       }
 
+      // 4. Gửi lên backend xử lý theo lô & dung thứ lỗi từng phần
       const res = await growthApi.importRecords(items);
       setImportResult({ count: res.importedCount, errors: res.errors || [] });
-      fetchData();
+
+      // 5. Tự động làm mới bảng dữ liệu và thống kê KPI
+      await fetchData();
+
+      if (selectedChildId) {
+        growthApi.getChildHistory(selectedChildId).then((hist) => {
+          setChildHistory(hist.history || []);
+          if (hist.child) setSelectedChildInfo(hist.child);
+        });
+      }
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Lỗi khi nhập dữ liệu.');
+      setImportWarning(err.response?.data?.message || 'Lỗi khi nhập dữ liệu từ hệ thống.');
     } finally {
       setImporting(false);
     }
@@ -598,6 +631,7 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
               onClick={() => {
                 setImportText('');
                 setImportResult(null);
+                setImportWarning(null);
                 setIsImportModalOpen(true);
               }}
               className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
@@ -1431,6 +1465,16 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                   className="w-full p-3 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white rounded-2xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
+
+              {importWarning && (
+                <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Cảnh báo dữ liệu:</span>
+                    <p className="mt-0.5 text-amber-700">{importWarning}</p>
+                  </div>
+                </div>
+              )}
 
               {importResult && (
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
