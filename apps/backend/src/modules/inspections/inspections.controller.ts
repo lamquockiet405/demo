@@ -30,6 +30,15 @@ export class InspectionsController {
     return this.inspectionsService.getInspections(query);
   }
 
+  @Get('meal-ingredients')
+  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu và món ăn theo ca ăn thực đơn' })
+  async getMealIngredients(
+    @Query('mealDate') mealDate?: string,
+    @Query('mealTime') mealTime?: string,
+  ) {
+    return this.inspectionsService.getMealIngredients(mealDate, mealTime);
+  }
+
   @Get('samples')
   @ApiOperation({ summary: 'Lấy danh sách các mẫu thức ăn lưu 24h (QĐ 1246/QĐ-BYT)' })
   async getSamples() {
@@ -64,7 +73,7 @@ export class InspectionsController {
   }
 
   @Post('step1')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Bước 1: Kiểm tra thực phẩm trước khi chế biến' })
   async createStep1(
     @Body() body: any,
@@ -74,7 +83,7 @@ export class InspectionsController {
   }
 
   @Post()
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Lập mới biên bản kiểm thực 3 bước' })
   async createInspection(
     @Body() body: any,
@@ -84,7 +93,7 @@ export class InspectionsController {
   }
 
   @Patch(':id/step2')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Bước 2: Kiểm tra thực phẩm trong quá trình chế biến' })
   async updateStep2(
     @Param('id') id: string,
@@ -95,7 +104,7 @@ export class InspectionsController {
   }
 
   @Patch(':id/step3')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Bước 3: Kiểm tra thức ăn trước khi ăn & lưu mẫu' })
   async updateStep3(
     @Param('id') id: string,

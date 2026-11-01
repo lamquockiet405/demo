@@ -878,4 +878,45 @@ export class InspectionsService {
     const numId = parseInt(String(id), 10);
     return this.disposeSample(numId);
   }
+
+  async getMealIngredients(mealDate?: string, mealTime?: string) {
+    const session = (mealTime || '').toLowerCase();
+    let mealType = 'LUNCH';
+    if (session.includes('sáng') || session.includes('morning')) {
+      mealType = 'MORNING_SNACK';
+    } else if (session.includes('xế') || session.includes('afternoon')) {
+      mealType = 'AFTERNOON_SNACK';
+    }
+
+    try {
+      const dishesRes = await this.inspectionRepo.manager.query(`
+        SELECT DISTINCT d.id, d.name as dish_name
+        FROM menu_meals mm
+        JOIN menu_dishes md ON md.menu_meal_id = mm.id
+        JOIN dishes d ON d.id = md.dish_id
+        WHERE mm.meal_type = $1
+        LIMIT 6
+      `, [mealType]);
+
+      const ingRes = await this.inspectionRepo.manager.query(`
+        SELECT DISTINCT fi.name as ingredient_name, fi.unit, dr.gross_weight_g
+        FROM menu_meals mm
+        JOIN menu_dishes md ON md.menu_meal_id = mm.id
+        JOIN dishes d ON d.id = md.dish_id
+        JOIN dish_recipes dr ON dr.dish_id = d.id
+        JOIN food_ingredients fi ON fi.id = dr.ingredient_id
+        WHERE mm.meal_type = $1
+        LIMIT 8
+      `, [mealType]);
+
+      return {
+        mealType,
+        mealTime: mealTime || (mealType === 'MORNING_SNACK' ? 'Bữa sáng (07:15)' : mealType === 'AFTERNOON_SNACK' ? 'Bữa xế chiều (14:30)' : 'Trưa chính (10:30)'),
+        dishes: dishesRes,
+        ingredients: ingRes,
+      };
+    } catch (e) {
+      return { mealType, dishes: [], ingredients: [] };
+    }
+  }
 }

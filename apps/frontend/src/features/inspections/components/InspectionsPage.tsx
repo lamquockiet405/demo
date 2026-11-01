@@ -73,6 +73,166 @@ export interface InspectionRecordItem {
   }>;
 }
 
+export interface MealIngredientItem {
+  id?: string;
+  name: string;
+  supplier: string;
+  weight: string;
+  standard: string;
+}
+
+export interface MealMenuConfig {
+  sessionKey: 'BREAKFAST' | 'LUNCH' | 'AFTERNOON_SNACK';
+  mealLabel: string;
+  badgeColor: string;
+  ingredientTitle: string;
+  defaultStep1Note: string;
+  dishes: Array<{ id: string; name: string; qty: string }>;
+  ingredients: MealIngredientItem[];
+}
+
+export const MEAL_MENU_CONFIGS: Record<string, MealMenuConfig> = {
+  'Bữa sáng (07:15)': {
+    sessionKey: 'BREAKFAST',
+    mealLabel: 'Bữa sáng (07:15)',
+    badgeColor: 'bg-amber-100 text-amber-800 border-amber-200',
+    ingredientTitle: 'Nguyên liệu thực đơn Bữa sáng:',
+    defaultStep1Note: 'Tiếp nhận bánh phở tươi, thịt bắp bò và xương hầm tươi mới sáng nay. 100% có tem kiểm dịch thú y và đạt chuẩn cảm quan.',
+    dishes: [
+      { id: 'bs1', name: 'Phở bò bắp Hà Nội', qty: '150' },
+      { id: 'bs2', name: 'Sữa tươi tiệt trùng học đường', qty: '180' },
+      { id: 'bs3', name: 'Bánh canh thịt heo nạc', qty: '150' },
+    ],
+    ingredients: [
+      {
+        name: 'Bánh phở tươi sợi mềm',
+        supplier: 'Cơ sở Việt Hưng',
+        weight: '20.0 kg',
+        standard: 'Sợi dẻo dai trắng tự nhiên, không hàn the / chất bảo quản',
+      },
+      {
+        name: 'Thịt bắp bò tươi loại 1',
+        supplier: 'Cty Vissan',
+        weight: '12.5 kg',
+        standard: 'Có tem kiểm dịch thú y, màu đỏ tươi dẻo dính tự nhiên',
+      },
+      {
+        name: 'Xương ống hầm nước dùng',
+        supplier: 'Lò mổ tập trung Vissan',
+        weight: '10.0 kg',
+        standard: 'Xương tươi mới trong ngày, màu tươi sáng, không mùi ôi chua',
+      },
+      {
+        name: 'Hành hoa, ngò gai & gừng tươi',
+        supplier: 'HTX Rau sạch Đà Lạt',
+        weight: '3.5 kg',
+        standard: 'Rau củ tươi non, rửa sạch đất cát, không dập úa sâu bệnh',
+      },
+      {
+        name: 'Sữa tươi tiệt trùng Vinamilk 100%',
+        supplier: 'Cty CP Sữa Việt Nam',
+        weight: '45 lốc (180 hộp)',
+        standard: 'Nguyên thùng màng co niêm phong, hạn dùng mới xuất xưởng',
+      },
+    ],
+  },
+  'Trưa chính (10:30)': {
+    sessionKey: 'LUNCH',
+    mealLabel: 'Trưa chính (10:30)',
+    badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    ingredientTitle: 'Nguyên liệu thực đơn Bữa trưa chính:',
+    defaultStep1Note: 'Tiếp nhận thịt heo nạc đùi sạch, bí đỏ hồ lô, gạo thơm ST25 và chuối tiêu. Đầy đủ hóa đơn kiểm dịch và chứng nhận ATTP.',
+    dishes: [
+      { id: 'tc1', name: 'Cơm tấm dẻo thơm ST25', qty: '150' },
+      { id: 'tc2', name: 'Thịt heo rim vừng sốt cà chua', qty: '150' },
+      { id: 'tc3', name: 'Canh bí đỏ hồ lô thịt bằm', qty: '150' },
+      { id: 'tc4', name: 'Chuối tiêu tráng miệng mầm non', qty: '120' },
+    ],
+    ingredients: [
+      {
+        name: 'Gạo tẻ thơm ST25 đóng bao',
+        supplier: 'Cty Lương thực Miền Nam',
+        weight: '25.0 kg',
+        standard: 'Nguyên bao bì tem nhãn, hạt đều trắng trong, không ẩm mốc',
+      },
+      {
+        name: 'Thịt heo nạc đùi sạch',
+        supplier: 'Cty CP Việt Nam',
+        weight: '16.5 kg',
+        standard: 'Kiểm dịch thú y đạt chuẩn, thớ thịt hồng hào dẻo dính',
+      },
+      {
+        name: 'Trứng chim cút sạch',
+        supplier: 'Trang trại Ba Huân',
+        weight: '250 quả',
+        standard: 'Vỏ nhẵn sạch không nứt vỡ, bảo quản mát đạt chuẩn',
+      },
+      {
+        name: 'Bí đỏ hồ lô loại 1',
+        supplier: 'Hợp tác xã Nông sản Xanh',
+        weight: '9.5 kg',
+        standard: 'Quả tươi nguyên cuống, đặc ruột vỏ cứng, thịt vàng óng ngọt bùi',
+      },
+      {
+        name: 'Chuối tiêu quả mầm non',
+        supplier: 'Nông sản Miền Tây',
+        weight: '18.0 kg',
+        standard: 'Chín tự nhiên, cuống tươi xanh, vỏ vàng mịn không thâm dập nát',
+      },
+    ],
+  },
+  'Bữa xế chiều (14:30)': {
+    sessionKey: 'AFTERNOON_SNACK',
+    mealLabel: 'Bữa xế chiều (14:30)',
+    badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    ingredientTitle: 'Nguyên liệu thực đơn Bữa xế chiều:',
+    defaultStep1Note: 'Tiếp nhận bún tươi sạch, thịt heo nạc băm nhuyễn, cà rốt và bánh flan dinh dưỡng. Đảm bảo bảo quản lạnh dưới 5°C đối với đồ mát.',
+    dishes: [
+      { id: 'bx1', name: 'Bún suông thịt nạc băm rau củ', qty: '150' },
+      { id: 'bx2', name: 'Bánh flan caramen dinh dưỡng', qty: '100' },
+      { id: 'bx3', name: 'Nước cam tươi nguyên chất đường phèn', qty: '150' },
+    ],
+    ingredients: [
+      {
+        name: 'Bún tươi sợi nhỏ sạch',
+        supplier: 'Cơ sở Bún Ba Khánh',
+        weight: '18.0 kg',
+        standard: 'Có chứng nhận ATTP, sợi trắng ngà tự nhiên, không chất tẩy trắng',
+      },
+      {
+        name: 'Thịt heo nạc dăm băm nhuyễn',
+        supplier: 'Cty MeatDeli',
+        weight: '8.5 kg',
+        standard: 'Thịt tươi dẻo đóng khay hút chân không có tem kiểm dịch, bảo quản mát 2-4°C',
+      },
+      {
+        name: 'Cà rốt Đà Lạt & nấm hương khô',
+        supplier: 'HTX Rau củ sạch Đà Lạt',
+        weight: '4.5 kg',
+        standard: 'Cà rốt giòn ngọt sạch đất, nấm hương cánh dày thơm loại 1',
+      },
+      {
+        name: 'Bánh flan caramen dinh dưỡng',
+        supplier: 'Cơ sở Thực phẩm Ánh Dương',
+        weight: '180 hũ',
+        standard: 'Hạn dùng mới xuất xưởng, bảo quản lạnh 4°C, nguyên nắp seal niêm phong',
+      },
+      {
+        name: 'Cam sành tươi mọng nước',
+        supplier: 'Nhà vườn Vĩnh Long',
+        weight: '15.0 kg',
+        standard: 'Quả tươi vỏ mỏng bóng mọng nước, tép vàng ngọt, không sâu ủng dập nát',
+      },
+    ],
+  },
+};
+
+export const getMealMenuConfig = (mealTime: string): MealMenuConfig => {
+  if (mealTime.includes('sáng')) return MEAL_MENU_CONFIGS['Bữa sáng (07:15)'];
+  if (mealTime.includes('xế')) return MEAL_MENU_CONFIGS['Bữa xế chiều (14:30)'];
+  return MEAL_MENU_CONFIGS['Trưa chính (10:30)'];
+};
+
 export const InspectionsPage: React.FC = () => {
   const location = useLocation();
   const { user } = useAuthStore();
@@ -98,16 +258,19 @@ export const InspectionsPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('');
 
   // 3-Step Creation Form State
+  const initialMeal = 'Trưa chính (10:30)';
+  const initialConfig = getMealMenuConfig(initialMeal);
+
   const [form, setForm] = useState({
     mealDate: new Date().toISOString().split('T')[0],
-    mealTime: 'Trưa chính (10:30)',
+    mealTime: initialMeal,
     step1Passed: true,
     step2Passed: true,
     step2KitchenPassed: true,
     step2Temperature: '85',
     step3Passed: true,
     step3Temperature: '68',
-    step1Note: 'Nguyên liệu tươi sống, nhãn mác rõ ràng, đạt chuẩn cảm quan khi giao nhận.',
+    step1Note: initialConfig.defaultStep1Note,
     step2Note: 'Quy trình bếp 1 chiều tuân thủ nghiêm ngặt, nhiệt độ nấu sôi trên 75°C.',
     step3Note: 'Mùi vị thơm ngon, chín đều, màu sắc tự nhiên, định lượng chia khay đồng đều.',
     step1Photo: null as File | null,
@@ -115,35 +278,60 @@ export const InspectionsPage: React.FC = () => {
     step3Photo: null as File | null,
   });
 
-  const [dishes, setDishes] = useState<Array<{ id: string; name: string; qty: string }>>([
-    { id: 'd1', name: 'Thịt heo xốt cà chua', qty: '150' },
-    { id: 'd2', name: 'Canh bí đỏ thịt bằm', qty: '150' },
-    { id: 'd3', name: 'Cơm tấm dẻo', qty: '150' },
-    { id: 'd4', name: 'Chuối tiêu tráng miệng', qty: '120' },
-  ]);
+  const [dishes, setDishes] = useState<Array<{ id: string; name: string; qty: string }>>(
+    initialConfig.dishes
+  );
 
-  useEffect(() => {
-    fetchRecords();
-    fetchDishes();
-  }, []);
+  const [currentIngredients, setCurrentIngredients] = useState<MealIngredientItem[]>(
+    initialConfig.ingredients
+  );
 
-  const fetchDishes = async () => {
+  // Deriving current meal config dynamically
+  const currentMealConfig = getMealMenuConfig(form.mealTime);
+
+  // Handle meal session change (Bữa sáng / Trưa chính / Bữa xế chiều)
+  const handleMealTimeChange = async (newMealTime: string) => {
+    const config = getMealMenuConfig(newMealTime);
+    setForm((prev) => ({
+      ...prev,
+      mealTime: newMealTime,
+      step1Note: config.defaultStep1Note,
+    }));
+    setDishes(config.dishes);
+    setCurrentIngredients(config.ingredients);
+
+    // Dynamic backend sync if meal ingredients API is available
     try {
-      const res = await apiClient.get('/dishes', { params: { limit: 20 } });
-      const items = res.data?.items || [];
-      if (items.length > 0) {
+      const res = await apiClient.get('/inspections/meal-ingredients', {
+        params: { mealDate: form.mealDate, mealTime: newMealTime },
+      });
+      if (res.data?.dishes && res.data.dishes.length > 0) {
         setDishes(
-          items.slice(0, 5).map((d: any) => ({
+          res.data.dishes.map((d: any) => ({
             id: String(d.id),
-            name: d.name,
+            name: d.dish_name || d.name,
             qty: '150',
           }))
         );
       }
-    } catch (err) {
-      console.warn('Could not load dishes from API, using default preschool dish items:', err);
+      if (res.data?.ingredients && res.data.ingredients.length > 0) {
+        setCurrentIngredients(
+          res.data.ingredients.map((ing: any) => ({
+            name: ing.ingredient_name || ing.name,
+            supplier: 'Nhà cung ứng HTX ATTP',
+            weight: `${parseFloat(ing.gross_weight_g || 10).toFixed(1)} kg`,
+            standard: 'Đạt chuẩn cảm quan, có chứng nhận kiểm định nguồn gốc',
+          }))
+        );
+      }
+    } catch (e) {
+      // Predefined preschool fallback is already applied
     }
   };
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
 
   const fetchRecords = async () => {
     setIsLoading(true);
@@ -198,16 +386,20 @@ export const InspectionsPage: React.FC = () => {
     setActiveRecordId(null);
     setCurrentStep(1);
     setModalMode('ASSIGN_KITCHEN');
+    const defaultMeal = 'Trưa chính (10:30)';
+    const config = getMealMenuConfig(defaultMeal);
+    setDishes(config.dishes);
+    setCurrentIngredients(config.ingredients);
     setForm({
       mealDate: new Date().toISOString().split('T')[0],
-      mealTime: 'Trưa chính (10:30)',
+      mealTime: defaultMeal,
       step1Passed: true,
       step2Passed: true,
       step2KitchenPassed: true,
       step2Temperature: '85',
       step3Passed: true,
       step3Temperature: '68',
-      step1Note: 'Nhà bếp vui lòng chụp đầy đủ ảnh 3 bước (nguyên liệu tươi + hóa đơn kiểm dịch, quy trình nấu sôi > 75°C, hộp inox niêm phong mẫu lưu 24h) và gửi duyệt.',
+      step1Note: config.defaultStep1Note,
       step2Note: 'Quy trình bếp 1 chiều tuân thủ nghiêm ngặt, nhiệt độ nấu sôi trên 75°C.',
       step3Note: 'Mùi vị thơm ngon, chín đều, màu sắc tự nhiên, định lượng chia khay đồng đều.',
       step1Photo: null,
@@ -835,13 +1027,34 @@ export const InspectionsPage: React.FC = () => {
                     <select
                       required
                       value={form.mealTime}
-                      onChange={(e) => setForm({ ...form, mealTime: e.target.value })}
+                      onChange={(e) => handleMealTimeChange(e.target.value)}
                       className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium outline-none"
                     >
-                      <option value="Trưa chính (10:30)">Trưa chính (10:30)</option>
                       <option value="Bữa sáng (07:15)">Bữa sáng (07:15)</option>
+                      <option value="Trưa chính (10:30)">Trưa chính (10:30)</option>
                       <option value="Bữa xế chiều (14:30)">Bữa xế chiều (14:30)</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* Tóm tắt nguyên liệu đầu vào theo ca ăn */}
+                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>{currentMealConfig.ingredientTitle}</span>
+                    </label>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${currentMealConfig.badgeColor}`}>
+                      {currentMealConfig.mealLabel}
+                    </span>
+                  </div>
+                  <div className="space-y-1 bg-white p-2.5 rounded-xl border border-slate-100 text-xs">
+                    {currentIngredients.map((ing, i) => (
+                      <div key={i} className="flex items-center justify-between text-slate-700 py-0.5">
+                        <span className="font-medium">• {ing.name} <span className="text-slate-400 font-normal">({ing.supplier})</span></span>
+                        <span className="font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 text-[11px]">{ing.weight}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -971,7 +1184,7 @@ export const InspectionsPage: React.FC = () => {
                       <select
                         required
                         value={form.mealTime}
-                        onChange={(e) => setForm({ ...form, mealTime: e.target.value })}
+                        onChange={(e) => handleMealTimeChange(e.target.value)}
                         className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 bg-white font-medium outline-none"
                       >
                         <option value="Bữa sáng (07:15)">Bữa sáng (07:15)</option>
@@ -992,13 +1205,68 @@ export const InspectionsPage: React.FC = () => {
                   </div>
 
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <p className="text-xs font-bold text-slate-700">Nguyên liệu giao nhận sáng nay:</p>
-                    <ul className="text-xs text-slate-600 space-y-1.5 list-disc list-inside bg-white p-3 rounded-xl border border-slate-100 font-medium">
-                      <li>Thịt heo nạc đùi sạch (Cty CP) — 14.5 kg, kiểm dịch đạt chuẩn</li>
-                      <li>Bí đỏ hồ lô loại 1 (Hợp tác xã) — 8.0 kg, tươi cuống</li>
-                      <li>Gạo tẻ thơm ST25 đóng bao — 25.0 kg, nguyên tem mác</li>
-                      <li>Chuối tiêu quả mầm non — 18.0 kg, không dập nát</li>
-                    </ul>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-slate-700">
+                          {currentMealConfig.ingredientTitle}
+                        </p>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${currentMealConfig.badgeColor}`}>
+                          {currentMealConfig.mealLabel}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const name = window.prompt('Nhập tên nguyên liệu & nhà cung ứng (VD: Dầu thực vật Tường An — 5.0 lít):');
+                          if (name && name.trim()) {
+                            setCurrentIngredients([
+                              ...currentIngredients,
+                              {
+                                name: name.trim(),
+                                supplier: 'Nhà cung ứng đạt chuẩn',
+                                weight: 'Đủ định lượng',
+                                standard: 'Đạt chuẩn cảm quan & có đầy đủ hóa đơn kiểm định',
+                              },
+                            ]);
+                          }
+                        }}
+                        className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Thêm nguyên liệu
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5 bg-white p-3 rounded-xl border border-slate-200/80">
+                      {currentIngredients.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start justify-between gap-2 p-2 rounded-lg bg-slate-50/70 hover:bg-slate-50 transition border border-slate-100 text-xs"
+                        >
+                          <div>
+                            <span className="font-bold text-slate-800">• {item.name}</span>{' '}
+                            <span className="text-slate-500 font-medium">({item.supplier})</span>
+                            <div className="text-[11px] text-emerald-700 mt-0.5 font-normal">
+                              {item.standard}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] font-mono font-bold bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700">
+                              {item.weight}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setCurrentIngredients(currentIngredients.filter((_, i) => i !== idx))
+                              }
+                              className="text-slate-400 hover:text-rose-600 font-bold px-1"
+                              title="Xóa nguyên liệu này"
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
 
                     <label className="flex items-center gap-3 cursor-pointer bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 transition">
                       <input
