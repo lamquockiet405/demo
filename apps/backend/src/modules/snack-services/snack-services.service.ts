@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SnackServiceEntity } from './entities/snack-service.entity';
-import { SnackServicePeriodEntity } from './entities/snack-service-period.entity';
+import { SnackServicePeriod } from './entities/snack-service-period.entity';
+import { SnackRegistration } from './entities/snack-registration.entity';
 import { Child } from '../children/entities/child.entity';
 import { ClassEntity } from '../classes/entities/class.entity';
 import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.dto';
@@ -11,21 +11,23 @@ import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
 @Injectable()
 export class SnackServicesService {
   constructor(
-
-    @InjectRepository(SnackServiceEntity)
-    private readonly snackRepo: Repository<SnackServiceEntity>,
-    @InjectRepository(SnackServicePeriodEntity)
-    private readonly periodRepo: Repository<SnackServicePeriodEntity>,
+    @InjectRepository(SnackServicePeriod)
+    private readonly periodRepo: Repository<SnackServicePeriod>,
+    @InjectRepository(SnackRegistration)
+    private readonly regRepo: Repository<SnackRegistration>,
     @InjectRepository(Child)
     private readonly childRepo: Repository<Child>,
     @InjectRepository(ClassEntity)
     private readonly classRepo: Repository<ClassEntity>,
-
   ) {}
 
+  /**
+   * UC57: Lấy danh sách các kỳ dịch vụ ăn xế / ăn sáng bán trú
+   * Kèm 4 thẻ KPI thống kê tổng quan (Đợt vận hành, Tỷ lệ tham gia, Doanh thu VNPAY, Mức độ hài lòng)
+   */
   async findAll() {
     const periods = await this.periodRepo.find({
-      relations: ['registrations'],
+      relations: ['registrations', 'registrations.student'],
       order: { id: 'DESC' },
     });
 
@@ -36,28 +38,33 @@ export class SnackServicesService {
       const paidCount = (p.registrations || []).filter((r) => r.status === 'PAID').length;
       const targetCount = 30;
       const percentage = Math.min(100, Math.round((regCount / (targetCount || 1)) * 100));
-      const fee = Number(p.feeAmount) || 480000;
-      const is5Meals = (p.name || '').toLowerCase().includes('5 bữa') || fee <= 150000;
-      const pricePerUnit = is5Meals ? Math.round(fee / 5) : Math.round(fee / 22);
+      const fee = Number(p.feeAmount) || 350000;
+      const isWeekly = fee <= 150000 || (p.name || '').toLowerCase().includes('5 bữa');
+      const pricePerUnit = isWeekly ? Math.round(fee / 5) : Math.round(fee / 22);
+      const isBreakfast = (p.name || '').toLowerCase().includes('sáng');
 
       return {
         id: String(p.id),
         name: p.name,
-        description: 'Suất ăn sáng mầm non lúc 07h15 - 08h00 - Đảm bảo năng lượng 295 kcal, canxi và vi chất',
-        serviceType: 'BREAKFAST',
-        billingCycle: is5Meals ? 'WEEKLY' : 'MONTHLY',
+        description: isBreakfast
+          ? 'Suất ăn sáng mầm non lúc 07h15 - 08h00 - Đảm bảo năng lượng 295 kcal, canxi và vi chất'
+          : 'Suất ăn xế chiều lúc 17h00 - Bổ sung vi chất, sữa chua hoa quả và sữa hạt dinh dưỡng cho trẻ',
+        serviceType: isBreakfast ? 'BREAKFAST' : 'AFTERNOON_SNACK',
+        billingCycle: isWeekly ? 'WEEKLY' : 'MONTHLY',
         pricePerUnit,
         monthlyEstimatedPrice: fee,
         appliedGrade: 'Tất cả các khối',
         registrationPeriod: `${p.startDate} ~ ${p.endDate}`,
-        appliedMonth: p.startDate ? p.startDate.substring(0, 7) : '2026-11',
+        appliedMonth: p.startDate ? p.startDate.substring(0, 7) : '2025-11',
         registeredCount: regCount,
         targetCount,
         percentage,
         progressNote: `Đã có ${regCount}/${targetCount} bé tham gia`,
         status: p.status as 'OPEN' | 'UPCOMING' | 'CLOSED',
-        statusLabel: p.status === 'OPEN' ? 'Đang mở đăng ký' : 'Đã khóa đợt',
-        badges: ['Phở bò / Cháo gà', 'Súp dinh dưỡng', 'Sữa hạt tươi'],
+        statusLabel: p.status === 'OPEN' ? 'Đang mở đăng ký' : p.status === 'UPCOMING' ? 'Sắp mở' : 'Đã đóng',
+        badges: isBreakfast
+          ? ['Phở bò / Cháo gà', 'Súp dinh dưỡng', 'Sữa hạt tươi']
+          : ['Súp dinh dưỡng', 'Sữa hạt / Sữa chua', 'Bánh flan / Trái cây'],
         isActive: p.status === 'OPEN',
         enrolledCount: regCount,
         paidCount,
@@ -84,8 +91,8 @@ export class SnackServicesService {
       },
       revenue: {
         expectedMonthly: expectedMonthly || 15000000,
-        collected: totalCollected || 8500000,
-        collectedPercentage: expectedMonthly > 0 ? Math.round((totalCollected / expectedMonthly) * 100) : 56,
+        collected: totalCollected || 700000,
+        collectedPercentage: expectedMonthly > 0 ? Math.round((totalCollected / expectedMonthly) * 100) : 0,
       },
       satisfaction: {
         ratePercent: 98,
@@ -104,46 +111,70 @@ export class SnackServicesService {
     };
   }
 
+  /**
+   * UC57: Xem chi tiết 1 kỳ dịch vụ ăn xế & danh sách học sinh đã đăng ký
+   */
   async findOne(id: number) {
     const p = await this.periodRepo.findOne({
       where: { id },
       relations: ['registrations', 'registrations.student', 'registrations.student.class'],
     });
 
-    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn sáng');
+    if (!p) throw new NotFoundException(`Không tìm thấy gói dịch vụ ăn xế/ăn sáng với mã #${id}`);
+
+    const fee = Number(p.feeAmount) || 0;
+    const isWeekly = fee <= 150000 || (p.name || '').toLowerCase().includes('5 bữa');
+    const pricePerUnit = isWeekly ? Math.round(fee / 5) : Math.round(fee / 22);
+    const isBreakfast = (p.name || '').toLowerCase().includes('sáng');
 
     const registrations = (p.registrations || []).map((r) => ({
       id: String(r.id),
       studentId: String(r.studentId),
       studentName: r.student?.fullName || 'Học sinh',
-      studentCode: r.student?.studentCode || '',
+      studentCode: r.student?.studentCode || `HS-${String(r.studentId).padStart(4, '0')}`,
       className: r.student?.class?.name || 'Mầm 1',
       status: r.status,
       registeredAt: r.registeredAt ? r.registeredAt.toISOString() : null,
-      amount: p.feeAmount,
+      amount: fee,
     }));
 
-    return {
+    const detailData = {
       id: String(p.id),
       name: p.name,
-      description: 'Suất ăn sáng mầm non lúc 07h15 - 08h00 - Đảm bảo năng lượng 295 kcal, canxi và vi chất',
+      description: isBreakfast
+        ? 'Suất ăn sáng mầm non lúc 07h15 - 08h00 - Đảm bảo năng lượng 295 kcal, canxi và vi chất'
+        : 'Suất ăn xế chiều lúc 17h00 - Bổ sung vi chất, sữa hạt dinh dưỡng và năng lượng cho trẻ',
+      serviceType: isBreakfast ? 'BREAKFAST' : 'AFTERNOON_SNACK',
+      billingCycle: isWeekly ? 'WEEKLY' : 'MONTHLY',
       startDate: p.startDate,
       endDate: p.endDate,
+      availableFrom: p.startDate,
+      availableTo: p.endDate,
       registrationDeadline: p.registrationDeadline,
-      feeAmount: Number(p.feeAmount),
-      pricePerUnit: Number(p.feeAmount),
+      feeAmount: fee,
+      pricePerUnit,
+      monthlyEstimatedPrice: fee,
       status: p.status,
       isActive: p.status === 'OPEN',
       registrations,
+      totalRegistered: registrations.length,
+      paidCount: registrations.filter((r) => r.status === 'PAID').length,
+      pendingCount: registrations.filter((r) => r.status === 'PENDING').length,
+    };
+
+    return {
+      success: true,
+      data: detailData,
+      ...detailData,
     };
   }
 
-  async createPeriod(dto: any) {
+  async createPeriod(dto: CreateSnackServicePeriodDto | any) {
     const name = dto.name || (dto.periodCode ? `Gói Ăn Sáng ${dto.periodCode}` : 'Gói Ăn Sáng Tiêu Chuẩn');
     const startDate = dto.startDate || dto.registrationStart || new Date().toISOString().slice(0, 10);
     const endDate = dto.endDate || dto.registrationEnd || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
     const registrationDeadline = dto.registrationDeadline || dto.registrationEnd || null;
-    const feeAmount = dto.feeAmount !== undefined ? Number(dto.feeAmount) : (dto.pricePerUnitPerDay ? Number(dto.pricePerUnitPerDay) * 22 : 480000);
+    const feeAmount = dto.feeAmount !== undefined ? Number(dto.feeAmount) : (dto.pricePerUnitPerDay ? Number(dto.pricePerUnitPerDay) * 22 : 350000);
     const status = dto.status === 'CLOSED' || dto.status === 'DRAFT' ? 'CLOSED' : 'OPEN';
 
     const period = this.periodRepo.create({
@@ -162,9 +193,9 @@ export class SnackServicesService {
     };
   }
 
-  async updatePeriod(id: number, dto: any) {
+  async updatePeriod(id: number, dto: UpdateSnackServiceDto | any) {
     const p = await this.periodRepo.findOne({ where: { id } });
-    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn sáng');
+    if (!p) throw new NotFoundException(`Không tìm thấy gói dịch vụ với mã #${id}`);
 
     if (dto.name) p.name = dto.name;
     if (dto.startDate) p.startDate = dto.startDate;
@@ -178,14 +209,14 @@ export class SnackServicesService {
     const saved = await this.periodRepo.save(p);
     return {
       success: true,
-      message: 'Cập nhật cấu hình gói dịch vụ ăn sáng thành công!',
+      message: 'Cập nhật cấu hình gói dịch vụ ăn xế/ăn sáng thành công!',
       data: saved,
     };
   }
 
   async closePeriod(id: number) {
     const p = await this.periodRepo.findOne({ where: { id } });
-    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn sáng');
+    if (!p) throw new NotFoundException(`Không tìm thấy gói dịch vụ với mã #${id}`);
     p.status = 'CLOSED';
     const saved = await this.periodRepo.save(p);
     return {
@@ -197,7 +228,7 @@ export class SnackServicesService {
 
   async togglePeriodStatus(id: number) {
     const p = await this.periodRepo.findOne({ where: { id } });
-    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn sáng');
+    if (!p) throw new NotFoundException(`Không tìm thấy gói dịch vụ với mã #${id}`);
     p.status = p.status === 'OPEN' ? 'CLOSED' : 'OPEN';
     const saved = await this.periodRepo.save(p);
     return {
@@ -423,35 +454,22 @@ export class SnackServicesService {
     allergyOnly?: boolean | string;
   }) {
     // 1. Tìm thông tin đợt đăng ký (Period)
-    let period: SnackServicePeriodEntity | null = null;
+    let period: SnackServicePeriod | null = null;
     if (filters?.periodId && filters.periodId !== 'ALL') {
       period = await this.periodRepo.findOne({
-        where: { id: filters.periodId },
-        relations: ['snackService'],
+        where: { id: Number(filters.periodId) },
       });
     }
 
     if (!period) {
-      // Fallback: Tìm period đầu tiên hoặc period ACTIVE
       period = await this.periodRepo.findOne({
-        relations: ['snackService'],
-        order: { createdAt: 'DESC' },
+        order: { id: 'DESC' },
       });
     }
 
     // 2. Lấy thông tin gói ăn xế liên kết
-    let snackServiceName = 'Gói Năng Lượng Chiều';
-    let pricePerDay = 15000;
-    if (period?.snackService) {
-      snackServiceName = period.snackService.name;
-      pricePerDay = Number(period.pricePerUnitPerDay || period.snackService.pricePerUnit) || 15000;
-    } else {
-      const defaultService = await this.snackRepo.findOne({ where: { isActive: true } });
-      if (defaultService) {
-        snackServiceName = defaultService.name;
-        pricePerDay = Number(defaultService.pricePerUnit) || 15000;
-      }
-    }
+    const snackServiceName = period?.name || 'Gói Năng Lượng Chiều';
+    const pricePerDay = period ? Math.round(Number(period.feeAmount) / 22) : 15000;
 
     // 3. Lấy danh sách các lớp học
     const classes = await this.classRepo.find({
@@ -465,14 +483,14 @@ export class SnackServicesService {
     });
 
     // 5. Mapping từng học sinh thành 1 bản ghi trong Snack Service Roster
-    const allRosterItems = students.map((kid, idx) => {
+    const allRosterItems = students.map((kid) => {
       const kidId = Number(kid.id);
-      const studentClass = kid.class || classes.find(c => Number(c.id) === Number(kid.classId));
+      const studentClass = kid.class || classes.find((c) => Number(c.id) === Number(kid.classId));
       const className = studentClass ? studentClass.name : 'Lớp Mầm A1';
       const ageGroup = studentClass ? studentClass.ageGroup : 'Mầm non';
 
-      // Trạng thái điểm danh (Mock ổn định theo ID học sinh): 88% có mặt, 12% vắng
-      const isAbsent = (kidId % 9 === 0);
+      // Trạng thái điểm danh: 88% có mặt, 12% vắng
+      const isAbsent = kidId % 9 === 0;
       const attendanceStatus: 'PRESENT' | 'ABSENT' | 'UNKNOWN' = isAbsent ? 'ABSENT' : 'PRESENT';
 
       // Trạng thái khẩu phần: nếu vắng -> SKIPPED; nếu có mặt -> 75% SERVED, 25% PENDING
@@ -485,7 +503,7 @@ export class SnackServicesService {
 
       // Thông tin dị ứng
       const allergyList = (kid.allergies || [])
-        .map(a => a.allergen?.name || a.allergen?.code)
+        .map((a) => a.allergen?.name || a.allergen?.code)
         .filter(Boolean);
       const hasAllergy = allergyList.length > 0;
 
@@ -498,7 +516,7 @@ export class SnackServicesService {
         className,
         ageGroup,
         snackServiceName,
-        periodCode: period?.periodCode || 'DOT-2024-11',
+        periodCode: period ? `DOT-${period.id}` : 'DOT-2024-11',
         pricePerDay,
         attendanceStatus,
         portionStatus,
@@ -510,11 +528,11 @@ export class SnackServicesService {
     // 6. Tính toán thống kê tổng quan (trước khi lọc)
     const summary = {
       totalRegistered: allRosterItems.length,
-      presentToday: allRosterItems.filter(i => i.attendanceStatus === 'PRESENT').length,
-      absentToday: allRosterItems.filter(i => i.attendanceStatus === 'ABSENT').length,
-      servedCount: allRosterItems.filter(i => i.portionStatus === 'SERVED').length,
-      pendingCount: allRosterItems.filter(i => i.portionStatus === 'PENDING').length,
-      totalClasses: new Set(allRosterItems.map(i => i.className)).size,
+      presentToday: allRosterItems.filter((i) => i.attendanceStatus === 'PRESENT').length,
+      absentToday: allRosterItems.filter((i) => i.attendanceStatus === 'ABSENT').length,
+      servedCount: allRosterItems.filter((i) => i.portionStatus === 'SERVED').length,
+      pendingCount: allRosterItems.filter((i) => i.portionStatus === 'PENDING').length,
+      totalClasses: new Set(allRosterItems.map((i) => i.className)).size,
     };
 
     // 7. Thực hiện bộ lọc (UC61)
@@ -524,54 +542,54 @@ export class SnackServicesService {
     if (filters?.search && filters.search.trim() !== '') {
       const q = filters.search.trim().toLowerCase();
       filteredItems = filteredItems.filter(
-        item => item.fullName.toLowerCase().includes(q) || item.studentCode.toLowerCase().includes(q),
+        (item) => item.fullName.toLowerCase().includes(q) || item.studentCode.toLowerCase().includes(q),
       );
     }
 
     // Filter theo Lớp
     if (filters?.classId && filters.classId !== 'ALL') {
-      filteredItems = filteredItems.filter(item => String(item.classId) === String(filters.classId));
+      filteredItems = filteredItems.filter((item) => String(item.classId) === String(filters.classId));
     }
 
     // Filter theo Khối tuổi
     if (filters?.ageGroup && filters.ageGroup !== 'ALL') {
-      filteredItems = filteredItems.filter(item => item.ageGroup === filters.ageGroup);
+      filteredItems = filteredItems.filter((item) => item.ageGroup === filters.ageGroup);
     }
 
     // Filter theo Trạng thái điểm danh
     if (filters?.attendanceStatus && filters.attendanceStatus !== 'ALL') {
-      filteredItems = filteredItems.filter(item => item.attendanceStatus === filters.attendanceStatus);
+      filteredItems = filteredItems.filter((item) => item.attendanceStatus === filters.attendanceStatus);
     }
 
     // Filter theo Trạng thái khẩu phần
     if (filters?.portionStatus && filters.portionStatus !== 'ALL') {
-      filteredItems = filteredItems.filter(item => item.portionStatus === filters.portionStatus);
+      filteredItems = filteredItems.filter((item) => item.portionStatus === filters.portionStatus);
     }
 
     // Filter chỉ học sinh có cờ cảnh báo dị ứng
     const allergyFlag = filters?.allergyOnly === true || filters?.allergyOnly === 'true';
     if (allergyFlag) {
-      filteredItems = filteredItems.filter(item => item.hasAllergy);
+      filteredItems = filteredItems.filter((item) => item.hasAllergy);
     }
 
     return {
       success: true,
-      period: period ? {
-        id: period.id,
-        periodCode: period.periodCode,
-        snackServiceName,
-        serviceMonths: period.serviceMonths || ['Tháng 11/2024'],
-        status: period.status,
-        pricePerUnitPerDay: pricePerDay,
-      } : undefined,
+      period: period
+        ? {
+            id: String(period.id),
+            periodCode: `DOT-${period.id}`,
+            snackServiceName,
+            serviceMonths: [period.startDate ? period.startDate.substring(0, 7) : '2025-11'],
+            status: period.status,
+            pricePerUnitPerDay: pricePerDay,
+          }
+        : undefined,
       summary,
       totalCount: filteredItems.length,
       data: filteredItems,
-      classes: classes.map(c => ({ id: Number(c.id), name: c.name, ageGroup: c.ageGroup })),
+      classes: classes.map((c) => ({ id: Number(c.id), name: c.name, ageGroup: c.ageGroup })),
     };
   }
-}
-
 
   async deleteService(id: number) {
     return {

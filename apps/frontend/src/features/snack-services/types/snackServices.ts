@@ -17,6 +17,9 @@ export interface SnackServiceItem {
   statusLabel: string;
   badges: string[];
   isActive: boolean;
+  enrolledCount?: number;
+  paidCount?: number;
+  totalRevenue?: number;
 }
 
 export interface SnackServicesSummary {
@@ -49,6 +52,8 @@ export interface SnackServicesResponse {
   summary: SnackServicesSummary;
   totalCount: number;
   data: SnackServiceItem[];
+  items?: SnackServiceItem[];
+  activePeriod?: SnackServiceItem | null;
 }
 
 // UC56 Types
@@ -65,23 +70,28 @@ export interface SnackServiceListResponse {
 }
 
 export interface CreateSnackServicePeriodDto {
-  snackServiceId: string;
-  periodCode: string;
-  appliedGrades: string[];
-  isWholeSchool: boolean;
-  registrationStart: string;
-  registrationEnd: string;
-  serviceMonths: string[];
-  pricePerUnitPerDay: number;
-  autoRefundEnabled: boolean;
-  capacityMode: 'UNLIMITED' | 'LIMITED';
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+  feeAmount?: number;
+  registrationDeadline?: string;
+  snackServiceId?: string;
+  periodCode?: string;
+  appliedGrades?: string[];
+  isWholeSchool?: boolean;
+  registrationStart?: string;
+  registrationEnd?: string;
+  serviceMonths?: string[];
+  pricePerUnitPerDay?: number;
+  autoRefundEnabled?: boolean;
+  capacityMode?: 'UNLIMITED' | 'LIMITED';
   kitchenCapacity?: number;
   totalQuota?: number;
   quotaPerGrade?: Record<string, number>;
-  autoCloseEnabled: boolean;
+  autoCloseEnabled?: boolean;
   autoCloseThresholdPercent?: number;
   nutritionNotes?: string;
-  status: 'DRAFT' | 'ACTIVE';
+  status: 'DRAFT' | 'ACTIVE' | 'OPEN' | 'CLOSED';
 }
 
 export interface CreatePeriodResponse {
@@ -97,24 +107,47 @@ export interface UpdateSnackServiceDto {
   serviceType?: string;
   billingCycle?: string;
   pricePerUnit?: number;
+  feeAmount?: number;
   isActive?: boolean;
   availableFrom?: string;
   availableTo?: string;
+  status?: string;
+}
+
+export interface SnackRegisteredStudentItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentCode: string;
+  className: string;
+  status: string; // 'PAID' | 'PENDING' | 'CANCELLED'
+  registeredAt: string | null;
+  amount: number;
 }
 
 export interface SnackServiceDetailEntity {
   id: string;
-  tenantId: string;
+  tenantId?: string;
   name: string;
   description: string;
   serviceType: string;
   billingCycle: string;
   pricePerUnit: number;
+  monthlyEstimatedPrice?: number;
+  feeAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  availableFrom?: string;
+  availableTo?: string | null;
+  registrationDeadline?: string;
+  status?: string;
   isActive: boolean;
-  availableFrom: string;
-  availableTo: string | null;
-  createdAt: string;
-  updatedAt: string;
+  registrations?: SnackRegisteredStudentItem[];
+  totalRegistered?: number;
+  paidCount?: number;
+  pendingCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SnackServiceDetailResponse {
@@ -178,5 +211,3 @@ export interface RosterFilters {
   portionStatus: string;
   allergyOnly: boolean;
 }
-
-

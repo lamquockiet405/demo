@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Search,
@@ -19,11 +19,18 @@ import {
   Sparkles,
   UtensilsCrossed,
   ClipboardList,
+  Layers,
+  Clock,
+  CreditCard,
+  ShieldAlert,
+  RefreshCw,
+  Send,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { apiClient } from '../../../core/api/axios';
-import { fetchSnackServices } from '../api/snackServicesApi';
-import { SnackServiceItem, SnackServicesSummary } from '../types/snackServices';
+import { fetchSnackServices, fetchSnackServiceById } from '../api/snackServicesApi';
+import { SnackServiceItem, SnackServicesSummary, SnackServiceDetailEntity } from '../types/snackServices';
 import { CreateSnackServicePeriodModal } from './CreateSnackServicePeriodModal';
 import { EditSnackServiceModal } from './EditSnackServiceModal';
 import { attendanceApi } from '../../attendance/api/attendanceApi';
@@ -50,6 +57,30 @@ export const SnackServicesPage: React.FC = () => {
 
   // UC57: Modal state
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+
+  // UC57: Detail Modal State
+  const [viewingDetailId, setViewingDetailId] = useState<string | null>(null);
+  const [detailData, setDetailData] = useState<SnackServiceDetailEntity | null>(null);
+  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+
+  const handleOpenDetail = async (id: string) => {
+    setViewingDetailId(id);
+    setDetailLoading(true);
+    try {
+      const res = await fetchSnackServiceById(id);
+      const entity = (res as any)?.data || res;
+      setDetailData(entity);
+    } catch (err) {
+      console.error('Lỗi khi tải chi tiết gói:', err);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setViewingDetailId(null);
+    setDetailData(null);
+  };
 
   // Roster Tab State
   const [rosterLoading, setRosterLoading] = useState<boolean>(false);
