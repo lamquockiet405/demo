@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Activity,
   Plus,
@@ -34,11 +34,19 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('ALL');
+  const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [classes, setClasses] = useState<Array<{ id: string; name: string }>>([]);
   const [childrenList, setChildrenList] = useState<Array<{ id: string; fullName: string; studentCode: string }>>([]);
 
   // Expanded classes state: Record<className, boolean>
   const [expandedClasses, setExpandedClasses] = useState<Record<string, boolean>>({});
+
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleSelectChildForChart = (childId: string) => {
+    setSelectedChildId(childId);
+    chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Selected child for chart view
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -429,6 +437,12 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (selectedClass !== 'ALL') {
+      growthApi.getClassOverview(selectedClass).catch(() => null);
+    }
+  }, [selectedClass]);
+
+  useEffect(() => {
     if (selectedChildId) {
       growthApi.getChildHistory(selectedChildId).then((res) => {
         setChildHistory(res.history || []);
@@ -480,6 +494,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
 
   const filteredRecords = records.filter((r) => {
     const matchesSearch =
+      !search ||
       r.child?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
       r.child?.studentCode?.toLowerCase().includes(search.toLowerCase());
     const childClass =
@@ -492,7 +507,17 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
       r.child?.class?.id === selectedClass ||
       (r.child as any)?.classId === selectedClass ||
       childClass.includes(selectedClass);
-    return matchesSearch && matchesClass;
+
+    const st = (r.overallNutritionalStatus || '').toUpperCase();
+    const matchesStatus =
+      selectedStatus === 'ALL' ||
+      (selectedStatus === 'NORMAL' && (st === 'NORMAL' || st === 'BINH_THUONG' || st.includes('BÌNH THƯỜNG'))) ||
+      (selectedStatus === 'STUNTED' && (r.heightClassification?.includes('STUNTED') || r.heightClassification?.toLowerCase().includes('thấp còi') || st.includes('STUNTED'))) ||
+      (selectedStatus === 'UNDERWEIGHT' && (Number(r.waz) < -2.0 || Number(r.baz) < -2.0 || r.weightClassification?.includes('UNDERWEIGHT') || r.bmiClassification === 'WASTED' || r.bmiClassification === 'SEVERELY_WASTED' || st.includes('UNDERWEIGHT') || st.includes('WASTED'))) ||
+      (selectedStatus === 'OVERWEIGHT' && (r.bmiClassification?.includes('OVERWEIGHT') || r.weightClassification?.includes('OVERWEIGHT') || st.includes('OVERWEIGHT'))) ||
+      (selectedStatus === 'OBESE' && (r.bmiClassification === 'OBESE' || Number(r.baz) > 3.0 || Number(r.bmi) >= 25 || st.includes('OBESE') || st.includes('BÉO PHÌ')));
+
+    return matchesSearch && matchesClass && matchesStatus;
   });
 
   const groupedRecords = useMemo(() => {
@@ -596,8 +621,18 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
       r.bmiClassification?.toLowerCase().includes('béo phì')
   ).length;
 
+  const underweightCount = summaryRecords.filter(
+    (r) =>
+      Number(r.waz) < -2.0 ||
+      Number(r.baz) < -2.0 ||
+      r.weightClassification?.includes('UNDERWEIGHT') ||
+      r.bmiClassification === 'WASTED' ||
+      r.bmiClassification === 'SEVERELY_WASTED'
+  ).length;
+
   const normalPercent = totalEvaluated > 0 ? Math.round((normalCount / totalEvaluated) * 100) : 0;
   const stuntedPercent = totalEvaluated > 0 ? Math.round((stuntedCount / totalEvaluated) * 100) : 0;
+  const underweightPercent = totalEvaluated > 0 ? Math.round((underweightCount / totalEvaluated) * 100) : 0;
   const overweightPercent = totalEvaluated > 0 ? Math.round((overweightCount / totalEvaluated) * 100) : 0;
 
   return (
@@ -673,45 +708,55 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
           <span>Thống kê dinh dưỡng: <strong className="text-teal-800">{selectedClassName}</strong></span>
           <span className="text-[11px] font-normal text-slate-400">Tự động tính toán lại khi cập nhật số liệu cân đo</span>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã Đánh Giá ({selectedClassName})</div>
-            <div className="text-2xl font-black text-slate-900">{totalEvaluated} <span className="text-sm font-semibold text-slate-400">lượt</span></div>
-            <div className="text-xs text-slate-400">Dữ liệu cân đo thể lực định kỳ</div>
+            <div className="text-2xl font-black text-slate-900">{totalEvaluated} <span className="text-xs font-semibold text-slate-400">lượt</span></div>
+            <div className="text-[11px] text-slate-400">Dữ liệu cân đo định kỳ</div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Bình Thường</div>
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+            <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Đạt Chuẩn WHO</div>
             <div className="text-2xl font-black text-emerald-700">
               {normalPercent}%
             </div>
-            <div className="text-xs text-emerald-600 font-semibold">{normalCount} học sinh đạt chuẩn WHO</div>
+            <div className="text-[11px] text-emerald-600 font-semibold">{normalCount} học sinh bình thường</div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-            <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">Thấp Còi (HAZ &lt; -2 SD)</div>
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+            <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">Thấp Còi (HAZ &lt; -2)</div>
             <div className="text-2xl font-black text-amber-700">
               {stuntedPercent}%
             </div>
-            <div className="text-xs text-amber-600 font-semibold">{stuntedCount} trẻ cần can thiệp vi chất</div>
+            <div className="text-[11px] text-amber-600 font-semibold">{stuntedCount} trẻ cần can thiệp</div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+            <div className="text-xs font-bold text-orange-600 uppercase tracking-wider">Nhẹ Cân (WAZ &lt; -2)</div>
+            <div className="text-2xl font-black text-orange-700">
+              {underweightPercent}%
+            </div>
+            <div className="text-[11px] text-orange-600 font-semibold">{underweightCount} trẻ nhẹ cân/gầy còm</div>
+          </div>
+
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
             <div className="text-xs font-bold text-rose-600 uppercase tracking-wider">Thừa Cân / Béo Phì</div>
             <div className="text-2xl font-black text-rose-700">
               {overweightPercent}%
             </div>
-            <div className="text-xs text-rose-600 font-semibold">{overweightCount} trẻ cần giảm chất béo/ngọt</div>
+            <div className="text-[11px] text-rose-600 font-semibold">{overweightCount} trẻ vượt chuẩn</div>
           </div>
         </div>
       </div>
 
-      {/* ─── 3. INTERACTIVE WHO GROWTH CHART SECTION (UC-78) ─── */}
-      <WhoGrowthChart
-        child={selectedChildInfo}
-        history={childHistory}
-        onEditRecord={handleOpenEdit}
-      />
+      {/* ─── 3. INTERACTIVE WHO GROWTH CHART SECTION (UC-76 & UC-78) ─── */}
+      <div ref={chartRef} className="scroll-mt-6">
+        <WhoGrowthChart
+          child={selectedChildInfo}
+          history={childHistory}
+          onEditRecord={handleOpenEdit}
+        />
+      </div>
 
       {/* ─── 4. SEARCH & FILTER BAR ─── */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -753,12 +798,25 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
           <select
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
-            className="px-3 py-2 text-xs rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-semibold"
+            className="px-3 py-2 text-xs rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-semibold text-slate-700"
           >
             <option value="ALL">Tất cả các lớp</option>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
+          </select>
+
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="px-3 py-2 text-xs rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả thể trạng</option>
+            <option value="NORMAL">Đạt chuẩn (Bình thường)</option>
+            <option value="STUNTED">Thấp còi (STUNTED)</option>
+            <option value="UNDERWEIGHT">Nhẹ cân (UNDERWEIGHT)</option>
+            <option value="OVERWEIGHT">Thừa cân (OVERWEIGHT)</option>
+            <option value="OBESE">Béo phì (OBESE)</option>
           </select>
         </div>
       </div>
@@ -967,7 +1025,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
                               className={`hover:bg-teal-50/30 transition cursor-pointer ${
                                 selectedChildId === r.childId ? 'bg-teal-50/50' : ''
                               }`}
-                              onClick={() => setSelectedChildId(r.childId)}
+                              onClick={() => handleSelectChildForChart(r.childId)}
                             >
                               <td className="py-3.5 px-4">
                                 <div className="font-bold text-slate-900">{r.child?.fullName}</div>
@@ -1026,7 +1084,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setSelectedChildId(r.childId);
+                                      handleSelectChildForChart(r.childId);
                                     }}
                                     className={`px-2.5 py-1 text-xs font-bold rounded-lg flex items-center gap-1 transition ${
                                       selectedChildId === r.childId

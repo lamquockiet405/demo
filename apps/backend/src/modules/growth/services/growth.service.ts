@@ -46,7 +46,7 @@ export class GrowthService {
     let baz = zscore?.baz != null ? Number(zscore.baz) : 0;
 
     // Tự động tính toán lại Z-Score chính xác nếu bản ghi cũ bị 0
-    if (waz === 0 && haz === 0 && baz === 0 && student && record.heightCm && record.weightKg) {
+    if ((!zscore || (waz === 0 && haz === 0 && baz === 0)) && student && Number(record.heightCm) > 0 && Number(record.weightKg) > 0) {
       const gender = (student.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
       const calc = this.whoService.calculateSync(
         gender,
@@ -126,7 +126,29 @@ export class GrowthService {
 
     const status = query.status || query.nutritionalStatus;
     if (status) {
-      qb.andWhere('zscore.classification = :status', { status });
+      if (status === 'STUNTED') {
+        qb.andWhere('(zscore.classification = :status OR zscore.classification = :sevStunted)', {
+          status: 'STUNTED',
+          sevStunted: 'SEVERELY_STUNTED',
+        });
+      } else if (status === 'UNDERWEIGHT') {
+        qb.andWhere(
+          '(zscore.classification = :status OR zscore.classification = :sevUnder OR zscore.classification = :wasted OR zscore.classification = :sevWasted)',
+          {
+            status: 'UNDERWEIGHT',
+            sevUnder: 'SEVERELY_UNDERWEIGHT',
+            wasted: 'WASTED',
+            sevWasted: 'SEVERELY_WASTED',
+          },
+        );
+      } else if (status === 'OVERWEIGHT') {
+        qb.andWhere('(zscore.classification = :status OR zscore.classification = :sevOver)', {
+          status: 'OVERWEIGHT',
+          sevOver: 'SEVERELY_OVERWEIGHT',
+        });
+      } else {
+        qb.andWhere('zscore.classification = :status', { status });
+      }
     }
 
     if (query.search) {
@@ -217,8 +239,8 @@ export class GrowthService {
     const records = await this.growthRepo
       .createQueryBuilder('record')
       .leftJoinAndSelect('record.zscore', 'zscore')
-      .where('record.student_id IN (:...studentIds)', { studentIds })
-      .orderBy('record.measured_date', 'DESC')
+      .where('record.studentId IN (:...studentIds)', { studentIds })
+      .orderBy('record.measuredDate', 'DESC')
       .getMany();
 
     // Map latest record per student
