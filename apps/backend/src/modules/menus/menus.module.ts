@@ -12,6 +12,9 @@ import { MenuRuleViolation } from './entities/menu-rule-violation.entity';
 import { MenusService } from './services/menus.service';
 import { MenuExportService } from './services/menu-export.service';
 import { MenusController } from './controllers/menus.controller';
+import { DishFrequencyRule } from '../nutrition-engine/entities/dish-frequency-rule.entity';
+import { DishSpacingRule } from '../nutrition-engine/entities/dish-spacing-rule.entity';
+import { NutritionIntakeStandard } from '../nutrition-engine/entities/nutrition-intake-standard.entity';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { MenusController } from './controllers/menus.controller';
       Dish,
       NutritionalStandard,
       MenuRuleViolation,
+      DishFrequencyRule,
+      DishSpacingRule,
+      NutritionIntakeStandard,
     ]),
   ],
   controllers: [MenusController],
