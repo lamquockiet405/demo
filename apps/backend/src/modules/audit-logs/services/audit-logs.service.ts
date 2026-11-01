@@ -1,171 +1,210 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, OnModuleInit } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AuditLogEntity } from '../entities/audit-log.entity';
 import { QueryAuditLogsDto } from '../dto/query-audit-logs.dto';
 
 export interface AuditLogItem {
   id: string;
-  tenantId: string | null;
-  userId: string;
-  userEmail: string | null;
+  tenantId: string | number;
+  userId?: string | number | null;
+  userName?: string | null;
+  userEmail?: string | null;
+  userRole?: string | null;
   action: string;
-  targetEntity: string | null;
-  targetId: string | null;
-  ipAddress: string | null;
-  details: any;
+  targetEntity?: string | null;
+  targetId?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  details: Record<string, any>;
   createdAt: string;
 }
 
-@Injectable()
-export class AuditLogsService {
-  private logs: AuditLogItem[] = [
-    {
-      id: 'log-101',
-      tenantId: '1',
-      userId: '2',
-      userEmail: 'nutritionist@huongduong.edu.vn',
-      action: 'APPROVE_MENU',
-      targetEntity: 'MENU',
-      targetId: '4',
-      ipAddress: '192.168.1.45',
-      details: {
-        note: 'Duyệt thực đơn Tuần 2 tháng 9 - Đạt chuẩn P:L:G Thông tư 28',
-        weekStartDate: '2026-09-08',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
-    },
-    {
-      id: 'log-102',
-      tenantId: '1',
-      userId: '4',
-      userEmail: 'kitchen@huongduong.edu.vn',
-      action: 'FOOD_INSPECTION_STEP1',
-      targetEntity: 'FOOD_INSPECTION',
-      targetId: '12',
-      ipAddress: '192.168.1.80',
-      details: {
-        step: 1,
-        stepName: 'Kiểm tra trước khi chế biến',
-        result: 'PASSED',
-        itemsInspected: 8,
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    },
-    {
-      id: 'log-103',
-      tenantId: '1',
-      userId: '4',
-      userEmail: 'kitchen@huongduong.edu.vn',
-      action: 'RETAIN_FOOD_SAMPLE',
-      targetEntity: 'FOOD_SAMPLE',
-      targetId: '6',
-      ipAddress: '192.168.1.80',
-      details: {
-        sampleCode: 'LM-20260908-01',
-        dishName: 'Thịt bò xào củ quả',
-        storageTemp: '3.5°C',
-        retentionDuration: '24h',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-    },
-    {
-      id: 'log-104',
-      tenantId: '1',
-      userId: '5',
-      userEmail: 'parent@huongduong.edu.vn',
-      action: 'SUBMIT_PAYMENT',
-      targetEntity: 'PAYMENT',
-      targetId: '25',
-      ipAddress: '14.161.22.10',
-      details: {
-        service: 'Dịch vụ Ăn xế 17h',
-        amount: 350000,
-        provider: 'VNPAY',
-        status: 'SUCCESS',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
-    },
-    {
-      id: 'log-105',
-      tenantId: '1',
-      userId: '3',
-      userEmail: 'teacher@huongduong.edu.vn',
-      action: 'RECORD_ATTENDANCE',
-      targetEntity: 'ATTENDANCE',
-      targetId: '88',
-      ipAddress: '192.168.1.92',
-      details: {
-        className: 'Mầm 1',
-        headcountLunch: 24,
-        headcountSnack: 20,
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
-    },
-    {
-      id: 'log-106',
-      tenantId: '1',
-      userId: '2',
-      userEmail: 'nutritionist@huongduong.edu.vn',
-      action: 'UPDATE_CHILD_GROWTH',
-      targetEntity: 'GROWTH_RECORD',
-      targetId: '14',
-      ipAddress: '192.168.1.45',
-      details: {
-        studentName: 'Nguyễn Minh Khang',
-        heightCm: 102.5,
-        weightKg: 16.2,
-        zscoreStatus: 'NORMAL',
-      },
-      createdAt: new Date(Date.now() - 1000 * 60 * 420).toISOString(),
-    },
-  ];
+// Danh sách các khóa chứa thông tin nhạy cảm cần tự động che mờ (Data Masking - CR-05)
+const SENSITIVE_KEYS = [
+  'password',
+  'passwd',
+  'hash',
+  'token',
+  'accesstoken',
+  'refreshtoken',
+  'secret',
+  'otp',
+  'otpsecret',
+  'pin',
+  'creditcard',
+  'cardnumber',
+  'cvv',
+  'authorization',
+];
 
-  log(entry: Omit<AuditLogItem, 'id' | 'createdAt'>) {
-    const item: AuditLogItem = {
-      ...entry,
-      id: `log-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    this.logs.unshift(item);
-    return item;
+@Injectable()
+export class AuditLogsService implements OnModuleInit {
+  constructor(
+    @InjectRepository(AuditLogEntity)
+    private readonly auditLogRepo: Repository<AuditLogEntity>,
+  ) {}
+
+  /**
+   * Tự động đảm bảo cấu trúc bảng audit_logs và các index cần thiết tồn tại trong Database
+   */
+  async onModuleInit() {
+    try {
+      await this.auditLogRepo.query(`
+        CREATE TABLE IF NOT EXISTS audit_logs (
+          id BIGSERIAL PRIMARY KEY,
+          school_id BIGINT NOT NULL DEFAULT 1,
+          user_id BIGINT,
+          user_email VARCHAR(255),
+          user_name VARCHAR(150),
+          user_role VARCHAR(50),
+          action VARCHAR(100) NOT NULL,
+          target_entity VARCHAR(100),
+          target_id VARCHAR(100),
+          ip_address VARCHAR(45),
+          user_agent TEXT,
+          details JSONB DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_audit_logs_school_created ON audit_logs(school_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+        CREATE INDEX IF NOT EXISTS idx_audit_logs_target ON audit_logs(target_entity, target_id);
+      `);
+    } catch (err: any) {
+      console.warn('[AuditLogsService] Auto-init check:', err.message);
+    }
   }
 
-  async getAuditLogs(query?: QueryAuditLogsDto) {
-    let filtered = [...this.logs];
+  /**
+   * Che mờ (Data Masking) các dữ liệu nhạy cảm trong đối tượng details (CR-05)
+   */
+  private maskSensitiveData(obj: any): any {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
 
-    if (query?.search) {
-      const q = query.search.toLowerCase();
-      filtered = filtered.filter(
-        (l) =>
-          l.action.toLowerCase().includes(q) ||
-          (l.userEmail && l.userEmail.toLowerCase().includes(q)) ||
-          (l.targetEntity && l.targetEntity.toLowerCase().includes(q)) ||
-          JSON.stringify(l.details).toLowerCase().includes(q),
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.maskSensitiveData(item));
+    }
+
+    const masked: Record<string, any> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const lowerKey = key.toLowerCase();
+      const isSensitive = SENSITIVE_KEYS.some((sk) => lowerKey.includes(sk));
+
+      if (isSensitive) {
+        masked[key] = '******** (Encrypted/Masked)';
+      } else if (typeof value === 'object' && value !== null) {
+        masked[key] = this.maskSensitiveData(value);
+      } else {
+        masked[key] = value;
+      }
+    }
+    return masked;
+  }
+
+  /**
+   * Ghi log hành động nhạy cảm vào database PostgreSQL (BR-009, BR-010)
+   */
+  async logAction(entry: Omit<AuditLogItem, 'id' | 'createdAt'>): Promise<AuditLogEntity> {
+    const entity = this.auditLogRepo.create({
+      schoolId: Number(entry.tenantId) || 1,
+      userId: entry.userId ? Number(entry.userId) : null,
+      userName: entry.userName || null,
+      userEmail: entry.userEmail || null,
+      userRole: entry.userRole || null,
+      action: entry.action,
+      targetEntity: entry.targetEntity || null,
+      targetId: entry.targetId ? String(entry.targetId) : null,
+      ipAddress: entry.ipAddress || null,
+      userAgent: entry.userAgent || null,
+      details: entry.details || {},
+    });
+    return this.auditLogRepo.save(entity);
+  }
+
+  /**
+   * Truy vấn và lọc danh sách nhật ký kiểm toán trực tiếp từ Database (SRS UC13, UC14)
+   */
+  async getAuditLogs(query?: QueryAuditLogsDto, schoolId?: string | number) {
+    // 1. Kiểm tra tính hợp lệ của khoảng ngày (Ngoại lệ EX-01 trong SRS)
+    if (query?.startDate && query?.endDate) {
+      const start = new Date(query.startDate);
+      const end = new Date(query.endDate);
+      if (start.getTime() > end.getTime()) {
+        throw new BadRequestException('Ngày bắt đầu không được lớn hơn ngày kết thúc (EX-01)');
+      }
+    }
+
+    const currentSchoolId = Number(schoolId) || 1;
+    const page = Math.max(1, Number(query?.page) || 1);
+    const limit = Math.max(1, Number(query?.limit) || 20);
+    const skip = (page - 1) * limit;
+
+    // 2. Xây dựng TypeORM QueryBuilder truy vấn database
+    const qb = this.auditLogRepo.createQueryBuilder('log');
+    qb.where('log.school_id = :schoolId', { schoolId: currentSchoolId });
+
+    // 3. Tìm kiếm theo từ khóa (Action, Email, Tên người dùng, Entity, IP, JSON details)
+    if (query?.search && query.search.trim()) {
+      const searchParam = `%${query.search.trim().toLowerCase()}%`;
+      qb.andWhere(
+        '(LOWER(log.action) LIKE :search OR LOWER(log.user_email) LIKE :search OR LOWER(log.user_name) LIKE :search OR LOWER(log.target_entity) LIKE :search OR log.ip_address LIKE :search OR CAST(log.details AS text) ILIKE :search)',
+        { search: searchParam },
       );
     }
 
+    // 4. Lọc theo Hành động (Action)
     if (query?.action && query.action !== 'ALL') {
-      filtered = filtered.filter((l) => l.action === query.action);
+      qb.andWhere('log.action = :action', { action: query.action });
     }
 
+    // 5. Lọc theo Thực thể tác động (Target Entity)
     if (query?.targetEntity && query.targetEntity !== 'ALL') {
-      filtered = filtered.filter((l) => l.targetEntity === query.targetEntity);
+      qb.andWhere('log.target_entity = :targetEntity', { targetEntity: query.targetEntity });
     }
 
+    // 6. Lọc theo Người dùng (User ID)
+    if (query?.userId && query.userId !== 'ALL') {
+      qb.andWhere('log.user_id = :userId', { userId: Number(query.userId) });
+    }
+
+    // 7. Lọc theo Khoảng thời gian (Start Date - End Date)
     if (query?.startDate) {
-      filtered = filtered.filter((l) => l.createdAt >= query.startDate!);
+      const startStr = query.startDate.length === 10 ? `${query.startDate} 00:00:00` : query.startDate;
+      qb.andWhere('log.created_at >= :startDate', { startDate: startStr });
     }
 
     if (query?.endDate) {
-      filtered = filtered.filter((l) => l.createdAt <= query.endDate!);
+      const endStr = query.endDate.length === 10 ? `${query.endDate} 23:59:59.999` : query.endDate;
+      qb.andWhere('log.created_at <= :endDate', { endDate: endStr });
     }
 
-    const total = filtered.length;
-    const page = Math.max(1, query?.page || 1);
-    const limit = Math.max(1, query?.limit || 20);
-    const startIndex = (page - 1) * limit;
-    const paginatedItems = filtered.slice(startIndex, startIndex + limit);
+    // 8. Sắp xếp giảm dần theo thời gian (UC13: chronologically ordered, most recent first)
+    qb.orderBy('log.created_at', 'DESC');
+    qb.skip(skip).take(limit);
+
+    const [entities, total] = await qb.getManyAndCount();
+
+    // 9. Che mờ dữ liệu nhạy cảm trong details (CR-05) trước khi trả về
+    const items: AuditLogItem[] = entities.map((item) => ({
+      id: String(item.id),
+      tenantId: item.schoolId,
+      userId: item.userId || '',
+      userName: item.userName,
+      userEmail: item.userEmail,
+      userRole: item.userRole,
+      action: item.action,
+      targetEntity: item.targetEntity,
+      targetId: item.targetId,
+      ipAddress: item.ipAddress,
+      userAgent: item.userAgent,
+      details: this.maskSensitiveData(item.details),
+      createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
+    }));
 
     return {
-      items: paginatedItems,
+      items,
       total,
       page,
       limit,
@@ -173,40 +212,102 @@ export class AuditLogsService {
     };
   }
 
-  async getFilterOptions() {
+  /**
+   * Lấy danh sách các tùy chọn lọc có sẵn từ database (Actions, Entities, Users)
+   */
+  async getFilterOptions(schoolId?: string | number) {
+    const currentSchoolId = Number(schoolId) || 1;
+
+    // Lấy distinct actions
+    const rawActions = await this.auditLogRepo
+      .createQueryBuilder('log')
+      .select('DISTINCT log.action', 'action')
+      .where('log.school_id = :schoolId', { schoolId: currentSchoolId })
+      .getRawMany();
+
+    // Lấy distinct target entities
+    const rawEntities = await this.auditLogRepo
+      .createQueryBuilder('log')
+      .select('DISTINCT log.target_entity', 'targetEntity')
+      .where('log.school_id = :schoolId', { schoolId: currentSchoolId })
+      .andWhere('log.target_entity IS NOT NULL')
+      .getRawMany();
+
+    // Lấy distinct users
+    const rawUsers = await this.auditLogRepo
+      .createQueryBuilder('log')
+      .select([
+        'log.user_id AS "userId"',
+        'log.user_name AS "userName"',
+        'log.user_email AS "userEmail"',
+        'log.user_role AS "userRole"',
+      ])
+      .where('log.school_id = :schoolId', { schoolId: currentSchoolId })
+      .andWhere('log.user_id IS NOT NULL')
+      .groupBy('log.user_id')
+      .addGroupBy('log.user_name')
+      .addGroupBy('log.user_email')
+      .addGroupBy('log.user_role')
+      .getRawMany();
+
     return {
-      actions: [
-        'APPROVE_MENU',
-        'CREATE_MENU',
-        'PUBLISH_MENU',
-        'FOOD_INSPECTION_STEP1',
-        'FOOD_INSPECTION_STEP2',
-        'FOOD_INSPECTION_STEP3',
-        'RETAIN_FOOD_SAMPLE',
-        'SUBMIT_PAYMENT',
-        'RECORD_ATTENDANCE',
-        'UPDATE_CHILD_GROWTH',
-        'LOGIN_SUCCESS',
-      ],
-      targetEntities: [
-        'MENU',
-        'FOOD_INSPECTION',
-        'FOOD_SAMPLE',
-        'PAYMENT',
-        'ATTENDANCE',
-        'GROWTH_RECORD',
-        'CHILD',
-        'USER',
-      ],
+      actions: rawActions.map((r) => r.action).filter(Boolean),
+      targetEntities: rawEntities.map((r) => r.targetEntity).filter(Boolean),
+      users: rawUsers.map((u) => ({
+        userId: String(u.userId),
+        userName: u.userName || 'Tài khoản hệ thống',
+        userEmail: u.userEmail || '',
+        userRole: u.userRole || 'STAFF',
+      })),
     };
   }
 
-  async getStats() {
-    const today = new Date().toISOString().split('T')[0];
-    const todayLogs = this.logs.filter((l) => l.createdAt.startsWith(today)).length;
+  /**
+   * Thống kê tổng số lượng nhật ký kiểm toán và cảnh báo nhạy cảm từ database
+   */
+  async getStats(schoolId?: string | number) {
+    const currentSchoolId = Number(schoolId) || 1;
+
+    // 1. Tổng số log
+    const totalLogs = await this.auditLogRepo.count({ where: { schoolId: currentSchoolId } });
+
+    // 2. Số log hôm nay
+    const todayLogs = await this.auditLogRepo
+      .createQueryBuilder('log')
+      .where('log.school_id = :schoolId', { schoolId: currentSchoolId })
+      .andWhere('log.created_at >= CURRENT_DATE')
+      .getCount();
+
+    // 3. Số hành động nhạy cảm
+    const sensitiveActions = [
+      'APPROVE_MENU',
+      'OVERRIDE_NUTRITION_RULE',
+      'UPDATE_CHILD_ALLERGY',
+      'UPDATE_CHILD_GROWTH',
+      'EXPORT_STUDENT_HEALTH_REPORT',
+      'SUBMIT_PAYMENT',
+    ];
+    const sensitiveCount = await this.auditLogRepo
+      .createQueryBuilder('log')
+      .where('log.school_id = :schoolId', { schoolId: currentSchoolId })
+      .andWhere('log.action IN (:...actions)', { actions: sensitiveActions })
+      .getCount();
+
+    // 4. Số user khác nhau
+    const rawUniqueUsers = await this.auditLogRepo
+      .createQueryBuilder('log')
+      .select('COUNT(DISTINCT log.user_id)', 'cnt')
+      .where('log.school_id = :schoolId', { schoolId: currentSchoolId })
+      .andWhere('log.user_id IS NOT NULL')
+      .getRawOne();
+
+    const activeUsersCount = parseInt(rawUniqueUsers?.cnt || '0', 10);
+
     return {
-      totalLogs: this.logs.length,
-      todayLogs: todayLogs || this.logs.length,
+      totalLogs,
+      todayLogs,
+      sensitiveCount,
+      activeUsersCount,
     };
   }
 }
