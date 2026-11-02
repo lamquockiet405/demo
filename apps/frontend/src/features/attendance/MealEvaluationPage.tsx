@@ -18,7 +18,11 @@ import {
 } from './types';
 import { Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react';
 
-export const MealEvaluationPage: React.FC = () => {
+interface MealEvaluationPageProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabChange }) => {
   const navigate = useNavigate();
 
   // State
@@ -93,16 +97,14 @@ export const MealEvaluationPage: React.FC = () => {
 
   // Handle Tab Change
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-    if (tabId === 'notes') {
-      navigate('/coordination-notes');
-    } else if (tabId === 'attendance') {
-      navigate('/attendance');
-    } else if (tabId === 'evaluation') {
-      navigate('/evaluation');
-    } else if (tabId === 'history') {
-      navigate('/history');
+    if (onTabChange) {
+      onTabChange(tabId);
+      return;
     }
+    if (tabId === 'notes') navigate('/coordination-notes');
+    else if (tabId === 'attendance') navigate('/tablet');
+    else if (tabId === 'evaluation') navigate('/tablet/record');
+    else if (tabId === 'history') navigate('/tablet?tab=history');
   };
 
   // Handle Single Child Portion Update
@@ -115,8 +117,10 @@ export const MealEvaluationPage: React.FC = () => {
       const updatedChildren = prev.children.map((c) => {
         if (c.id === childId) {
           let percentage = 100;
-          if (portion === 'HALF') percentage = 50;
-          else if (portion === 'NONE') percentage = 20;
+          if (portion === 'MOST') percentage = 75;
+          else if (portion === 'HALF') percentage = 50;
+          else if (portion === 'LITTLE') percentage = 25;
+          else if (portion === 'NONE') percentage = 0;
 
           return {
             ...c,

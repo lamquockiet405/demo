@@ -201,20 +201,20 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
 
           <button
             onClick={handleLockClick}
-            disabled={sensory.isLocked || isLocking}
+            disabled={isLocking}
             className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition shadow-xs ${
               sensory.isLocked
-                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-700/20 cursor-pointer'
                 : 'bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-teal-700/20'
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>
               {sensory.isLocked
-                ? 'Đã khóa đánh giá bữa trưa'
+                ? 'Đã gửi Bếp (Bấm để Mở khóa sửa)'
                 : isLocking
-                ? 'Đang khóa...'
-                : 'Hoàn thành & Khóa đánh giá bữa trưa'}
+                ? 'Đang gửi...'
+                : 'Hoàn thành & Gửi đánh giá cho Bếp'}
             </span>
           </button>
         </div>

@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { AttendanceHistoryPage } from './AttendanceHistoryPage';
+import { MealEvaluationPage } from './MealEvaluationPage';
+import { MealCoordinationNotesPage } from './MealCoordinationNotesPage';
 import { AttendanceTopNav } from './components/AttendanceTopNav';
 import { AttendanceSubTabs } from './components/AttendanceSubTabs';
 import { AttendanceHeader } from './components/AttendanceHeader';
@@ -14,8 +17,17 @@ import { AttendanceResponse, ClassItem, ChildAttendanceItem, MealOption } from '
 import { Loader2, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { getKitchenSocket } from '../../core/socket';
 
-export const AttendancePage: React.FC = () => {
+interface AttendancePageProps {
+  initialActiveTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export const AttendancePage: React.FC<AttendancePageProps> = ({
+  initialActiveTab,
+  onTabChange,
+}) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // State
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -24,7 +36,30 @@ export const AttendancePage: React.FC = () => {
   const [mealFilter, setMealFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<string>('attendance');
+  const [activeTab, setActiveTab] = useState<string>(
+    () => initialActiveTab || searchParams.get('tab') || 'attendance'
+  );
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (t: string) => {
+    setActiveTab(t);
+    onTabChange?.(t);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (t === 'attendance') {
+        next.delete('tab');
+      } else {
+        next.set('tab', t);
+      }
+      return next;
+    });
+  };
 
   // Attendance Data from Real Database
   const [attendanceData, setAttendanceData] = useState<AttendanceResponse | null>(null);
@@ -251,6 +286,16 @@ export const AttendancePage: React.FC = () => {
     );
   };
 
+  if (activeTab === 'history') {
+    return <AttendanceHistoryPage onTabChange={handleTabChange} />;
+  }
+  if (activeTab === 'evaluation') {
+    return <MealEvaluationPage onTabChange={handleTabChange} />;
+  }
+  if (activeTab === 'notes') {
+    return <MealCoordinationNotesPage onTabChange={handleTabChange} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 flex flex-col font-sans text-slate-800 antialiased selection:bg-teal-500 selection:text-white pb-16">
       {/* Toast Notification */}
@@ -284,13 +329,7 @@ export const AttendancePage: React.FC = () => {
       {/* 2. Sub Navigation Tabs */}
       <AttendanceSubTabs
         activeTab={activeTab}
-        onTabChange={(t) => {
-          setActiveTab(t);
-          if (t === 'notes') navigate('/coordination-notes');
-          else if (t === 'evaluation') navigate('/evaluation');
-          else if (t === 'attendance') navigate('/attendance');
-          else if (t === 'history') navigate('/history');
-        }}
+        onTabChange={handleTabChange}
       />
 
       {/* 3. Main Content Container */}

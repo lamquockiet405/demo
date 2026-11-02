@@ -5,6 +5,7 @@ import {
   Put,
   Param,
   Body,
+  Delete,
   Query,
   UseGuards,
   ParseIntPipe,
@@ -13,11 +14,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AttendanceService } from './services/attendance.service';
 import { MealCoordinationService } from './services/meal-coordination.service';
 import { SnackRosterService } from './services/snack-roster.service';
+import { AttendanceHistoryService } from './services/attendance-history.service';
 import { AttendanceQueryDto } from './dto/attendance-query.dto';
 import { UpdateMealAttendanceDto } from './dto/update-meal-attendance.dto';
 import { MealEvaluationQueryDto } from './dto/meal-evaluation-query.dto';
 import { UpdateMealEvaluationDto } from './dto/update-meal-evaluation.dto';
-import { AttendanceHistoryQueryDto } from './dto/attendance-history-query.dto';
+import { AttendanceHistoryFilterDto } from './dto/attendance-history-filter.dto';
 import { MealCoordinationDto } from './dto/meal-coordination.dto';
 import { SnackRosterQueryDto } from './dto/snack-roster-query.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -32,6 +34,7 @@ export class AttendanceController {
     private readonly attendanceService: AttendanceService,
     private readonly noteService: MealCoordinationService,
     private readonly snackRosterService: SnackRosterService,
+    private readonly historyService: AttendanceHistoryService,
   ) {}
 
   @Get('attendance/classes')
@@ -124,9 +127,9 @@ export class AttendanceController {
   }
 
   @Get('attendance/history')
-  @ApiOperation({ summary: 'Xem lịch sử điểm danh và sức ăn' })
-  async getHistory(@Query() query: AttendanceHistoryQueryDto) {
-    return this.attendanceService.getHistoryList(query);
+  @ApiOperation({ summary: 'Xem và lọc lịch sử điểm danh và sức ăn' })
+  async getHistory(@Query() query: AttendanceHistoryFilterDto) {
+    return this.historyService.getHistoryList(query);
   }
 
   @Get('attendance/kitchen-kds')
@@ -137,17 +140,50 @@ export class AttendanceController {
 
   @Get('attendance/coordination-notes')
   @ApiOperation({ summary: 'Lấy danh sách ghi chú phối hợp giữa GV và Bếp' })
-  async getNotes(@Query('date') date?: string) {
-    return this.noteService.findAll(date);
+  async getNotes(@Query() query: any) {
+    return this.noteService.findAll(query);
   }
 
   @Post('attendance/coordination-notes')
   @ApiOperation({ summary: 'Tạo ghi chú phối hợp giữa GV và Bếp' })
   async createNote(
-    @Body() dto: MealCoordinationDto,
+    @Body() dto: any,
     @CurrentUser('sub') userId: number,
   ) {
     return this.noteService.create(dto, userId);
+  }
+
+  @Put('attendance/coordination-notes/:id')
+  @ApiOperation({ summary: 'Cập nhật ghi chú phối hợp' })
+  async updateNote(
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return this.noteService.update(id, body);
+  }
+
+  @Post('attendance/coordination-notes/:id/acknowledge')
+  @ApiOperation({ summary: 'Tiếp nhận xử lý ghi chú phối hợp' })
+  async acknowledgeNote(
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return this.noteService.acknowledge(id, body);
+  }
+
+  @Post('attendance/coordination-notes/:id/resolve')
+  @ApiOperation({ summary: 'Đánh dấu hoàn tất xử lý suất ăn' })
+  async resolveNote(
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return this.noteService.resolve(id, body);
+  }
+
+  @Delete('attendance/coordination-notes/:id')
+  @ApiOperation({ summary: 'Xóa ghi chú phối hợp' })
+  async deleteNote(@Param('id') id: string) {
+    return this.noteService.delete(id);
   }
 
   @Get('snack-roster')
