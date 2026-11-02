@@ -21,14 +21,9 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Bạn không có quyền truy cập chức năng này (Missing roles)');
     }
 
-    const userRoles: string[] = user.roles.map((r: string) => r.toUpperCase());
-    if (userRoles.includes('SUPER_ADMIN')) {
-      return true;
-    }
-
     const normalizeRole = (r: string): string => {
       const up = (r || '').trim().toUpperCase();
-      if (up === 'SCHOOL_MANAGEMENT' || up === 'PRINCIPAL') {
+      if (up === 'SCHOOL_MANAGEMENT' || up === 'PRINCIPAL' || up === 'SUPER_ADMIN') {
         return 'SCHOOL_MANAGER';
       }
       if (up === 'KITCHEN_MANAGER') {
@@ -37,6 +32,7 @@ export class RolesGuard implements CanActivate {
       return up;
     };
 
+    const userRoles: string[] = user.roles.map((r: string) => r.toUpperCase());
     const normalizedUserRoles = userRoles.map(normalizeRole);
     const normalizedRequired = requiredRoles.map(normalizeRole);
 

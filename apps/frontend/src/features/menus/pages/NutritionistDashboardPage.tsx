@@ -125,7 +125,7 @@ export const NutritionistDashboardPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <span className="text-[10px] text-slate-400 block font-semibold">Năng lượng TB</span>
-                    <span className="text-xs font-black text-emerald-800">{menu.dailyAverageCalories || 780} Kcal</span>
+                    <span className="text-xs font-black text-emerald-800">{menu.dailyAverageCalories || 0} Kcal</span>
                   </div>
                   <span
                     className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${

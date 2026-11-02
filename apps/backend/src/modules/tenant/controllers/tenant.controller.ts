@@ -1,89 +1,65 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Body,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Patch, Post, Body, Query, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TenantService } from '../services/tenant.service';
 import { UpdateTenantProfileDto } from '../dto/update-tenant-profile.dto';
 import { UploadLogoDto } from '../dto/upload-logo.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
-import { CurrentTenant } from '../../../common/decorators/current-tenant.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
 
-@ApiTags('Tenant Configuration')
+@ApiTags('Tenant & School Management')
 @Controller('tenant')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth()
 export class TenantController {
   constructor(private readonly tenantService: TenantService) {}
 
-  /**
-   * UC07: Xem thông tin cấu hình trường học
-   * Cho phép tất cả tài khoản đã đăng nhập trong trường xem thông tin trường
-   */
   @Get('profile')
-  @ApiOperation({ summary: 'UC07 - Xem thông tin cấu hình trường mầm non & pháp lý ATTP' })
-  @ApiResponse({ status: 200, description: 'Lấy thông tin cấu hình trường học thành công' })
-  async getProfile(
-    @CurrentTenant() tenantId: string,
-    @CurrentUser() user?: any,
-  ) {
-    return this.tenantService.getTenantProfile(tenantId, user);
+  @ApiOperation({ summary: 'Lấy thông tin cấu hình trường mầm non & pháp lý ATTP' })
+  async getProfile() {
+    return this.tenantService.getProfile();
   }
 
-  /**
-   * UC07: Cập nhật thông tin trường học & pháp lý ATTP
-   * Chỉ Hiệu trưởng / Ban Giám Hiệu và SuperAdmin được phép chỉnh sửa
-   */
   @Patch('profile')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
-  @ApiOperation({ summary: 'UC07 - Cập nhật thông tin trường học & pháp lý ATTP' })
-  @ApiResponse({ status: 200, description: 'Cập nhật thông tin cấu hình trường học thành công' })
-  async updateProfile(
-    @CurrentTenant() tenantId: string,
-    @Body() dto: UpdateTenantProfileDto,
-    @CurrentUser() user?: any,
-  ) {
-    return this.tenantService.updateTenantProfile(tenantId, dto, user);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cập nhật thông tin trường mầm non (Dành cho BGH)' })
+  async updateProfile(@Body() dto: UpdateTenantProfileDto) {
+    return this.tenantService.updateProfile(dto);
   }
 
-  /**
-   * UC07: Tải lên Logo trường học với kiểm duyệt định dạng và dung lượng
-   * Chỉ Hiệu trưởng / Ban Giám Hiệu được quyền cập nhật nhận diện
-   */
   @Post('upload-logo')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'UC07 - Tải lên Logo nhận diện trường học (SVG/PNG/JPG <= 2MB)' })
-  @ApiResponse({ status: 200, description: 'Tải lên logo thành công' })
-  async uploadLogo(
-    @CurrentTenant() tenantId: string,
-    @Body() dto: UploadLogoDto,
-    @CurrentUser() user?: any,
-  ) {
-    return this.tenantService.uploadLogo(tenantId, dto, user);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Tải lên logo trường mầm non' })
+  async uploadLogo(@Body() dto: UploadLogoDto) {
+    return this.tenantService.uploadLogo(dto);
   }
 
-  /**
-   * UC07: Đồng bộ dữ liệu với Cơ sở dữ liệu ngành của Bộ GD&ĐT
-   */
   @Post('sync-education-db')
-  @Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'UC07 - Đồng bộ dữ liệu với CSDL ngành của Bộ GD&ĐT' })
-  @ApiResponse({ status: 200, description: 'Đồng bộ dữ liệu thành công' })
-  async syncEducationDb(
-    @CurrentTenant() tenantId: string,
-    @CurrentUser() user?: any,
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Đồng bộ cơ sở dữ liệu ngành GD&ĐT' })
+  async syncEducationDb() {
+    return this.tenantService.syncEducationDb();
+  }
+
+  @Public()
+  @Get('languages')
+  @ApiOperation({ summary: 'Lấy danh sách các ngôn ngữ được hỗ trợ (i18n)' })
+  async getLanguages() {
+    return this.tenantService.getLanguages();
+  }
+
+  @Public()
+  @Get('translations/:langCode')
+  @ApiOperation({ summary: 'Lấy từ điển bản dịch UI theo ngôn ngữ (i18n)' })
+  async getTranslations(
+    @Param('langCode') langCode: string,
+    @Query('namespace') namespace?: string,
   ) {
-    return this.tenantService.syncEducationDb(tenantId, user);
+    return this.tenantService.getTranslations(langCode, namespace);
   }
 }

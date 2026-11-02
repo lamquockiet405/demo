@@ -7,10 +7,7 @@ import { Child } from '../children/entities/child.entity';
 import { AttendanceService } from './services/attendance.service';
 import { MealCoordinationService } from './services/meal-coordination.service';
 import { SnackRosterService } from './services/snack-roster.service';
-import { AttendanceHistoryService } from './services/attendance-history.service';
 import { AttendanceController } from './attendance.controller';
-
-import { InspectionsModule } from '../inspections/inspections.module';
 
 @Module({
   imports: [
@@ -20,21 +17,13 @@ import { InspectionsModule } from '../inspections/inspections.module';
       ClassEntity,
       Child,
     ]),
-    InspectionsModule,
   ],
   controllers: [AttendanceController],
   providers: [
     AttendanceService,
     MealCoordinationService,
     SnackRosterService,
-    AttendanceHistoryService,
   ],
-  exports: [
-    AttendanceService,
-    MealCoordinationService,
-    SnackRosterService,
-    AttendanceHistoryService,
-    TypeOrmModule,
-  ],
+  exports: [AttendanceService, MealCoordinationService, SnackRosterService, TypeOrmModule],
 })
-export class AttendanceModule { }
+export class AttendanceModule {}

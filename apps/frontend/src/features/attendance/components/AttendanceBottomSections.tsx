@@ -138,7 +138,7 @@ export const AttendanceBottomSections: React.FC<AttendanceBottomSectionsProps> =
             <h3 className="text-base font-black text-slate-900">Thực đơn hôm nay</h3>
           </div>
           <span className="px-2.5 py-1 bg-sky-50 text-sky-700 border border-sky-200 rounded-full text-xs font-bold">
-            Tuần {todayMenu.week}
+            Tuần {todayMenu?.week ?? 10}
           </span>
         </div>
 
@@ -148,11 +148,11 @@ export const AttendanceBottomSections: React.FC<AttendanceBottomSectionsProps> =
           <div className="bg-sky-50/50 border border-sky-100 rounded-2xl p-4 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-sky-900">
               <span className="flex items-center gap-1.5">
-                <span>🍲</span> Bữa Trưa ({todayMenu.lunchTime})
+                <span>🍲</span> Bữa Trưa ({todayMenu?.lunchTime || '10:45 - 11:30'})
               </span>
             </div>
             <ul className="space-y-1.5 text-xs text-slate-700 font-medium">
-              {todayMenu.lunchItems.map((item, idx) => (
+              {(todayMenu?.lunchItems || []).map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="text-sky-600 font-bold">•</span>
                   <span>{item}</span>
@@ -165,11 +165,11 @@ export const AttendanceBottomSections: React.FC<AttendanceBottomSectionsProps> =
           <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-amber-900">
               <span className="flex items-center gap-1.5">
-                <span>🍮</span> Bữa Xế ({todayMenu.snackTime})
+                <span>🍮</span> Bữa Xế ({todayMenu?.snackTime || '14:30 - 15:00'})
               </span>
             </div>
             <ul className="space-y-1.5 text-xs text-slate-700 font-medium">
-              {todayMenu.snackItems.map((item, idx) => (
+              {(todayMenu?.snackItems || []).map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="text-amber-600 font-bold">•</span>
                   <span>{item}</span>

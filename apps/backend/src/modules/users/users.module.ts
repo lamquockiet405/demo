@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
-
 import { Role } from '../auth/entities/role.entity';
 import { StaffProfile } from './entities/staff-profile.entity';
 import { ParentProfile } from './entities/parent-profile.entity';
@@ -34,4 +33,3 @@ import { ParentManagementController } from './controllers/parent-management.cont
   ],
 })
 export class UsersModule {}
-

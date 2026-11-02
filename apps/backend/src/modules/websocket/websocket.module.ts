@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { KitchenGateway } from './kitchen.gateway';
-import { RootGateway } from './root.gateway';
 
+@Global()
 @Module({
-  providers: [KitchenGateway, RootGateway],
-  exports: [KitchenGateway, RootGateway],
+  providers: [KitchenGateway],
+  exports: [KitchenGateway],
 })
 export class WebsocketModule {}

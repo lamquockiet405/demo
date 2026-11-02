@@ -1,6 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Search,
   Download,
@@ -18,7 +16,19 @@ import {
   MessageSquare,
   Sparkles,
   UtensilsCrossed,
-  ClipboardList,
+  Lock,
+  Layers,
+  CreditCard,
+  Send,
+  FileSpreadsheet,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  ArrowUpRight,
+  Building,
+  Phone,
+  ShieldAlert,
+  RefreshCw,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../../core/api/axios';
@@ -126,23 +136,13 @@ export const SnackServicesPage: React.FC = () => {
   };
 
   const handleClosePeriod = async (id: string, name: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn đóng đợt đăng ký cho gói "${name}"? Phụ huynh sẽ không thể thấy và mua gói này.`)) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn đóng đợt đăng ký cho gói "${name}"? Phụ huynh sẽ không thể đăng ký thêm vào đợt này.`)) return;
     try {
       await apiClient.put(`/snack-services/periods/${id}/close`);
-      alert('Đã đóng đợt đăng ký gói ăn sáng thành công!');
+      alert('Đã đóng đợt đăng ký ăn xế thành công!');
       loadData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Có lỗi xảy ra khi đóng đợt đăng ký.');
-    }
-  };
-
-  const handleOpenPeriod = async (id: string, name: string) => {
-    try {
-      await apiClient.put(`/snack-services/periods/${id}/open`);
-      alert(`Đã mở lại đăng ký cho gói "${name}". Phụ huynh đã có thể thấy và mua gói này trên cổng phụ huynh!`);
-      loadData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi mở đợt đăng ký.');
     }
   };
 
@@ -160,13 +160,13 @@ export const SnackServicesPage: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `danh_sach_suat_an_sang_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `danh_sach_suat_an_xe_17h_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const handleSendReminder = (orderCode: string, parentName: string) => {
-    alert(`Đã gửi thông báo nhắc đóng phí ăn sáng (Zalo/SMS) tới phụ huynh của đơn hàng ${orderCode}!`);
+    alert(`Đã gửi thông báo nhắc đóng phí ăn xế (Zalo/SMS) tới phụ huynh của đơn hàng ${orderCode}!`);
   };
 
   // Filtered invoices
@@ -200,7 +200,7 @@ export const SnackServicesPage: React.FC = () => {
             <span>›</span>
             <span>Dịch vụ bán trú</span>
             <span>›</span>
-            <span className="text-slate-700 font-bold">Gói dịch vụ ăn sáng</span>
+            <span className="text-slate-700 font-bold">Cấu hình gói ăn xế</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-teal-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
@@ -208,36 +208,43 @@ export const SnackServicesPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Quản lý Gói Dịch Vụ Ăn Sáng & Bán Trú
+                Quản lý Gói Ăn Xế Chiều 17h & Dịch vụ Bán Trú
               </h1>
               <p className="text-xs text-slate-500 mt-0.5 max-w-3xl">
-                Cấu hình các gói dịch vụ ăn sáng mầm non (07h15 - 08h00), năng lượng chuẩn 295 kcal & mở cổng cho phụ huynh đăng ký mua trực tuyến qua cổng VNPAY Sandbox.
+                Tạo và vận hành các gói dinh dưỡng ăn xế chiều tự nguyện, theo dõi chỉ tiêu đăng ký, quản lý danh sách chia suất nhà bếp và thu phí trực tuyến qua cổng VNPAY Sandbox.
               </p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          {activeTab === 'roster' ? (
+            <button
+              onClick={handleExportRoster}
+              className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              Xuất Danh Sách Suất Ăn (CSV)
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setActiveTab('roster');
+                loadRosterData();
+              }}
+              className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
+            >
+              <Download className="w-4 h-4 text-slate-500" />
+              Xem Danh Sách Đăng Ký
+            </button>
+          )}
 
-          <Link
-            to="/snack-roster"
-            className="px-4 py-2.5 bg-teal-50 border border-teal-200 rounded-xl text-xs font-bold text-teal-800 hover:bg-teal-100 shadow-sm flex items-center gap-2 transition"
-          >
-            <ClipboardList className="w-4 h-4 text-teal-600" />
-            Bảng phân công ăn xế (Roster)
-          </Link>
-          <button className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition">
-            <Download className="w-4 h-4 text-slate-500" />
-            Xuất danh sách đăng ký Excel
-          </button>
-
-      
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
-            Tạo Gói Ăn Sáng Mới
+            Tạo Đợt Đăng Ký
           </button>
         </div>
       </div>
@@ -276,7 +283,7 @@ export const SnackServicesPage: React.FC = () => {
                 {summary.studentParticipation.percentage}% toàn trường
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">Học sinh tham gia ăn sáng</p>
+            <p className="text-xs text-slate-500 font-medium">Học sinh tham gia ăn xế</p>
             <p className="text-2xl font-black text-slate-900 mt-1">
               {summary.studentParticipation.registered}{' '}
               <span className="text-xs font-bold text-slate-400">/ {summary.studentParticipation.total} trẻ</span>
@@ -299,7 +306,7 @@ export const SnackServicesPage: React.FC = () => {
                 {summary.revenue.collectedPercentage}% hoàn tất
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">Doanh thu gói ăn sáng dự kiến</p>
+            <p className="text-xs text-slate-500 font-medium">Doanh thu ăn xế dự kiến</p>
             <p className="text-2xl font-black text-slate-900 mt-1">
               {formatVND(summary.revenue.expectedMonthly)}
             </p>
@@ -319,7 +326,7 @@ export const SnackServicesPage: React.FC = () => {
                 Rất tốt
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">Tỷ lệ hài lòng bữa sáng</p>
+            <p className="text-xs text-slate-500 font-medium">Tỷ lệ hài lòng phụ huynh</p>
             <p className="text-2xl font-black text-slate-900 mt-1">
               {summary.satisfaction.ratePercent}%{' '}
               <span className="text-xs font-bold text-slate-400">({summary.satisfaction.totalReviews} đánh giá)</span>
@@ -344,7 +351,7 @@ export const SnackServicesPage: React.FC = () => {
             }`}
           >
             <Layers className="w-4 h-4" />
-            Cấu Hình Gói Ăn Sáng & Đợt Đăng Ký
+            Cấu Hình Gói & Đợt Đăng Ký
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                 activeTab === 'packages' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
@@ -363,7 +370,7 @@ export const SnackServicesPage: React.FC = () => {
             }`}
           >
             <Clock className="w-4 h-4" />
-            Danh Sách Học Sinh Ăn Sáng (Breakfast Roster)
+            Danh Sách Học Sinh Ăn Xế 17h (Snack Roster)
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                 activeTab === 'roster' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
@@ -402,7 +409,7 @@ export const SnackServicesPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* 4. TAB 1: CẤU HÌNH GÓI ĂN SÁNG & ĐỢT ĐĂNG KÝ */}
+      {/* 4. TAB 1: CẤU HÌNH GÓI & ĐỢT ĐĂNG KÝ */}
       {activeTab === 'packages' && (
         <div className="space-y-6">
           {/* Middle Banner Section */}
@@ -414,7 +421,7 @@ export const SnackServicesPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-3 text-xs mb-3">
                   <span className="bg-teal-500/30 text-teal-200 border border-teal-400/30 px-3 py-1 rounded-full font-bold">
-                    Hôm nay: Thứ Năm, 25/11 • Bữa sáng (07:15 - 08:00)
+                    Hôm nay: Thứ Năm, 25/11
                   </span>
                   <span className="bg-white/10 text-white/90 px-3 py-1 rounded-full font-medium flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-300" /> 100% Nguyên liệu kiểm định
@@ -422,28 +429,28 @@ export const SnackServicesPage: React.FC = () => {
                 </div>
 
                 <h3 className="text-xl font-bold text-white tracking-tight mt-1">
-                  Thực đơn bữa sáng hôm nay: Phở bò mầm non & Súp gà ngô non
+                  Thực đơn xế chiều ưu tiên hôm nay
                 </h3>
                 <p className="text-xs text-teal-100/90 mt-1 max-w-xl leading-relaxed">
-                  Cung cấp năng lượng khởi đầu ngày mới 295 kcal/trẻ, giàu vi chất sắt, kẽm và canxi từ xương hầm tự nhiên & sữa hạt dinh dưỡng.
+                  Sữa hạt Yến mạch & Bánh Tart Táo Nướng Mật Ong cung cấp năng lượng tiêu chuẩn 210 kcal/trẻ, đảm bảo không chất bảo quản và đường hóa học.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-4 mt-6 pt-4 border-t border-teal-700/50 text-xs">
                 <span className="bg-teal-950/60 px-3 py-1.5 rounded-lg border border-teal-700/40 text-teal-200">
-                  ⚡ Canxi: <strong className="text-white">210mg</strong>
+                  ⚡ Canxi: <strong className="text-white">190mg</strong>
                 </span>
                 <span className="bg-teal-950/60 px-3 py-1.5 rounded-lg border border-teal-700/40 text-teal-200">
-                  💪 Protein: <strong className="text-white">12.5g</strong>
+                  💪 Protein: <strong className="text-white">6.8g</strong>
                 </span>
                 <span className="bg-teal-950/60 px-3 py-1.5 rounded-lg border border-teal-700/40 text-teal-200">
-                  🔥 Năng lượng: <strong className="text-white">295 kcal</strong>
+                  🔥 Năng lượng: <strong className="text-white">215 kcal</strong>
                 </span>
                 <button
                   onClick={() => setActiveTab('roster')}
                   className="ml-auto text-xs font-bold text-teal-300 hover:text-white flex items-center gap-1 transition"
                 >
-                  Xem danh sách chia suất bếp (Breakfast Roster) &rarr;
+                  Xem danh sách chia suất bếp (Snack Roster) &rarr;
                 </button>
               </div>
             </div>
@@ -633,19 +640,12 @@ export const SnackServicesPage: React.FC = () => {
                         <Edit2 className="w-4 h-4" />
                       </button>
 
-                      {isOpen ? (
+                      {isOpen && (
                         <button
                           onClick={() => handleClosePeriod(item.id, item.name)}
                           className="px-3 py-1.5 bg-white border border-slate-200 hover:border-red-200 hover:bg-red-50 hover:text-red-700 rounded-xl text-xs font-bold text-slate-700 transition"
                         >
                           Đóng đợt
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleOpenPeriod(item.id, item.name)}
-                          className="px-3 py-1.5 bg-teal-50 border border-teal-200 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-bold transition"
-                        >
-                          Mở lại đợt
                         </button>
                       )}
                     </div>

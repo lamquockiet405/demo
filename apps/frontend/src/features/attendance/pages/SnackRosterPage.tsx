@@ -8,7 +8,7 @@ import { SnackRosterTable } from '../components/SnackRosterTable';
 import { SnackRosterFooter } from '../components/SnackRosterFooter';
 import { SnackRosterDetailModal } from '../components/SnackRosterDetailModal';
 import { attendanceApi } from '../api/attendanceApi';
-import { SnackRosterResponse, SnackRosterItem } from './types';
+import { SnackRosterResponse, SnackRosterItem } from '../types';
 
 export const SnackRosterPage: React.FC = () => {
   // Filter States
