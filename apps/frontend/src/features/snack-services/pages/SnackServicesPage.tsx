@@ -36,6 +36,7 @@ import { fetchSnackServices, closeSnackServicePeriod, openSnackServicePeriod } f
 import { SnackServiceItem, SnackServicesSummary } from '../types/snackServices';
 import { CreateSnackServicePeriodModal } from './CreateSnackServicePeriodModal';
 import { EditSnackServiceModal } from './EditSnackServiceModal';
+import { RegisterSnackServiceModal } from './RegisterSnackServiceModal';
 import { attendanceApi } from '../../attendance/api/attendanceApi';
 import { SnackRosterItem, SnackRosterResponse } from '../../attendance/types';
 import { SnackInvoiceItem } from '../../payments/pages/SnackBillingPaymentPage';
@@ -60,6 +61,10 @@ export const SnackServicesPage: React.FC = () => {
 
   // UC57: Modal state
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+
+  // UC61: Modal state
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [registerPeriodId, setRegisterPeriodId] = useState<string | undefined>(undefined);
 
   // Roster Tab State
   const [rosterLoading, setRosterLoading] = useState<boolean>(false);
@@ -266,6 +271,16 @@ export const SnackServicesPage: React.FC = () => {
             </button>
           )}
 
+          <button
+            onClick={() => {
+              setRegisterPeriodId(undefined);
+              setIsRegisterModalOpen(true);
+            }}
+            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-2 transition cursor-pointer"
+          >
+            <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+            Đăng Ký Ăn Xế (UC61)
+          </button>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
@@ -667,6 +682,19 @@ export const SnackServicesPage: React.FC = () => {
                         <Edit2 className="w-4 h-4" />
                       </button>
 
+                      {isOpen && (
+                        <button
+                          onClick={() => {
+                            setRegisterPeriodId(item.id);
+                            setIsRegisterModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                          title="Đăng ký cho học sinh vào đợt này"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          Đăng ký
+                        </button>
+                      )}
                       {isOpen ? (
                         <button
                           onClick={() => handleClosePeriod(item.id, item.name, item.registeredCount, item.paidCount)}
@@ -1017,6 +1045,15 @@ export const SnackServicesPage: React.FC = () => {
         serviceId={editingServiceId}
         onClose={() => setEditingServiceId(null)}
         onSuccess={() => loadData()}
+      />
+
+      {/* UC61: Modal Đăng Ký Ăn Xế (Kiểm Tra Dị Ứng) */}
+      <RegisterSnackServiceModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSuccess={() => loadData()}
+        selectedPeriodId={registerPeriodId}
+        periods={services}
       />
     </div>
   );

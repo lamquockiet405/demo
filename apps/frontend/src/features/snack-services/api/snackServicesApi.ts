@@ -71,3 +71,52 @@ export const toggleSnackServicePeriod = async (id: string): Promise<{ success: b
   const response = await apiClient.put(`/snack-services/periods/${id}/toggle`);
   return response.data;
 };
+
+
+/** UC61: Kiểm tra độ an toàn dị ứng của trẻ với thực đơn đợt ăn xế */
+export const checkSnackAllergy = async (
+  periodId: number,
+  studentId: number,
+): Promise<import('../types/snackServices').CheckAllergyResponse> => {
+  const response = await apiClient.get<import('../types/snackServices').CheckAllergyResponse>(
+    '/snack-services/check-allergy',
+    {
+      params: { periodId, studentId },
+    },
+  );
+  return response.data;
+};
+
+/** UC61: Lấy danh sách học sinh có thể đăng ký đợt ăn xế */
+export const fetchAvailableStudents = async (
+  periodId?: string,
+): Promise<import('../types/snackServices').AvailableStudentsResponse> => {
+  const response = await apiClient.get<import('../types/snackServices').AvailableStudentsResponse>(
+    '/snack-services/students-available',
+    {
+      params: { periodId },
+    },
+  );
+  return response.data;
+};
+
+/** UC61: Đăng ký dịch vụ ăn xế (Kiểm tra quy tắc dị ứng) */
+export const registerSnackService = async (
+  dto: import('../types/snackServices').RegisterSnackServiceDto,
+): Promise<import('../types/snackServices').RegisterSnackServiceResponse> => {
+  const response = await apiClient.post<import('../types/snackServices').RegisterSnackServiceResponse>(
+    '/snack-services/enrollment',
+    dto,
+  );
+  return response.data;
+};
+
+/** UC61: Xác nhận thanh toán đăng ký ăn xế */
+export const confirmSnackPayment = async (
+  registrationId: string,
+): Promise<{ success: boolean; message: string; data: any }> => {
+  const response = await apiClient.put<{ success: boolean; message: string; data: any }>(
+    `/snack-services/registrations/${registrationId}/confirm-payment`,
+  );
+  return response.data;
+};

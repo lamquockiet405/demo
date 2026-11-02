@@ -138,3 +138,71 @@ export interface UpdateSnackServiceResponse {
   data: SnackServiceDetailEntity;
 }
 
+
+
+// UC61 Types - Đăng ký dịch vụ ăn xế (Kiểm tra quy tắc dị ứng)
+export interface RegisterSnackServiceDto {
+  periodId: number;
+  studentId: number;
+  parentId?: number;
+  acceptRisk?: boolean;
+  dietaryNote?: string;
+  paymentMethod?: string;
+  markAsPaid?: boolean;
+}
+
+export interface CheckAllergyResponse {
+  success: boolean;
+  hasAllergy: boolean;
+  isConflict: boolean;
+  isDangerous: boolean;
+  severity: 'NONE' | 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH';
+  conflictingAllergens: string[];
+  allergyNames: string[];
+  warning?: string;
+  statusMessage: string;
+}
+
+export interface AvailableStudentItem {
+  id: string;
+  studentCode: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: string;
+  className: string;
+  classId?: string;
+  hasAllergy: boolean;
+  allergies: Array<{
+    allergenName: string;
+    allergenCode: string;
+    severity: string;
+    note?: string;
+  }>;
+  isRegistered: boolean;
+}
+
+export interface AvailableStudentsResponse {
+  success: boolean;
+  data: AvailableStudentItem[];
+}
+
+export interface RegisterSnackServiceResponse {
+  success: boolean;
+  message: string;
+  warning?: string;
+  isExisting?: boolean;
+  data: {
+    id: string;
+    periodId: string;
+    studentId: string;
+    studentName: string;
+    studentCode: string;
+    className: string;
+    parentId: string;
+    status: string;
+    feeAmount: number;
+    hasAllergy: boolean;
+    allergyNames: string[];
+    registeredAt: string;
+  };
+}

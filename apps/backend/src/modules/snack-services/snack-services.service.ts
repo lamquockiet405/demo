@@ -6,6 +6,7 @@ import { SnackRegistration } from './entities/snack-registration.entity';
 import { Child } from '../children/entities/child.entity';
 import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.dto';
 import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
+import { RegisterSnackServiceDto } from './dto/register-snack-service.dto';
 
 @Injectable()
 export class SnackServicesService {
@@ -99,21 +100,34 @@ export class SnackServicesService {
   async findOne(id: number) {
     const p = await this.periodRepo.findOne({
       where: { id },
-      relations: ['registrations', 'registrations.student', 'registrations.student.class'],
+      relations: [
+        'registrations',
+        'registrations.student',
+        'registrations.student.class',
+        'registrations.student.allergies',
+        'registrations.student.allergies.allergen',
+      ],
     });
 
     if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn xế');
 
-    const registrations = (p.registrations || []).map((r) => ({
-      id: String(r.id),
-      studentId: String(r.studentId),
-      studentName: r.student?.fullName || 'Học sinh',
-      studentCode: r.student?.studentCode || '',
-      className: r.student?.class?.name || 'Mầm 1',
-      status: r.status,
-      registeredAt: r.registeredAt ? r.registeredAt.toISOString() : null,
-      amount: p.feeAmount,
-    }));
+    const registrations = (p.registrations || []).map((r) => {
+      const allergyList = (r.student?.allergies || [])
+        .map((a) => a.allergen?.name || a.allergen?.code)
+        .filter(Boolean);
+      return {
+        id: String(r.id),
+        studentId: String(r.studentId),
+        studentName: r.student?.fullName || 'Học sinh',
+        studentCode: r.student?.studentCode || '',
+        className: r.student?.class?.name || 'Mầm 1',
+        status: r.status,
+        registeredAt: r.registeredAt ? r.registeredAt.toISOString() : null,
+        amount: p.feeAmount,
+        hasAllergy: allergyList.length > 0,
+        allergens: allergyList,
+      };
+    });
 
     const pricePerUnit = Math.round((Number(p.feeAmount) || 440000) / 22);
 
@@ -511,11 +525,299 @@ export class SnackServicesService {
     };
   }
 
-  async registerEnrollment(body: any) {
+  async registerEnrollment(dto: RegisterSnackServiceDto, currentUser?: any) {
+    const periodId = Number(dto.periodId);
+    const studentId = Number(dto.studentId);
+
+    if (!periodId || !studentId) {
+      throw new BadRequestException('Vui lòng chọn đợt đăng ký và học sinh');
+    }
+
+    // 1. Kiểm tra đợt dịch vụ
+    const period = await this.periodRepo.findOne({
+      where: { id: periodId },
+      relations: ['registrations'],
+    });
+    if (!period) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
+
+    // Pre-condition: Đợt phải đang OPEN
+    if (period.status !== 'OPEN') {
+      throw new BadRequestException('Đã hết thời gian đăng ký (đợt dịch vụ đã đóng)');
+    }
+
+    // Pre-condition: Kiểm tra hạn chót đăng ký (registrationDeadline)
+    if (period.registrationDeadline) {
+      const deadline = new Date(period.registrationDeadline);
+      deadline.setHours(23, 59, 59, 999);
+      if (new Date().getTime() > deadline.getTime()) {
+        throw new BadRequestException('Đã hết thời gian đăng ký');
+      }
+    }
+
+    // 2. Kiểm tra học sinh
+    const child = await this.childRepo.findOne({
+      where: { id: studentId },
+      relations: ['allergies', 'allergies.allergen', 'class'],
+    });
+    if (!child) throw new NotFoundException('Không tìm thấy học sinh');
+
+    // 3. Kiểm tra đơn đăng ký trùng lặp của trẻ trong đợt này
+    const existingReg = await this.regRepo.findOne({
+      where: { periodId, studentId },
+    });
+    if (existingReg) {
+      if (existingReg.status === 'PAID') {
+        throw new BadRequestException('Bé đã đăng ký và thanh toán thành công rồi');
+      }
+      if (existingReg.status === 'PENDING') {
+        return {
+          success: true,
+          isExisting: true,
+          message: 'Bé đã có đơn đăng ký đang chờ thanh toán',
+          warning: 'Đơn đăng ký của bé đang ở trạng thái chờ thanh toán. Vui lòng hoàn tất thanh toán.',
+          data: {
+            id: String(existingReg.id),
+            periodId: String(existingReg.periodId),
+            studentId: String(existingReg.studentId),
+            studentName: child.fullName,
+            studentCode: child.studentCode,
+            className: child.class?.name || '',
+            parentId: String(existingReg.parentId),
+            status: existingReg.status,
+            feeAmount: Number(period.feeAmount),
+            hasAllergy: (child.allergies || []).length > 0,
+            allergyNames: (child.allergies || []).map((a) => a.allergen?.name || a.allergen?.code),
+            registeredAt: existingReg.registeredAt ? existingReg.registeredAt.toISOString() : new Date().toISOString(),
+          },
+        };
+      }
+    }
+
+    // 4. Kiểm tra chỉ tiêu (Quota capacity) nếu giới hạn
+    const totalRegistrations = (period.registrations || []).filter((r) => r.status !== 'CANCELLED').length;
+    const quotaLimit = 30; // Giới hạn chỉ tiêu suất bếp của trường
+    if (totalRegistrations >= quotaLimit) {
+      throw new BadRequestException('Đã đủ chỉ tiêu cho khối lớp của bé. Liên hệ nhà trường để được hỗ trợ');
+    }
+
+    // 5. Kiểm tra quy tắc Dị ứng (Allergy Rules Check)
+    const allergyCheck = await this.checkAllergySafety(periodId, studentId);
+    let warningNote = allergyCheck.warning;
+
+    if (allergyCheck.isConflict) {
+      if (!dto.acceptRisk) {
+        throw new BadRequestException(
+          `Thực đơn không phù hợp với hồ sơ dị ứng của trẻ: ${allergyCheck.conflictingAllergens.join(', ')}`,
+        );
+      } else {
+        warningNote = `Trẻ có hồ sơ dị ứng (${allergyCheck.conflictingAllergens.join(', ')}). Phụ huynh/quản lý đã xác nhận chấp nhận rủi ro và bếp đã nhận cảnh báo đặc biệt để chuẩn bị suất ăn thay thế.`;
+      }
+    }
+
+    // 6. Xác định parentId
+    let parentId = dto.parentId;
+    if (!parentId) {
+      try {
+        const parentRows = await this.childRepo.query(
+          `SELECT parent_id FROM student_parents WHERE student_id = $1 ORDER BY is_primary DESC LIMIT 1`,
+          [studentId],
+        );
+        if (parentRows && parentRows.length > 0 && parentRows[0].parent_id) {
+          parentId = Number(parentRows[0].parent_id);
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+    if (!parentId) {
+      parentId = currentUser?.id ? Number(currentUser.id) : 1;
+    }
+
+    // 7. Tạo bản ghi đăng ký mới trong DB
+    const regStatus = dto.markAsPaid ? 'PAID' : 'PENDING';
+    const newReg = this.regRepo.create({
+      periodId,
+      studentId,
+      parentId,
+      status: regStatus,
+    });
+
+    const saved = await this.regRepo.save(newReg);
+
     return {
       success: true,
-      message: 'Đã cập nhật đăng ký tham gia dịch vụ bán trú cho học sinh',
-      data: body,
+      message: regStatus === 'PAID'
+        ? `Đăng ký và xác nhận thanh toán thành công cho bé ${child.fullName} vào đợt '${period.name}'`
+        : `Đăng ký thành công cho bé ${child.fullName} vào đợt '${period.name}'. Vui lòng hoàn tất thanh toán.`,
+      warning: warningNote,
+      data: {
+        id: String(saved.id),
+        periodId: String(saved.periodId),
+        studentId: String(saved.studentId),
+        studentName: child.fullName,
+        studentCode: child.studentCode,
+        className: child.class?.name || '',
+        parentId: String(saved.parentId),
+        status: saved.status,
+        feeAmount: Number(period.feeAmount),
+        hasAllergy: (child.allergies || []).length > 0,
+        allergyNames: (child.allergies || []).map((a) => a.allergen?.name || a.allergen?.code),
+        registeredAt: saved.registeredAt ? saved.registeredAt.toISOString() : new Date().toISOString(),
+      },
     };
   }
-}
+
+  async checkAllergySafety(periodId: number, studentId: number) {
+    const period = await this.periodRepo.findOne({ where: { id: periodId } });
+    if (!period) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
+
+    const child = await this.childRepo.findOne({
+      where: { id: studentId },
+      relations: ['allergies', 'allergies.allergen', 'class'],
+    });
+    if (!child) throw new NotFoundException('Không tìm thấy học sinh');
+
+    const allergies = child.allergies || [];
+    if (allergies.length === 0) {
+      return {
+        success: true,
+        hasAllergy: false,
+        isConflict: false,
+        isDangerous: false,
+        severity: 'NONE',
+        conflictingAllergens: [],
+        allergyNames: [],
+        warning: undefined,
+        statusMessage: 'Trẻ không có hồ sơ dị ứng thực phẩm. Đủ điều kiện đăng ký an toàn.',
+      };
+    }
+
+    const menuText = [
+      period.name,
+      'Suất ăn xế nhẹ lúc 17h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    const allergenKeywords: Record<string, string[]> = {
+      MILK: ['sữa', 'bơ', 'phô mai', 'váng sữa', 'milk', 'cheese', 'butter'],
+      EGG: ['trứng', 'egg', 'mayonnaise'],
+      PEANUT: ['đậu phộng', 'lạc', 'peanut'],
+      TREE_NUT: ['hạt dẻ', 'hạnh nhân', 'hạt điều', 'óc chó', 'macca', 'tree nut', 'almond', 'walnut'],
+      SEAFOOD: ['hải sản', 'tôm', 'cua', 'cá', 'mực', 'nghêu', 'sò', 'seafood', 'shrimp', 'fish'],
+      WHEAT: ['lúa mì', 'bột mì', 'mì', 'bánh mì', 'gluten', 'wheat'],
+      SOY: ['đậu nành', 'đậu hũ', 'đậu phụ', 'soy', 'tofu'],
+      SESAME: ['mè', 'vừng', 'sesame'],
+    };
+
+    const conflictingAllergens: string[] = [];
+    let maxSeverity: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
+
+    for (const alg of allergies) {
+      const code = (alg.allergen?.code || '').toUpperCase();
+      const name = alg.allergen?.name || 'Dị ứng thực phẩm';
+      const kws = allergenKeywords[code] || [name.toLowerCase()];
+      const matches = kws.some((kw) => menuText.includes(kw));
+
+      if (matches) {
+        conflictingAllergens.push(name);
+        const sev = (alg.severity || 'MEDIUM').toUpperCase() as 'LOW' | 'MEDIUM' | 'HIGH';
+        if (sev === 'HIGH' || (sev === 'MEDIUM' && maxSeverity === 'LOW')) {
+          maxSeverity = sev;
+        }
+      }
+    }
+
+    const isConflict = conflictingAllergens.length > 0;
+    const isDangerous = isConflict && maxSeverity === 'HIGH';
+    const allAllergyNames = allergies.map((a) => a.allergen?.name || a.allergen?.code || 'Dị ứng');
+
+    let statusMessage = '';
+    let warning: string | undefined = undefined;
+
+    if (!isConflict) {
+      statusMessage = 'Trẻ có hồ sơ dị ứng nhưng thực đơn an toàn';
+      warning = `Trẻ có hồ sơ dị ứng (${allAllergyNames.join(', ')}) - Bếp đã được thông báo`;
+    } else if (isDangerous) {
+      statusMessage = `Thực đơn không phù hợp với hồ sơ dị ứng của trẻ: ${conflictingAllergens.join(', ')} (Mức độ nguy hiểm cao)`;
+      warning = statusMessage;
+    } else {
+      statusMessage = `Thực đơn có chứa chất gây dị ứng: ${conflictingAllergens.join(', ')}`;
+      warning = statusMessage;
+    }
+
+    return {
+      success: true,
+      hasAllergy: true,
+      isConflict,
+      isDangerous,
+      severity: isConflict ? maxSeverity : 'SAFE',
+      conflictingAllergens,
+      allergyNames: allAllergyNames,
+      warning,
+      statusMessage,
+    };
+  }
+
+  async confirmPayment(registrationId: number) {
+    const reg = await this.regRepo.findOne({
+      where: { id: registrationId },
+      relations: ['student', 'student.class', 'period'],
+    });
+    if (!reg) throw new NotFoundException('Không tìm thấy thông tin đăng ký');
+
+    reg.status = 'PAID';
+    const saved = await this.regRepo.save(reg);
+
+    const studentName = reg.student?.fullName || 'Bé';
+    const periodName = reg.period?.name || 'Ăn xế';
+
+    return {
+      success: true,
+      message: `Bé ${studentName} đã được đăng ký thành công đợt ăn xế ${periodName}`,
+      data: {
+        id: String(saved.id),
+        periodId: String(saved.periodId),
+        studentId: String(saved.studentId),
+        studentName,
+        status: saved.status,
+        registeredAt: saved.registeredAt,
+      },
+    };
+  }
+
+  async getStudentsAvailable(periodId?: number) {
+    const students = await this.childRepo.find({
+      relations: ['class', 'allergies', 'allergies.allergen'],
+      order: { fullName: 'ASC' },
+    });
+
+    let registeredStudentIds: number[] = [];
+    if (periodId) {
+      const regs = await this.regRepo.find({
+        where: { periodId },
+      });
+      registeredStudentIds = regs.map((r) => Number(r.studentId));
+    }
+
+    return {
+      success: true,
+      data: students.map((s) => ({
+        id: String(s.id),
+        studentCode: s.studentCode,
+        fullName: s.fullName,
+        dateOfBirth: s.dateOfBirth,
+        gender: s.gender,
+        className: s.class?.name || 'Chưa xếp lớp',
+        classId: s.classId ? String(s.classId) : undefined,
+        hasAllergy: (s.allergies || []).length > 0,
+        allergies: (s.allergies || []).map((a) => ({
+          allergenName: a.allergen?.name || 'Dị ứng',
+          allergenCode: a.allergen?.code || '',
+          severity: a.severity,
+          note: a.note,
+        })),
+        isRegistered: registeredStudentIds.includes(Number(s.id)),
+      })),
+    };
+  }}

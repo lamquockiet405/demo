@@ -8,11 +8,14 @@ import {
   Body,
   UseGuards,
   ParseIntPipe,
+  Query,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SnackServicesService } from './snack-services.service';
 import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.dto';
 import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
+import { RegisterSnackServiceDto } from './dto/register-snack-service.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -55,11 +58,33 @@ export class SnackServicesController {
     return this.snackService.createPeriod(dto);
   }
 
+  @Get('check-allergy')
+  @ApiOperation({ summary: 'Kiểm tra độ an toàn dị ứng của trẻ với thực đơn đợt ăn xế' })
+  async checkAllergy(
+    @Query('periodId', ParseIntPipe) periodId: number,
+    @Query('studentId', ParseIntPipe) studentId: number,
+  ) {
+    return this.snackService.checkAllergySafety(periodId, studentId);
+  }
+
+  @Get('students-available')
+  @ApiOperation({ summary: 'Lấy danh sách học sinh có thể đăng ký đợt ăn xế' })
+  async getStudentsAvailable(@Query('periodId') periodId?: string) {
+    return this.snackService.getStudentsAvailable(periodId ? Number(periodId) : undefined);
+  }
+
   @Post('enrollment')
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN', 'TEACHER', 'PARENT')
-  @ApiOperation({ summary: 'Đăng ký tham gia dịch vụ ăn xế / bán trú' })
-  async registerEnrollment(@Body() body: any) {
-    return this.snackService.registerEnrollment(body);
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'TEACHER', 'PARENT')
+  @ApiOperation({ summary: 'Đăng ký tham gia dịch vụ ăn xế (Kiểm tra quy tắc dị ứng)' })
+  async registerEnrollment(@Body() dto: RegisterSnackServiceDto, @Req() req: any) {
+    return this.snackService.registerEnrollment(dto, req.user);
+  }
+
+  @Put('registrations/:id/confirm-payment')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Xác nhận thanh toán cho đăng ký ăn xế' })
+  async confirmPayment(@Param('id', ParseIntPipe) id: number) {
+    return this.snackService.confirmPayment(id);
   }
 
   @Post()
