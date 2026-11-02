@@ -19,8 +19,8 @@ export const AttendancePage: React.FC = () => {
 
   // State
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState<string>('f1000000-0000-0000-0000-000000000001');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-09-25');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [mealFilter, setMealFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -71,8 +71,9 @@ export const AttendancePage: React.FC = () => {
       try {
         const classList = await attendanceApi.getClasses();
         setClasses(classList);
-        if (classList.length > 0 && !selectedClassId) {
-          setSelectedClassId(classList[0].id);
+        if (classList.length > 0) {
+          const mam1 = classList.find((c) => c.name.includes('Mầm 1'));
+          setSelectedClassId(mam1 ? mam1.id : classList[0].id);
         }
       } catch (err) {
         console.error('Lỗi khi tải danh sách lớp học:', err);
@@ -364,7 +365,14 @@ export const AttendancePage: React.FC = () => {
               ...attendanceData.kitchenConnection,
               isLocked,
             }}
-            todayMenu={attendanceData.todayMenu}
+            todayMenu={{
+              week: (attendanceData.todayMenu as any)?.week ?? 10,
+              lunchTime: (attendanceData.todayMenu as any)?.lunchTime ?? '10:45 - 11:30',
+              lunchItems: (attendanceData.todayMenu as any)?.lunchItems ?? ['Cơm chiên Dương Châu', 'Cá lóc muối chiên', 'Canh thịt bằm bắp cải', 'Lê đường'],
+              snackTime: (attendanceData.todayMenu as any)?.snackTime ?? '14:30 - 15:00',
+              snackItems: (attendanceData.todayMenu as any)?.snackItems ?? ['Súp cua trứng cút', 'Sữa chua men sống'],
+              estimatedCalories: (attendanceData.todayMenu as any)?.estimatedCalories ?? 680,
+            }}
             onLockKitchen={handleLockKitchen}
             isLocking={isLocking}
           />

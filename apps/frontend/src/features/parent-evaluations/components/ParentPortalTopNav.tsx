@@ -5,6 +5,7 @@ import { Bell, ChevronDown, Utensils, ShieldAlert, Coffee, CreditCard, MessageSq
 import { ChildProfile } from '../types';
 import { useAuthStore } from '../../../core/stores/auth.store';
 import { UserProfileModal } from '../../auth/components/UserProfileModal';
+import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 
 interface ParentPortalTopNavProps {
   child?: ChildProfile;
@@ -15,6 +16,7 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
 
   const { user } = useAuthStore();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const schoolBranding = useSchoolBranding();
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

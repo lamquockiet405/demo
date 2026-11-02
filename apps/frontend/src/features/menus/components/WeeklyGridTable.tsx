@@ -209,6 +209,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   // Bộ lọc thực đơn & hồ sơ trẻ em: 'ALL' (mặc định hiện cả 3 loại + suất chung), 'MASTER' (chỉ thực đơn tổng), 'STUNTED' (Loại 1), 'OBESE' (Loại 2), 'ALLERGIES' (Loại 3), 'COMMON' (món chung)
   const [activeChildTypeFilter, setActiveChildTypeFilter] = useState<'ALL' | 'MASTER' | 'STUNTED' | 'OBESE' | 'ALLERGIES' | 'COMMON'>('ALL');
   const [modalActiveTab, setModalActiveTab] = useState<'COMMON' | 'STUNTED' | 'OBESE' | 'ALLERGIES'>('COMMON');
+  const [replaceMode, setReplaceMode] = useState<'REPLACE_ALL' | 'SPECIAL_DIET'>('SPECIAL_DIET');
 
   // Dữ liệu 3 nhóm trẻ em
   const wastedChildren = advisory?.bmiRecommendations?.wastedGroup?.children?.length
@@ -464,82 +465,124 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
     };
 
     // ─────────────────────────────────────────────────────────────
-    // 2. LOẠI 1: THẤP CÒI / SDD (QĐ 1246 & TT 28: +18% Đạm, +15% Béo, +8% Tinh bột, ~+15% Calo)
+    // HELPER TÍNH TOÁN DINH DƯỠNG THỰC TẾ CHO TỪNG LOẠI SUẤT RIÊNG (LOẠI 1, 2, 3)
     // ─────────────────────────────────────────────────────────────
-    const p1 = Math.round(totalP * 1.18 * 10) / 10;
-    const l1 = Math.round(totalL * 1.15 * 10) / 10;
-    const g1 = Math.round(totalG * 1.08 * 10) / 10;
-    const calo1 = Math.round(p1 * 4 + l1 * 9 + g1 * 4);
-    const pPct1 = calo1 > 0 ? Math.round((p1 * 4 / calo1) * 100) : 0;
-    const lPct1 = calo1 > 0 ? Math.round((l1 * 9 / calo1) * 100) : 0;
-    const gPct1 = calo1 > 0 ? Math.max(0, 100 - pPct1 - lPct1) : 0;
+    const calculateNutritionForDietType = (
+      targetType: 'STUNTED' | 'OBESE' | 'ALLERGIES',
+      defaultLabel: string,
+    ) => {
+      // 1. Lọc các món suất riêng / món thay thế của ngày thuộc loại này
+      const typeSubs = (menu.menuDishes || []).filter(
+        (md) =>
+          (md.dayOfWeek === day || (!hasDayOne && md.dayOfWeek === day + 1)) &&
+          !md.deletedAt &&
+          isDietSubstitute(md) &&
+          resolveSubstituteInfo(md, advisory).type === targetType,
+      );
 
-    const type1 = {
-      calo: calo1,
-      p: p1,
-      l: l1,
-      g: g1,
-      pPct: pPct1,
-      lPct: lPct1,
-      gPct: gPct1,
-      isOptimal: true,
-      statusType: 'optimal' as const,
-      statusText: '+15% Calo phục hồi',
-      badgeText: '+15% Calo phục hồi SDD (QĐ 1246)',
-      noteText: 'Tăng đạm sinh học cao & chất béo tốt',
+      // Nếu chưa có món ăn / suất riêng nào được thêm cho loại này vào ngày này -> Hiển thị chưa lên món (0 Kcal)
+      if (typeSubs.length === 0) {
+        return {
+          calo: 0,
+          p: 0,
+          l: 0,
+          g: 0,
+          pPct: 0,
+          lPct: 0,
+          gPct: 0,
+          isOptimal: false,
+          statusType: 'empty' as const,
+          statusText: 'Chưa lên món',
+          badgeText: '',
+          noteText: 'Chưa có suất riêng',
+        };
+      }
+
+      // 2. Nếu đã có suất riêng: Tập hợp các món ăn thực tế mà trẻ nhóm này sẽ ăn
+      // Bắt đầu từ danh sách món gốc (Thực đơn tổng)
+      // Những món gốc nào đã được thay thế bởi món thuộc typeSubs thì sẽ bị loại ra và thay bằng món typeSubs
+      const replacedMasterDishIds = new Set<string | number>();
+      const actualChildDishes: MenuDishItem[] = [];
+
+      for (const sub of typeSubs) {
+        const notesLower = (sub.specialDietNotes || '').toLowerCase();
+        for (const masterMd of dayMasterDishes) {
+          const masterNameLower = (masterMd.dish?.name || '').toLowerCase().trim();
+          if (
+            !replacedMasterDishIds.has(masterMd.id) &&
+            masterNameLower &&
+            (notesLower.includes(masterNameLower) || (sub as any).oldDishId === masterMd.dishId)
+          ) {
+            replacedMasterDishIds.add(masterMd.id);
+            break;
+          }
+        }
+        actualChildDishes.push(sub);
+      }
+
+      for (const masterMd of dayMasterDishes) {
+        if (!replacedMasterDishIds.has(masterMd.id)) {
+          actualChildDishes.push(masterMd);
+        }
+      }
+
+      let tP = 0;
+      let tL = 0;
+      let tG = 0;
+      let sumPlannedCalo = 0;
+
+      for (const md of actualChildDishes) {
+        const dish = md.dish;
+        const portion = Number(md.portionSizeG) || 100;
+        const standardSize = dish && Number(dish.standardServingSizeG) > 0 ? Number(dish.standardServingSizeG) : 100;
+        const ratio = portion / standardSize;
+
+        if (dish) {
+          tP += (Number(dish.totalProteinG) || 0) * ratio;
+          tL += (Number(dish.totalFatG) || 0) * ratio;
+          tG += (Number(dish.totalCarbG) || 0) * ratio;
+        }
+        sumPlannedCalo += Number(md.plannedCalories) || (dish ? Number(dish.totalCalories) * ratio : 0);
+      }
+
+      tP = Math.round(tP * 10) / 10;
+      tL = Math.round(tL * 10) / 10;
+      tG = Math.round(tG * 10) / 10;
+
+      const cP = tP * 4;
+      const cL = tL * 9;
+      const cG = tG * 4;
+      let tCalo = Math.round(cP + cL + cG);
+      if (tCalo === 0 && sumPlannedCalo > 0) {
+        tCalo = Math.round(sumPlannedCalo);
+      }
+
+      const pP = tCalo > 0 ? Math.round((cP / tCalo) * 100) : 0;
+      const lP = tCalo > 0 ? Math.round((cL / tCalo) * 100) : 0;
+      const gP = tCalo > 0 ? Math.max(0, 100 - pP - lP) : 0;
+
+      const diffCalo = Math.round(tCalo - totalCalo);
+      const diffText = diffCalo > 0 ? `+${diffCalo} Kcal` : `${diffCalo} Kcal`;
+
+      return {
+        calo: tCalo,
+        p: tP,
+        l: tL,
+        g: tG,
+        pPct: pP,
+        lPct: lP,
+        gPct: gP,
+        isOptimal: true,
+        statusType: 'optimal' as const,
+        statusText: `${typeSubs.length} suất riêng (${diffText})`,
+        badgeText: `${typeSubs.length} suất riêng • ${defaultLabel}`,
+        noteText: `Đã đổi ${typeSubs.length} món riêng theo chuẩn`,
+      };
     };
 
-    // ─────────────────────────────────────────────────────────────
-    // 3. LOẠI 2: THỪA CÂN / BÉO PHÌ (TT 28: Giữ 100% Đạm nạc, -30% Dầu mỡ, -10% Đường bột, ~-12% Calo)
-    // ─────────────────────────────────────────────────────────────
-    const p2 = Math.round(totalP * 1.00 * 10) / 10;
-    const l2 = Math.round(totalL * 0.70 * 10) / 10;
-    const g2 = Math.round(totalG * 0.90 * 10) / 10;
-    const calo2 = Math.round(p2 * 4 + l2 * 9 + g2 * 4);
-    const pPct2 = calo2 > 0 ? Math.round((p2 * 4 / calo2) * 100) : 0;
-    const lPct2 = calo2 > 0 ? Math.round((l2 * 9 / calo2) * 100) : 0;
-    const gPct2 = calo2 > 0 ? Math.max(0, 100 - pPct2 - lPct2) : 0;
-
-    const type2 = {
-      calo: calo2,
-      p: p2,
-      l: l2,
-      g: g2,
-      pPct: pPct2,
-      lPct: lPct2,
-      gPct: gPct2,
-      isOptimal: true,
-      statusType: 'optimal' as const,
-      statusText: '-12% Calo giảm béo',
-      badgeText: '-12% Calo giảm béo (TT 28)',
-      noteText: 'Giảm 30% dầu mỡ rán & tinh bột đơn',
-    };
-
-    // ─────────────────────────────────────────────────────────────
-    // 4. LOẠI 3: DỊ ỨNG THỰC PHẨM (100% Loại trừ dị nguyên, đạm nạc an toàn, calo tương đương)
-    // ─────────────────────────────────────────────────────────────
-    const p3 = Math.round(totalP * 1.01 * 10) / 10;
-    const l3 = Math.round(totalL * 0.98 * 10) / 10;
-    const g3 = Math.round(totalG * 1.00 * 10) / 10;
-    const calo3 = Math.round(p3 * 4 + l3 * 9 + g3 * 4);
-    const pPct3 = calo3 > 0 ? Math.round((p3 * 4 / calo3) * 100) : 0;
-    const lPct3 = calo3 > 0 ? Math.round((l3 * 9 / calo3) * 100) : 0;
-    const gPct3 = calo3 > 0 ? Math.max(0, 100 - pPct3 - lPct3) : 0;
-
-    const type3 = {
-      calo: calo3,
-      p: p3,
-      l: l3,
-      g: g3,
-      pPct: pPct3,
-      lPct: lPct3,
-      gPct: gPct3,
-      isOptimal: true,
-      statusType: 'optimal' as const,
-      statusText: '100% An toàn dị nguyên',
-      badgeText: '100% An toàn dị nguyên',
-      noteText: 'Thay đạm an toàn (Heo nạc, Gà, Canh bí)',
-    };
+    const type1 = calculateNutritionForDietType('STUNTED', 'Tăng đạm QĐ 1246');
+    const type2 = calculateNutritionForDietType('OBESE', 'Giảm béo TT 28');
+    const type3 = calculateNutritionForDietType('ALLERGIES', 'An toàn dị nguyên');
 
     return { master, type1, type2, type3 };
   };
@@ -1204,6 +1247,9 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 {/* Các Cột tương ứng từng ngày */}
                 {days.map((day) => {
                   const dishesInCell = getDishesInSlot(day.dayOfWeek, slot.key);
+                  const primaryDishes = dishesInCell.filter((md) => !isDietSubstitute(md));
+                  const allSubDishes = dishesInCell.filter((md) => isDietSubstitute(md));
+                  const renderedSubIds = new Set<string | number>();
                   return (
                     <td
                       key={day.dayOfWeek}
@@ -1212,16 +1258,13 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       }`}
                     >
                       <div className="space-y-1.5 min-h-[64px]">
-                        {dishesInCell.map((md) => {
+                        {primaryDishes.map((md) => {
                           const portion = Number(md.portionSizeG) || 100;
                           const standard = Number(md.dish?.standardServingSizeG) || 100;
                           const ratio = portion / standard;
                           const pVal = ((Number(md.dish?.totalProteinG) || 0) * ratio).toFixed(1);
                           const lVal = ((Number(md.dish?.totalFatG) || 0) * ratio).toFixed(1);
                           const gVal = ((Number(md.dish?.totalCarbG) || 0) * ratio).toFixed(1);
-
-                          const isSub = isDietSubstitute(md);
-                          const subInfo = isSub ? resolveSubstituteInfo(md, advisory) : null;
 
                           const dishNameLower = (md.dish?.name || '').toLowerCase().trim();
                           const conflictsForDish = advisory?.allergyConflicts?.filter((c) => 
@@ -1233,44 +1276,39 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           const isFriedOrHighFat = Number(md.dish?.totalFatG || 0) >= 5.0 || /chiên|rán|mỡ|xào mặn|kho tàu/i.test(dishNameLower);
                           const isHighProteinOrSoup = Number(md.dish?.totalProteinG || 0) >= 7.5 || /hầm|súp|bò|sườn|gà|cháo/i.test(dishNameLower);
 
+                          // Tìm các suất riêng liên kết trực tiếp với món này
+                          const linkedSubs = allSubDishes.filter((subMd) => {
+                            const notesLower = (subMd.specialDietNotes || '').toLowerCase();
+                            return (
+                              (dishNameLower && notesLower.includes(dishNameLower)) ||
+                              notesLower.includes(`thay cho: ${dishNameLower}`)
+                            );
+                          });
+                          linkedSubs.forEach((s) => renderedSubIds.add(s.id));
+
+                          const allergySub = linkedSubs.find((s) => {
+                            const info = resolveSubstituteInfo(s, advisory);
+                            return info.type === 'ALLERGIES';
+                          });
+
                           return (
                             <div
                               key={md.id}
-                              className={`rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border ${
-                                isSub && subInfo
-                                  ? subInfo.containerClasses
-                                  : 'bg-white border-slate-200/80 hover:border-emerald-300'
-                              }`}
+                              className="rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border bg-white border-slate-200/80 hover:border-emerald-300"
                             >
-                              {/* HUY HIỆU PHÂN LOẠI MÓN ĂN: SUẤT RIÊNG vs SUẤT CHUNG */}
-                              {isSub && subInfo ? (
-                                <div className="mb-1.5 flex items-center justify-between gap-1">
-                                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-2xs ${subInfo.badgeBg}`}>
-                                    {subInfo.type === 'ALLERGIES' && <ShieldAlert className="w-2.5 h-2.5" />}
-                                    {subInfo.type === 'OBESE' && <Scale className="w-2.5 h-2.5" />}
-                                    {subInfo.type === 'STUNTED' && <Baby className="w-2.5 h-2.5" />}
-                                    <span>Suất riêng: {subInfo.badgeTitle}</span>
-                                  </span>
-                                  <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-white/90 border border-slate-200 text-slate-700">
-                                    Đã đổi
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="mb-1 flex items-center justify-between gap-1">
-                                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                                    <span>Suất chung (Trẻ bình thường)</span>
-                                  </span>
-                                </div>
-                              )}
+                              {/* HUY HIỆU PHÂN LOẠI: SUẤT CHUNG */}
+                              <div className="mb-1 flex items-center justify-between gap-1">
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                  <span>Suất chung (Trẻ bình thường)</span>
+                                </span>
+                              </div>
 
                               <div className="flex items-start justify-between gap-1">
                                 <span 
                                   onClick={() => setInspectingDish({ menuDish: md, dayLabel: day.label, slotName: slot.name })}
                                   title="Bấm để xem công thức & nguyên liệu chi tiết"
-                                  className={`text-xs font-bold leading-tight hover:text-emerald-700 cursor-pointer transition line-clamp-2 ${
-                                    isSub && subInfo ? subInfo.textColor : 'text-slate-800'
-                                  }`}
+                                  className="text-xs font-bold leading-tight hover:text-emerald-700 cursor-pointer transition line-clamp-2 text-slate-800"
                                 >
                                   {md.dish?.name || 'Món ăn'}
                                 </span>
@@ -1366,10 +1404,14 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                               )}
 
                               {/* NÚT THAO TÁC ĐỔI MÓN CHO 3 LOẠI TRẺ EM TRÊN MÓN CHUNG */}
-                              {!isSub && (
-                                <div className="mt-1.5 pt-1 border-t border-slate-100 space-y-1">
-                                  {/* 1. NÚT LOẠI 3: DỊ ỨNG */}
-                                  {hasAllergyConflict && (
+                              <div className="mt-1.5 pt-1 border-t border-slate-100 space-y-1">
+                                {/* 1. NÚT LOẠI 3: DỊ ỨNG */}
+                                {allergySub ? (
+                                  <div className="w-full text-left px-2 py-1.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-950 transition flex items-center justify-between gap-1 shadow-2xs">
+                                    <div className="flex items-center gap-1.5 truncate text-[10px] font-bold text-emerald-800">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                      <span className="truncate">✓ Đã có suất riêng: {allergySub.dish?.name || 'Món thay thế'} ({conflictsForDish.length || 1} bé)</span>
+                                    </div>
                                     <button
                                       type="button"
                                       onClick={() => {
@@ -1383,70 +1425,200 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                                           targetType: 'ALLERGIES',
                                         });
                                       }}
-                                      className="w-full text-left px-2 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 hover:bg-rose-100 transition cursor-pointer flex items-center justify-between gap-1 shadow-2xs"
-                                      title={`Phát hiện ${conflictsForDish.length} bé dị ứng: ${conflictsForDish.map((c) => `${c.childName} (${c.allergenDetected})`).join(', ')}. Bấm để đổi món.`}
+                                      className="text-[8.5px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-0.5 rounded font-extrabold shrink-0 shadow-2xs cursor-pointer"
                                     >
-                                      <div className="flex items-center gap-1 truncate text-[10px] font-bold text-rose-700">
-                                        <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
-                                        <span className="truncate">Loại 3: Dị ứng ({conflictsForDish[0]?.allergenDetected || 'Hải sản'} • {conflictsForDish.length} bé)</span>
+                                      Đổi lại
+                                    </button>
+                                  </div>
+                                ) : hasAllergyConflict ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setModalActiveTab('ALLERGIES');
+                                      setSelectedSubDish(null);
+                                      setSubApplySuccess(null);
+                                      setUniversalModalDish({
+                                        menuDish: md,
+                                        dayLabel: day.label,
+                                        slotName: slot.name,
+                                        targetType: 'ALLERGIES',
+                                      });
+                                    }}
+                                    className="w-full text-left px-2 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 hover:bg-rose-100 transition cursor-pointer flex items-center justify-between gap-1 shadow-2xs"
+                                    title={`Phát hiện ${conflictsForDish.length} bé dị ứng: ${conflictsForDish.map((c) => `${c.childName} (${c.allergenDetected})`).join(', ')}. Bấm để đổi món.`}
+                                  >
+                                    <div className="flex items-center gap-1 truncate text-[10px] font-bold text-rose-700">
+                                      <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
+                                      <span className="truncate">Loại 3: Dị ứng ({conflictsForDish[0]?.allergenDetected || 'Hải sản'} • {conflictsForDish.length} bé)</span>
+                                    </div>
+                                    <span className="text-[8px] bg-rose-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">
+                                      Đổi món
+                                    </span>
+                                  </button>
+                                ) : null}
+
+                                {/* 2. NÚT LOẠI 2: BÉO PHÌ */}
+                                {isFriedOrHighFat && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setModalActiveTab('OBESE');
+                                      setSelectedSubDish(null);
+                                      setSubApplySuccess(null);
+                                      setUniversalModalDish({
+                                        menuDish: md,
+                                        dayLabel: day.label,
+                                        slotName: slot.name,
+                                        targetType: 'OBESE',
+                                      });
+                                    }}
+                                    className="w-full text-left px-1.5 py-0.5 rounded-md bg-purple-50/90 border border-purple-200/80 text-purple-900 hover:bg-purple-100 transition cursor-pointer flex items-center justify-between text-[9px] font-semibold"
+                                    title="Món nhiều chất béo/calo - Cần giảm khẩu phần béo 15% cho trẻ thừa cân theo TT 28/2016"
+                                  >
+                                    <span className="truncate text-purple-800 font-bold">Loại 2 (Béo phì): Giảm béo TT 28</span>
+                                    <span className="text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">Đổi món</span>
+                                  </button>
+                                )}
+
+                                {/* 3. NÚT LOẠI 1: CÒI XƯƠNG / SDD */}
+                                {isHighProteinOrSoup && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setModalActiveTab('STUNTED');
+                                      setSelectedSubDish(null);
+                                      setSubApplySuccess(null);
+                                      setUniversalModalDish({
+                                        menuDish: md,
+                                        dayLabel: day.label,
+                                        slotName: slot.name,
+                                        targetType: 'STUNTED',
+                                      });
+                                    }}
+                                    className="w-full text-left px-1.5 py-0.5 rounded-md bg-amber-50/90 border border-amber-200/80 text-amber-900 hover:bg-amber-100 transition cursor-pointer flex items-center justify-between text-[9px] font-semibold"
+                                    title="Món giàu đạm sinh học cao - Cần chia thêm 15% khẩu phần cho trẻ suy dinh dưỡng theo QĐ 1246"
+                                  >
+                                    <span className="truncate text-amber-900 font-bold">Loại 1 (SDD): + Khẩu phần đạm</span>
+                                    <span className="text-[8px] bg-amber-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">Đổi món</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* DANH SÁCH SUẤT RIÊNG GẮN LIỀN VỚI MÓN NÀY */}
+                              {linkedSubs.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-slate-100 space-y-1.5">
+                                  {linkedSubs.map((subMd) => {
+                                    const subInfo = resolveSubstituteInfo(subMd, advisory);
+                                    const subCalo = Number(subMd.plannedCalories || subMd.dish?.totalCalories || 0);
+                                    const subPortion = Number(subMd.portionSizeG) || 100;
+                                    return (
+                                      <div
+                                        key={subMd.id}
+                                        className={`p-2 rounded-xl border border-dashed transition group/sub ${subInfo.containerClasses}`}
+                                      >
+                                        <div className="flex items-center justify-between gap-1 mb-1">
+                                          <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-2xs ${subInfo.badgeBg}`}>
+                                            {subInfo.type === 'ALLERGIES' && <ShieldAlert className="w-2.5 h-2.5" />}
+                                            {subInfo.type === 'OBESE' && <Scale className="w-2.5 h-2.5" />}
+                                            {subInfo.type === 'STUNTED' && <Baby className="w-2.5 h-2.5" />}
+                                            <span>Suất riêng: {subInfo.badgeTitle}</span>
+                                          </span>
+                                          <div className="flex items-center gap-1">
+                                            <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-white/90 border border-slate-200 text-slate-700">
+                                              Nấu riêng
+                                            </span>
+                                            {!readOnly && (
+                                              <button
+                                                type="button"
+                                                onClick={() => onRemoveDish(subMd.id)}
+                                                title="Xóa suất riêng này"
+                                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                                              >
+                                                <Trash2 className="w-3 h-3" />
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-1">
+                                          <span className={`text-xs font-bold leading-tight ${subInfo.textColor}`}>
+                                            🥗 {subMd.dish?.name || 'Món thay thế'}
+                                          </span>
+                                          <span className="text-[10px] font-bold text-amber-700 flex items-center gap-0.5 shrink-0">
+                                            <Flame className="w-2.5 h-2.5 text-amber-500" />
+                                            {subCalo.toFixed(1)} Kcal
+                                          </span>
+                                        </div>
+                                        <div className="mt-1 flex items-center justify-between text-[9.5px] text-slate-500 font-medium">
+                                          <span className="bg-white/80 border border-slate-200/80 px-1.5 py-0.2 rounded font-semibold text-slate-700">
+                                            {subPortion}g
+                                          </span>
+                                          <span className="text-emerald-800 font-semibold italic truncate max-w-[140px]" title={subMd.specialDietNotes || ''}>
+                                            {subMd.specialDietNotes || `Thay cho: ${md.dish?.name}`}
+                                          </span>
+                                        </div>
                                       </div>
-                                      <span className="text-[8px] bg-rose-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">
-                                        Đổi món
-                                      </span>
-                                    </button>
-                                  )}
-
-                                  {/* 2. NÚT LOẠI 2: BÉO PHÌ */}
-                                  {isFriedOrHighFat && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setModalActiveTab('OBESE');
-                                        setSelectedSubDish(null);
-                                        setSubApplySuccess(null);
-                                        setUniversalModalDish({
-                                          menuDish: md,
-                                          dayLabel: day.label,
-                                          slotName: slot.name,
-                                          targetType: 'OBESE',
-                                        });
-                                      }}
-                                      className="w-full text-left px-1.5 py-0.5 rounded-md bg-purple-50/90 border border-purple-200/80 text-purple-900 hover:bg-purple-100 transition cursor-pointer flex items-center justify-between text-[9px] font-semibold"
-                                      title="Món nhiều chất béo/calo - Cần giảm khẩu phần béo 15% cho trẻ thừa cân theo TT 28/2016"
-                                    >
-                                      <span className="truncate text-purple-800 font-bold">Loại 2 (Béo phì): Giảm béo TT 28</span>
-                                      <span className="text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">Đổi món</span>
-                                    </button>
-                                  )}
-
-                                  {/* 3. NÚT LOẠI 1: CÒI XƯƠNG / SDD */}
-                                  {isHighProteinOrSoup && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setModalActiveTab('STUNTED');
-                                        setSelectedSubDish(null);
-                                        setSubApplySuccess(null);
-                                        setUniversalModalDish({
-                                          menuDish: md,
-                                          dayLabel: day.label,
-                                          slotName: slot.name,
-                                          targetType: 'STUNTED',
-                                        });
-                                      }}
-                                      className="w-full text-left px-1.5 py-0.5 rounded-md bg-amber-50/90 border border-amber-200/80 text-amber-900 hover:bg-amber-100 transition cursor-pointer flex items-center justify-between text-[9px] font-semibold"
-                                      title="Món giàu đạm sinh học cao - Cần chia thêm 15% khẩu phần cho trẻ suy dinh dưỡng theo QĐ 1246"
-                                    >
-                                      <span className="truncate text-amber-900 font-bold">Loại 1 (SDD): + Khẩu phần đạm</span>
-                                      <span className="text-[8px] bg-amber-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">Đổi món</span>
-                                    </button>
-                                  )}
+                                    );
+                                  })}
                                 </div>
                               )}
                             </div>
                           );
                         })}
 
+                        {/* RENDER CÁC MÓN SUẤT RIÊNG ĐỘC LẬP (NẾU CÓ HOẶC KHÔNG KHỚP MÓN GỐC NÀO) */}
+                        {allSubDishes.filter((s) => !renderedSubIds.has(s.id)).map((subMd) => {
+                          const portion = Number(subMd.portionSizeG) || 100;
+                          const subInfo = resolveSubstituteInfo(subMd, advisory);
+                          const subCalo = Number(subMd.plannedCalories || subMd.dish?.totalCalories || 0);
+
+                          return (
+                            <div
+                              key={subMd.id}
+                              className={`rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border ${subInfo.containerClasses}`}
+                            >
+                              <div className="mb-1 flex items-center justify-between gap-1">
+                                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-2xs ${subInfo.badgeBg}`}>
+                                  {subInfo.type === 'ALLERGIES' && <ShieldAlert className="w-2.5 h-2.5" />}
+                                  {subInfo.type === 'OBESE' && <Scale className="w-2.5 h-2.5" />}
+                                  {subInfo.type === 'STUNTED' && <Baby className="w-2.5 h-2.5" />}
+                                  <span>Suất riêng: {subInfo.badgeTitle}</span>
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-white/90 border border-slate-200 text-slate-700">
+                                    Nấu riêng
+                                  </span>
+                                  {!readOnly && (
+                                    <button
+                                      type="button"
+                                      onClick={() => onRemoveDish(subMd.id)}
+                                      title="Xóa món này"
+                                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-start justify-between gap-1">
+                                <span className={`text-xs font-bold leading-tight ${subInfo.textColor}`}>
+                                  {subMd.dish?.name || 'Món ăn'}
+                                </span>
+                              </div>
+                              <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                                <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-semibold">{portion}g</span>
+                                <span className="font-bold text-amber-700 flex items-center gap-0.5">
+                                  <Flame className="w-2.5 h-2.5 text-amber-500" />
+                                  {subCalo.toFixed(1)} Kcal
+                                </span>
+                              </div>
+                              {subMd.specialDietNotes && (
+                                <div className="mt-1.5 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200/90 text-emerald-950 shadow-2xs">
+                                  <span className="text-[9.5px] font-bold truncate block">{subMd.specialDietNotes}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                         {/* Nút thêm món vào ô */}
                         {!readOnly && (
                           <button
@@ -1688,7 +1860,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                               : 'bg-slate-200 text-slate-500'
                           }`}
                         >
-                          {nutri.calo > 0 ? '+15% Phục hồi SDD' : 'Chưa lên món'}
+                          {nutri.calo > 0 ? (nutri.statusText || '+15% Phục hồi SDD') : 'Chưa lên món'}
                         </span>
                       </td>
                     );
@@ -1776,7 +1948,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                               : 'bg-slate-200 text-slate-500'
                           }`}
                         >
-                          {nutri.calo > 0 ? '-12% Giảm béo TT 28' : 'Chưa lên món'}
+                          {nutri.calo > 0 ? (nutri.statusText || '-12% Giảm béo TT 28') : 'Chưa lên món'}
                         </span>
                       </td>
                     );
@@ -1864,7 +2036,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                               : 'bg-slate-200 text-slate-500'
                           }`}
                         >
-                          {nutri.calo > 0 ? '100% An toàn dị nguyên' : 'Chưa lên món'}
+                          {nutri.calo > 0 ? (nutri.statusText || '100% An toàn dị nguyên') : 'Chưa lên món'}
                         </span>
                       </td>
                     );
@@ -1958,6 +2130,9 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
         const currentL = Number(universalModalDish.menuDish.dish?.totalFatG || 0);
         const currentG = Number(universalModalDish.menuDish.dish?.totalCarbG || 0);
 
+        // Khóa đúng 1 loại trẻ em được bấm từ menu (không hiển thị các tab loại khác gây nhầm lẫn)
+        const lockedType = universalModalDish.targetType || modalActiveTab || 'COMMON';
+
         // Tìm các xung đột dị ứng của món này
         const conflictsForThisDish = advisory?.allergyConflicts?.filter((c) =>
           c.menuDishId === universalModalDish.menuDish.id ||
@@ -1967,9 +2142,15 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
 
         // Đề xuất danh sách món thay thế CÙNG LOẠI & TƯƠNG ĐƯƠNG DINH DƯỠNG (100% ID số thực tế trong cơ sở dữ liệu)
         const getCandidateSubstitutes = () => {
+          // Tính toán calo cao hơn món gốc cho trẻ thấp còi (tối thiểu tăng +15% đến +35%)
+          const stuntedCaloBonus = (minBase: number, percentBonus: number) => {
+            const targetByRatio = Math.round(currentCalo * (1 + percentBonus / 100));
+            return Math.max(minBase, targetByRatio > currentCalo ? targetByRatio : currentCalo + 15);
+          };
+
           // 1. Món Canh / Súp (SOUP)
           if (currentCat.code === 'SOUP') {
-            if (modalActiveTab === 'OBESE') {
+            if (lockedType === 'OBESE') {
               return [
                 {
                   id: '57',
@@ -2003,37 +2184,40 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 },
               ];
             }
-            if (modalActiveTab === 'STUNTED') {
+            if (lockedType === 'STUNTED') {
+              const calo1 = stuntedCaloBonus(65, 30);
+              const calo2 = stuntedCaloBonus(58, 25);
+              const calo3 = stuntedCaloBonus(68, 35);
               return [
                 {
                   id: '33',
-                  name: 'Canh thịt sườn hầm bắp, bầu',
+                  name: 'Canh thịt sườn hầm bắp ngọt, bầu',
                   categoryLabel: 'Món Canh',
-                  calories: 65,
-                  proteinG: 6.2,
-                  fatG: 2.5,
-                  carbG: 4.2,
-                  suitabilityReason: '✓ Cùng loại Món Canh • Tăng 20% đạm sinh học & canxi • Tối ưu cho trẻ thấp còi/SDD (QĐ 1246)',
+                  calories: calo1,
+                  proteinG: 7.2,
+                  fatG: 2.8,
+                  carbG: 4.5,
+                  suitabilityReason: `✓ Cùng loại Món Canh • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+15'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Tăng 20% đạm sinh học & canxi sườn non (QĐ 1246)`,
                 },
                 {
                   id: '50',
                   name: 'Canh gà hầm củ sen, cà rốt',
                   categoryLabel: 'Món Canh',
-                  calories: 58,
-                  proteinG: 5.8,
-                  fatG: 2.0,
-                  carbG: 3.8,
-                  suitabilityReason: '✓ Cùng loại Món Canh • Bổ dưỡng vi chất, hồi phục thể trạng trẻ nhẹ cân',
+                  calories: calo2,
+                  proteinG: 6.5,
+                  fatG: 2.5,
+                  carbG: 4.0,
+                  suitabilityReason: `✓ Cùng loại Món Canh • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+12'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Bổ dưỡng vi chất, hồi phục thể trạng trẻ nhẹ cân`,
                 },
                 {
-                  id: '47',
-                  name: 'Canh thịt bằm rau ngót',
+                  id: '53',
+                  name: 'Canh bí hồ lô hầm xương thịt bằm',
                   categoryLabel: 'Món Canh',
-                  calories: 32,
-                  proteinG: 4.8,
-                  fatG: 0.8,
-                  carbG: 1.5,
-                  suitabilityReason: '✓ Cùng loại Món Canh • Đạm sinh học cao, dễ tiêu hóa',
+                  calories: calo3,
+                  proteinG: 7.5,
+                  fatG: 3.2,
+                  carbG: 4.8,
+                  suitabilityReason: `✓ Cùng loại Món Canh • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+18'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đậm độ năng lượng cao & vitamin A phát triển thể chất`,
                 },
               ];
             }
@@ -2057,7 +2241,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 proteinG: 4.3,
                 fatG: 1.2,
                 carbG: 2.0,
-                suitabilityReason: '✓ Cùng loại Món Canh • Thanh mát giàu chất xơ • Lành tính cho trẻ dị ứng & béo phì',
+                suitabilityReason: '✓ Cùng loại Món Canh • Thanh mát giàu chất xơ • Lành tính cho trẻ dị ứng',
               },
               {
                 id: '57',
@@ -2069,21 +2253,73 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 carbG: 1.6,
                 suitabilityReason: '✓ Cùng loại Món Canh • Lành tính cho mọi cơ địa dị ứng',
               },
-              {
-                id: '48',
-                name: 'Canh thịt nạc bằm bắp cải, cà rốt',
-                categoryLabel: 'Món Canh',
-                calories: 30,
-                proteinG: 4.0,
-                fatG: 0.7,
-                carbG: 1.8,
-                suitabilityReason: '✓ Cùng loại Món Canh • Thanh đạm không dầu mỡ • An toàn',
-              },
             ];
           }
 
           // 2. Món Cơm / Tinh Bột (STAPLE)
           if (currentCat.code === 'STAPLE') {
+            if (lockedType === 'STUNTED') {
+              const calo1 = stuntedCaloBonus(275, 20);
+              const calo2 = stuntedCaloBonus(285, 25);
+              const calo3 = stuntedCaloBonus(265, 18);
+              return [
+                {
+                  id: '2',
+                  name: 'Cơm chiên Dương Châu (thịt xá xíu, trứng, đậu)',
+                  categoryLabel: 'Cơm / Tinh bột',
+                  calories: calo1,
+                  proteinG: 12.0,
+                  fatG: 9.0,
+                  carbG: 38.0,
+                  suitabilityReason: `✓ Cùng loại Tinh bột • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+35'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm trứng/thịt xá xíu sinh học cao (QĐ 1246)`,
+                },
+                {
+                  id: '4',
+                  name: 'Cơm tấm sườn bì chả hấp',
+                  categoryLabel: 'Cơm / Tinh bột',
+                  calories: calo2,
+                  proteinG: 13.5,
+                  fatG: 9.5,
+                  carbG: 37.0,
+                  suitabilityReason: `✓ Cùng loại Tinh bột • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+45'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đậm độ năng lượng cao giúp bắt kịp đà tăng trưởng`,
+                },
+                {
+                  id: '1',
+                  name: 'Cơm dẻo xới mỡ hành & ruốc thịt nạc',
+                  categoryLabel: 'Cơm / Tinh bột',
+                  calories: calo3,
+                  proteinG: 9.5,
+                  fatG: 7.2,
+                  carbG: 38.0,
+                  suitabilityReason: `✓ Cùng loại Tinh bột • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+25'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Bổ sung chất béo tốt và đạm ruốc`,
+                },
+              ];
+            }
+            if (lockedType === 'OBESE') {
+              return [
+                {
+                  id: '1',
+                  name: 'Cơm trắng gạo tẻ dẻo',
+                  categoryLabel: 'Cơm / Tinh bột',
+                  calories: 172,
+                  proteinG: 3.8,
+                  fatG: 0.3,
+                  carbG: 38.1,
+                  suitabilityReason: '✓ Cùng loại Tinh bột • Cắt giảm 94% chất béo so với cơm chiên • Tốt cho trẻ béo phì kiểm soát mỡ máu',
+                },
+                {
+                  id: '1',
+                  name: 'Cơm gạo lứt huyết rồng trộn hạt sen',
+                  categoryLabel: 'Cơm / Tinh bột',
+                  calories: 165,
+                  proteinG: 4.5,
+                  fatG: 0.8,
+                  carbG: 34.0,
+                  suitabilityReason: '✓ Cùng loại Tinh bột • Giàu chất xơ hòa tan, no lâu, giảm hấp thu chất béo TT 28',
+                },
+              ];
+            }
+            // Mặc định hoặc Dị ứng (ALLERGIES / COMMON)
             return [
               {
                 id: '1',
@@ -2093,24 +2329,24 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 proteinG: 3.8,
                 fatG: 0.3,
                 carbG: 38.1,
-                suitabilityReason: '✓ Cùng loại Tinh bột • Cắt giảm 94% chất béo so với cơm chiên • Tốt cho trẻ béo phì & dị ứng',
+                suitabilityReason: '✓ Cùng loại Tinh bột • An toàn 100% không dị nguyên, thuần tự nhiên',
               },
               {
                 id: '2',
-                name: 'Cơm chiên Dương Châu',
+                name: 'Cơm chiên Dương Châu (không hải sản)',
                 categoryLabel: 'Cơm / Tinh bột',
                 calories: 269,
                 proteinG: 10.7,
                 fatG: 8.7,
                 carbG: 37.0,
-                suitabilityReason: '✓ Cùng loại Cơm chiên • Thay thế hoàn toàn tôm/cua/hải sản • Năng lượng tương đương 100%',
+                suitabilityReason: '✓ Cùng loại Cơm chiên • Thay thế hoàn toàn tôm/cua/hải sản bằng thịt nạc và trứng • Năng lượng tương đương 100%',
               },
             ];
           }
 
-          // 3. Món Uống / Tráng Miệng (DRINK) — 100% các món thức uống / tráng miệng, KHÔNG lẫn món cháo/mặn
+          // 3. Món Uống / Tráng Miệng (DRINK)
           if (currentCat.code === 'DRINK') {
-            if (modalActiveTab === 'OBESE') {
+            if (lockedType === 'OBESE') {
               return [
                 {
                   id: '98',
@@ -2144,37 +2380,40 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 },
               ];
             }
-            if (modalActiveTab === 'STUNTED') {
+            if (lockedType === 'STUNTED') {
+              const calo1 = stuntedCaloBonus(130, 25);
+              const calo2 = stuntedCaloBonus(125, 20);
+              const calo3 = stuntedCaloBonus(120, 18);
               return [
                 {
                   id: '96',
-                  name: 'Sữa đậu nành nguyên chất',
+                  name: 'Sữa tươi nguyên kem tiệt trùng có đường',
                   categoryLabel: 'Thức uống',
-                  calories: 75,
-                  proteinG: 4.2,
-                  fatG: 2.5,
-                  carbG: 8.5,
-                  suitabilityReason: '✓ Cùng loại Thức uống • Đạm thực vật sinh học cao phục hồi thể trạng (QĐ 1246)',
+                  calories: calo1,
+                  proteinG: 5.5,
+                  fatG: 4.8,
+                  carbG: 14.5,
+                  suitabilityReason: `✓ Cùng loại Thức uống • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+30'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm sữa nguyên kem & canxi/vitamin D bồi bổ thể trạng (QĐ 1246)`,
+                },
+                {
+                  id: '94',
+                  name: 'Yaourt phô mai sữa chua men sống giàu đạm',
+                  categoryLabel: 'Thức uống',
+                  calories: calo2,
+                  proteinG: 5.0,
+                  fatG: 4.5,
+                  carbG: 15.0,
+                  suitabilityReason: `✓ Cùng loại Thức uống • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+25'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm phô mai & lợi khuẩn hỗ trợ hấp thu`,
                 },
                 {
                   id: '71',
-                  name: 'Chuối cau chín',
+                  name: 'Chuối cau chín dầm sữa đặc dinh dưỡng',
                   categoryLabel: 'Tráng miệng',
-                  calories: 68,
-                  proteinG: 0.9,
-                  fatG: 0.2,
-                  carbG: 16.5,
-                  suitabilityReason: '✓ Cùng loại Tráng miệng • Giàu kali & năng lượng tự nhiên cho trẻ nhẹ cân',
-                },
-                {
-                  id: '97',
-                  name: 'Nha đam hạt chia đường phèn',
-                  categoryLabel: 'Thức uống',
-                  calories: 65,
-                  proteinG: 0.5,
-                  fatG: 0.2,
-                  carbG: 15.0,
-                  suitabilityReason: '✓ Cùng loại Thức uống • Thanh mát bồi bổ thể chất',
+                  calories: calo3,
+                  proteinG: 3.2,
+                  fatG: 3.5,
+                  carbG: 22.0,
+                  suitabilityReason: `✓ Cùng loại Tráng miệng • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+20'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Năng lượng tự nhiên & kali chống mệt mỏi`,
                 },
               ];
             }
@@ -2210,32 +2449,12 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 carbG: 14.5,
                 suitabilityReason: '✓ Cùng loại Thức uống • Vitamin C tự nhiên • An toàn 100% không dị ứng',
               },
-              {
-                id: '99',
-                name: 'Nước đậu đen rang đường phèn',
-                categoryLabel: 'Thức uống',
-                calories: 45,
-                proteinG: 1.0,
-                fatG: 0.1,
-                carbG: 10.5,
-                suitabilityReason: '✓ Cùng loại Thức uống • Thanh nhiệt, lành tính, an toàn tuyệt đối',
-              },
-              {
-                id: '71',
-                name: 'Chuối cau chín',
-                categoryLabel: 'Tráng miệng',
-                calories: 68,
-                proteinG: 0.9,
-                fatG: 0.2,
-                carbG: 16.5,
-                suitabilityReason: '✓ Cùng loại Tráng miệng • Trái cây tươi bổ dưỡng, 100% không dị nguyên',
-              },
             ];
           }
 
-          // 4. Món Xế / Cháo / Súp / Bún (SNACK_MEAL) — 100% các món cháo / xế, KHÔNG lẫn nước uống
+          // 4. Món Xế / Cháo / Súp / Bún (SNACK_MEAL)
           if (currentCat.code === 'SNACK_MEAL') {
-            if (modalActiveTab === 'OBESE') {
+            if (lockedType === 'OBESE') {
               return [
                 {
                   id: '84',
@@ -2259,37 +2478,40 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 },
               ];
             }
-            if (modalActiveTab === 'STUNTED') {
+            if (lockedType === 'STUNTED') {
+              const calo1 = stuntedCaloBonus(165, 35);
+              const calo2 = stuntedCaloBonus(155, 27);
+              const calo3 = stuntedCaloBonus(150, 22);
               return [
                 {
                   id: '77',
                   name: 'Súp óc heo, gà xé, trứng cút, ngô ngọt',
                   categoryLabel: 'Món Xế / Súp',
-                  calories: 165,
-                  proteinG: 9.5,
-                  fatG: 5.2,
-                  carbG: 18.0,
-                  suitabilityReason: '✓ Cùng loại Món Xế • Tăng 20% đạm sinh học cao & vi chất (QĐ 1246)',
-                },
-                {
-                  id: '91',
-                  name: 'Cháo thịt bằm đậu xanh',
-                  categoryLabel: 'Món Xế / Cháo',
-                  calories: 140,
-                  proteinG: 8.2,
-                  fatG: 3.5,
-                  carbG: 19.0,
-                  suitabilityReason: '✓ Cùng loại Món Xế • Bổ sung đạm thực vật & động vật cân đối',
+                  calories: calo1,
+                  proteinG: 9.8,
+                  fatG: 5.5,
+                  carbG: 18.5,
+                  suitabilityReason: `✓ Cùng loại Món Xế • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+40'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Tăng 20% đạm sinh học cao & vi chất óc heo (QĐ 1246)`,
                 },
                 {
                   id: '78',
-                  name: 'Bánh bao thịt cút',
+                  name: 'Bánh bao thịt cút trứng muối giàu năng lượng',
                   categoryLabel: 'Món Xế',
-                  calories: 155,
-                  proteinG: 7.5,
-                  fatG: 4.0,
+                  calories: calo2,
+                  proteinG: 8.5,
+                  fatG: 4.8,
                   carbG: 22.0,
-                  suitabilityReason: '✓ Cùng loại Món Xế • Giàu năng lượng cho trẻ nhẹ cân',
+                  suitabilityReason: `✓ Cùng loại Món Xế • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+30'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đậm độ năng lượng cao cho trẻ nhẹ cân`,
+                },
+                {
+                  id: '91',
+                  name: 'Cháo thịt bằm đậu xanh hạt sen hầm nhừ',
+                  categoryLabel: 'Món Xế / Cháo',
+                  calories: calo3,
+                  proteinG: 8.8,
+                  fatG: 4.2,
+                  carbG: 20.0,
+                  suitabilityReason: `✓ Cùng loại Món Xế • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+25'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Bổ sung đạm thực vật & động vật cân đối`,
                 },
               ];
             }
@@ -2329,7 +2551,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
           }
 
           // 5. Món Mặn Chính (MAIN)
-          if (modalActiveTab === 'OBESE') {
+          if (lockedType === 'OBESE') {
             return [
               {
                 id: '16',
@@ -2363,37 +2585,40 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               },
             ];
           }
-          if (modalActiveTab === 'STUNTED') {
+          if (lockedType === 'STUNTED') {
+            const calo1 = stuntedCaloBonus(158, 25);
+            const calo2 = stuntedCaloBonus(150, 20);
+            const calo3 = stuntedCaloBonus(145, 18);
             return [
               {
                 id: '22',
                 name: 'Sườn cốt lết khìa nước dừa',
                 categoryLabel: 'Món Mặn Chính',
-                calories: 155,
-                proteinG: 11.5,
-                fatG: 8.0,
+                calories: calo1,
+                proteinG: 12.0,
+                fatG: 8.5,
                 carbG: 3.0,
-                suitabilityReason: '✓ Cùng loại Món Mặn • Tăng 20% đạm sinh học cao • Tối ưu phục hồi cho trẻ thấp còi/SDD (QĐ 1246)',
+                suitabilityReason: `✓ Cùng loại Món Mặn • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+30'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm sinh học cao & năng lượng phục hồi (QĐ 1246)`,
               },
               {
                 id: '15',
                 name: 'Thịt sườn heo khìa nước dừa',
                 categoryLabel: 'Món Mặn Chính',
-                calories: 145,
-                proteinG: 10.2,
-                fatG: 8.5,
-                carbG: 2.0,
-                suitabilityReason: '✓ Cùng loại Món Mặn • Giàu năng lượng & vi chất cho trẻ nhẹ cân',
+                calories: calo2,
+                proteinG: 11.0,
+                fatG: 8.8,
+                carbG: 2.2,
+                suitabilityReason: `✓ Cùng loại Món Mặn • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+25'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Giàu năng lượng & vi chất cho trẻ nhẹ cân`,
               },
               {
-                id: '6',
-                name: 'Thịt gà rô ti',
+                id: '17',
+                name: 'Thịt kho trứng cút đậm đà bồi bổ',
                 categoryLabel: 'Món Mặn Chính',
-                calories: 124,
-                proteinG: 9.6,
-                fatG: 8.9,
-                carbG: 1.4,
-                suitabilityReason: '✓ Cùng loại Món Mặn • Thịt gà mềm giàu đạm sinh học dễ hấp thu',
+                calories: calo3,
+                proteinG: 10.8,
+                fatG: 8.5,
+                carbG: 2.5,
+                suitabilityReason: `✓ Cùng loại Món Mặn • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+20'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm trứng & thịt sinh học cao, dễ hấp thu`,
               },
             ];
           }
@@ -2429,20 +2654,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               carbG: 1.4,
               suitabilityReason: '✓ Cùng loại Món Mặn • Đạm sạch lành tính, an toàn tuyệt đối',
             },
-            {
-              id: '20',
-              name: 'Thịt bò xào khóm',
-              categoryLabel: 'Món Mặn Chính',
-              calories: 80,
-              proteinG: 8.4,
-              fatG: 4.3,
-              carbG: 1.8,
-              suitabilityReason: '✓ Cùng loại Món Mặn • Không gây dị ứng',
-            },
           ];
-        };
-
-        const candidates = getCandidateSubstitutes();
+        };const candidates = getCandidateSubstitutes();
         const activeSub = selectedSubDish || candidates[0];
 
         const handleConfirmSubstitute = async () => {
@@ -2450,11 +2663,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
           try {
             setIsApplyingSub(true);
             const generatedNote = `[${
-              modalActiveTab === 'ALLERGIES'
+              lockedType === 'ALLERGIES'
                 ? 'Loại 3: Dị ứng'
-                : modalActiveTab === 'OBESE'
+                : lockedType === 'OBESE'
                 ? 'Loại 2: Béo phì'
-                : modalActiveTab === 'STUNTED'
+                : lockedType === 'STUNTED'
                 ? 'Loại 1: SDD'
                 : 'Món Chung'
             }] Thay cho: ${universalModalDish.menuDish.dish?.name || 'Món gốc'} -> Đổi sang: ${activeSub.name} (${activeSub.calories} Kcal). ${substituteStaffNote || 'Nấu suất riêng theo chuẩn dinh dưỡng.'}`;
@@ -2474,8 +2687,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               newDishId: targetDishId,
               substituteDishId: targetDishId,
               portionSizeG: currentPortion,
-              specialDietNotes: generatedNote,
-              keepOriginalDish: true,
+              specialDietNotes: replaceMode === 'REPLACE_ALL' ? null : generatedNote,
+              keepOriginalDish: replaceMode !== 'REPLACE_ALL',
             };
 
             if (onAdjustDish && menu?.id) {
@@ -2484,7 +2697,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               await weeklyMenusApi.adjustDish(menu.id, payload);
             }
 
-            setSubApplySuccess(`Đã xác nhận thay thế bằng món "${activeSub.name}" thành công!`);
+            setSubApplySuccess(
+              replaceMode === 'REPLACE_ALL'
+                ? `Đã thay thế hoàn toàn món "${universalModalDish.menuDish.dish?.name || 'món gốc'}" bằng món "${activeSub.name}" thành công!`
+                : `Đã xác nhận suất riêng "${activeSub.name}" cho món "${universalModalDish.menuDish.dish?.name || 'món gốc'}" thành công!`
+            );
             setTimeout(() => {
               setUniversalModalDish(null);
             }, 1000);
@@ -2526,63 +2743,56 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               {/* Body */}
               <div className="p-6 space-y-4">
                 
-                                {/* 1. TABS CHỌN LOẠI TRẺ EM: HIỂN THỊ ĐỦ CẢ 4 LOẠI ĐỂ TÙY CHỌN, KHÔNG BỊ MẤT LOẠI NÀO */}
-                <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => { setModalActiveTab('COMMON'); setSelectedSubDish(null); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      modalActiveTab === 'COMMON'
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                        : 'bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100'
-                    }`}
-                  >
-                    <ChefHat className="w-3.5 h-3.5" />
-                    <span>⭐ Món Thay Thế Chung Cho Bếp</span>
-                  </button>
+                                {/* 1. HIỂN THỊ ĐÚNG DUY NHẤT 1 LOẠI ĐÃ CHỌN TỪ MENU */}
+                {lockedType === 'STUNTED' && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-amber-200">
+                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-amber-600 text-white shadow-md shadow-amber-600/30 flex items-center gap-1.5">
+                      <Baby className="w-4 h-4" />
+                      <span>Loại 1: Thấp Còi / Suy Dinh Dưỡng ({wastedChildren.length} bé)</span>
+                    </span>
+                    <span className="text-xs text-amber-900 font-bold bg-amber-100/90 px-2.5 py-1 rounded-lg">
+                      ⚡ Chuẩn QĐ 1246/QĐ-BYT: Tăng +15% đến +35% Calo & đạm sinh học
+                    </span>
+                  </div>
+                )}
 
-                  <button
-                    type="button"
-                    onClick={() => { setModalActiveTab('ALLERGIES'); setSelectedSubDish(null); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      modalActiveTab === 'ALLERGIES'
-                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
-                        : 'bg-rose-50 text-rose-900 border border-rose-200 hover:bg-rose-100'
-                    }`}
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>Loại 3: Dị Ứng ({conflictsForThisDish.length > 0 ? conflictsForThisDish.length : allergicChildrenList.length} bé)</span>
-                  </button>
+                {lockedType === 'OBESE' && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-purple-200">
+                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-purple-600 text-white shadow-md shadow-purple-600/30 flex items-center gap-1.5">
+                      <Scale className="w-4 h-4" />
+                      <span>Loại 2: Thừa Cân / Béo Phì ({overweightChildren.length} bé)</span>
+                    </span>
+                    <span className="text-xs text-purple-900 font-bold bg-purple-100/90 px-2.5 py-1 rounded-lg">
+                      🥗 Chuẩn TT 28/2016: Giảm 50% chất béo & tiết chế calo
+                    </span>
+                  </div>
+                )}
 
-                  <button
-                    type="button"
-                    onClick={() => { setModalActiveTab('OBESE'); setSelectedSubDish(null); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      modalActiveTab === 'OBESE'
-                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
-                        : 'bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100'
-                    }`}
-                  >
-                    <Scale className="w-3.5 h-3.5" />
-                    <span>Loại 2: Thừa Cân / Béo Phì ({overweightChildren.length} bé)</span>
-                  </button>
+                {lockedType === 'ALLERGIES' && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-rose-200">
+                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md shadow-rose-600/30 flex items-center gap-1.5">
+                      <ShieldAlert className="w-4 h-4" />
+                      <span>Loại 3: Dị Ứng Thực Phẩm ({conflictsForThisDish.length > 0 ? conflictsForThisDish.length : allergicChildrenList.length} bé)</span>
+                    </span>
+                    <span className="text-xs text-rose-900 font-bold bg-rose-100/90 px-2.5 py-1 rounded-lg">
+                      🛡️ An toàn tuyệt đối: 100% loại bỏ dị nguyên nguy cơ
+                    </span>
+                  </div>
+                )}
 
-                  <button
-                    type="button"
-                    onClick={() => { setModalActiveTab('STUNTED'); setSelectedSubDish(null); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      modalActiveTab === 'STUNTED'
-                        ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30'
-                        : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
-                    }`}
-                  >
-                    <Baby className="w-3.5 h-3.5" />
-                    <span>Loại 1: Thấp Còi / SDD ({wastedChildren.length} bé)</span>
-                  </button>
-                </div>
-
+                {lockedType === 'COMMON' && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-emerald-200">
+                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-md shadow-emerald-600/30 flex items-center gap-1.5">
+                      <ChefHat className="w-4 h-4" />
+                      <span>Món Thay Thế Chung Toàn Năng Cho Bếp</span>
+                    </span>
+                    <span className="text-xs text-emerald-900 font-bold bg-emerald-100/90 px-2.5 py-1 rounded-lg">
+                      ⭐ Đổi món cho toàn trường phù hợp cả 3 nhóm trẻ
+                    </span>
+                  </div>
+                )}
                 {/* 2. THÔNG TIN TRẺ EM THEO ĐÚNG LOẠI ĐÃ CHỌN */}
-                {modalActiveTab === 'ALLERGIES' && (
+                {lockedType === 'ALLERGIES' && (
                   <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 animate-in fade-in duration-150">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-black text-rose-950 text-xs uppercase tracking-wide">
@@ -2610,7 +2820,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 )}
 
-                {modalActiveTab === 'OBESE' && (
+                {lockedType === 'OBESE' && (
                   <div className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 animate-in fade-in duration-150">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-black text-purple-950 text-xs uppercase tracking-wide">
@@ -2639,7 +2849,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 )}
 
-                {modalActiveTab === 'STUNTED' && (
+                {lockedType === 'STUNTED' && (
                   <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 animate-in fade-in duration-150">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-black text-amber-950 text-xs uppercase tracking-wide">
@@ -2668,7 +2878,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 )}
 
-                {modalActiveTab === 'COMMON' && (
+                {lockedType === 'COMMON' && (
                   <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 animate-in fade-in duration-150">
                     <p className="font-black text-emerald-950 text-xs uppercase tracking-wide flex items-center gap-1.5">
                       <ChefHat className="w-4 h-4 text-emerald-600" />
@@ -2716,6 +2926,58 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           </span>
                         )}</p>
                         <p>Chất đạm (P): <strong>{activeSub.proteinG}g</strong> • Chất béo (L): <strong>{activeSub.fatG}g</strong></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3.1. LỰA CHỌN PHƯƠNG THỨC ĐỔI MÓN: THAY THẾ TOÀN BỘ vs SUẤT RIÊNG */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <span className="text-xs font-black text-slate-800 uppercase tracking-wide block mb-2">
+                    Hình thức áp dụng vào thực đơn:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div
+                      onClick={() => setReplaceMode('REPLACE_ALL')}
+                      className={`p-2.5 rounded-xl border transition cursor-pointer flex items-start gap-2.5 ${
+                        replaceMode === 'REPLACE_ALL'
+                          ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/30 shadow-xs'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        checked={replaceMode === 'REPLACE_ALL'}
+                        onChange={() => setReplaceMode('REPLACE_ALL')}
+                        className="mt-0.5 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <div>
+                        <p className="text-xs font-black text-slate-900">1. Thay thế hoàn toàn món gốc</p>
+                        <p className="text-[10.5px] text-slate-500 mt-0.5 leading-tight">
+                          Đổi hẳn món này cho toàn trường, loại bỏ hoàn toàn dị nguyên, Bếp không cần nấu riêng.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => setReplaceMode('SPECIAL_DIET')}
+                      className={`p-2.5 rounded-xl border transition cursor-pointer flex items-start gap-2.5 ${
+                        replaceMode === 'SPECIAL_DIET'
+                          ? 'bg-rose-50 border-rose-500 ring-2 ring-rose-500/30 shadow-xs'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        checked={replaceMode === 'SPECIAL_DIET'}
+                        onChange={() => setReplaceMode('SPECIAL_DIET')}
+                        className="mt-0.5 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                      />
+                      <div>
+                        <p className="text-xs font-black text-slate-900">2. Nấu suất riêng cho trẻ dị ứng / ăn kiêng</p>
+                        <p className="text-[10.5px] text-slate-500 mt-0.5 leading-tight">
+                          Giữ món gốc cho trẻ bình thường, Bếp nấu thêm suất riêng hiển thị gắn liền bên dưới món này.
+                        </p>
                       </div>
                     </div>
                   </div>

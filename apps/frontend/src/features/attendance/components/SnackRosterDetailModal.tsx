@@ -84,11 +84,10 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
                 Chỉ dẫn chuẩn bị của Nhà bếp:
               </p>
               <div
-                className={`p-3 rounded-xl text-xs font-medium leading-relaxed ${
-                  item.isKitchenHighlight
-                    ? 'bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] font-bold'
-                    : 'bg-slate-50 border border-slate-200 text-slate-700'
-                }`}
+                className={`p-3 rounded-xl text-xs font-medium leading-relaxed ${item.isKitchenHighlight
+                  ? 'bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] font-bold'
+                  : 'bg-slate-50 border border-slate-200 text-slate-700'
+                  }`}
               >
                 {item.kitchenNotes}
               </div>

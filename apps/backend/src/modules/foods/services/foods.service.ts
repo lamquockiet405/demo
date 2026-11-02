@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Food } from '../entities/food.entity';
@@ -14,7 +14,7 @@ export class FoodsService {
     private readonly foodRepo: Repository<Food>,
     @InjectRepository(FoodCategory)
     private readonly catRepo: Repository<FoodCategory>,
-  ) { }
+  ) {}
 
   async findAll(query: GetFoodsQueryDto) {
     const qb = this.foodRepo
@@ -27,12 +27,6 @@ export class FoodsService {
 
     if (query.categoryId) {
       qb.andWhere('f.categoryId = :catId', { catId: query.categoryId });
-    } else if (query.category) {
-      if (!isNaN(Number(query.category))) {
-        qb.andWhere('f.categoryId = :catId', { catId: Number(query.category) });
-      } else {
-        qb.andWhere('LOWER(cat.name) LIKE :catName', { catName: `%${query.category.toLowerCase()}%` });
-      }
     }
 
     if (query.status) {
@@ -99,29 +93,24 @@ export class FoodsService {
   }
 
   async create(dto: CreateFoodDto) {
-    try {
-      const food = this.foodRepo.create({
-        name: dto.name,
-        categoryId: dto.categoryId ? Number(dto.categoryId) : null,
-        unit: dto.unit || 'g',
-        energyKcal100g: dto.energyKcal100g ?? dto.energyKcal ?? 0,
-        proteinG: dto.proteinG ?? 0,
-        fatG: dto.fatG ?? 0,
-        carbG: dto.carbG ?? 0,
-        fiberG: dto.fiberG ?? 0,
-        calciumMg: dto.calciumMg ?? 0,
-        ironMg: dto.ironMg ?? 0,
-        zincMg: dto.zincMg ?? 0,
-        refuseRatePercent: dto.refuseRatePercent ?? 0,
-        status: dto.status || 'ACTIVE',
-      });
+    const food = this.foodRepo.create({
+      name: dto.name,
+      categoryId: dto.categoryId || null,
+      unit: dto.unit || 'g',
+      energyKcal100g: dto.energyKcal100g || 0,
+      proteinG: dto.proteinG || 0,
+      fatG: dto.fatG || 0,
+      carbG: dto.carbG || 0,
+      fiberG: dto.fiberG || 0,
+      calciumMg: dto.calciumMg || 0,
+      ironMg: dto.ironMg || 0,
+      zincMg: dto.zincMg || 0,
+      refuseRatePercent: dto.refuseRatePercent || 0,
+      status: dto.status || 'ACTIVE',
+    });
 
-      const saved = await this.foodRepo.save(food);
-      return this.findOne(Number(saved.id));
-    } catch (err: any) {
-      console.error('Error in FoodsService.create:', err);
-      throw new BadRequestException(err?.message || String(err));
-    }
+    const saved = await this.foodRepo.save(food);
+    return this.findOne(saved.id);
   }
 
   async update(id: number, dto: UpdateFoodDto) {
@@ -133,8 +122,16 @@ export class FoodsService {
     if (dto.name !== undefined) food.name = dto.name;
     if (dto.categoryId !== undefined) food.categoryId = dto.categoryId;
     if (dto.unit !== undefined) food.unit = dto.unit;
+    if (dto.energyKcal100g !== undefined) food.energyKcal100g = dto.energyKcal100g;
+    if (dto.proteinG !== undefined) food.proteinG = dto.proteinG;
+    if (dto.fatG !== undefined) food.fatG = dto.fatG;
+    if (dto.carbG !== undefined) food.carbG = dto.carbG;
+    if (dto.fiberG !== undefined) food.fiberG = dto.fiberG;
+    if (dto.calciumMg !== undefined) food.calciumMg = dto.calciumMg;
+    if (dto.ironMg !== undefined) food.ironMg = dto.ironMg;
+    if (dto.zincMg !== undefined) food.zincMg = dto.zincMg;
+    if (dto.refuseRatePercent !== undefined) food.refuseRatePercent = dto.refuseRatePercent;
     if (dto.status !== undefined) food.status = dto.status;
-    // Quy định: Các chỉ số dinh dưỡng và tỉ lệ thải bỏ sơ chế là dữ liệu chuẩn FCT Viện Dinh Dưỡng, cố định chỉ xem, không được thay đổi khi cập nhật.
 
     await this.foodRepo.save(food);
     return this.findOne(id);

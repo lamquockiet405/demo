@@ -3,102 +3,99 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Patch,
+  Delete,
   Param,
   Body,
   Query,
   UseGuards,
-  HttpCode,
-  HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { StaffManagementService } from '../services/staff-management.service';
+import { QueryStaffDto } from '../dto/staff/query-staff.dto';
+import { CreateStaffDto } from '../dto/staff/create-staff.dto';
+import { UpdateStaffDto } from '../dto/staff/update-staff.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { CurrentTenant } from '../../../common/decorators/current-tenant.decorator';
-import { StaffManagementService } from '../services/staff-management.service';
-import { CreateStaffDto } from '../dto/staff/create-staff.dto';
-import { UpdateStaffDto } from '../dto/staff/update-staff.dto';
-import { QueryStaffDto } from '../dto/staff/query-staff.dto';
 
 @ApiTags('Staff Management')
 @Controller('users/staff')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT')
 @ApiBearerAuth()
 export class StaffManagementController {
   constructor(private readonly staffService: StaffManagementService) {}
 
   @Get()
-  @ApiOperation({ summary: 'UC08 & UC11 - Xem và tìm kiếm/lọc danh sách tài khoản nhân sự' })
-  @ApiResponse({ status: 200, description: 'Lấy danh sách nhân sự thành công' })
-  getStaffList(@CurrentTenant() tenantId: string, @Query() query: QueryStaffDto) {
-    return this.staffService.getStaffList(tenantId, query);
+  @ApiOperation({ summary: 'Lấy danh sách cán bộ, giáo viên, nhân viên trường học' })
+  async findAll(@Query() query: QueryStaffDto) {
+    return this.staffService.findAll(query);
   }
 
   @Get('stats')
-  @ApiOperation({ summary: 'Thống kê số lượng nhân sự theo vai trò và trạng thái' })
-  getStaffStats(@CurrentTenant() tenantId: string) {
-    return this.staffService.getStaffStats(tenantId);
+  @ApiOperation({ summary: 'Thống kê tổng số lượng nhân sự theo vị trí' })
+  async getStats() {
+    return this.staffService.getStats();
   }
 
   @Get('roles')
-  @ApiOperation({ summary: 'Lấy danh sách vai trò chuyên môn khả dụng trong trường' })
-  getAvailableStaffRoles() {
-    return this.staffService.getAvailableStaffRoles();
+  @ApiOperation({ summary: 'Lấy danh mục vai trò nhân sự' })
+  async getRoles() {
+    return this.staffService.getRoles();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'UC08 - Xem thông tin chi tiết tài khoản nhân sự' })
-  @ApiResponse({ status: 200, description: 'Lấy chi tiết nhân sự thành công' })
-  getStaffById(@CurrentTenant() tenantId: string, @Param('id') id: string) {
-    return this.staffService.getStaffById(tenantId, id);
+  @ApiOperation({ summary: 'Xem chi tiết một nhân viên' })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.staffService.findOne(id);
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'UC09 - Tạo mới tài khoản nhân sự và gán vai trò' })
-  @ApiResponse({ status: 201, description: 'Tạo tài khoản nhân sự thành công' })
-  createStaff(@CurrentTenant() tenantId: string, @Body() createDto: CreateStaffDto) {
-    return this.staffService.createStaff(tenantId, createDto);
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Thêm mới nhân viên / giáo viên (BGH)' })
+  async create(@Body() dto: CreateStaffDto) {
+    return this.staffService.create(dto);
+  }
+
+  @Patch(':id')
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Cập nhật nhân viên / phân quyền (BGH)' })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateStaffDto,
+  ) {
+    return this.staffService.update(id, dto);
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'UC10 - Cập nhật thông tin và vai trò nhân sự' })
-  @ApiResponse({ status: 200, description: 'Cập nhật tài khoản nhân sự thành công' })
-  updateStaff(
-    @CurrentTenant() tenantId: string,
-    @Param('id') id: string,
-    @Body() updateDto: UpdateStaffDto,
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Cập nhật toàn bộ thông tin nhân sự (BGH)' })
+  async updatePut(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateStaffDto,
   ) {
-    return this.staffService.updateStaff(tenantId, id, updateDto);
-  }
-
-  @Delete(':id')
-  @ApiOperation({ summary: 'Xóa mềm tài khoản nhân sự' })
-  softDeleteStaff(
-    @CurrentTenant() tenantId: string,
-    @CurrentUser('userId') currentUserId: string,
-    @Param('id') id: string,
-  ) {
-    return this.staffService.softDeleteStaff(tenantId, currentUserId, id);
+    return this.staffService.update(id, dto);
   }
 
   @Patch(':id/restore')
-  @ApiOperation({ summary: 'Khôi phục tài khoản nhân sự đã xóa mềm' })
-  restoreStaff(@CurrentTenant() tenantId: string, @Param('id') id: string) {
-    return this.staffService.restoreStaff(tenantId, id);
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Khôi phục tài khoản nhân sự' })
+  async restore(@Param('id', ParseIntPipe) id: number) {
+    return this.staffService.restore(id);
   }
 
   @Patch(':id/status')
-  @ApiOperation({ summary: 'Chuyển đổi trạng thái tài khoản nhân sự (ACTIVE/INACTIVE)' })
-  toggleStaffStatus(
-    @CurrentTenant() tenantId: string,
-    @CurrentUser('userId') currentUserId: string,
-    @Param('id') id: string,
-  ) {
-    return this.staffService.toggleStaffStatus(tenantId, currentUserId, id);
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Đổi trạng thái tài khoản nhân sự' })
+  async toggleStatus(@Param('id', ParseIntPipe) id: number) {
+    return this.staffService.toggleStatus(id);
+  }
+
+  @Delete(':id')
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Xóa nhân viên (BGH)' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.staffService.remove(id);
   }
 }

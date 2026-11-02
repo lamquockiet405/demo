@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WhoGrowthStandard } from '../entities/who-growth-standard.entity';
 
-export interface WhoLmsEntry {
+interface WhoLmsEntry {
   age: number; // age in months
   L: number;
   M: number;
@@ -11,7 +11,7 @@ export interface WhoLmsEntry {
 }
 
 // Official WHO Child Growth Standards (0 to 72 months)
-export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoLmsEntry[]>> = {
+const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ', WhoLmsEntry[]>> = {
   MALE: {
     WAZ: [
       { age: 0,  L: 0.3487, M: 3.346,  S: 0.14602 },
@@ -22,7 +22,6 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 48, L: -0.198, M: 16.33,  S: 0.12500 },
       { age: 60, L: -0.238, M: 18.25,  S: 0.13280 },
       { age: 72, L: -0.280, M: 20.52,  S: 0.14200 },
-      { age: 84, L: -0.320, M: 23.00,  S: 0.15000 },
     ],
     HAZ: [
       { age: 0,  L: 1, M: 49.88, S: 0.03795 },
@@ -33,7 +32,6 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 48, L: 1, M: 103.3, S: 0.04100 },
       { age: 60, L: 1, M: 110.0, S: 0.04200 },
       { age: 72, L: 1, M: 116.1, S: 0.04300 },
-      { age: 84, L: 1, M: 121.7, S: 0.04400 },
     ],
     BAZ: [
       { age: 0,  L: 0.28,  M: 13.40, S: 0.0940 },
@@ -44,7 +42,6 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 48, L: -0.85, M: 15.30, S: 0.0820 },
       { age: 60, L: -0.90, M: 15.20, S: 0.0850 },
       { age: 72, L: -0.95, M: 15.30, S: 0.0880 },
-      { age: 84, L: -1.00, M: 15.50, S: 0.0920 },
     ],
   },
   FEMALE: {
@@ -57,7 +54,6 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 48, L: -0.250, M: 15.80,  S: 0.13300 },
       { age: 60, L: -0.290, M: 17.70,  S: 0.14100 },
       { age: 72, L: -0.330, M: 20.00,  S: 0.15000 },
-      { age: 84, L: -0.370, M: 22.40,  S: 0.15900 },
     ],
     HAZ: [
       { age: 0,  L: 1, M: 49.14, S: 0.03790 },
@@ -68,7 +64,6 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 48, L: 1, M: 102.3, S: 0.04200 },
       { age: 60, L: 1, M: 109.4, S: 0.04300 },
       { age: 72, L: 1, M: 115.5, S: 0.04400 },
-      { age: 84, L: 1, M: 120.6, S: 0.04500 },
     ],
     BAZ: [
       { age: 0,  L: 0.30,  M: 13.30, S: 0.0960 },
@@ -79,12 +74,11 @@ export const WHO_LMS_DATA: Record<'MALE' | 'FEMALE', Record<'WAZ' | 'HAZ' | 'BAZ
       { age: 48, L: -0.87, M: 15.10, S: 0.0870 },
       { age: 60, L: -0.92, M: 15.00, S: 0.0900 },
       { age: 72, L: -0.96, M: 15.20, S: 0.0940 },
-      { age: 84, L: -1.00, M: 15.40, S: 0.0980 },
     ],
   },
 };
 
-export function interpolateLms(entries: WhoLmsEntry[], age: number): { L: number; M: number; S: number } {
+function interpolateLms(entries: WhoLmsEntry[], age: number): { L: number; M: number; S: number } {
   if (age <= entries[0].age) return entries[0];
   if (age >= entries[entries.length - 1].age) return entries[entries.length - 1];
 
@@ -103,7 +97,7 @@ export function interpolateLms(entries: WhoLmsEntry[], age: number): { L: number
   return entries[entries.length - 1];
 }
 
-export function computeLmsZscore(value: number, L: number, M: number, S: number): number {
+function computeLmsZscore(value: number, L: number, M: number, S: number): number {
   if (!M || !S || M <= 0 || S <= 0 || value <= 0) return 0.0;
   let z: number;
   if (Math.abs(L) < 0.001) {
@@ -114,38 +108,6 @@ export function computeLmsZscore(value: number, L: number, M: number, S: number)
   // Clamp to [-6, +6] as per WHO child anthropometrics guideline
   const clampedZ = Math.max(-6, Math.min(6, z));
   return Math.round(clampedZ * 100) / 100;
-}
-
-export function computeLmsCurveValue(L: number, M: number, S: number, z: number): number {
-  if (!M || !S || M <= 0 || S <= 0) return 0.0;
-  let val: number;
-  if (Math.abs(L) < 0.001) {
-    val = M * Math.exp(S * z);
-  } else {
-    const base = 1 + L * S * z;
-    val = base > 0 ? M * Math.pow(base, 1 / L) : 0.0;
-  }
-  return Math.round(val * 100) / 100;
-}
-
-export type WhoStandardsResult =
-  | {
-      gender: 'MALE' | 'FEMALE';
-      indicator: 'WAZ' | 'HAZ' | 'BAZ';
-      entries: WhoLmsEntry[];
-    }
-  | {
-      gender: 'MALE' | 'FEMALE';
-      WAZ: WhoLmsEntry[];
-      HAZ: WhoLmsEntry[];
-      BAZ: WhoLmsEntry[];
-    };
-
-export interface GrowthClassificationResult {
-  weightClassification: 'SEVERELY_UNDERWEIGHT' | 'UNDERWEIGHT' | 'NORMAL' | 'OVERWEIGHT' | 'SEVERELY_OVERWEIGHT';
-  heightClassification: 'SEVERELY_STUNTED' | 'STUNTED' | 'NORMAL' | 'TALL' | 'VERY_TALL';
-  bmiClassification: 'SEVERELY_WASTED' | 'WASTED' | 'NORMAL' | 'OVERWEIGHT' | 'OBESE';
-  overallNutritionalStatus: string;
 }
 
 @Injectable()
@@ -173,17 +135,9 @@ export class WhoZscoreService {
     const haz = computeLmsZscore(heightCm, hazLms.L, hazLms.M, hazLms.S);
     const baz = computeLmsZscore(bmi, bazLms.L, bazLms.M, bazLms.S);
 
-    const detailed = this.classifyDetailed(waz, haz, baz, bmi);
+    const classification = this.classifyStatus(waz, haz, baz, bmi);
 
-    return {
-      waz,
-      haz,
-      baz,
-      classification: detailed.overallNutritionalStatus,
-      weightClassification: detailed.weightClassification,
-      heightClassification: detailed.heightClassification,
-      bmiClassification: detailed.bmiClassification,
-    };
+    return { waz, haz, baz, classification };
   }
 
   async calculateZscore(
@@ -217,66 +171,15 @@ export class WhoZscoreService {
   }
 
   classifyStatus(waz: number, haz: number, baz: number, bmi?: number): string {
-    return this.classifyDetailed(waz, haz, baz, bmi).overallNutritionalStatus;
-  }
+    // 1. BMI-for-Age (BAZ) / Clinical BMI check: Overweight & Obesity
+    if (baz > 3.0 || (bmi != null && bmi >= 25)) return 'OBESE'; // Béo phì
+    if (baz > 2.0 || (bmi != null && bmi >= 19)) return 'OVERWEIGHT'; // Thừa cân
+    if (baz < -2.0 || waz < -2.0) return 'UNDERWEIGHT'; // Nhẹ cân / Gầy còm
 
-  classifyDetailed(
-    waz: number,
-    haz: number,
-    baz: number,
-    bmi?: number,
-  ): GrowthClassificationResult {
-    // 1. Cân nặng theo tuổi (WAZ) - WHO WAZ Standard
-    let weightClassification: GrowthClassificationResult['weightClassification'] = 'NORMAL';
-    if (waz < -3.0) weightClassification = 'SEVERELY_UNDERWEIGHT';
-    else if (waz < -2.0) weightClassification = 'UNDERWEIGHT';
-    else if (waz > 3.0) weightClassification = 'SEVERELY_OVERWEIGHT';
-    else if (waz > 2.0) weightClassification = 'OVERWEIGHT';
+    // 2. Height-for-Age (HAZ): Stunting
+    if (haz < -2.0) return 'STUNTED'; // Thấp còi
 
-    // 2. Chiều cao theo tuổi (HAZ) - WHO HAZ Standard
-    let heightClassification: GrowthClassificationResult['heightClassification'] = 'NORMAL';
-    if (haz < -3.0) heightClassification = 'SEVERELY_STUNTED';
-    else if (haz < -2.0) heightClassification = 'STUNTED';
-    else if (haz > 3.0) heightClassification = 'VERY_TALL';
-    else if (haz > 2.0) heightClassification = 'TALL';
-
-    // 3. BMI theo tuổi (BAZ) & BMI lâm sàng - WHO BAZ Standard
-    let bmiClassification: GrowthClassificationResult['bmiClassification'] = 'NORMAL';
-    if (baz > 3.0 || (bmi != null && bmi >= 25)) bmiClassification = 'OBESE';
-    else if (baz > 2.0 || (bmi != null && bmi >= 19)) bmiClassification = 'OVERWEIGHT';
-    else if (baz < -3.0) bmiClassification = 'SEVERELY_WASTED';
-    else if (baz < -2.0) bmiClassification = 'WASTED';
-
-    // 4. Tổng hợp trạng thái overallNutritionalStatus theo độ ưu tiên nguy cơ dinh dưỡng
-    let overallNutritionalStatus = 'NORMAL';
-    if (bmiClassification === 'OBESE') {
-      overallNutritionalStatus = 'OBESE';
-    } else if (bmiClassification === 'SEVERELY_WASTED') {
-      overallNutritionalStatus = 'SEVERELY_WASTED';
-    } else if (heightClassification === 'SEVERELY_STUNTED') {
-      overallNutritionalStatus = 'SEVERELY_STUNTED';
-    } else if (weightClassification === 'SEVERELY_UNDERWEIGHT') {
-      overallNutritionalStatus = 'SEVERELY_UNDERWEIGHT';
-    } else if (bmiClassification === 'OVERWEIGHT') {
-      overallNutritionalStatus = 'OVERWEIGHT';
-    } else if (bmiClassification === 'WASTED') {
-      overallNutritionalStatus = 'WASTED';
-    } else if (heightClassification === 'STUNTED') {
-      overallNutritionalStatus = 'STUNTED';
-    } else if (weightClassification === 'UNDERWEIGHT') {
-      overallNutritionalStatus = 'UNDERWEIGHT';
-    } else if (weightClassification === 'SEVERELY_OVERWEIGHT') {
-      overallNutritionalStatus = 'SEVERELY_OVERWEIGHT';
-    } else if (weightClassification === 'OVERWEIGHT') {
-      overallNutritionalStatus = 'OVERWEIGHT';
-    }
-
-    return {
-      weightClassification,
-      heightClassification,
-      bmiClassification,
-      overallNutritionalStatus,
-    };
+    return 'NORMAL'; // Bình thường
   }
 
   async calculateChildGrowth(
@@ -288,12 +191,10 @@ export class WhoZscoreService {
   ) {
     const dob = new Date(dateOfBirth);
     const mDate = new Date(measuredDate);
-    let ageInMonths =
-      (mDate.getFullYear() - dob.getFullYear()) * 12 + (mDate.getMonth() - dob.getMonth());
-    if (mDate.getDate() < dob.getDate()) {
-      ageInMonths--;
-    }
-    ageInMonths = Math.min(Math.max(0, ageInMonths), 84);
+    const ageInMonths = Math.max(
+      0,
+      (mDate.getFullYear() - dob.getFullYear()) * 12 + (mDate.getMonth() - dob.getMonth()),
+    );
 
     const heightM = heightCm / 100;
     const bmi = heightM > 0 ? Math.round((weightKg / (heightM * heightM)) * 100) / 100 : 0;
@@ -302,7 +203,7 @@ export class WhoZscoreService {
     const haz = await this.calculateZscore('HAZ', gender, ageInMonths, heightCm);
     const baz = await this.calculateZscore('BAZ', gender, ageInMonths, bmi);
 
-    const detailed = this.classifyDetailed(waz, haz, baz, bmi);
+    const classification = this.classifyStatus(waz, haz, baz, bmi);
 
     return {
       ageInMonths,
@@ -310,29 +211,7 @@ export class WhoZscoreService {
       waz,
       haz,
       baz,
-      classification: detailed.overallNutritionalStatus,
-      weightClassification: detailed.weightClassification,
-      heightClassification: detailed.heightClassification,
-      bmiClassification: detailed.bmiClassification,
-    };
-  }
-
-  getStandards(gender: 'MALE' | 'FEMALE', indicator: 'WAZ' | 'HAZ' | 'BAZ'): { gender: 'MALE' | 'FEMALE'; indicator: 'WAZ' | 'HAZ' | 'BAZ'; entries: WhoLmsEntry[] };
-  getStandards(gender: 'MALE' | 'FEMALE'): { gender: 'MALE' | 'FEMALE'; WAZ: WhoLmsEntry[]; HAZ: WhoLmsEntry[]; BAZ: WhoLmsEntry[] };
-  getStandards(gender: 'MALE' | 'FEMALE', indicator?: 'WAZ' | 'HAZ' | 'BAZ'): WhoStandardsResult {
-    const gKey = gender === 'FEMALE' ? 'FEMALE' : 'MALE';
-    if (indicator) {
-      return {
-        gender: gKey,
-        indicator,
-        entries: WHO_LMS_DATA[gKey][indicator],
-      };
-    }
-    return {
-      gender: gKey,
-      WAZ: WHO_LMS_DATA[gKey].WAZ,
-      HAZ: WHO_LMS_DATA[gKey].HAZ,
-      BAZ: WHO_LMS_DATA[gKey].BAZ,
+      classification,
     };
   }
 }

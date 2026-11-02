@@ -150,7 +150,7 @@ export const NutriKidHeader: React.FC<NutriKidHeaderProps> = ({
                       onClick={() => {
                         setIsUserDropdownOpen(false);
                         logout();
-                        navigate('/login');
+                        navigate('/home');
                       }}
                       className="w-full text-left px-4 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2 border-t border-slate-100"
                     >

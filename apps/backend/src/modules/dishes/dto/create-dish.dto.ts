@@ -47,44 +47,10 @@ export class CreateDishDto {
   @IsString()
   status?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  dishType?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  targetAgeGroup?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  photoUrl?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cookingInstructions?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  presentationNotes?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  isActive?: boolean;
-
   @ApiPropertyOptional({ type: [RecipeIngredientInput] })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RecipeIngredientInput)
   recipes?: RecipeIngredientInput[];
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsArray()
-  recipeItems?: any[];
 }

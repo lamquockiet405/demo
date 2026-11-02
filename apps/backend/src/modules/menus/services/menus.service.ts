@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, Optional, NotFoundException, BadRequestException, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
@@ -15,6 +15,11 @@ import { CreateMenuDto } from '../dto/create-menu.dto';
 import { UpdateMenuDto } from '../dto/update-menu.dto';
 import { AdjustDishDto } from '../dto/adjust-dish.dto';
 import { AutoGenerateMenuDto } from '../dto/auto-generate-menu.dto';
+import { SubmitMenuDto } from '../dto/submit-menu.dto';
+import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
+import { DishFrequencyRule } from '../../nutrition-engine/entities/dish-frequency-rule.entity';
+import { DishSpacingRule } from '../../nutrition-engine/entities/dish-spacing-rule.entity';
+import { NutritionIntakeStandard } from '../../nutrition-engine/entities/nutrition-intake-standard.entity';
 
 // â”€â”€ Helper: Fisher-Yates shuffle for true randomness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function shuffleArray<T>(arr: T[]): T[] {
@@ -69,7 +74,27 @@ export interface DayMealPlan {
 }
 
 @Injectable()
-export class MenusService {
+export class MenusService implements OnModuleInit {
+  async onModuleInit() {
+    try {
+      await this.menuRepo.query(`
+        ALTER TABLE menus 
+        ADD COLUMN IF NOT EXISTS submitted_by BIGINT,
+        ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS commitment_signed BOOLEAN NOT NULL DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS commitment_text TEXT,
+        ADD COLUMN IF NOT EXISTS commitment_items JSONB DEFAULT '[]'::jsonb,
+        ADD COLUMN IF NOT EXISTS override_justification TEXT,
+        ADD COLUMN IF NOT EXISTS violations_snapshot JSONB DEFAULT '[]'::jsonb;
+
+        CREATE INDEX IF NOT EXISTS idx_menus_submitted_by ON menus(submitted_by);
+        CREATE INDEX IF NOT EXISTS idx_menus_submitted_at ON menus(submitted_at);
+      `);
+      this.logger.log('Tự động đồng bộ các cột nộp duyệt vào bảng menus thành công.');
+    } catch (err: any) {
+      this.logger.warn(`Kiểm tra cấu trúc bảng menus: ${err.message}`);
+    }
+  }
   private readonly logger = new Logger(MenusService.name);
 
   constructor(
@@ -91,13 +116,18 @@ export class MenusService {
     private readonly standardRepo: Repository<NutritionalStandard>,
     @InjectRepository(MenuRuleViolation)
     private readonly violationRepo: Repository<MenuRuleViolation>,
+    @Optional() private readonly auditLogsService?: AuditLogsService,
+    @Optional() @InjectRepository(DishFrequencyRule) private readonly freqRuleRepo?: Repository<DishFrequencyRule>,
+    @Optional() @InjectRepository(DishSpacingRule) private readonly spacingRuleRepo?: Repository<DishSpacingRule>,
+    @Optional() @InjectRepository(NutritionIntakeStandard) private readonly intakeStandardRepo?: Repository<NutritionIntakeStandard>,
   ) {}
 
   async findAll(query: QueryMenuDto) {
     const qb = this.menuRepo
       .createQueryBuilder('m')
       .leftJoinAndSelect('m.creator', 'creator')
-      .leftJoinAndSelect('m.approver', 'approver');
+      .leftJoinAndSelect('m.approver', 'approver')
+      .leftJoinAndSelect('m.submitter', 'submitter');
 
     if (query.search) {
       qb.andWhere('LOWER(m.title) LIKE :s', { s: `%${query.search.toLowerCase()}%` });
@@ -124,29 +154,75 @@ export class MenusService {
 
     const [items, total] = await qb.getManyAndCount();
 
-    const mapped = items.map((m) => ({
-      id: String(m.id),
-      tenantId: '1',
-      title: m.title,
-      weekStartDate: m.weekStartDate,
-      weekEndDate: m.weekEndDate,
-      startDate: m.weekStartDate,
-      endDate: m.weekEndDate,
-      ageGroup: m.ageGroup,
-      targetAgeGroup: m.ageGroup,
-      status: m.status,
-      cycleId: m.cycleId ? String(m.cycleId) : null,
-      cycleWeekNumber: 1,
-      createdByName: m.creator?.fullName || 'ChuyÃªn viÃªn Dinh dÆ°á»¡ng',
-      approvedByName: m.approver?.fullName || null,
-      approvedAt: m.approvedAt ? m.approvedAt.toISOString() : null,
-      version: 1,
-      isPublished: m.status === 'ACTIVE' || m.status === 'APPROVED' || m.status === 'PUBLISHED',
-      dailyAverageCalories: 685,
-      dailyAverageProteinG: 28.5,
-      dailyAverageFatG: 22.4,
-      dailyAverageCarbG: 92.1,
-    }));
+    // Tính toán dinh dưỡng thực tế 100% từ cơ sở dữ liệu dish_nutrition
+    const menuIds = items.map((m) => m.id);
+    const nutritionMap: Record<number, { cal: number; prot: number; fat: number; carb: number }> = {};
+
+    if (menuIds.length > 0) {
+      try {
+        const nutRows = await this.menuRepo.query(
+          `SELECT 
+             mv.menu_id,
+             ROUND(COALESCE(SUM(dn.energy_kcal) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_cal,
+             ROUND(COALESCE(SUM(dn.protein_g) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_prot,
+             ROUND(COALESCE(SUM(dn.fat_g) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_fat,
+             ROUND(COALESCE(SUM(dn.carb_g) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_carb
+           FROM menu_versions mv
+           JOIN menu_days md ON md.menu_version_id = mv.id
+           JOIN menu_meals mm ON mm.menu_day_id = md.id
+           JOIN menu_dishes mdi ON mdi.menu_meal_id = mm.id
+           JOIN dish_nutrition dn ON dn.dish_id = mdi.dish_id
+           WHERE mv.menu_id = ANY($1)
+           GROUP BY mv.menu_id`,
+          [menuIds],
+        );
+        for (const row of nutRows) {
+          nutritionMap[Number(row.menu_id)] = {
+            cal: Number(row.avg_cal) || 0,
+            prot: Number(row.avg_prot) || 0,
+            fat: Number(row.avg_fat) || 0,
+            carb: Number(row.avg_carb) || 0,
+          };
+        }
+      } catch (err: any) {
+        this.logger.warn(`Lỗi tính toán dinh dưỡng thực tế: ${err.message}`);
+      }
+    }
+
+    const mapped = items.map((m) => {
+      const nut = nutritionMap[m.id] || { cal: 0, prot: 0, fat: 0, carb: 0 };
+      return {
+        id: String(m.id),
+        tenantId: '1',
+        title: m.title,
+        weekStartDate: m.weekStartDate,
+        weekEndDate: m.weekEndDate,
+        startDate: m.weekStartDate,
+        endDate: m.weekEndDate,
+        ageGroup: m.ageGroup,
+        targetAgeGroup: m.ageGroup,
+        status: m.status,
+        cycleId: m.cycleId ? String(m.cycleId) : null,
+        cycleWeekNumber: 1,
+        createdByName: m.creator?.fullName || 'Chuyên viên Dinh dưỡng',
+        approvedByName: m.approver?.fullName || null,
+        approvedAt: m.approvedAt ? m.approvedAt.toISOString() : null,
+        submittedBy: m.submittedBy ? String(m.submittedBy) : null,
+        submittedByName: m.submitter?.fullName || (m.submittedBy ? 'Chuyên viên Dinh dưỡng' : null),
+        submittedAt: m.submittedAt ? m.submittedAt.toISOString() : null,
+        commitmentSigned: m.commitmentSigned ?? false,
+        commitmentText: m.commitmentText || null,
+        commitmentItems: m.commitmentItems || [],
+        overrideJustification: m.overrideJustification || null,
+        violationsSnapshot: m.violationsSnapshot || [],
+        version: 1,
+        isPublished: m.status === 'ACTIVE' || m.status === 'APPROVED' || m.status === 'PUBLISHED',
+        dailyAverageCalories: nut.cal,
+        dailyAverageProteinG: nut.prot,
+        dailyAverageFatG: nut.fat,
+        dailyAverageCarbG: nut.carb,
+      };
+    });
 
     return { items: mapped, total, page, limit };
   }
@@ -159,10 +235,22 @@ export class MenusService {
     const active = await this.menuRepo.count({ where: { status: 'ACTIVE' } });
     const published = await this.menuRepo.count({ where: { status: 'PUBLISHED' } });
 
+    let realAvgCalories = 0;
+    try {
+      const avgRows = await this.menuRepo.query(
+        `SELECT ROUND(COALESCE(AVG(dn.energy_kcal), 0), 1) as avg_cal
+         FROM menu_dishes md
+         JOIN dish_nutrition dn ON dn.dish_id = md.dish_id`
+      );
+      realAvgCalories = Number(avgRows?.[0]?.avg_cal) || 0;
+    } catch (e: any) {
+      realAvgCalories = 0;
+    }
+
     return {
       total,
       totalMenus: total,
-      active: active || published || 1,
+      active: active || published || 0,
       submitted: pending,
       pendingApproval: pending,
       draft,
@@ -171,8 +259,8 @@ export class MenusService {
       approvedMenus: approved,
       publishedMenus: published,
       rejected: 0,
-      avgCalories: 685.5,
-      nutritionStandard: 'ThÃ´ng tÆ° 28/2016/TT-BGDÄT',
+      avgCalories: realAvgCalories,
+      nutritionStandard: 'Thông tư 28/2016/TT-BGDĐT',
     };
   }
 
@@ -197,7 +285,7 @@ export class MenusService {
   async findOne(id: number) {
     const menu = await this.menuRepo.findOne({
       where: { id },
-      relations: ['creator', 'approver'],
+      relations: ['creator', 'approver', 'submitter'],
     });
 
     if (!menu) {
@@ -291,6 +379,14 @@ export class MenusService {
       createdByName: menu.creator?.fullName || 'Chuyên viên Dinh dưỡng',
       approvedByName: menu.approver?.fullName || null,
       approvedAt: menu.approvedAt ? menu.approvedAt.toISOString() : null,
+      submittedBy: menu.submittedBy ? String(menu.submittedBy) : null,
+      submittedByName: menu.submitter?.fullName || (menu.submittedBy ? 'Chuyên viên Dinh dưỡng' : null),
+      submittedAt: menu.submittedAt ? menu.submittedAt.toISOString() : null,
+      commitmentSigned: menu.commitmentSigned ?? false,
+      commitmentText: menu.commitmentText || null,
+      commitmentItems: menu.commitmentItems || [],
+      overrideJustification: menu.overrideJustification || null,
+      violationsSnapshot: menu.violationsSnapshot || [],
       version: version.versionNumber,
       versionNumber: version.versionNumber,
       dailyAverageCalories: avgCal,
@@ -627,6 +723,23 @@ export class MenusService {
     if (dto.status) menu.status = dto.status;
 
     await this.menuRepo.save(menu);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: 1,
+      userName: 'Ban Giám Hiệu',
+      userRole: 'PRINCIPAL',
+      action: 'UPDATE_MENU',
+      targetEntity: 'MENU',
+      targetId: String(id),
+      ipAddress: '127.0.0.1',
+      details: {
+        menuId: id,
+        title: menu.title,
+        updatedFields: Object.keys(dto),
+      },
+    }).catch(() => {});
+
     return this.findOne(id);
   }
 
@@ -733,11 +846,85 @@ export class MenusService {
     return { success: true };
   }
 
-  async submitForReview(id: number) {
-    const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n');
+  async submitForReview(id: number, submitter?: any, dto?: SubmitMenuDto) {
+    const menu = await this.menuRepo.findOne({
+      where: { id },
+      relations: ['creator', 'submitter'],
+    });
+    if (!menu) throw new NotFoundException('Không tìm thấy thực đơn để gửi duyệt');
+
+    // 1. Kiểm tra trạng thái thực đơn hợp lệ (DRAFT, REJECTED, PENDING, SUBMITTED_FOR_REVIEW)
+    const allowedStatuses = ['DRAFT', 'REJECTED', 'PENDING', 'SUBMITTED_FOR_REVIEW'];
+    if (!allowedStatuses.includes(menu.status)) {
+      throw new BadRequestException(`Thực đơn đang ở trạng thái "${menu.status}", không thể gửi duyệt lại.`);
+    }
+
+    // 2. Kiểm tra bản cam kết trách nhiệm chuyên môn (Nutritionist Commitment)
+    if (dto && dto.commitmentSigned === false) {
+      throw new BadRequestException('Chuyên viên Dinh dưỡng bắt buộc phải xác nhận ký số cam kết trách nhiệm chuyên môn');
+    }
+
+    // 3. Kiểm tra giải trình vượt ngưỡng nếu có cảnh báo (Override Justification)
+    const hasWarnings = Array.isArray(dto?.violationsSnapshot) && dto.violationsSnapshot.length > 0;
+    if (hasWarnings) {
+      const justification = dto?.overrideJustification?.trim();
+      if (!justification || justification.length < 10) {
+        throw new BadRequestException(
+          'Thực đơn có cảnh báo vượt ngưỡng quy tắc dinh dưỡng / lặp món. Chuyên viên Dinh dưỡng bắt buộc phải nhập giải trình chuyên môn cụ thể (tối thiểu 10 ký tự).'
+        );
+      }
+    }
+
+    // 4. Lưu thông tin nộp duyệt vào Menu entity
+    const submitterId = submitter?.id || submitter?.sub || (menu.createdBy ? Number(menu.createdBy) : 1);
     menu.status = 'PENDING';
+    menu.submittedBy = submitterId;
+    menu.submittedAt = new Date();
+    menu.commitmentSigned = dto?.commitmentSigned !== undefined ? dto.commitmentSigned : true;
+    menu.commitmentText =
+      dto?.commitmentText ||
+      'Cam kết thực đơn tuân thủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn thực phẩm Quyết định 1246/QĐ-BYT';
+    menu.commitmentItems =
+      dto?.commitmentItems && dto.commitmentItems.length > 0
+        ? dto.commitmentItems
+        : ['COMMIT_TT28_NUTRITION', 'COMMIT_QD1246_SAFETY', 'COMMIT_ALLERGEN_SAFETY', 'COMMIT_PROFESSIONAL_RESP'];
+    menu.overrideJustification = dto?.overrideJustification?.trim() || null;
+    menu.violationsSnapshot = dto?.violationsSnapshot || [];
+
     await this.menuRepo.save(menu);
+
+    // 5. Ghi vết kiểm toán trực tiếp vào bảng audit_logs của PostgreSQL
+    try {
+      await this.auditLogsService?.logAction({
+        tenantId: submitter?.tenantId || 1,
+        userId: submitterId,
+        userName: submitter?.fullName || submitter?.name || 'Chuyên viên Dinh dưỡng',
+        userEmail: submitter?.email || 'dinhduong@huongduong.edu.vn',
+        userRole: 'NUTRITIONIST',
+        action: 'SUBMIT_MENU_FOR_REVIEW',
+        targetEntity: 'MENU',
+        targetId: String(id),
+        ipAddress: submitter?.ip || '127.0.0.1',
+        userAgent: submitter?.userAgent || 'NutriKid Web Application',
+        details: {
+          menuId: id,
+          title: menu.title,
+          ageGroup: menu.ageGroup,
+          weekStartDate: menu.weekStartDate,
+          weekEndDate: menu.weekEndDate,
+          commitmentSigned: menu.commitmentSigned,
+          commitmentItemsCount: menu.commitmentItems?.length || 0,
+          hasOverrideJustification: Boolean(menu.overrideJustification),
+          overrideJustification: menu.overrideJustification,
+          violationsCount: menu.violationsSnapshot?.length || 0,
+          violations: menu.violationsSnapshot,
+          submittedAt: menu.submittedAt,
+        },
+      });
+    } catch (auditErr: any) {
+      this.logger.warn(`[MenusService] Ghi audit log submit thất bại: ${auditErr.message}`);
+    }
+
     return this.findOne(id);
   }
 
@@ -748,6 +935,24 @@ export class MenusService {
     menu.approvedBy = approverId || 1;
     menu.approvedAt = new Date();
     await this.menuRepo.save(menu);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: approverId || 1,
+      userName: 'Ban Giám Hiệu',
+      userRole: 'PRINCIPAL',
+      action: 'APPROVE_MENU',
+      targetEntity: 'MENU',
+      targetId: String(id),
+      ipAddress: '127.0.0.1',
+      details: {
+        menuId: id,
+        title: menu.title,
+        note: notes || 'Phê duyệt thực đơn tuần đạt chuẩn',
+        approvedAt: menu.approvedAt,
+      },
+    }).catch(() => {});
+
     return this.findOne(id);
   }
 
@@ -756,6 +961,18 @@ export class MenusService {
     if (!menu) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n');
     menu.status = 'REJECTED';
     await this.menuRepo.save(menu);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: approverId || 1,
+      userName: 'Ban Giám Hiệu',
+      userRole: 'PRINCIPAL',
+      action: 'REJECT_MENU',
+      targetEntity: 'MENU',
+      targetId: String(id),
+      ipAddress: '127.0.0.1',
+      details: { menuId: id, reason, status: 'REJECTED' },
+    }).catch(() => {});
     return this.findOne(id);
   }
 
@@ -765,6 +982,28 @@ export class MenusService {
     menu.status = 'PUBLISHED';
     await this.menuRepo.save(menu);
     return this.findOne(id);
+  }
+
+  /**
+   * Tìm thực đơn trường ĐÃ CÔNG BỐ (PUBLISHED / ACTIVE) áp dụng cho một ngày cụ thể.
+   * - Chỉ xét thực đơn cùng nhóm tuổi (NHA_TRE / MAU_GIAO) nếu có truyền vào.
+   * - Bắt buộc weekStartDate <= date <= weekEndDate.
+   * - Trả về chi tiết đầy đủ (giống findOne) hoặc null nếu chưa có thực đơn công bố.
+   */
+  async findPublishedMenuForDate(date: string, ageGroup?: string | null) {
+    const qb = this.menuRepo
+      .createQueryBuilder('m')
+      .where('m.status IN (:...statuses)', { statuses: ['PUBLISHED', 'ACTIVE'] })
+      .andWhere('m.weekStartDate <= :date', { date })
+      .andWhere('m.weekEndDate >= :date', { date });
+
+    if (ageGroup) {
+      qb.andWhere('m.ageGroup = :ageGroup', { ageGroup });
+    }
+
+    const menu = await qb.orderBy('m.id', 'DESC').getOne();
+    if (!menu) return null;
+    return this.findOne(menu.id);
   }
 
   async createVersion(id: number, userId?: number) {
@@ -892,6 +1131,25 @@ export class MenusService {
       .addGroupBy('c.code')
       .getRawMany();
 
+    const dynamicLimits = new Map<string, number>();
+    if (this.freqRuleRepo) {
+      try {
+        const customRules = await this.freqRuleRepo.find({
+          where: [
+            { targetType: 'DISH_CATEGORY', ageGroup, isActive: true },
+            { targetType: 'DISH_CATEGORY', ageGroup: 'ALL', isActive: true },
+          ],
+        });
+        for (const cr of customRules) {
+          if (cr.targetCode && cr.maxOccurrences > 0) {
+            dynamicLimits.set(cr.targetCode, cr.maxOccurrences);
+          }
+        }
+      } catch (err: any) {
+        this.logger.warn('Could not load dynamic frequency rules: ' + err.message);
+      }
+    }
+
     const cycleDishCounts = new Map<number, { count: number; name: string; categoryCode: string }>();
     const cycleExclusionDishIds = new Set<number>();
 
@@ -901,7 +1159,7 @@ export class MenusService {
       const code = row.categoryCode || 'MAIN';
       cycleDishCounts.set(dishId, { count, name: row.dishName, categoryCode: code });
 
-      const maxLimit = this.getMaxCycleLimit(code);
+      const maxLimit = this.getMaxCycleLimit(code, dynamicLimits);
       if (count >= maxLimit) {
         cycleExclusionDishIds.add(dishId);
       }
@@ -928,6 +1186,7 @@ export class MenusService {
     // ── Step 4: Sinh thực đơn từng ngày đảm bảo Kcal & P:L:G ──────────────────
     const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     const usedDishIdsThisWeek = new Set<number>();
+    let previousDayDishIds = new Set<number>();
     const dailySummary: DayMealPlan[] = [];
 
     const shuffleArray = <T>(arr: T[]): T[] => {
@@ -951,7 +1210,7 @@ export class MenusService {
 
         // 1. Phụ sáng (MORNING_SNACK): 1 món (Sữa dinh dưỡng / Thức uống) ~100-110 Kcal
         const morningPool = shuffleArray([...dishPool.SNACK_MORNING, ...dishPool.DRINK, ...dishPool.SNACK_AFTERNOON]);
-        const morningDish = this.pickDish(morningPool, usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 25, true);
+        const morningDish = this.pickDish(morningPool, usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 25);
         if (morningDish) {
           dayDishes.push({
             dishId: String(morningDish.id),
@@ -969,7 +1228,7 @@ export class MenusService {
 
         // 2. Bữa trưa chính (LUNCH): Cơm + Món chính + Canh + Tráng miệng
         // Cơm (RICE) ~172-269 Kcal (cho phép lặp lại vì số lượng món tinh bột hạn chế)
-        const riceDish = this.pickDish(shuffleArray(dishPool.RICE), usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 20, true);
+        const riceDish = this.pickDish(shuffleArray(dishPool.RICE), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 20);
         if (riceDish) {
           dayDishes.push({
             dishId: String(riceDish.id),
@@ -986,7 +1245,7 @@ export class MenusService {
         }
 
         // Món chính (MAIN) ~60-144 Kcal (tuyệt đối không lặp lại trong tuần & không vượt chu kỳ 4 tuần)
-        const mainDish = this.pickDish(shuffleArray(dishPool.MAIN), usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 35, false);
+        const mainDish = this.pickDish(shuffleArray(dishPool.MAIN), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 35);
         if (mainDish) {
           dayDishes.push({
             dishId: String(mainDish.id),
@@ -1003,7 +1262,7 @@ export class MenusService {
         }
 
         // Canh súp (SOUP) ~25-105 Kcal
-        const soupDish = this.pickDish(shuffleArray(dishPool.SOUP), usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 30, false);
+        const soupDish = this.pickDish(shuffleArray(dishPool.SOUP), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 30);
         if (soupDish) {
           dayDishes.push({
             dishId: String(soupDish.id),
@@ -1020,7 +1279,7 @@ export class MenusService {
         }
 
         // Tráng miệng (DESSERT) ~20-150 Kcal
-        const dessertDish = this.pickDish(shuffleArray(dishPool.DESSERT), usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 30, false);
+        const dessertDish = this.pickDish(shuffleArray(dishPool.DESSERT), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 30);
         if (dessertDish) {
           dayDishes.push({
             dishId: String(dessertDish.id),
@@ -1039,7 +1298,7 @@ export class MenusService {
         // 3. Phụ chiều / Xế (AFTERNOON_SNACK): 1 món ăn xế + 1 thức uống
         // Món xế (SNACK_AFTERNOON) ~100-168 Kcal
         const afternoonSnackPool = shuffleArray(dishPool.SNACK_AFTERNOON);
-        const afternoonDish = this.pickDish(afternoonSnackPool, usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 30, false);
+        const afternoonDish = this.pickDish(afternoonSnackPool, usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 30);
         if (afternoonDish && (!morningDish || afternoonDish.id !== morningDish.id)) {
           dayDishes.push({
             dishId: String(afternoonDish.id),
@@ -1056,7 +1315,7 @@ export class MenusService {
         }
 
         // Thức uống xế (DRINK) ~45-102 Kcal (cho phép lặp lại)
-        const drinkDish = this.pickDish(shuffleArray(dishPool.DRINK), usedDishIdsThisWeek, recentDishIds, cycleExclusionDishIds, attempt > 20, true);
+        const drinkDish = this.pickDish(shuffleArray(dishPool.DRINK), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 20);
         if (drinkDish && (!morningDish || drinkDish.id !== morningDish.id)) {
           dayDishes.push({
             dishId: String(drinkDish.id),
@@ -1163,12 +1422,11 @@ export class MenusService {
           ? `✅ ĐẠT CHUẨN Thông tư 28 (${bestPlan.totalCalories} Kcal, P:${bestPlan.proteinPct}% L:${bestPlan.lipidPct}% G:${bestPlan.glucidPct}%)`
           : `⚠️ CHƯA ĐẠT: ${bestPlan.violations.join('; ')}`;
 
-        // Đánh dấu các món đã dùng trong tuần để tránh trùng lặp
+        // Đánh dấu TẤT CẢ các món đã dùng trong tuần và thiết lập previousDayDishIds để chống trùng lặp tuyệt đối
         for (const d of bestPlan.dishes) {
-          if (d.dishType === 'MAIN' || d.dishType === 'SOUP' || d.dishType === 'DESSERT' || d.dishType === 'SNACK_AFTERNOON') {
-            usedDishIdsThisWeek.add(Number(d.dishId));
-          }
+          usedDishIdsThisWeek.add(Number(d.dishId));
         }
+        previousDayDishIds = new Set(bestPlan.dishes.map((d) => Number(d.dishId)));
 
         dailySummary.push(bestPlan);
       }
@@ -1187,7 +1445,7 @@ export class MenusService {
         currentWeekDishCounts.set(dishId, weekCount);
 
         const totalCycleCount = prevCount + weekCount;
-        const maxLimit = this.getMaxCycleLimit(d.dishType);
+        const maxLimit = this.getMaxCycleLimit(d.dishType, dynamicLimits);
 
         if (totalCycleCount > maxLimit && !cycleLoggedDishes.has(dishId)) {
           cycleLoggedDishes.add(dishId);
@@ -1333,10 +1591,13 @@ export class MenusService {
   }
 
   // ── Helper: Giới hạn tối đa số lần xuất hiện trong chu kỳ 4 tuần ───────────
-  private getMaxCycleLimit(categoryCode: string): number {
+  private getMaxCycleLimit(categoryCode: string, dynamicLimits?: Map<string, number>): number {
+    if (dynamicLimits && dynamicLimits.has(categoryCode)) {
+      return dynamicLimits.get(categoryCode)!;
+    }
     switch (categoryCode) {
       case 'MAIN':
-        return 2; // Món chính tối đa 2 lần trong chu kỳ 4 tuần
+        return 2; // Món mặn tối đa 2 lần trong chu kỳ 4 tuần
       case 'SOUP':
         return 3; // Món canh tối đa 3 lần trong chu kỳ 4 tuần
       case 'DESSERT':
@@ -1352,22 +1613,18 @@ export class MenusService {
   private pickDish(
     pool: DishWithNutrition[],
     usedThisWeek: Set<number>,
+    previousDayDishIds: Set<number>,
     recentDishIds: Set<number>,
     cycleExclusionDishIds: Set<number>,
     relaxConstraints: boolean,
-    allowRepeatInWeek: boolean = false,
   ): DishWithNutrition | null {
     if (pool.length === 0) return null;
 
-    if (allowRepeatInWeek) {
-      // Cho các món nền tảng (Cơm, Nước, Sữa sáng), chọn ngẫu nhiên trong danh sách
-      return pool[Math.floor(Math.random() * pool.length)];
-    }
-
-    // Lượt 1: Tránh cả trùng tuần, trùng 14 ngày VÀ trùng chu kỳ 4 tuần
+    // Lượt 1: Tối ưu chuẩn nhất: Chưa dùng tuần này, không dùng ngày hôm qua, không trùng 14 ngày, không vượt chu kỳ 4 tuần
     for (const dish of pool) {
       if (
         !usedThisWeek.has(dish.id) &&
+        !previousDayDishIds.has(dish.id) &&
         !recentDishIds.has(dish.id) &&
         !cycleExclusionDishIds.has(dish.id)
       ) {
@@ -1375,25 +1632,33 @@ export class MenusService {
       }
     }
 
-    // Lượt 2: Cho phép 14 ngày gần nhất nhưng tuyệt đối tránh trùng tuần & vượt chu kỳ 4 tuần
+    // Lượt 2: Chưa dùng tuần này, không dùng ngày hôm qua, không vượt chu kỳ 4 tuần
     for (const dish of pool) {
-      if (!usedThisWeek.has(dish.id) && !cycleExclusionDishIds.has(dish.id)) {
+      if (
+        !usedThisWeek.has(dish.id) &&
+        !previousDayDishIds.has(dish.id) &&
+        !cycleExclusionDishIds.has(dish.id)
+      ) {
         return dish;
       }
     }
 
-    // Lượt 3: Tránh trùng tuần
+    // Lượt 3: Chưa dùng tuần này và không dùng ngày hôm qua
     for (const dish of pool) {
-      if (!usedThisWeek.has(dish.id)) {
+      if (!usedThisWeek.has(dish.id) && !previousDayDishIds.has(dish.id)) {
         return dish;
       }
     }
 
-    // Fallback: nếu cho phép giãn điều kiện
-    if (relaxConstraints) {
-      return pool[Math.floor(Math.random() * pool.length)];
+    // Lượt 4: Nếu danh mục có số lượng món ít hơn số ngày trong tuần (ví dụ Cơm chỉ có 4 món mà tuần có 5 ngày):
+    // Cho phép lặp lại món đã dùng trong tuần, nhưng TUYỆT ĐỐI KHÔNG DÙNG LẠI MÓN CỦA NGÀY HÔM QUA (tránh trùng 2 ngày liên tiếp)
+    for (const dish of pool) {
+      if (!previousDayDishIds.has(dish.id)) {
+        return dish;
+      }
     }
 
+    // Fallback: nếu danh mục chỉ có 1 món duy nhất trong toàn hệ thống
     return pool[0];
   }
 }

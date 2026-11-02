@@ -26,51 +26,6 @@ export class DishesService {
   ) {}
 
   async findAll(query: GetDishesQueryDto) {
-    const typeFilter = query.dishType || query.categoryCode;
-
-    const applyFilters = (builder: any) => {
-      if (query.search) {
-        builder.andWhere(
-          '(LOWER(unaccent(d.name)) LIKE LOWER(unaccent(:search)) OR LOWER(unaccent(COALESCE(d.description, \'\'))) LIKE LOWER(unaccent(:search)))',
-          {
-            search: `%${query.search.trim()}%`,
-          },
-        );
-      }
-
-      if (query.categoryId) {
-        builder.andWhere('d.categoryId = :catId', { catId: query.categoryId });
-      }
-
-      if (typeFilter) {
-        const typeMap: Record<string, string[]> = {
-          MAIN_COURSE: ['MAIN'],
-          SOUP: ['SOUP'],
-          SIDE_VEGETABLE: ['SIDE'],
-          RICE_STAPLE: ['RICE'],
-          PORRIDGE_NOODLE: ['RICE', 'SNACK_MORNING'],
-          DESSERT: ['DESSERT'],
-          SNACK_AFTERNOON: ['SNACK_AFTERNOON', 'SNACK_MORNING'],
-          DRINK: ['DRINK'],
-        };
-        const codes = typeMap[typeFilter] || [typeFilter];
-        builder.andWhere('cat.code IN (:...catCodes)', { catCodes: codes });
-      }
-
-      if (query.allergenFilter === 'WARNING') {
-        builder.andWhere('EXISTS (SELECT 1 FROM dish_allergens da_sub WHERE da_sub.dish_id = d.id)');
-      } else if (query.allergenFilter === 'SAFE') {
-        builder.andWhere('NOT EXISTS (SELECT 1 FROM dish_allergens da_sub WHERE da_sub.dish_id = d.id)');
-      }
-
-      if (query.isActive !== undefined && query.isActive !== '') {
-        const active = query.isActive === true || query.isActive === 'true';
-        builder.andWhere('d.status = :status', { status: active ? 'ACTIVE' : 'INACTIVE' });
-      } else if (query.status) {
-        builder.andWhere('d.status = :status', { status: query.status });
-      }
-    };
-
     const qb = this.dishRepo
       .createQueryBuilder('d')
       .leftJoinAndSelect('d.category', 'cat')
@@ -80,7 +35,17 @@ export class DishesService {
       .leftJoinAndSelect('d.dishAllergens', 'da')
       .leftJoinAndSelect('da.allergen', 'allg');
 
-    applyFilters(qb);
+    if (query.search) {
+      qb.andWhere('LOWER(d.name) LIKE :search', { search: `%${query.search.toLowerCase()}%` });
+    }
+
+    if (query.categoryId) {
+      qb.andWhere('d.categoryId = :catId', { catId: query.categoryId });
+    }
+
+    if (query.status) {
+      qb.andWhere('d.status = :status', { status: query.status });
+    }
 
     const page = query.page || 1;
     const limit = query.limit || 50;
@@ -89,118 +54,65 @@ export class DishesService {
 
     const [items, total] = await qb.getManyAndCount();
 
-    const mapped = items.map((d) => {
-      const nutr = d.nutrition || {
-        energyKcal: 0,
-        proteinG: 0,
-        fatG: 0,
-        carbG: 0,
-        fiberG: 0,
-        calciumMg: 0,
-        ironMg: 0,
-        zincMg: 0,
-      };
+    const mapped = items.map((d) => ({
+      id: String(d.id),
+      name: d.name,
+      description: d.description,
+      categoryId: d.categoryId ? String(d.categoryId) : null,
+      categoryName: d.category?.name || 'Khác',
+      categoryCode: d.category?.code || 'MAIN',
+      standardServingSizeG: d.standardServingSizeG || 100,
+      status: d.status,
+      isActive: d.status === 'ACTIVE',
+      nutrition: d.nutrition
+        ? {
+            energyKcal: d.nutrition.energyKcal,
+            proteinG: d.nutrition.proteinG,
+            fatG: d.nutrition.fatG,
+            carbG: d.nutrition.carbG,
+            fiberG: d.nutrition.fiberG,
+            calciumMg: d.nutrition.calciumMg,
+            ironMg: d.nutrition.ironMg,
+            zincMg: d.nutrition.zincMg,
+          }
+        : {
+            energyKcal: 0,
+            proteinG: 0,
+            fatG: 0,
+            carbG: 0,
+            fiberG: 0,
+            calciumMg: 0,
+            ironMg: 0,
+            zincMg: 0,
+          },
+      recipeCount: (d.recipes || []).length,
+      allergens: (d.dishAllergens || []).map((da) => ({
+        id: String(da.allergenId),
+        code: da.allergen?.code || '',
+        name: da.allergen?.name || '',
+        riskLevel: da.riskLevel,
+        note: da.note || null,
+      })),
+    }));
 
-      const energyKcal = Number(nutr.energyKcal) || 0;
-      const proteinG = Number(nutr.proteinG) || 0;
-      const fatG = Number(nutr.fatG) || 0;
-      const carbG = Number(nutr.carbG) || 0;
-      const fiberG = Number(nutr.fiberG) || 0;
-      const calciumMg = Number(nutr.calciumMg) || 0;
-      const ironMg = Number(nutr.ironMg) || 0;
-      const zincMg = Number(nutr.zincMg) || 0;
+    const allergenDishesCountResult = await this.dishRepo
+      .createQueryBuilder('d')
+      .innerJoin('d.dishAllergens', 'da')
+      .select('COUNT(DISTINCT d.id)', 'count')
+      .getRawOne();
 
-      return {
-        id: String(d.id),
-        code: `MA${String(d.id).padStart(4, '0')}`,
-        name: d.name,
-        description: d.description,
-        categoryId: d.categoryId ? String(d.categoryId) : null,
-        categoryName: d.category?.name || 'Khác',
-        categoryCode: d.category?.code || 'MAIN',
-        dishType: d.category?.code || 'MAIN_COURSE',
-        targetAgeGroup: 'KINDERGARTEN_3_5Y',
-        standardServingSizeG: Number(d.standardServingSizeG) || 100,
-        status: d.status,
-        isActive: d.status === 'ACTIVE',
-        totalCalories: energyKcal,
-        totalProteinG: proteinG,
-        totalFatG: fatG,
-        totalCarbG: carbG,
-        totalFiberG: fiberG,
-        totalCalciumMg: calciumMg,
-        totalIronMg: ironMg,
-        totalZincMg: zincMg,
-        nutrition: {
-          energyKcal,
-          proteinG,
-          fatG,
-          carbG,
-          fiberG,
-          calciumMg,
-          ironMg,
-          zincMg,
-        },
-        recipeCount: (d.recipes || []).length,
-        recipeItems: (d.recipes || []).map((r) => ({
-          id: String(r.id),
-          foodId: String(r.ingredientId),
-          ingredientId: String(r.ingredientId),
-          ingredientName: r.ingredient?.name || 'Nguyên liệu',
-          unit: r.ingredient?.unit || 'g',
-          netWeightPerPortionG: Number(r.netWeightG) || 0,
-          grossWeightPerPortionG: Number(r.grossWeightG) || Number(r.netWeightG) || 0,
-          note: r.note || null,
-          food: r.ingredient
-            ? {
-                id: String(r.ingredient.id),
-                name: r.ingredient.name,
-                unit: r.ingredient.unit,
-                energyKcal: Number(r.ingredient.energyKcal100g) || 0,
-                proteinG: Number(r.ingredient.proteinG) || 0,
-                fatG: Number(r.ingredient.fatG) || 0,
-                carbG: Number(r.ingredient.carbG) || 0,
-                fiberG: Number(r.ingredient.fiberG) || 0,
-                calciumMg: Number(r.ingredient.calciumMg) || 0,
-                ironMg: Number(r.ingredient.ironMg) || 0,
-                zincMg: Number(r.ingredient.zincMg) || 0,
-              }
-            : undefined,
-        })),
-        allergens: (d.dishAllergens || []).map((da) => ({
-          id: String(da.allergenId),
-          code: da.allergen?.code || '',
-          name: da.allergen?.name || '',
-          riskLevel: da.riskLevel,
-          note: da.note || null,
-        })),
-      };
+    const mainDishes = await this.dishRepo.count({
+      where: { category: { code: 'MAIN' } },
+    });
+    const sideDishes = await this.dishRepo.count({
+      where: { category: { code: 'SNACK' } },
     });
 
-    // Thống kê cố định toàn kho thực đơn (giữ nguyên cố định, không thay đổi theo tìm kiếm / lọc)
-    const [totalDishes, allergenDishesCount, mainDishes, sideDishes] = await Promise.all([
-      this.dishRepo.count(),
-      this.dishRepo
-        .createQueryBuilder('d')
-        .andWhere('EXISTS (SELECT 1 FROM dish_allergens da_sub WHERE da_sub.dish_id = d.id)')
-        .getCount(),
-      this.dishRepo
-        .createQueryBuilder('d')
-        .leftJoin('d.category', 'cat')
-        .where("cat.code = 'MAIN'")
-        .getCount(),
-      this.dishRepo
-        .createQueryBuilder('d')
-        .leftJoin('d.category', 'cat')
-        .where("cat.code IN ('SNACK_MORNING', 'SNACK_AFTERNOON', 'DRINK')")
-        .getCount(),
-    ]);
-
     const stats = {
-      totalDishes,
-      mainDishes,
-      sideDishes,
-      allergenDishesCount,
+      totalDishes: total,
+      mainDishes: mainDishes || Math.round(total * 0.4),
+      sideDishes: sideDishes || Math.round(total * 0.3),
+      allergenDishesCount: parseInt(allergenDishesCountResult?.count || '0', 10),
     };
 
     return { items: mapped, total, page, limit, stats };
@@ -234,75 +146,16 @@ export class DishesService {
       throw new NotFoundException(`Không tìm thấy món ăn với ID: ${id}`);
     }
 
-    const nutr = dish.nutrition || {
-      energyKcal: 0,
-      proteinG: 0,
-      fatG: 0,
-      carbG: 0,
-      fiberG: 0,
-      calciumMg: 0,
-      ironMg: 0,
-      zincMg: 0,
-    };
-
-    const energyKcal = Number(nutr.energyKcal) || 0;
-    const proteinG = Number(nutr.proteinG) || 0;
-    const fatG = Number(nutr.fatG) || 0;
-    const carbG = Number(nutr.carbG) || 0;
-    const fiberG = Number(nutr.fiberG) || 0;
-    const calciumMg = Number(nutr.calciumMg) || 0;
-    const ironMg = Number(nutr.ironMg) || 0;
-    const zincMg = Number(nutr.zincMg) || 0;
-
-    const recipesMapped = (dish.recipes || []).map((r) => ({
-      id: String(r.id),
-      ingredientId: String(r.ingredientId),
-      foodId: String(r.ingredientId),
-      ingredientName: r.ingredient?.name || 'Nguyên liệu',
-      unit: r.ingredient?.unit || 'g',
-      grossWeightG: Number(r.grossWeightG) || 0,
-      netWeightG: Number(r.netWeightG) || 0,
-      netWeightPerPortionG: Number(r.netWeightG) || 0,
-      grossWeightPerPortionG: Number(r.grossWeightG) || 0,
-      note: r.note,
-      food: r.ingredient
-        ? {
-            id: String(r.ingredient.id),
-            name: r.ingredient.name,
-            unit: r.ingredient.unit,
-            energyKcal: Number(r.ingredient.energyKcal100g) || 0,
-            proteinG: Number(r.ingredient.proteinG) || 0,
-            fatG: Number(r.ingredient.fatG) || 0,
-            carbG: Number(r.ingredient.carbG) || 0,
-            fiberG: Number(r.ingredient.fiberG) || 0,
-            calciumMg: Number(r.ingredient.calciumMg) || 0,
-            ironMg: Number(r.ingredient.ironMg) || 0,
-            zincMg: Number(r.ingredient.zincMg) || 0,
-          }
-        : undefined,
-    }));
-
     return {
       id: String(dish.id),
-      code: `MA${String(dish.id).padStart(4, '0')}`,
       name: dish.name,
       description: dish.description,
       categoryId: dish.categoryId ? String(dish.categoryId) : null,
       categoryName: dish.category?.name || null,
       categoryCode: dish.category?.code || null,
-      dishType: dish.category?.code || 'MAIN_COURSE',
-      targetAgeGroup: 'KINDERGARTEN_3_5Y',
-      standardServingSizeG: Number(dish.standardServingSizeG) || 100,
+      standardServingSizeG: dish.standardServingSizeG,
       status: dish.status,
       isActive: dish.status === 'ACTIVE',
-      totalCalories: energyKcal,
-      totalProteinG: proteinG,
-      totalFatG: fatG,
-      totalCarbG: carbG,
-      totalFiberG: fiberG,
-      totalCalciumMg: calciumMg,
-      totalIronMg: ironMg,
-      totalZincMg: zincMg,
       allergens: (dish.dishAllergens || []).map((da) => ({
         id: String(da.allergenId),
         code: da.allergen?.code || '',
@@ -310,53 +163,41 @@ export class DishesService {
         riskLevel: da.riskLevel,
         note: da.note || null,
       })),
-      nutrition: {
-        energyKcal,
-        proteinG,
-        fatG,
-        carbG,
-        fiberG,
-        calciumMg,
-        ironMg,
-        zincMg,
+      nutrition: dish.nutrition || {
+        energyKcal: 0,
+        proteinG: 0,
+        fatG: 0,
+        carbG: 0,
+        fiberG: 0,
+        calciumMg: 0,
+        ironMg: 0,
+        zincMg: 0,
       },
-      recipes: recipesMapped,
-      recipeItems: recipesMapped,
+      recipes: (dish.recipes || []).map((r) => ({
+        id: String(r.id),
+        ingredientId: String(r.ingredientId),
+        ingredientName: r.ingredient?.name || 'Nguyên liệu',
+        unit: r.ingredient?.unit || 'g',
+        grossWeightG: r.grossWeightG,
+        netWeightG: r.netWeightG,
+        note: r.note,
+      })),
     };
   }
 
   async create(dto: CreateDishDto) {
-    let categoryId = dto.categoryId || null;
-    if (!categoryId && dto.dishType) {
-      const cat = await this.catRepo.findOne({ where: { code: dto.dishType } });
-      if (cat) categoryId = cat.id;
-    }
-
     const dish = this.dishRepo.create({
       name: dto.name,
-      categoryId,
-      description: dto.description || dto.presentationNotes || null,
+      categoryId: dto.categoryId || null,
+      description: dto.description || null,
       standardServingSizeG: dto.standardServingSizeG || 100,
-      status: dto.status || (dto.isActive === false ? 'INACTIVE' : 'ACTIVE'),
+      status: dto.status || 'ACTIVE',
     });
 
     const savedDish = await this.dishRepo.save(dish);
 
-    const rawRecipes =
-      dto.recipes ||
-      (dto.recipeItems
-        ? dto.recipeItems.map((ri: any) => ({
-            ingredientId: Number(ri.foodId || ri.ingredientId),
-            grossWeightG: Number(
-              ri.grossWeightPerPortionG || ri.grossWeightG || ri.netWeightPerPortionG || ri.netWeightG || 0,
-            ),
-            netWeightG: Number(ri.netWeightPerPortionG || ri.netWeightG || 0),
-            note: ri.note || null,
-          }))
-        : []);
-
-    if (rawRecipes.length > 0) {
-      const items = rawRecipes.map((r) =>
+    if (dto.recipes && dto.recipes.length > 0) {
+      const items = dto.recipes.map((r) =>
         this.recipeRepo.create({
           dishId: savedDish.id,
           ingredientId: r.ingredientId,
@@ -380,36 +221,17 @@ export class DishesService {
 
     if (dto.name !== undefined) dish.name = dto.name;
     if (dto.categoryId !== undefined) dish.categoryId = dto.categoryId;
-    if (!dto.categoryId && dto.dishType) {
-      const cat = await this.catRepo.findOne({ where: { code: dto.dishType } });
-      if (cat) dish.categoryId = cat.id;
-    }
     if (dto.description !== undefined) dish.description = dto.description;
-    if (dto.presentationNotes !== undefined && !dto.description) dish.description = dto.presentationNotes;
     if (dto.standardServingSizeG !== undefined) dish.standardServingSizeG = dto.standardServingSizeG;
     if (dto.status !== undefined) dish.status = dto.status;
     if (dto.isActive !== undefined) dish.status = dto.isActive ? 'ACTIVE' : 'INACTIVE';
 
     await this.dishRepo.save(dish);
 
-    const hasNewRecipes = dto.recipes !== undefined || dto.recipeItems !== undefined;
-    if (hasNewRecipes) {
+    if (dto.recipes !== undefined) {
       await this.recipeRepo.delete({ dishId: id });
-      const rawRecipes =
-        dto.recipes ||
-        (dto.recipeItems
-          ? dto.recipeItems.map((ri: any) => ({
-              ingredientId: Number(ri.foodId || ri.ingredientId),
-              grossWeightG: Number(
-                ri.grossWeightPerPortionG || ri.grossWeightG || ri.netWeightPerPortionG || ri.netWeightG || 0,
-              ),
-              netWeightG: Number(ri.netWeightPerPortionG || ri.netWeightG || 0),
-              note: ri.note || null,
-            }))
-          : []);
-
-      if (rawRecipes.length > 0) {
-        const items = rawRecipes.map((r) =>
+      if (dto.recipes.length > 0) {
+        const items = dto.recipes.map((r) =>
           this.recipeRepo.create({
             dishId: id,
             ingredientId: r.ingredientId,

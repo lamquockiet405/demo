@@ -8,7 +8,7 @@ import {
   HttpStatus,
   Headers,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { PasswordResetService } from '../services/password-reset.service';
 import { LoginDto } from '../dto/login.dto';
@@ -44,7 +44,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Headers('x-tenant-id') tenantIdHeader?: string,
   ) {
-    const tenantId = tenantIdHeader || '1';
+    const tenantId = Number(tenantIdHeader) || 1;
     return this.authService.login(loginDto, tenantId);
   }
 
@@ -68,7 +68,7 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy thông tin tài khoản hiện tại đang đăng nhập' })
-  async getMe(@CurrentUser('sub') userId: any) {
+  async getMe(@CurrentUser('sub') userId: number) {
     return this.authService.getMe(userId);
   }
 
@@ -78,7 +78,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Đổi mật khẩu tài khoản đang đăng nhập' })
   async changePassword(
-    @CurrentUser('sub') userId: any,
+    @CurrentUser('sub') userId: number,
     @Body() dto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(userId, dto);
@@ -105,10 +105,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Đặt lại mật khẩu mới bằng Reset Token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.passwordResetService.resetPassword(
-      dto.resetToken,
-      dto.newPassword,
-      dto.confirmPassword,
-    );
+    return this.passwordResetService.resetPassword(dto.resetToken, dto.newPassword);
   }
 }

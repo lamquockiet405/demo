@@ -9,14 +9,14 @@ interface ProtectedRouteProps {
 
 /**
  * ProtectedRoute — Wrapper component kiểm tra auth và RBAC roles trước khi render.
- * - Chưa login → redirect /login.
+ * - Chưa login → redirect /home.
  * - Sai role → redirect về đúng portal theo role của user.
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   // Nếu có quy định allowedRoles và user không có role nào phù hợp
