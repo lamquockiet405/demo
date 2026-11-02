@@ -66,19 +66,52 @@ export interface WorkflowMeta {
   nutritionistName?: string;
 }
 
+const WORKFLOW_PREFIX = '__WORKFLOW__:';
+const WORKFLOW_SUFFIX = ':__END__';
+
 export function parseWorkflowMeta(note?: string): WorkflowMeta | null {
   if (!note) return null;
   try {
-    const match = note.match(/__WORKFLOW__:(.*?):__END__/);
-    if (match && match[1]) {
-      return JSON.parse(match[1]);
+    const start = note.indexOf(WORKFLOW_PREFIX);
+    if (start !== -1) {
+      const payloadStart = start + WORKFLOW_PREFIX.length;
+      const end = note.indexOf(WORKFLOW_SUFFIX, payloadStart);
+      if (end !== -1) {
+        return JSON.parse(note.slice(payloadStart, end));
+      }
     }
   } catch (e) {}
   return null;
 }
 
 export function embedWorkflowMeta(note: string | undefined, meta: WorkflowMeta): string {
-  const cleanNote = (note || '').replace(/__WORKFLOW__:.*?:__END__\s*/g, '').trim();
+  const source = note || '';
+  let cleanNote = '';
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const start = source.indexOf(WORKFLOW_PREFIX, cursor);
+    if (start === -1) {
+      cleanNote += source.slice(cursor);
+      break;
+    }
+
+    cleanNote += source.slice(cursor, start);
+    const payloadStart = start + WORKFLOW_PREFIX.length;
+    const end = source.indexOf(WORKFLOW_SUFFIX, payloadStart);
+
+    if (end === -1) {
+      cleanNote += source.slice(start);
+      break;
+    }
+
+    cursor = end + WORKFLOW_SUFFIX.length;
+    while (source[cursor] === ' ' || source[cursor] === '\t' || source[cursor] === '\n' || source[cursor] === '\r') {
+      cursor += 1;
+    }
+  }
+
+  cleanNote = cleanNote.trim();
   return `__WORKFLOW__:${JSON.stringify(meta)}:__END__ ${cleanNote}`.trim();
 }
 
