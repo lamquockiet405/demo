@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../../core/api/axios';
-import { fetchSnackServices } from '../api/snackServicesApi';
+import { fetchSnackServices, closeSnackServicePeriod, openSnackServicePeriod } from '../api/snackServicesApi';
 import { SnackServiceItem, SnackServicesSummary } from '../types/snackServices';
 import { CreateSnackServicePeriodModal } from './CreateSnackServicePeriodModal';
 import { EditSnackServiceModal } from './EditSnackServiceModal';
@@ -135,14 +135,41 @@ export const SnackServicesPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
   };
 
-  const handleClosePeriod = async (id: string, name: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn đóng đợt đăng ký cho gói "${name}"? Phụ huynh sẽ không thể đăng ký thêm vào đợt này.`)) return;
+  const handleClosePeriod = async (id: string, name: string, registeredCount?: number, paidCount?: number) => {
+    let confirmMsg = `Bạn có chắc chắn muốn đóng đợt đăng ký cho gói "${name}"?\nSau khi đóng, phụ huynh sẽ không thấy gói này nữa và danh sách sẽ được chốt chuyển cho bếp.`;
+    if (registeredCount === 0) {
+      confirmMsg += `\n\n⚠️ Lưu ý: Chưa có phụ huynh nào đăng ký trong đợt này.`;
+    } else {
+      const pending = (registeredCount || 0) - (paidCount || 0);
+      if (pending > 0) {
+        confirmMsg += `\n\n⚠️ Cảnh báo: Hiện còn ${pending} đơn chờ thanh toán (PENDING). Danh sách chốt phục vụ chỉ bao gồm ${paidCount || 0} học sinh đã thanh toán.`;
+      }
+    }
+
+    if (!window.confirm(confirmMsg)) return;
+
     try {
-      await apiClient.put(`/snack-services/periods/${id}/close`);
-      alert('Đã đóng đợt đăng ký ăn xế thành công!');
+      const res = await closeSnackServicePeriod(id);
+      if (res.warning) {
+        alert(`${res.message}\n\n⚠️ ${res.warning}`);
+      } else {
+        alert(res.message || 'Đã đóng đợt đăng ký ăn xế thành công!');
+      }
       loadData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Có lỗi xảy ra khi đóng đợt đăng ký.');
+    }
+  };
+
+  const handleOpenPeriod = async (id: string, name: string) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn mở lại đợt đăng ký cho gói "${name}"?\nPhụ huynh các lớp áp dụng sẽ có thể tiếp tục gửi đơn đăng ký tham gia.`)) return;
+
+    try {
+      const res = await openSnackServicePeriod(id);
+      alert(res.message || 'Đã mở lại đợt đăng ký ăn xế thành công!');
+      loadData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi mở lại đợt đăng ký.');
     }
   };
 
@@ -640,12 +667,21 @@ export const SnackServicesPage: React.FC = () => {
                         <Edit2 className="w-4 h-4" />
                       </button>
 
-                      {isOpen && (
+                      {isOpen ? (
                         <button
-                          onClick={() => handleClosePeriod(item.id, item.name)}
+                          onClick={() => handleClosePeriod(item.id, item.name, item.registeredCount, item.paidCount)}
                           className="px-3 py-1.5 bg-white border border-slate-200 hover:border-red-200 hover:bg-red-50 hover:text-red-700 rounded-xl text-xs font-bold text-slate-700 transition"
+                          title="Đóng đợt đăng ký và chốt danh sách phục vụ cho bếp"
                         >
                           Đóng đợt
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleOpenPeriod(item.id, item.name)}
+                          className="px-3 py-1.5 bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold transition"
+                          title="Mở lại đợt đăng ký cho phụ huynh tham gia"
+                        >
+                          Mở lại đợt
                         </button>
                       )}
                     </div>

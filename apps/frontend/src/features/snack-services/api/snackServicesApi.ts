@@ -53,3 +53,21 @@ export const updateSnackService = async (
   return response.data;
 };
 
+
+/** UC60: Đóng đợt dịch vụ ăn xế */
+export const closeSnackServicePeriod = async (id: string): Promise<{ success: boolean; message: string; warning?: string; data: any }> => {
+  const response = await apiClient.put(`/snack-services/periods/${id}/close`);
+  return response.data;
+};
+
+/** UC60: Mở lại đợt dịch vụ ăn xế */
+export const openSnackServicePeriod = async (id: string): Promise<{ success: boolean; message: string; data: any }> => {
+  const response = await apiClient.put(`/snack-services/periods/${id}/open`);
+  return response.data;
+};
+
+/** UC60: Chuyển đổi trạng thái đóng/mở đợt */
+export const toggleSnackServicePeriod = async (id: string): Promise<{ success: boolean; message: string; warning?: string; data: any }> => {
+  const response = await apiClient.put(`/snack-services/periods/${id}/toggle`);
+  return response.data;
+};

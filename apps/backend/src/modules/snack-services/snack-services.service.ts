@@ -356,10 +356,80 @@ export class SnackServicesService {
   }
 
   async closePeriod(id: number) {
+    const p = await this.periodRepo.findOne({
+      where: { id },
+      relations: ['registrations'],
+    });
+    if (!p) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
+
+    const totalCount = (p.registrations || []).length;
+    const paidCount = (p.registrations || []).filter((r) => r.status === 'PAID').length;
+    const pendingCount = (p.registrations || []).filter((r) => r.status === 'PENDING').length;
+
+    let warning: string | undefined = undefined;
+    if (totalCount === 0) {
+      warning = 'Chưa có phụ huynh nào đăng ký trong đợt này';
+    } else if (pendingCount > 0) {
+      warning = `Còn ${pendingCount} đơn chờ thanh toán (PENDING). Danh sách chốt phục vụ gồm ${paidCount} học sinh đã thanh toán.`;
+    }
+
+    p.status = 'CLOSED';
+    const saved = await this.periodRepo.save(p);
+
+    return {
+      success: true,
+      message: `Đã đóng đợt đăng ký cho '${saved.name}'. Phụ huynh sẽ không thấy gói này nữa.`,
+      warning,
+      data: {
+        id: String(saved.id),
+        name: saved.name,
+        status: saved.status,
+        totalRegistrations: totalCount,
+        paidCount,
+        pendingCount,
+        rosterClosed: true,
+      },
+    };
+  }
+
+  async openPeriod(id: number) {
     const p = await this.periodRepo.findOne({ where: { id } });
     if (!p) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
-    p.status = 'CLOSED';
-    return this.periodRepo.save(p);
+
+    // Kiểm tra xung đột: Không tồn tại đợt đăng ký khác đang OPEN cùng khoảng thời gian
+    const openPeriods = await this.periodRepo.find({ where: { status: 'OPEN' } });
+    const hasConflict = openPeriods.some(
+      (op) => Number(op.id) !== Number(p.id) && op.startDate <= p.endDate && op.endDate >= p.startDate,
+    );
+    if (hasConflict) {
+      throw new BadRequestException(
+        'Đã tồn tại đợt đăng ký khác đang mở cho tháng phục vụ này. Vui lòng đóng đợt cũ trước khi mở lại đợt này.',
+      );
+    }
+
+    p.status = 'OPEN';
+    const saved = await this.periodRepo.save(p);
+
+    return {
+      success: true,
+      message: `Đã mở lại đợt đăng ký cho '${saved.name}'. Phụ huynh có thể tiếp tục đăng ký.`,
+      data: {
+        id: String(saved.id),
+        name: saved.name,
+        status: saved.status,
+      },
+    };
+  }
+
+  async togglePeriod(id: number) {
+    const p = await this.periodRepo.findOne({ where: { id } });
+    if (!p) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
+
+    if (p.status === 'OPEN') {
+      return this.closePeriod(id);
+    } else {
+      return this.openPeriod(id);
+    }
   }
 
   async getDayboardingSummary() {

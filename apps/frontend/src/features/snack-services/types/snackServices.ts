@@ -17,6 +17,7 @@ export interface SnackServiceItem {
   statusLabel: string;
   badges: string[];
   isActive: boolean;
+  paidCount?: number;
 }
 
 export interface SnackServicesSummary {
@@ -118,6 +119,7 @@ export interface SnackServiceDetailEntity {
   billingCycle: string;
   pricePerUnit: number;
   isActive: boolean;
+  paidCount?: number;
   availableFrom: string;
   availableTo: string | null;
   createdAt: string;
