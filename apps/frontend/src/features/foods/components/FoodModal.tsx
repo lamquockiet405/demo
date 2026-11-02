@@ -321,32 +321,17 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nguồn cung cấp / NSX</label>
-                  <input
-                    type="text"
-                    name="supplier"
-                    readOnly={isReadOnly}
-                    value={formData.supplier}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
-                    placeholder="VD: Cty Cổ phần Chuỗi Thực phẩm TH"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Trạng thái lưu hành</label>
-                  <select
-                    name="status"
-                    disabled={isReadOnly}
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600 appearance-none' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
-                  >
-                    <option value="ACTIVE">Đang sử dụng thực đơn</option>
-                    <option value="INACTIVE">Tạm ngưng</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nguồn cung cấp / NSX</label>
+                <input
+                  type="text"
+                  name="supplier"
+                  readOnly={isReadOnly}
+                  value={formData.supplier}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
+                  placeholder="VD: Cty Cổ phần Chuỗi Thực phẩm TH"
+                />
               </div>
 
               {mode === 'create' && (
