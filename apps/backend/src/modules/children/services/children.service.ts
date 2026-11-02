@@ -332,11 +332,157 @@ export class ChildrenService {
   }
 
   async importChildren(items: any[]) {
+    if (!Array.isArray(items) || items.length === 0) {
+      return {
+        success: true,
+        message: 'Không có dữ liệu học sinh để nhập.',
+        importedCount: 0,
+        errors: [],
+      };
+    }
+
+    const errors: string[] = [];
+    let importedCount = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      try {
+        const fullName =
+          item.fullName?.trim() ||
+          `${item.lastName || ''} ${item.firstName || ''}`.trim();
+
+        if (!fullName) {
+          errors.push(`Dòng ${i + 1}: Họ và tên học sinh không được để trống.`);
+          continue;
+        }
+
+        // Chuẩn hóa giới tính ('MALE' | 'FEMALE')
+        let gender = 'MALE';
+        const rawGender = String(item.gender || '').trim().toUpperCase();
+        if (
+          rawGender === 'FEMALE' ||
+          rawGender === 'NỮ' ||
+          rawGender === 'NU' ||
+          rawGender === 'GIRL' ||
+          rawGender.includes('GÁI') ||
+          rawGender.includes('NỮ')
+        ) {
+          gender = 'FEMALE';
+        }
+
+        // Chuẩn hóa ngày sinh (YYYY-MM-DD)
+        let dob = '2021-01-01';
+        if (item.dateOfBirth) {
+          const rawDob = String(item.dateOfBirth).trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(rawDob)) {
+            dob = rawDob;
+          } else if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(rawDob)) {
+            const parts = rawDob.split(/[\/\-]/);
+            const day = parts[0].padStart(2, '0');
+            const month = parts[1].padStart(2, '0');
+            const year = parts[2];
+            dob = `${year}-${month}-${day}`;
+          } else {
+            const parsed = new Date(rawDob);
+            if (!isNaN(parsed.getTime())) {
+              dob = parsed.toISOString().split('T')[0];
+            }
+          }
+        }
+
+        // Chuẩn hóa classId
+        let classId: number | null = null;
+        if (
+          item.classId !== undefined &&
+          item.classId !== null &&
+          String(item.classId).trim() !== '' &&
+          String(item.classId) !== 'ALL'
+        ) {
+          const parsedClassId = Number(item.classId);
+          if (!isNaN(parsedClassId) && parsedClassId > 0) {
+            classId = parsedClassId;
+          }
+        }
+
+        // Xử lý studentCode & Cơ chế Upsert
+        let studentCode = (item.studentCode || '').trim();
+        let existingChild: Child | null = null;
+
+        if (studentCode) {
+          existingChild = await this.childRepo.findOne({ where: { studentCode } });
+        }
+
+        if (existingChild) {
+          // Học sinh đã tồn tại -> cập nhật thông tin và gán vào lớp mới
+          existingChild.fullName = fullName;
+          existingChild.dateOfBirth = dob;
+          existingChild.gender = gender;
+          if (classId !== null) {
+            existingChild.classId = classId;
+          }
+          await this.childRepo.save(existingChild);
+          importedCount++;
+        } else {
+          // Tạo mới hồ sơ học sinh
+          if (!studentCode) {
+            studentCode = `HS-${Date.now().toString().slice(-6)}-${(i + 1).toString().padStart(2, '0')}`;
+          }
+
+          const newChild = this.childRepo.create({
+            studentCode,
+            fullName,
+            dateOfBirth: dob,
+            gender,
+            classId,
+            status: 'ACTIVE',
+          });
+
+          const savedChild = await this.childRepo.save(newChild);
+
+          // Tự động ghi nhận dị ứng nếu có ghi chú y tế đặc biệt
+          const notes = (item.medicalNotes || '').trim();
+          if (
+            notes &&
+            notes.toLowerCase() !== 'bình thường' &&
+            notes.toLowerCase() !== 'khong' &&
+            notes.toLowerCase() !== 'không'
+          ) {
+            try {
+              const catalogs = await this.catalogRepo.find();
+              const matchedCat = catalogs.find(
+                (c) =>
+                  notes.toLowerCase().includes(c.name.toLowerCase()) ||
+                  c.name.toLowerCase().includes(notes.toLowerCase()),
+              );
+
+              const allergy = this.allergyRepo.create({
+                studentId: savedChild.id,
+                allergenId: matchedCat ? matchedCat.id : null,
+                customAllergenName: matchedCat ? null : notes,
+                allergyType: 'ALLERGY',
+                severity: 'MEDIUM',
+                symptoms: notes,
+                reactionTreatment: 'Báo y tế trường học khi có dấu hiệu dị ứng',
+                isActive: true,
+              });
+              await this.allergyRepo.save(allergy);
+            } catch (algErr) {
+              console.warn('Could not auto-declare allergy for imported child:', algErr);
+            }
+          }
+
+          importedCount++;
+        }
+      } catch (rowErr: any) {
+        errors.push(`Dòng ${i + 1}: ${rowErr.message || 'Lỗi xử lý dữ liệu.'}`);
+      }
+    }
+
     return {
       success: true,
-      message: `Đã nhập khẩu thành công ${items.length} hồ sơ học sinh`,
-      importedCount: items.length,
-      errors: [],
+      message: `Đã nhập khẩu thành công ${importedCount} hồ sơ học sinh.`,
+      importedCount,
+      errors,
     };
   }
 }
