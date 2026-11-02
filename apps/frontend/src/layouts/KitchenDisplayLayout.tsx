@@ -364,6 +364,13 @@ export const KitchenDisplayLayout: React.FC = () => {
               🛡️ Kiểm Thực 3 Bước
             </Link>
             <Link
+              to="/kitchen/purchasing"
+              className="px-3 py-1.5 rounded-lg text-amber-400 bg-amber-950/70 border border-amber-500/40 hover:bg-amber-900/90 hover:text-amber-300 font-bold transition flex items-center gap-1.5 shadow-sm"
+              title="Tính khối lượng thô dự kiến mua hàng theo tổng học sinh các lớp"
+            >
+              🛒 Đi Chợ (Gross)
+            </Link>
+            <Link
               to="/kitchen/samples"
               className="px-3 py-1.5 rounded-lg text-blue-400 bg-blue-950/70 border border-blue-500/40 hover:bg-blue-900/90 hover:text-blue-300 font-bold transition flex items-center gap-1.5 shadow-sm"
               title="Quản lý và tiêu hủy các mẫu lưu thức ăn 24 giờ"
