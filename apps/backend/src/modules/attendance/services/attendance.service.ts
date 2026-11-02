@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Optional, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { DailyMealAttendance } from '../entities/daily-meal-attendance.entity';
@@ -8,6 +8,8 @@ import { AttendanceQueryDto } from '../dto/attendance-query.dto';
 import { UpdateMealAttendanceDto } from '../dto/update-meal-attendance.dto';
 import { MealEvaluationQueryDto } from '../dto/meal-evaluation-query.dto';
 import { UpdateMealEvaluationDto } from '../dto/update-meal-evaluation.dto';
+import { AttendanceHistoryQueryDto } from '../dto/attendance-history-query.dto';
+import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
 
 @Injectable()
 export class AttendanceService {
@@ -18,8 +20,48 @@ export class AttendanceService {
     private readonly classRepo: Repository<ClassEntity>,
     @InjectRepository(Child)
     private readonly childRepo: Repository<Child>,
+    @Optional() private readonly auditLogsService?: AuditLogsService,
   ) {}
 
+    private getMenu8ForDate(dateStr: string) {
+    const d = new Date(dateStr);
+    const day = d.getDay(); // 0: Sun, 1: Mon, 2: Tue, 3: Wed, 4: Thu, 5: Fri, 6: Sat
+    const dayMap: Record<number, { lunch: string[]; snack: string[]; calories: number }> = {
+      1: {
+        lunch: ['Cơm trắng gạo tẻ dẻo', 'Cá hú muối sả chiên', 'Canh tôm thẻ nấu khoai sọ', 'Chuối cau chín'],
+        snack: ['Bún bò Huế, ngò gai, quế', 'Sữa đậu nành nguyên chất'],
+        calories: 685,
+      },
+      2: {
+        lunch: ['Cơm trắng gạo tẻ dẻo', 'Thịt kho trứng cút', 'Canh tôm thẻ nấu khoai sọ', 'Nho tươi ngọt'],
+        snack: ['Nui thịt bằm, tôm, cà rốt', 'Sâm bí đao hạt chia'],
+        calories: 695,
+      },
+      3: {
+        lunch: ['Cơm trắng gạo tẻ dẻo', 'Thịt bò xào su su', 'Canh cua đồng rau ngót', 'Lê đường'],
+        snack: ['Cháo thịt bằm, nghêu, rau mùi', 'Yaourt men sống (sữa chua)'],
+        calories: 680,
+      },
+      4: {
+        lunch: ['Cơm trắng gạo tẻ dẻo', 'Gà chiên nước mắm', 'Canh bí hồ lô thịt bằm', 'Nho tươi ngọt'],
+        snack: ['Bánh canh bột xắt tôm khô, cá lóc', 'Nước cam tươi nguyên chất'],
+        calories: 690,
+      },
+      5: {
+        lunch: ['Cơm trắng gạo tẻ dẻo', 'Cá lóc muối chiên', 'Canh tôm thẻ nấu khoai sọ', 'Thanh long ruột trắng'],
+        snack: ['Bún suông thịt heo, trứng cút, cà rốt', 'Nước mía tươi'],
+        calories: 675,
+      },
+    };
+
+    return dayMap[day] || dayMap[1];
+  }
+
+  private parseClassId(classId: any, fallback = 1): number {
+    if (!classId) return fallback;
+    const num = Number(classId);
+    return isNaN(num) || num <= 0 ? fallback : num;
+  }
 
   async getClasses() {
     const classes = await this.classRepo.find({ order: { name: 'ASC' } });
@@ -30,7 +72,10 @@ export class AttendanceService {
           id: String(cls.id),
           name: cls.name,
           ageGroup: cls.ageGroup,
+          gradeLevel: cls.ageGroup || 'MAU_GIAO',
+          totalStudents: studentCount,
           studentCount,
+          academicYear: cls.schoolYear || '2025-2026',
         };
       }),
     );
@@ -86,15 +131,12 @@ export class AttendanceService {
             : nameLower.includes('chồi') || nameLower.includes('choi')
             ? 'CHOI'
             : 'LA';
-
         const gradeName =
           gradeLevel === 'MAM'
             ? 'Khối Mầm (3-4T)'
             : gradeLevel === 'CHOI'
-
             ? 'Khối Chồi (4-5T)'
             : 'Khối Lá (5-6T)';
-
         return {
           id: String(cls.id),
           name: cls.name,
@@ -164,9 +206,14 @@ export class AttendanceService {
     };
   }
 
-  async getAttendanceList(params: AttendanceQueryDto) {
+    async getAttendanceList(params: AttendanceQueryDto) {
     const date = params.date || new Date().toISOString().split('T')[0];
-    const classId = params.classId ? Number(params.classId) : 1;
+    const classId = this.parseClassId(params.classId, 1);
+
+    const cls = await this.classRepo.findOne({
+      where: { id: classId },
+      relations: ['homeroomTeacher'],
+    });
 
     const children = await this.childRepo.find({
       where: { classId },
@@ -179,48 +226,126 @@ export class AttendanceService {
     });
     const attendanceMap = new Map(existing.map((a) => [a.studentId, a]));
 
-    let breakfastSubs: any[] = [];
-    try {
-      breakfastSubs = await this.attendanceRepo.manager.query(
-        "SELECT student_id, package_name, status, end_date FROM breakfast_subscriptions WHERE status = 'PAID' AND (end_date IS NULL OR end_date >= $1)",
-        [date],
-      );
-    } catch {
-      // fallback if table does not exist
-    }
-    const breakfastMap = new Map(breakfastSubs.map((s: any) => [Number(s.student_id), s]));
-
-    const items = children.map((c) => {
+    const childrenList = children.map((c) => {
       const att = attendanceMap.get(c.id);
       const isAttended = att ? att.isAttended : true;
-      const bf = breakfastMap.get(c.id);
-      const hasBreakfast = Boolean(bf);
+      const isAbsent = !isAttended;
+      const mealOption = isAbsent ? 'ABSENT' : 'ALL_DAY';
+
+      const allergy = c.allergies && c.allergies.length > 0 ? c.allergies[0] : null;
+      let dietBadge: any = {
+        type: 'STANDARD',
+        title: 'Suất chuẩn',
+      };
+
+      if (allergy) {
+        const allergenName = allergy.allergen?.name || 'Thực phẩm';
+        const isIntolerance =
+          allergenName.toLowerCase().includes('sữa') ||
+          (allergy.note && allergy.note.toLowerCase().includes('bất dung nạp'));
+
+        dietBadge = {
+          type: isIntolerance ? 'INTOLERANCE' : 'ALLERGY',
+          title: isIntolerance ? `Bất dung nạp: ${allergenName}` : `Dị ứng: ${allergenName}`,
+          description: allergy.note || undefined,
+          severity: allergy.severity || 'HIGH',
+        };
+      }
+
+      let age = 3;
+      if (c.dateOfBirth) {
+        const birthYear = new Date(c.dateOfBirth).getFullYear();
+        age = Math.max(2, 2026 - birthYear);
+      }
+      const genderText = c.gender === 'MALE' ? 'Nam' : 'Nữ';
+      const genderAgeText = `${genderText}, ${age} tuổi`;
 
       return {
         id: String(c.id),
         childId: String(c.id),
         studentCode: c.studentCode,
         fullName: c.fullName,
-        avatarUrl: c.avatar || null,
-        isAttended,
-        mealOption: isAttended ? 'FULL' : 'ABSENT',
-        hasBreakfast,
-        breakfastPackage: bf ? bf.package_name : null,
-        isEligibleForBreakfast: hasBreakfast,
+        gender: c.gender,
+        genderAgeText,
+        avatarUrl: c.avatar || undefined,
+        mealOption,
+        dietBadge,
+        parentNote: att?.note || (allergy ? allergy.note : undefined),
+        kitchenStatus: (isAbsent ? 'CANCELLED' : 'SYNCED') as 'CANCELLED' | 'SYNCED',
+        checkinSource: 'TABLET',
+        isAbsent,
+        hasBreakfast: false,
         hasAllergyAlert: (c.allergies || []).length > 0,
         allergies: (c.allergies || []).map((a) => a.allergen?.name || 'Dị ứng'),
         notes: att?.note || '',
       };
     });
 
-    return {
-      classId: String(classId),
-      date,
-      totalChildren: children.length,
-      presentCount: items.filter((i) => i.isAttended).length,
-      absentCount: items.filter((i) => !i.isAttended).length,
+    const totalStudents = children.length;
+    const absentCount = childrenList.filter((c) => c.isAbsent).length;
+    const registeredToday = totalStudents - absentCount;
+    const dietSpecialCount = childrenList.filter((c) => c.hasAllergyAlert).length;
+
+    const classInfo = {
+      id: String(cls ? cls.id : classId),
+      name: cls ? cls.name : 'Lớp Mầm 1 (3-4 tuổi)',
+      gradeLevel: cls ? cls.ageGroup : 'MAU_GIAO',
+      roomNumber: 'P.101',
+      totalStudents,
+      academicYear: cls?.schoolYear || '2025-2026',
+    };
+
+    const summary = {
+      totalClassStudents: totalStudents,
+      officialRatioPercent: 100,
+      registeredToday,
+      registeredRatioPercent: totalStudents > 0 ? parseFloat(((registeredToday / totalStudents) * 100).toFixed(1)) : 100,
+      absentCount,
+      absentPermitted: absentCount,
+      absentUnpermitted: 0,
+      dietSpecialCount,
+      dietSpecialSummary: dietSpecialCount > 0 ? `${dietSpecialCount} trẻ có hồ sơ dị ứng đặc biệt` : 'Không có trẻ dị ứng',
+    };
+
+    const kitchenConnection = {
+      deadline: '08:45',
+      headChef: 'Nguyễn Văn Cường',
+      station: 'Bếp trung tâm số 1',
+      standardPortions: registeredToday - dietSpecialCount,
+      customTrays: dietSpecialCount,
+      snackUnits: registeredToday,
       isLocked: false,
-      items,
+      lastSyncTime: '08:30',
+      recordedBy: cls?.homeroomTeacher?.fullName || 'Lê Thị Hương Giang',
+      cutoffTime: '08:45',
+    };
+
+    const dailyDishes = this.getMenu8ForDate(date);
+    const todayMenu = {
+      week: 8,
+      title: 'Thực đơn Bán trú Tuần 8 (27/10 - 31/10/2025)',
+      mealSession: 'Trưa chính + Xế',
+      lunchTime: '10:45 - 11:30',
+      lunchItems: dailyDishes.lunch,
+      snackTime: '14:30 - 15:00',
+      snackItems: dailyDishes.snack,
+      estimatedCalories: dailyDishes.calories,
+      dishes: dailyDishes.lunch,
+    };
+
+    return {
+      classInfo,
+      summary,
+      kitchenConnection,
+      todayMenu,
+      children: childrenList,
+      items: childrenList,
+      pagination: {
+        currentPage: Number(params.page) || 1,
+        totalPages: 1,
+        totalItems: childrenList.length,
+        limit: Number(params.limit) || 10,
+      },
     };
   }
 
@@ -244,11 +369,30 @@ export class AttendanceService {
     att.recordedBy = userId || 1;
 
     await this.attendanceRepo.save(att);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: userId || 3,
+      userName: 'Giáo viên Chủ nhiệm',
+      userRole: 'TEACHER',
+      action: 'RECORD_ATTENDANCE',
+      targetEntity: 'ATTENDANCE',
+      targetId: String(att.id || childId),
+      ipAddress: '127.0.0.1',
+      details: {
+        studentId: childId,
+        date: dto.date,
+        isAttended,
+        mealOption: dto.mealOption,
+      },
+    }).catch(() => {});
+
     return { success: true, isAttended, date: dto.date };
   }
 
   async markAllPresent(data: { classId: string; date: string }, userId?: number) {
-    const children = await this.childRepo.find({ where: { classId: Number(data.classId) } });
+    const classId = this.parseClassId(data.classId, 1);
+    const children = await this.childRepo.find({ where: { classId } });
     for (const c of children) {
       await this.updateChildAttendance(c.id, { date: data.date, mealOption: 'FULL' }, userId);
     }
@@ -267,12 +411,12 @@ export class AttendanceService {
     };
   }
 
-  async getEvaluationList(params: MealEvaluationQueryDto) {
+    async getEvaluationList(params: MealEvaluationQueryDto) {
     const date = params.date || new Date().toISOString().split('T')[0];
-    const classId = params.classId ? Number(params.classId) : 1;
+    const classId = this.parseClassId(params.classId, 1);
     const mealType = params.mealType || 'LUNCH';
 
-    const currentClass = await this.classRepo.findOne({
+    const cls = await this.classRepo.findOne({
       where: { id: classId },
       relations: ['homeroomTeacher'],
     });
@@ -288,77 +432,78 @@ export class AttendanceService {
     });
     const evalMap = new Map(existing.map((e) => [e.studentId, e]));
 
-    let ateAllCount = 0;
-    let ateHalfCount = 0;
-    let ateLittleCount = 0;
-
-    const mappedChildren = children.map((c, idx) => {
+    const childrenList = children.map((c) => {
       const e = evalMap.get(c.id);
-      const isAllergic = (c.allergies || []).length > 0;
-      const rawPortion = e?.consumptionLevel || (idx % 8 === 0 ? 'HALF' : 'ALL');
-      const portionConsumed: 'ALL' | 'HALF' | 'NONE' =
-        rawPortion === 'HALF' ? 'HALF' : rawPortion === 'NONE' || e?.isAttended === false ? 'NONE' : 'ALL';
+      const isAbsent = e ? !e.isAttended : false;
+      let portionConsumed: 'ALL' | 'HALF' | 'NONE' = 'ALL';
+      if (e?.consumptionLevel === 'PARTIAL') portionConsumed = 'HALF';
+      else if (e?.consumptionLevel === 'NONE' || isAbsent) portionConsumed = 'NONE';
+      else if (e?.consumptionLevel === 'FULL') portionConsumed = 'ALL';
 
-      if (portionConsumed === 'ALL') ateAllCount++;
-      else if (portionConsumed === 'HALF') ateHalfCount++;
-      else ateLittleCount++;
+      let percentage = 100;
+      if (portionConsumed === 'HALF') percentage = 50;
+      else if (portionConsumed === 'NONE') percentage = 0;
 
-      const percentage = portionConsumed === 'ALL' ? 100 : portionConsumed === 'HALF' ? 50 : 20;
+      let age = 3;
+      if (c.dateOfBirth) {
+        const birthYear = new Date(c.dateOfBirth).getFullYear();
+        age = Math.max(2, 2026 - birthYear);
+      }
+      const genderText = c.gender === 'MALE' ? 'Nam' : 'Nữ';
+      const genderAgeText = `${genderText}, ${age} tuổi`;
 
-      const allergyText = isAllergic
-        ? c.allergies.map((a) => a.allergen?.name || 'Dị ứng').join(', ')
-        : '';
-
-      const nameParts = (c.fullName || '').trim().split(' ');
-      const firstName = nameParts[nameParts.length - 1] || 'Bé';
+      const allergy = c.allergies && c.allergies.length > 0 ? c.allergies[0] : null;
 
       return {
         id: String(c.id),
-        studentCode: c.studentCode || `HD-2026-${String(c.id).padStart(2, '0')}`,
+        childId: String(c.id),
+        studentCode: c.studentCode,
         fullName: c.fullName,
-        firstName,
-        gender: c.gender || (idx % 2 === 0 ? 'FEMALE' : 'MALE'),
-        genderAgeText: `${c.gender === 'MALE' ? 'Nam' : 'Nữ'} • ${currentClass?.ageGroup === 'NHA_TRE' ? '2-3T' : '3-4T'}`,
-        avatarLetter: firstName[0] || 'B',
-        menuBadge: {
-          label: isAllergic ? `Khay dị ứng (${allergyText})` : 'Thực đơn tiêu chuẩn',
-          type: (isAllergic ? 'allergy' : 'standard') as 'allergy' | 'standard',
-        },
-        menuDetail: isAllergic
-          ? `Khay riêng: Canh hầm riêng, không nêm bơ thực vật/đậu phộng (${allergyText})`
-          : 'Thịt heo xốt cà chua, Canh rau cải cá thác lác, Cơm trắng, Chuối tiêu',
+        avatarUrl: c.avatar || undefined,
+        genderAgeText,
+        isAbsent,
+        dietBadge: allergy
+          ? {
+              type: 'ALLERGY',
+              title: allergy.allergen?.name || 'Dị ứng',
+              description: allergy.note || undefined,
+            }
+          : { type: 'STANDARD', title: 'Suất chuẩn' },
         portionConsumed,
-        percentage,
-        waterIntake: '180 ml',
-        teacherNote: e?.note || (idx % 7 === 0 ? 'Bé ăn hơi chậm, cô có hỗ trợ xúc' : 'Bé ăn ngoan, tự xúc hết phần'),
-        isLocked: false,
-        parentSyncStatus: 'SYNCED' as const,
+        consumptionPercentage: percentage,
+        waterIntake: '150ml',
+        notes: e?.note || '',
+        syncStatus: 'SENT' as any,
+        hasAllergy: (c.allergies || []).length > 0,
       };
     });
 
-    const totalClassStudents = children.length || 25;
-    const totalEating = mappedChildren.filter((c) => c.portionConsumed !== 'NONE').length;
-    const absentCount = totalClassStudents - totalEating;
+    const totalClassStudents = children.length;
+    const absentCount = childrenList.filter((c) => c.isAbsent).length;
+    const totalEating = totalClassStudents - absentCount;
+    const ateAllCount = childrenList.filter((c) => !c.isAbsent && c.portionConsumed === 'ALL').length;
+    const ateHalfCount = childrenList.filter((c) => !c.isAbsent && c.portionConsumed === 'HALF').length;
+    const ateLittleCount = childrenList.filter((c) => !c.isAbsent && c.portionConsumed === 'NONE').length;
 
     const summary = {
       totalClassStudents,
       totalEating,
       absentCount,
       ateAllCount,
-      ateAllPercent: totalClassStudents > 0 ? Math.round((ateAllCount / totalClassStudents) * 100) : 92,
+      ateAllPercent: totalEating > 0 ? Math.round((ateAllCount / totalEating) * 100) : 0,
       ateHalfCount,
-      ateHalfPercent: totalClassStudents > 0 ? Math.round((ateHalfCount / totalClassStudents) * 100) : 8,
+      ateHalfPercent: totalEating > 0 ? Math.round((ateHalfCount / totalEating) * 100) : 0,
       ateLittleCount,
-      ateLittlePercent: totalClassStudents > 0 ? Math.round((ateLittleCount / totalClassStudents) * 100) : 0,
+      ateLittlePercent: totalEating > 0 ? Math.round((ateLittleCount / totalEating) * 100) : 0,
     };
 
     const classInfo = {
-      id: String(classId),
-      name: currentClass?.name || 'Lớp Mầm 1 (3-4 tuổi)',
-      gradeLevel: currentClass?.ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mầm',
+      id: String(cls ? cls.id : classId),
+      name: cls ? cls.name : 'Lớp Mầm 1 (3-4 tuổi)',
+      gradeLevel: cls ? cls.ageGroup : 'MAU_GIAO',
       roomNumber: 'P.101',
       totalStudents: totalClassStudents,
-      academicYear: '2026 - 2027',
+      academicYear: cls?.schoolYear || '2025-2026',
     };
 
     return {
@@ -369,18 +514,15 @@ export class AttendanceService {
         temperatureScore: 5,
         excitementScore: 4,
         foodSafetyChecked: true,
-        chefFeedback: 'Thức ăn mềm thơm, giữ nhiệt độ > 65°C khi đưa tới lớp, trẻ ăn ngon miệng.',
-        headChefName: 'Nguyễn Văn Cường (Bếp trưởng)',
-        isLocked: true,
-        status: 'LOCKED',
+        chefFeedback: 'Trẻ ăn ngon miệng, ăn hết suất',
       },
-      children: mappedChildren,
-      items: mappedChildren,
+      children: childrenList,
+      items: childrenList,
       pagination: {
-        currentPage: 1,
+        currentPage: Number(params.page) || 1,
         totalPages: 1,
-        totalItems: mappedChildren.length,
-        limit: 20,
+        totalItems: childrenList.length,
+        limit: Number(params.limit) || 10,
       },
     };
   }
@@ -408,7 +550,8 @@ export class AttendanceService {
   }
 
   async batchUpdatePortion(data: { classId: string; date: string; portionConsumed: string }, userId?: number) {
-    const children = await this.childRepo.find({ where: { classId: Number(data.classId) } });
+    const classId = this.parseClassId(data.classId, 1);
+    const children = await this.childRepo.find({ where: { classId } });
     for (const c of children) {
       await this.updateChildEvaluation(c.id, { date: data.date, portionConsumed: data.portionConsumed }, userId);
     }
@@ -423,158 +566,59 @@ export class AttendanceService {
     return { success: true, message: 'Đã khóa đánh giá bữa ăn' };
   }
 
+  async getHistoryList(params: AttendanceHistoryQueryDto) {
+    const items = [
+      {
+        id: '1',
+        date: params.startDate || '2025-09-08',
+        className: 'Mầm 1',
+        totalEnrolled: 25,
+        presentCount: 24,
+        absentCount: 1,
+        fullConsumptionRate: '92%',
+        status: 'COMPLETED',
+      },
+      {
+        id: '2',
+        date: '2025-09-09',
+        className: 'Mầm 1',
+        totalEnrolled: 25,
+        presentCount: 25,
+        absentCount: 0,
+        fullConsumptionRate: '96%',
+        status: 'COMPLETED',
+      },
+    ];
+    return { items, total: items.length };
+  }
+
   async getKitchenKdsData(date?: string) {
+    const classes = await this.classRepo.find();
     const today = date || new Date().toISOString().split('T')[0];
-    const headcount = await this.getSchoolHeadcountSummary(today);
 
-    // Compute toddler (MAM) vs kindergarten (CHOI & LA) portions
-    let toddlerPortions = 0;
-    let kindergartenPortions = 0;
-    let specialTraysCount = 0;
-
-    const kdsClasses = (headcount.classes || []).map((c: any) => {
-      const isToddler = c.gradeLevel === 'MAM';
-      const portions = c.lunchCount || c.presentToday || 24;
-      if (isToddler) {
-        toddlerPortions += portions;
-      } else {
-        kindergartenPortions += portions;
-      }
-      specialTraysCount += c.allergicCount || 1;
-
-      return {
-        classId: String(c.id),
-        className: c.name,
-        gradeLevel: c.gradeLevel || 'MAM',
-        gradeLevelLabel: c.gradeName || 'Khối Lớp',
-        roomNumber: c.roomNumber || 'P.101',
-        totalStudents: c.enrolled || 25,
-        lunchCount: portions,
-        snackCount: c.snackCount || portions,
-        absentCount: c.absentToday || 1,
-        specialCount: c.allergicCount || 1,
-        isLocked: c.isKitchenLocked ?? true,
-        kitchenStatus: 'SYNCED',
-        teacherName: c.homeroomTeacher || 'Giáo viên chủ nhiệm',
-      };
-    });
-
-    const totalLunch = kdsClasses.reduce((acc: number, c: any) => acc + c.lunchCount, 0);
-    const totalSnack = kdsClasses.reduce((acc: number, c: any) => acc + c.snackCount, 0);
-    const totalAbsent = kdsClasses.reduce((acc: number, c: any) => acc + c.absentCount, 0);
-
-    const summary = {
-      totalLunchPortions: totalLunch || headcount.totalPresent || 146,
-      totalSnackPortions: totalSnack || headcount.totalPresent || 146,
-      toddlerPortions: toddlerPortions || 48,
-      kindergartenPortions: kindergartenPortions || 98,
-      absentCount: totalAbsent || headcount.totalAbsent || 4,
-      specialTraysCount: specialTraysCount || 3,
-      lockedClasses: kdsClasses.length || 6,
-      totalClasses: kdsClasses.length || 6,
-      completionPercentage: 100,
-    };
-
-    const allergyAlerts = [
-      {
-        id: 'al-1',
-        childName: 'Nguyễn Phương Linh',
-        className: 'Mầm 1 (Họa Mi)',
-        severity: 'HIGH',
-        badgeColor: 'RED',
-        allergen: 'Sữa bò & Chế phẩm từ sữa',
-        replacementMeal: 'Sữa hạt sen mè đen • Khay ăn riêng biệt',
-        dosingNotes: 'Tuyệt đối không dùng bơ thực vật, phô mai hoặc gia vị chứa sữa',
-        isResolved: false,
-      },
-      {
-        id: 'al-2',
-        childName: 'Trần Bảo Nam',
-        className: 'Chồi 2 (Sơn Ca)',
-        severity: 'MEDIUM',
-        badgeColor: 'ORANGE',
-        allergen: 'Tôm & Hải sản giáp xác',
-        replacementMeal: 'Thịt gà xào nấm rơm (thay tôm rim thịt)',
-        dosingNotes: 'Dụng cụ chế biến và chảo xào riêng biệt, dán tem cam',
-        isResolved: false,
-      },
-      {
-        id: 'al-3',
-        childName: 'Lê Minh Khang',
-        className: 'Lá 1 (Vành Khuyên)',
-        severity: 'HIGH',
-        badgeColor: 'RED',
-        allergen: 'Đậu phộng (Lạc) & Hạt',
-        replacementMeal: 'Chè hạt sen đậu xanh (không rắc đậu phộng)',
-        dosingNotes: 'Cảnh báo sốc phản vệ, bàn ăn riêng có GV kèm',
-        isResolved: false,
-      },
-    ];
-
+    const dailyDishes = this.getMenu8ForDate(today);
     const todayMenu = [
-      {
-        id: 'm-1',
-        name: 'Thịt heo xốt cà chua',
-        type: 'Món mặn chính',
-        portionSize: '65g / phần',
-        calories: '185 kcal',
-      },
-      {
-        id: 'm-2',
-        name: 'Canh rau cải cá thác lác',
-        type: 'Canh dinh dưỡng',
-        portionSize: '150ml / phần',
-        calories: '75 kcal',
-      },
-      {
-        id: 'm-3',
-        name: 'Cơm trắng',
-        type: 'Cơm dẻo',
-        portionSize: '120g / phần',
-        calories: '210 kcal',
-      },
-      {
-        id: 'm-4',
-        name: 'Chuối tiêu tráng miệng',
-        type: 'Tráng miệng',
-        portionSize: '1 trái (~80g)',
-        calories: '72 kcal',
-      },
-      {
-        id: 'm-5',
-        name: 'Súp gà ngô non nấm hương (Bữa xế 14h)',
-        type: 'Xế chiều chính',
-        portionSize: '180ml / phần',
-        calories: '145 kcal',
-      },
-      {
-        id: 'm-6',
-        name: 'Sữa đậu đen óc chó (Ăn xế phụ 16h30)',
-        type: 'Thức uống dinh dưỡng',
-        portionSize: '150ml / phần',
-        calories: '110 kcal',
-      },
-    ];
-
-    const rawIngredients = [
-      { name: 'Thịt nạc vai heo sạch CP', plannedKg: 12.5, unit: 'kg', standard: 'VietGAP', storage: 'Ngăn mát 0-4°C' },
-      { name: 'Cà chua Đà Lạt', plannedKg: 6.0, unit: 'kg', standard: 'VietGAP', storage: 'Kho rau củ thoáng khí' },
-      { name: 'Cá thác lác nạo nguyên chất', plannedKg: 4.8, unit: 'kg', standard: 'HACCP', storage: 'Ngăn đông -18°C' },
-      { name: 'Rau cải ngọt canh', plannedKg: 8.5, unit: 'kg', standard: 'An toàn VSTP', storage: 'Rổ ráo nước' },
-      { name: 'Gạo ST25 chuẩn cơm mềm', plannedKg: 18.0, unit: 'kg', standard: 'OCOP 5 sao', storage: 'Thùng bảo quản kín' },
-      { name: 'Chuối tiêu chín tự nhiên', plannedKg: 15.0, unit: 'kg', standard: 'VietGAP', storage: 'Kho quả' },
+      { id: 'm1', name: dailyDishes.lunch[0] || 'Cơm trắng gạo tẻ dẻo', type: 'CƠM TRẮNG', portionSize: '100g', calories: '172 Kcal' },
+      { id: 'm2', name: dailyDishes.lunch[1] || 'Cá hú muối sả chiên', type: 'MÓN CHÍNH', portionSize: '65g', calories: '105.8 Kcal' },
+      { id: 'm3', name: dailyDishes.lunch[2] || 'Canh tôm thẻ nấu khoai sọ', type: 'MÓN CANH', portionSize: '120g', calories: '61.8 Kcal' },
+      { id: 'm4', name: dailyDishes.lunch[3] || 'Chuối cau chín', type: 'TRÁNG MIỆNG', portionSize: '50g', calories: '46 Kcal' },
     ];
 
     return {
       date: today,
       lastUpdated: new Date().toISOString(),
-      summary,
-      classes: kdsClasses,
-      allergyAlerts,
       todayMenu,
-      rawIngredients,
-      totalPlanned: summary.totalLunchPortions,
-      totalActual: summary.totalLunchPortions - summary.absentCount,
+      classes: classes.map((c) => ({
+        classId: String(c.id),
+        className: c.name,
+        ageGroup: c.ageGroup,
+        plannedPortions: 25,
+        actualPortions: 24,
+        status: 'READY_DELIVERY',
+        allergies: c.id === 1 ? ['1 suất không sữa bò (Bé Phương Linh)'] : [],
+      })),
+      totalPlanned: 150,
+      totalActual: 146,
     };
   }
 }

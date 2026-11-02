@@ -1,395 +1,203 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Optional,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../auth/entities/user.entity';
 import { Role } from '../../auth/entities/role.entity';
-import { Tenant } from '../../auth/entities/tenant.entity';
+import { StaffProfile } from '../entities/staff-profile.entity';
+import { QueryStaffDto } from '../dto/staff/query-staff.dto';
 import { CreateStaffDto } from '../dto/staff/create-staff.dto';
 import { UpdateStaffDto } from '../dto/staff/update-staff.dto';
-import { QueryStaffDto } from '../dto/staff/query-staff.dto';
-
-export interface StaffStats {
-  totalStaff: number;
-  activeStaff: number;
-  teachers: number;
-  kitchenAndNutrition: number;
-  medicalStaff: number;
-  inactiveOrDeleted: number;
-}
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const STAFF_ROLES_SQL = `('SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGER', 'NUTRITIONIST', 'KITCHEN_MANAGER', 'KITCHEN_STAFF', 'TEACHER', 'MEDICAL_STAFF')`;
-const AVAILABLE_STAFF_ROLES = [
-  'PRINCIPAL',
-  'SCHOOL_MANAGER',
-  'NUTRITIONIST',
-  'KITCHEN_MANAGER',
-  'KITCHEN_STAFF',
-  'TEACHER',
-  'MEDICAL_STAFF',
-];
 
 @Injectable()
 export class StaffManagementService {
-  private cachedTenantMap = new Map<string, string>();
-
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     @InjectRepository(Role)
     private readonly roleRepo: Repository<Role>,
-    @Optional()
-    @InjectRepository(Tenant)
-    private readonly tenantRepo?: Repository<Tenant>,
+    @InjectRepository(StaffProfile)
+    private readonly staffRepo: Repository<StaffProfile>,
   ) {}
 
-  private async resolveTenantId(rawTenantId: string): Promise<string> {
-    const raw = String(rawTenantId || '').trim();
-    if (!this.tenantRepo || UUID_REGEX.test(raw)) return raw;
-    if (this.cachedTenantMap.has(raw)) return this.cachedTenantMap.get(raw)!;
-
-    try {
-      const tenants = await this.tenantRepo.find({ order: { createdAt: 'ASC' } });
-      if (tenants.length > 0) {
-        const idx = /^\d+$/.test(raw) ? Math.max(0, parseInt(raw, 10) - 1) : 0;
-        const resolved = (tenants[idx] || tenants[0]).id;
-        this.cachedTenantMap.set(raw, resolved);
-        return resolved;
-      }
-    } catch {}
-    return raw;
-  }
-
-  private toStaffDto(u: User) {
-    return {
-      id: u.id,
-      tenantId: u.tenantId,
-      email: u.email,
-      fullName: u.fullName,
-      phone: u.phone,
-      avatarUrl: u.avatarUrl,
-      status: u.status,
-      twoFactorEnabled: u.twoFactorEnabled,
-      lastLoginAt: u.lastLoginAt,
-      createdAt: u.createdAt,
-      updatedAt: u.updatedAt,
-      deletedAt: u.deletedAt,
-      isDeleted: u.deletedAt !== null && u.deletedAt !== undefined,
-      roles: (u.roles || []).map((r) => ({ id: r.id, code: r.code, name: r.name })),
-    };
-  }
-
-  async getStaffList(rawTenantId: string, query: QueryStaffDto) {
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const page = query.page || 1;
-    const limit = query.limit || 10;
-
+  async findAll(query: QueryStaffDto) {
     const qb = this.userRepo
       .createQueryBuilder('u')
       .leftJoinAndSelect('u.roles', 'r')
-      .where('u.tenantId = :tenantId', { tenantId });
+      .innerJoin(StaffProfile, 'sp', 'sp.user_id = u.id')
+      .addSelect(['sp.staffType', 'sp.position', 'sp.startDate']);
 
-    if (query.includeDeleted || query.status === 'DELETED') {
-      qb.withDeleted();
-    }
-
-    if (query.search?.trim()) {
-      qb.andWhere(
-        '(LOWER(u.fullName) LIKE :search OR LOWER(u.email) LIKE :search OR u.phone LIKE :search)',
-        { search: `%${query.search.trim().toLowerCase()}%` },
-      );
-    }
-
-    if (query.roleCode?.trim()) {
-      qb.andWhere('r.code = :roleCode', { roleCode: query.roleCode.trim() });
-    } else {
-      qb.andWhere((subQb) => {
-        const subQuery = subQb
-          .subQuery()
-          .select('ur_filter.user_id')
-          .from('user_roles', 'ur_filter')
-          .innerJoin('roles', 'r_filter', 'ur_filter.role_id = r_filter.id')
-          .where(`r_filter.code IN ${STAFF_ROLES_SQL}`)
-          .getQuery();
-        return `u.id IN ${subQuery}`;
+    if (query.search) {
+      qb.andWhere('(LOWER(u.fullName) LIKE :s OR LOWER(u.email) LIKE :s OR u.phone LIKE :s)', {
+        s: `%${query.search.toLowerCase()}%`,
       });
     }
 
-    if (query.status?.trim()) {
-      if (query.status === 'DELETED') {
-        qb.andWhere('u.deletedAt IS NOT NULL');
-      } else {
-        qb.andWhere('u.status = :status', { status: query.status.trim() });
-      }
+    if (query.status) {
+      qb.andWhere('u.status = :status', { status: query.status });
     }
 
-    const validSortFields = ['fullName', 'email', 'createdAt', 'lastLoginAt'];
-    const sortBy = validSortFields.includes(query.sortBy || '') ? query.sortBy : 'createdAt';
-    qb.orderBy(`u.${sortBy}`, query.sortOrder === 'ASC' ? 'ASC' : 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit);
+    const users = await qb.getMany();
+    const staffProfiles = await this.staffRepo.find();
+    const profileMap = new Map(staffProfiles.map((p) => [p.userId, p]));
 
-    const [users, total] = await qb.getManyAndCount();
-
-    return {
-      data: users.map((u) => this.toStaffDto(u)),
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-  }
-
-  async getStaffStats(rawTenantId: string): Promise<StaffStats> {
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const countWith = (roleClause: string, statusClause?: string, withDel = false) => {
-      const qb = this.userRepo.createQueryBuilder('u');
-      if (withDel) qb.withDeleted();
-      qb.innerJoin('u.roles', 'r')
-        .where('u.tenantId = :tenantId', { tenantId })
-        .andWhere(roleClause);
-      if (statusClause) qb.andWhere(statusClause);
-      return qb.getCount();
-    };
-
-    const [
-      totalStaff,
-      activeStaff,
-      teachers,
-      kitchenAndNutrition,
-      medicalStaff,
-      inactiveOrDeleted,
-    ] = await Promise.all([
-      countWith(`r.code IN ${STAFF_ROLES_SQL}`),
-      countWith(`r.code IN ${STAFF_ROLES_SQL}`, "u.status = 'ACTIVE'"),
-      countWith("r.code = 'TEACHER'", "u.status = 'ACTIVE'"),
-      countWith("r.code IN ('KITCHEN_MANAGER', 'KITCHEN_STAFF', 'NUTRITIONIST')", "u.status = 'ACTIVE'"),
-      countWith("r.code = 'MEDICAL_STAFF'", "u.status = 'ACTIVE'"),
-      countWith(`r.code IN ${STAFF_ROLES_SQL}`, "(u.status != 'ACTIVE' OR u.deletedAt IS NOT NULL)", true),
-    ]);
-
-    return {
-      totalStaff,
-      activeStaff,
-      teachers,
-      kitchenAndNutrition,
-      medicalStaff,
-      inactiveOrDeleted,
-    };
-  }
-
-  async getAvailableStaffRoles() {
-    return this.roleRepo.find({
-      where: { code: In(AVAILABLE_STAFF_ROLES) },
-      select: ['id', 'code', 'name', 'description'],
-      order: { code: 'ASC' },
+    let results = users.map((u) => {
+      const p = profileMap.get(u.id);
+      return {
+        id: String(u.id),
+        email: u.email,
+        fullName: u.fullName,
+        phone: u.phone,
+        avatarUrl: u.avatar,
+        status: u.status,
+        roles: u.roles?.map((r) => r.code) || [],
+        staffType: p?.staffType || 'MANAGEMENT',
+        position: p?.position || '',
+        startDate: p?.startDate || null,
+        createdAt: u.createdAt,
+      };
     });
+
+    if (query.staffType) {
+      results = results.filter((s) => s.staffType === query.staffType);
+    }
+
+    return results;
   }
 
-  async getStaffById(rawTenantId: string, id: string) {
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const user = await this.userRepo
-      .createQueryBuilder('u')
-      .withDeleted()
-      .leftJoinAndSelect('u.roles', 'r')
-      .where('u.id = :id AND u.tenantId = :tenantId', { id, tenantId })
-      .getOne();
+  async findOne(id: number) {
+    const user = await this.userRepo.findOne({
+      where: { id },
+      relations: ['roles'],
+    });
+    if (!user) throw new NotFoundException('Không tìm thấy cán bộ/nhân viên');
 
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy tài khoản nhân sự này trong trường.');
-    }
-
-    return this.toStaffDto(user);
-  }
-
-  async createStaff(rawTenantId: string, createDto: CreateStaffDto) {
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const email = createDto.email.trim().toLowerCase();
-
-    const existingUser = await this.userRepo
-      .createQueryBuilder('u')
-      .withDeleted()
-      .where('LOWER(u.email) = :email AND u.tenantId = :tenantId', { email, tenantId })
-      .getOne();
-
-    if (existingUser) {
-      throw new ConflictException(
-        existingUser.deletedAt !== null
-          ? 'Email này thuộc về một tài khoản đã bị xóa mềm trước đó. Bạn có thể khôi phục tài khoản này thay vì tạo mới.'
-          : 'Email này đã được sử dụng bởi một tài khoản khác trong trường.',
-      );
-    }
-
-    const roles = await this.roleRepo.find({ where: { code: In(createDto.roleCodes) } });
-    if (!roles?.length) {
-      throw new BadRequestException('Vai trò được chọn không hợp lệ.');
-    }
-
-    const rawPassword = createDto.password?.trim() || 'Password123@';
-    const passwordHash = await bcrypt.hash(rawPassword, 10);
-
-    const savedUser = await this.userRepo.save(
-      this.userRepo.create({
-        tenantId,
-        email,
-        fullName: createDto.fullName.trim(),
-        phone: createDto.phone?.trim() || null,
-        passwordHash,
-        status: createDto.status || 'ACTIVE',
-        roles,
-      }),
-    );
+    const profile = await this.staffRepo.findOne({ where: { userId: id } });
 
     return {
-      id: savedUser.id,
-      tenantId: savedUser.tenantId,
-      email: savedUser.email,
-      fullName: savedUser.fullName,
-      phone: savedUser.phone,
-      status: savedUser.status,
-      createdAt: savedUser.createdAt,
-      roles: (savedUser.roles || roles).map((r) => ({ id: r.id, code: r.code, name: r.name })),
-      initialPassword: rawPassword,
+      id: String(user.id),
+      email: user.email,
+      fullName: user.fullName,
+      phone: user.phone,
+      avatarUrl: user.avatar,
+      status: user.status,
+      roles: user.roles?.map((r) => r.code) || [],
+      staffType: profile?.staffType || 'MANAGEMENT',
+      position: profile?.position || '',
+      startDate: profile?.startDate || null,
     };
   }
 
-  async updateStaff(rawTenantId: string, id: string, updateDto: UpdateStaffDto) {
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const user = await this.userRepo
-      .createQueryBuilder('u')
-      .addSelect('u.passwordHash')
-      .leftJoinAndSelect('u.roles', 'r')
-      .where('u.id = :id AND u.tenantId = :tenantId', { id, tenantId })
-      .getOne();
-
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy tài khoản nhân sự cần cập nhật.');
+  async create(dto: CreateStaffDto) {
+    const existing = await this.userRepo.findOne({ where: { email: dto.email.toLowerCase() } });
+    if (existing) {
+      throw new ConflictException('Email này đã được sử dụng trong hệ thống');
     }
 
-    const prevRoles = user.roles || [];
-    if (updateDto.fullName !== undefined) user.fullName = updateDto.fullName.trim();
-    if (updateDto.phone !== undefined) user.phone = updateDto.phone?.trim() || null;
-    if (updateDto.status !== undefined) user.status = updateDto.status;
-    if (updateDto.newPassword?.trim()) {
-      user.passwordHash = await bcrypt.hash(updateDto.newPassword.trim(), 10);
-    }
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(dto.password || '123456', salt);
 
-    let resolvedRoles = prevRoles;
-    if (updateDto.roleCodes?.length) {
-      const nextRoles = await this.roleRepo.find({ where: { code: In(updateDto.roleCodes) } });
-      if (nextRoles.length > 0) {
-        resolvedRoles = nextRoles;
-        const prevCodes = prevRoles.map((r) => r.code).sort().join(',');
-        const nextCodes = nextRoles.map((r) => r.code).sort().join(',');
-        if (prevCodes !== nextCodes) {
-          user.roles = nextRoles;
-        } else {
-          delete (user as any).roles;
-        }
-      }
-    } else {
-      delete (user as any).roles;
-    }
+    const role = await this.roleRepo.findOne({ where: { code: dto.roleCode } });
 
-    const updatedUser = await this.userRepo.save(user);
+    const user = this.userRepo.create({
+      email: dto.email.toLowerCase(),
+      passwordHash,
+      fullName: dto.fullName,
+      phone: dto.phone || null,
+      status: 'ACTIVE',
+      roles: role ? [role] : [],
+    });
+
+    const savedUser = await this.userRepo.save(user);
+
+    const profile = this.staffRepo.create({
+      userId: savedUser.id,
+      staffType: dto.staffType,
+      position: dto.position || null,
+      startDate: new Date().toISOString().split('T')[0],
+    });
+    await this.staffRepo.save(profile);
+
+    return this.findOne(savedUser.id);
+  }
+
+  async update(id: number, dto: UpdateStaffDto) {
+    const user = await this.userRepo.findOne({ where: { id }, relations: ['roles'] });
+    if (!user) throw new NotFoundException('Không tìm thấy nhân viên');
+
+    if (dto.fullName) user.fullName = dto.fullName;
+    if (dto.phone) user.phone = dto.phone;
+    if (dto.status) user.status = dto.status;
+
+    if (dto.roleCode) {
+      const role = await this.roleRepo.findOne({ where: { code: dto.roleCode } });
+      if (role) user.roles = [role];
+    }
+    await this.userRepo.save(user);
+
+    let profile = await this.staffRepo.findOne({ where: { userId: id } });
+    if (!profile) {
+      profile = this.staffRepo.create({ userId: id });
+    }
+    if (dto.staffType) profile.staffType = dto.staffType;
+    if (dto.position) profile.position = dto.position;
+    await this.staffRepo.save(profile);
+
+    return this.findOne(id);
+  }
+
+  async remove(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Không tìm thấy nhân viên');
+    user.status = 'INACTIVE';
+    await this.userRepo.save(user);
+    return { success: true, message: 'Đã tạm ngưng cán bộ/nhân viên' };
+  }
+
+  async getStats() {
+    const totalStaff = await this.staffRepo.count();
+    const users = await this.userRepo.find({ relations: ['roles'] });
+    const staffProfiles = await this.staffRepo.find();
+    const staffUserIds = new Set(staffProfiles.map((p) => p.userId));
+    const staffUsers = users.filter((u) => staffUserIds.has(u.id));
+
+    const activeStaff = staffUsers.filter((u) => u.status === 'ACTIVE').length;
+    const teachingStaff = staffUsers.filter((u) => u.roles?.some((r) => r.code === 'TEACHER')).length;
+    const kitchenStaff = staffUsers.filter((u) => u.roles?.some((r) => r.code === 'KITCHEN_STAFF')).length;
+    const nutritionStaff = staffUsers.filter((u) => u.roles?.some((r) => r.code === 'NUTRITIONIST')).length;
+    const managementStaff = staffUsers.filter((u) =>
+      u.roles?.some((r) => r.code === 'SCHOOL_MANAGER' || r.code === 'PRINCIPAL' || r.code === 'SUPER_ADMIN'),
+    ).length;
 
     return {
-      id: updatedUser.id,
-      tenantId: updatedUser.tenantId,
-      email: updatedUser.email,
-      fullName: updatedUser.fullName,
-      phone: updatedUser.phone,
-      status: updatedUser.status,
-      updatedAt: updatedUser.updatedAt,
-      roles: (updatedUser.roles || resolvedRoles).map((r) => ({
-        id: r.id,
-        code: r.code,
-        name: r.name,
-      })),
+      totalStaff: staffUsers.length || totalStaff,
+      activeStaff,
+      teachingStaff,
+      kitchenStaff,
+      nutritionStaff,
+      managementStaff,
+      onLeaveStaff: 0,
     };
   }
 
-  async softDeleteStaff(rawTenantId: string, currentUserId: string, targetId: string) {
-    if (currentUserId === targetId) {
-      throw new ForbiddenException('Bạn không thể tự xóa tài khoản của chính mình.');
-    }
-
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const user = await this.userRepo
-      .createQueryBuilder('u')
-      .leftJoinAndSelect('u.roles', 'r')
-      .where('u.id = :targetId AND u.tenantId = :tenantId', { targetId, tenantId })
-      .getOne();
-
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy tài khoản nhân sự này.');
-    }
-
-    if ((user.roles || []).some((r) => r.code === 'SUPER_ADMIN')) {
-      throw new ForbiddenException('Không thể xóa tài khoản Quản Trị Viên Hệ Thống.');
-    }
-
-    await this.userRepo.softDelete({ id: targetId, tenantId });
-    await this.userRepo.update({ id: targetId, tenantId }, { status: 'INACTIVE' });
-
-    return {
-      success: true,
-      message: `Đã chuyển nhân sự "${user.fullName}" vào danh sách lưu trữ (xóa mềm). Lịch sử dữ liệu học sinh, thực đơn và sổ kiểm thực được bảo toàn nguyên vẹn.`,
-    };
+  async getRoles() {
+    const roles = await this.roleRepo.find();
+    return roles.map((r) => ({ code: r.code, name: r.name, description: (r as any).description || r.name }));
   }
 
-  async restoreStaff(rawTenantId: string, targetId: string) {
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const user = await this.userRepo
-      .createQueryBuilder('u')
-      .withDeleted()
-      .where('u.id = :targetId AND u.tenantId = :tenantId', { targetId, tenantId })
-      .getOne();
-
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy tài khoản nhân sự này.');
-    }
-    if (!user.deletedAt) {
-      throw new BadRequestException('Tài khoản này hiện không ở trạng thái bị xóa mềm.');
-    }
-
-    await this.userRepo.restore({ id: targetId, tenantId });
-    await this.userRepo.update({ id: targetId, tenantId }, { status: 'ACTIVE' });
-
-    return {
-      success: true,
-      message: `Đã khôi phục tài khoản nhân sự "${user.fullName}" thành công.`,
-    };
+  async restore(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Không tìm thấy nhân sự');
+    user.status = 'ACTIVE';
+    await this.userRepo.save(user);
+    return { success: true, message: 'Đã khôi phục nhân sự' };
   }
 
-  async toggleStaffStatus(rawTenantId: string, currentUserId: string, targetId: string) {
-    if (currentUserId === targetId) {
-      throw new ForbiddenException('Bạn không thể tự khóa tài khoản của chính mình.');
-    }
-
-    const tenantId = await this.resolveTenantId(rawTenantId);
-    const user = await this.userRepo.findOne({ where: { id: targetId, tenantId } });
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy tài khoản nhân sự.');
-    }
-
-    const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    await this.userRepo.update({ id: targetId, tenantId }, { status: newStatus });
-
-    return {
-      success: true,
-      status: newStatus,
-      message: `Đã đổi trạng thái tài khoản thành ${newStatus === 'ACTIVE' ? 'Hoạt động' : 'Tạm khóa'}.`,
-    };
+  async toggleStatus(id: number) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Không tìm thấy nhân sự');
+    user.status = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    await this.userRepo.save(user);
+    return { success: true, status: user.status, message: `Đã đổi trạng thái sang ${user.status}` };
   }
 }

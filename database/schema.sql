@@ -332,6 +332,13 @@ CREATE TABLE menus (
     status          VARCHAR(20) NOT NULL DEFAULT 'DRAFT'
                         CHECK (status IN ('DRAFT', 'PENDING', 'APPROVED', 'PUBLISHED', 'REJECTED')),
     created_by      BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    submitted_by    BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    submitted_at    TIMESTAMPTZ,
+    commitment_signed BOOLEAN NOT NULL DEFAULT FALSE,
+    commitment_text TEXT,
+    commitment_items JSONB DEFAULT '[]'::jsonb,
+    override_justification TEXT,
+    violations_snapshot JSONB DEFAULT '[]'::jsonb,
     approved_by     BIGINT REFERENCES users(id) ON DELETE SET NULL,
     approved_at     TIMESTAMPTZ,
     CONSTRAINT chk_menus_dates CHECK (week_end_date >= week_start_date)
@@ -341,6 +348,8 @@ CREATE INDEX idx_menus_cycle ON menus(cycle_id);
 CREATE INDEX idx_menus_status ON menus(status);
 CREATE INDEX idx_menus_age_group ON menus(age_group);
 CREATE INDEX idx_menus_dates ON menus(week_start_date, week_end_date);
+CREATE INDEX idx_menus_submitted_by ON menus(submitted_by);
+CREATE INDEX idx_menus_submitted_at ON menus(submitted_at);
 
 -- menu_versions: Phiên bản thực đơn (hỗ trợ điều chỉnh)
 CREATE TABLE menu_versions (
@@ -820,5 +829,107 @@ CREATE TABLE ui_translations (
 
 CREATE INDEX idx_ui_translations_lang ON ui_translations(language_id);
 CREATE INDEX idx_ui_translations_key ON ui_translations(translation_key);
+
+
+-- audit_logs: Lưu trữ nhật ký kiểm toán và truy vết các hành động nhạy cảm (UC13, UC14, BR-009, BR-010)
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id              BIGSERIAL PRIMARY KEY,
+    school_id       BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+    user_id         BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    user_email      VARCHAR(255),
+    user_name       VARCHAR(150),
+    user_role       VARCHAR(50),
+    action          VARCHAR(100) NOT NULL,
+    target_entity   VARCHAR(100),
+    target_id       VARCHAR(100),
+    ip_address      VARCHAR(45),
+    user_agent      TEXT,
+    details         JSONB DEFAULT '{}'::jsonb,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_school_created ON audit_logs(school_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_target ON audit_logs(target_entity, target_id);
+
+-- dish_frequency_rules: Cấu hình quy tắc cơ cấu loại món (Món mặn, Cơm, Canh, Món phụ, Tráng miệng, Xế) & Tần suất 10 nhóm thực phẩm Phụ lục 7
+CREATE TABLE IF NOT EXISTS dish_frequency_rules (
+    id                      BIGSERIAL PRIMARY KEY,
+    school_id               BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+    rule_name               VARCHAR(200) NOT NULL,
+    meal_slot               VARCHAR(30) NOT NULL DEFAULT 'ALL', -- 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'ALL'
+    target_type             VARCHAR(30) NOT NULL, -- 'DISH_CATEGORY' hoặc 'FOOD_GROUP'
+    target_id               BIGINT,
+    target_code             VARCHAR(50) NOT NULL, -- 'MAIN', 'RICE', 'SOUP', 'SIDE', 'DESSERT', 'SNACK_MORNING', 'SNACK_AFTERNOON', 'MEAT', 'SEAFOOD'...
+    target_name             VARCHAR(150) NOT NULL,
+    age_group               VARCHAR(30) NOT NULL DEFAULT 'ALL', -- 'NHA_TRE', 'MAU_GIAO', 'PRIMARY_6_7', 'PRIMARY_8_9', 'ALL'
+    period_type             VARCHAR(20) NOT NULL DEFAULT 'PER_CYCLE_4_WEEKS', -- 'PER_DAY', 'PER_WEEK', 'PER_CYCLE_4_WEEKS'
+    min_occurrences         INT NOT NULL DEFAULT 0,
+    max_occurrences         INT NOT NULL,
+    is_required_in_meal     BOOLEAN NOT NULL DEFAULT FALSE,
+    severity                VARCHAR(15) NOT NULL DEFAULT 'WARNING', -- 'ERROR', 'WARNING', 'INFO'
+    is_active               BOOLEAN NOT NULL DEFAULT TRUE,
+    note                    TEXT,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_freq_rules_school ON dish_frequency_rules(school_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_freq_rules_slot ON dish_frequency_rules(meal_slot, target_code);
+
+-- dish_spacing_rules: Cấu hình khoảng cách ngày lặp lại món ăn & chống ngán
+CREATE TABLE IF NOT EXISTS dish_spacing_rules (
+    id                      BIGSERIAL PRIMARY KEY,
+    school_id               BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+    rule_name               VARCHAR(200) NOT NULL,
+    meal_slot               VARCHAR(30) NOT NULL DEFAULT 'ALL',
+    target_type             VARCHAR(30) NOT NULL, -- 'DISH_CATEGORY', 'SPECIFIC_DISH'
+    target_id               BIGINT,
+    target_name             VARCHAR(150),
+    age_group               VARCHAR(30) NOT NULL DEFAULT 'ALL',
+    min_spacing_days        INT NOT NULL DEFAULT 1,
+    no_repeat_in_same_week  BOOLEAN NOT NULL DEFAULT TRUE,
+    no_repeat_in_same_day   BOOLEAN NOT NULL DEFAULT TRUE,
+    priority_order          INT NOT NULL DEFAULT 1,
+    severity                VARCHAR(15) NOT NULL DEFAULT 'WARNING',
+    is_active               BOOLEAN NOT NULL DEFAULT TRUE,
+    note                    TEXT,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_spacing_rules_school ON dish_spacing_rules(school_id, is_active);
+
+-- nutrition_intake_standards: Định mức nhu cầu dinh dưỡng & vi chất học sinh (Phụ lục 1 -> 6)
+CREATE TABLE IF NOT EXISTS nutrition_intake_standards (
+    id                      BIGSERIAL PRIMARY KEY,
+    school_id               BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+    standard_name           VARCHAR(200) NOT NULL,
+    age_group               VARCHAR(30) NOT NULL,
+    gender                  VARCHAR(10) NOT NULL DEFAULT 'ALL',
+    meal_scope              VARCHAR(30) NOT NULL DEFAULT 'DAYBOARDING',
+    energy_kcal_min         NUMERIC(8,2) NOT NULL,
+    energy_kcal_max         NUMERIC(8,2) NOT NULL,
+    protein_ratio_min       NUMERIC(5,2) NOT NULL DEFAULT 13.0,
+    protein_ratio_max       NUMERIC(5,2) NOT NULL DEFAULT 20.0,
+    lipid_ratio_min         NUMERIC(5,2) NOT NULL DEFAULT 25.0,
+    lipid_ratio_max         NUMERIC(5,2) NOT NULL DEFAULT 35.0,
+    carbohydrate_ratio_min  NUMERIC(5,2) NOT NULL DEFAULT 52.0,
+    carbohydrate_ratio_max  NUMERIC(5,2) NOT NULL DEFAULT 60.0,
+    fiber_g_min             NUMERIC(6,2),
+    fiber_g_max             NUMERIC(6,2),
+    calcium_mg_min          NUMERIC(8,2) NOT NULL,
+    iron_absorption_rate    VARCHAR(10) DEFAULT '10%',
+    iron_mg_min             NUMERIC(6,2) NOT NULL,
+    zinc_absorption_level   VARCHAR(10) DEFAULT 'MEDIUM',
+    zinc_mg_min             NUMERIC(6,2) NOT NULL,
+    vitamin_a_rae_mcg_min   NUMERIC(8,2) NOT NULL,
+    is_active               BOOLEAN NOT NULL DEFAULT TRUE,
+    note                    TEXT,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_intake_std_school ON nutrition_intake_standards(school_id, age_group, is_active);
 
 COMMIT;

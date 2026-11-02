@@ -20,39 +20,77 @@ import { TeacherTabletPage } from './features/attendance/pages/TeacherTabletPage
 import { ChildGrowthMonitoringPage } from './features/growth/pages/ChildGrowthMonitoringPage';
 import { AttendancePage } from './features/attendance/AttendancePage';
 import { MealEvaluationPage } from './features/attendance/MealEvaluationPage';
-
+import { MonitorChildMenuConsumptionPage } from './features/parent-evaluations/MonitorChildMenuConsumptionPage';
+import { HomePage } from './features/home/HomePage';
+import { AuditLogsPage } from './features/audit-logs/pages/AuditLogsPage';
+import { FoodGroupRulesPage } from './features/menus/pages/FoodGroupRulesPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
-import { ChefHat, Tablet, LayoutDashboard, Sparkles, LogOut, Users, Scale, UtensilsCrossed, TrendingUp } from 'lucide-react';
+import { isJwtExpired } from './core/utils/jwt';
+import { ChefHat, Tablet, LayoutDashboard, Sparkles, LogOut, Users, Scale, UtensilsCrossed, Home } from 'lucide-react';
 
 /**
- * Component điều hướng thông minh theo Role người dùng khi vào trang chủ "/"
+ * Lấy đường dẫn phân hệ tương ứng với Role của tài khoản
+ */
+export const getPortalPathForRoles = (roles?: any[]): string => {
+  if (!roles || roles.length === 0) return '/dashboard';
+  const roleStrings = roles.map((r: any) =>
+    typeof r === 'string' ? r.toUpperCase() : (r?.code || r?.name || '').toUpperCase()
+  );
+
+  if (roleStrings.includes('KITCHEN_STAFF') || roleStrings.includes('KITCHEN_MANAGER')) {
+    return '/kitchen';
+  }
+  if (roleStrings.includes('NUTRITIONIST')) {
+    return '/nutritionist/menus';
+  }
+  if (roleStrings.includes('TEACHER')) {
+    return '/tablet';
+  }
+  if (roleStrings.includes('PARENT')) {
+    return '/child-menu-consumption';
+  }
+  if (
+    roleStrings.includes('PRINCIPAL') ||
+    roleStrings.includes('SUPER_ADMIN') ||
+    roleStrings.includes('SCHOOL_MANAGEMENT') ||
+    roleStrings.includes('SCHOOL_MANAGER')
+  ) {
+    return '/dashboard';
+  }
+  return '/dashboard';
+};
+
+/**
+ * Component điều hướng thông minh theo Role người dùng khi muốn vào đúng Cổng
  */
 const RoleBasedRedirect: React.FC = () => {
   const { user } = useAuthStore();
-  const roles = user?.roles || [];
-
-  if (roles.includes('NUTRITIONIST')) {
-    return <Navigate to="/nutritionist/menus" replace />;
-  }
-  if (roles.includes('TEACHER')) {
-    return <Navigate to="/tablet" replace />;
-  }
-  if (roles.includes('KITCHEN_STAFF')) {
-    return <Navigate to="/kds" replace />;
-  }
-  if (roles.includes('PRINCIPAL') || roles.includes('SUPER_ADMIN')) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  return <Navigate to="/dashboard" replace />;
+  const targetPath = getPortalPathForRoles(user?.roles);
+  return <Navigate to={targetPath} replace />;
 };
 
+/**
+ * Component xử lý khi người dùng vào trang gốc (/) hoặc (/home):
+ * - Nếu CÒN Access Token (và chưa hết hạn) -> Vào THẲNG trang quản lý của tài khoản đó.
+ * - Nếu CHƯA ĐĂNG NHẬP / ĐÃ ĐĂNG XUẤT / HẾT HẠN TOKEN -> Vào trang HomePage.
+ */
+const HomeOrPortalRedirect: React.FC = () => {
+  const { isAuthenticated, accessToken, user } = useAuthStore();
+
+  if (isAuthenticated && accessToken && !isJwtExpired(accessToken)) {
+    const targetPath = getPortalPathForRoles(user?.roles);
+    return <Navigate to={targetPath} replace />;
+  }
+
+  return <HomePage />;
+};
 
 export const App: React.FC = () => {
   const { hydrate, isAuthenticated, logout, user } = useAuthStore();
 
-  // Hydrate auth state từ localStorage 1 lần khi app mount
+  // Hydrate auth state từ localStorage 1 lần khi app mount & kiểm tra token hết hạn
   useEffect(() => {
     hydrate();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -66,6 +104,11 @@ export const App: React.FC = () => {
       {/* Quick Navigation Floating Bar — chỉ hiện khi đã login */}
       {isAuthenticated && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700 text-xs font-semibold">
+          <Link to="/landing" className="flex items-center gap-1 text-slate-300 hover:text-white transition" title="Xem trang giới thiệu giải pháp">
+            <Home className="w-3.5 h-3.5" /> Giới thiệu
+          </Link>
+          <span className="text-slate-600">|</span>
+
           <span className="text-slate-300 flex items-center gap-1.5 font-bold">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             {user?.fullName} ({isNutritionist ? 'Dinh dưỡng' : isPrincipal ? 'Hiệu trưởng' : 'Nhân sự'})
@@ -110,7 +153,7 @@ export const App: React.FC = () => {
             <Tablet className="w-3.5 h-3.5" /> Tablet GV
           </Link>
           <span className="text-slate-600">|</span>
-          <Link to="/kds" className="flex items-center gap-1 hover:text-amber-300 transition">
+          <Link to="/kitchen" className="flex items-center gap-1 hover:text-amber-300 transition">
             <ChefHat className="w-3.5 h-3.5" /> KDS Bếp
           </Link>
 
@@ -118,7 +161,7 @@ export const App: React.FC = () => {
           <button
             onClick={() => {
               logout();
-              window.location.href = '/login';
+              window.location.href = '/home';
             }}
             className="flex items-center gap-1 text-rose-400 hover:text-rose-300 transition font-bold"
           >
@@ -128,13 +171,21 @@ export const App: React.FC = () => {
       )}
 
       <Routes>
+        {/* Điểm vào:
+            - Nếu còn Access Token hợp lệ -> Vào THẲNG trang quản lý của tài khoản đó.
+            - Nếu chưa đăng nhập / đã đăng xuất / hết hạn token -> Vào HomePage.
+        */}
+        <Route path="/" element={<HomeOrPortalRedirect />} />
+        <Route path="/home" element={<HomeOrPortalRedirect />} />
+        <Route path="/landing" element={<HomePage />} />
+
         {/* Public: Login Page & Forgot Password */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-        {/* Root Redirect: Tự động phân luồng về Cổng phù hợp với Role */}
+        {/* Cổng mặc định theo Role */}
         <Route
-          path="/"
+          path="/portal"
           element={
             <ProtectedRoute>
               <RoleBasedRedirect />
@@ -143,7 +194,6 @@ export const App: React.FC = () => {
         />
 
         {/* ─── 1. PHÂN HỆ CỔNG CHUYÊN GIA DINH DƯỠNG (NUTRITIONIST PORTAL) ─── */}
-        {/* Layout Topbar NutriKid chuẩn 100% hình ảnh, CHỈ CHO ROLE NUTRITIONIST & SUPER_ADMIN */}
         <Route
           path="/nutritionist"
           element={
@@ -156,6 +206,7 @@ export const App: React.FC = () => {
           <Route path="dashboard" element={<NutritionistDashboardPage />} />
           <Route path="menus" element={<WeeklyMenuManagementPage />} />
           <Route path="rules" element={<NutritionRulesPage />} />
+          <Route path="food-group-rules" element={<FoodGroupRulesPage />} />
           <Route path="allergens" element={<NutritionistAllergyManagementPage />} />
           <Route path="foods" element={<NutritionRulesPage />} />
           <Route path="dishes" element={<NutritionRulesPage />} />
@@ -182,8 +233,16 @@ export const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/food-group-rules"
+          element={
+            <ProtectedRoute allowedRoles={['NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL']}>
+              <Navigate to="/nutritionist/food-group-rules" replace />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* ─── 2. PHÂN HỆ CỔNG BAN GIÁM HIỆU / ADMIN (CHỈ CHO ROLE PRINCIPAL / SUPER_ADMIN / SCHOOL_MANAGEMENT / TEACHER) ─── */}
+        {/* ─── 2. PHÂN HỆ CỔNG BAN GIÁM HIỆU / ADMIN ─── */}
         <Route
           element={
             <ProtectedRoute allowedRoles={['PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT', 'TEACHER']}>
@@ -201,12 +260,12 @@ export const App: React.FC = () => {
           <Route path="/menu-planning" element={<MenuPlanningPage />} />
           <Route path="/services" element={<WeeklyMenuManagementPage />} />
           <Route path="/food-safety" element={<WeeklyMenuManagementPage />} />
+          <Route path="/audit-logs" element={<AuditLogsPage />} />
           <Route path="/finances" element={<WeeklyMenuManagementPage />} />
           <Route path="/children" element={<WeeklyMenuManagementPage />} />
           <Route path="/growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="/payments" element={<WeeklyMenuManagementPage />} />
         </Route>
-
 
         {/* ─── 3. PHÂN HỆ TABLET GIÁO VIÊN ─── */}
         <Route
@@ -221,7 +280,7 @@ export const App: React.FC = () => {
           <Route path="record" element={<MealEvaluationPage />} />
         </Route>
 
-        {/* ─── 4. PHÂN HỆ MÀN HÌNH BẾP (KDS) ─── */}
+        {/* ─── 4. PHÂN HỆ MÀN HÌNH BẾP (KDS) & KITCHEN ─── */}
         <Route
           path="/kds"
           element={
@@ -230,9 +289,27 @@ export const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/kitchen"
+          element={
+            <ProtectedRoute allowedRoles={['KITCHEN_STAFF', 'SUPER_ADMIN', 'PRINCIPAL']}>
+              <KitchenDisplayLayout />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/login'} replace />} />
+        {/* ─── 5. PHÂN HỆ CỔNG PHỤ HUYNH (PARENT PORTAL) ─── */}
+        <Route
+          path="/child-menu-consumption"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL']}>
+              <MonitorChildMenuConsumptionPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all: Điều hướng về /home */}
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
   );

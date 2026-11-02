@@ -39,25 +39,25 @@ export const EvaluationSidebar: React.FC = () => {
 
         {/* Navigation Links */}
         <nav className="p-3 space-y-1 text-sm">
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/dashboard" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <LayoutDashboard className="w-4 h-4 text-slate-400" />
             <span>Dashboard Tổng quan</span>
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/classes" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <Users className="w-4 h-4 text-slate-400" />
             <span>Hồ sơ Học sinh</span>
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/classes" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <Building2 className="w-4 h-4 text-slate-400" />
             <span>Quản trị Lớp học</span>
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/staff" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <ChefHat className="w-4 h-4 text-slate-400" />
             <span>Nhân sự & Bếp</span>
-          </button>
+          </Link>
 
           {/* Dịch vụ bán trú Collapsible */}
           <div>
@@ -73,35 +73,35 @@ export const EvaluationSidebar: React.FC = () => {
             </button>
             {isServiceOpen && (
               <div className="pl-9 pr-2 py-1 space-y-1 text-xs">
-                <Link to="/snack-roster" className="block py-1.5 px-2 rounded-lg text-slate-500 hover:text-teal-700 hover:bg-teal-50/60 font-medium">
+                <Link to="/services" className="block py-1.5 px-2 rounded-lg text-slate-500 hover:text-teal-700 hover:bg-teal-50/60 font-medium">
                   Phí ăn xế & Công nợ
                 </Link>
-                <Link to="/snack-roster" className="block py-1.5 px-2 rounded-lg text-slate-500 hover:text-teal-700 hover:bg-teal-50/60 font-medium">
+                <Link to="/services" className="block py-1.5 px-2 rounded-lg text-slate-500 hover:text-teal-700 hover:bg-teal-50/60 font-medium">
                   Gói ăn xế
                 </Link>
               </div>
             )}
           </div>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/menu-approval" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <CalendarCheck className="w-4 h-4 text-slate-400" />
             <span>Phê duyệt thực đơn</span>
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/inventory" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <Package className="w-4 h-4 text-slate-400" />
             <span>Kho & Dinh dưỡng</span>
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/food-safety" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <ClipboardList className="w-4 h-4 text-slate-400" />
             <span>Sổ kiểm thực 3 bước</span>
-          </button>
+          </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/finances" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <BarChart3 className="w-4 h-4 text-slate-400" />
             <span>Báo cáo tài chính</span>
-          </button>
+          </Link>
 
           {/* ACTIVE ITEM: Ý kiến & Đánh giá */}
           <Link
@@ -112,10 +112,10 @@ export const EvaluationSidebar: React.FC = () => {
             <span className="flex-1">Ý kiến & Đánh giá</span>
           </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
+          <Link to="/settings" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 transition text-left font-medium">
             <Settings className="w-4 h-4 text-slate-400" />
             <span>Cài đặt trường học</span>
-          </button>
+          </Link>
         </nav>
       </div>
 

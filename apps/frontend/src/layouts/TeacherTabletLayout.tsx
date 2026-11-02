@@ -18,7 +18,7 @@ export const TeacherTabletLayout: React.FC = () => {
             <UtensilsCrossed className="w-7 h-7 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Lớp Chồi 1 – Ghi nhận Bữa ăn</h1>
+            <h1 className="text-xl font-bold">Ghi nhận Suất ăn Bán trú</h1>
             <p className="text-xs text-emerald-200">
               {user?.fullName ? `${user.fullName} phụ trách` : 'Cô Nguyễn Lan Anh phụ trách'}
             </p>

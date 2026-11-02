@@ -69,6 +69,15 @@ export interface WeeklyMenu {
   approvedAt?: string | null;
   approvalNotes?: string | null;
   rejectionReason?: string | null;
+  createdByName?: string | null;
+  submittedBy?: string | null;
+  submittedByName?: string | null;
+  submittedAt?: string | null;
+  commitmentSigned?: boolean;
+  commitmentText?: string | null;
+  commitmentItems?: string[];
+  overrideJustification?: string | null;
+  violationsSnapshot?: any[];
   editRequestStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
   editRequestReason?: string | null;
   editRequestAt?: string | null;
@@ -98,6 +107,14 @@ export interface MenuStatistics {
   approved: number;
   avgCalories: number;
   nutritionStandard: string;
+}
+
+export interface SubmitMenuPayload {
+  commitmentSigned: boolean;
+  commitmentItems: string[];
+  commitmentText: string;
+  overrideJustification?: string;
+  violationsSnapshot?: any[];
 }
 
 export interface CreateMenuPayload {
@@ -352,8 +369,17 @@ export const weeklyMenusApi = {
    * - GỌI TỪ: handleSubmitForReview() trong WeeklyMenuManagementPage.tsx
    * - GỌI SANG: POST /menus/:id/submit trong apps/backend/src/modules/menus/controllers/menus.controller.ts (BƯỚC 3)
    */
-  async submitForReview(id: string): Promise<WeeklyMenu> {
-    const res = await apiClient.post(`/menus/${id}/submit`);
+  async submitForReview(id: string, payload?: SubmitMenuPayload): Promise<WeeklyMenu> {
+    const res = await apiClient.post(`/menus/${id}/submit`, payload || {
+      commitmentSigned: true,
+      commitmentItems: [
+        'COMMIT_TT28_NUTRITION',
+        'COMMIT_QD1246_SAFETY',
+        'COMMIT_ALLERGEN_SAFETY',
+        'COMMIT_PROFESSIONAL_RESP',
+      ],
+      commitmentText: 'Cam kết thực đơn tuân thủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn thực phẩm Quyết định 1246/QĐ-BYT',
+    });
     return res.data;
   },
 

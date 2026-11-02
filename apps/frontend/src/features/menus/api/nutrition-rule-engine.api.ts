@@ -235,9 +235,202 @@ export const nutritionEngineApi = {
     return res.data;
   },
 
+  // --- BẢNG 1: QUY TẮC TẦN SUẤT & CƠ CẤU MÓN (Món mặn, Cơm, Canh... & 10 nhóm PL7) ---
+  async getFrequencyRules(params?: { targetType?: string; ageGroup?: string; mealSlot?: string; isActive?: boolean }): Promise<DishFrequencyRule[]> {
+    const res = await apiClient.get<DishFrequencyRule[]>('/nutrition-rules/frequency-rules', { params });
+    const raw = res.data;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray((raw as any)?.data)) return (raw as any).data;
+    if (Array.isArray((raw as any)?.items)) return (raw as any).items;
+    return [];
+  },
+
+  async getFrequencyRuleSummary(): Promise<{ total: number; active: number; dishCategoryRules: number; foodGroupRules: number }> {
+    const res = await apiClient.get('/nutrition-rules/frequency-rules/summary');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async getFoodGroupsCatalog(): Promise<{
+    dishCategories: Array<{ id: number; code: string; name: string; isRequiredInMeal: boolean; displayOrder: number }>;
+    foodCategories: Array<{ id: number; name: string }>;
+    standardFoodGroups: Array<{ code: string; name: string }>;
+  }> {
+    const res = await apiClient.get('/nutrition-rules/frequency-rules/food-groups-catalog');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async createFrequencyRule(payload: Partial<DishFrequencyRule>): Promise<DishFrequencyRule> {
+    const res = await apiClient.post<DishFrequencyRule>('/nutrition-rules/frequency-rules', payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async updateFrequencyRule(id: number | string, payload: Partial<DishFrequencyRule>): Promise<DishFrequencyRule> {
+    const res = await apiClient.put<DishFrequencyRule>('/nutrition-rules/frequency-rules/' + id, payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async toggleFrequencyRule(id: number | string): Promise<DishFrequencyRule> {
+    const res = await apiClient.patch<DishFrequencyRule>('/nutrition-rules/frequency-rules/' + id + '/toggle');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async deleteFrequencyRule(id: number | string): Promise<{ success: boolean; message: string }> {
+    const res = await apiClient.delete<{ success: boolean; message: string }>('/nutrition-rules/frequency-rules/' + id);
+    return res.data;
+  },
+
+  // --- BẢNG 2: QUY TẮC GIÃN CÁCH LẶP MÓN (CHỐNG NGÁN) ---
+  async getSpacingRules(params?: { targetType?: string; ageGroup?: string; mealSlot?: string; isActive?: boolean }): Promise<DishSpacingRule[]> {
+    const res = await apiClient.get<DishSpacingRule[]>('/nutrition-rules/spacing-rules', { params });
+    const raw = res.data;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray((raw as any)?.data)) return (raw as any).data;
+    if (Array.isArray((raw as any)?.items)) return (raw as any).items;
+    return [];
+  },
+
+  async getSpacingRuleSummary(): Promise<{ total: number; active: number; categoryRules: number; specificDishRules: number }> {
+    const res = await apiClient.get('/nutrition-rules/spacing-rules/summary');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async getDishesCatalog(): Promise<{
+    categories: Array<{ id: number; code: string; name: string }>;
+    dishes: Array<{ id: number; name: string; categoryCode: string; categoryName: string }>;
+  }> {
+    const res = await apiClient.get('/nutrition-rules/spacing-rules/dishes-catalog');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async createSpacingRule(payload: Partial<DishSpacingRule>): Promise<DishSpacingRule> {
+    const res = await apiClient.post<DishSpacingRule>('/nutrition-rules/spacing-rules', payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async updateSpacingRule(id: number | string, payload: Partial<DishSpacingRule>): Promise<DishSpacingRule> {
+    const res = await apiClient.put<DishSpacingRule>('/nutrition-rules/spacing-rules/' + id, payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async toggleSpacingRule(id: number | string): Promise<DishSpacingRule> {
+    const res = await apiClient.patch<DishSpacingRule>('/nutrition-rules/spacing-rules/' + id + '/toggle');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async deleteSpacingRule(id: number | string): Promise<{ success: boolean; message: string }> {
+    const res = await apiClient.delete<{ success: boolean; message: string }>('/nutrition-rules/spacing-rules/' + id);
+    return res.data;
+  },
+
+  // --- BẢNG 3: ĐỊNH MỨC NĂNG LƯỢNG & VI CHẤT (PHỤ LỤC 1 - 6) ---
+  async getIntakeStandards(params?: { ageGroup?: string; gender?: string; mealScope?: string; isActive?: boolean }): Promise<NutritionIntakeStandard[]> {
+    const res = await apiClient.get<NutritionIntakeStandard[]>('/nutrition-rules/intake-standards', { params });
+    const raw = res.data;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray((raw as any)?.data)) return (raw as any).data;
+    if (Array.isArray((raw as any)?.items)) return (raw as any).items;
+    return [];
+  },
+
+  async getIntakeStandardSummary(): Promise<{ total: number; active: number; mauGiaoCount: number; nhaTreCount: number }> {
+    const res = await apiClient.get('/nutrition-rules/intake-standards/summary');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async createIntakeStandard(payload: Partial<NutritionIntakeStandard>): Promise<NutritionIntakeStandard> {
+    const res = await apiClient.post<NutritionIntakeStandard>('/nutrition-rules/intake-standards', payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async updateIntakeStandard(id: number | string, payload: Partial<NutritionIntakeStandard>): Promise<NutritionIntakeStandard> {
+    const res = await apiClient.put<NutritionIntakeStandard>('/nutrition-rules/intake-standards/' + id, payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async toggleIntakeStandard(id: number | string): Promise<NutritionIntakeStandard> {
+    const res = await apiClient.patch<NutritionIntakeStandard>('/nutrition-rules/intake-standards/' + id + '/toggle');
+    return (res.data as any)?.data || res.data;
+  },
+
+  async deleteIntakeStandard(id: number | string): Promise<{ success: boolean; message: string }> {
+    const res = await apiClient.delete<{ success: boolean; message: string }>('/nutrition-rules/intake-standards/' + id);
+    return res.data;
+  },
+
   // --- QUÉT & ĐÁNH GIÁ THỰC ĐƠN BẰNG RULE ENGINE ---
   async evaluateMenu(payload: EvaluateMenuPayload): Promise<MenuScanResult> {
     const res = await apiClient.post<MenuScanResult>('/rule-engine/evaluate-menu', payload);
     return res.data;
   },
 };
+
+// ── TypeScript Interfaces cho 3 Bảng Quy Tắc ──────────────────────────────────
+export interface DishFrequencyRule {
+  id: number;
+  schoolId: number;
+  ruleName: string;
+  mealSlot: string; // 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'ALL'
+  targetType: string; // 'DISH_CATEGORY' hoặc 'FOOD_GROUP'
+  targetId?: number | null;
+  targetCode: string;
+  targetName: string;
+  ageGroup: string;
+  periodType: string; // 'PER_DAY', 'PER_WEEK', 'PER_CYCLE_4_WEEKS'
+  minOccurrences: number;
+  maxOccurrences: number;
+  isRequiredInMeal: boolean;
+  severity: string; // 'ERROR', 'WARNING', 'INFO'
+  isActive: boolean;
+  note?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DishSpacingRule {
+  id: number;
+  schoolId: number;
+  ruleName: string;
+  mealSlot: string;
+  targetType: string; // 'DISH_CATEGORY', 'SPECIFIC_DISH'
+  targetId?: number | null;
+  targetName?: string | null;
+  ageGroup: string;
+  minSpacingDays: number;
+  noRepeatInSameWeek: boolean;
+  noRepeatInSameDay: boolean;
+  priorityOrder: number;
+  severity: string;
+  isActive: boolean;
+  note?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface NutritionIntakeStandard {
+  id: number;
+  schoolId: number;
+  standardName: string;
+  ageGroup: string;
+  gender: string;
+  mealScope: string;
+  energyKcalMin: number;
+  energyKcalMax: number;
+  proteinRatioMin: number;
+  proteinRatioMax: number;
+  lipidRatioMin: number;
+  lipidRatioMax: number;
+  carbohydrateRatioMin: number;
+  carbohydrateRatioMax: number;
+  fiberGMin?: number | null;
+  fiberGMax?: number | null;
+  calciumMgMin: number;
+  ironAbsorptionRate: string;
+  ironMgMin: number;
+  zincAbsorptionLevel: string;
+  zincMgMin: number;
+  vitaminARaeMcgMin: number;
+  isActive: boolean;
+  note?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}

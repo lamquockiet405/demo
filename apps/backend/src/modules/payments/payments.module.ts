@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
-import { BreakfastSubscription } from './entities/breakfast-subscription.entity';
 import { SnackRegistration } from '../snack-services/entities/snack-registration.entity';
 import { SnackServicePeriod } from '../snack-services/entities/snack-service-period.entity';
 import { Child } from '../children/entities/child.entity';
@@ -12,7 +11,6 @@ import { PaymentsController } from './controllers/payments.controller';
   imports: [
     TypeOrmModule.forFeature([
       Payment,
-      BreakfastSubscription,
       SnackRegistration,
       SnackServicePeriod,
       Child,

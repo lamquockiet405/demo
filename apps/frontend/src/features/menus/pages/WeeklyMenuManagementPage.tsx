@@ -42,6 +42,8 @@ import { AutoGenerateMenuModal } from '../components/AutoGenerateMenuModal';
 import { AllergyAndBmiAdvisorModal } from '../components/AllergyAndBmiAdvisorModal';
 import { RequestEditMenuModal } from '../components/RequestEditMenuModal';
 import { RespondEditRequestModal } from '../components/RespondEditRequestModal';
+import { SubmitMenuModal } from '../components/SubmitMenuModal';
+import { SubmitMenuPayload } from '../api/weekly-menus.api';
 
 interface WeeklyMenuManagementPageProps {
   hideHeader?: boolean;
@@ -83,6 +85,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
   const [isAutoGenerateModalOpen, setIsAutoGenerateModalOpen] = useState<boolean>(false);
   const [isRequestEditModalOpen, setIsRequestEditModalOpen] = useState<boolean>(false);
   const [isRespondEditModalOpen, setIsRespondEditModalOpen] = useState<boolean>(false);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [advisory, setAdvisory] = useState<MenuAdvisoryResponse | null>(null);
   const [isAdvisorModalOpen, setIsAdvisorModalOpen] = useState<boolean>(false);
   const [advisorFocusDishId, setAdvisorFocusDishId] = useState<string | null>(null);
@@ -243,22 +246,26 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
    *   -> `apps/frontend/src/features/menus/api/weekly-menus.api.ts` (BƯỚC 2)
    * =========================================================================================
    */
-  const handleSubmitForReview = async () => {
+  const handleSubmitForReview = () => {
     if (!selectedMenu) return;
+    setIsSubmitModalOpen(true);
+  };
+
+  const handleConfirmSubmitForReview = async (id: string, payload: SubmitMenuPayload) => {
     try {
       setActionLoading(true);
-      // GỌI SANG: apps/frontend/src/features/menus/api/weekly-menus.api.ts -> submitForReview()
-      const updated = await weeklyMenusApi.submitForReview(selectedMenu.id);
+      const updated = await weeklyMenusApi.submitForReview(id, payload);
       showNotify(
         'success',
-        selectedMenu.status === 'SUBMITTED_FOR_REVIEW'
-          ? 'Đã cập nhật và gửi lại thực đơn lên Ban Giám Hiệu phê duyệt.'
-          : 'Đã gửi thực đơn lên Ban Giám Hiệu để phê duyệt.'
+        selectedMenu?.status === 'SUBMITTED_FOR_REVIEW'
+          ? 'Đã cập nhật cam kết và gửi lại thực đơn lên Ban Giám Hiệu phê duyệt.'
+          : 'Đã gửi duyệt thực đơn kèm bản cam kết trách nhiệm chuyên môn.'
       );
       await fetchInitialData();
       await handleSelectMenu(updated.id);
     } catch (err: any) {
-      showNotify('error', err?.response?.data?.message || 'Không thể gửi duyệt.');
+      showNotify('error', err?.response?.data?.message || 'Không thể gửi duyệt thực đơn.');
+      throw err;
     } finally {
       setActionLoading(false);
     }
@@ -983,6 +990,19 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
         menu={selectedMenu}
         onApprove={handleApproveEditRequest}
         onReject={handleRejectEditRequest}
+      />
+
+      {/* Modal 10: Gửi duyệt thực đơn kèm Cam kết chuyên môn & Giải trình vượt ngưỡng */}
+      <SubmitMenuModal
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
+        menu={selectedMenu}
+        onSubmit={handleConfirmSubmitForReview}
+        detectedViolations={
+          selectedMenu?.violationsSnapshot && selectedMenu.violationsSnapshot.length > 0
+            ? selectedMenu.violationsSnapshot
+            : []
+        }
       />
     </div>
   );
