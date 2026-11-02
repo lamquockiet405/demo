@@ -21,6 +21,43 @@ export class ChildrenService {
     private readonly catalogRepo: Repository<AllergenCatalog>,
   ) {}
 
+  private mapChildAllergy(a: ChildAllergy) {
+    const allergenNameVi = a.allergen?.name || a.customAllergenName || 'Dị ứng thực phẩm';
+    return {
+      id: String(a.id),
+      childId: String(a.studentId),
+      allergenId: a.allergenId ? String(a.allergenId) : undefined,
+      customAllergenName: a.customAllergenName || undefined,
+      allergenName: allergenNameVi,
+      allergenCode: a.allergen?.code || 'CUSTOM',
+      allergen: a.allergen
+        ? {
+            id: String(a.allergen.id),
+            code: a.allergen.code,
+            nameVi: a.allergen.name,
+            nameEn: a.allergen.code,
+            description: a.allergen.description,
+          }
+        : a.customAllergenName
+        ? {
+            id: '0',
+            code: 'CUSTOM',
+            nameVi: a.customAllergenName,
+            nameEn: 'Custom',
+            description: a.customAllergenName,
+          }
+        : undefined,
+      allergyType: a.allergyType || 'ALLERGY',
+      severity: a.severity,
+      symptoms: a.symptoms || undefined,
+      reactionTreatment: a.reactionTreatment || undefined,
+      diagnosedDate: a.diagnosedDate || undefined,
+      note: a.note || a.symptoms || undefined,
+      isActive: a.isActive ?? true,
+      declaredAt: a.declaredAt ? a.declaredAt.toISOString() : null,
+    };
+  }
+
   async findAll(query: GetChildrenQueryDto) {
     const qb = this.childRepo
       .createQueryBuilder('c')
@@ -66,15 +103,7 @@ export class ChildrenService {
       className: c.class?.name || 'Chưa phân lớp',
       ageGroup: c.class?.ageGroup || 'MAU_GIAO',
       status: c.status,
-      allergies: (c.allergies || []).map((a) => ({
-        id: String(a.id),
-        allergenId: String(a.allergenId),
-        allergenName: a.allergen?.name || 'Dị ứng',
-        allergenCode: a.allergen?.code || 'UNKNOWN',
-        severity: a.severity,
-        note: a.note,
-        declaredAt: a.declaredAt ? a.declaredAt.toISOString() : null,
-      })),
+      allergies: (c.allergies || []).map((a) => this.mapChildAllergy(a)),
       hasAllergy: (c.allergies || []).length > 0,
     }));
 
@@ -83,36 +112,28 @@ export class ChildrenService {
 
   async getStats() {
     const total = await this.childRepo.count();
-    const boys = await this.childRepo.count({ where: { gender: 'MALE' } });
-    const girls = await this.childRepo.count({ where: { gender: 'FEMALE' } });
-
-    const childrenWithAllergies = await this.childRepo
+    const allergicCount = await this.childRepo
       .createQueryBuilder('c')
       .innerJoin('c.allergies', 'a')
-      .select('COUNT(DISTINCT c.id)', 'count')
+      .select('COUNT(DISTINCT c.id)', 'cnt')
       .getRawOne();
 
-    const allergicCount = parseInt(childrenWithAllergies?.count || '0', 10);
-
-    const severeResult = await this.childRepo
+    const severeCount = await this.childRepo
       .createQueryBuilder('c')
       .innerJoin('c.allergies', 'a')
-      .where('a.severity IN (:...severities)', { severities: ['SEVERE', 'ANAPHYLACTIC'] })
-      .select('COUNT(DISTINCT c.id)', 'count')
+      .where("a.severity IN ('HIGH', 'SEVERE', 'ANAPHYLACTIC')")
+      .select('COUNT(DISTINCT c.id)', 'cnt')
       .getRawOne();
 
-    const severeCount = parseInt(severeResult?.count || '0', 10);
-    const allergyRate = total > 0 ? Math.round((allergicCount / total) * 100) : 0;
+    const allergic = parseInt(allergicCount?.cnt || '0', 10);
+    const severe = parseInt(severeCount?.cnt || '0', 10);
+    const rate = total > 0 ? parseFloat(((allergic / total) * 100).toFixed(1)) : 0;
 
     return {
       totalChildren: total,
-      boysCount: boys,
-      girlsCount: girls,
-      allergicCount,
-      allergicChildrenCount: allergicCount,
-      severeCount,
-      allergyRate,
-      normalDietCount: total - allergicCount,
+      allergicCount: allergic,
+      severeCount: severe,
+      allergyRate: rate,
     };
   }
 
@@ -150,15 +171,7 @@ export class ChildrenService {
       classId: child.classId ? String(child.classId) : null,
       className: child.class?.name || null,
       status: child.status,
-      allergies: (child.allergies || []).map((a) => ({
-        id: String(a.id),
-        allergenId: String(a.allergenId),
-        allergenName: a.allergen?.name || 'Dị ứng',
-        allergenCode: a.allergen?.code || 'UNKNOWN',
-        severity: a.severity,
-        note: a.note,
-        declaredAt: a.declaredAt ? a.declaredAt.toISOString() : null,
-      })),
+      allergies: (child.allergies || []).map((a) => this.mapChildAllergy(a)),
     };
   }
 
@@ -180,7 +193,7 @@ export class ChildrenService {
   async update(id: number, dto: UpdateChildDto) {
     const child = await this.childRepo.findOne({ where: { id } });
     if (!child) {
-      throw new NotFoundException(`Không tìm thấy thông tin trẻ với ID: ${id}`);
+      throw new NotFoundException(`Không tìm thấy hồ sơ trẻ với ID: ${id}`);
     }
 
     if (dto.fullName !== undefined) child.fullName = dto.fullName;
@@ -201,11 +214,34 @@ export class ChildrenService {
       throw new NotFoundException(`Không tìm thấy trẻ với ID: ${childId}`);
     }
 
+    let allergenId: number | null = null;
+    if (dto.allergenId !== undefined && dto.allergenId !== null && dto.allergenId !== '') {
+      const parsed = Number(dto.allergenId);
+      if (!isNaN(parsed) && parsed > 0) {
+        allergenId = parsed;
+      }
+    }
+
+    if (!allergenId && dto.customAllergenName) {
+      const match = await this.catalogRepo.findOne({
+        where: { name: dto.customAllergenName.trim() },
+      });
+      if (match) {
+        allergenId = match.id;
+      }
+    }
+
     const allergy = this.allergyRepo.create({
       studentId: childId,
-      allergenId: dto.allergenId,
-      severity: dto.severity,
-      note: dto.note || null,
+      allergenId,
+      customAllergenName: dto.customAllergenName || null,
+      allergyType: dto.allergyType || 'ALLERGY',
+      severity: dto.severity || 'MEDIUM',
+      symptoms: dto.symptoms || null,
+      reactionTreatment: dto.reactionTreatment || null,
+      diagnosedDate: dto.diagnosedDate || null,
+      note: dto.note || dto.symptoms || null,
+      isActive: true,
       declaredBy: declaredBy || null,
     });
 
@@ -215,15 +251,7 @@ export class ChildrenService {
       relations: ['allergen'],
     });
 
-    return {
-      id: String(reloaded.id),
-      allergenId: String(reloaded.allergenId),
-      allergenName: reloaded.allergen?.name,
-      allergenCode: reloaded.allergen?.code,
-      severity: reloaded.severity,
-      note: reloaded.note,
-      declaredAt: reloaded.declaredAt ? reloaded.declaredAt.toISOString() : null,
-    };
+    return this.mapChildAllergy(reloaded);
   }
 
   async updateAllergy(allergyId: number, dto: UpdateAllergyDto) {
@@ -235,18 +263,25 @@ export class ChildrenService {
       throw new NotFoundException(`Không tìm thấy thông tin dị ứng với ID: ${allergyId}`);
     }
 
+    if (dto.allergenId !== undefined) {
+      const parsed = Number(dto.allergenId);
+      allergy.allergenId = !isNaN(parsed) && parsed > 0 ? parsed : null;
+    }
+    if (dto.customAllergenName !== undefined) allergy.customAllergenName = dto.customAllergenName || null;
+    if (dto.allergyType !== undefined) allergy.allergyType = dto.allergyType;
     if (dto.severity !== undefined) allergy.severity = dto.severity;
-    if (dto.note !== undefined) allergy.note = dto.note;
+    if (dto.symptoms !== undefined) allergy.symptoms = dto.symptoms || null;
+    if (dto.reactionTreatment !== undefined) allergy.reactionTreatment = dto.reactionTreatment || null;
+    if (dto.diagnosedDate !== undefined) allergy.diagnosedDate = dto.diagnosedDate || null;
+    if (dto.note !== undefined) allergy.note = dto.note || null;
+    if (dto.isActive !== undefined) allergy.isActive = dto.isActive;
 
     await this.allergyRepo.save(allergy);
-    return {
-      id: String(allergy.id),
-      allergenId: String(allergy.allergenId),
-      allergenName: allergy.allergen?.name,
-      allergenCode: allergy.allergen?.code,
-      severity: allergy.severity,
-      note: allergy.note,
-    };
+    const reloaded = await this.allergyRepo.findOne({
+      where: { id: allergy.id },
+      relations: ['allergen'],
+    });
+    return this.mapChildAllergy(reloaded);
   }
 
   async deleteAllergy(allergyId: number) {
@@ -273,10 +308,10 @@ export class ChildrenService {
     });
     return allergies.map((a) => ({
       id: String(a.id),
-      allergenId: String(a.allergenId),
-      allergenName: a.allergen?.name,
+      allergenId: a.allergenId ? String(a.allergenId) : null,
+      allergenName: a.allergen?.name || a.customAllergenName || 'Dị ứng',
       severity: a.severity,
-      note: a.note,
+      note: a.note || a.symptoms,
       action: 'DECLARED',
       date: a.declaredAt ? a.declaredAt.toISOString() : new Date().toISOString(),
       updatedBy: 'Phụ huynh / Y tế trường',
