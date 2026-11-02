@@ -7,6 +7,7 @@ export interface LinkedChild {
   gender: string;
   dateOfBirth: string;
   className: string;
+  relationship?: string;
 }
 
 export interface ParentUser {
@@ -23,6 +24,9 @@ export interface ParentUser {
   updatedAt: string;
   deletedAt: string | null;
   isDeleted: boolean;
+  address?: string;
+  occupation?: string;
+  note?: string;
   children: LinkedChild[];
 }
 
@@ -31,6 +35,8 @@ export interface ParentStats {
   activeParents: number;
   parentsWithChildren: number;
   inactiveOrDeleted: number;
+  inactiveParents?: number;
+  verifiedParents?: number;
 }
 
 export interface ParentListResponse {
@@ -49,6 +55,9 @@ export interface CreateParentPayload {
   phone?: string;
   password?: string;
   status?: string;
+  address?: string;
+  occupation?: string;
+  note?: string;
   childIds?: string[];
 }
 
@@ -57,6 +66,9 @@ export interface UpdateParentPayload {
   phone?: string;
   status?: string;
   newPassword?: string;
+  address?: string;
+  occupation?: string;
+  note?: string;
   childIds?: string[];
 }
 
@@ -76,8 +88,20 @@ export const parentsApi = {
     return res.data;
   },
 
+  async getParent(id: string): Promise<ParentUser> {
+    const res = await apiClient.get<ParentUser>(`/users/parents/${id}`);
+    return res.data;
+  },
+
   async getStats(): Promise<ParentStats> {
     const res = await apiClient.get<ParentStats>('/users/parents/stats');
+    return res.data;
+  },
+
+  async checkEmail(email: string): Promise<{ exists: boolean; message?: string }> {
+    const res = await apiClient.get<{ exists: boolean; message?: string }>('/users/parents/check-email', {
+      params: { email },
+    });
     return res.data;
   },
 

@@ -51,6 +51,7 @@ export const ParentManagementPage: React.FC = () => {
 
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [viewingParent, setViewingParent] = useState<ParentUser | null>(null);
   const [editingParent, setEditingParent] = useState<ParentUser | null>(null);
   const [deletingParent, setDeletingParent] = useState<ParentUser | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -62,7 +63,15 @@ export const ParentManagementPage: React.FC = () => {
   const [formPhone, setFormPhone] = useState('');
   const [formPassword, setFormPassword] = useState('');
   const [formStatus, setFormStatus] = useState('ACTIVE');
+  const [formAddress, setFormAddress] = useState('');
+  const [formOccupation, setFormOccupation] = useState('');
+  const [formNote, setFormNote] = useState('');
   const [formSelectedChildIds, setFormSelectedChildIds] = useState<string[]>([]);
+
+  // Email validation & duplicate checking states
+  const [isDuplicateEmail, setIsDuplicateEmail] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState<string | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const showToast = (type: 'success' | 'error', text: string) => {
     setToastMessage({ type, text });
@@ -106,7 +115,7 @@ export const ParentManagementPage: React.FC = () => {
           id: c.id,
           fullName: c.fullName,
           studentCode: c.studentCode,
-          className: c.class?.name || 'Chưa xếp lớp',
+          className: c.className || c.class?.name || 'Chưa xếp lớp',
         }))
       );
     } catch (err) {
@@ -122,6 +131,64 @@ export const ParentManagementPage: React.FC = () => {
     fetchChildren();
   }, []);
 
+  // Debounced check for duplicate email during account creation
+  useEffect(() => {
+    if (!isCreateModalOpen || editingParent) {
+      setIsDuplicateEmail(false);
+      setEmailErrorMessage(null);
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    const trimmed = formEmail.trim().toLowerCase();
+    if (!trimmed) {
+      setIsDuplicateEmail(false);
+      setEmailErrorMessage(null);
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    // 1. Kiểm tra nhanh tức thì trên danh sách parents hiện có trong RAM
+    const localMatch = parents.some((p) => p.email?.trim().toLowerCase() === trimmed);
+    if (localMatch) {
+      setIsDuplicateEmail(true);
+      setEmailErrorMessage('Email này đã tồn tại trong danh sách phụ huynh.');
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    // Kiểm tra cơ bản định dạng email trước khi gọi backend API
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      setIsDuplicateEmail(false);
+      setEmailErrorMessage(null);
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    setIsCheckingEmail(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await parentsApi.checkEmail(trimmed);
+        if (res.exists) {
+          setIsDuplicateEmail(true);
+          setEmailErrorMessage(
+            res.message || 'Email này đã được sử dụng trong hệ thống. Vui lòng chọn email khác.',
+          );
+        } else {
+          setIsDuplicateEmail(false);
+          setEmailErrorMessage(null);
+        }
+      } catch (err) {
+        console.error('Lỗi khi kiểm tra email:', err);
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [formEmail, isCreateModalOpen, editingParent, parents]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
@@ -134,7 +201,13 @@ export const ParentManagementPage: React.FC = () => {
     setFormPhone('');
     setFormPassword('');
     setFormStatus('ACTIVE');
+    setFormAddress('');
+    setFormOccupation('');
+    setFormNote('');
     setFormSelectedChildIds([]);
+    setIsDuplicateEmail(false);
+    setEmailErrorMessage(null);
+    setIsCheckingEmail(false);
     setIsCreateModalOpen(true);
   };
 
@@ -145,13 +218,27 @@ export const ParentManagementPage: React.FC = () => {
     setFormPhone(parent.phone || '');
     setFormPassword('');
     setFormStatus(parent.status);
+    setFormAddress(parent.address || '');
+    setFormOccupation(parent.occupation || '');
+    setFormNote(parent.note || '');
     setFormSelectedChildIds(Array.isArray(parent.children) ? parent.children.map((c) => c.id) : []);
+    setIsDuplicateEmail(false);
+    setEmailErrorMessage(null);
+    setIsCheckingEmail(false);
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formEmail.trim() || !formFullName.trim()) {
       showToast('error', 'Vui lòng nhập đầy đủ email và họ tên phụ huynh.');
+      return;
+    }
+
+    if (isDuplicateEmail) {
+      showToast(
+        'error',
+        emailErrorMessage || 'Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.',
+      );
       return;
     }
 
@@ -163,6 +250,9 @@ export const ParentManagementPage: React.FC = () => {
         phone: formPhone.trim() || undefined,
         password: formPassword.trim() || undefined,
         status: formStatus,
+        address: formAddress.trim() || undefined,
+        occupation: formOccupation.trim() || undefined,
+        note: formNote.trim() || undefined,
         childIds: formSelectedChildIds,
       };
       await parentsApi.createParent(payload);
@@ -170,7 +260,12 @@ export const ParentManagementPage: React.FC = () => {
       setIsCreateModalOpen(false);
       fetchParents();
     } catch (err: any) {
-      showToast('error', err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.');
+      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.';
+      if (err.response?.status === 409 || msg.toLowerCase().includes('email')) {
+        setIsDuplicateEmail(true);
+        setEmailErrorMessage(msg);
+      }
+      showToast('error', msg);
     } finally {
       setSubmitting(false);
     }
@@ -187,6 +282,9 @@ export const ParentManagementPage: React.FC = () => {
         phone: formPhone.trim() || undefined,
         status: formStatus,
         newPassword: formPassword.trim() || undefined,
+        address: formAddress.trim() || undefined,
+        occupation: formOccupation.trim() || undefined,
+        note: formNote.trim() || undefined,
         childIds: formSelectedChildIds,
       };
       await parentsApi.updateParent(editingParent.id, payload);
@@ -236,11 +334,10 @@ export const ParentManagementPage: React.FC = () => {
       {/* Toast */}
       {toastMessage && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2 text-xs font-bold ${
-            toastMessage.type === 'success'
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2 text-xs font-bold ${toastMessage.type === 'success'
               ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
               : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
+            }`}
         >
           {toastMessage.type === 'success' ? (
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -330,7 +427,7 @@ export const ParentManagementPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tạm dừng / Đã xóa</p>
-            <p className="text-2xl font-black text-slate-700 mt-0.5">{stats?.inactiveOrDeleted || 0}</p>
+            <p className="text-2xl font-black text-slate-700 mt-0.5">{stats?.inactiveOrDeleted ?? (stats as any)?.inactiveParents ?? 0}</p>
           </div>
         </div>
       </div>
@@ -424,7 +521,7 @@ export const ParentManagementPage: React.FC = () => {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-teal-100 text-teal-700 font-black flex items-center justify-center text-sm shadow-inner shrink-0">
-                          {p.fullName.charAt(0).toUpperCase()}
+                          {(p.fullName || 'P').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="font-bold text-slate-900">{p.fullName}</div>
@@ -487,14 +584,30 @@ export const ParentManagementPage: React.FC = () => {
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        {p.isDeleted ? (
-                          <button
-                            onClick={() => handleRestore(p.id)}
-                            title="Khôi phục tài khoản"
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                          >
-                            <RotateCcw className="w-4 h-4" />
-                          </button>
+                        <button
+                          onClick={() => setViewingParent(p)}
+                          title="Xem chi tiết tài khoản"
+                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        {p.status === 'INACTIVE' || p.isDeleted ? (
+                          <>
+                            <button
+                              onClick={() => handleRestore(p.id)}
+                              title="Khôi phục / Kích hoạt lại tài khoản"
+                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => openEditModal(p)}
+                              title="Chỉnh sửa tài khoản"
+                              className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                          </>
                         ) : (
                           <>
                             <button
@@ -506,7 +619,7 @@ export const ParentManagementPage: React.FC = () => {
                             </button>
                             <button
                               onClick={() => setDeletingParent(p)}
-                              title="Xóa tài khoản"
+                              title="Tạm ngưng / Vô hiệu hóa tài khoản"
                               className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -547,7 +660,161 @@ export const ParentManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 5. Create / Edit Modal */}
+      {/* 5. View Details Modal */}
+      {viewingParent && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Hồ sơ chi tiết Phụ huynh</h3>
+                  <p className="text-[11px] text-slate-500">Mã định danh: #{viewingParent.id}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewingParent(null)}
+                className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-5 text-xs">
+              {/* Header Profile Card */}
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-teal-50/60 to-blue-50/60 border border-teal-100">
+                <div className="w-14 h-14 rounded-2xl bg-teal-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-teal-600/20 shrink-0">
+                  {(viewingParent.fullName || 'P').charAt(0).toUpperCase()}
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-base font-extrabold text-slate-900">{viewingParent.fullName}</h4>
+                    {viewingParent.status === 'ACTIVE' ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        HOẠT ĐỘNG
+                      </span>
+                    ) : viewingParent.status === 'INACTIVE' ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                        TẠM DỪNG
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                        {viewingParent.status}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-slate-600">
+                    <span className="flex items-center gap-1 font-semibold text-slate-700">
+                      <Mail className="w-3.5 h-3.5 text-teal-600" /> {viewingParent.email}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5 text-teal-600" /> {viewingParent.phone || 'Chưa cập nhật SĐT'}
+                    </span>
+                    {viewingParent.twoFactorEnabled && (
+                      <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                        <ShieldCheck className="w-3.5 h-3.5" /> 2FA Bảo mật
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed Specs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                <div>
+                  <span className="text-slate-400 font-medium block text-[11px]">Nghề nghiệp:</span>
+                  <span className="text-slate-800 font-semibold">{viewingParent.occupation || 'Chưa thiết lập'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block text-[11px]">Địa chỉ liên hệ:</span>
+                  <span className="text-slate-800 font-semibold">{viewingParent.address || 'Chưa thiết lập'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block text-[11px]">Ngày khởi tạo tài khoản:</span>
+                  <span className="text-slate-800 font-mono font-medium">
+                    {new Date(viewingParent.createdAt).toLocaleString('vi-VN')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block text-[11px]">Đăng nhập lần cuối:</span>
+                  <span className="text-slate-800 font-mono font-medium">
+                    {viewingParent.lastLoginAt
+                      ? new Date(viewingParent.lastLoginAt).toLocaleString('vi-VN')
+                      : 'Chưa từng đăng nhập'}
+                  </span>
+                </div>
+                {viewingParent.note && (
+                  <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
+                    <span className="text-slate-400 font-medium block text-[11px]">Ghi chú nội bộ:</span>
+                    <p className="text-slate-700 italic mt-0.5">{viewingParent.note}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Linked Children List */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
+                    <GraduationCap className="w-4 h-4 text-teal-600" />
+                    Học sinh thuộc quyền giám hộ ({viewingParent.children?.length || 0})
+                  </h5>
+                </div>
+                {viewingParent.children && viewingParent.children.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {viewingParent.children.map((child) => (
+                      <div
+                        key={child.id}
+                        className="p-3 bg-white border border-teal-200/80 rounded-2xl shadow-xs flex items-center gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 font-black text-xs flex items-center justify-center shrink-0">
+                          {child.gender === 'FEMALE' ? '👧' : '👦'}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-slate-900 truncate">{child.fullName}</p>
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                            <span className="font-mono text-teal-700 font-semibold">{child.studentCode}</span>
+                            <span>•</span>
+                            <span className="font-medium text-slate-700">{child.className}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400">
+                    Phụ huynh này chưa được liên kết với học sinh nào trong hệ thống.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setViewingParent(null)}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const p = viewingParent;
+                  setViewingParent(null);
+                  openEditModal(p);
+                }}
+                className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
+              >
+                <Edit3 className="w-3.5 h-3.5" /> Chỉnh sửa tài khoản này
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Create / Edit Modal */}
       {(isCreateModalOpen || editingParent) && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
@@ -564,6 +831,8 @@ export const ParentManagementPage: React.FC = () => {
                 onClick={() => {
                   setIsCreateModalOpen(false);
                   setEditingParent(null);
+                  setIsDuplicateEmail(false);
+                  setEmailErrorMessage(null);
                 }}
                 className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition"
               >
@@ -593,6 +862,9 @@ export const ParentManagementPage: React.FC = () => {
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
                     Email đăng nhập <span className="text-rose-500">*</span>
+                    {isCheckingEmail && (
+                      <span className="text-[10px] text-teal-600 font-normal ml-2">Đang kiểm tra...</span>
+                    )}
                   </label>
                   <input
                     type="email"
@@ -601,8 +873,18 @@ export const ParentManagementPage: React.FC = () => {
                     placeholder="phuhuynh@example.com"
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition disabled:bg-slate-100 disabled:text-slate-500"
+                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border transition disabled:bg-slate-100 disabled:text-slate-500 ${
+                      !editingParent && isDuplicateEmail
+                        ? 'border-rose-400 bg-rose-50 text-rose-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
+                        : 'border-slate-200 bg-slate-50 focus:bg-white text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20'
+                    }`}
                   />
+                  {!editingParent && isDuplicateEmail && (
+                    <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                      {emailErrorMessage || 'Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.'}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -620,7 +902,7 @@ export const ParentManagementPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
-                    {editingParent ? 'Mật khẩu mới (bỏ trống nếu không đổi)' : 'Mật khẩu (mặc định: Parent@123)'}
+                    {editingParent ? 'Mật khẩu mới (bỏ trống nếu không đổi)' : 'Mật khẩu (mặc định: 123456)'}
                   </label>
                   <input
                     type="password"
@@ -630,7 +912,9 @@ export const ParentManagementPage: React.FC = () => {
                     className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">Trạng thái tài khoản</label>
                   <select
@@ -643,6 +927,39 @@ export const ParentManagementPage: React.FC = () => {
                     <option value="BLOCKED">Khóa (BLOCKED)</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Nghề nghiệp</label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: Kỹ sư, Bác sĩ, Kinh doanh..."
+                    value={formOccupation}
+                    onChange={(e) => setFormOccupation(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Địa chỉ liên hệ</label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: 45 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM"
+                  value={formAddress}
+                  onChange={(e) => setFormAddress(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Ghi chú nội bộ</label>
+                <textarea
+                  rows={2}
+                  placeholder="Ghi chú về phụ huynh (người liên hệ chính, giờ đón bé...)"
+                  value={formNote}
+                  onChange={(e) => setFormNote(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition resize-none"
+                />
               </div>
 
               {/* Children Selection */}
@@ -663,17 +980,16 @@ export const ParentManagementPage: React.FC = () => {
                         <div
                           key={c.id}
                           onClick={() => toggleChildSelection(c.id)}
-                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer text-xs transition select-none ${
-                            isSelected
+                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer text-xs transition select-none ${isSelected
                               ? 'bg-teal-100/70 border border-teal-300 font-bold text-teal-900'
                               : 'bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-medium'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2">
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => {}}
+                              onChange={() => { }}
                               className="rounded text-teal-600 pointer-events-none"
                             />
                             <span>
@@ -701,6 +1017,8 @@ export const ParentManagementPage: React.FC = () => {
                   onClick={() => {
                     setIsCreateModalOpen(false);
                     setEditingParent(null);
+                    setIsDuplicateEmail(false);
+                    setEmailErrorMessage(null);
                   }}
                   className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
                 >
@@ -708,8 +1026,9 @@ export const ParentManagementPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition disabled:opacity-50"
+                  disabled={submitting || (!editingParent && isDuplicateEmail)}
+                  title={!editingParent && isDuplicateEmail ? 'Email này đã tồn tại trong hệ thống' : undefined}
+                  className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Đang lưu...' : editingParent ? 'Lưu thay đổi' : 'Tạo tài khoản'}
                 </button>

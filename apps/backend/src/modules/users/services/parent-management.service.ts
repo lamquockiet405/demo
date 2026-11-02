@@ -21,41 +21,97 @@ export class ParentManagementService {
   ) {}
 
   async findAll(query: QueryParentDto) {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const skip = (page - 1) * limit;
+
     const qb = this.userRepo
       .createQueryBuilder('u')
-      .innerJoin(ParentProfile, 'pp', 'pp.user_id = u.id')
-      .leftJoinAndSelect('u.roles', 'r');
+      .leftJoin(ParentProfile, 'pp', 'pp.user_id = u.id')
+      .leftJoinAndSelect('u.roles', 'r')
+      .where((subQb) => {
+        const roleSubQuery = subQb
+          .subQuery()
+          .select('ur_parent.user_id')
+          .from('user_roles', 'ur_parent')
+          .innerJoin('roles', 'r_parent', 'ur_parent.role_id = r_parent.id')
+          .where("r_parent.code = 'PARENT'")
+          .getQuery();
 
-    if (query.search) {
-      qb.andWhere('(LOWER(u.fullName) LIKE :s OR LOWER(u.email) LIKE :s OR u.phone LIKE :s)', {
-        s: `%${query.search.toLowerCase()}%`,
+        const studentParentSubQuery = subQb
+          .subQuery()
+          .select('sp_parent.parent_id')
+          .from('student_parents', 'sp_parent')
+          .getQuery();
+
+        return `(u.id IN ${roleSubQuery} OR pp.user_id IS NOT NULL OR u.id IN ${studentParentSubQuery})`;
       });
+
+    // Tìm kiếm thời gian thực theo họ tên phụ huynh, email, SĐT hoặc thông tin học sinh
+    if (query.search && query.search.trim() !== '') {
+      const searchPattern = `%${query.search.trim().toLowerCase()}%`;
+      qb.andWhere((subQb) => {
+        const childSearchSubQuery = subQb
+          .subQuery()
+          .select('sp_s.parent_id')
+          .from('student_parents', 'sp_s')
+          .innerJoin('students', 'st_s', 'sp_s.student_id = st_s.id')
+          .where('(LOWER(st_s.full_name) LIKE :searchPattern OR LOWER(st_s.student_code) LIKE :searchPattern)')
+          .getQuery();
+
+        return `(LOWER(u.fullName) LIKE :searchPattern OR LOWER(u.email) LIKE :searchPattern OR u.phone LIKE :searchPattern OR u.id IN ${childSearchSubQuery})`;
+      }, { searchPattern });
     }
 
-    if (query.status) {
-      qb.andWhere('u.status = :status', { status: query.status });
+    // Lọc theo trạng thái & xóa mềm
+    if (query.status && query.status.trim() !== '' && query.status !== 'ALL') {
+      if (query.status === 'DELETED') {
+        qb.andWhere("u.status = 'INACTIVE'");
+      } else {
+        qb.andWhere('u.status = :status', { status: query.status.trim() });
+      }
+    } else if (!query.includeDeleted) {
+      qb.andWhere("u.status != 'INACTIVE'");
     }
 
-    const users = await qb.getMany();
+    // Sắp xếp
+    const validSortFields = ['fullName', 'email', 'createdAt', 'lastLoginAt'];
+    const sortBy = validSortFields.includes(query.sortBy || '') ? query.sortBy : 'createdAt';
+    const sortOrder = query.sortOrder === 'ASC' ? 'ASC' : 'DESC';
+    qb.orderBy(`u.${sortBy}`, sortOrder);
+
+    // Phân trang
+    qb.skip(skip).take(limit);
+
+    const [users, total] = await qb.getManyAndCount();
+
     const profiles = await this.parentRepo.find();
-    const profileMap = new Map(profiles.map((p) => [p.userId, p]));
+    const profileMap = new Map(profiles.map((p) => [String(p.userId), p]));
 
-    // Lấy thông tin học sinh liên kết cho tất cả phụ huynh
-    const childrenRows = await this.userRepo.query(`
-      SELECT 
-        sp.parent_id,
-        sp.relationship,
-        s.id as child_id,
-        s.student_code,
-        s.full_name,
-        s.gender,
-        s.date_of_birth,
-        c.name as class_name
-      FROM student_parents sp
-      JOIN students s ON s.id = sp.student_id
-      LEFT JOIN classes c ON c.id = s.class_id
-      ORDER BY s.id ASC
-    `);
+    // Lấy thông tin học sinh liên kết cho các phụ huynh trong trang hiện tại
+    const userIds = users.map((u) => u.id);
+    let childrenRows: any[] = [];
+    if (userIds.length > 0) {
+      childrenRows = await this.userRepo.query(
+        `
+        SELECT 
+          sp.parent_id,
+          sp.relationship,
+          s.id as child_id,
+          s.student_code,
+          s.full_name,
+          s.gender,
+          s.date_of_birth,
+          c.name as class_name
+        FROM student_parents sp
+        JOIN students s ON s.id = sp.student_id
+        LEFT JOIN classes c ON c.id = s.class_id
+        WHERE sp.parent_id = ANY($1)
+        ORDER BY s.id ASC
+      `,
+        [userIds],
+      );
+    }
 
     const childrenMap = new Map<string, any[]>();
     for (const row of childrenRows) {
@@ -72,23 +128,39 @@ export class ParentManagementService {
       });
     }
 
-    return users.map((u) => {
-      const p = profileMap.get(u.id);
+    const data = users.map((u) => {
       const uId = String(u.id);
+      const p = profileMap.get(uId);
       return {
         id: uId,
+        tenantId: u.tenantId,
         email: u.email,
         fullName: u.fullName,
         phone: u.phone,
         avatarUrl: u.avatar,
         status: u.status,
+        twoFactorEnabled: u.twoFactorEnabled,
+        lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : null,
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        deletedAt: u.status === 'INACTIVE' ? u.updatedAt : null,
+        isDeleted: u.status === 'INACTIVE',
         address: p?.address || '',
         occupation: p?.occupation || '',
         note: p?.note || '',
         children: childrenMap.get(uId) || [],
-        createdAt: u.createdAt,
       };
     });
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+      },
+    };
   }
 
   async findOne(id: number) {
@@ -141,10 +213,35 @@ export class ParentManagementService {
     };
   }
 
+  async checkEmailExists(email: string) {
+    const trimmed = (email || '').trim().toLowerCase();
+    if (!trimmed) {
+      return { exists: false };
+    }
+    const user = await this.userRepo
+      .createQueryBuilder('u')
+      .where('LOWER(u.email) = LOWER(:email)', { email: trimmed })
+      .getOne();
+
+    return {
+      exists: !!user,
+      message: user
+        ? `Email "${trimmed}" đã được sử dụng trong hệ thống. Vui lòng chọn email khác.`
+        : undefined,
+    };
+  }
+
   async create(dto: CreateParentDto) {
-    const existing = await this.userRepo.findOne({ where: { email: dto.email.toLowerCase() } });
+    const email = (dto.email || '').trim().toLowerCase();
+    const existing = await this.userRepo
+      .createQueryBuilder('u')
+      .where('LOWER(u.email) = LOWER(:email)', { email })
+      .getOne();
+
     if (existing) {
-      throw new ConflictException('Email này đã được sử dụng trong hệ thống');
+      throw new ConflictException(
+        `Email "${email}" đã được sử dụng trong hệ thống. Vui lòng chọn email khác.`,
+      );
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -153,14 +250,28 @@ export class ParentManagementService {
     const role = await this.roleRepo.findOne({ where: { code: 'PARENT' } });
 
     const user = this.userRepo.create({
-      email: dto.email.toLowerCase(),
+      email,
       passwordHash,
-      fullName: dto.fullName,
-      phone: dto.phone || null,
+      fullName: dto.fullName?.trim(),
+      phone: dto.phone?.trim() || null,
       status: dto.status || 'ACTIVE',
     });
 
-    const savedUser = await this.userRepo.save(user);
+    let savedUser: User;
+    try {
+      savedUser = await this.userRepo.save(user);
+    } catch (err: any) {
+      if (
+        err?.code === '23505' ||
+        err?.message?.includes('duplicate key') ||
+        err?.message?.includes('users_email_key')
+      ) {
+        throw new ConflictException(
+          `Email "${email}" đã được sử dụng trong hệ thống. Vui lòng chọn email khác.`,
+        );
+      }
+      throw err;
+    }
 
     if (role) {
       await this.userRepo.query(
@@ -237,14 +348,20 @@ export class ParentManagementService {
   }
 
   async getStats() {
-    const totalParents = await this.parentRepo.count();
-    const users = await this.userRepo.find();
-    const profiles = await this.parentRepo.find();
-    const parentUserIds = new Set(profiles.map((p) => p.userId));
-    const parentUsers = users.filter((u) => parentUserIds.has(u.id));
+    const parentQuery = `
+      SELECT DISTINCT u.id, u.status
+      FROM users u
+      LEFT JOIN parent_profiles pp ON pp.user_id = u.id
+      LEFT JOIN user_roles ur ON ur.user_id = u.id
+      LEFT JOIN roles r ON r.id = ur.role_id
+      LEFT JOIN student_parents sp ON sp.parent_id = u.id
+      WHERE r.code = 'PARENT' OR pp.user_id IS NOT NULL OR sp.parent_id IS NOT NULL
+    `;
+    const parentUsers: any[] = await this.userRepo.query(parentQuery);
 
-    const activeParents = parentUsers.filter((u) => u.status === 'ACTIVE').length;
-    const inactiveParents = parentUsers.filter((u) => u.status === 'INACTIVE').length;
+    const totalParents = parentUsers.length;
+    const activeParents = parentUsers.filter((u: any) => u.status === 'ACTIVE').length;
+    const inactiveParents = parentUsers.filter((u: any) => u.status === 'INACTIVE').length;
 
     const linkedCountRes = await this.userRepo.query(`
       SELECT COUNT(DISTINCT parent_id) as count FROM student_parents
@@ -252,9 +369,10 @@ export class ParentManagementService {
     const parentsWithChildren = parseInt(linkedCountRes?.[0]?.count || '0', 10);
 
     return {
-      totalParents: parentUsers.length || totalParents,
+      totalParents,
       activeParents,
       inactiveParents,
+      inactiveOrDeleted: inactiveParents,
       parentsWithChildren,
       verifiedParents: activeParents,
     };
