@@ -17,6 +17,7 @@ import {
   Bell,
   UtensilsCrossed,
   Scale,
+  Activity,
 } from 'lucide-react';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 import { useAuthStore } from '../core/stores/auth.store';
@@ -74,6 +75,7 @@ export const AdminDashboardLayout: React.FC = () => {
   // Danh mục menu Ban Giám Hiệu
   const navItems = [
     { label: 'Dashboard Tổng quan', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Chỉ huy Dinh dưỡng & Thể trạng', path: '/nutrition-physical-dashboard', icon: Activity },
     { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
@@ -87,6 +89,7 @@ export const AdminDashboardLayout: React.FC = () => {
   ];
 
   const getBreadcrumbTitle = () => {
+    if (location.pathname.startsWith('/nutrition-physical')) return 'Chỉ huy Dinh dưỡng & Thể trạng (UC92)';
     if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';

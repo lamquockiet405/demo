@@ -9,8 +9,11 @@ import { SnackRegistration } from '../snack-services/entities/snack-registration
 import { Payment } from '../payments/entities/payment.entity';
 import { InspectionRecord } from '../inspections/entities/inspection-record.entity';
 import { InspectionSampleItem } from '../inspections/entities/inspection-sample-item.entity';
+import { ClassEntity } from '../classes/entities/class.entity';
 import { DashboardService } from './services/dashboard.service';
 import { DashboardController } from './controllers/dashboard.controller';
+import { NutritionPhysicalDashboardService } from './services/nutrition-physical-dashboard.service';
+import { NutritionPhysicalDashboardController } from './controllers/nutrition-physical-dashboard.controller';
 
 @Module({
   imports: [
@@ -25,10 +28,20 @@ import { DashboardController } from './controllers/dashboard.controller';
       Payment,
       InspectionRecord,
       InspectionSampleItem,
+      ClassEntity,
     ]),
   ],
-  controllers: [DashboardController],
-  providers: [DashboardService],
-  exports: [DashboardService],
+  controllers: [
+    DashboardController,
+    NutritionPhysicalDashboardController,
+  ],
+  providers: [
+    DashboardService,
+    NutritionPhysicalDashboardService,
+  ],
+  exports: [
+    DashboardService,
+    NutritionPhysicalDashboardService,
+  ],
 })
 export class DashboardModule {}

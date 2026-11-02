@@ -28,6 +28,7 @@ export const NutritionistLayout: React.FC = () => {
   // 10 Tabs ngang chuẩn xác theo ảnh thiết kế NutriKid
   const navTabs = [
     { label: 'Tổng quan', path: '/nutritionist/dashboard' },
+    { label: 'Chỉ huy Dinh dưỡng (UC92)', path: '/nutritionist/nutrition-physical' },
     { label: 'Học sinh', path: '/nutritionist/children' },
     { label: 'Dị ứng', path: '/nutritionist/allergens' },
     { label: 'Nguyên liệu', path: '/nutritionist/foods' },
