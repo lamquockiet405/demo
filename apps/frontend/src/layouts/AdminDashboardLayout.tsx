@@ -19,6 +19,7 @@ import {
   Scale,
   MessageSquareText,
   ClipboardCheck,
+  Sparkles,
 } from 'lucide-react';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 import { ParentEvaluationsPage } from '../features/parent-evaluations/ParentEvaluationsPage';
@@ -84,6 +85,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
     { label: 'Kế hoạch suất ăn bán trú', path: '/children', icon: ClipboardCheck },
     { label: 'Phục vụ ăn xế (Roster)', path: '/snack-roster', icon: Coffee },
+    { label: 'Bé kén ăn & Tư vấn dinh dưỡng', path: '/picky-eating', icon: Sparkles },
     { label: 'Ý kiến & Đánh giá PH', path: '/services', icon: MessageSquareText },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },

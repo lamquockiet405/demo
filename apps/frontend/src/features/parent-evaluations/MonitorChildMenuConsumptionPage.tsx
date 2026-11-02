@@ -10,6 +10,7 @@ import { DaySelectorTabs } from './components/DaySelectorTabs';
 import { DailySessionsTimeline } from './components/DailySessionsTimeline';
 import { NutritionOverviewCard } from './components/NutritionOverviewCard';
 import { WeeklyConsumptionHistoryTable } from './components/WeeklyConsumptionHistoryTable';
+import { ParentNutritionAdviceCard } from './components/ParentNutritionAdviceCard';
 import { PortalFooter } from './components/PortalFooter';
 import { Loader2, Utensils, Sparkles, RefreshCw } from 'lucide-react';
 
@@ -155,6 +156,9 @@ export const MonitorChildMenuConsumptionPage: React.FC = () => {
 
         {/* 3. KPI Metrics Overview Strip */}
         <ConsumptionKPIStrip metrics={metrics} />
+
+        {/* 3.1. Hướng dẫn bổ sung dinh dưỡng tại nhà cho bé kén ăn */}
+        <ParentNutritionAdviceCard childId={child.id} />
 
         {/* 3.1. Trạng thái đồng bộ với thực đơn trường đã công bố */}
         {isMenuPublished ? (
