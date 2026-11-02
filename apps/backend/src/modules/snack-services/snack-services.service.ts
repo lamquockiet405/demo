@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SnackServicePeriod } from './entities/snack-service-period.entity';
@@ -102,7 +102,7 @@ export class SnackServicesService {
       relations: ['registrations', 'registrations.student', 'registrations.student.class'],
     });
 
-    if (!p) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
+    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn xế');
 
     const registrations = (p.registrations || []).map((r) => ({
       id: String(r.id),
@@ -115,41 +115,244 @@ export class SnackServicesService {
       amount: p.feeAmount,
     }));
 
-    return {
+    const pricePerUnit = Math.round((Number(p.feeAmount) || 440000) / 22);
+
+    const periodData = {
       id: String(p.id),
+      tenantId: 'a0000000-0000-0000-0000-000000000001',
       name: p.name,
+      description: 'Suất ăn xế nhẹ lúc 17h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
+      serviceType: 'AFTER_SCHOOL_SNACK',
+      billingCycle: 'MONTHLY',
+      pricePerUnit,
       startDate: p.startDate,
       endDate: p.endDate,
+      availableFrom: p.startDate,
+      availableTo: p.endDate,
       registrationDeadline: p.registrationDeadline,
-      feeAmount: p.feeAmount,
+      feeAmount: Number(p.feeAmount),
+      isActive: p.status === 'OPEN',
       status: p.status,
       registrations,
+    };
+
+    return {
+      success: true,
+      ...periodData,
+      data: periodData,
     };
   }
 
   async createPeriod(dto: CreateSnackServicePeriodDto) {
+    // 1. Luồng ngoại lệ: Ngày kết thúc nhận đơn <= ngày bắt đầu nhận đơn
+    if (dto.registrationStart && dto.registrationEnd) {
+      if (new Date(dto.registrationEnd).getTime() <= new Date(dto.registrationStart).getTime()) {
+        throw new BadRequestException('Ngày kết thúc phải sau ngày bắt đầu');
+      }
+    }
+
+    // 2. Luồng ngoại lệ: Chưa chọn ít nhất 1 tháng phục vụ
+    if (dto.serviceMonths !== undefined && dto.serviceMonths.length === 0) {
+      throw new BadRequestException('Vui lòng chọn ít nhất 1 tháng phục vụ');
+    }
+    if (!dto.serviceMonths?.length && (!dto.startDate || !dto.endDate)) {
+      throw new BadRequestException('Vui lòng chọn ít nhất 1 tháng phục vụ');
+    }
+
+    // 3. Luồng ngoại lệ: Chọn "Giới hạn chỗ" nhưng không nhập chỉ tiêu
+    if (dto.capacityMode === 'LIMITED' && (!dto.totalQuota || dto.totalQuota <= 0)) {
+      throw new BadRequestException('Vui lòng nhập tổng chỉ tiêu');
+    }
+
+    // 4. Tính toán thời gian bắt đầu và kết thúc phục vụ
+    let startDate = dto.startDate;
+    let endDate = dto.endDate;
+
+    if (dto.serviceMonths && dto.serviceMonths.length > 0) {
+      const sortedMonths = [...dto.serviceMonths].sort();
+      startDate = `${sortedMonths[0]}-01`;
+      const [yearStr, monthStr] = sortedMonths[sortedMonths.length - 1].split('-');
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      const lastDay = new Date(year, month, 0).getDate();
+      endDate = `${sortedMonths[sortedMonths.length - 1]}-${String(lastDay).padStart(2, '0')}`;
+    }
+
+    if (!startDate) {
+      startDate = dto.registrationStart || new Date().toISOString().slice(0, 10);
+    }
+    if (!endDate) {
+      endDate = dto.registrationEnd || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+    }
+
+    // 5. Điều kiện tiên quyết: Không tồn tại đợt đăng ký nào đang OPEN cùng tháng phục vụ
+    const isDraft = dto.status === 'DRAFT';
+    if (!isDraft) {
+      const openPeriods = await this.periodRepo.find({
+        where: { status: 'OPEN' },
+      });
+      const hasConflict = openPeriods.some(
+        (p) => p.startDate <= endDate && p.endDate >= startDate,
+      );
+      if (hasConflict) {
+        throw new BadRequestException(
+          'Đã tồn tại đợt đăng ký đang mở cho tháng phục vụ này. Vui lòng đóng đợt cũ trước khi tạo đợt mới.',
+        );
+      }
+    }
+
+    // 6. Tên gói, hạn chót nhận đơn, và tính toán phí
+    const name =
+      dto.name ||
+      (dto.serviceMonths?.length
+        ? `Dịch vụ ăn xế Tháng ${dto.serviceMonths.join(', ')}`
+        : dto.periodCode
+        ? `Dịch vụ ăn xế ${dto.periodCode}`
+        : 'Dịch vụ ăn xế');
+
+    const registrationDeadline =
+      dto.registrationEnd || dto.registrationDeadline || dto.registrationStart || startDate;
+
+    const monthsCount = dto.serviceMonths?.length || 1;
+    const pricePerDay = dto.pricePerUnitPerDay !== undefined ? Number(dto.pricePerUnitPerDay) : 20000;
+    const feeAmount =
+      dto.feeAmount !== undefined && dto.feeAmount > 0
+        ? Number(dto.feeAmount)
+        : pricePerDay * 22 * monthsCount;
+
+    // 7. DB Status: Bản ghi snack_service_periods có ràng buộc CHECK (status IN ('OPEN', 'CLOSED'))
+    const dbStatus = isDraft ? 'CLOSED' : 'OPEN';
+
     const period = this.periodRepo.create({
-      name: dto.name,
-      startDate: dto.startDate,
-      endDate: dto.endDate,
-      registrationDeadline: dto.registrationDeadline || null,
-      feeAmount: dto.feeAmount,
-      status: 'OPEN',
+      name,
+      startDate,
+      endDate,
+      registrationDeadline,
+      feeAmount,
+      status: dbStatus,
     });
-    return this.periodRepo.save(period);
+
+    const saved = await this.periodRepo.save(period);
+
+    return {
+      success: true,
+      message: isDraft
+        ? `Đã lưu bản nháp gói "${saved.name}" thành công!`
+        : `Đã khởi tạo gói "${saved.name}" thành công và mở cổng cho phụ huynh đăng ký!`,
+      data: {
+        ...saved,
+        periodCode: dto.periodCode,
+        appliedGrades: dto.appliedGrades,
+        isWholeSchool: dto.isWholeSchool,
+        registrationStart: dto.registrationStart,
+        registrationEnd: dto.registrationEnd,
+        serviceMonths: dto.serviceMonths,
+        pricePerUnitPerDay: dto.pricePerUnitPerDay,
+        capacityMode: dto.capacityMode,
+        kitchenCapacity: dto.kitchenCapacity,
+        totalQuota: dto.totalQuota,
+        quotaPerGrade: dto.quotaPerGrade,
+        autoRefundEnabled: dto.autoRefundEnabled,
+        autoCloseEnabled: dto.autoCloseEnabled,
+        autoCloseThresholdPercent: dto.autoCloseThresholdPercent,
+        nutritionNotes: dto.nutritionNotes,
+        status: isDraft ? 'DRAFT' : saved.status,
+      },
+    };
   }
 
   async updatePeriod(id: number, dto: UpdateSnackServiceDto) {
-    const p = await this.periodRepo.findOne({ where: { id } });
-    if (!p) throw new NotFoundException('Không tìm thấy kỳ dịch vụ ăn xế');
+    // 1. Kiểm tra sự tồn tại của đợt dịch vụ
+    const p = await this.periodRepo.findOne({
+      where: { id },
+      relations: ['registrations'],
+    });
+    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn xế');
 
-    if (dto.name) p.name = dto.name;
-    if (dto.startDate) p.startDate = dto.startDate;
-    if (dto.endDate) p.endDate = dto.endDate;
-    if (dto.feeAmount !== undefined) p.feeAmount = dto.feeAmount;
-    if (dto.status) p.status = dto.status;
+    const paidCount = (p.registrations || []).filter((r) => r.status === 'PAID').length;
 
-    return this.periodRepo.save(p);
+    // 2. Điều kiện tiên quyết: Đợt chưa CLOSED (nếu đã đóng, không sửa đơn giá khi đã có đăng ký PAID)
+    if (p.status === 'CLOSED') {
+      const isPriceModified = dto.pricePerUnit !== undefined || dto.feeAmount !== undefined;
+      if (isPriceModified && paidCount > 0) {
+        throw new BadRequestException(
+          'Đợt dịch vụ đã đóng và có học sinh đã thanh toán, không thể chỉnh sửa đơn giá',
+        );
+      }
+    }
+
+    // 3. Luồng ngoại lệ: Tên gói để trống
+    if (dto.name !== undefined && !dto.name.trim()) {
+      throw new BadRequestException('Vui lòng nhập tên gói dịch vụ');
+    }
+
+    // 4. Luồng ngoại lệ: Đơn giá nhập âm
+    if (
+      (dto.pricePerUnit !== undefined && dto.pricePerUnit < 0) ||
+      (dto.feeAmount !== undefined && dto.feeAmount < 0)
+    ) {
+      throw new BadRequestException('Đơn giá không được âm');
+    }
+
+    // 5. Luồng ngoại lệ: Ngày kết thúc trước ngày bắt đầu
+    const newStartDate = dto.startDate || dto.availableFrom || p.startDate;
+    const newEndDate = dto.endDate || dto.availableTo || p.endDate;
+    if (newStartDate && newEndDate && new Date(newEndDate).getTime() < new Date(newStartDate).getTime()) {
+      throw new BadRequestException('Ngày kết thúc phải sau ngày bắt đầu');
+    }
+
+    // 6. Cảnh báo khi giảm đơn giá nếu đã có học sinh thanh toán (PAID)
+    let calculatedFee = p.feeAmount;
+    if (dto.feeAmount !== undefined) {
+      calculatedFee = Number(dto.feeAmount);
+    } else if (dto.pricePerUnit !== undefined) {
+      calculatedFee = Number(dto.pricePerUnit) * 22;
+    }
+
+    let warning: string | undefined = undefined;
+    if (paidCount > 0 && calculatedFee < Number(p.feeAmount)) {
+      warning = `Đã có ${paidCount} trẻ đã thanh toán. Thay đổi đơn giá sẽ ảnh hưởng đến các kỳ tính phí kế tiếp`;
+    }
+
+    // 7. Cập nhật các trường
+    if (dto.name !== undefined) p.name = dto.name.trim();
+    if (dto.startDate || dto.availableFrom) p.startDate = dto.startDate || dto.availableFrom || p.startDate;
+    if (dto.endDate || dto.availableTo) p.endDate = dto.endDate || dto.availableTo || p.endDate;
+    if (dto.registrationDeadline !== undefined) p.registrationDeadline = dto.registrationDeadline;
+    p.feeAmount = calculatedFee;
+
+    if (dto.status !== undefined) {
+      p.status = dto.status;
+    } else if (dto.isActive !== undefined) {
+      p.status = dto.isActive ? 'OPEN' : 'CLOSED';
+    }
+
+    const saved = await this.periodRepo.save(p);
+
+    const pricePerUnit = dto.pricePerUnit !== undefined ? dto.pricePerUnit : Math.round(Number(saved.feeAmount) / 22);
+    const updatedData = {
+      id: String(saved.id),
+      name: saved.name,
+      serviceType: dto.serviceType || 'AFTER_SCHOOL_SNACK',
+      billingCycle: dto.billingCycle || 'MONTHLY',
+      pricePerUnit,
+      startDate: saved.startDate,
+      endDate: saved.endDate,
+      availableFrom: saved.startDate,
+      availableTo: saved.endDate,
+      registrationDeadline: saved.registrationDeadline,
+      feeAmount: Number(saved.feeAmount),
+      isActive: saved.status === 'OPEN',
+      status: saved.status,
+      description: dto.description || 'Suất ăn xế chiều bổ sung dinh dưỡng',
+    };
+
+    return {
+      success: true,
+      message: 'Cập nhật cấu hình gói dịch vụ ăn sáng thành công!',
+      warning,
+      data: updatedData,
+    };
   }
 
   async closePeriod(id: number) {

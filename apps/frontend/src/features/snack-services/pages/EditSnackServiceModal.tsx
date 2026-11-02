@@ -46,7 +46,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -105,6 +105,11 @@ export const EditSnackServiceModal: React.FC<Props> = ({
       return;
     }
 
+    if (availableFrom && availableTo && new Date(availableTo).getTime() < new Date(availableFrom).getTime()) {
+      setSubmitMessage({ type: 'error', text: 'Ngày kết thúc phải sau ngày bắt đầu' });
+      return;
+    }
+
     setSubmitting(true);
     setSubmitMessage(null);
 
@@ -115,18 +120,36 @@ export const EditSnackServiceModal: React.FC<Props> = ({
         serviceType,
         billingCycle,
         pricePerUnit,
+        feeAmount: pricePerUnit * 22,
         isActive,
+        status: isActive ? 'OPEN' : 'CLOSED',
+        startDate: availableFrom || undefined,
+        endDate: availableTo || undefined,
         availableFrom: availableFrom || undefined,
         availableTo: availableTo || undefined,
       };
 
       const res = await updateSnackService(serviceId, dto);
       if (res.success) {
-        setSubmitMessage({ type: 'success', text: res.message || 'Cập nhật cấu hình gói dịch vụ thành công!' });
-        setTimeout(() => {
-          onSuccess();
-          onClose();
-        }, 1200);
+        if (res.warning) {
+          setSubmitMessage({
+            type: 'warning',
+            text: `${res.message} ⚠️ ${res.warning}`,
+          });
+          setTimeout(() => {
+            onSuccess();
+            onClose();
+          }, 3000);
+        } else {
+          setSubmitMessage({
+            type: 'success',
+            text: res.message || 'Cập nhật cấu hình gói dịch vụ ăn sáng thành công!',
+          });
+          setTimeout(() => {
+            onSuccess();
+            onClose();
+          }, 1500);
+        }
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Có lỗi xảy ra khi cập nhật gói dịch vụ.';
@@ -371,18 +394,22 @@ export const EditSnackServiceModal: React.FC<Props> = ({
             {/* Notification message */}
             {submitMessage && (
               <div
-                className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-bold ${
+                className={`flex items-start gap-2 p-3 rounded-xl border text-xs font-bold ${
                   submitMessage.type === 'success'
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : submitMessage.type === 'warning'
+                    ? 'bg-amber-50 border-amber-300 text-amber-800'
                     : 'bg-rose-50 border-rose-200 text-rose-700'
                 }`}
               >
                 {submitMessage.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                ) : submitMessage.type === 'warning' ? (
+                  <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 )}
-                <span>{submitMessage.text}</span>
+                <span className="whitespace-pre-line leading-relaxed">{submitMessage.text}</span>
               </div>
             )}
           </form>

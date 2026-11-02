@@ -20,6 +20,7 @@ export class ParentEvaluationService {
     private readonly childRepo: Repository<Child>,
     @InjectRepository(DailyMealAttendance)
     private readonly attendanceRepo: Repository<DailyMealAttendance>,
+    private readonly menusService?: MenusService,
   ) {}
 
 
@@ -391,11 +392,7 @@ export class ParentEvaluationService {
     const sId = Number(childId || 1);
     const targetDate = date || new Date().toISOString().split('T')[0];
 
-    const attendances = await this.attendanceRepo.find({
-      where: { studentId: sId, date: targetDate },
-
-    });
-
+    
     let student = await this.childRepo.findOne({
       where: { id: sId },
       relations: ['class', 'allergies', 'allergies.allergen'],
@@ -438,6 +435,15 @@ export class ParentEvaluationService {
           parentName: 'Chị Hoàng Yến',
           parentRole: 'Mẹ bé Bảo Nam',
         };
+
+    // ─────────────────────────────────────────────────────────────
+    // ĐỒNG BỘ THỰC ĐƠN TRƯỜNG ĐÃ CÔNG BỐ (PUBLISHED / ACTIVE)
+    // ─────────────────────────────────────────────────────────────
+    const ageGroup = student?.class?.ageGroup || null;
+    const publishedMenu: any = await this.menusService?.findPublishedMenuForDate(targetDate, ageGroup)
+      .catch(() => null);
+    const isMenuPublished = !!publishedMenu;
+    const hasAllergy = !!(student?.allergies && student.allergies.length > 0);
 
     const currDate = new Date(targetDate);
     const dayOfWeek = currDate.getDay();

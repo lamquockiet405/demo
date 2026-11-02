@@ -49,7 +49,7 @@ export class SnackServicesController {
   }
 
   @Post('periods')
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Tạo mới kỳ đăng ký dịch vụ ăn xế' })
   async createPeriod(@Body() dto: CreateSnackServicePeriodDto) {
     return this.snackService.createPeriod(dto);
@@ -63,14 +63,14 @@ export class SnackServicesController {
   }
 
   @Post()
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Tạo mới dịch vụ bán trú' })
   async createService(@Body() dto: any) {
     return this.snackService.createService(dto);
   }
 
   @Put(':id')
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Cập nhật thông tin kỳ dịch vụ ăn xế' })
   async updatePeriod(
     @Param('id', ParseIntPipe) id: number,
@@ -80,14 +80,14 @@ export class SnackServicesController {
   }
 
   @Put('periods/:id/close')
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Đóng kỳ đăng ký ăn xế' })
   async closePeriod(@Param('id', ParseIntPipe) id: number) {
     return this.snackService.closePeriod(id);
   }
 
   @Delete(':id')
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Xóa dịch vụ bán trú' })
   async deleteService(@Param('id', ParseIntPipe) id: number) {
     return this.snackService.deleteService(id);

@@ -132,7 +132,7 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
 
   const formatVND = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
 
-  const handleSubmit = async (status: 'DRAFT' | 'ACTIVE') => {
+  const handleSubmit = async (status: 'DRAFT' | 'ACTIVE' | 'OPEN') => {
     if (!selectedServiceId) {
       setSubmitMessage({ type: 'error', text: 'Vui lòng chọn gói ăn xế.' });
       return;
@@ -145,8 +145,16 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
       setSubmitMessage({ type: 'error', text: 'Vui lòng chọn thời gian nhận đơn.' });
       return;
     }
+    if (new Date(registrationEnd).getTime() <= new Date(registrationStart).getTime()) {
+      setSubmitMessage({ type: 'error', text: 'Ngày kết thúc phải sau ngày bắt đầu' });
+      return;
+    }
     if (serviceMonths.length === 0) {
-      setSubmitMessage({ type: 'error', text: 'Vui lòng chọn ít nhất 1 tháng phục vụ.' });
+      setSubmitMessage({ type: 'error', text: 'Vui lòng chọn ít nhất 1 tháng phục vụ' });
+      return;
+    }
+    if (capacityMode === 'LIMITED' && (!totalQuota || totalQuota <= 0)) {
+      setSubmitMessage({ type: 'error', text: 'Vui lòng nhập tổng chỉ tiêu' });
       return;
     }
 
@@ -154,7 +162,11 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
     setSubmitMessage(null);
 
     try {
+      const selectedService = servicesList.find(s => s.id === selectedServiceId);
+      const name = selectedService?.name || (serviceMonths.length > 0 ? `Dịch vụ ăn xế Tháng ${serviceMonths[0]}` : 'Dịch vụ ăn xế');
+
       const dto: CreateSnackServicePeriodDto = {
+        name,
         snackServiceId: selectedServiceId,
         periodCode,
         appliedGrades,
@@ -171,7 +183,7 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
         autoCloseEnabled: autoClose,
         autoCloseThresholdPercent: autoClose ? autoCloseThreshold : undefined,
         nutritionNotes: nutritionNotes || undefined,
-        status,
+        status: status === 'ACTIVE' ? 'OPEN' : status,
       };
 
       const res = await createSnackServicePeriod(dto);
@@ -591,7 +603,7 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
               Lưu bản nháp
             </button>
             <button
-              onClick={() => handleSubmit('ACTIVE')}
+              onClick={() => handleSubmit('OPEN')}
               disabled={submitting}
               className="px-5 py-2.5 bg-teal-500 hover:bg-teal-600 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-500/20 flex items-center gap-2 transition disabled:opacity-50"
             >

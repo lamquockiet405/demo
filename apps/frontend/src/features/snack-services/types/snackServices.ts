@@ -65,6 +65,7 @@ export interface SnackServiceListResponse {
 }
 
 export interface CreateSnackServicePeriodDto {
+  name?: string;
   snackServiceId: string;
   periodCode: string;
   appliedGrades: string[];
@@ -81,12 +82,13 @@ export interface CreateSnackServicePeriodDto {
   autoCloseEnabled: boolean;
   autoCloseThresholdPercent?: number;
   nutritionNotes?: string;
-  status: 'DRAFT' | 'ACTIVE';
+  status: 'DRAFT' | 'ACTIVE' | 'OPEN';
 }
 
 export interface CreatePeriodResponse {
   success: boolean;
   message: string;
+  warning?: string;
   data: any;
 }
 
@@ -97,6 +99,11 @@ export interface UpdateSnackServiceDto {
   serviceType?: string;
   billingCycle?: string;
   pricePerUnit?: number;
+  feeAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  registrationDeadline?: string;
+  status?: string;
   isActive?: boolean;
   availableFrom?: string;
   availableTo?: string;
@@ -125,6 +132,7 @@ export interface SnackServiceDetailResponse {
 export interface UpdateSnackServiceResponse {
   success: boolean;
   message: string;
+  warning?: string;
   data: SnackServiceDetailEntity;
 }
 
