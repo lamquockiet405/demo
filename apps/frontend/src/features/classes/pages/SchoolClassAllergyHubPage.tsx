@@ -135,7 +135,6 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
           console.error('Lỗi tải danh sách học sinh:', err);
           return { items: [] };
         }),
-
         childrenApi.getAllergenCatalogs().catch(() => []),
         attendanceApi.getSchoolHeadcountSummary().catch(() => null),
 

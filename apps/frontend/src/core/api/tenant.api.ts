@@ -63,31 +63,31 @@ export const tenantApi = {
    * UC07: Lấy cấu hình trường mầm non & pháp lý ATTP (Configure School Information)
    */
   getProfile: async (): Promise<TenantProfile> => {
-    const res = await apiClient.get<TenantProfile>('/tenant/profile');
-    return res.data;
+    const res = await apiClient.get<any>('/tenant/profile');
+    return res.data?.data || res.data;
   },
 
   /**
    * UC07: Cập nhật thông tin trường mầm non & pháp lý ATTP
    */
   updateProfile: async (data: UpdateTenantProfileInput): Promise<TenantProfile> => {
-    const res = await apiClient.patch<TenantProfile>('/tenant/profile', data);
-    return res.data;
+    const res = await apiClient.patch<any>('/tenant/profile', data);
+    return res.data?.data || res.data;
   },
 
   /**
    * UC07: Tải lên Logo trường học (kiểm soát định dạng & dung lượng tối đa 2MB)
    */
   uploadLogo: async (data: UploadLogoInput) => {
-    const res = await apiClient.post('/tenant/upload-logo', data);
-    return res.data;
+    const res = await apiClient.post<any>('/tenant/upload-logo', data);
+    return res.data?.data || res.data;
   },
 
   /**
    * UC07: Đồng bộ dữ liệu với Cơ sở dữ liệu ngành của Bộ GD&ĐT
    */
   syncEducationDb: async () => {
-    const res = await apiClient.post('/tenant/sync-education-db');
-    return res.data;
+    const res = await apiClient.post<any>('/tenant/sync-education-db');
+    return res.data?.data || res.data;
   },
 };

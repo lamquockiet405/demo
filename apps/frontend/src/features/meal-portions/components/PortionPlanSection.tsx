@@ -127,19 +127,18 @@ export const PortionPlanSection: React.FC<PortionPlanSectionProps> = ({
           <button
             onClick={onApproveExport}
             disabled={isApproving || isWarehouseExported}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition active:scale-98 ${
-              isWarehouseExported
-                ? 'bg-emerald-600 text-white cursor-default'
-                : 'bg-teal-700 hover:bg-teal-800 text-white shadow-teal-900/20'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition active:scale-98 ${isWarehouseExported
+              ? 'bg-emerald-600 text-white cursor-default'
+              : 'bg-teal-700 hover:bg-teal-800 text-white shadow-teal-900/20'
+              }`}
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-200" />
             <span>
               {isApproving
                 ? 'Đang xử lý...'
                 : isWarehouseExported
-                ? 'Đã duyệt lệnh xuất kho tuần'
-                : 'Duyệt lệnh xuất kho nguyên liệu tuần'}
+                  ? 'Đã duyệt lệnh xuất kho tuần'
+                  : 'Duyệt lệnh xuất kho nguyên liệu tuần'}
             </span>
           </button>
         </div>
@@ -187,11 +186,10 @@ export const PortionPlanSection: React.FC<PortionPlanSectionProps> = ({
                       </p>
                       {ing.targetBadge && (
                         <span
-                          className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                            ing.category === 'SPECIAL_DIET'
-                              ? 'bg-rose-100 text-rose-700'
-                              : 'bg-sky-100 text-sky-800'
-                          }`}
+                          className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${ing.category === 'SPECIAL_DIET'
+                            ? 'bg-rose-100 text-rose-700'
+                            : 'bg-sky-100 text-sky-800'
+                            }`}
                         >
                           {ing.targetBadge}
                         </span>
@@ -212,11 +210,10 @@ export const PortionPlanSection: React.FC<PortionPlanSectionProps> = ({
                     <span className="text-xs font-bold text-slate-500">{ing.unit}</span>
                   </div>
                   <p
-                    className={`text-[10.5px] font-medium ${
-                      ing.category === 'SPECIAL_DIET'
-                        ? 'text-rose-600 font-bold'
-                        : 'text-slate-400'
-                    }`}
+                    className={`text-[10.5px] font-medium ${ing.category === 'SPECIAL_DIET'
+                      ? 'text-rose-600 font-bold'
+                      : 'text-slate-400'
+                      }`}
                   >
                     {ing.warehouseStockText}
                   </p>
@@ -252,11 +249,10 @@ export const PortionPlanSection: React.FC<PortionPlanSectionProps> = ({
                     Bước {step.stepNumber}: {step.name.split(':')[0]}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      step.badgeColor === 'cyan'
-                        ? 'bg-cyan-100 text-cyan-800'
-                        : 'bg-emerald-100 text-emerald-800'
-                    }`}
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${step.badgeColor === 'cyan'
+                      ? 'bg-cyan-100 text-cyan-800'
+                      : 'bg-emerald-100 text-emerald-800'
+                      }`}
                   >
                     {step.badgeText}
                   </span>
