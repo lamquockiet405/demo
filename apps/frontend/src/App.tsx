@@ -30,6 +30,7 @@ import { MealOperationsReportPage } from './features/kitchen/pages/MealOperation
 import { FoodSafetyComplianceReportPage } from './features/food-safety/pages/FoodSafetyComplianceReportPage';
 import { SnackServiceRevenueReportPage } from './features/finances/pages/SnackServiceRevenueReportPage';
 import { ParentEvaluationSummaryReportPage } from './features/parent-evaluations/pages/ParentEvaluationSummaryReportPage';
+import { RoleBasedGrowthNotificationsPage } from './features/growth/pages/RoleBasedGrowthNotificationsPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -225,6 +226,7 @@ export const App: React.FC = () => {
           <Route path="meal-operations" element={<MealOperationsReportPage />} />
           <Route path="parent-evaluations" element={<ParentEvaluationSummaryReportPage />} />
           <Route path="evaluations" element={<ParentEvaluationSummaryReportPage />} />
+          <Route path="growth-notifications" element={<RoleBasedGrowthNotificationsPage />} />
           <Route path="reports" element={<NutritionistDashboardPage />} />
         </Route>
 
@@ -282,6 +284,8 @@ export const App: React.FC = () => {
           <Route path="/parent-evaluations" element={<ParentEvaluationSummaryReportPage />} />
           <Route path="/children" element={<WeeklyMenuManagementPage />} />
           <Route path="/growth" element={<ChildGrowthMonitoringPage />} />
+          <Route path="/growth-notifications" element={<RoleBasedGrowthNotificationsPage />} />
+          <Route path="/growth-alerts" element={<RoleBasedGrowthNotificationsPage />} />
           <Route path="/nutrition-physical-dashboard" element={<NutritionPhysicalDashboardPage />} />
           <Route path="/nutrition-dashboard" element={<NutritionPhysicalDashboardPage />} />
           <Route path="/child-alerts" element={<RoleSpecificChildAlertsPage />} />

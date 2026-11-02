@@ -81,6 +81,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Báo cáo Vận hành Bữa ăn (UC94)', path: '/meal-operations-report', icon: UtensilsCrossed },
     { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
+    { label: 'Điều phối cảnh báo thể trạng (UC85)', path: '/growth-notifications', icon: Bell },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
     { label: 'Dịch vụ bán trú', path: '/services', icon: Coffee },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
@@ -96,6 +97,7 @@ export const AdminDashboardLayout: React.FC = () => {
     if (location.pathname.startsWith('/nutrition-physical')) return 'Chỉ huy Dinh dưỡng & Thể trạng (UC92)';
     if (location.pathname.startsWith('/child-alerts')) return 'Tổng hợp Cảnh báo Trẻ em (UC93)';
     if (location.pathname.startsWith('/meal-operations')) return 'Báo Cáo Vận Hành Bữa Ăn & Bán Trú (UC94)';
+    if (location.pathname.startsWith('/growth-notifications')) return 'Điều Phối Thông Báo Bất Thường Thể Trạng (UC85)';
     if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
