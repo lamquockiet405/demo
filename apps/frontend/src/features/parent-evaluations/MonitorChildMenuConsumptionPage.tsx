@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SubmitMealEvaluationPage } from './SubmitMealEvaluationPage';
 import { parentEvaluationApi } from './api/parentEvaluationApi';
 import { ChildMenuConsumptionData } from './types';
 import { ParentPortalTopNav } from './components/ParentPortalTopNav';
@@ -12,6 +14,10 @@ import { PortalFooter } from './components/PortalFooter';
 import { Loader2, Utensils, Sparkles, RefreshCw } from 'lucide-react';
 
 export const MonitorChildMenuConsumptionPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  if (searchParams.get('tab') === 'evaluation') {
+    return <SubmitMealEvaluationPage />;
+  }
   const [data, setData] = useState<ChildMenuConsumptionData | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState<boolean>(true);

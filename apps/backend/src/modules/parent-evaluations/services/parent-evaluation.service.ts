@@ -411,6 +411,19 @@ export class ParentEvaluationService {
       });
     }
 
+    if (!student && userId) {
+      const parentRel = await this.evalRepo.query(
+        `SELECT student_id FROM student_parents WHERE parent_id = $1 LIMIT 1`,
+        [userId],
+      );
+      if (parentRel && parentRel.length > 0) {
+        student = await this.childRepo.findOne({
+          where: { id: Number(parentRel[0].student_id) },
+          relations: ['class', 'allergies', 'allergies.allergen'],
+        });
+      }
+    }
+
     if (!student) {
       const [first] = await this.childRepo.find({
         take: 1,
@@ -419,24 +432,48 @@ export class ParentEvaluationService {
       student = first || null;
     }
 
-    const allergyNames = student?.allergies && student.allergies.length > 0
-      ? student.allergies.map((a) => a.allergen?.name || 'Dị ứng').join(', ')
-      : 'Không có dị ứng';
+    let allergyNames = '';
+    if (student) {
+      const allergyRows = await this.evalRepo.query(
+        `SELECT a.name, sa.note, sa.severity
+         FROM student_allergies sa
+         JOIN allergens a ON a.id = sa.allergen_id
+         WHERE sa.student_id = $1;`,
+        [student.id],
+      );
+      if (allergyRows.length > 0) {
+        allergyNames = allergyRows.map((a: any) => a.name).join(', ');
+      }
+    }
+    const allergyWarning = allergyNames || 'Không có dị ứng';
 
     // Lấy thông tin phụ huynh thực tế từ bảng student_parents
     let parentName = student ? `Phụ huynh bé ${student.fullName}` : 'Phụ huynh';
     let parentRole = 'Phụ huynh';
     if (student) {
-      const parentRows = await this.evalRepo.query(
-        `SELECT sp.relationship, u.full_name as parent_name 
-         FROM student_parents sp 
-         JOIN users u ON u.id = sp.parent_id 
-         WHERE sp.student_id = $1 LIMIT 1;`,
-        [student.id],
-      );
+      const queryParams: any[] = [student.id];
+      let sql = `SELECT sp.relationship, u.full_name as parent_name 
+                 FROM student_parents sp 
+                 JOIN users u ON u.id = sp.parent_id 
+                 WHERE sp.student_id = $1`;
+      if (userId) {
+        sql += ` AND sp.parent_id = $2`;
+        queryParams.push(userId);
+      }
+      sql += ` LIMIT 1;`;
+      let parentRows = await this.evalRepo.query(sql, queryParams);
+      if (parentRows.length === 0 && userId) {
+        parentRows = await this.evalRepo.query(
+          `SELECT sp.relationship, u.full_name as parent_name 
+           FROM student_parents sp 
+           JOIN users u ON u.id = sp.parent_id 
+           WHERE sp.student_id = $1 LIMIT 1;`,
+          [student.id],
+        );
+      }
       if (parentRows.length > 0) {
         parentName = parentRows[0].parent_name;
-        parentRole = parentRows[0].relationship === 'FATHER' ? 'Bố bé' : 'Mẹ bé';
+        parentRole = parentRows[0].relationship === 'FATHER' ? 'Bố bé' : parentRows[0].relationship === 'MOTHER' ? 'Mẹ bé' : 'Phụ huynh';
       }
     }
 
@@ -536,12 +573,47 @@ export class ParentEvaluationService {
   }
 
   async submitEvaluation(payload: SubmitEvaluationDto, userId?: number) {
-    const studentId = Number(payload.studentId || payload.childId || 1);
-    const comment = payload.content || payload.comment || payload.title || 'Đánh giá tốt';
+    let studentId = payload.studentId || payload.childId ? Number(payload.studentId || payload.childId) : null;
+    if (!studentId && userId) {
+      const parentRel = await this.evalRepo.query(
+        `SELECT student_id FROM student_parents WHERE parent_id = $1 LIMIT 1`,
+        [userId],
+      );
+      if (parentRel && parentRel.length > 0) {
+        studentId = Number(parentRel[0].student_id);
+      }
+    }
+    if (!studentId) {
+      studentId = 1;
+    }
+
+    let comment = payload.content || payload.comment || payload.title || '';
+    if (payload.attributes && typeof payload.attributes === 'object') {
+      const attrs = payload.attributes as any;
+      const details: string[] = [];
+      if (attrs.taste) details.push(`Khẩu vị: ${attrs.taste}`);
+      if (attrs.appetite) details.push(`Sức ăn: ${attrs.appetite}`);
+      if (attrs.portion) details.push(`Khẩu phần: ${attrs.portion}`);
+      if (attrs.allergy) details.push(`Dị ứng: ${attrs.allergy}`);
+      if (details.length > 0 && !comment.includes('Khẩu vị:')) {
+        comment = comment ? `${comment} (${details.join(', ')})` : details.join(', ');
+      }
+    }
+    if (!comment) comment = 'Đánh giá tốt';
+
+    let menuId = payload.menuId ? Number(payload.menuId) : null;
+    if (!menuId) {
+      const menuRow = await this.evalRepo.query(
+        `SELECT id FROM menus WHERE status IN ('PUBLISHED', 'APPROVED') ORDER BY id DESC LIMIT 1;`,
+      );
+      if (menuRow && menuRow.length > 0) {
+        menuId = Number(menuRow[0].id);
+      }
+    }
 
     const evaluation = this.evalRepo.create({
       studentId,
-      menuId: payload.menuId ? Number(payload.menuId) : null,
+      menuId,
       rating: payload.rating || 5,
       comment,
     });
@@ -560,8 +632,22 @@ export class ParentEvaluationService {
     };
   }
 
-  async getChildMenuConsumption(childId?: string, date?: string) {
-    const sId = Number(childId || 1);
+  async getChildMenuConsumption(childId?: string, date?: string, userId?: number) {
+    let sId = childId ? Number(childId) : null;
+    if (!sId && userId) {
+      const parentRel = await this.evalRepo.query(
+        `SELECT student_id FROM student_parents WHERE parent_id = $1 LIMIT 1`,
+        [userId],
+      );
+      if (parentRel && parentRel.length > 0) {
+        sId = Number(parentRel[0].student_id);
+      }
+    }
+    if (!sId) {
+      const [first] = await this.childRepo.find({ take: 1 });
+      sId = first ? first.id : 1;
+    }
+
     const targetDate = date || new Date().toISOString().split('T')[0];
 
     const attendances = await this.attendanceRepo.find({
@@ -579,25 +665,49 @@ export class ParentEvaluationService {
         relations: ['class', 'allergies', 'allergies.allergen'],
       });
       student = first || null;
+      if (student) sId = student.id;
     }
 
-    const allergyNames = student?.allergies && student.allergies.length > 0
-      ? student.allergies.map((a) => a.allergen?.name || 'Dị ứng').join(', ')
-      : '';
+    let allergyNames = '';
+    if (student) {
+      const allergyRows = await this.evalRepo.query(
+        `SELECT a.name, sa.note, sa.severity
+         FROM student_allergies sa
+         JOIN allergens a ON a.id = sa.allergen_id
+         WHERE sa.student_id = $1;`,
+        [student.id],
+      );
+      if (allergyRows.length > 0) {
+        allergyNames = allergyRows.map((a: any) => a.name).join(', ');
+      }
+    }
 
     let parentName = student ? `Phụ huynh bé ${student.fullName}` : 'Phụ huynh';
     let parentRole = 'Phụ huynh';
     if (student) {
-      const parentRows = await this.evalRepo.query(
-        `SELECT sp.relationship, u.full_name as parent_name 
-         FROM student_parents sp 
-         JOIN users u ON u.id = sp.parent_id 
-         WHERE sp.student_id = $1 LIMIT 1;`,
-        [student.id],
-      );
+      const queryParams: any[] = [student.id];
+      let sql = `SELECT sp.relationship, u.full_name as parent_name 
+                 FROM student_parents sp 
+                 JOIN users u ON u.id = sp.parent_id 
+                 WHERE sp.student_id = $1`;
+      if (userId) {
+        sql += ` AND sp.parent_id = $2`;
+        queryParams.push(userId);
+      }
+      sql += ` LIMIT 1;`;
+      let parentRows = await this.evalRepo.query(sql, queryParams);
+      if (parentRows.length === 0 && userId) {
+        parentRows = await this.evalRepo.query(
+          `SELECT sp.relationship, u.full_name as parent_name 
+           FROM student_parents sp 
+           JOIN users u ON u.id = sp.parent_id 
+           WHERE sp.student_id = $1 LIMIT 1;`,
+          [student.id],
+        );
+      }
       if (parentRows.length > 0) {
         parentName = parentRows[0].parent_name;
-        parentRole = parentRows[0].relationship === 'FATHER' ? 'Bố bé' : 'Mẹ bé';
+        parentRole = parentRows[0].relationship === 'FATHER' ? 'Bố bé' : parentRows[0].relationship === 'MOTHER' ? 'Mẹ bé' : 'Phụ huynh';
       }
     }
 
