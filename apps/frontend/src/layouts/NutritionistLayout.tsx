@@ -36,6 +36,7 @@ export const NutritionistLayout: React.FC = () => {
     { label: 'Quy tắc Tần suất & Món', path: '/nutritionist/food-group-rules' },
     { label: 'Thực đơn', path: '/nutritionist/menus' },
     { label: 'Kiểm thực', path: '/nutritionist/food-safety' },
+    { label: 'Lưu mẫu 24h', path: '/nutritionist/samples' },
     { label: 'Tăng trưởng', path: '/nutritionist/growth' },
     { label: 'Báo cáo', path: '/nutritionist/reports' },
   ];

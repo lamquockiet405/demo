@@ -355,7 +355,21 @@ export const KitchenDisplayLayout: React.FC = () => {
         {/* Header Right Controls */}
         <div className="flex items-center gap-4 flex-wrap">
           {/* Quick links to other modules */}
-          <div className="hidden xl:flex items-center gap-2 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700 text-xs font-semibold">
+          <div className="hidden md:flex items-center gap-2 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700 text-xs font-semibold">
+            <Link
+              to="/kitchen/inspections"
+              className="px-3 py-1.5 rounded-lg text-emerald-400 bg-emerald-950/70 border border-emerald-500/40 hover:bg-emerald-900/90 hover:text-emerald-300 font-bold transition flex items-center gap-1.5 shadow-sm"
+              title="Lập và quản lý biên bản kiểm thực 3 bước ATTP"
+            >
+              🛡️ Kiểm Thực 3 Bước
+            </Link>
+            <Link
+              to="/kitchen/samples"
+              className="px-3 py-1.5 rounded-lg text-blue-400 bg-blue-950/70 border border-blue-500/40 hover:bg-blue-900/90 hover:text-blue-300 font-bold transition flex items-center gap-1.5 shadow-sm"
+              title="Quản lý và tiêu hủy các mẫu lưu thức ăn 24 giờ"
+            >
+              🧊 Mẫu Lưu 24H
+            </Link>
             <Link
               to="/attendance"
               className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"

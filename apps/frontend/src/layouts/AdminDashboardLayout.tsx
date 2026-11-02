@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Refrigerator,
   GraduationCap,
   Users2,
   Coffee,
@@ -81,6 +82,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
     { label: 'Sổ kiểm thực 3 bước', path: '/food-safety', icon: ShieldCheck },
+    { label: 'Sổ lưu mẫu 24h', path: '/food-safety/samples', icon: Refrigerator },
     { label: 'Nhật ký kiểm toán', path: '/audit-logs', icon: ShieldAlert },
     { label: 'Báo cáo tài chính', path: '/finances', icon: CircleDollarSign },
     { label: 'Cài đặt trường học', path: '/settings', icon: Settings },
