@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { ClipboardCheck, UtensilsCrossed, AlertTriangle, User } from 'lucide-react';
+import { ClipboardCheck, UtensilsCrossed, AlertTriangle, User, Coffee } from 'lucide-react';
 import { useAuthStore } from '../core/stores/auth.store';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 
@@ -43,6 +43,15 @@ export const TeacherTabletLayout: React.FC = () => {
           >
             <AlertTriangle className="w-5 h-5 text-amber-300" />
             Trạng thái ăn & Dị ứng
+          </Link>
+          <Link
+            to="/snack-roster"
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition ${
+              location.pathname === "/snack-roster" ? "bg-white text-emerald-800" : "bg-emerald-800/60 text-white"
+            }`}
+          >
+            <Coffee className="w-5 h-5 text-amber-300" />
+            Suất ăn xế
           </Link>
 
           {/* Profile & Avatar button */}
