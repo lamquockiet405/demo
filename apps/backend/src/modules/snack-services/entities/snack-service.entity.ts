@@ -1,1 +1,1 @@
-export { SnackServicePeriod as SnackService } from './snack-service-period.entity';
+export { SnackServicePeriod as SnackService, SnackServicePeriod as SnackServiceEntity, SnackServicePeriod as SnackServicePeriodEntity } from './snack-service-period.entity';

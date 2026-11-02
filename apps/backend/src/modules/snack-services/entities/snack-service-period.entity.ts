@@ -36,3 +36,5 @@ export class SnackServicePeriod {
   @OneToMany(() => SnackRegistration, (reg) => reg.period)
   registrations: SnackRegistration[];
 }
+
+export { SnackServicePeriod as SnackServicePeriodEntity };

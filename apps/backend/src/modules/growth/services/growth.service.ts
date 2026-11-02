@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Optional, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GrowthRecord, GrowthZscore } from '../entities/growth-record.entity';
 import { Child } from '../../children/entities/child.entity';
-import { WhoZscoreService, WhoLmsEntry, WhoStandardsResult } from './who-zscore.service';
+import { WhoZscoreService } from './who-zscore.service';
 import { CreateGrowthRecordDto } from '../dto/create-growth-record.dto';
-import { UpdateGrowthRecordDto } from '../dto/update-growth-record.dto';
 import { QueryGrowthRecordsDto } from '../dto/query-growth-records.dto';
+import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
 
 @Injectable()
 export class GrowthService {
@@ -18,6 +18,7 @@ export class GrowthService {
     @InjectRepository(Child)
     private readonly childRepo: Repository<Child>,
     private readonly whoService: WhoZscoreService,
+    @Optional() private readonly auditLogsService?: AuditLogsService,
   ) {}
 
   private mapToItem(record: GrowthRecord) {
@@ -29,11 +30,10 @@ export class GrowthService {
     if (student && student.dateOfBirth && record.measuredDate) {
       const dob = new Date(student.dateOfBirth);
       const md = new Date(record.measuredDate);
-      ageInMonths = (md.getFullYear() - dob.getFullYear()) * 12 + (md.getMonth() - dob.getMonth());
-      if (md.getDate() < dob.getDate()) {
-        ageInMonths--;
-      }
-      ageInMonths = Math.min(Math.max(0, ageInMonths), 84);
+      ageInMonths = Math.max(
+        0,
+        (md.getFullYear() - dob.getFullYear()) * 12 + (md.getMonth() - dob.getMonth()),
+      );
     }
 
     if (record.heightCm && record.heightCm > 0 && record.weightKg) {
@@ -46,7 +46,7 @@ export class GrowthService {
     let baz = zscore?.baz != null ? Number(zscore.baz) : 0;
 
     // Tự động tính toán lại Z-Score chính xác nếu bản ghi cũ bị 0
-    if ((!zscore || (waz === 0 && haz === 0 && baz === 0)) && student && Number(record.heightCm) > 0 && Number(record.weightKg) > 0) {
+    if (waz === 0 && haz === 0 && baz === 0 && student && record.heightCm && record.weightKg) {
       const gender = (student.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
       const calc = this.whoService.calculateSync(
         gender,
@@ -60,11 +60,27 @@ export class GrowthService {
       baz = calc.baz;
     }
 
-    const detailed = this.whoService.classifyDetailed(waz, haz, baz, bmi);
-    const weightClassification = detailed.weightClassification;
-    const heightClassification = detailed.heightClassification;
-    const bmiClassification = detailed.bmiClassification;
-    const overall = detailed.overallNutritionalStatus;
+    let weightClassification = 'NORMAL';
+    if (waz < -3) weightClassification = 'SEVERELY_UNDERWEIGHT';
+    else if (waz < -2) weightClassification = 'UNDERWEIGHT';
+    else if (waz > 3) weightClassification = 'SEVERELY_OVERWEIGHT';
+    else if (waz > 2) weightClassification = 'OVERWEIGHT';
+
+    let heightClassification = 'NORMAL';
+    if (haz < -3) heightClassification = 'SEVERELY_STUNTED';
+    else if (haz < -2) heightClassification = 'STUNTED';
+
+    let bmiClassification = 'NORMAL';
+    if (baz > 3 || (bmi != null && bmi >= 25)) bmiClassification = 'OBESE';
+    else if (baz > 2 || (bmi != null && bmi >= 19)) bmiClassification = 'OVERWEIGHT';
+    else if (baz < -3) bmiClassification = 'SEVERELY_WASTED';
+    else if (baz < -2) bmiClassification = 'WASTED';
+
+    let overall = bmiClassification;
+    if (overall === 'NORMAL') {
+      if (heightClassification !== 'NORMAL') overall = heightClassification;
+      else if (weightClassification !== 'NORMAL') overall = weightClassification;
+    }
 
     return {
       id: String(record.id),
@@ -103,7 +119,6 @@ export class GrowthService {
       heightClassification,
       bmiClassification,
       overallNutritionalStatus: overall,
-      healthNotes: record.healthNotes || '',
       createdAt: record.measuredDate,
     };
   }
@@ -126,29 +141,7 @@ export class GrowthService {
 
     const status = query.status || query.nutritionalStatus;
     if (status) {
-      if (status === 'STUNTED') {
-        qb.andWhere('(zscore.classification = :status OR zscore.classification = :sevStunted)', {
-          status: 'STUNTED',
-          sevStunted: 'SEVERELY_STUNTED',
-        });
-      } else if (status === 'UNDERWEIGHT') {
-        qb.andWhere(
-          '(zscore.classification = :status OR zscore.classification = :sevUnder OR zscore.classification = :wasted OR zscore.classification = :sevWasted)',
-          {
-            status: 'UNDERWEIGHT',
-            sevUnder: 'SEVERELY_UNDERWEIGHT',
-            wasted: 'WASTED',
-            sevWasted: 'SEVERELY_WASTED',
-          },
-        );
-      } else if (status === 'OVERWEIGHT') {
-        qb.andWhere('(zscore.classification = :status OR zscore.classification = :sevOver)', {
-          status: 'OVERWEIGHT',
-          sevOver: 'SEVERELY_OVERWEIGHT',
-        });
-      } else {
-        qb.andWhere('zscore.classification = :status', { status });
-      }
+      qb.andWhere('zscore.classification = :status', { status });
     }
 
     if (query.search) {
@@ -239,8 +232,8 @@ export class GrowthService {
     const records = await this.growthRepo
       .createQueryBuilder('record')
       .leftJoinAndSelect('record.zscore', 'zscore')
-      .where('record.studentId IN (:...studentIds)', { studentIds })
-      .orderBy('record.measuredDate', 'DESC')
+      .where('record.student_id IN (:...studentIds)', { studentIds })
+      .orderBy('record.measured_date', 'DESC')
       .getMany();
 
     // Map latest record per student
@@ -261,26 +254,12 @@ export class GrowthService {
       const rec = latestMap.get(s.id);
       if (rec && rec.zscore) {
         evaluatedCount++;
-        const haz = Number(rec.zscore.haz);
-        const waz = Number(rec.zscore.waz);
-        const baz = Number(rec.zscore.baz);
-        const hM = Number(rec.heightCm) > 0 ? Number(rec.heightCm) / 100 : 0;
-        const bmi = hM > 0 ? Math.round((Number(rec.weightKg) / (hM * hM)) * 100) / 100 : 0;
-
-        const detailed = this.whoService.classifyDetailed(waz, haz, baz, bmi);
-
-        if (detailed.heightClassification === 'STUNTED' || detailed.heightClassification === 'SEVERELY_STUNTED') {
-          stuntedCount++;
-        }
-        if (detailed.weightClassification === 'UNDERWEIGHT' || detailed.weightClassification === 'SEVERELY_UNDERWEIGHT' || detailed.bmiClassification === 'WASTED' || detailed.bmiClassification === 'SEVERELY_WASTED') {
-          underweightCount++;
-        }
-        if (detailed.bmiClassification === 'OVERWEIGHT' || detailed.bmiClassification === 'OBESE' || detailed.weightClassification === 'OVERWEIGHT' || detailed.weightClassification === 'SEVERELY_OVERWEIGHT') {
-          overweightCount++;
-        }
-        if (detailed.overallNutritionalStatus === 'NORMAL') {
-          normalCount++;
-        }
+        const cls = rec.zscore.classification;
+        if (cls === 'NORMAL') normalCount++;
+        else if (cls === 'STUNTED' || cls === 'SEVERELY_STUNTED') stuntedCount++;
+        else if (cls === 'UNDERWEIGHT' || cls === 'SEVERELY_UNDERWEIGHT') underweightCount++;
+        else if (cls === 'OVERWEIGHT' || cls === 'OBESE') overweightCount++;
+        else normalCount++;
       }
     }
 
@@ -298,60 +277,19 @@ export class GrowthService {
       stuntedPercent: calcPct(stuntedCount),
       underweightPercent: calcPct(underweightCount),
       overweightPercent: calcPct(overweightCount),
-      hasAlerts: stuntedCount > 0 || overweightCount > 0 || underweightCount > 0,
-      alertBadges: {
-        stunted: stuntedCount,
-        overweight: overweightCount,
-        underweight: underweightCount,
-        isAllNormal: evaluatedCount > 0 && stuntedCount === 0 && overweightCount === 0 && underweightCount === 0,
-      },
     };
   }
 
   async createRecord(dto: CreateGrowthRecordDto, measurerId?: number) {
-    let studentId = Number(dto.studentId || dto.childId);
-    let child: Child | null = null;
+    const studentId = Number(dto.studentId || dto.childId);
+    const measuredDate = dto.measuredDate || dto.measurementDate || new Date().toISOString().split('T')[0];
 
-    if (!isNaN(studentId) && studentId > 0) {
-      child = await this.childRepo.findOne({
-        where: { id: studentId },
-        relations: ['class'],
-      });
-    }
-
-    if (!child && (dto.studentCode || dto.childId || dto.studentId)) {
-      const code = String(dto.studentCode || dto.childId || dto.studentId).trim();
-      child = await this.childRepo.findOne({
-        where: { studentCode: code },
-        relations: ['class'],
-      });
-      if (child) {
-        studentId = child.id;
-      }
-    }
-
+    const child = await this.childRepo.findOne({
+      where: { id: studentId },
+      relations: ['class'],
+    });
     if (!child) {
-      const lookupIdentifier = dto.studentCode || dto.childId || dto.studentId || 'N/A';
-      throw new NotFoundException(`Không tìm thấy hồ sơ học sinh (${lookupIdentifier}) trong hệ thống`);
-    }
-
-    const measuredDate =
-      dto.measuredDate ||
-      dto.measurementDate ||
-      new Date().toISOString().split('T')[0];
-
-    if (isNaN(new Date(measuredDate).getTime())) {
-      throw new BadRequestException(`Ngày đo "${measuredDate}" không hợp lệ (định dạng chuẩn YYYY-MM-DD)`);
-    }
-
-    const heightCm = Number(dto.heightCm);
-    const weightKg = Number(dto.weightKg);
-
-    if (isNaN(heightCm) || heightCm < 40 || heightCm > 150) {
-      throw new BadRequestException('Chiều cao phải là số trong khoảng từ 40 đến 150 cm');
-    }
-    if (isNaN(weightKg) || weightKg < 3 || weightKg > 60) {
-      throw new BadRequestException('Cân nặng phải là số trong khoảng từ 3 đến 60 kg');
+      throw new NotFoundException(`Child with ID ${studentId} not found`);
     }
 
     const gender = (child.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
@@ -359,13 +297,12 @@ export class GrowthService {
       gender,
       child.dateOfBirth,
       measuredDate,
-      heightCm,
-      weightKg,
+      Number(dto.heightCm),
+      Number(dto.weightKg),
     );
 
-    // Upsert cơ chế chống trùng lặp: Học sinh + Ngày đo
     let record = await this.growthRepo.findOne({
-      where: { studentId: child.id, measuredDate },
+      where: { studentId, measuredDate },
       relations: ['zscore'],
     });
 
@@ -373,16 +310,14 @@ export class GrowthService {
       record.heightCm = Number(dto.heightCm);
       record.weightKg = Number(dto.weightKg);
       if (measurerId) record.measuredBy = measurerId;
-      if (dto.healthNotes !== undefined) record.healthNotes = dto.healthNotes;
       await this.growthRepo.save(record);
     } else {
       record = this.growthRepo.create({
-        studentId: child.id,
+        studentId,
         measuredDate,
         heightCm: Number(dto.heightCm),
         weightKg: Number(dto.weightKg),
         measuredBy: measurerId,
-        healthNotes: dto.healthNotes,
       });
       await this.growthRepo.save(record);
     }
@@ -413,7 +348,7 @@ export class GrowthService {
     return this.mapToItem(record);
   }
 
-  async updateRecord(id: number, dto: UpdateGrowthRecordDto) {
+  async updateRecord(id: number, dto: Partial<CreateGrowthRecordDto>) {
     const record = await this.growthRepo.findOne({
       where: { id },
       relations: ['student', 'student.class', 'zscore'],
@@ -422,26 +357,12 @@ export class GrowthService {
       throw new NotFoundException(`Growth record with ID ${id} not found`);
     }
 
-    // 1. Cập nhật ngày đo (kiểm tra chống trùng lặp ngày đo cho cùng một học sinh)
-    const targetDate = dto.measuredDate || dto.measurementDate;
-    if (targetDate && targetDate !== record.measuredDate) {
-      const duplicateRecord = await this.growthRepo.findOne({
-        where: { studentId: record.studentId, measuredDate: targetDate },
-      });
-      if (duplicateRecord && Number(duplicateRecord.id) !== Number(record.id)) {
-        throw new BadRequestException(
-          `Đã có bản ghi cân đo của học sinh vào ngày ${targetDate}. Vui lòng chọn ngày khác hoặc sửa bản ghi ngày đó.`
-        );
-      }
-      record.measuredDate = targetDate;
-    }
-
-    // 2. Cập nhật thông số đo: chiều cao, cân nặng, ghi chú
     if (dto.heightCm != null) record.heightCm = Number(dto.heightCm);
     if (dto.weightKg != null) record.weightKg = Number(dto.weightKg);
-    if (dto.healthNotes !== undefined) record.healthNotes = dto.healthNotes;
+    if (dto.measuredDate || dto.measurementDate) {
+      record.measuredDate = dto.measuredDate || dto.measurementDate!;
+    }
 
-    // 3. Tính toán lại (Re-calculate) Z-Score & Phân loại WHO
     const student = record.student;
     if (student) {
       const gender = (student.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
@@ -455,8 +376,7 @@ export class GrowthService {
 
       let zscore = record.zscore;
       if (!zscore) {
-        zscore = await this.zscoreRepo.findOne({ where: { measurementId: record.id } }) ||
-                 this.zscoreRepo.create({ measurementId: record.id });
+        zscore = this.zscoreRepo.create({ measurementId: record.id });
       }
       zscore.waz = growth.waz;
       zscore.haz = growth.haz;
@@ -498,8 +418,7 @@ export class GrowthService {
         await this.createRecord(item, measurerId);
         importedCount++;
       } catch (err: any) {
-        const iden = item.studentCode || item.studentId || item.childId || 'Dòng dữ liệu';
-        errors.push(`Lỗi dòng học sinh ${iden}: ${err.message}`);
+        errors.push(`Lỗi dòng học sinh ${item.studentId || item.childId}: ${err.message}`);
       }
     }
 
@@ -510,105 +429,16 @@ export class GrowthService {
     };
   }
 
-  private formatWeightClassification(wc?: string): string {
-    switch (wc) {
-      case 'SEVERELY_UNDERWEIGHT':
-        return 'Nhẹ cân nặng';
-      case 'UNDERWEIGHT':
-        return 'Nhẹ cân';
-      case 'NORMAL':
-        return 'Bình thường';
-      case 'OVERWEIGHT':
-        return 'Thừa cân';
-      case 'SEVERELY_OVERWEIGHT':
-        return 'Thừa cân nặng';
-      default:
-        return wc || 'Bình thường';
-    }
-  }
-
-  private formatOverallNutritionalStatus(st?: string): string {
-    switch (st) {
-      case 'OBESE':
-        return 'Béo phì';
-      case 'OVERWEIGHT':
-        return 'Thừa cân';
-      case 'SEVERELY_STUNTED':
-        return 'Thấp còi nặng';
-      case 'STUNTED':
-        return 'Thấp còi';
-      case 'SEVERELY_WASTED':
-        return 'Gầy còm nặng';
-      case 'WASTED':
-        return 'Gầy còm';
-      case 'SEVERELY_UNDERWEIGHT':
-        return 'Nhẹ cân nặng';
-      case 'UNDERWEIGHT':
-        return 'Nhẹ cân';
-      case 'SEVERELY_OVERWEIGHT':
-        return 'Thừa cân nặng';
-      case 'NORMAL':
-        return 'Bình thường';
-      default:
-        return st || 'Bình thường';
-    }
-  }
-
-  async exportReport(classId?: string, schoolId?: number) {
+  async exportReport(classId?: string) {
     const query: QueryGrowthRecordsDto = {
       classId,
       page: 1,
       limit: 1000,
     };
-    const { items, total } = await this.findAll(query, schoolId);
-
-    const formattedItems = items.map((it: any) => {
-      const studentCode = it.child?.studentCode || it.studentCode || '';
-      const childName = it.child?.fullName || it.childName || '';
-      let gender = it.child?.gender || it.gender || '';
-      if (gender === 'MALE' || gender === 'male') gender = 'Nam';
-      else if (gender === 'FEMALE' || gender === 'female') gender = 'Nữ';
-
-      const className = it.child?.class?.name || it.className || '';
-      const measurementDate = it.measurementDate ? String(it.measurementDate).split('T')[0] : '';
-      const ageInMonths = it.ageInMonths ?? 0;
-      const weightKg = it.weightKg ?? 0;
-      const heightCm = it.heightCm ?? 0;
-
-      const waz = it.waz != null ? Number(it.waz).toFixed(2) : '0.00';
-      const haz = it.haz != null ? Number(it.haz).toFixed(2) : '0.00';
-      const baz = it.baz != null ? Number(it.baz).toFixed(2) : '0.00';
-
-      const weightStatus = this.formatWeightClassification(it.weightClassification);
-      const overallStatus = this.formatOverallNutritionalStatus(it.overallNutritionalStatus);
-      const notes = it.healthNotes || it.notes || '';
-
-      return {
-        ...it,
-        studentCode,
-        childName,
-        gender,
-        className,
-        measurementDate,
-        ageInMonths,
-        weightKg,
-        heightCm,
-        waz,
-        haz,
-        baz,
-        weightStatus,
-        overallStatus,
-        notes,
-      };
-    });
-
+    const { items, total } = await this.findAll(query);
     return {
       totalRecords: total,
-      items: formattedItems,
+      items,
     };
-  }
-
-  getStandards(gender: 'MALE' | 'FEMALE', indicator?: 'WAZ' | 'HAZ' | 'BAZ'): WhoStandardsResult {
-    return this.whoService.getStandards(gender, indicator);
   }
 }

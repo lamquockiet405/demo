@@ -23,8 +23,8 @@ export const MealEvaluationPage: React.FC = () => {
 
   // State
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState<string>('f1000000-0000-0000-0000-000000000001');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-09-25');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [selectedMealType, setSelectedMealType] = useState<string>('LUNCH');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -54,8 +54,9 @@ export const MealEvaluationPage: React.FC = () => {
       try {
         const classList = await attendanceApi.getClasses();
         setClasses(classList);
-        if (classList.length > 0 && !selectedClassId) {
-          setSelectedClassId(classList[0].id);
+        if (classList.length > 0) {
+          const mam1 = classList.find((c) => c.name.includes('Mầm 1'));
+          setSelectedClassId(mam1 ? mam1.id : classList[0].id);
         }
       } catch (err) {
         console.error('Lỗi khi tải danh sách lớp học:', err);

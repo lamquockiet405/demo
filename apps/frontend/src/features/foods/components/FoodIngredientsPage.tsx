@@ -23,6 +23,7 @@ import {
   PauseCircle,
   PlayCircle,
   CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 import { FoodModal } from './FoodModal';
 

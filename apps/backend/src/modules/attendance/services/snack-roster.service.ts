@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChildEntity as Child } from '../entities/child.entity';
+import { Child } from '../../children/entities/child.entity';
 import { SnackRosterQueryDto } from '../dto/snack-roster-query.dto';
 
 @Injectable()
@@ -15,7 +15,8 @@ export class SnackRosterService {
     const qb = this.childRepo
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.class', 'cls')
-      .leftJoinAndSelect('c.allergies', 'alg');
+      .leftJoinAndSelect('c.allergies', 'alg')
+      .leftJoinAndSelect('alg.allergen', 'ac');
 
     if (query.classId) {
       qb.andWhere('c.classId = :classId', { classId: query.classId });
@@ -45,14 +46,10 @@ export class SnackRosterService {
       isRegistered: true,
       paymentStatus: 'PAID',
       allergyWarning: (c.allergies || []).length > 0,
-      allergens: (c.allergies || []).map((a) => (a as any).customAllergenName || (a as any).allergen?.name || 'Dị ứng'),
+      allergens: (c.allergies || []).map((a) => a.allergen?.name || 'Dị ứng'),
       status: 'SERVED',
     }));
 
     return { items, total, page, limit };
-  }
-
-  async getRosterData(tenantId: string, query: SnackRosterQueryDto) {
-    return this.findAll(query);
   }
 }

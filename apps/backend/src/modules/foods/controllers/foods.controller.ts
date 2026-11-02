@@ -51,14 +51,14 @@ export class FoodsController {
   }
 
   @Post()
-  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
+  @Roles('NUTRITIONIST', 'SCHOOL_MANAGER', 'PRINCIPAL')
   @ApiOperation({ summary: 'Tạo mới nguyên liệu vào kho dữ liệu' })
   async create(@Body() dto: CreateFoodDto) {
     return this.foodsService.create(dto);
   }
 
   @Put(':id')
-  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
+  @Roles('NUTRITIONIST', 'SCHOOL_MANAGER', 'PRINCIPAL')
   @ApiOperation({ summary: 'Cập nhật chỉ số dinh dưỡng nguyên liệu' })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -68,7 +68,7 @@ export class FoodsController {
   }
 
   @Delete(':id')
-  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
+  @Roles('NUTRITIONIST', 'SCHOOL_MANAGER', 'PRINCIPAL')
   @ApiOperation({ summary: 'Xóa nguyên liệu' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.foodsService.remove(id);
