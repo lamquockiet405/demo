@@ -4,6 +4,7 @@ import {
   BadRequestException,
   NotFoundException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +15,7 @@ import { User } from '../entities/user.entity';
 import { Role } from '../entities/role.entity';
 import { SchoolTenant } from '../entities/tenant.entity';
 import { LoginDto } from '../dto/login.dto';
+import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
 import { QuickLoginDto } from '../dto/quick-login.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 
@@ -30,6 +32,7 @@ export class AuthService {
     private readonly tenantRepository: Repository<SchoolTenant>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @Optional() private readonly auditLogsService?: AuditLogsService,
   ) {}
 
   /**
@@ -96,6 +99,19 @@ export class AuthService {
     user.lastLoginAt = new Date();
     await this.userRepository.update(user.id, { lastLoginAt: user.lastLoginAt });
 
+    this.auditLogsService?.logAction({
+      tenantId,
+      userId: user.id,
+      userName: user.fullName,
+      userEmail: user.email,
+      userRole: user.roles?.[0]?.code || 'STAFF',
+      action: 'LOGIN_SUCCESS',
+      targetEntity: 'USER',
+      targetId: String(user.id),
+      ipAddress: '127.0.0.1',
+      details: { method: 'PASSWORD_LOGIN', email: user.email },
+    }).catch(() => {});
+
     return this.generateAuthResponse(user, tenantId);
   }
 
@@ -122,6 +138,19 @@ export class AuthService {
     }
 
     const tenantId = Number(dto.tenantId) || 1;
+    this.auditLogsService?.logAction({
+      tenantId,
+      userId: user.id,
+      userName: user.fullName,
+      userEmail: user.email,
+      userRole: targetRoleCode,
+      action: 'LOGIN_SUCCESS',
+      targetEntity: 'USER',
+      targetId: String(user.id),
+      ipAddress: '127.0.0.1',
+      details: { method: 'QUICK_LOGIN', requestedRole: targetRoleCode },
+    }).catch(() => {});
+
     return this.generateAuthResponse(user, tenantId, targetRoleCode);
   }
 

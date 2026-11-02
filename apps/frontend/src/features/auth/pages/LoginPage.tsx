@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, Shield, Phone } from 'lucide-react';
 import { useAuthStore } from '../../../core/stores/auth.store';
 import {
@@ -11,7 +11,8 @@ import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setAuth, setTenantId, isAuthenticated, selectedTenantId, user } = useAuthStore();
+  const location = useLocation();
+  const { setAuth, setTenantId, isAuthenticated, user } = useAuthStore();
 
   const getPortalPath = (roles?: any[]): string => {
     if (!roles || roles.length === 0) return '/dashboard';
@@ -34,7 +35,7 @@ export const LoginPage: React.FC = () => {
   };
 
   // Form state
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState<string>(() => (location.state as any)?.email || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -191,7 +192,7 @@ export const LoginPage: React.FC = () => {
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="hieutruong@saomai.edu.vn"
+                    placeholder="hieutruong@huongduong.edu.vn"
                     autoComplete="email"
                     required
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 outline-none"
@@ -380,6 +381,8 @@ export const LoginPage: React.FC = () => {
         initialEmail={email}
         onSuccessLogin={(resetEmail) => {
           setEmail(resetEmail);
+          setPassword('');
+          setError('');
           setShowForgotPassword(false);
         }}
       />

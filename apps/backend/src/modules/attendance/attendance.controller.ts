@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Param,
   Body,
   Query,
@@ -24,8 +23,6 @@ import { SnackRosterQueryDto } from './dto/snack-roster-query.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
-import { InspectionsService } from '../inspections/inspections.service';
-
 @ApiTags('Meal Attendance & Evaluations')
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -35,7 +32,6 @@ export class AttendanceController {
     private readonly attendanceService: AttendanceService,
     private readonly noteService: MealCoordinationService,
     private readonly snackRosterService: SnackRosterService,
-    private readonly inspectionsService: InspectionsService,
   ) {}
 
   @Get('attendance/classes')
@@ -141,90 +137,22 @@ export class AttendanceController {
 
   @Get('attendance/coordination-notes')
   @ApiOperation({ summary: 'Lấy danh sách ghi chú phối hợp giữa GV và Bếp' })
-  async getNotes(@Query() query: any) {
-    return this.noteService.findAll(query);
+  async getNotes(@Query('date') date?: string) {
+    return this.noteService.findAll(date);
   }
 
   @Post('attendance/coordination-notes')
   @ApiOperation({ summary: 'Tạo ghi chú phối hợp giữa GV và Bếp' })
   async createNote(
-    @Body() dto: any,
+    @Body() dto: MealCoordinationDto,
     @CurrentUser('sub') userId: number,
   ) {
     return this.noteService.create(dto, userId);
-  }
-
-  @Put('attendance/coordination-notes/:id')
-  @ApiOperation({ summary: 'Cập nhật ghi chú điều phối suất ăn' })
-  async updateNote(
-    @Param('id') id: string,
-    @Body() dto: any,
-  ) {
-    return this.noteService.update(id, dto);
-  }
-
-  @Post('attendance/coordination-notes/:id/acknowledge')
-  @ApiOperation({ summary: 'Bếp xác nhận đã tiếp nhận ghi chú điều phối' })
-  async acknowledgeNote(
-    @Param('id') id: string,
-    @Body() data: any,
-    @CurrentUser('sub') userId: number,
-  ) {
-    return this.noteService.acknowledge(id, data, userId);
-  }
-
-  @Post('attendance/coordination-notes/:id/resolve')
-  @ApiOperation({ summary: 'Hoàn tất xử lý điều phối suất ăn' })
-  async resolveNote(
-    @Param('id') id: string,
-    @Body() data: any,
-  ) {
-    return this.noteService.resolve(id, data);
-  }
-
-  @Delete('attendance/coordination-notes/:id')
-  @ApiOperation({ summary: 'Xóa ghi chú điều phối' })
-  async deleteNote(@Param('id') id: string) {
-    return this.noteService.delete(id);
   }
 
   @Get('snack-roster')
   @ApiOperation({ summary: 'Lấy danh sách suất ăn xế chiều của trẻ' })
   async getSnackRoster(@Query() query: SnackRosterQueryDto) {
     return this.snackRosterService.findAll(query);
-  }
-
-  // =========================================================================
-  // KDS FOOD SAFETY INSPECTION & 24H SAMPLE RETENTION ALIASES
-  // =========================================================================
-
-  @Get('attendance/food-safety-logs')
-  @ApiOperation({ summary: 'Lấy danh sách nhật ký kiểm thực 3 bước cho KDS Bếp' })
-  async getFoodSafetyLogs() {
-    return this.inspectionsService.getFoodSafetyLogs();
-  }
-
-  @Post('attendance/food-safety-logs')
-  @ApiOperation({ summary: 'Tạo hoặc cập nhật bước kiểm thực an toàn thực phẩm từ KDS Bếp' })
-  async createFoodSafetyLog(@Body() body: any) {
-    return this.inspectionsService.createFoodSafetyLog(body);
-  }
-
-  @Get('attendance/sample-retention-records')
-  @ApiOperation({ summary: 'Lấy danh sách mẫu lưu thức ăn 24h cho KDS Bếp' })
-  async getSampleRetentionRecords() {
-    return this.inspectionsService.getSampleRetentionRecords();
-  }
-
-  @Post('attendance/sample-retention-records')
-  @ApiOperation({ summary: 'Lưu mẫu thức ăn 24h mới từ KDS Bếp' })
-  async createSampleRetentionRecord(@Body() body: any) {
-    return this.inspectionsService.createSampleRetentionRecord(body);
-  }
-
-  @Post('attendance/sample-retention-records/:id/dispose')
-  @ApiOperation({ summary: 'Hủy mẫu lưu an toàn sau 24h từ KDS Bếp' })
-  async disposeSampleRetentionRecord(@Param('id') id: string) {
-    return this.inspectionsService.disposeSampleRetentionRecord(id);
   }
 }

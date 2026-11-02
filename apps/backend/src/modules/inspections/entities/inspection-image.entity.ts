@@ -23,7 +23,7 @@ export class InspectionImage {
   @CreateDateColumn({ name: 'uploaded_at', type: 'timestamptz' })
   uploadedAt: Date;
 
-  @ManyToOne(() => InspectionRecord, (inspection) => inspection.images, {
+  @ManyToOne(() => InspectionRecord, (inspection: any) => inspection.images, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'inspection_id' })

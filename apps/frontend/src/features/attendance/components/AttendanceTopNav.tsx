@@ -1,12 +1,17 @@
-import React from 'react';
-import { School, Search, Bell, ChevronDown, UtensilsCrossed } from 'lucide-react';
+import React, { useState } from 'react';
+import { School, Search, Bell, ChevronDown, UtensilsCrossed, User } from 'lucide-react';
+import { useAuthStore } from '../../../core/stores/auth.store';
+import { UserProfileModal } from '../../auth/components/UserProfileModal';
 import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
+
 
 interface AttendanceTopNavProps {
   onSearch?: (query: string) => void;
 }
 
 export const AttendanceTopNav: React.FC<AttendanceTopNavProps> = ({ onSearch }) => {
+  const { user } = useAuthStore();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const schoolBranding = useSchoolBranding();
 
   return (
@@ -70,26 +75,41 @@ export const AttendanceTopNav: React.FC<AttendanceTopNavProps> = ({ onSearch }) 
           </button>
 
           {/* User Profile */}
-          <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+          <button
+            type="button"
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex items-center gap-2.5 pl-2 border-l border-slate-200 hover:opacity-80 transition cursor-pointer text-left"
+            title="Xem và chỉnh sửa hồ sơ cá nhân"
+          >
             <div className="w-9 h-9 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80"
-                alt="Cô Mai Anh"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  // Fallback avatar
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-              <span className="text-xs font-bold text-amber-700">MA</span>
+              {(user as any)?.avatar ? (
+                <img
+                  src={(user as any).avatar}
+                  alt={user?.fullName || 'User'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xs font-bold text-amber-700">
+                  {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'GV'}
+                </span>
+              )}
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-xs font-bold text-slate-800 leading-tight">Cô Mai Anh</p>
-              <p className="text-[11px] text-slate-500 font-medium leading-tight">Hiệu phó Nuôi dưỡng</p>
+              <p className="text-xs font-bold text-slate-800 leading-tight">
+                {user?.fullName || 'Cô Mai Anh'}
+              </p>
+              <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                Giáo viên Nuôi dưỡng
+              </p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </header>
   );
 };

@@ -22,6 +22,7 @@ import { RejectMenuDto } from '../dto/reject-menu.dto';
 import { AutoGenerateMenuDto } from '../dto/auto-generate-menu.dto';
 import { EmergencyRotateDishDto } from '../dto/emergency-rotate-dish.dto';
 import { ApplySubstituteDishDto } from '../dto/apply-substitute-dish.dto';
+import { SubmitMenuDto } from '../dto/submit-menu.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -124,10 +125,14 @@ export class MenusController {
   }
 
   @Post(':id/submit')
-  @Roles('NUTRITIONIST')
-  @ApiOperation({ summary: 'Gửi thực đơn lên Ban Giám Hiệu phê duyệt' })
-  async submitForReview(@Param('id', ParseIntPipe) id: number) {
-    return this.menusService.submitForReview(id);
+  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Gửi thực đơn lên Ban Giám Hiệu phê duyệt kèm Cam kết chuyên môn & Giải trình vượt ngưỡng' })
+  async submitForReview(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: any,
+    @Body() dto: SubmitMenuDto,
+  ) {
+    return this.menusService.submitForReview(id, user, dto);
   }
 
   @Post(':id/approve')

@@ -92,7 +92,7 @@ apiClient.interceptors.response.use(
       const refreshToken = localStorage.getItem('refresh_token');
       if (!refreshToken || refreshToken === 'undefined' || refreshToken === 'null') {
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = '/home';
         return Promise.reject(error);
       }
 
@@ -121,7 +121,7 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = '/home';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

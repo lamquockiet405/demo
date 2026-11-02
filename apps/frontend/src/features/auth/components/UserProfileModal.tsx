@@ -20,6 +20,10 @@ import {
   Smartphone,
   Lock,
   RefreshCw,
+  Camera,
+  UploadCloud,
+  ExternalLink,
+  Trash2,
 } from 'lucide-react';
 import {
   userProfileApi,
@@ -27,6 +31,45 @@ import {
   TwoFactorSetupResponse,
 } from '../../../core/api/user-profile.api';
 import { useAuthStore } from '../../../core/stores/auth.store';
+
+/**
+ * Nén và chuyển đổi ảnh local từ máy tính thành Data URL tối ưu
+ */
+const compressImage = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 256;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(e.target?.result as string);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.88));
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -51,6 +94,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   // Form states - Profile
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // Form states - Password
   const [currentPassword, setCurrentPassword] = useState('');
@@ -70,6 +116,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   // Form states - 2FA Disable Modal/Card
   const [showDisable2FAConfirm, setShowDisable2FAConfirm] = useState(false);
   const [disableTotpCode, setDisableTotpCode] = useState('');
+
+  // Role validation: Non-Principal roles can edit profile; Principal configures school
+  const userRoles = (profile?.roles || authUser?.roles || []).map((r: any) =>
+    (typeof r === 'string' ? r : r.code || '').toUpperCase(),
+  );
+  const isPrincipal = userRoles.some((r) =>
+    ['PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER'].includes(r),
+  );
+  const hasOtherRole = userRoles.some((r) =>
+    ['NUTRITIONIST', 'TEACHER', 'KITCHEN_STAFF', 'PARENT'].includes(r),
+  );
+  const isPrincipalOnly = isPrincipal && !hasOtherRole;
 
   useEffect(() => {
     if (isOpen) {
@@ -93,6 +151,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       setProfile(data);
       setFullName(data.fullName || '');
       setPhone(data.phone || '');
+      setAvatarUrl(data.avatarUrl || '');
     } catch {
       if (authUser) {
         setProfile({
@@ -100,7 +159,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           email: authUser.email,
           fullName: authUser.fullName,
           phone: '(028) 3829 4999',
-          avatarUrl: '',
+          avatarUrl: (authUser as any).avatar || '',
           status: 'ACTIVE',
           twoFactorEnabled: false,
           roles: authUser.roles.map((r, i) => ({ id: `r-${i}`, code: r, name: r })),
@@ -118,20 +177,71 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         });
         setFullName(authUser.fullName || '');
         setPhone('(028) 3829 4999');
+        setAvatarUrl((authUser as any).avatar || '');
       }
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Dung lượng ảnh gốc không được vượt quá 5MB.' });
+      return;
+    }
+
+    try {
+      setIsCompressing(true);
+      const compressedDataUrl = await compressImage(file);
+      setAvatarUrl(compressedDataUrl);
+      setMessage({
+        type: 'success',
+        text: `Đã nạp ảnh đại diện từ máy tính (${(file.size / 1024).toFixed(0)} KB). Nhấn "Lưu thay đổi" để hoàn tất.`,
+      });
+    } catch {
+      setMessage({ type: 'error', text: 'Không thể xử lý tệp ảnh vừa chọn.' });
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setMessage({
+      type: 'success',
+      text: 'Đã xóa ảnh đại diện. Nhấn "Lưu thay đổi" để áp dụng.',
+    });
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isPrincipalOnly) {
+      setMessage({
+        type: 'error',
+        text: 'Hiệu trưởng không sử dụng chức năng chỉnh sửa hồ sơ cá nhân mà thực hiện Cấu hình thông tin trường học.',
+      });
+      return;
+    }
     setSaving(true);
     setMessage(null);
     try {
-      const updated = await userProfileApi.updateMyProfile({ fullName, phone });
+      const updated = await userProfileApi.updateMyProfile({
+        fullName,
+        phone,
+        avatarUrl,
+      });
       setProfile(updated);
-      setMessage({ type: 'success', text: 'Cập nhật thông tin cá nhân thành công!' });
+      setMessage({ type: 'success', text: 'Cập nhật thông tin cá nhân và ảnh đại diện thành công!' });
       if (onProfileUpdated) onProfileUpdated(updated);
     } catch (err: any) {
       setMessage({
@@ -330,8 +440,18 @@ Lưu ý: Mỗi mã chỉ có giá trị sử dụng 01 lần duy nhất khi bạ
           </button>
 
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-black text-xl border border-white/30 shadow-inner">
-              {profile?.fullName ? profile.fullName.charAt(0).toUpperCase() : 'TT'}
+            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-black text-xl border border-white/30 shadow-inner overflow-hidden">
+              {avatarUrl || profile?.avatarUrl ? (
+                <img
+                  src={avatarUrl || profile?.avatarUrl}
+                  alt={profile?.fullName || 'Avatar'}
+                  className="w-full h-full object-cover"
+                />
+              ) : profile?.fullName ? (
+                profile.fullName.charAt(0).toUpperCase()
+              ) : (
+                'TT'
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -430,6 +550,103 @@ Lưu ý: Mỗi mã chỉ có giá trị sử dụng 01 lần duy nhất khi bạ
               {/* ─── TAB 1: THÔNG TIN CÁ NHÂN (UC05: View Profile & UC06: Edit Profile) ── */}
               {activeTab === 'profile' && (
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  {/* Banner hướng dẫn riêng cho vai trò Hiệu Trưởng */}
+                  {isPrincipalOnly && (
+                    <div className="p-4 bg-teal-50 border border-teal-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-teal-600 text-white rounded-xl shrink-0 mt-0.5">
+                          <Building className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-teal-900">Tài khoản Ban Giám Hiệu / Hiệu Trưởng</h4>
+                          <p className="text-xs text-teal-700 mt-0.5">
+                            Hiệu trưởng thực hiện cấu hình thông tin cơ sở, logo nhận diện, pháp lý ATTP và thông số toàn trường tại chức năng <strong>Cấu hình thông tin trường học (UC07)</strong>.
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href="/tenant/settings"
+                        onClick={onClose}
+                        className="shrink-0 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
+                      >
+                        Đến Cấu hình trường <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Khu vực Đổi ảnh Avatar từ thư mục máy tính (Dành cho các vai trò khác Hiệu trưởng) */}
+                  {!isPrincipalOnly && (
+                    <div className="p-4 rounded-2xl border border-dashed border-teal-300 bg-teal-50/40 flex flex-col sm:flex-row items-center gap-4">
+                      <div className="relative group shrink-0">
+                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-slate-200 border-2 border-teal-500 shadow-sm flex items-center justify-center text-teal-700 font-bold text-2xl">
+                          {avatarUrl || profile?.avatarUrl ? (
+                            <img
+                              src={avatarUrl || profile?.avatarUrl}
+                              alt="Avatar Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span>{fullName ? fullName.charAt(0).toUpperCase() : 'TT'}</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs rounded-2xl opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white text-[10px] font-bold"
+                          title="Chọn ảnh từ máy tính"
+                        >
+                          <Camera className="w-5 h-5 mb-0.5" />
+                          Đổi ảnh
+                        </button>
+                      </div>
+
+                      <div className="flex-1 text-center sm:text-left">
+                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 justify-center sm:justify-start">
+                          <UploadCloud className="w-4 h-4 text-teal-600" />
+                          Ảnh đại diện cá nhân (Lấy từ thư mục máy tính)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-1">
+                          Hỗ trợ định dạng PNG, JPG, WEBP. Ảnh được tự động xử lý và nén trực tiếp trên máy của bạn.
+                        </p>
+
+                        <div className="mt-2.5 flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarFileSelect}
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isCompressing || saving}
+                            className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {isCompressing ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Camera className="w-3.5 h-3.5" />
+                            )}
+                            Chọn ảnh từ máy tính
+                          </button>
+
+                          {(avatarUrl || profile?.avatarUrl) && (
+                            <button
+                              type="button"
+                              onClick={handleRemoveAvatar}
+                              disabled={saving}
+                              className="px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Xóa ảnh
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -439,8 +656,9 @@ Lưu ý: Mỗi mã chỉ có giá trị sử dụng 01 lần duy nhất khi bạ
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
+                        disabled={isPrincipalOnly}
                         required
-                        className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
+                        className={`w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition ${isPrincipalOnly ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
                         placeholder="Nguyễn Thu Thủy"
                       />
                     </div>
@@ -469,7 +687,8 @@ Lưu ý: Mỗi mã chỉ có giá trị sử dụng 01 lần duy nhất khi bạ
                           type="text"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
+                          disabled={isPrincipalOnly}
+                          className={`w-full text-xs px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition ${isPrincipalOnly ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
                           placeholder="(028) 3829 4999"
                         />
                         <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -511,14 +730,16 @@ Lưu ý: Mỗi mã chỉ có giá trị sử dụng 01 lần duy nhất khi bạ
                     >
                       Đóng
                     </button>
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="px-5 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
-                    >
-                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                      Lưu thay đổi
-                    </button>
+                    {!isPrincipalOnly && (
+                      <button
+                        type="submit"
+                        disabled={saving || isCompressing}
+                        className="px-5 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
+                      >
+                        {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                        Lưu thay đổi
+                      </button>
+                    )}
                   </div>
                 </form>
               )}

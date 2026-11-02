@@ -11,4 +11,4 @@ import { MealPortionsController } from './meal-portions.controller';
   providers: [MealPortionsService],
   exports: [MealPortionsService, TypeOrmModule],
 })
-export class MealPortionsModule { }
+export class MealPortionsModule {}

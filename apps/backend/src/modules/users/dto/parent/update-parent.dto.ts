@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsArray } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateParentDto {
@@ -31,14 +31,4 @@ export class UpdateParentDto {
   @IsOptional()
   @IsString()
   status?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  newPassword?: string;
-
-  @ApiPropertyOptional({ type: [Number] })
-  @IsOptional()
-  @IsArray()
-  childIds?: (string | number)[];
 }

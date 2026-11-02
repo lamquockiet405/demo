@@ -139,14 +139,47 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <div className="flex justify-between">
               <span className="text-slate-500">Năng lượng trung bình:</span>
               <span className="font-bold text-emerald-700">
-                {menu.dailyAverageCalories || 780} Kcal / ngày (Chuẩn VN-RDA)
+                {menu.dailyAverageCalories ? `${menu.dailyAverageCalories} Kcal / ngày (Chuẩn VN-RDA)` : 'Chưa có định lượng Kcal'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Người lập thực đơn:</span>
-              <span className="font-medium text-slate-800">BS. Hoàng Mai Trang (Dinh dưỡng)</span>
+              <span className="text-slate-500">Người lập / Gửi duyệt:</span>
+              <span className="font-medium text-slate-800">
+                {menu.submittedByName || menu.createdByName || 'Chuyên viên Dinh dưỡng'}
+              </span>
             </div>
           </div>
+
+          {/* Bản cam kết chuyên môn của Nutritionist */}
+          {menu.commitmentSigned ? (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-950">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-0.5">
+                <div className="font-bold flex items-center justify-between">
+                  <span>Bản cam kết chuyên môn dinh dưỡng đã ký số</span>
+                  <span className="text-[10px] text-emerald-700 font-semibold">
+                    {menu.submittedAt ? new Date(menu.submittedAt).toLocaleDateString('vi-VN') : 'Đã xác nhận'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-800 leading-normal">
+                  Chuyên viên đã cam kết tuân thủ Thông tư 28/2016/TT-BGDĐT, an toàn VSTP theo Quyết định 1246/QĐ-BYT và rà soát dị ứng học sinh.
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Giải trình can thiệp / vượt ngưỡng của Nutritionist */}
+          {menu.overrideJustification ? (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl space-y-1.5 text-xs text-amber-950">
+              <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Giải trình can thiệp / vượt ngưỡng của Chuyên viên Dinh dưỡng:</span>
+              </div>
+              <p className="text-[11px] text-amber-900 bg-white/80 p-2.5 rounded-xl border border-amber-200 whitespace-pre-wrap leading-relaxed">
+                "{menu.overrideJustification}"
+              </p>
+            </div>
+          ) : null}
 
           {actionType === 'approve' ? (
             <div>

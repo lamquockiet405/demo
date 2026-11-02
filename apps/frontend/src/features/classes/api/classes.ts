@@ -2,10 +2,12 @@ import { apiClient } from '../../../core/api/axios';
 import { ClassData, ClassFilters } from '../types';
 
 export const classesApi = {
-  getClasses: async (filters: ClassFilters) => {
-    const cleanedFilters = Object.fromEntries(
-      Object.entries(filters).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
-    );
+  getClasses: async (filters?: Partial<ClassFilters> & { limit?: number; page?: number; search?: string }) => {
+    const cleanedFilters = filters
+      ? Object.fromEntries(
+          Object.entries(filters).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+        )
+      : {};
     const { data } = await apiClient.get('/classes', { params: cleanedFilters });
     return data;
   },
@@ -45,3 +47,6 @@ export const classesApi = {
     return data;
   },
 };
+
+// Re-export children types and API for compatibility
+export * from '../../children/api/children.api';

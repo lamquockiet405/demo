@@ -122,7 +122,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs">
-            {childrenList.map((child) => {
+            {(childrenList || []).map((child) => {
               const isSelected = selectedChildIds.includes(child.id);
               const isAbsent = child.mealOption === 'ABSENT';
 
@@ -219,7 +219,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       <span className="text-xs font-semibold text-slate-400 italic">
                         Cắt suất ăn ngày {new Date().toLocaleDateString('vi-VN')}
                       </span>
-                    ) : child.dietBadge.type === 'ALLERGY' ? (
+                    ) : child.dietBadge?.type === 'ALLERGY' ? (
                       <div className="space-y-0.5">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-bold border border-red-200">
                           <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -231,7 +231,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                           </p>
                         )}
                       </div>
-                    ) : child.dietBadge.type === 'INTOLERANCE' ? (
+                    ) : child.dietBadge?.type === 'INTOLERANCE' ? (
                       <div className="space-y-0.5">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-bold border border-amber-200">
                           <Milk className="w-3.5 h-3.5 shrink-0" />
@@ -243,7 +243,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                           </p>
                         )}
                       </div>
-                    ) : child.dietBadge.type === 'SPECIAL_CARE' ? (
+                    ) : child.dietBadge?.type === 'SPECIAL_CARE' ? (
                       <div className="space-y-0.5">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-bold border border-blue-200">
                           <Soup className="w-3.5 h-3.5 shrink-0" />
