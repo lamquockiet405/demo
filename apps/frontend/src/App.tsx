@@ -28,6 +28,7 @@ import { NutritionPhysicalDashboardPage } from './features/dashboard/pages/Nutri
 import { RoleSpecificChildAlertsPage } from './features/dashboard/pages/RoleSpecificChildAlertsPage';
 import { MealOperationsReportPage } from './features/kitchen/pages/MealOperationsReportPage';
 import { FoodSafetyComplianceReportPage } from './features/food-safety/pages/FoodSafetyComplianceReportPage';
+import { SnackServiceRevenueReportPage } from './features/finances/pages/SnackServiceRevenueReportPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -271,7 +272,9 @@ export const App: React.FC = () => {
           <Route path="/food-safety-report" element={<FoodSafetyComplianceReportPage />} />
           <Route path="/food-safety-compliance" element={<FoodSafetyComplianceReportPage />} />
           <Route path="/audit-logs" element={<AuditLogsPage />} />
-          <Route path="/finances" element={<WeeklyMenuManagementPage />} />
+          <Route path="/finances" element={<SnackServiceRevenueReportPage />} />
+          <Route path="/snack-revenue-report" element={<SnackServiceRevenueReportPage />} />
+          <Route path="/snack-revenue" element={<SnackServiceRevenueReportPage />} />
           <Route path="/children" element={<WeeklyMenuManagementPage />} />
           <Route path="/growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="/nutrition-physical-dashboard" element={<NutritionPhysicalDashboardPage />} />
