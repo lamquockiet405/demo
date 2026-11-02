@@ -26,6 +26,7 @@ import { AuditLogsPage } from './features/audit-logs/pages/AuditLogsPage';
 import { FoodGroupRulesPage } from './features/menus/pages/FoodGroupRulesPage';
 import { NutritionPhysicalDashboardPage } from './features/dashboard/pages/NutritionPhysicalDashboardPage';
 import { RoleSpecificChildAlertsPage } from './features/dashboard/pages/RoleSpecificChildAlertsPage';
+import { MealOperationsReportPage } from './features/kitchen/pages/MealOperationsReportPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -217,6 +218,7 @@ export const App: React.FC = () => {
           <Route path="growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="nutrition-physical" element={<NutritionPhysicalDashboardPage />} />
           <Route path="alerts" element={<RoleSpecificChildAlertsPage />} />
+          <Route path="meal-operations" element={<MealOperationsReportPage />} />
           <Route path="reports" element={<NutritionistDashboardPage />} />
         </Route>
 
@@ -271,6 +273,8 @@ export const App: React.FC = () => {
           <Route path="/nutrition-physical-dashboard" element={<NutritionPhysicalDashboardPage />} />
           <Route path="/nutrition-dashboard" element={<NutritionPhysicalDashboardPage />} />
           <Route path="/child-alerts" element={<RoleSpecificChildAlertsPage />} />
+          <Route path="/meal-operations-report" element={<MealOperationsReportPage />} />
+          <Route path="/meal-operations" element={<MealOperationsReportPage />} />
           <Route path="/payments" element={<WeeklyMenuManagementPage />} />
         </Route>
 

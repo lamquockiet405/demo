@@ -77,6 +77,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Dashboard Tổng quan', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Chỉ huy Dinh dưỡng & Thể trạng', path: '/nutrition-physical-dashboard', icon: Activity },
     { label: 'Cảnh báo an toàn trẻ (UC93)', path: '/child-alerts', icon: ShieldAlert },
+    { label: 'Báo cáo Vận hành Bữa ăn (UC94)', path: '/meal-operations-report', icon: UtensilsCrossed },
     { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
@@ -92,6 +93,7 @@ export const AdminDashboardLayout: React.FC = () => {
   const getBreadcrumbTitle = () => {
     if (location.pathname.startsWith('/nutrition-physical')) return 'Chỉ huy Dinh dưỡng & Thể trạng (UC92)';
     if (location.pathname.startsWith('/child-alerts')) return 'Tổng hợp Cảnh báo Trẻ em (UC93)';
+    if (location.pathname.startsWith('/meal-operations')) return 'Báo Cáo Vận Hành Bữa Ăn & Bán Trú (UC94)';
     if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
