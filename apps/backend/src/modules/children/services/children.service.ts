@@ -19,7 +19,7 @@ export class ChildrenService {
     private readonly allergyRepo: Repository<ChildAllergy>,
     @InjectRepository(AllergenCatalog)
     private readonly catalogRepo: Repository<AllergenCatalog>,
-  ) {}
+  ) { }
 
   private mapChildAllergy(a: ChildAllergy) {
     const allergenNameVi = a.allergen?.name || a.customAllergenName || 'Dị ứng thực phẩm';
@@ -32,21 +32,21 @@ export class ChildrenService {
       allergenCode: a.allergen?.code || 'CUSTOM',
       allergen: a.allergen
         ? {
-            id: String(a.allergen.id),
-            code: a.allergen.code,
-            nameVi: a.allergen.name,
-            nameEn: a.allergen.code,
-            description: a.allergen.description,
-          }
+          id: String(a.allergen.id),
+          code: a.allergen.code,
+          nameVi: a.allergen.name,
+          nameEn: a.allergen.code,
+          description: a.allergen.description,
+        }
         : a.customAllergenName
-        ? {
+          ? {
             id: '0',
             code: 'CUSTOM',
             nameVi: a.customAllergenName,
             nameEn: 'Custom',
             description: a.customAllergenName,
           }
-        : undefined,
+          : undefined,
       allergyType: a.allergyType || 'ALLERGY',
       severity: a.severity,
       symptoms: a.symptoms || undefined,
@@ -176,10 +176,15 @@ export class ChildrenService {
   }
 
   async create(dto: CreateChildDto) {
-    const studentCode = dto.studentCode || `HS-${Date.now().toString().slice(-6)}`;
+    const studentCode = dto.studentCode?.trim() || `HS-${Date.now().toString().slice(-6)}`;
+    const fullName =
+      dto.fullName?.trim() ||
+      `${dto.lastName || ''} ${dto.firstName || ''}`.trim() ||
+      'Học sinh mới';
+
     const child = this.childRepo.create({
       studentCode,
-      fullName: dto.fullName,
+      fullName,
       dateOfBirth: dto.dateOfBirth,
       gender: dto.gender,
       classId: dto.classId || null,
@@ -196,7 +201,15 @@ export class ChildrenService {
       throw new NotFoundException(`Không tìm thấy hồ sơ trẻ với ID: ${id}`);
     }
 
-    if (dto.fullName !== undefined) child.fullName = dto.fullName;
+    const calculatedFullName =
+      dto.fullName?.trim() ||
+      (dto.lastName !== undefined || dto.firstName !== undefined
+        ? `${dto.lastName || ''} ${dto.firstName || ''}`.trim()
+        : undefined);
+
+    if (calculatedFullName !== undefined && calculatedFullName.length > 0) {
+      child.fullName = calculatedFullName;
+    }
     if (dto.dateOfBirth !== undefined) child.dateOfBirth = dto.dateOfBirth;
     if (dto.gender !== undefined) child.gender = dto.gender;
     if (dto.classId !== undefined) child.classId = dto.classId;

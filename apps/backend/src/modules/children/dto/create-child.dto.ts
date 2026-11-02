@@ -1,11 +1,22 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateChildDto {
-  @ApiProperty({ example: 'Nguyễn Gia Huy' })
-  @IsNotEmpty({ message: 'Họ tên trẻ không được để trống' })
+  @ApiPropertyOptional({ example: 'Nguyễn Gia Huy' })
+  @IsOptional()
   @IsString()
-  fullName: string;
+  fullName?: string;
+
+  @ApiPropertyOptional({ example: 'Huy' })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiPropertyOptional({ example: 'Nguyễn Gia' })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
 
   @ApiProperty({ example: '2020-03-15' })
   @IsNotEmpty({ message: 'Ngày sinh không được để trống' })
@@ -19,6 +30,8 @@ export class CreateChildDto {
 
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Mã lớp phải là số' })
   classId?: number;
 
   @ApiPropertyOptional({ example: 'HS-2024-001' })
@@ -35,4 +48,19 @@ export class CreateChildDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiPropertyOptional({ example: 'Nguyễn Xuân An' })
+  @IsOptional()
+  @IsString()
+  emergencyContactName?: string;
+
+  @ApiPropertyOptional({ example: '0918273645' })
+  @IsOptional()
+  @IsString()
+  emergencyContactPhone?: string;
+
+  @ApiPropertyOptional({ example: 'Tiền sử sốt co giật' })
+  @IsOptional()
+  @IsString()
+  medicalNotes?: string;
 }
