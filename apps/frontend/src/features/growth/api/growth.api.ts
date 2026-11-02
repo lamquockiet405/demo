@@ -82,8 +82,11 @@ export interface GrowthExportResponse {
 export const growthApi = {
   getRecords: async (params?: {
     childId?: string;
+    studentId?: string;
     classId?: string;
+    status?: string;
     nutritionalStatus?: string;
+    search?: string;
     page?: number;
     limit?: number;
   }) => {

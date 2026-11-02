@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Activity,
   Plus,
@@ -34,11 +34,19 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('ALL');
+  const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [classes, setClasses] = useState<Array<{ id: string; name: string }>>([]);
   const [childrenList, setChildrenList] = useState<Array<{ id: string; fullName: string; studentCode: string }>>([]);
 
   // Expanded classes state: Record<className, boolean>
   const [expandedClasses, setExpandedClasses] = useState<Record<string, boolean>>({});
+
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleSelectChildForChart = (childId: string) => {
+    setSelectedChildId(childId);
+    chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Selected child for chart view
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -139,12 +147,18 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
   const [importText, setImportText] = useState('');
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ count: number; errors: string[] } | null>(null);
+    const [importResult, setImportResult] = useState<{ count: number; errors: string[] } | null>(null);
+  const [importWarning, setImportWarning] = useState<string | null>(null);
 
-  const sampleGrowthCsv = `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú
-HS-2026-0001, 2026-10-01, 15.2, 98.5, Khám sức khỏe định kỳ
-HS-2026-0002, 2026-10-01, 14.8, 96.0, Thể lực bình thường
-HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
+  const sampleGrowthCsv = useMemo(() => {
+    if (childrenList && childrenList.length >= 2) {
+      const c1 = childrenList[0];
+      const c2 = childrenList[1];
+      const today = new Date().toISOString().split('T')[0];
+      return `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú\n${c1.studentCode || 'HD-2023-01'}, ${today}, 15.2, 98.5, Khám sức khỏe định kỳ\n${c2.studentCode || 'HD-2023-02'}, ${today}, 14.8, 96.0, Thể lực bình thường\nHS-2026-9999, ${today}, 12.0, 92.0, Dữ liệu kiểm tra mã học sinh không tồn tại`;
+    }
+    return `Mã học sinh, Ngày đo (YYYY-MM-DD), Cân nặng (kg), Chiều cao (cm), Ghi chú\nHD-2023-01, 2026-10-01, 15.2, 98.5, Khám sức khỏe định kỳ\nHD-2023-02, 2026-10-01, 14.8, 96.0, Thể lực bình thường\nHS-2026-0001, 2026-10-01, 12.0, 92.0, Dữ liệu mẫu kiểm thử`;
+  }, [childrenList]);
 
   const handleOpenEdit = (r: GrowthRecordItem) => {
     setEditingRecord(r);
@@ -221,43 +235,70 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
     if (!importText.trim()) return;
     setImporting(true);
     setImportResult(null);
+    setImportWarning(null);
     try {
-      const lines = importText.trim().split('\n');
-      const items = [];
-      const startIdx =
-        lines[0].toLowerCase().includes('mã') ||
-        lines[0].toLowerCase().includes('student') ||
-        lines[0].toLowerCase().includes('ngày')
-          ? 1
-          : 0;
+      const lines = importText.trim().split(/\r?\n/);
+      if (lines.length === 0) {
+        setImportWarning('Vui lòng dán dữ liệu cân đo trước khi bắt đầu.');
+        setImporting(false);
+        return;
+      }
 
+      // 1. Tự động nhận diện và bỏ qua dòng tiêu đề (Header)
+      const firstLineNorm = lines[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const hasHeader =
+        firstLineNorm.includes('ma') ||
+        firstLineNorm.includes('student') ||
+        firstLineNorm.includes('ngay');
+      const startIdx = hasHeader ? 1 : 0;
+
+      const items = [];
       for (let i = startIdx; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
+
+        // 2. Tự động nhận diện ký tự phân tách: Tab (\t) hoặc dấu phẩy (,)
         const delimiter = line.includes('\t') ? '\t' : ',';
         const parts = line.split(delimiter).map((s) => s.trim());
-        if (parts.length >= 4) {
+
+        // 3. Kiểm tra tối thiểu 4 cột bắt buộc (studentCode, measurementDate, weightKg, heightCm)
+        if (parts.length >= 4 && parts[0] && parts[1]) {
+          const rawWeight = parts[2].replace(',', '.');
+          const rawHeight = parts[3].replace(',', '.');
+          const weightKg = parseFloat(rawWeight);
+          const heightCm = parseFloat(rawHeight);
+
           items.push({
             studentCode: parts[0],
             measurementDate: parts[1],
-            weightKg: parseFloat(parts[2]),
-            heightCm: parseFloat(parts[3]),
+            weightKg: isNaN(weightKg) ? parts[2] : weightKg,
+            heightCm: isNaN(heightCm) ? parts[3] : heightCm,
             healthNotes: parts[4] || undefined,
           });
         }
       }
 
       if (items.length === 0) {
-        alert('Không tìm thấy dòng dữ liệu cân đo hợp lệ.');
+        setImportWarning('Không tìm thấy dòng dữ liệu cân đo hợp lệ. Mỗi dòng cần tối thiểu 4 cột: Mã học sinh, Ngày đo, Cân nặng, Chiều cao.');
         setImporting(false);
         return;
       }
 
+      // 4. Gửi lên backend xử lý theo lô & dung thứ lỗi từng phần
       const res = await growthApi.importRecords(items);
       setImportResult({ count: res.importedCount, errors: res.errors || [] });
-      fetchData();
+
+      // 5. Tự động làm mới bảng dữ liệu và thống kê KPI
+      await fetchData();
+
+      if (selectedChildId) {
+        growthApi.getChildHistory(selectedChildId).then((hist) => {
+          setChildHistory(hist.history || []);
+          if (hist.child) setSelectedChildInfo(hist.child);
+        });
+      }
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Lỗi khi nhập dữ liệu.');
+      setImportWarning(err.response?.data?.message || 'Lỗi khi nhập dữ liệu từ hệ thống.');
     } finally {
       setImporting(false);
     }
@@ -396,6 +437,12 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
   }, []);
 
   useEffect(() => {
+    if (selectedClass !== 'ALL') {
+      growthApi.getClassOverview(selectedClass).catch(() => null);
+    }
+  }, [selectedClass]);
+
+  useEffect(() => {
     if (selectedChildId) {
       growthApi.getChildHistory(selectedChildId).then((res) => {
         setChildHistory(res.history || []);
@@ -447,6 +494,7 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
 
   const filteredRecords = records.filter((r) => {
     const matchesSearch =
+      !search ||
       r.child?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
       r.child?.studentCode?.toLowerCase().includes(search.toLowerCase());
     const childClass =
@@ -459,7 +507,17 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
       r.child?.class?.id === selectedClass ||
       (r.child as any)?.classId === selectedClass ||
       childClass.includes(selectedClass);
-    return matchesSearch && matchesClass;
+
+    const st = (r.overallNutritionalStatus || '').toUpperCase();
+    const matchesStatus =
+      selectedStatus === 'ALL' ||
+      (selectedStatus === 'NORMAL' && (st === 'NORMAL' || st === 'BINH_THUONG' || st.includes('BÌNH THƯỜNG'))) ||
+      (selectedStatus === 'STUNTED' && (r.heightClassification?.includes('STUNTED') || r.heightClassification?.toLowerCase().includes('thấp còi') || st.includes('STUNTED'))) ||
+      (selectedStatus === 'UNDERWEIGHT' && (Number(r.waz) < -2.0 || Number(r.baz) < -2.0 || r.weightClassification?.includes('UNDERWEIGHT') || r.bmiClassification === 'WASTED' || r.bmiClassification === 'SEVERELY_WASTED' || st.includes('UNDERWEIGHT') || st.includes('WASTED'))) ||
+      (selectedStatus === 'OVERWEIGHT' && (r.bmiClassification?.includes('OVERWEIGHT') || r.weightClassification?.includes('OVERWEIGHT') || st.includes('OVERWEIGHT'))) ||
+      (selectedStatus === 'OBESE' && (r.bmiClassification === 'OBESE' || Number(r.baz) > 3.0 || Number(r.bmi) >= 25 || st.includes('OBESE') || st.includes('BÉO PHÌ')));
+
+    return matchesSearch && matchesClass && matchesStatus;
   });
 
   const groupedRecords = useMemo(() => {
@@ -563,8 +621,18 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
       r.bmiClassification?.toLowerCase().includes('béo phì')
   ).length;
 
+  const underweightCount = summaryRecords.filter(
+    (r) =>
+      Number(r.waz) < -2.0 ||
+      Number(r.baz) < -2.0 ||
+      r.weightClassification?.includes('UNDERWEIGHT') ||
+      r.bmiClassification === 'WASTED' ||
+      r.bmiClassification === 'SEVERELY_WASTED'
+  ).length;
+
   const normalPercent = totalEvaluated > 0 ? Math.round((normalCount / totalEvaluated) * 100) : 0;
   const stuntedPercent = totalEvaluated > 0 ? Math.round((stuntedCount / totalEvaluated) * 100) : 0;
+  const underweightPercent = totalEvaluated > 0 ? Math.round((underweightCount / totalEvaluated) * 100) : 0;
   const overweightPercent = totalEvaluated > 0 ? Math.round((overweightCount / totalEvaluated) * 100) : 0;
 
   return (
@@ -598,6 +666,7 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
               onClick={() => {
                 setImportText('');
                 setImportResult(null);
+                setImportWarning(null);
                 setIsImportModalOpen(true);
               }}
               className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
@@ -639,45 +708,55 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
           <span>Thống kê dinh dưỡng: <strong className="text-teal-800">{selectedClassName}</strong></span>
           <span className="text-[11px] font-normal text-slate-400">Tự động tính toán lại khi cập nhật số liệu cân đo</span>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã Đánh Giá ({selectedClassName})</div>
-            <div className="text-2xl font-black text-slate-900">{totalEvaluated} <span className="text-sm font-semibold text-slate-400">lượt</span></div>
-            <div className="text-xs text-slate-400">Dữ liệu cân đo thể lực định kỳ</div>
+            <div className="text-2xl font-black text-slate-900">{totalEvaluated} <span className="text-xs font-semibold text-slate-400">lượt</span></div>
+            <div className="text-[11px] text-slate-400">Dữ liệu cân đo định kỳ</div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Bình Thường</div>
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+            <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Đạt Chuẩn WHO</div>
             <div className="text-2xl font-black text-emerald-700">
               {normalPercent}%
             </div>
-            <div className="text-xs text-emerald-600 font-semibold">{normalCount} học sinh đạt chuẩn WHO</div>
+            <div className="text-[11px] text-emerald-600 font-semibold">{normalCount} học sinh bình thường</div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-            <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">Thấp Còi (HAZ &lt; -2 SD)</div>
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+            <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">Thấp Còi (HAZ &lt; -2)</div>
             <div className="text-2xl font-black text-amber-700">
               {stuntedPercent}%
             </div>
-            <div className="text-xs text-amber-600 font-semibold">{stuntedCount} trẻ cần can thiệp vi chất</div>
+            <div className="text-[11px] text-amber-600 font-semibold">{stuntedCount} trẻ cần can thiệp</div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+            <div className="text-xs font-bold text-orange-600 uppercase tracking-wider">Nhẹ Cân (WAZ &lt; -2)</div>
+            <div className="text-2xl font-black text-orange-700">
+              {underweightPercent}%
+            </div>
+            <div className="text-[11px] text-orange-600 font-semibold">{underweightCount} trẻ nhẹ cân/gầy còm</div>
+          </div>
+
+          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
             <div className="text-xs font-bold text-rose-600 uppercase tracking-wider">Thừa Cân / Béo Phì</div>
             <div className="text-2xl font-black text-rose-700">
               {overweightPercent}%
             </div>
-            <div className="text-xs text-rose-600 font-semibold">{overweightCount} trẻ cần giảm chất béo/ngọt</div>
+            <div className="text-[11px] text-rose-600 font-semibold">{overweightCount} trẻ vượt chuẩn</div>
           </div>
         </div>
       </div>
 
-      {/* ─── 3. INTERACTIVE WHO GROWTH CHART SECTION (UC-78) ─── */}
-      <WhoGrowthChart
-        child={selectedChildInfo}
-        history={childHistory}
-        onEditRecord={handleOpenEdit}
-      />
+      {/* ─── 3. INTERACTIVE WHO GROWTH CHART SECTION (UC-76 & UC-78) ─── */}
+      <div ref={chartRef} className="scroll-mt-6">
+        <WhoGrowthChart
+          child={selectedChildInfo}
+          history={childHistory}
+          onEditRecord={handleOpenEdit}
+        />
+      </div>
 
       {/* ─── 4. SEARCH & FILTER BAR ─── */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -719,12 +798,25 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
           <select
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
-            className="px-3 py-2 text-xs rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-semibold"
+            className="px-3 py-2 text-xs rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-semibold text-slate-700"
           >
             <option value="ALL">Tất cả các lớp</option>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
+          </select>
+
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="px-3 py-2 text-xs rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả thể trạng</option>
+            <option value="NORMAL">Đạt chuẩn (Bình thường)</option>
+            <option value="STUNTED">Thấp còi (STUNTED)</option>
+            <option value="UNDERWEIGHT">Nhẹ cân (UNDERWEIGHT)</option>
+            <option value="OVERWEIGHT">Thừa cân (OVERWEIGHT)</option>
+            <option value="OBESE">Béo phì (OBESE)</option>
           </select>
         </div>
       </div>
@@ -933,7 +1025,7 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                               className={`hover:bg-teal-50/30 transition cursor-pointer ${
                                 selectedChildId === r.childId ? 'bg-teal-50/50' : ''
                               }`}
-                              onClick={() => setSelectedChildId(r.childId)}
+                              onClick={() => handleSelectChildForChart(r.childId)}
                             >
                               <td className="py-3.5 px-4">
                                 <div className="font-bold text-slate-900">{r.child?.fullName}</div>
@@ -992,7 +1084,7 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setSelectedChildId(r.childId);
+                                      handleSelectChildForChart(r.childId);
                                     }}
                                     className={`px-2.5 py-1 text-xs font-bold rounded-lg flex items-center gap-1 transition ${
                                       selectedChildId === r.childId
@@ -1431,6 +1523,16 @@ HS-2026-0003, 2026-10-01, 12.0, 92.0, Cần bổ sung dinh dưỡng`;
                   className="w-full p-3 font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white rounded-2xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
+
+              {importWarning && (
+                <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Cảnh báo dữ liệu:</span>
+                    <p className="mt-0.5 text-amber-700">{importWarning}</p>
+                  </div>
+                </div>
+              )}
 
               {importResult && (
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
