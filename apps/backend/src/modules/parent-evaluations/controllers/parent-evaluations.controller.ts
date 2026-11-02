@@ -19,6 +19,9 @@ import { ParentEvaluationService } from '../services/parent-evaluation.service';
 import { ParentEvaluationQueryParams } from '../dto/parent-evaluation-query.dto';
 import { RespondEvaluationPayload } from '../dto/respond-parent-evaluation.dto';
 import { SubmitEvaluationDto } from '../dto/submit-evaluation.dto';
+import { QueryParentEvaluationSummaryDto } from '../dto/query-parent-evaluation-summary.dto';
+import { RespondSpecialistDto } from '../dto/respond-specialist.dto';
+import { CreateRecipeImprovementLogDto } from '../dto/create-recipe-improvement-log.dto';
 
 @ApiTags('Parent Evaluations & Feedback')
 @ApiBearerAuth()
@@ -107,5 +110,56 @@ export class ParentEvaluationsController {
     @Body('isDrafting') isDrafting: boolean,
   ) {
     return this.evalService.toggleDraft(id, isDrafting);
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // UC97: VIEW PARENT EVALUATION SUMMARY REPORT (SCHOOL MANAGER & NUTRITIONIST)
+  // ════════════════════════════════════════════════════════════════════════════
+
+  @Get('summary-report')
+  @ApiOperation({ summary: 'Báo cáo tổng hợp đánh giá của phụ huynh & chỉ số CSAT (UC97)' })
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST')
+  async getSummaryReport(
+    @Query() query: QueryParentEvaluationSummaryDto,
+    @CurrentTenant() schoolId?: number,
+  ) {
+    return this.evalService.getSummaryReport(query, schoolId);
+  }
+
+  @Post(':id/respond-specialist')
+  @ApiOperation({ summary: 'Phản hồi chuyên môn Dinh dưỡng hoặc Ban Giám Hiệu gửi phụ huynh (UC97)' })
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST')
+  async respondSpecialist(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: RespondSpecialistDto,
+    @CurrentUser('id') userId: number,
+    @CurrentUser('role') userRole?: string,
+  ) {
+    return this.evalService.respondSpecialist(id, payload, userId, userRole);
+  }
+
+  @Post('recipe-improvement-log')
+  @ApiOperation({ summary: 'Chuyên viên Dinh dưỡng thêm món vào Sổ tay cải tiến công thức Bếp trưởng (UC97)' })
+  @Roles('NUTRITIONIST', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'SUPER_ADMIN')
+  async createRecipeImprovementLog(
+    @Body() payload: CreateRecipeImprovementLogDto,
+    @CurrentUser('id') userId: number,
+    @CurrentUser('role') userRole?: string,
+  ) {
+    return this.evalService.createRecipeImprovementLog(payload, userId, userRole);
+  }
+
+  @Get('recipe-improvement-logs')
+  @ApiOperation({ summary: 'Xem danh sách Sổ tay cải tiến công thức nấu của Bếp trưởng (UC97)' })
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST', 'KITCHEN_STAFF')
+  async getRecipeImprovementLogs() {
+    return this.evalService.getRecipeImprovementLogs();
+  }
+
+  @Get('summary-report/export')
+  @ApiOperation({ summary: 'Xuất dữ liệu báo cáo tổng hợp đánh giá phụ huynh chính thức (UC97)' })
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST')
+  async exportSummaryReport(@Query() query: QueryParentEvaluationSummaryDto) {
+    return this.evalService.exportSummaryReport(query);
   }
 }

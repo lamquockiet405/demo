@@ -41,6 +41,7 @@ export const NutritionistLayout: React.FC = () => {
     { label: 'Tuân thủ ATTP (UC95)', path: '/nutritionist/food-safety' },
     { label: 'Tăng trưởng', path: '/nutritionist/growth' },
     { label: 'Báo cáo', path: '/nutritionist/reports' },
+    { label: 'Đánh giá Phụ huynh (UC97)', path: '/nutritionist/parent-evaluations' },
   ];
 
   // Xác định tiêu đề breadcrumb theo URL hiện tại
