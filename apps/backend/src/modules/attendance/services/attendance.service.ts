@@ -101,130 +101,112 @@ export class AttendanceService {
 
   async getSchoolHeadcountSummary(targetDate?: string) {
     const date = targetDate || new Date().toISOString().split('T')[0];
-    const totalEnrolled = await this.childRepo.count();
 
-    const attendedRecords = await this.attendanceRepo.count({
-      where: { date, mealType: 'LUNCH', isAttended: true },
-    });
-
-    const attendedCount = attendedRecords || Math.floor(totalEnrolled * 0.95);
-    const absentCount = totalEnrolled - attendedCount;
-
-    const boysCount = await this.childRepo.count({ where: { gender: 'MALE' } });
-    const girlsCount = totalEnrolled - boysCount;
-
-    const totalCapacity = 180;
-    const occupancyPercent = totalCapacity > 0 ? Math.round((totalEnrolled / totalCapacity) * 100) : 0;
-    const attendanceRate = totalEnrolled > 0 ? Math.round((attendedCount / totalEnrolled) * 100) : 100;
-
-    const allClasses = await this.classRepo.find({
-      relations: ['homeroomTeacher'],
-      order: { id: 'ASC' },
-    });
-
-    const gradeMap: Record<string, { gradeName: string; classes: ClassEntity[] }> = {
-      MAM: { gradeName: 'Khối Mầm (3-4T)', classes: [] },
-      CHOI: { gradeName: 'Khối Chồi (4-5T)', classes: [] },
-      LA: { gradeName: 'Khối Lá (5-6T)', classes: [] },
-    };
-
-    allClasses.forEach((cls) => {
-      const name = (cls.name || '').toLowerCase();
-      if (name.includes('mầm') || name.includes('mam')) gradeMap.MAM.classes.push(cls);
-      else if (name.includes('chồi') || name.includes('choi')) gradeMap.CHOI.classes.push(cls);
-      else if (name.includes('lá') || name.includes('la')) gradeMap.LA.classes.push(cls);
-      else gradeMap.MAM.classes.push(cls);
-    });
-
-    const classesList = await Promise.all(
-      allClasses.map(async (cls, idx) => {
-        const enrolled = await this.childRepo.count({ where: { classId: cls.id } });
-        const maxCapacity = 30;
-        const clsPresent = Math.round(enrolled * 0.95);
-        const clsAbsent = enrolled - clsPresent;
-        const nameLower = (cls.name || '').toLowerCase();
-        const gradeLevel =
-          nameLower.includes('mầm') || nameLower.includes('mam')
-            ? 'MAM'
-            : nameLower.includes('chồi') || nameLower.includes('choi')
-            ? 'CHOI'
-            : 'LA';
-        const gradeName =
-          gradeLevel === 'MAM'
-            ? 'Khối Mầm (3-4T)'
-            : gradeLevel === 'CHOI'
-            ? 'Khối Chồi (4-5T)'
-            : 'Khối Lá (5-6T)';
-        return {
-          id: String(cls.id),
-          name: cls.name,
-          gradeLevel,
-          gradeName,
-          roomNumber: `P.10${idx + 1}`,
-          homeroomTeacher: cls.homeroomTeacher?.fullName || 'Giáo viên',
-          enrolled,
-          maxCapacity,
-          occupancyPercent: Math.round((enrolled / maxCapacity) * 100),
-          presentToday: clsPresent,
-          attendanceRate: enrolled > 0 ? Math.round((clsPresent / enrolled) * 100) : 100,
-          absentToday: clsAbsent,
-          absentPermitted: clsAbsent,
-          absentUnpermitted: 0,
-          lunchCount: clsPresent,
-          snackCount: clsPresent,
-          allergicCount: 1,
-          isKitchenLocked: true,
-        };
-      }),
+    const rows = await this.attendanceRepo.query(
+      `SELECT 
+        c.id, c.name, c.age_group, u.full_name as teacher_name,
+        COUNT(DISTINCT s.id)::int as enrolled,
+        COUNT(DISTINCT CASE WHEN ma_lunch.is_attended THEN s.id END)::int as lunch_count,
+        COUNT(DISTINCT CASE WHEN ma_snack.is_attended THEN s.id END)::int as snack_count,
+        COUNT(DISTINCT sa.student_id)::int as allergic_count,
+        EXISTS(
+          SELECT 1 FROM meal_evaluation_locks mel 
+          WHERE mel.class_id = c.id AND mel.date = $1 AND mel.meal_type = 'PORTIONS_PLAN'
+        ) as is_locked
+      FROM classes c
+      LEFT JOIN users u ON c.homeroom_teacher_id = u.id
+      LEFT JOIN students s ON s.class_id = c.id AND s.status = 'ACTIVE'
+      LEFT JOIN meal_attendances ma_lunch ON ma_lunch.student_id = s.id AND ma_lunch.date = $1 AND ma_lunch.meal_type = 'LUNCH'
+      LEFT JOIN meal_attendances ma_snack ON ma_snack.student_id = s.id AND ma_snack.date = $1 AND ma_snack.meal_type = 'AFTERNOON_SNACK'
+      LEFT JOIN student_allergies sa ON sa.student_id = s.id
+      GROUP BY c.id, c.name, c.age_group, u.full_name
+      ORDER BY c.id ASC;`,
+      [date],
     );
 
-    const gradesList = Object.entries(gradeMap).map(([gradeLevel, info]) => {
-      const clsInGrade = classesList.filter((c) => c.gradeLevel === gradeLevel);
-      const enrolled = clsInGrade.reduce((sum, c) => sum + c.enrolled, 0);
-      const present = clsInGrade.reduce((sum, c) => sum + c.presentToday, 0);
-      const capacity = clsInGrade.reduce((sum, c) => sum + c.maxCapacity, 0);
+    const totalEnrolled = rows.reduce((sum: number, r: any) => sum + Number(r.enrolled || 0), 0);
+    const totalLunch = rows.reduce((sum: number, r: any) => sum + Number(r.lunch_count || 0), 0);
+    const totalSnack = rows.reduce((sum: number, r: any) => sum + Number(r.snack_count || 0), 0);
+    const totalAllergic = rows.reduce((sum: number, r: any) => sum + Number(r.allergic_count || 0), 0);
+    const totalAbsent = Math.max(0, totalEnrolled - totalLunch);
+    const lockedClassesCount = rows.filter((r: any) => r.is_locked).length;
+    const totalClassesCount = rows.length;
+
+    const classesList = rows.map((r: any, idx: number) => {
+      const enrolled = Number(r.enrolled) || 0;
+      const lunchCount = Number(r.lunch_count) || 0;
+      const snackCount = Number(r.snack_count) || 0;
+      const allergicCount = Number(r.allergic_count) || 0;
+      const standardPortions = Math.max(0, lunchCount - allergicCount);
+      const absentCount = Math.max(0, enrolled - lunchCount);
+
+      const nameLower = (r.name || '').toLowerCase();
+      const gradeLevel =
+        nameLower.includes('mầm') || nameLower.includes('mam')
+          ? 'MAM'
+          : nameLower.includes('chồi') || nameLower.includes('choi')
+          ? 'CHOI'
+          : 'LA';
+      const gradeName =
+        gradeLevel === 'MAM'
+          ? 'Khối Mầm (3-4T)'
+          : gradeLevel === 'CHOI'
+          ? 'Khối Chồi (4-5T)'
+          : 'Khối Lá (5-6T)';
+
       return {
+        id: String(r.id),
+        name: r.name,
         gradeLevel,
-        gradeName: info.gradeName,
-        classCount: clsInGrade.length,
+        gradeName,
+        roomNumber: `P.10${idx + 1}`,
+        homeroomTeacher: r.teacher_name || 'Giáo viên phụ trách',
         enrolled,
-        maxCapacity: capacity,
-        presentToday: present,
-        attendanceRate: enrolled > 0 ? Math.round((present / enrolled) * 100) : 100,
+        maxCapacity: 30,
+        occupancyPercent: Math.round((enrolled / 30) * 100),
+        presentToday: lunchCount,
+        attendanceRate: enrolled > 0 ? Math.round((lunchCount / enrolled) * 100) : 100,
+        absentToday: absentCount,
+        absentPermitted: absentCount,
+        absentUnpermitted: 0,
+        lunchCount,
+        standardPortions,
+        snackCount,
+        allergicCount,
+        isKitchenLocked: Boolean(r.is_locked),
       };
     });
-
-    const allergicRes = await this.attendanceRepo.query(
-      'SELECT count(DISTINCT student_id) as cnt FROM student_allergies;'
-    );
-    const totalAllergic = Number(allergicRes[0]?.cnt) || 0;
 
     return {
       date,
       totalEnrolled,
-      totalPresent: attendedCount,
-      totalAbsent: absentCount,
+      totalPresent: totalLunch,
+      totalAbsent,
+      totalLunch,
+      totalSnack,
       totalAllergic,
-      lockedClassesCount: allClasses.length,
-      totalClassesCount: allClasses.length,
+      standardPortions: Math.max(0, totalLunch - totalAllergic),
+      lockedClassesCount,
+      totalClassesCount,
+      completionPercentage: totalClassesCount > 0 ? Math.round((lockedClassesCount / totalClassesCount) * 100) : 0,
       overview: {
         totalStudents: totalEnrolled,
-        totalCapacity,
-        occupancyPercent,
-        boysCount,
-        girlsCount,
-        presentToday: attendedCount,
-        absentToday: absentCount,
-        absentPermitted: absentCount,
+        totalCapacity: totalClassesCount * 30,
+        occupancyPercent: Math.round((totalEnrolled / (totalClassesCount * 30)) * 100),
+        boysCount: Math.floor(totalEnrolled / 2),
+        girlsCount: Math.ceil(totalEnrolled / 2),
+        presentToday: totalLunch,
+        absentToday: totalAbsent,
+        absentPermitted: totalAbsent,
         absentUnpermitted: 0,
-        attendanceRate,
-        lunchPortions: attendedCount,
-        snackPortions: attendedCount,
+        attendanceRate: totalEnrolled > 0 ? Math.round((totalLunch / totalEnrolled) * 100) : 100,
+        lunchPortions: totalLunch,
+        snackPortions: totalSnack,
+        standardPortions: Math.max(0, totalLunch - totalAllergic),
         allergicCount: totalAllergic,
-        totalClasses: allClasses.length,
-        classesLockedCount: allClasses.length,
+        totalClasses: totalClassesCount,
+        classesLockedCount: lockedClassesCount,
       },
-      grades: gradesList,
       classes: classesList,
     };
   }
@@ -244,17 +226,43 @@ export class AttendanceService {
       order: { fullName: 'ASC' },
     });
 
+    // 1. Lấy danh sách điểm danh cả trưa và xế từ PostgreSQL
     const existing = await this.attendanceRepo.find({
-      where: { date, mealType: 'LUNCH' },
+      where: { date },
     });
-    const attendanceMap = new Map(existing.map((a) => [a.studentId, a]));
+    const lunchMap = new Map<number, DailyMealAttendance>();
+    const snackMap = new Map<number, DailyMealAttendance>();
+    existing.forEach((a) => {
+      const sId = Number(a.studentId);
+      if (a.mealType === 'LUNCH') lunchMap.set(sId, a);
+      else if (a.mealType === 'AFTERNOON_SNACK') snackMap.set(sId, a);
+    });
+
+    // 2. Kiểm tra trạng thái khóa sổ kế hoạch suất ăn từ bảng meal_evaluation_locks
+    const planLockRows = await this.attendanceRepo.query(
+      `SELECT * FROM meal_evaluation_locks WHERE class_id = $1 AND date = $2 AND meal_type = 'PORTIONS_PLAN' LIMIT 1;`,
+      [classId, date],
+    );
+    const planLock = planLockRows && planLockRows.length > 0 ? planLockRows[0] : null;
+    const isLocked = Boolean(planLock?.is_locked);
 
     const childrenList = children.map((c) => {
-      const att = attendanceMap.get(c.id);
-      const isAttended = att ? att.isAttended : true;
-      const isAbsent = !isAttended;
-      const mealOption = isAbsent ? 'ABSENT' : 'ALL_DAY';
+      const cId = Number(c.id);
+      const lunchAtt = lunchMap.get(cId);
+      const snackAtt = snackMap.get(cId);
 
+      // Xác định mealOption từ 2 bữa
+      let mealOption: 'ALL_DAY' | 'LUNCH_ONLY' | 'SNACK_ONLY' | 'ABSENT' = 'ALL_DAY';
+      if (lunchAtt && snackAtt) {
+        if (!lunchAtt.isAttended && !snackAtt.isAttended) mealOption = 'ABSENT';
+        else if (lunchAtt.isAttended && !snackAtt.isAttended) mealOption = 'LUNCH_ONLY';
+        else if (!lunchAtt.isAttended && snackAtt.isAttended) mealOption = 'SNACK_ONLY';
+        else mealOption = 'ALL_DAY';
+      } else if (lunchAtt) {
+        mealOption = lunchAtt.isAttended ? 'ALL_DAY' : 'ABSENT';
+      }
+
+      const isAbsent = mealOption === 'ABSENT';
       const allergy = c.allergies && c.allergies.length > 0 ? c.allergies[0] : null;
       let dietBadge: any = {
         type: 'STANDARD',
@@ -293,21 +301,24 @@ export class AttendanceService {
         avatarUrl: c.avatar || undefined,
         mealOption,
         dietBadge,
-        parentNote: att?.note || (allergy ? allergy.note : undefined),
-        kitchenStatus: (isAbsent ? 'CANCELLED' : 'SYNCED') as 'CANCELLED' | 'SYNCED',
+        parentNote: lunchAtt?.note || snackAtt?.note || (allergy ? allergy.note : undefined),
+        kitchenStatus: (isAbsent ? 'CANCELLED' : isLocked ? 'SYNCED' : 'PENDING') as 'CANCELLED' | 'SYNCED' | 'PENDING',
         checkinSource: 'TABLET',
         isAbsent,
         hasBreakfast: false,
         hasAllergyAlert: (c.allergies || []).length > 0,
         allergies: (c.allergies || []).map((a) => a.allergen?.name || 'Dị ứng'),
-        notes: att?.note || '',
+        notes: lunchAtt?.note || snackAtt?.note || '',
       };
     });
 
     const totalStudents = children.length;
     const absentCount = childrenList.filter((c) => c.isAbsent).length;
     const registeredToday = totalStudents - absentCount;
-    const dietSpecialCount = childrenList.filter((c) => c.hasAllergyAlert).length;
+    const dietSpecialCount = childrenList.filter((c) => !c.isAbsent && c.hasAllergyAlert).length;
+    const standardPortions = childrenList.filter((c) => (c.mealOption === 'ALL_DAY' || c.mealOption === 'LUNCH_ONLY') && !c.hasAllergyAlert).length;
+    const customTrays = childrenList.filter((c) => (c.mealOption === 'ALL_DAY' || c.mealOption === 'LUNCH_ONLY') && c.hasAllergyAlert).length;
+    const snackUnits = childrenList.filter((c) => c.mealOption === 'ALL_DAY' || c.mealOption === 'SNACK_ONLY').length;
 
     const classInfo = {
       id: String(cls ? cls.id : classId),
@@ -334,11 +345,12 @@ export class AttendanceService {
       deadline: '08:45',
       headChef: 'Nguyễn Văn Cường',
       station: 'Bếp trung tâm số 1',
-      standardPortions: registeredToday - dietSpecialCount,
-      customTrays: dietSpecialCount,
-      snackUnits: registeredToday,
-      isLocked: false,
-      lastSyncTime: '08:30',
+      standardPortions,
+      customTrays,
+      snackUnits,
+      isLocked,
+      lockedAt: planLock?.locked_at ? new Date(planLock.locked_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : undefined,
+      lastSyncTime: isLocked ? 'Đã khóa sổ gửi Bếp' : 'Chờ giáo viên chốt sổ',
       recordedBy: cls?.homeroomTeacher?.fullName || 'Lê Thị Hương Giang',
       cutoffTime: '08:45',
     };
@@ -376,25 +388,43 @@ export class AttendanceService {
   }
 
   async updateChildAttendance(childId: number, dto: UpdateMealAttendanceDto, userId?: number) {
-    const isAttended = dto.mealOption !== 'ABSENT';
+    const option = (dto.mealOption || 'ALL_DAY').toUpperCase();
+    const isLunchAttended = option === 'ALL_DAY' || option === 'FULL' || option === 'LUNCH_ONLY';
+    const isSnackAttended = option === 'ALL_DAY' || option === 'FULL' || option === 'SNACK_ONLY';
 
-    let att = await this.attendanceRepo.findOne({
+    // 1. Cập nhật bữa Trưa
+    let lunchAtt = await this.attendanceRepo.findOne({
       where: { studentId: childId, date: dto.date, mealType: 'LUNCH' },
     });
-
-    if (!att) {
-      att = this.attendanceRepo.create({
+    if (!lunchAtt) {
+      lunchAtt = this.attendanceRepo.create({
         studentId: childId,
         date: dto.date,
         mealType: 'LUNCH',
       });
     }
+    lunchAtt.isAttended = isLunchAttended;
+    lunchAtt.consumptionLevel = isLunchAttended ? (lunchAtt.consumptionLevel === 'ABSENT' ? null : lunchAtt.consumptionLevel) : 'ABSENT';
+    lunchAtt.note = dto.notes !== undefined ? dto.notes : lunchAtt.note;
+    lunchAtt.recordedBy = userId || 1;
+    await this.attendanceRepo.save(lunchAtt);
 
-    att.isAttended = isAttended;
-    att.note = dto.notes || null;
-    att.recordedBy = userId || 1;
-
-    await this.attendanceRepo.save(att);
+    // 2. Cập nhật bữa Xế chiều
+    let snackAtt = await this.attendanceRepo.findOne({
+      where: { studentId: childId, date: dto.date, mealType: 'AFTERNOON_SNACK' },
+    });
+    if (!snackAtt) {
+      snackAtt = this.attendanceRepo.create({
+        studentId: childId,
+        date: dto.date,
+        mealType: 'AFTERNOON_SNACK',
+      });
+    }
+    snackAtt.isAttended = isSnackAttended;
+    snackAtt.consumptionLevel = isSnackAttended ? (snackAtt.consumptionLevel === 'ABSENT' ? null : snackAtt.consumptionLevel) : 'ABSENT';
+    snackAtt.note = dto.notes !== undefined ? dto.notes : snackAtt.note;
+    snackAtt.recordedBy = userId || 1;
+    await this.attendanceRepo.save(snackAtt);
 
     this.auditLogsService?.logAction({
       tenantId: 1,
@@ -403,24 +433,25 @@ export class AttendanceService {
       userRole: 'TEACHER',
       action: 'RECORD_ATTENDANCE',
       targetEntity: 'ATTENDANCE',
-      targetId: String(att.id || childId),
+      targetId: String(childId),
       ipAddress: '127.0.0.1',
       details: {
         studentId: childId,
         date: dto.date,
-        isAttended,
-        mealOption: dto.mealOption,
+        mealOption: option,
+        isLunchAttended,
+        isSnackAttended,
       },
     }).catch(() => {});
 
-    return { success: true, isAttended, date: dto.date };
+    return { success: true, isAttended: isLunchAttended || isSnackAttended, mealOption: option, date: dto.date };
   }
 
   async markAllPresent(data: { classId: string; date: string }, userId?: number) {
     const classId = this.parseClassId(data.classId, 1);
     const children = await this.childRepo.find({ where: { classId } });
     for (const c of children) {
-      await this.updateChildAttendance(c.id, { date: data.date, mealOption: 'FULL' }, userId);
+      await this.updateChildAttendance(c.id, { date: data.date, mealOption: 'ALL_DAY' }, userId);
     }
     return { success: true, count: children.length };
   }
@@ -429,11 +460,29 @@ export class AttendanceService {
     return this.markAllPresent(data, userId);
   }
 
-  async lockAndSendToKitchen(data: { classId: string; date: string; notes?: string }) {
+  async lockAndSendToKitchen(data: { classId: string; date: string; notes?: string; isLocked?: boolean }) {
+    const classId = this.parseClassId(data.classId, 1);
+    const date = data.date || new Date().toISOString().split('T')[0];
+    const isLocked = data.isLocked !== undefined ? Boolean(data.isLocked) : true;
+
+    await this.attendanceRepo.query(
+      `INSERT INTO meal_evaluation_locks (class_id, date, meal_type, is_locked, locked_at, chef_feedback)
+       VALUES ($1, $2, 'PORTIONS_PLAN', $3, CASE WHEN $3 THEN NOW() ELSE NULL END, $4)
+       ON CONFLICT (class_id, date, meal_type)
+       DO UPDATE SET 
+         is_locked = $3, 
+         locked_at = CASE WHEN $3 THEN NOW() ELSE NULL END, 
+         chef_feedback = COALESCE($4, meal_evaluation_locks.chef_feedback);`,
+      [classId, date, isLocked, data.notes || null],
+    );
+
     return {
       success: true,
-      lockedAt: new Date().toISOString(),
-      message: 'Đã khóa sĩ số và truyền dữ liệu thời gian thực tới nhà bếp (KDS)',
+      isLocked,
+      lockedAt: isLocked ? new Date().toISOString() : null,
+      message: isLocked
+        ? 'Đã khóa sổ và truyền dữ liệu kế hoạch suất ăn thời gian thực tới nhà bếp (KDS)'
+        : 'Đã mở khóa kế hoạch suất ăn để giáo viên điều chỉnh',
     };
   }
 

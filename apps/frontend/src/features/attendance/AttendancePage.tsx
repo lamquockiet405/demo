@@ -20,11 +20,13 @@ import { getKitchenSocket } from '../../core/socket';
 interface AttendancePageProps {
   initialActiveTab?: string;
   onTabChange?: (tab: string) => void;
+  hideTopNav?: boolean;
 }
 
 export const AttendancePage: React.FC<AttendancePageProps> = ({
   initialActiveTab,
   onTabChange,
+  hideTopNav = false,
 }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -131,6 +133,9 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
         limit: 8,
       });
       setAttendanceData(data);
+      if (data?.kitchenConnection?.isLocked !== undefined) {
+        setIsLocked(Boolean(data.kitchenConnection.isLocked));
+      }
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu điểm danh:', err);
       showToast('Không thể kết nối máy chủ dữ liệu điểm danh', 'error');
@@ -236,12 +241,15 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
     if (!selectedClassId) return;
     setIsLocking(true);
     try {
+      const nextLocked = !isLocked;
       const res = await attendanceApi.lockAndSendToKitchen({
         classId: selectedClassId,
         date: selectedDate,
+        isLocked: nextLocked,
       });
-      setIsLocked(true);
-      showToast(res.message || 'Đã khóa sổ và gửi số lượng suất ăn tới Bếp Trung Tâm');
+      setIsLocked(nextLocked);
+      showToast(res.message || (nextLocked ? 'Đã khóa sổ và gửi số lượng suất ăn tới Bếp Trung Tâm' : 'Đã mở khóa sổ điều chỉnh'));
+      fetchAttendance();
     } catch (err) {
       console.error('Lỗi khi khóa danh sách gửi bếp:', err);
       showToast('Lỗi khi gửi dữ liệu tới bếp', 'error');
@@ -292,6 +300,8 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
   if (activeTab === 'evaluation') {
     return <MealEvaluationPage onTabChange={handleTabChange} />;
   }
+    
+
   if (activeTab === 'notes') {
     return <MealCoordinationNotesPage onTabChange={handleTabChange} />;
   }
@@ -324,7 +334,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
       )}
 
       {/* 1. Top Navigation Bar */}
-      <AttendanceTopNav onSearch={(q) => setSearchQuery(q)} />
+      {!hideTopNav && <AttendanceTopNav onSearch={(q) => setSearchQuery(q)} />}
 
       {/* 2. Sub Navigation Tabs */}
       <AttendanceSubTabs

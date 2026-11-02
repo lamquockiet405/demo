@@ -17,8 +17,12 @@ import {
   Bell,
   UtensilsCrossed,
   Scale,
+  MessageSquareText,
+  ClipboardCheck,
 } from 'lucide-react';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
+import { ParentEvaluationsPage } from '../features/parent-evaluations/ParentEvaluationsPage';
+import { BghMealPortionsOverviewPage } from '../features/attendance/pages/BghMealPortionsOverviewPage';
 import { useAuthStore } from '../core/stores/auth.store';
 import { tenantApi, TenantProfile } from '../core/api/tenant.api';
 
@@ -77,7 +81,8 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
-    { label: 'Dịch vụ bán trú', path: '/services', icon: Coffee },
+    { label: 'Kế hoạch suất ăn bán trú', path: '/children', icon: ClipboardCheck },
+    { label: 'Ý kiến & Đánh giá PH', path: '/services', icon: MessageSquareText },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
     { label: 'Sổ kiểm thực 3 bước', path: '/food-safety', icon: ShieldCheck },
@@ -91,7 +96,8 @@ export const AdminDashboardLayout: React.FC = () => {
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
-    if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Ăn xế';
+    if (location.pathname.startsWith('/children')) return 'Kế hoạch Suất ăn & Điểm danh Bán trú';
+    if (location.pathname.startsWith('/services')) return 'Ý kiến & Đánh giá của Phụ huynh';
     if (location.pathname.startsWith('/inventory')) return 'Kho nguyên liệu & Tiêu chuẩn dinh dưỡng';
     if (location.pathname.startsWith('/food-safety')) return 'Sổ kiểm thực 3 bước & Lưu mẫu';
     if (location.pathname.startsWith('/audit-logs')) return 'Nhật ký Kiểm toán & Truy vết Dữ liệu Nhạy cảm (Audit Logs)';
@@ -258,7 +264,7 @@ export const AdminDashboardLayout: React.FC = () => {
 
         {/* Scrollable Page Container */}
         <main className="flex-1 overflow-y-auto p-8">
-          <Outlet />
+          {location.pathname === '/services' ? <ParentEvaluationsPage /> : location.pathname === '/children' ? <BghMealPortionsOverviewPage /> : <Outlet />}
         </main>
       </div>
 

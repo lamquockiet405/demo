@@ -84,8 +84,8 @@ export class AttendanceController {
   }
 
   @Post('attendance/lock-kitchen')
-  @ApiOperation({ summary: 'Khóa sĩ số chốt số suất ăn gửi xuống bếp' })
-  async lockKitchen(@Body() body: { classId: string; date: string; notes?: string }) {
+  @ApiOperation({ summary: 'Khóa / Mở khóa sĩ số chốt số suất ăn gửi xuống bếp' })
+  async lockKitchen(@Body() body: { classId: string; date: string; notes?: string; isLocked?: boolean }) {
     return this.attendanceService.lockAndSendToKitchen(body);
   }
 
