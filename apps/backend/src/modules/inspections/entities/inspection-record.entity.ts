@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { BigIntTransformer } from '../../../database/base.entity';
 import { User } from '../../auth/entities/user.entity';
+import { InspectionImage } from './inspection-image.entity';
 
 @Entity('food_inspections')
 export class InspectionRecord {
@@ -32,4 +33,7 @@ export class InspectionRecord {
   @ManyToOne(() => User, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'inspector_id' })
   inspector: User;
+
+  @OneToMany(() => InspectionImage, (img) => img.inspection)
+  images?: InspectionImage[];
 }

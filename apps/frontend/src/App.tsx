@@ -27,6 +27,7 @@ import { FoodGroupRulesPage } from './features/menus/pages/FoodGroupRulesPage';
 import { NutritionPhysicalDashboardPage } from './features/dashboard/pages/NutritionPhysicalDashboardPage';
 import { RoleSpecificChildAlertsPage } from './features/dashboard/pages/RoleSpecificChildAlertsPage';
 import { MealOperationsReportPage } from './features/kitchen/pages/MealOperationsReportPage';
+import { FoodSafetyComplianceReportPage } from './features/food-safety/pages/FoodSafetyComplianceReportPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -214,7 +215,8 @@ export const App: React.FC = () => {
           <Route path="foods" element={<NutritionRulesPage />} />
           <Route path="dishes" element={<NutritionRulesPage />} />
           <Route path="children" element={<NutritionistDashboardPage />} />
-          <Route path="food-safety" element={<NutritionistDashboardPage />} />
+          <Route path="food-safety" element={<FoodSafetyComplianceReportPage />} />
+          <Route path="food-safety-report" element={<FoodSafetyComplianceReportPage />} />
           <Route path="growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="nutrition-physical" element={<NutritionPhysicalDashboardPage />} />
           <Route path="alerts" element={<RoleSpecificChildAlertsPage />} />
@@ -265,7 +267,9 @@ export const App: React.FC = () => {
           <Route path="/menu-approval" element={<PrincipalMenuApprovalPage />} />
           <Route path="/menu-planning" element={<MenuPlanningPage />} />
           <Route path="/services" element={<WeeklyMenuManagementPage />} />
-          <Route path="/food-safety" element={<WeeklyMenuManagementPage />} />
+          <Route path="/food-safety" element={<FoodSafetyComplianceReportPage />} />
+          <Route path="/food-safety-report" element={<FoodSafetyComplianceReportPage />} />
+          <Route path="/food-safety-compliance" element={<FoodSafetyComplianceReportPage />} />
           <Route path="/audit-logs" element={<AuditLogsPage />} />
           <Route path="/finances" element={<WeeklyMenuManagementPage />} />
           <Route path="/children" element={<WeeklyMenuManagementPage />} />

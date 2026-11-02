@@ -84,7 +84,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Dịch vụ bán trú', path: '/services', icon: Coffee },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
-    { label: 'Sổ kiểm thực 3 bước', path: '/food-safety', icon: ShieldCheck },
+    { label: 'Tuân thủ ATTP & Kiểm thực (UC95)', path: '/food-safety', icon: ShieldCheck },
     { label: 'Nhật ký kiểm toán', path: '/audit-logs', icon: ShieldAlert },
     { label: 'Báo cáo tài chính', path: '/finances', icon: CircleDollarSign },
     { label: 'Cài đặt trường học', path: '/settings', icon: Settings },
@@ -100,7 +100,7 @@ export const AdminDashboardLayout: React.FC = () => {
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
     if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Ăn xế';
     if (location.pathname.startsWith('/inventory')) return 'Kho nguyên liệu & Tiêu chuẩn dinh dưỡng';
-    if (location.pathname.startsWith('/food-safety')) return 'Sổ kiểm thực 3 bước & Lưu mẫu';
+    if (location.pathname.startsWith('/food-safety')) return 'Báo Cáo Tuân Thủ An Toàn Thực Phẩm (UC95)';
     if (location.pathname.startsWith('/audit-logs')) return 'Nhật ký Kiểm toán & Truy vết Dữ liệu Nhạy cảm (Audit Logs)';
     if (location.pathname.startsWith('/finances')) return 'Báo cáo Tài chính & Thu chi';
     if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/tenant/settings'))
