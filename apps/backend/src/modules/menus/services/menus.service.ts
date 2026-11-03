@@ -300,14 +300,64 @@ export class MenusService implements OnModuleInit {
       order: { name: 'ASC' },
     });
 
-    return dishes.map((d) => ({
+    return dishes.map(d => this.serializeAvailableDish(d));
+  }
+
+  private serializeAvailableDish(d: Dish) {
+    const nutrition = getPortionNutrition(d);
+    return {
       id: String(d.id),
       name: d.name,
       categoryCode: d.category?.code || 'MAIN',
       categoryName: d.category?.name || 'Món ăn',
+      dishType: d.category?.code || 'MAIN',
+      isActive: d.status === 'ACTIVE',
+      standardServingSizeG: Number(d.standardServingSizeG) || 100,
       nutritionAvailable: hasVerifiedNutrition(d),
-      ...getPortionNutrition(d),
-    }));
+      ...nutrition,
+      totalCalories: nutrition.energyKcal,
+      totalProteinG: nutrition.proteinG,
+      totalFatG: nutrition.fatG,
+      totalCarbG: nutrition.carbG,
+    };
+  }
+
+  private getActiveAllergyDeclarations() {
+    return this.menuDishRepo.manager.query(`
+      SELECT s.id as student_id, s.full_name, c.id as class_id, c.name as class_name,
+        sa.allergen_id, COALESCE(a.name,NULLIF(btrim(sa.custom_allergen_name),'')) as allergen_name,
+        COALESCE(a.code,'CUSTOM') as allergen_code, sa.severity, sa.reaction_treatment, sa.allergy_type
+      FROM student_allergies sa
+      JOIN students s ON sa.student_id = s.id
+      LEFT JOIN allergens a ON sa.allergen_id = a.id
+      LEFT JOIN classes c ON s.class_id = c.id
+      WHERE sa.is_active = TRUE AND s.status = 'ACTIVE'
+      ORDER BY s.full_name ASC
+    `);
+  }
+
+  async getSubstituteCandidates(menuId: number, menuDishId: number) {
+    const menu = await this.findOne(menuId);
+    const original = menu.menuDishes.find(item => Number(item.id) === menuDishId);
+    if (!original) throw new NotFoundException('Món gốc không còn trong phiên bản thực đơn hiện tại. Vui lòng tải lại.');
+    const dishes = await this.dishRepo.find({
+      where: [{ status: 'ACTIVE' }, { id: Number(original.dishId) }],
+      relations: ['category', 'nutrition', 'recipes', 'recipes.ingredient', 'dishAllergens'],
+      order: { name: 'ASC' },
+    });
+    const source = dishes.find(dish => Number(dish.id) === Number(original.dishId));
+    if (!source) throw new NotFoundException('Món gốc không còn trong danh mục. Vui lòng tải lại.');
+    const declarations = await this.getActiveAllergyDeclarations();
+    const matches = (declaration: any, dish: Dish) => matchesDeclaredAllergy(
+      { name: declaration.allergen_name || '', code: declaration.allergen_code, catalogId: declaration.allergen_id },
+      { name: dish.name, ingredients: (dish.recipes || []).map(item => item.ingredient?.name || ''),
+        allergenIds: (dish.dishAllergens || []).map(item => Number(item.allergenId)) },
+    );
+    const affected = new Set(declarations.filter(item => matches(item, source)).map(item => String(item.student_id)));
+    const restrictions = declarations.filter(item => affected.has(String(item.student_id)));
+    return dishes.filter(dish => Number(dish.id) !== Number(source.id) && dish.status === 'ACTIVE'
+      && hasVerifiedNutrition(dish) && dish.recipes?.length
+      && !restrictions.some(item => matches(item, dish))).map(dish => this.serializeAvailableDish(dish));
   }
 
   async findOne(id: number) {
@@ -486,17 +536,7 @@ export class MenusService implements OnModuleInit {
     const menuDetail = await this.findOne(menuId);
 
     // 1. Tải danh sách dị ứng học sinh từ database
-    const studentAllergiesRaw = await this.menuDishRepo.manager.query(`
-      SELECT s.id as student_id, s.full_name, c.id as class_id, c.name as class_name,
-        sa.allergen_id, COALESCE(a.name,NULLIF(btrim(sa.custom_allergen_name),'')) as allergen_name,
-        COALESCE(a.code,'CUSTOM') as allergen_code, sa.severity, sa.reaction_treatment, sa.allergy_type
-      FROM student_allergies sa
-      JOIN students s ON sa.student_id = s.id
-      LEFT JOIN allergens a ON sa.allergen_id = a.id
-      LEFT JOIN classes c ON s.class_id = c.id
-      WHERE sa.is_active = TRUE AND s.status = 'ACTIVE'
-      ORDER BY s.full_name ASC
-    `);
+    const studentAllergiesRaw = await this.getActiveAllergyDeclarations();
 
     // 2. Tải danh sách tăng trưởng BMI / WHO Z-score từ database
     const bmiStudentsRaw = await this.menuDishRepo.manager.query(`
@@ -726,101 +766,81 @@ export class MenusService implements OnModuleInit {
   }
 
   async adjustDish(menuId: number, dto: AdjustDishDto) {
-    const menu = await this.menuRepo.findOne({ where: { id: menuId } });
-    if (!menu) throw new NotFoundException('Không tìm thấy thực đơn');
-
-    let version = await this.versionRepo.findOne({
-      where: { menuId },
-      order: { versionNumber: 'DESC' },
-    });
-    if (!version) {
-      version = await this.versionRepo.save(
-        this.versionRepo.create({ menuId, versionNumber: 1, createdBy: menu.createdBy }),
-      );
+    const targetId = Number(dto.newDishId ?? dto.substituteDishId ?? dto.dishId);
+    if (!Number.isSafeInteger(targetId) || targetId <= 0) {
+      throw new BadRequestException('Vui lòng chọn một món ăn hợp lệ từ danh mục.');
     }
+    try {
+      return await this.menuRepo.manager.transaction(async manager => {
+        const menus = manager.getRepository(Menu);
+        const versions = manager.getRepository(MenuVersion);
+        const days = manager.getRepository(MenuDay);
+        const meals = manager.getRepository(MenuMeal);
+        const menuDishes = manager.getRepository(MenuDish);
+        const dishes = manager.getRepository(Dish);
+        const menu = await menus.findOne({ where: { id: menuId }, lock: { mode: 'pessimistic_write' } });
+        if (!menu) throw new NotFoundException('Không tìm thấy thực đơn');
+        const target = await dishes.findOne({ where: { id: targetId }, lock: { mode: 'pessimistic_read' } });
+        if (!target) throw new NotFoundException('Món thay thế không còn trong danh mục. Vui lòng tải lại và chọn món khác.');
+        if (target.status !== 'ACTIVE') throw new BadRequestException('Món thay thế đã tạm ngưng. Vui lòng chọn món khác.');
 
-    const mealType = dto.mealType || (dto as any).mealTime || 'LUNCH';
-    const rawDay = Number(dto.dayOfWeek) || 2;
+        let version = await versions.findOne({ where: { menuId }, order: { versionNumber: 'DESC' } });
+        if (!version) {
+          if (dto.menuDishId) throw new NotFoundException('Ô món gốc không còn trong phiên bản thực đơn hiện tại.');
+          version = await versions.save(versions.create({ menuId, versionNumber: 1, createdBy: menu.createdBy }));
+        }
+        let original: MenuDish | null = null;
+        let meal: MenuMeal;
+        if (dto.menuDishId) {
+          original = await menuDishes.findOne({ where: { id: dto.menuDishId }, relations: ['menuMeal', 'menuMeal.menuDay'] });
+          if (!original || Number(original.menuMeal?.menuDay?.menuVersionId) !== Number(version.id)) {
+            throw new NotFoundException('Ô món gốc không còn trong phiên bản thực đơn hiện tại. Vui lòng tải lại.');
+          }
+          if (dto.oldDishId && Number(original.dishId) !== Number(dto.oldDishId)) {
+            throw new BadRequestException('Món gốc đã được thay đổi. Vui lòng tải lại thực đơn.');
+          }
+          meal = original.menuMeal;
+        } else {
+          const mealType = dto.mealType || dto.mealTime || 'LUNCH';
+          if (!['BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'LATE_SNACK'].includes(mealType)) {
+            throw new BadRequestException('Bữa ăn không hợp lệ.');
+          }
+          const rawDay = Number(dto.dayOfWeek ?? 1);
+          if (!Number.isInteger(rawDay) || rawDay < 1 || rawDay > 7) throw new BadRequestException('Ngày trong tuần không hợp lệ.');
+          let dbDay = rawDay;
+          if (rawDay <= 5 && await days.findOne({ where: { menuVersionId: version.id, dayOfWeek: rawDay + 1 } })) dbDay++;
+          let day = await days.findOne({ where: { menuVersionId: version.id, dayOfWeek: dbDay }, relations: ['meals'] });
+          if (!day) {
+            const date = new Date(menu.weekStartDate);
+            date.setUTCDate(date.getUTCDate() + rawDay - 1);
+            day = await days.save(days.create({ menuVersionId: version.id, dayOfWeek: dbDay, date: date.toISOString().slice(0, 10) }));
+          }
+          meal = day.meals?.find(item => item.mealType === mealType);
+          if (!meal) meal = await meals.save(meals.create({ menuDayId: day.id, mealType }));
+          if (dto.oldDishId) {
+            original = await menuDishes.findOne({ where: { menuMealId: meal.id, dishId: dto.oldDishId } });
+            if (!original) throw new NotFoundException('Món gốc không còn trong bữa ăn đã chọn. Vui lòng tải lại.');
+          }
+        }
 
-    // Ánh xạ thứ trong tuần: Frontend gửi 1..5 (Thứ 2..Thứ 6), DB có thể lưu 2..6
-    let dbDayOfWeek = rawDay;
-    if (rawDay >= 1 && rawDay <= 5) {
-      const offsetDay = await this.dayRepo.findOne({
-        where: { menuVersionId: version.id, dayOfWeek: rawDay + 1 },
+        const existing = await menuDishes.findOne({ where: { menuMealId: meal.id, dishId: targetId } });
+        const menuDish = existing || menuDishes.create({ menuMealId: meal.id, dishId: targetId, specialDietNotes: null });
+        menuDish.portionSizeG = dto.portionSizeG ?? existing?.portionSizeG ?? 100;
+        if (!Number.isFinite(menuDish.portionSizeG) || menuDish.portionSizeG <= 0) throw new BadRequestException('Khẩu phần phải lớn hơn 0.');
+        if (dto.specialDietNotes !== undefined) menuDish.specialDietNotes = dto.specialDietNotes || null;
+        // Save first, then remove the original within the same transaction.
+        await menuDishes.save(menuDish);
+        if (original && dto.keepOriginalDish === false && Number(original.id) !== Number(menuDish.id)) {
+          await menuDishes.delete({ id: original.id, menuMealId: meal.id });
+        }
+        return { success: true, menuDishId: String(menuDish.id), dishId: String(targetId), message: 'Đã cập nhật món ăn trong thực đơn thành công' };
       });
-      if (offsetDay) {
-        dbDayOfWeek = rawDay + 1;
+    } catch (error) {
+      if (error.code === '23503' && error.constraint === 'menu_dishes_dish_id_fkey') {
+        throw new BadRequestException('Danh mục món ăn đã thay đổi. Vui lòng tải lại thực đơn và chọn món khác.');
       }
+      throw error;
     }
-
-    let day = await this.dayRepo.findOne({
-      where: { menuVersionId: version.id, dayOfWeek: dbDayOfWeek },
-      relations: ['meals'],
-    });
-
-    if (!day) {
-      day = await this.dayRepo.findOne({
-        where: { menuVersionId: version.id, dayOfWeek: rawDay },
-        relations: ['meals'],
-      });
-    }
-
-    if (!day) {
-      const existingDays = await this.dayRepo.find({
-        where: { menuVersionId: version.id },
-        order: { dayOfWeek: 'ASC' },
-        relations: ['meals'],
-      });
-      day = existingDays[0] || await this.dayRepo.save(
-        this.dayRepo.create({ menuVersionId: version.id, dayOfWeek: dbDayOfWeek }),
-      );
-    }
-
-    let meal = day.meals?.find((m) => m.mealType === mealType);
-    if (!meal) {
-      meal = await this.mealRepo.save(
-        this.mealRepo.create({ menuDayId: day.id, mealType }),
-      );
-    }
-
-    const resolvedOldDishId = Number(dto.oldDishId || (dto as any).dishId) || null;
-    let resolvedNewDishId = Number(dto.newDishId || (dto as any).substituteDishId || (dto as any).dishId);
-
-    if (!resolvedNewDishId || isNaN(resolvedNewDishId)) {
-      resolvedNewDishId = resolvedOldDishId || 1;
-    }
-
-    const keepOriginalDish = dto.keepOriginalDish !== false; // Mặc định luôn giữ món gốc cho trẻ bình thường
-
-    if (resolvedOldDishId && !keepOriginalDish && resolvedOldDishId !== resolvedNewDishId) {
-      await this.menuDishRepo.delete({ menuMealId: meal.id, dishId: resolvedOldDishId });
-    }
-
-    // Kiểm tra xem món thay thế này đã có trong bữa ăn chưa
-    let menuDish = await this.menuDishRepo.findOne({
-      where: { menuMealId: meal.id, dishId: resolvedNewDishId },
-    });
-
-    if (menuDish) {
-      menuDish.portionSizeG = dto.portionSizeG || menuDish.portionSizeG || 100;
-      menuDish.specialDietNotes = dto.specialDietNotes || (dto as any).notes || menuDish.specialDietNotes;
-      await this.menuDishRepo.save(menuDish);
-    } else {
-      menuDish = this.menuDishRepo.create({
-        menuMealId: meal.id,
-        dishId: resolvedNewDishId,
-        portionSizeG: dto.portionSizeG || 100,
-        specialDietNotes: dto.specialDietNotes || (dto as any).notes || null,
-      });
-      await this.menuDishRepo.save(menuDish);
-    }
-
-    return {
-      success: true,
-      menuDishId: String(menuDish.id),
-      dishId: String(resolvedNewDishId),
-      message: 'Đã cập nhật món ăn trong thực đơn thành công',
-    };
   }
 
   async removeDish(menuId: number, menuDishId: number) {

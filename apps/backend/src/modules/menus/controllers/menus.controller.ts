@@ -188,6 +188,16 @@ export class MenusController {
     return { success: true, message: 'Đã lưu món thay thế cho học sinh', details: dto };
   }
 
+  @Get(':menuId/dishes/:menuDishId/substitute-candidates')
+  @Roles('NUTRITIONIST', 'SCHOOL_MANAGER', 'PRINCIPAL')
+  @ApiOperation({ summary: 'Danh mục món thay thế từ dữ liệu hiện tại, đối chiếu dị ứng đã khai báo' })
+  async getSubstituteCandidates(
+    @Param('menuId', ParseIntPipe) menuId: number,
+    @Param('menuDishId', ParseIntPipe) menuDishId: number,
+  ) {
+    return this.menusService.getSubstituteCandidates(menuId, menuDishId);
+  }
+
   @Post(':menuId/dishes/:menuDishId/apply-substitute')
   @Roles('NUTRITIONIST', 'TEACHER', 'KITCHEN_STAFF')
   @ApiOperation({ summary: 'Gán món thay thế vào ô món ăn trong thực đơn' })

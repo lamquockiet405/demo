@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Plus,
   Trash2,
@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import { WeeklyMenu, MenuDishItem, MenuAdvisoryResponse, DishItem, weeklyMenusApi } from '../api/weekly-menus.api';
 import { RecipeInspectionModal } from './RecipeInspectionModal';
+import { buildSubstituteCandidates, detectDishCategory } from '../utils/substitute-candidates';
+export { detectDishCategory } from '../utils/substitute-candidates';
 
 interface WeeklyGridTableProps {
   menu: WeeklyMenu | null;
@@ -53,27 +55,6 @@ export interface ResolvedSubstituteInfo {
   textColor: string;
 }
 
-
-export type DishCategoryType = 'SOUP' | 'MAIN' | 'STAPLE' | 'DRINK' | 'SNACK_MEAL';
-
-export const detectDishCategory = (name: string, dishType?: string): { code: DishCategoryType; label: string } => {
-  const n = (name || '').toLowerCase();
-  const dt = (dishType || '').toUpperCase();
-
-  if (dt === 'SOUP' || n.startsWith('canh')) {
-    return { code: 'SOUP', label: 'Món Canh' };
-  }
-  if (n.startsWith('cháo') || n.includes('súp') || n.includes('bún') || n.includes('phở') || n.includes('miến') || n.includes('hủ tiếu') || n.includes('bánh canh') || n.includes('nui') || n.includes('bánh bao')) {
-    return { code: 'SNACK_MEAL', label: 'Món Xế / Cháo / Súp' };
-  }
-  if (n.startsWith('cơm') || n.includes('xôi') || n.includes('bánh mì')) {
-    return { code: 'STAPLE', label: 'Cơm / Tinh bột' };
-  }
-  if (dt === 'DRINK' || n.includes('sữa') || n.includes('yaourt') || n.includes('sữa chua') || n.includes('nước') || n.includes('chè') || n.includes('sâm') || n.includes('nha đam') || n.includes('chuối') || n.includes('dưa') || n.includes('hồng')) {
-    return { code: 'DRINK', label: 'Món Uống / Tráng Miệng' };
-  }
-  return { code: 'MAIN', label: 'Món Mặn Chính' };
-};
 
 export const resolveSubstituteInfo = (
   md: MenuDishItem,
@@ -202,6 +183,24 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
     slotName: string;
     targetType?: 'COMMON' | 'STUNTED' | 'OBESE' | 'ALLERGIES';
   } | null>(null);
+
+  const [substituteCatalog, setSubstituteCatalog] = useState<DishItem[]>([]);
+  const [substituteLoading, setSubstituteLoading] = useState(false);
+  const [substituteError, setSubstituteError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    setSelectedSubDish(null);
+    setSubApplySuccess(null);
+    setSubstituteError('');
+    setSubstituteCatalog([]);
+    if (!menu?.id || !universalModalDish?.menuDish.id) return;
+    setSubstituteLoading(true);
+    weeklyMenusApi.getSubstituteCandidates(menu.id, universalModalDish.menuDish.id)
+      .then(items => { if (alive) setSubstituteCatalog(items); })
+      .catch(error => { if (alive) setSubstituteError(error?.response?.data?.message || 'Không tải được danh mục món thay thế. Vui lòng mở lại hộp chọn.'); })
+      .finally(() => { if (alive) setSubstituteLoading(false); });
+    return () => { alive = false; };
+  }, [menu?.id, universalModalDish?.menuDish.id, universalModalDish?.targetType]);
 
   // Chế độ hiển thị dinh dưỡng ở chân bảng (tfoot): Mặc định hiển thị TẤT CẢ 3 loại trẻ em + Thực đơn tổng
   const [footerNutritionTab, setFooterNutritionTab] = useState<'ALL' | 'MASTER' | 'STUNTED' | 'OBESE' | 'ALLERGIES'>('ALL');
@@ -2150,526 +2149,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
           (c.dishName && c.dishName.toLowerCase().trim() === currentDishName.toLowerCase().trim())
         ) || [];
 
-        // Đề xuất danh sách món thay thế CÙNG LOẠI & TƯƠNG ĐƯƠNG DINH DƯỠNG (100% ID số thực tế trong cơ sở dữ liệu)
-        const getCandidateSubstitutes = () => {
-          // Tính toán calo cao hơn món gốc cho trẻ thấp còi (tối thiểu tăng +15% đến +35%)
-          const stuntedCaloBonus = (minBase: number, percentBonus: number) => {
-            const targetByRatio = Math.round(currentCalo * (1 + percentBonus / 100));
-            return Math.max(minBase, targetByRatio > currentCalo ? targetByRatio : currentCalo + 15);
-          };
-
-          // 1. Món Canh / Súp (SOUP)
-          if (currentCat.code === 'SOUP') {
-            if (lockedType === 'OBESE') {
-              return [
-                {
-                  id: '57',
-                  name: 'Canh bí đao thịt bằm',
-                  categoryLabel: 'Món Canh',
-                  calories: 28,
-                  proteinG: 3.8,
-                  fatG: 0.6,
-                  carbG: 1.6,
-                  suitabilityReason: '✓ Cùng loại Món Canh • Cắt giảm 60% chất béo • Tối ưu kiểm soát cân nặng TT 28',
-                },
-                {
-                  id: '48',
-                  name: 'Canh thịt nạc bằm bắp cải, cà rốt',
-                  categoryLabel: 'Món Canh',
-                  calories: 30,
-                  proteinG: 4.0,
-                  fatG: 0.7,
-                  carbG: 1.8,
-                  suitabilityReason: '✓ Cùng loại Món Canh • Giàu chất xơ, không dầu mỡ • Tốt cho trẻ thừa cân',
-                },
-                {
-                  id: '47',
-                  name: 'Canh thịt bằm rau ngót',
-                  categoryLabel: 'Món Canh',
-                  calories: 32,
-                  proteinG: 4.8,
-                  fatG: 0.8,
-                  carbG: 1.5,
-                  suitabilityReason: '✓ Cùng loại Món Canh • Thanh nhiệt, đạm nạc tinh khiết',
-                },
-              ];
-            }
-            if (lockedType === 'STUNTED') {
-              const calo1 = stuntedCaloBonus(65, 30);
-              const calo2 = stuntedCaloBonus(58, 25);
-              const calo3 = stuntedCaloBonus(68, 35);
-              return [
-                {
-                  id: '33',
-                  name: 'Canh thịt sườn hầm bắp ngọt, bầu',
-                  categoryLabel: 'Món Canh',
-                  calories: calo1,
-                  proteinG: 7.2,
-                  fatG: 2.8,
-                  carbG: 4.5,
-                  suitabilityReason: `✓ Cùng loại Món Canh • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+15'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Tăng 20% đạm sinh học & canxi sườn non (QĐ 1246)`,
-                },
-                {
-                  id: '50',
-                  name: 'Canh gà hầm củ sen, cà rốt',
-                  categoryLabel: 'Món Canh',
-                  calories: calo2,
-                  proteinG: 6.5,
-                  fatG: 2.5,
-                  carbG: 4.0,
-                  suitabilityReason: `✓ Cùng loại Món Canh • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+12'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Bổ dưỡng vi chất, hồi phục thể trạng trẻ nhẹ cân`,
-                },
-                {
-                  id: '53',
-                  name: 'Canh bí hồ lô hầm xương thịt bằm',
-                  categoryLabel: 'Món Canh',
-                  calories: calo3,
-                  proteinG: 7.5,
-                  fatG: 3.2,
-                  carbG: 4.8,
-                  suitabilityReason: `✓ Cùng loại Món Canh • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+18'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đậm độ năng lượng cao & vitamin A phát triển thể chất`,
-                },
-              ];
-            }
-            // Mặc định hoặc Dị ứng (ALLERGIES / COMMON)
-            return [
-              {
-                id: '47',
-                name: 'Canh thịt bằm rau ngót',
-                categoryLabel: 'Món Canh',
-                calories: 32,
-                proteinG: 4.8,
-                fatG: 0.8,
-                carbG: 1.5,
-                suitabilityReason: '✓ Cùng loại Món Canh • 100% không tôm/cua/hải sản • An toàn dị ứng tuyệt đối',
-              },
-              {
-                id: '42',
-                name: 'Canh thịt bằm rau dền, mồng tơi',
-                categoryLabel: 'Món Canh',
-                calories: 36,
-                proteinG: 4.3,
-                fatG: 1.2,
-                carbG: 2.0,
-                suitabilityReason: '✓ Cùng loại Món Canh • Thanh mát giàu chất xơ • Lành tính cho trẻ dị ứng',
-              },
-              {
-                id: '57',
-                name: 'Canh bí đao thịt bằm',
-                categoryLabel: 'Món Canh',
-                calories: 28,
-                proteinG: 3.8,
-                fatG: 0.6,
-                carbG: 1.6,
-                suitabilityReason: '✓ Cùng loại Món Canh • Lành tính cho mọi cơ địa dị ứng',
-              },
-            ];
-          }
-
-          // 2. Món Cơm / Tinh Bột (STAPLE)
-          if (currentCat.code === 'STAPLE') {
-            if (lockedType === 'STUNTED') {
-              const calo1 = stuntedCaloBonus(275, 20);
-              const calo2 = stuntedCaloBonus(285, 25);
-              const calo3 = stuntedCaloBonus(265, 18);
-              return [
-                {
-                  id: '2',
-                  name: 'Cơm chiên Dương Châu (thịt xá xíu, trứng, đậu)',
-                  categoryLabel: 'Cơm / Tinh bột',
-                  calories: calo1,
-                  proteinG: 12.0,
-                  fatG: 9.0,
-                  carbG: 38.0,
-                  suitabilityReason: `✓ Cùng loại Tinh bột • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+35'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm trứng/thịt xá xíu sinh học cao (QĐ 1246)`,
-                },
-                {
-                  id: '4',
-                  name: 'Cơm tấm sườn bì chả hấp',
-                  categoryLabel: 'Cơm / Tinh bột',
-                  calories: calo2,
-                  proteinG: 13.5,
-                  fatG: 9.5,
-                  carbG: 37.0,
-                  suitabilityReason: `✓ Cùng loại Tinh bột • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+45'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đậm độ năng lượng cao giúp bắt kịp đà tăng trưởng`,
-                },
-                {
-                  id: '1',
-                  name: 'Cơm dẻo xới mỡ hành & ruốc thịt nạc',
-                  categoryLabel: 'Cơm / Tinh bột',
-                  calories: calo3,
-                  proteinG: 9.5,
-                  fatG: 7.2,
-                  carbG: 38.0,
-                  suitabilityReason: `✓ Cùng loại Tinh bột • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+25'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Bổ sung chất béo tốt và đạm ruốc`,
-                },
-              ];
-            }
-            if (lockedType === 'OBESE') {
-              return [
-                {
-                  id: '1',
-                  name: 'Cơm trắng gạo tẻ dẻo',
-                  categoryLabel: 'Cơm / Tinh bột',
-                  calories: 172,
-                  proteinG: 3.8,
-                  fatG: 0.3,
-                  carbG: 38.1,
-                  suitabilityReason: '✓ Cùng loại Tinh bột • Cắt giảm 94% chất béo so với cơm chiên • Tốt cho trẻ béo phì kiểm soát mỡ máu',
-                },
-                {
-                  id: '1',
-                  name: 'Cơm gạo lứt huyết rồng trộn hạt sen',
-                  categoryLabel: 'Cơm / Tinh bột',
-                  calories: 165,
-                  proteinG: 4.5,
-                  fatG: 0.8,
-                  carbG: 34.0,
-                  suitabilityReason: '✓ Cùng loại Tinh bột • Giàu chất xơ hòa tan, no lâu, giảm hấp thu chất béo TT 28',
-                },
-              ];
-            }
-            // Mặc định hoặc Dị ứng (ALLERGIES / COMMON)
-            return [
-              {
-                id: '1',
-                name: 'Cơm trắng gạo tẻ dẻo',
-                categoryLabel: 'Cơm / Tinh bột',
-                calories: 172,
-                proteinG: 3.8,
-                fatG: 0.3,
-                carbG: 38.1,
-                suitabilityReason: '✓ Cùng loại Tinh bột • An toàn 100% không dị nguyên, thuần tự nhiên',
-              },
-              {
-                id: '2',
-                name: 'Cơm chiên Dương Châu (không hải sản)',
-                categoryLabel: 'Cơm / Tinh bột',
-                calories: 269,
-                proteinG: 10.7,
-                fatG: 8.7,
-                carbG: 37.0,
-                suitabilityReason: '✓ Cùng loại Cơm chiên • Thay thế hoàn toàn tôm/cua/hải sản bằng thịt nạc và trứng • Năng lượng tương đương 100%',
-              },
-            ];
-          }
-
-          // 3. Món Uống / Tráng Miệng (DRINK)
-          if (currentCat.code === 'DRINK') {
-            if (lockedType === 'OBESE') {
-              return [
-                {
-                  id: '98',
-                  name: 'Sâm bí đao hạt chia thanh mát',
-                  categoryLabel: 'Thức uống',
-                  calories: 50,
-                  proteinG: 0.7,
-                  fatG: 0.2,
-                  carbG: 10.2,
-                  suitabilityReason: '✓ Cùng loại Thức uống • Thanh nhiệt ít calo • Tối ưu kiểm soát cân nặng TT 28',
-                },
-                {
-                  id: '99',
-                  name: 'Nước đậu đen rang đường phèn',
-                  categoryLabel: 'Thức uống',
-                  calories: 45,
-                  proteinG: 1.0,
-                  fatG: 0.1,
-                  carbG: 10.5,
-                  suitabilityReason: '✓ Cùng loại Thức uống • Ít đường, thanh lọc giải nhiệt cơ thể',
-                },
-                {
-                  id: '95',
-                  name: 'Nước cam tươi nguyên chất',
-                  categoryLabel: 'Thức uống',
-                  calories: 60,
-                  proteinG: 1.2,
-                  fatG: 0.2,
-                  carbG: 14.5,
-                  suitabilityReason: '✓ Cùng loại Thức uống • Giàu vitamin C • Không dầu mỡ, bồi bổ tự nhiên',
-                },
-              ];
-            }
-            if (lockedType === 'STUNTED') {
-              const calo1 = stuntedCaloBonus(130, 25);
-              const calo2 = stuntedCaloBonus(125, 20);
-              const calo3 = stuntedCaloBonus(120, 18);
-              return [
-                {
-                  id: '96',
-                  name: 'Sữa tươi nguyên kem tiệt trùng có đường',
-                  categoryLabel: 'Thức uống',
-                  calories: calo1,
-                  proteinG: 5.5,
-                  fatG: 4.8,
-                  carbG: 14.5,
-                  suitabilityReason: `✓ Cùng loại Thức uống • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+30'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm sữa nguyên kem & canxi/vitamin D bồi bổ thể trạng (QĐ 1246)`,
-                },
-                {
-                  id: '94',
-                  name: 'Yaourt phô mai sữa chua men sống giàu đạm',
-                  categoryLabel: 'Thức uống',
-                  calories: calo2,
-                  proteinG: 5.0,
-                  fatG: 4.5,
-                  carbG: 15.0,
-                  suitabilityReason: `✓ Cùng loại Thức uống • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+25'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm phô mai & lợi khuẩn hỗ trợ hấp thu`,
-                },
-                {
-                  id: '71',
-                  name: 'Chuối cau chín dầm sữa đặc dinh dưỡng',
-                  categoryLabel: 'Tráng miệng',
-                  calories: calo3,
-                  proteinG: 3.2,
-                  fatG: 3.5,
-                  carbG: 22.0,
-                  suitabilityReason: `✓ Cùng loại Tráng miệng • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+20'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Năng lượng tự nhiên & kali chống mệt mỏi`,
-                },
-              ];
-            }
-            // Mặc định hoặc Dị ứng (ALLERGIES / COMMON)
-            return [
-              {
-                id: '98',
-                name: 'Sâm bí đao hạt chia thanh mát',
-                categoryLabel: 'Thức uống',
-                calories: 50,
-                proteinG: 0.7,
-                fatG: 0.2,
-                carbG: 10.2,
-                suitabilityReason: '✓ Cùng loại Thức uống • Hoàn toàn không sữa bò, không lactose, không hạt • 100% an toàn dị ứng',
-              },
-              {
-                id: '97',
-                name: 'Nha đam hạt chia đường phèn',
-                categoryLabel: 'Thức uống',
-                calories: 65,
-                proteinG: 0.5,
-                fatG: 0.2,
-                carbG: 15.0,
-                suitabilityReason: '✓ Cùng loại Thức uống • Lành tính tuyệt đối, không có dị nguyên',
-              },
-              {
-                id: '95',
-                name: 'Nước cam tươi nguyên chất',
-                categoryLabel: 'Thức uống',
-                calories: 60,
-                proteinG: 1.2,
-                fatG: 0.2,
-                carbG: 14.5,
-                suitabilityReason: '✓ Cùng loại Thức uống • Vitamin C tự nhiên • An toàn 100% không dị ứng',
-              },
-            ];
-          }
-
-          // 4. Món Xế / Cháo / Súp / Bún (SNACK_MEAL)
-          if (currentCat.code === 'SNACK_MEAL') {
-            if (lockedType === 'OBESE') {
-              return [
-                {
-                  id: '84',
-                  name: 'Cháo thịt bằm, cải bó xôi, cà rốt',
-                  categoryLabel: 'Món Xế / Cháo',
-                  calories: 135,
-                  proteinG: 7.8,
-                  fatG: 2.2,
-                  carbG: 18.0,
-                  suitabilityReason: '✓ Cùng loại Món Xế • Thịt nạc, nhiều chất xơ, giảm béo TT 28',
-                },
-                {
-                  id: '89',
-                  name: 'Cháo thịt gà, nấm rơm, cà rốt',
-                  categoryLabel: 'Món Xế / Cháo',
-                  calories: 145,
-                  proteinG: 8.8,
-                  fatG: 2.5,
-                  carbG: 18.5,
-                  suitabilityReason: '✓ Cùng loại Món Xế • Ức gà nạc không da, thanh đạm',
-                },
-              ];
-            }
-            if (lockedType === 'STUNTED') {
-              const calo1 = stuntedCaloBonus(165, 35);
-              const calo2 = stuntedCaloBonus(155, 27);
-              const calo3 = stuntedCaloBonus(150, 22);
-              return [
-                {
-                  id: '77',
-                  name: 'Súp óc heo, gà xé, trứng cút, ngô ngọt',
-                  categoryLabel: 'Món Xế / Súp',
-                  calories: calo1,
-                  proteinG: 9.8,
-                  fatG: 5.5,
-                  carbG: 18.5,
-                  suitabilityReason: `✓ Cùng loại Món Xế • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+40'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Tăng 20% đạm sinh học cao & vi chất óc heo (QĐ 1246)`,
-                },
-                {
-                  id: '78',
-                  name: 'Bánh bao thịt cút trứng muối giàu năng lượng',
-                  categoryLabel: 'Món Xế',
-                  calories: calo2,
-                  proteinG: 8.5,
-                  fatG: 4.8,
-                  carbG: 22.0,
-                  suitabilityReason: `✓ Cùng loại Món Xế • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+30'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đậm độ năng lượng cao cho trẻ nhẹ cân`,
-                },
-                {
-                  id: '91',
-                  name: 'Cháo thịt bằm đậu xanh hạt sen hầm nhừ',
-                  categoryLabel: 'Món Xế / Cháo',
-                  calories: calo3,
-                  proteinG: 8.8,
-                  fatG: 4.2,
-                  carbG: 20.0,
-                  suitabilityReason: `✓ Cùng loại Món Xế • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+25'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Bổ sung đạm thực vật & động vật cân đối`,
-                },
-              ];
-            }
-            // Mặc định hoặc Dị ứng (ALLERGIES / COMMON)
-            return [
-              {
-                id: '89',
-                name: 'Cháo thịt gà, nấm rơm, cà rốt',
-                categoryLabel: 'Món Xế / Cháo',
-                calories: 145,
-                proteinG: 8.8,
-                fatG: 3.8,
-                carbG: 18.5,
-                suitabilityReason: '✓ Cùng loại Món Xế • Không hải sản, thịt gà nạc lành tính',
-              },
-              {
-                id: '84',
-                name: 'Cháo thịt bằm, cải bó xôi, cà rốt',
-                categoryLabel: 'Món Xế / Cháo',
-                calories: 135,
-                proteinG: 7.8,
-                fatG: 2.5,
-                carbG: 18.0,
-                suitabilityReason: '✓ Cùng loại Món Xế • Không hải sản, không dị nguyên',
-              },
-              {
-                id: '91',
-                name: 'Cháo thịt bằm đậu xanh',
-                categoryLabel: 'Món Xế / Cháo',
-                calories: 140,
-                proteinG: 8.2,
-                fatG: 3.5,
-                carbG: 19.0,
-                suitabilityReason: '✓ Cùng loại Món Xế • Lành tính cho mọi cơ địa trẻ dị ứng',
-              },
-            ];
-          }
-
-          // 5. Món Mặn Chính (MAIN)
-          if (lockedType === 'OBESE') {
-            return [
-              {
-                id: '16',
-                name: 'Thịt bò xào đậu que',
-                categoryLabel: 'Món Mặn Chính',
-                calories: 84,
-                proteinG: 8.8,
-                fatG: 4.4,
-                carbG: 2.8,
-                suitabilityReason: '✓ Cùng loại Món Mặn • Giảm 50% chất béo so với món chiên rán • Kiểm soát cân nặng TT 28',
-              },
-              {
-                id: '20',
-                name: 'Thịt bò xào khóm',
-                categoryLabel: 'Món Mặn Chính',
-                calories: 80,
-                proteinG: 8.4,
-                fatG: 4.3,
-                carbG: 1.8,
-                suitabilityReason: '✓ Cùng loại Món Mặn • Vị chua ngọt thanh nhẹ • Rất ít chất béo',
-              },
-              {
-                id: '10',
-                name: 'Thịt heo ram mặn cà rốt',
-                categoryLabel: 'Món Mặn Chính',
-                calories: 125,
-                proteinG: 9.8,
-                fatG: 7.2,
-                carbG: 1.5,
-                suitabilityReason: '✓ Cùng loại Món Mặn • Thịt nạc lọc mỡ, bổ sung carotene',
-              },
-            ];
-          }
-          if (lockedType === 'STUNTED') {
-            const calo1 = stuntedCaloBonus(158, 25);
-            const calo2 = stuntedCaloBonus(150, 20);
-            const calo3 = stuntedCaloBonus(145, 18);
-            return [
-              {
-                id: '22',
-                name: 'Sườn cốt lết khìa nước dừa',
-                categoryLabel: 'Món Mặn Chính',
-                calories: calo1,
-                proteinG: 12.0,
-                fatG: 8.5,
-                carbG: 3.0,
-                suitabilityReason: `✓ Cùng loại Món Mặn • Tăng ${Math.round(calo1 - currentCalo) > 0 ? '+' + Math.round(calo1 - currentCalo) : '+30'} Kcal (+${Math.round(((calo1 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm sinh học cao & năng lượng phục hồi (QĐ 1246)`,
-              },
-              {
-                id: '15',
-                name: 'Thịt sườn heo khìa nước dừa',
-                categoryLabel: 'Món Mặn Chính',
-                calories: calo2,
-                proteinG: 11.0,
-                fatG: 8.8,
-                carbG: 2.2,
-                suitabilityReason: `✓ Cùng loại Món Mặn • Tăng ${Math.round(calo2 - currentCalo) > 0 ? '+' + Math.round(calo2 - currentCalo) : '+25'} Kcal (+${Math.round(((calo2 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Giàu năng lượng & vi chất cho trẻ nhẹ cân`,
-              },
-              {
-                id: '17',
-                name: 'Thịt kho trứng cút đậm đà bồi bổ',
-                categoryLabel: 'Món Mặn Chính',
-                calories: calo3,
-                proteinG: 10.8,
-                fatG: 8.5,
-                carbG: 2.5,
-                suitabilityReason: `✓ Cùng loại Món Mặn • Tăng ${Math.round(calo3 - currentCalo) > 0 ? '+' + Math.round(calo3 - currentCalo) : '+20'} Kcal (+${Math.round(((calo3 - currentCalo) / (currentCalo || 1)) * 100)}% Calo) • Đạm trứng & thịt sinh học cao, dễ hấp thu`,
-              },
-            ];
-          }
-          // Mặc định hoặc Dị ứng (ALLERGIES / COMMON)
-          return [
-            {
-              id: '10',
-              name: 'Thịt heo ram mặn cà rốt',
-              categoryLabel: 'Món Mặn Chính',
-              calories: 125,
-              proteinG: 9.8,
-              fatG: 7.2,
-              carbG: 1.5,
-              suitabilityReason: '✓ Cùng loại Món Mặn • 100% không tôm/cua/hải sản, không trứng • Đạm tương đương',
-            },
-            {
-              id: '16',
-              name: 'Thịt bò xào đậu que',
-              categoryLabel: 'Món Mặn Chính',
-              calories: 84,
-              proteinG: 8.8,
-              fatG: 4.4,
-              carbG: 2.8,
-              suitabilityReason: '✓ Cùng loại Món Mặn • Giàu sắt, kẽm • Hoàn toàn không dị nguyên',
-            },
-            {
-              id: '6',
-              name: 'Thịt gà rô ti',
-              categoryLabel: 'Món Mặn Chính',
-              calories: 124,
-              proteinG: 9.6,
-              fatG: 8.9,
-              carbG: 1.4,
-              suitabilityReason: '✓ Cùng loại Món Mặn • Đạm sạch lành tính, an toàn tuyệt đối',
-            },
-          ];
-        };const candidates = getCandidateSubstitutes();
-        const activeSub = selectedSubDish || candidates[0];
+        const candidates = buildSubstituteCandidates(substituteCatalog, universalModalDish.menuDish, lockedType);
+        const activeSub = candidates.find(dish => dish.id === selectedSubDish?.id) || candidates[0];
 
         const handleConfirmSubstitute = async () => {
-          if (!activeSub) return;
+          if (!activeSub || substituteLoading || isApplyingSub || readOnly || !menu?.id) return;
           try {
             setIsApplyingSub(true);
             const generatedNote = `[${
@@ -2682,13 +2166,15 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                 : 'Món Chung'
             }] Thay cho: ${universalModalDish.menuDish.dish?.name || 'Món gốc'} -> Đổi sang: ${activeSub.name} (${activeSub.calories} Kcal). ${substituteStaffNote || 'Nấu suất riêng theo chuẩn dinh dưỡng.'}`;
 
-            const targetDishId = Number(activeSub.id) || 1;
+            const targetDishId = Number(activeSub.id);
+            if (!Number.isSafeInteger(targetDishId) || targetDishId <= 0) throw new Error('Vui lòng tải lại danh mục món ăn.');
             const originDishId = Number(universalModalDish.menuDish.dishId) || undefined;
             const currentDayOfWeek = Number(universalModalDish.menuDish.dayOfWeek) || 2;
             const currentMealTime = universalModalDish.menuDish.mealTime || 'LUNCH';
             const currentPortion = Number(universalModalDish.menuDish.portionSizeG) || 100;
 
             const payload = {
+              menuDishId: Number(universalModalDish.menuDish.id),
               dayOfWeek: currentDayOfWeek,
               mealType: currentMealTime,
               mealTime: currentMealTime,
@@ -2900,6 +2386,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 )}
 
+                {activeSub && <>
                 {/* 3. BẢNG SO SÁNH DINH DƯỠNG: MÓN GỐC vs MÓN THAY THẾ ĐÃ CHỌN */}
                 <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
                   <div className="flex items-center justify-between mb-2">
@@ -2941,6 +2428,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 </div>
 
+                </>}
                 {/* 3.1. LỰA CHỌN PHƯƠNG THỨC ĐỔI MÓN: THAY THẾ TOÀN BỘ vs SUẤT RIÊNG */}
                 <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
                   <span className="text-xs font-black text-slate-800 uppercase tracking-wide block mb-2">
@@ -3000,8 +2488,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </label>
                   
                   <div className="space-y-2">
+                    {substituteLoading && <p role="status" className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Đang tải món thay thế…</p>}
+                    {substituteError && <p role="alert" className="rounded-xl bg-rose-50 p-4 text-sm text-rose-700">{substituteError}</p>}
+                    {!substituteLoading && !substituteError && !candidates.length && <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Chưa có món thay thế cùng nhóm đủ dữ liệu trong danh mục hiện tại.</p>}
                     {candidates.map((dish) => {
-                      const isSelected = activeSub.name === dish.name;
+                      const isSelected = activeSub?.id === dish.id;
                       return (
                         <div
                           key={dish.id}
@@ -3071,7 +2562,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </button>
                   <button
                     type="button"
-                    disabled={isApplyingSub}
+                    disabled={isApplyingSub || substituteLoading || !activeSub || readOnly}
                     onClick={handleConfirmSubstitute}
                     className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer hover:scale-102 active:scale-98"
                   >

@@ -140,6 +140,7 @@ export interface CreateMenuPayload {
 }
 
 export interface AdjustDishPayload {
+  menuDishId?: number;
   dayOfWeek: number;
   mealTime?: string;
   mealType?: string;
@@ -149,6 +150,7 @@ export interface AdjustDishPayload {
   substituteDishId?: string | number;
   portionSizeG?: number;
   specialDietNotes?: string;
+  keepOriginalDish?: boolean;
 }
 
 export interface ImportExcelPayload {
@@ -292,6 +294,11 @@ export const weeklyMenusApi = {
     if (Array.isArray(raw?.items)) return raw.items;
     if (Array.isArray(raw?.data)) return raw.data;
     return [];
+  },
+
+  async getSubstituteCandidates(menuId: string, menuDishId: string): Promise<DishItem[]> {
+    const res = await apiClient.get(`/menus/${menuId}/dishes/${menuDishId}/substitute-candidates`);
+    return Array.isArray(res.data) ? res.data : [];
   },
 
   // 4. Chi tiết thực đơn tuần

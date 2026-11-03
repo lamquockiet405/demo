@@ -121,6 +121,8 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
       }
 
       await onSubmit({
+        menuDishId: initialSlot?.existingDish ? Number(initialSlot.existingDish.id) : undefined,
+        oldDishId: initialSlot?.existingDish ? Number(initialSlot.existingDish.dishId) : undefined,
         dayOfWeek,
         mealTime,
         dishId: selectedDishId,

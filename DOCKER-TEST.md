@@ -1,5 +1,9 @@
 # Docker test với database mới nhất từ kiet
 
+Sửa lỗi đổi món theo nhóm trẻ ngày 03/11/2026: giữ bố cục, nhãn nhóm và hai chế độ đổi món hiện có. Hộp chọn dùng ID/tên/dinh dưỡng của món trong database thay cho danh sách ID mẫu viết sẵn; đối chiếu các dị ứng đang áp dụng của trẻ bị ảnh hưởng. Mỗi yêu cầu kèm ID ô món gốc để cập nhật đúng bữa trong phiên bản hiện tại. Backend kiểm tra món tồn tại/đang áp dụng, không mặc định về món ID 1, và lưu món thay thế trước khi xóa món gốc trong cùng transaction. Món không tồn tại hoặc ô món đã thay đổi trả lỗi rõ ràng, không làm mất món gốc.
+
+Kiểm tra đổi món: 37 unit test backend liên quan và 4 test chọn món phía frontend pass; kiểm tra 99 liên kết tĩnh pass. `node scripts/verify-menu-substitution-docker.cjs` tạo thực đơn thử riêng, kiểm tra cả ALLERGIES/OBESE/STUNTED/COMMON với hai chế độ suất riêng và thay toàn bộ, đối chiếu tên/ID đã lưu với database, kiểm tra mã không tồn tại/món gốc bị thay đổi và dọn sạch 4 thực đơn thử. Không có tham chiếu món mồ côi. Frontend/backend build thành công; không thay đổi thực đơn đang sử dụng để thử nghiệm.
+
 Dọn giao diện ngày 03/11/2026: bỏ 61 file giao diện cũ và phần hỗ trợ không còn được gọi, gồm các bản sao điểm danh/đánh giá/ăn xế, các trang độc lập chưa được gắn route và hai header trùng. Bỏ thanh chuyển cổng nổi, menu trùng, menu dẫn tới chức năng chưa được đăng ký và các nút thông báo/tin nhắn/tìm kiếm minh họa trên header. Nút đăng xuất được đặt trong các cổng đang dùng; giáo viên dùng chung một header và các tab điểm danh hiện có.
 
 Các trang ý kiến phụ huynh, tổng quan suất ăn và phục vụ ăn xế của BGH được gắn trực tiếp vào router, thay cho điều kiện pathname trong layout. `/tablet/record` chuyển về tab đánh giá hiện có; các liên kết ghi chú điều phối đi qua `/tablet?tab=notes`. Các alias cũ vẫn được giữ khi có trang đích phù hợp.
