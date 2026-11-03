@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { isJwtExpired, getJwtRemainingTimeMs } from '../utils/jwt';
+import { fetchCurrentUser } from '../api/auth.api';
 
 /**
  * Auth User — dữ liệu user nhận từ API login response.
@@ -44,6 +45,8 @@ interface AuthState {
   logout: () => void;
   /** Hydrate từ localStorage khi app khởi động */
   hydrate: () => void;
+  /** Refresh display fields from the server while preserving login role aliases. */
+  refreshProfile: () => Promise<void>;
 }
 
 let autoLogoutTimer: any = null;
@@ -143,12 +146,27 @@ const initialState = getInitialAuthState();
  * Zustand Auth Store — Quản lý trạng thái xác thực.
  * Tự động tính toán thời hạn Access Token và tự động đăng xuất về /home khi hết hạn.
  */
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: initialState.user,
   accessToken: initialState.accessToken,
   refreshToken: initialState.refreshToken,
   selectedTenantId: initialState.selectedTenantId,
   isAuthenticated: initialState.isAuthenticated,
+
+  refreshProfile: async () => {
+    const startedForUser = get().user;
+    if (!startedForUser || !get().accessToken) return;
+    try {
+      const profile = await fetchCurrentUser();
+      const current = get().user;
+      if (!current || current.id !== startedForUser.id || String(profile.id) !== current.id) return;
+      const updated = { ...current, fullName: profile.fullName, phone: profile.phone, avatarUrl: profile.avatarUrl };
+      localStorage.setItem('auth_user', JSON.stringify(updated));
+      set({ user: updated });
+    } catch {
+      // Keep the existing session when a profile refresh is temporarily unavailable.
+    }
+  },
 
   setAuth: (user, accessToken, refreshToken) => {
     // Persist vào localStorage

@@ -23,7 +23,7 @@ import { DishSpacingRule } from '../../nutrition-engine/entities/dish-spacing-ru
 import { NutritionIntakeStandard } from '../../nutrition-engine/entities/nutrition-intake-standard.entity';
 import { isFriedRice, isFriday, validateLunchRice } from './lunch-rice-policy';
 
-// â”€â”€ Helper: Fisher-Yates shuffle for true randomness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helper: Fisher-Yates shuffle for true randomness ───────────────────────
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -33,7 +33,7 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-// â”€â”€ Interfaces for structured daily nutrition â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Interfaces for structured daily nutrition ──────────────────────────────
 export interface DishWithNutrition {
   id: number;
   name: string;
@@ -303,7 +303,7 @@ export class MenusService implements OnModuleInit {
       id: String(d.id),
       name: d.name,
       categoryCode: d.category?.code || 'MAIN',
-      categoryName: d.category?.name || 'MÃ³n Äƒn',
+      categoryName: d.category?.name || 'Món ăn',
       nutritionAvailable: hasVerifiedNutrition(d),
       ...getPortionNutrition(d),
     }));
@@ -462,9 +462,9 @@ export class MenusService implements OnModuleInit {
           menuId: String(menuId),
           version: 1,
           versionNumber: 1,
-          changeNote: 'PhiÃªn báº£n gá»‘c',
+          changeNote: 'Phiên bản gốc',
           createdAt: new Date().toISOString(),
-          createdByName: 'ChuyÃªn viÃªn Dinh dÆ°á»¡ng',
+          createdByName: 'Chuyên viên Dinh dưỡng',
         },
       ];
     }
@@ -474,9 +474,9 @@ export class MenusService implements OnModuleInit {
       menuId: String(v.menuId),
       version: v.versionNumber,
       versionNumber: v.versionNumber,
-      changeNote: v.changeNote || 'Khá»Ÿi táº¡o thá»±c Ä‘Æ¡n tuáº§n',
+      changeNote: v.changeNote || 'Khởi tạo thực đơn tuần',
       createdAt: v.createdAt ? v.createdAt.toISOString() : new Date().toISOString(),
-      createdByName: v.creator?.fullName || 'ChuyÃªn viÃªn Dinh dÆ°á»¡ng',
+      createdByName: v.creator?.fullName || 'Chuyên viên Dinh dưỡng',
     }));
   }
 
@@ -666,7 +666,7 @@ export class MenusService implements OnModuleInit {
       menuId: savedMenu.id,
       versionNumber: 1,
       createdBy: userId || 3,
-      changeNote: 'Khá»Ÿi táº¡o thá»±c Ä‘Æ¡n tuáº§n',
+      changeNote: 'Khởi tạo thực đơn tuần',
     });
     const savedVersion = await this.versionRepo.save(version);
 
@@ -701,7 +701,7 @@ export class MenusService implements OnModuleInit {
 
   async update(id: number, dto: UpdateMenuDto) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n');
+    if (!menu) throw new NotFoundException('Không tìm thấy thực đơn');
 
     if (dto.title) menu.title = dto.title;
     if (dto.weekStartDate) menu.weekStartDate = dto.weekStartDate;
@@ -1050,16 +1050,16 @@ export class MenusService implements OnModuleInit {
       menuId: id,
       versionNumber: nextVersion,
       createdBy: userId || 3,
-      changeNote: `PhiÃªn báº£n v${nextVersion}.0`,
+      changeNote: `Phiên bản v${nextVersion}.0`,
     });
     await this.versionRepo.save(newVersion);
     return this.findOne(id);
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ════════════════════════════════════════════════════════════════════════════
   // AUTO-GENERATE: Constrained Nutrition-Aware Menu Generation
-  // ThÃ´ng tÆ° 28/2016/TT-BGDÄT compliant
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // Thông tư 28/2016/TT-BGDĐT compliant
+  // ════════════════════════════════════════════════════════════════════════════
 
   async autoGenerate(dto: AutoGenerateMenuDto, userId?: number) {
     const rawAge = dto.ageGroup || dto.targetAgeGroup || 'MAU_GIAO';
@@ -1074,14 +1074,14 @@ export class MenusService implements OnModuleInit {
       weekEndDate = d.toISOString().split('T')[0];
     }
 
-    const title = dto.title || `Thá»±c Ä‘Æ¡n BÃ¡n trÃº Tuáº§n ${dto.cycleWeekNumber || 1} (${ageGroup === 'MAU_GIAO' ? 'Máº«u giÃ¡o' : 'NhÃ  tráº»'})`;
+    const title = dto.title || `Thực đơn Bán trú Tuần ${dto.cycleWeekNumber || 1} (${ageGroup === 'MAU_GIAO' ? 'Mẫu giáo' : 'Nhà trẻ'})`;
 
-    // â”€â”€ Step 1: Load nutritional standards from DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Step 1: Load nutritional standards from DB ──────────────────────────
     const standard = await this.standardRepo.findOne({
       where: { ageGroup, mealScope: 'DAYBOARDING', status: 'ACTIVE' },
     });
 
-    // Fallback defaults matching ThÃ´ng tÆ° 28 if DB lookup fails
+    // Fallback defaults matching Thông tư 28 if DB lookup fails
     const minKcal = standard?.minEnergyKcal || (ageGroup === 'NHA_TRE' ? 600 : 615);
     const maxKcal = standard?.maxEnergyKcal || (ageGroup === 'NHA_TRE' ? 735 : 726);
     const minProtPct = standard?.minProteinPct || 13;
@@ -1091,9 +1091,9 @@ export class MenusService implements OnModuleInit {
     const minCarbPct = standard?.minCarbPct || (ageGroup === 'NHA_TRE' ? 47 : 52);
     const maxCarbPct = standard?.maxCarbPct || (ageGroup === 'NHA_TRE' ? 57 : 60);
 
-    this.logger.log(`ðŸ“‹ Chuáº©n dinh dÆ°á»¡ng ${ageGroup} DAYBOARDING: ${minKcal}â€“${maxKcal} Kcal, P:${minProtPct}â€“${maxProtPct}%, L:${minFatPct}â€“${maxFatPct}%, G:${minCarbPct}â€“${maxCarbPct}%`);
+    this.logger.log(`📋 Chuẩn dinh dưỡng ${ageGroup} DAYBOARDING: ${minKcal}–${maxKcal} Kcal, P:${minProtPct}–${maxProtPct}%, L:${minFatPct}–${maxFatPct}%, G:${minCarbPct}–${maxCarbPct}%`);
 
-    // â”€â”€ Step 2: Load all dishes with nutrition data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Step 2: Load all dishes with nutrition data ─────────────────────────
     const allDishes = await this.dishRepo.find({
       relations: ['category', 'nutrition'],
       where: { status: 'ACTIVE' },
@@ -1118,7 +1118,7 @@ export class MenusService implements OnModuleInit {
         id: d.id,
         name: d.name,
         categoryCode: code,
-        categoryName: d.category?.name || 'MÃ³n Äƒn',
+        categoryName: d.category?.name || 'Món ăn',
         energyKcal: Number(d.nutrition?.energyKcal) || 0,
         proteinG: Number(d.nutrition?.proteinG) || 0,
         fatG: Number(d.nutrition?.fatG) || 0,

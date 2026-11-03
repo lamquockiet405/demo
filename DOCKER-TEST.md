@@ -1,5 +1,9 @@
 # Docker test với database mới nhất từ kiet
 
+Sửa mã hóa tiếng Việt ngày 03/11/2026: đã sao lưu và sửa 525 bản ghi hiển thị, gồm tên người dùng/học sinh/lớp, tên trường, thực đơn, thông báo, bản dịch, địa chỉ và ghi chú. Các chuỗi như `L├¬ Ho├ái Nam` được khôi phục thành `Lê Hoài Nam`. Các cột mật khẩu, token, email, URL và bản lưu trữ nguồn được giữ nguyên. Frontend làm mới thông tin tên/hồ sơ từ API khi tải trang, giữ các role alias và phiên đăng nhập.
+
+Chạy `node scripts/repair-vietnamese.cjs` để rà soát, không ghi dữ liệu; thêm `--apply` để sao lưu database Docker test và áp dụng sửa mã hóa theo transaction, kèm kiểm tra chống ghi đè thay đổi đồng thời. Script chỉ kết nối database test cục bộ trên cổng 55432. Sau sửa, lượt rà soát trả 0 bản ghi và 0 file nguồn cần sửa. 25 test công cụ/profile/encoding pass; API đăng nhập, hồ sơ, trường, lớp, thực đơn, phụ huynh và món ăn đã kiểm tra trả tiếng Việt đúng.
+
 Quy tắc bữa trưa bổ sung ngày 03/11/2026: thứ Hai–thứ Năm có cơm thường và món mặn; thứ Sáu có cơm chiên Dương Châu/hải sản và không có món mặn riêng. Quy tắc áp dụng cho thực đơn tạo tự động mới, cả xem trước và lưu. Thiếu loại cơm đủ dữ liệu thì báo lỗi rõ ràng. Cơm thường được phép lặp lại giữa các ngày.
 
 Migration `20261103-lunch-rice-recipes.sql` phục hồi ba công thức tham khảo từ định lượng seed lưu trữ: cơm thường, một món Dương Châu và một món cơm chiên hải sản. Không thay đổi công thức đã tồn tại. Nguồn, ID công thức cũ và trạng thái tham khảo được lưu trong metadata; đây không phải định lượng bếp mới được đo/xác minh. Chạy `node scripts/prepare-lunch-rice.cjs` để sinh lại migration. Image database mới nạp migration này ở bước 07; volume hiện tại đã áp dụng sau khi sao lưu. Các thực đơn đã lưu trước thay đổi cần tạo lại để áp dụng quy tắc mới.

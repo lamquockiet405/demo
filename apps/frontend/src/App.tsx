@@ -101,11 +101,12 @@ const HomeOrPortalRedirect: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-  const { hydrate, isAuthenticated, logout, user } = useAuthStore();
+  const { hydrate, refreshProfile, isAuthenticated, logout, user } = useAuthStore();
 
   // Hydrate auth state từ localStorage 1 lần khi app mount & kiểm tra token hết hạn
   useEffect(() => {
     hydrate();
+    void refreshProfile();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const roles = user?.roles || [];
