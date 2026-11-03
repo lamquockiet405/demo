@@ -21,31 +21,120 @@ export class FoodsService {
       .createQueryBuilder('f')
       .leftJoinAndSelect('f.category', 'cat');
 
-    if (query.search) {
-      qb.andWhere('LOWER(f.name) LIKE :search', { search: `%${query.search.toLowerCase()}%` });
+    // 1. Tìm kiếm theo tên hoặc mã nguyên liệu (NL-x hoặc x)
+    if (query.search && query.search.trim()) {
+      const raw = query.search.trim();
+      const term = `%${raw.toLowerCase()}%`;
+      const idMatch = raw.replace(/^nl-?/i, '');
+      const numId = Number(idMatch);
+      if (!isNaN(numId) && numId > 0) {
+        qb.andWhere('(LOWER(f.name) LIKE :term OR f.id = :numId)', { term, numId });
+      } else {
+        qb.andWhere('LOWER(f.name) LIKE :term', { term });
+      }
     }
 
-    if (query.categoryId) {
-      qb.andWhere('f.categoryId = :catId', { catId: query.categoryId });
+    // 2. Lọc theo nhóm nguyên liệu (hỗ trợ categoryId hoặc category)
+    const targetCatId =
+      query.categoryId ||
+      (query.category && !isNaN(Number(query.category)) ? Number(query.category) : undefined);
+
+    if (targetCatId) {
+      qb.andWhere('f.categoryId = :catId', { catId: targetCatId });
+    } else if (query.category && typeof query.category === 'string' && query.category.trim()) {
+      qb.andWhere('(LOWER(cat.name) LIKE :catName)', {
+        catName: `%${query.category.toLowerCase().trim()}%`,
+      });
+    }
+
+    // 3. Lọc theo trạng thái dị ứng (SAFE: an toàn, WARNING: có nguy cơ dị ứng)
+    const allergenRegex =
+      'tôm|cua|mực|ghẹ|ốc|sò|hàu|tép|sữa|trứng|lạc|đậu phộng|đậu nành|bột mì|lúa mì|hạt điều|hạnh nhân|vừng|([[:space:]]|^)cá([[:space:]]|$)|([[:space:]]|^)mè([[:space:]]|$)';
+
+    if (query.allergen === 'WARNING') {
+      qb.andWhere('(f.categoryId IN (3, 8, 9, 10) OR f.name ~* :allergenRegex)', {
+        allergenRegex,
+      });
+    } else if (query.allergen === 'SAFE') {
+      qb.andWhere('(f.categoryId NOT IN (3, 8, 9, 10) AND f.name !~* :allergenRegex)', {
+        allergenRegex,
+      });
+    }
+
+    // 4. Lọc theo tiêu chí dinh dưỡng
+    if (query.nutrition === 'HIGH_PROTEIN') {
+      qb.andWhere('f.proteinG >= 15');
+    } else if (query.nutrition === 'HIGH_CARB') {
+      qb.andWhere('f.carbG >= 40');
+    } else if (query.nutrition === 'HIGH_CALORIES') {
+      qb.andWhere('f.energyKcal100g >= 250');
     }
 
     if (query.status) {
       qb.andWhere('f.status = :status', { status: query.status });
     }
 
-    const page = query.page || 1;
-    const limit = query.limit || 50;
+    const page = Math.max(1, query.page || 1);
+    const limit = Math.max(1, query.limit || 50);
     qb.skip((page - 1) * limit).take(limit);
     qb.orderBy('f.id', 'ASC');
 
     const [items, total] = await qb.getManyAndCount();
 
-    const mapped = items.map((f) => ({
-      ...f,
-      id: String(f.id),
-      categoryId: f.categoryId ? String(f.categoryId) : null,
-      categoryName: f.category?.name || 'Khác',
-    }));
+    const mapped = items.map((f) => {
+      const detectedAllergens: Array<{ id: string; name: string }> = [];
+      const lowerName = (f.name || '').toLowerCase();
+      const catId = Number(f.categoryId);
+
+      const isFish = /(^|[\s,./\-])cá([\s,./\-]|$)/i.test(lowerName);
+      const isSesame = /(^|[\s,./\-])mè([\s,./\-]|$)/i.test(lowerName);
+
+      if (
+        catId === 8 ||
+        lowerName.includes('tôm') ||
+        lowerName.includes('cua') ||
+        isFish ||
+        lowerName.includes('mực') ||
+        lowerName.includes('ốc') ||
+        lowerName.includes('hàu') ||
+        lowerName.includes('sò') ||
+        lowerName.includes('ghẹ') ||
+        lowerName.includes('tép')
+      ) {
+        detectedAllergens.push({ id: 'SEAFOOD', name: 'Hải sản / Thủy sản' });
+      }
+      if (catId === 9 || lowerName.includes('trứng')) {
+        detectedAllergens.push({ id: 'EGG', name: 'Trứng' });
+      }
+      if (catId === 10 || lowerName.includes('sữa')) {
+        detectedAllergens.push({ id: 'MILK', name: 'Sữa & Chế phẩm' });
+      }
+      if (
+        catId === 3 ||
+        lowerName.includes('lạc') ||
+        lowerName.includes('đậu phộng') ||
+        lowerName.includes('đậu nành') ||
+        lowerName.includes('hạt điều') ||
+        lowerName.includes('hạnh nhân') ||
+        isSesame ||
+        lowerName.includes('vừng')
+      ) {
+        detectedAllergens.push({ id: 'PEANUT_NUTS', name: 'Đậu hạt / Lạc' });
+      }
+      if (lowerName.includes('bột mì') || lowerName.includes('lúa mì')) {
+        detectedAllergens.push({ id: 'GLUTEN', name: 'Gluten / Lúa mì' });
+      }
+
+      return {
+        ...f,
+        id: String(f.id),
+        code: `NL-${f.id}`,
+        categoryId: f.categoryId ? String(f.categoryId) : null,
+        categoryName: f.category?.name || 'Khác',
+        energyKcal: Number(f.energyKcal100g || 0),
+        allergens: detectedAllergens,
+      };
+    });
 
     return { items: mapped, total, page, limit };
   }
@@ -55,14 +144,22 @@ export class FoodsService {
     const active = await this.foodRepo.count({ where: { status: 'ACTIVE' } });
     const categoriesCount = await this.catRepo.count();
 
+    const allergenCount = await this.foodRepo
+      .createQueryBuilder('f')
+      .where('(f.categoryId IN (3, 8, 9, 10) OR f.name ~* :allergenRegex)', {
+        allergenRegex:
+          'tôm|cua|cá|mực|ghẹ|ốc|sò|hàu|tép|sữa|trứng|lạc|đậu phộng|đậu nành|mè|vừng|bột mì|lúa mì|hạt điều|hạnh nhân',
+      })
+      .getCount();
+
     return {
       totalFoods: total,
       totalIngredients: total,
       activeFoods: active,
       categoryCount: categoriesCount,
       categoriesCount,
-      allergenCount: 8,
-      updatedThisWeekCount: 3,
+      allergenCount,
+      updatedThisWeekCount: total,
     };
   }
 

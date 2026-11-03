@@ -27,6 +27,12 @@ export class InspectionRecord {
   @Column({ length: 20, default: 'PASS' })
   result: string;
 
+  @Column({ name: 'meal_session', length: 50, nullable: true, default: 'LUNCH' })
+  mealSession: string;
+
+  @Column({ name: 'session_code', length: 50, nullable: true })
+  sessionCode: string;
+
   @Column({ type: 'text', nullable: true })
   note: string;
 
@@ -36,4 +42,5 @@ export class InspectionRecord {
 
   @OneToMany(() => InspectionImage, (img) => img.inspection)
   images?: InspectionImage[];
+
 }

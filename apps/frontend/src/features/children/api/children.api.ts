@@ -53,14 +53,15 @@ export interface ChildrenStats {
 }
 
 export interface CreateChildDto {
-  classId?: string;
-  studentCode: string;
-  firstName: string;
-  lastName: string;
+  classId?: string | number;
+  studentCode?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   dateOfBirth: string;
   gender: 'MALE' | 'FEMALE';
-  emergencyContactName: string;
-  emergencyContactPhone: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
   medicalNotes?: string;
 }
 
@@ -104,7 +105,36 @@ export const childrenApi = {
   },
 
   createChild: async (dto: CreateChildDto): Promise<ChildItem> => {
-    const res = await apiClient.post<ChildItem>('/children', dto);
+    const fullName =
+      dto.fullName?.trim() ||
+      `${dto.lastName || ''} ${dto.firstName || ''}`.trim();
+
+    const payload = {
+      ...dto,
+      fullName,
+      studentCode: dto.studentCode?.trim() || undefined,
+      classId: dto.classId && String(dto.classId).trim() !== '' ? Number(dto.classId) : undefined,
+    };
+
+    const res = await apiClient.post<ChildItem>('/children', payload);
+    return res.data;
+  },
+
+  updateChild: async (id: string | number, dto: Partial<CreateChildDto>): Promise<ChildItem> => {
+    const fullName =
+      dto.fullName !== undefined
+        ? dto.fullName.trim()
+        : dto.lastName !== undefined || dto.firstName !== undefined
+        ? `${dto.lastName || ''} ${dto.firstName || ''}`.trim()
+        : undefined;
+
+    const payload = {
+      ...dto,
+      fullName,
+      classId: dto.classId && String(dto.classId).trim() !== '' ? Number(dto.classId) : undefined,
+    };
+
+    const res = await apiClient.patch<ChildItem>(`/children/${id}`, payload);
     return res.data;
   },
 

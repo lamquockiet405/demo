@@ -103,6 +103,7 @@ export const attendanceApi = {
     classId: string;
     date: string;
     notes?: string;
+    isLocked?: boolean;
   }) => {
     const res = await apiClient.post('/attendance/lock-kitchen', data);
     return res.data;
@@ -260,27 +261,27 @@ export const attendanceApi = {
   // =========================================================================
 
   getFoodSafetyLogs: async () => {
-    const res = await apiClient.get('/attendance/food-safety-logs');
+    const res = await apiClient.get('/inspections');
     return res.data;
   },
 
   createFoodSafetyLog: async (data: any) => {
-    const res = await apiClient.post('/attendance/food-safety-logs', data);
+    const res = await apiClient.post('/inspections/step1', data);
     return res.data;
   },
 
   getSampleRetentionRecords: async () => {
-    const res = await apiClient.get('/attendance/sample-retention-records');
+    const res = await apiClient.get('/inspections/samples');
     return res.data;
   },
 
   createSampleRetentionRecord: async (data: any) => {
-    const res = await apiClient.post('/attendance/sample-retention-records', data);
+    const res = await apiClient.post('/inspections/samples', data);
     return res.data;
   },
 
   disposeSampleRetentionRecord: async (id: string) => {
-    const res = await apiClient.post(`/attendance/sample-retention-records/${id}/dispose`);
+    const res = await apiClient.patch(`/inspections/samples/${id}/dispose`);
     return res.data;
   },
 };

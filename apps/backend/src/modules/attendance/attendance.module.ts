@@ -9,6 +9,7 @@ import { SnackServicePeriod } from '../snack-services/entities/snack-service-per
 import { AttendanceService } from './services/attendance.service';
 import { MealCoordinationService } from './services/meal-coordination.service';
 import { SnackRosterService } from './services/snack-roster.service';
+import { AttendanceHistoryService } from './services/attendance-history.service';
 import { AttendanceController } from './attendance.controller';
 
 @Module({
@@ -27,7 +28,14 @@ import { AttendanceController } from './attendance.controller';
     AttendanceService,
     MealCoordinationService,
     SnackRosterService,
+    AttendanceHistoryService,
   ],
-  exports: [AttendanceService, MealCoordinationService, SnackRosterService, TypeOrmModule],
+  exports: [
+    AttendanceService,
+    MealCoordinationService,
+    SnackRosterService,
+    AttendanceHistoryService,
+    TypeOrmModule,
+  ],
 })
 export class AttendanceModule {}

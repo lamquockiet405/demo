@@ -117,15 +117,15 @@ export const AttendanceBottomSections: React.FC<AttendanceBottomSectionsProps> =
 
           <button
             onClick={onLockKitchen}
-            disabled={isLocking || kitchen.isLocked}
+            disabled={isLocking}
             className={`flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-black text-xs text-white shadow-lg active:scale-95 transition ${
               kitchen.isLocked
-                ? 'bg-slate-400 cursor-not-allowed'
-                : 'bg-teal-800 hover:bg-teal-900 ring-2 ring-teal-700/30'
+                ? 'bg-amber-600 hover:bg-amber-700 ring-2 ring-amber-500/30 cursor-pointer'
+                : 'bg-teal-800 hover:bg-teal-900 ring-2 ring-teal-700/30 cursor-pointer'
             }`}
           >
             <Lock className="w-4 h-4" />
-            <span>{kitchen.isLocked ? 'Danh sách đã được Khóa' : 'Xác nhận & Khóa danh sách gửi Bếp'}</span>
+            <span>{kitchen.isLocked ? '✓ Đã khóa gửi Bếp (Bấm để Mở khóa điều chỉnh)' : 'Xác nhận & Khóa danh sách gửi Bếp'}</span>
           </button>
         </div>
       </div>

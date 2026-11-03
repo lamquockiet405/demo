@@ -33,10 +33,10 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
   onSortByChange,
   stats,
 }) => {
-  const total = stats?.totalCount ?? 418;
-  const pending = stats?.pendingCount ?? 3;
-  const responded = stats?.respondedCount ?? 415;
-  const photos = stats?.photosCount ?? 68;
+  const total = stats?.totalCount ?? 0;
+  const pending = stats?.pendingCount ?? 0;
+  const responded = stats?.respondedCount ?? 0;
+  const photos = stats?.photosCount ?? 0;
 
   return (
     <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3.5">
@@ -172,18 +172,13 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
               onChange={(e) => onClassChange(e.target.value)}
               className="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer"
             >
-              <option value="ALL">Tất cả các khối</option>
-              <option value="Lớp Mầm 1">Lớp Mầm 1</option>
-              <option value="Lớp Mầm 2">Lớp Mầm 2</option>
-              <option value="Lớp Mầm 3">Lớp Mầm 3</option>
-              <option value="Lớp Chồi 1">Lớp Chồi 1</option>
-              <option value="Lớp Chồi 2">Lớp Chồi 2</option>
-              <option value="Lớp Chồi 3">Lớp Chồi 3</option>
-              <option value="Lớp Lá 1">Lớp Lá 1</option>
-              <option value="Lớp Lá 2">Lớp Lá 2</option>
-              <option value="Lớp Lá 3">Lớp Lá 3</option>
-              <option value="Nhà Trẻ 1">Nhà Trẻ 1</option>
-              <option value="Nhà Trẻ 2">Nhà Trẻ 2</option>
+              <option value="ALL">Tất cả các lớp</option>
+              <option value="Lớp Mầm 1">Lớp Mầm 1 (3-4 tuổi)</option>
+              <option value="Lớp Mầm 2">Lớp Mầm 2 (3-4 tuổi)</option>
+              <option value="Lớp Chồi 1">Lớp Chồi 1 (4-5 tuổi)</option>
+              <option value="Lớp Chồi 2">Lớp Chồi 2 (4-5 tuổi)</option>
+              <option value="Lớp Lá 1">Lớp Lá 1 (5-6 tuổi)</option>
+              <option value="Lớp Lá 2">Lớp Lá 2 (5-6 tuổi)</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>

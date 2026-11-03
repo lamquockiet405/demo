@@ -20,8 +20,6 @@ import {
   Sparkles,
   Flame,
   Lock,
-  PauseCircle,
-  PlayCircle,
   CheckCircle2,
   ShieldCheck,
 } from 'lucide-react';
@@ -77,7 +75,6 @@ export const FoodIngredientsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [allergenFilter, setAllergenFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [nutritionFilter, setNutritionFilter] = useState('');
 
   // Pagination
@@ -96,9 +93,10 @@ export const FoodIngredientsPage: React.FC = () => {
       const res = await apiClient.get('/foods', {
         params: {
           search: searchTerm || undefined,
+          categoryId: categoryFilter || undefined,
           category: categoryFilter || undefined,
           allergen: allergenFilter || undefined,
-          status: statusFilter || undefined,
+          nutrition: nutritionFilter || undefined,
           page,
           limit,
         },
@@ -155,7 +153,7 @@ export const FoodIngredientsPage: React.FC = () => {
 
   useEffect(() => {
     fetchFoods();
-  }, [page, limit, searchTerm, categoryFilter, allergenFilter, statusFilter]);
+  }, [page, limit, searchTerm, categoryFilter, allergenFilter, nutritionFilter]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -166,27 +164,8 @@ export const FoodIngredientsPage: React.FC = () => {
     setSearchTerm('');
     setCategoryFilter('');
     setAllergenFilter('');
-    setStatusFilter('');
     setNutritionFilter('');
     setPage(1);
-  };
-
-  const handleToggleStatus = async (food: Food) => {
-    const isCurrentlyActive = food.status !== 'INACTIVE';
-    const nextStatus = isCurrentlyActive ? 'INACTIVE' : 'ACTIVE';
-    const confirmMessage = isCurrentlyActive
-      ? `Bạn có chắc muốn TẠM NGƯNG SỬ DỤNG nguyên liệu "${food.name}"?\n(Nguyên liệu sẽ chuyển sang trạng thái tạm ngưng và không đưa vào thực đơn mới)`
-      : `Bạn có chắc muốn KÍCH HOẠT LẠI nguyên liệu "${food.name}" để tiếp tục sử dụng trong thực đơn?`;
-
-    if (window.confirm(confirmMessage)) {
-      try {
-        await apiClient.put(`/foods/${food.id}`, { status: nextStatus });
-        await fetchFoods();
-        await fetchStats();
-      } catch (err: any) {
-        alert('Không thể cập nhật trạng thái nguyên liệu: ' + (err.response?.data?.message || err.message));
-      }
-    }
   };
 
   const getCategoryBadge = (category: any) => {
@@ -398,7 +377,7 @@ export const FoodIngredientsPage: React.FC = () => {
             </div>
 
             {/* Filter Dropdowns */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Nhóm thực phẩm */}
               <div>
                 <select
@@ -417,22 +396,6 @@ export const FoodIngredientsPage: React.FC = () => {
                       {cat.name}
                     </option>
                   ))}
-                </select>
-              </div>
-
-              {/* Lọc trạng thái lưu hành */}
-              <div>
-                <select
-                  className="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="ACTIVE">Đang sử dụng</option>
-                  <option value="INACTIVE">Tạm ngưng sử dụng</option>
                 </select>
               </div>
 
@@ -457,7 +420,10 @@ export const FoodIngredientsPage: React.FC = () => {
                 <select
                   className="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20"
                   value={nutritionFilter}
-                  onChange={(e) => setNutritionFilter(e.target.value)}
+                  onChange={(e) => {
+                    setNutritionFilter(e.target.value);
+                    setPage(1);
+                  }}
                 >
                   <option value="">Tất cả chỉ số dinh dưỡng</option>
                   <option value="HIGH_PROTEIN">Giàu Đạm (P ≥ 15g)</option>
@@ -468,7 +434,7 @@ export const FoodIngredientsPage: React.FC = () => {
             </div>
 
             {/* Clear button */}
-            {(searchTerm || categoryFilter || allergenFilter || statusFilter || nutritionFilter) && (
+            {(searchTerm || categoryFilter || allergenFilter || nutritionFilter) && (
               <button
                 type="button"
                 onClick={handleClearFilters}
@@ -544,7 +510,7 @@ export const FoodIngredientsPage: React.FC = () => {
                               {getFoodEmoji(food.category)}
                             </div>
                             <div className="truncate max-w-[240px]">
-                              <p className={`font-black text-xs truncate ${food.status === 'INACTIVE' ? 'text-slate-600 line-through' : 'text-slate-900'}`} title={food.name}>
+                              <p className="font-black text-xs truncate text-slate-900" title={food.name}>
                                 {food.name}
                               </p>
                               <div className="flex items-center gap-1.5 mt-0.5">
@@ -554,15 +520,6 @@ export const FoodIngredientsPage: React.FC = () => {
                                 {Number(food.refuseRatePercent) > 0 && (
                                   <span className="bg-amber-50 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-200" title="Tỷ lệ thải bỏ sơ chế chuẩn FCT">
                                     Bỏ {food.refuseRatePercent}%
-                                  </span>
-                                )}
-                                {food.status === 'INACTIVE' ? (
-                                  <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                    Tạm ngưng
-                                  </span>
-                                ) : (
-                                  <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                    Đang dùng
                                   </span>
                                 )}
                               </div>
@@ -634,27 +591,6 @@ export const FoodIngredientsPage: React.FC = () => {
                                 >
                                   <PenSquare className="w-3.5 h-3.5" />
                                 </button>
-                                {food.status === 'INACTIVE' ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleToggleStatus(food)}
-                                    className="px-2 py-1 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-2xs"
-                                    title="Kích hoạt sử dụng lại nguyên liệu này"
-                                  >
-                                    <PlayCircle className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>Dùng lại</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleToggleStatus(food)}
-                                    className="px-2 py-1 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition cursor-pointer flex items-center gap-1 text-[11px] font-bold shadow-2xs"
-                                    title="Tạm ngưng sử dụng nguyên liệu này"
-                                  >
-                                    <PauseCircle className="w-3.5 h-3.5 text-amber-600" />
-                                    <span>Tạm ngưng</span>
-                                  </button>
-                                )}
                               </>
                             )}
                           </div>
