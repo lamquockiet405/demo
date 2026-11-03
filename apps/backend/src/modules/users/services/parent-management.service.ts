@@ -212,6 +212,7 @@ export class ParentManagementService {
     const passwordHash = await bcrypt.hash(dto.password || '123456', salt);
 
     const role = await this.roleRepo.findOne({ where: { code: 'PARENT' } });
+    if (!role) throw new NotFoundException('Chưa cấu hình vai trò phụ huynh trong hệ thống');
 
     const user = this.userRepo.create({
       email,
@@ -219,6 +220,7 @@ export class ParentManagementService {
       fullName: dto.fullName?.trim(),
       phone: dto.phone?.trim() || null,
       status: dto.status || 'ACTIVE',
+      roles: [role],
     });
 
     let savedUser: User;

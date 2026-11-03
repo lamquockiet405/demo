@@ -1,5 +1,7 @@
 # Docker test với database mới nhất từ kiet
 
+Trang `/parents` đã được đăng ký dưới cổng BGH, cùng mục “Tài khoản phụ huynh” ngay dưới “Nhân sự & Bếp”. Chỉ các vai trò quản lý trường/hiệu trưởng/quản trị được mở trang này. Nút “Tạo tài khoản phụ huynh” dùng form hiện có; backend đã được sửa để lưu quan hệ vai trò PARENT cho tài khoản mới. Hai unit test liên quan pass; đã tạo một tài khoản thử qua API, đăng nhập bằng email/mật khẩu và xác nhận vai trò PARENT, sau đó xóa đúng tài khoản thử này. Frontend/backend Docker build thành công.
+
 Đã bổ sung hai route phụ huynh bị thiếu: `/submit-evaluation` (Đánh giá & Góp ý) và `/declare-allergy` (Khai báo Dị ứng). Các liên kết trên thanh điều hướng trỏ đúng vào hai component hiện có, cùng quyền truy cập với cổng phụ huynh. Frontend Docker build thành công; các API tải dữ liệu góp ý, danh sách trẻ, danh mục dị ứng, chi tiết trẻ và lịch sử dị ứng trả HTTP 200 khi đăng nhập PARENT.
 
 Sửa mã hóa tiếng Việt ngày 03/11/2026: đã sao lưu và sửa 525 bản ghi hiển thị, gồm tên người dùng/học sinh/lớp, tên trường, thực đơn, thông báo, bản dịch, địa chỉ và ghi chú. Các chuỗi như `L├¬ Ho├ái Nam` được khôi phục thành `Lê Hoài Nam`. Các cột mật khẩu, token, email, URL và bản lưu trữ nguồn được giữ nguyên. Frontend làm mới thông tin tên/hồ sơ từ API khi tải trang, giữ các role alias và phiên đăng nhập.

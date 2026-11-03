@@ -41,6 +41,9 @@ function getInitials(name?: string): string {
 export const AdminDashboardLayout: React.FC = () => {
   const location = useLocation();
   const { user } = useAuthStore();
+  const canManageParents = (user?.roles || []).some(role =>
+    ['SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT'].includes(role.toUpperCase()),
+  );
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [schoolName, setSchoolName] = useState<string>(
     () => localStorage.getItem('school_name') || 'Hệ thống Bán trú KidMeal',
@@ -90,6 +93,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
     { label: 'Điều phối cảnh báo thể trạng (UC85)', path: '/growth-notifications', icon: Bell },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
+    ...(canManageParents ? [{ label: 'Tài khoản phụ huynh', path: '/parents', icon: Users2 }] : []),
     { label: 'Kế hoạch suất ăn bán trú', path: '/children', icon: ClipboardCheck },
     { label: 'Phục vụ ăn xế (Roster)', path: '/snack-roster', icon: Coffee },
     { label: 'Bé kén ăn & Tư vấn dinh dưỡng', path: '/picky-eating', icon: Sparkles },
@@ -114,6 +118,7 @@ export const AdminDashboardLayout: React.FC = () => {
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
+    if (location.pathname.startsWith('/parents')) return 'Quản lý Tài khoản Phụ huynh';
     if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Suất ăn sáng';
     if (location.pathname.startsWith('/children')) return 'Kế hoạch Suất ăn & Điểm danh Bán trú';
     if (location.pathname.startsWith('/snack-roster')) return 'Danh sách Phục vụ Suất ăn Xế (Snack Service Roster)';

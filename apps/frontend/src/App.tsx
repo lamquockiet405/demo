@@ -39,6 +39,7 @@ import { SnackBillingPaymentPage } from './features/payments/pages/SnackBillingP
 import { SnackServicesPage } from './features/snack-services/pages/SnackServicesPage';
 import { FoodIngredientsPage } from './features/foods/components/FoodIngredientsPage';
 import { DishesPage } from './features/dishes/components/DishesPage';
+import { ParentManagementPage } from './features/parents/pages/ParentManagementPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -280,6 +281,14 @@ export const App: React.FC = () => {
           <Route path="/settings" element={<SchoolSettingsPage />} />
           <Route path="/classes" element={<SchoolSettingsPage />} />
           <Route path="/staff" element={<StaffManagementPage />} />
+          <Route
+            path="/parents"
+            element={
+              <ProtectedRoute allowedRoles={['SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT']}>
+                <ParentManagementPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/inventory" element={<NutritionRulesPage />} />
           <Route path="/menu-approval" element={<PrincipalMenuApprovalPage />} />
           <Route path="/menu-planning" element={<MenuPlanningPage />} />
