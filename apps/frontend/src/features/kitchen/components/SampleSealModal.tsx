@@ -32,22 +32,14 @@ export const SampleSealModal: React.FC<SampleSealModalProps> = ({
     const expiry = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
     const newRecord = {
-      id: Math.random().toString(36).substring(2, 9),
-      code: `SMP-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}-${Math.floor(
-        1000 + Math.random() * 9000,
-      )}`,
       dishName,
+      date: now.toISOString().split('T')[0],
       mealSession,
-      mealDate: now.toLocaleDateString('vi-VN'),
-      sampleWeight,
+      sampleWeightG: sampleWeight,
       storageTemp,
       fridgeUnit,
       collectorName,
-      sealedAt: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('vi-VN'),
-      expiresAt: expiry.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + expiry.toLocaleDateString('vi-VN'),
-      status: 'RETAINED' as const,
-      countdownHours: 24,
-      notes,
+      note: notes,
     };
 
     onSave(newRecord);

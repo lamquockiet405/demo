@@ -19,6 +19,8 @@ import {
   AlertCircle,
   ExternalLink,
   ChevronRight,
+  Lock,
+  Trash2,
 } from 'lucide-react';
 import { apiClient } from '@/core/api/axios';
 
@@ -28,10 +30,15 @@ export const InspectionDetailPage: React.FC = () => {
   const location = useLocation();
   const { user } = useAuthStore();
   const roles = user?.roles || [];
-  const isPrincipalOrManagement = roles.includes('SCHOOL_MANAGEMENT') || roles.includes('SCHOOL_MANAGER') || roles.includes('PRINCIPAL');
-  const isKitchenOrNutritionist = roles.includes('KITCHEN_STAFF') || roles.includes('KITCHEN_MANAGER') || roles.includes('NUTRITIONIST');
-  // Khi ở phân hệ Ban Giám Hiệu (/food-safety/:id) hoặc tài khoản BGH, chỉ được xem không được can thiệp duyệt/hủy
-  const isReadOnly = location.pathname.startsWith('/food-safety') || (isPrincipalOrManagement && !isKitchenOrNutritionist);
+  const isNutritionist = roles.includes('NUTRITIONIST');
+  const isPrincipalOrManagement =
+    roles.includes('SCHOOL_MANAGEMENT') ||
+    roles.includes('SCHOOL_MANAGER') ||
+    roles.includes('PRINCIPAL') ||
+    roles.includes('SUPER_ADMIN');
+  // Chức năng duyệt do Chuyên gia dinh dưỡng VÀ Hiệu trưởng / Ban giám hiệu thực hiện
+  const canApprove = isNutritionist || isPrincipalOrManagement;
+  const isReadOnly = !canApprove;
 
   const [record, setRecord] = useState<any>(null);
   const [countdown, setCountdown] = useState<string>('');
@@ -93,28 +100,28 @@ export const InspectionDetailPage: React.FC = () => {
             code: s.sampleCode || s.code || `BB-KT-${s.date || '2026'}-01`,
             mealDate: s.date || s.mealDate || new Date().toISOString().split('T')[0],
             mealTime: s.mealSession || 'Trưa chính (10:30)',
-            performerName: s.collectorName || 'Nguyễn Văn Cường (Bếp trưởng)',
-            totalPortions: 380,
-            storageTemp: Number(s.storageTemp) || 3.8,
+            performerName: s.collectorName || 'Chưa cập nhật',
+            totalPortions: null,
+            storageTemp: s.storageTemp != null ? Number(s.storageTemp) : null,
             status: s.status === 'STORED' ? 'Hoàn tất' : s.status === 'DISPOSED' ? 'Hoàn tất' : 'Chưa hoàn tất',
-            sealedAt: s.storedAt || `${s.date}T10:45:00.000Z`,
+            sealedAt: s.storedAt || null,
             disposedAt: s.disposeAt,
-            step1Status: 'Đạt chuẩn',
-            step1Time: `${s.date}T06:30:00.000Z`,
-            step1Note: 'Tiếp nhận 100% nguyên liệu tươi sống, kiểm dịch ATTP đầy đủ.',
-            step2Status: 'Đạt chuẩn',
-            step2Time: `${s.date}T09:15:00.000Z`,
-            step2Note: 'Quy trình bếp 1 chiều, nhiệt độ nấu sôi > 75°C.',
-            step3Status: 'Đạt chuẩn',
-            step3Time: `${s.date}T10:30:00.000Z`,
-            step3Note: 'Cảm quan thức ăn chín đạt chuẩn, mùi vị thơm ngon.',
+            step1Status: 'Chưa thực hiện',
+            step1Time: null,
+            step1Note: '',
+            step2Status: 'Chưa thực hiện',
+            step2Time: null,
+            step2Note: '',
+            step3Status: s.status === 'STORED' || s.status === 'DISPOSED' ? 'Đạt chuẩn' : 'Chưa thực hiện',
+            step3Time: s.storedAt || null,
+            step3Note: s.note || '',
             sampleItems: [
               {
                 id: String(s.id),
                 dishName: s.dishName,
                 sampleCode: s.sampleCode,
                 quantityGrams: Number(s.sampleWeight) || 150,
-                temperatureC: Number(s.storageTemp) || 3.8,
+                temperatureC: s.storageTemp != null ? Number(s.storageTemp) : null,
                 containerType: 'Hộp Inox vô trùng',
                 status: s.status,
               },
@@ -134,28 +141,37 @@ export const InspectionDetailPage: React.FC = () => {
 
   const handleBack = () => {
     const isNutritionist = window.location.pathname.startsWith('/nutritionist');
-    const basePath = isNutritionist ? '/nutritionist/food-safety' : '/food-safety';
+    const isKitchen = window.location.pathname.startsWith('/kitchen');
+    const basePath = isNutritionist
+      ? '/nutritionist/food-safety'
+      : isKitchen
+      ? '/kitchen/inspections'
+      : '/food-safety';
     navigate(basePath);
   };
 
   const handleDispose = async () => {
+    if (!isExpired) {
+      alert('⚠️ Chưa đủ 24 giờ lưu mẫu theo quy định Bộ Y Tế (QĐ 1246/QĐ-BYT). Mẫu thức ăn chỉ được phép tiêu hủy sau khi hoàn thành thời gian lưu giữ tối thiểu 24 giờ!');
+      return;
+    }
     if (!window.confirm('Xác nhận đã tiêu hủy mẫu thức ăn an toàn sau 24 giờ theo quy chuẩn Bộ Y Tế?')) {
       return;
     }
     try {
       const sampleId = record?.sampleItems?.[0]?.id || id;
       await apiClient.patch(`/inspections/samples/${sampleId}/dispose`);
-      alert('Đã xác nhận tiêu hủy mẫu lưu an toàn thành công!');
+      alert('✅ Đã xác nhận tiêu hủy mẫu lưu an toàn thành công!');
       fetchRecord();
-    } catch (error) {
+    } catch (error: any) {
       // Also try POST fallback
       try {
         const sampleId = record?.sampleItems?.[0]?.id || id;
         await apiClient.post(`/inspections/samples/${sampleId}/dispose`);
-        alert('Đã xác nhận tiêu hủy mẫu lưu an toàn thành công!');
+        alert('✅ Đã xác nhận tiêu hủy mẫu lưu an toàn thành công!');
         fetchRecord();
-      } catch (errPost) {
-        alert('Lỗi khi ghi nhận hủy mẫu');
+      } catch (errPost: any) {
+        alert('Lỗi khi ghi nhận hủy mẫu: ' + (errPost.response?.data?.message || errPost.message));
       }
     }
   };
@@ -227,10 +243,13 @@ export const InspectionDetailPage: React.FC = () => {
     record.step3Status === 'Đã hủy mẫu' ||
     record.sampleItems?.some((s: any) => s.status === 'DISPOSED');
 
-  const is24hPassed =
-    record.sealedAt &&
-    new Date().getTime() - new Date(record.sealedAt).getTime() >= 24 * 60 * 60 * 1000;
-  const isExpired = countdown.includes('quá hạn');
+  const isExpired = Boolean(
+    (record.sealedAt &&
+      new Date().getTime() - new Date(record.sealedAt).getTime() >= 24 * 60 * 60 * 1000) ||
+      countdown.includes('quá hạn') ||
+      countdown.includes('Đã đủ 24h'),
+  );
+  const is24hPassed = isExpired;
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen font-sans text-slate-800">
@@ -240,8 +259,16 @@ export const InspectionDetailPage: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2">
               Biên Bản Kiểm Thực Ba Bước: <span className="text-emerald-700 font-mono">{record.code}</span>
-              <span className="ml-2 inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold uppercase rounded-full border border-emerald-200">
-                <CheckCircle className="w-3.5 h-3.5" /> Đạt chuẩn ATTP
+              <span className={`ml-2 inline-flex items-center gap-1 px-3 py-1 text-xs font-bold uppercase rounded-full border ${
+                record.approvalStatus === 'DA_DUYET'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                  : 'bg-amber-100 text-amber-800 border-amber-200'
+              }`}>
+                {record.approvalStatus === 'DA_DUYET' ? (
+                  <><CheckCircle className="w-3.5 h-3.5" /> Đã duyệt</>
+                ) : (
+                  <><Clock className="w-3.5 h-3.5" /> Chờ duyệt</>
+                )}
               </span>
             </h2>
           </div>
@@ -268,33 +295,32 @@ export const InspectionDetailPage: React.FC = () => {
 
       {/* ─── WORKFLOW APPROVAL STATUS BANNER & ACTION BAR ─── */}
       {record.approvalStatus === 'CHO_DUYET' && (
-        <div className="bg-gradient-to-r from-violet-50 via-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-3xl p-5 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm animate-pulse">
+        <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-2 border-amber-200 rounded-3xl p-5 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-md shrink-0">
-              <FileText className="w-6 h-6" />
+            <div className="p-3 bg-amber-500 text-white rounded-2xl shadow-md shrink-0">
+              <Clock className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-black text-indigo-950 text-base">
-                  Nhà bếp đã gửi duyệt ảnh minh chứng kiểm thực
+                <h3 className="font-black text-amber-950 text-base">
+                  Biên bản kiểm thực đang Chờ Phê Duyệt
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-200 text-indigo-900 border border-indigo-300">
-                  ⏳ Chờ Chuyên Gia Duyệt
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-200 text-amber-900 border border-amber-300">
+                  ⏳ Chờ Duyệt
                 </span>
               </div>
-              <p className="text-xs text-indigo-700 font-medium mt-0.5">
-                Gửi lúc: <span className="font-bold">{formatTime(record.kitchenSubmittedAt)}</span> • Bếp viên phụ trách:{' '}
-                <span className="font-bold">{record.performerName || 'Bếp trưởng'}</span>. Vui lòng kiểm tra hình ảnh và xác nhận.
+              <p className="text-xs text-amber-800 font-medium mt-0.5">
+                Nhà bếp đã hoàn tất kiểm thực 3 bước kèm ảnh minh chứng. Chuyên gia Dinh dưỡng hoặc Hiệu trưởng vui lòng kiểm tra và duyệt đạt chuẩn.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
-            {!isReadOnly ? (
+            {canApprove ? (
               <>
                 <button
                   onClick={handleApprove}
                   disabled={isSubmittingApproval}
-                  className="flex-1 md:flex-initial px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 active:scale-95"
+                  className="flex-1 md:flex-initial px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                 >
                   <CheckCircle className="w-4 h-4" />
                   {isSubmittingApproval ? 'Đang duyệt...' : 'Phê Duyệt Đạt Chuẩn'}
@@ -302,40 +328,19 @@ export const InspectionDetailPage: React.FC = () => {
                 <button
                   onClick={() => setIsRejectModalOpen(true)}
                   disabled={isSubmittingApproval}
-                  className="flex-1 md:flex-initial px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 active:scale-95"
+                  className="flex-1 md:flex-initial px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                 >
                   <AlertTriangle className="w-4 h-4" />
-                  Yêu Cầu Chụp Lại
+                  Yêu Cầu Kiểm Tra Lại
                 </button>
               </>
             ) : (
-              <span className="px-3.5 py-2 rounded-xl bg-indigo-100 text-indigo-900 font-bold text-xs border border-indigo-200 flex items-center gap-1.5 shadow-2xs">
-                <ShieldCheck className="w-4 h-4 text-indigo-700" />
-                <span>Chờ Chuyên viên Dinh dưỡng duyệt</span>
+              <span className="px-3.5 py-2 rounded-xl bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200 flex items-center gap-1.5 shadow-2xs">
+                <Clock className="w-4 h-4 text-amber-700" />
+                <span>Đang chờ Chuyên gia Dinh dưỡng / Hiệu trưởng duyệt</span>
               </span>
             )}
           </div>
-        </div>
-      )}
-
-      {record.approvalStatus === 'CHO_BEP_TAI_ANH' && (
-        <div className="bg-amber-50 border-2 border-amber-200 rounded-3xl p-4 mb-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-500 text-white rounded-xl shrink-0">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-bold text-amber-900 text-sm">
-                Biên bản đang chờ nhà bếp chụp ảnh minh chứng 3 bước
-              </p>
-              <p className="text-xs text-amber-700 font-medium mt-0.5">
-                Chuyên gia dinh dưỡng đã khởi tạo biên bản. Nhân viên nhà bếp sẽ tải ảnh nguyên liệu, bếp nấu và lưu mẫu để gửi duyệt.
-              </p>
-            </div>
-          </div>
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-200 text-amber-900 shrink-0">
-            📷 Chờ bếp tải ảnh
-          </span>
         </div>
       )}
 
@@ -347,10 +352,10 @@ export const InspectionDetailPage: React.FC = () => {
             </div>
             <div>
               <p className="font-bold text-emerald-950 text-sm">
-                Biên bản đã được Chuyên gia Dinh dưỡng Phê Duyệt Đạt Chuẩn ATTP
+                Biên bản đã được Phê Duyệt Đạt Chuẩn ATTP
               </p>
               <p className="text-xs text-emerald-700 font-medium mt-0.5">
-                Duyệt bởi: <span className="font-bold">{record.approvedBy || 'Chuyên gia Dinh dưỡng'}</span>
+                Duyệt bởi: <span className="font-bold">{record.approvedBy || 'Chuyên gia Dinh dưỡng / Hiệu trưởng'}</span>
                 {record.approvedAt ? ` lúc ${formatTime(record.approvedAt)} - ${formatDate(record.approvedAt)}` : ''}
               </p>
             </div>
@@ -416,7 +421,7 @@ export const InspectionDetailPage: React.FC = () => {
             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1">
               Ca ăn & Khẩu phần
             </p>
-            <p className="text-xl font-bold text-emerald-700">{record.totalPortions || 380} suất bán trú</p>
+            <p className="text-xl font-bold text-emerald-700">{record.totalPortions ? `${record.totalPortions} suất bán trú` : 'Theo thực đơn'}</p>
             <p className="text-xs text-slate-500 font-medium mt-1">
               Phụ trách: <span className="font-bold text-slate-700">{record.performerName}</span>
             </p>
@@ -427,7 +432,7 @@ export const InspectionDetailPage: React.FC = () => {
               Bảo quản mẫu lưu 24h
             </p>
             <p className="text-xl font-black text-blue-600 flex items-center gap-2">
-              {record.storageTemp ?? 3.8}°C{' '}
+              {record.storageTemp != null ? `${record.storageTemp}°C` : '--°C'}{' '}
               <span className="text-[11px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-lg font-bold">
                 Tủ lưu số 01
               </span>
@@ -492,7 +497,7 @@ export const InspectionDetailPage: React.FC = () => {
             <div className="flex justify-between border-b border-slate-100 pb-2.5 text-xs">
               <span className="text-slate-400 font-medium">Giờ tiếp nhận</span>
               <span className="font-bold text-slate-800">
-                {record.step1Time ? formatTime(record.step1Time) : '06:30'}
+                {record.step1Time ? formatTime(record.step1Time) : '--:--'}
               </span>
             </div>
 
@@ -503,12 +508,19 @@ export const InspectionDetailPage: React.FC = () => {
               </span>
             </div>
 
-            {record.step1Note && (
+            {record.step1Note ? (
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Ghi chú nhận xét:
                 </span>
                 <p className="text-xs text-slate-700 leading-relaxed italic">"{record.step1Note}"</p>
+              </div>
+            ) : (
+              <div className="bg-slate-50/60 p-3 rounded-xl border border-dashed border-slate-200">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Ghi chú nhận xét:
+                </span>
+                <p className="text-xs text-slate-400 italic">Chưa có ghi chú</p>
               </div>
             )}
 
@@ -516,27 +528,44 @@ export const InspectionDetailPage: React.FC = () => {
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
                 Minh chứng hình ảnh:
               </span>
-              <div className="grid grid-cols-2 gap-2">
-                {(record.step1Photos && record.step1Photos.length > 0
-                  ? record.step1Photos
-                  : [record.step1PhotoUrl || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80']
-                ).map((photoUrl: string, idx: number) => (
-                  <div
-                    key={idx}
-                    onClick={() => setPreviewImage(photoUrl)}
-                    className="h-28 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
-                  >
-                    <img
-                      src={photoUrl}
-                      alt={`Minh chứng Bước 1 - ${idx + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
-                      <span>🔍 Xem ảnh</span>
+              {record.step1Photos && record.step1Photos.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {record.step1Photos.map((photoUrl: string, idx: number) => (
+                    <div
+                      key={idx}
+                      onClick={() => setPreviewImage(photoUrl)}
+                      className="h-28 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Minh chứng Bước 1 - ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
+                        <span>🔍 Xem ảnh</span>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              ) : record.step1PhotoUrl ? (
+                <div
+                  onClick={() => setPreviewImage(record.step1PhotoUrl)}
+                  className="h-28 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
+                >
+                  <img
+                    src={record.step1PhotoUrl}
+                    alt="Minh chứng Bước 1"
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
+                    <span>🔍 Xem ảnh</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="h-20 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 flex items-center justify-center text-xs text-slate-400 italic">
+                  Chưa tải ảnh minh chứng
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -562,23 +591,30 @@ export const InspectionDetailPage: React.FC = () => {
             <div className="flex justify-between border-b border-slate-100 pb-2.5 text-xs">
               <span className="text-slate-400 font-medium">Giờ giám sát</span>
               <span className="font-bold text-slate-800">
-                {record.step2Time ? formatTime(record.step2Time) : '09:15'}
+                {record.step2Time ? formatTime(record.step2Time) : '--:--'}
               </span>
             </div>
 
             <div className="flex justify-between border-b border-slate-100 pb-2.5 text-xs">
               <span className="text-slate-400 font-medium">Nhiệt độ tâm món</span>
               <span className="font-bold text-emerald-600 flex items-center gap-1">
-                &gt; {record.step2Temperature || 85}°C <CheckCircle className="w-3.5 h-3.5" />
+                {record.step2Temperature != null ? `> ${record.step2Temperature}°C` : 'Đạt chuẩn sôi chín'} <CheckCircle className="w-3.5 h-3.5" />
               </span>
             </div>
 
-            {record.step2Note && (
+            {record.step2Note ? (
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Ghi chú nhận xét:
                 </span>
                 <p className="text-xs text-slate-700 leading-relaxed italic">"{record.step2Note}"</p>
+              </div>
+            ) : (
+              <div className="bg-slate-50/60 p-3 rounded-xl border border-dashed border-slate-200">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Ghi chú nhận xét:
+                </span>
+                <p className="text-xs text-slate-400 italic">Chưa có ghi chú</p>
               </div>
             )}
 
@@ -586,27 +622,44 @@ export const InspectionDetailPage: React.FC = () => {
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
                 Minh chứng hình ảnh:
               </span>
-              <div className="grid grid-cols-2 gap-2">
-                {(record.step2Photos && record.step2Photos.length > 0
-                  ? record.step2Photos
-                  : [record.step2PhotoUrl || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=600&q=80']
-                ).map((photoUrl: string, idx: number) => (
-                  <div
-                    key={idx}
-                    onClick={() => setPreviewImage(photoUrl)}
-                    className="h-28 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
-                  >
-                    <img
-                      src={photoUrl}
-                      alt={`Minh chứng Bước 2 - ${idx + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
-                      <span>🔍 Xem ảnh</span>
+              {record.step2Photos && record.step2Photos.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {record.step2Photos.map((photoUrl: string, idx: number) => (
+                    <div
+                      key={idx}
+                      onClick={() => setPreviewImage(photoUrl)}
+                      className="h-28 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Minh chứng Bước 2 - ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
+                        <span>🔍 Xem ảnh</span>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              ) : record.step2PhotoUrl ? (
+                <div
+                  onClick={() => setPreviewImage(record.step2PhotoUrl)}
+                  className="h-28 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
+                >
+                  <img
+                    src={record.step2PhotoUrl}
+                    alt="Minh chứng Bước 2"
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
+                    <span>🔍 Xem ảnh</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="h-20 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 flex items-center justify-center text-xs text-slate-400 italic">
+                  Chưa tải ảnh minh chứng
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -632,16 +685,23 @@ export const InspectionDetailPage: React.FC = () => {
             <div className="flex justify-between border-b border-slate-100 pb-2.5 text-xs">
               <span className="text-slate-400 font-medium">Giờ niêm phong</span>
               <span className="font-bold text-slate-800">
-                {record.sealedAt ? formatTime(record.sealedAt) : '10:45'}
+                {record.sealedAt ? formatTime(record.sealedAt) : '--:--'}
               </span>
             </div>
 
-            {record.step3Note && (
+            {record.step3Note ? (
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Cảm quan món ăn:
                 </span>
                 <p className="text-xs text-slate-700 leading-relaxed italic">"{record.step3Note}"</p>
+              </div>
+            ) : (
+              <div className="bg-slate-50/60 p-3 rounded-xl border border-dashed border-slate-200">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Cảm quan món ăn:
+                </span>
+                <p className="text-xs text-slate-400 italic">Chưa có ghi chú</p>
               </div>
             )}
 
@@ -649,44 +709,34 @@ export const InspectionDetailPage: React.FC = () => {
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-2">
                 Các món lưu mẫu 24h:
               </span>
-              <div className="space-y-2">
-                {(record.sampleItems && record.sampleItems.length > 0
-                  ? record.sampleItems
-                  : [
-                      {
-                        id: 's1',
-                        dishName: 'Thịt heo xốt cà chua',
-                        sampleCode: 'LM-TH-01',
-                        quantityGrams: 150,
-                      },
-                      {
-                        id: 's2',
-                        dishName: 'Canh bí đỏ thịt bằm',
-                        sampleCode: 'LM-CB-02',
-                        quantityGrams: 150,
-                      },
-                    ]
-                ).map((item: any) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-2.5 bg-blue-50/60 rounded-xl border border-blue-100 text-xs"
-                  >
-                    <div>
-                      <p className="font-bold text-slate-800">{item.dishName}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">Mã: {item.sampleCode || record.code}</p>
+              {record.sampleItems && record.sampleItems.length > 0 ? (
+                <div className="space-y-2">
+                  {record.sampleItems.map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-2.5 bg-blue-50/60 rounded-xl border border-blue-100 text-xs"
+                    >
+                      <div>
+                        <p className="font-bold text-slate-800">{item.dishName}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">Mã: {item.sampleCode || record.code}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-black text-blue-700">{item.quantityGrams || 150}g</span>
+                        <button
+                          onClick={() => handleOpenSampleLabel(item)}
+                          className="block text-[10px] font-bold text-blue-600 hover:underline mt-0.5"
+                        >
+                          In tem dán
+                        </button>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-black text-blue-700">{item.quantityGrams || 150}g</span>
-                      <button
-                        onClick={() => handleOpenSampleLabel(item)}
-                        className="block text-[10px] font-bold text-blue-600 hover:underline mt-0.5"
-                      >
-                        In tem dán
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 text-xs text-slate-400 italic text-center">
+                  Chưa có thông tin lưu mẫu 24h
+                </div>
+              )}
             </div>
 
             {/* Step 3 Photo Proof */}
@@ -694,27 +744,44 @@ export const InspectionDetailPage: React.FC = () => {
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-2">
                 Ảnh hộp niêm phong & Tủ lưu mẫu:
               </span>
-              <div className="grid grid-cols-2 gap-2">
-                {(record.step3Photos && record.step3Photos.length > 0
-                  ? record.step3Photos
-                  : [record.step3PhotoUrl || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=600&q=80']
-                ).map((photoUrl: string, idx: number) => (
-                  <div
-                    key={idx}
-                    onClick={() => setPreviewImage(photoUrl)}
-                    className="h-24 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
-                  >
-                    <img
-                      src={photoUrl}
-                      alt={`Minh chứng Bước 3 - ${idx + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
-                      <span>🔍 Xem ảnh</span>
+              {record.step3Photos && record.step3Photos.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {record.step3Photos.map((photoUrl: string, idx: number) => (
+                    <div
+                      key={idx}
+                      onClick={() => setPreviewImage(photoUrl)}
+                      className="h-24 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Minh chứng Bước 3 - ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
+                        <span>🔍 Xem ảnh</span>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              ) : record.step3PhotoUrl ? (
+                <div
+                  onClick={() => setPreviewImage(record.step3PhotoUrl)}
+                  className="h-24 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative group cursor-pointer"
+                >
+                  <img
+                    src={record.step3PhotoUrl}
+                    alt="Minh chứng Bước 3"
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold gap-1">
+                    <span>🔍 Xem ảnh</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="h-20 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 flex items-center justify-center text-xs text-slate-400 italic">
+                  Chưa tải ảnh minh chứng
+                </div>
+              )}
             </div>
 
             {/* COUNTDOWN & DISPOSE SECTION */}
@@ -722,21 +789,57 @@ export const InspectionDetailPage: React.FC = () => {
               {!isDisposed ? (
                 <div
                   className={`p-4 rounded-2xl border text-center transition ${
-                    isExpired ? 'bg-rose-50 border-rose-200' : 'bg-blue-50 border-blue-200 border-dashed'
+                    isExpired
+                      ? 'bg-rose-50 border-rose-200 shadow-sm'
+                      : 'bg-blue-50/70 border-blue-200 border-dashed'
                   }`}
                 >
                   <span className="text-[11px] font-bold text-slate-500 flex items-center justify-center gap-1 mb-1">
                     <Clock className="w-3.5 h-3.5" /> Thời gian lưu mẫu còn lại (24h)
                   </span>
-                  <p className={`text-2xl font-black mb-3 ${isExpired ? 'text-rose-600' : 'text-blue-700'}`}>
-                    {countdown || '18:35:42'}
+                  <p
+                    className={`text-2xl font-black mb-1.5 ${
+                      isExpired ? 'text-rose-600' : 'text-blue-700 font-mono'
+                    }`}
+                  >
+                    {countdown || (isExpired ? '00:00:00 (Đã đủ 24h)' : '24:00:00')}
                   </p>
+
+                  {!isExpired ? (
+                    <p className="text-[11px] text-slate-500 font-medium mb-3">
+                      Đang trong thời gian lưu trữ bắt buộc (0°C - 5°C). Chưa được phép hủy.
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-rose-600 font-medium mb-3">
+                      Đã hoàn thành lưu giữ đủ 24h theo QĐ 1246/QĐ-BYT. Có thể tiến hành tiêu hủy.
+                    </p>
+                  )}
 
                   <button
                     onClick={handleDispose}
-                    className="w-full py-2.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 transition active:scale-95"
+                    disabled={!isExpired}
+                    className={`w-full py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 ${
+                      isExpired
+                        ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 active:scale-95 cursor-pointer'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                    }`}
+                    title={
+                      !isExpired
+                        ? 'Chưa đủ 24 giờ lưu mẫu theo quy định Bộ Y Tế'
+                        : 'Xác nhận tiêu hủy mẫu thức ăn an toàn'
+                    }
                   >
-                    Xác nhận Đã Hủy Mẫu An Toàn
+                    {!isExpired ? (
+                      <>
+                        <Lock className="w-3.5 h-3.5 text-slate-400" />
+                        Chưa đủ 24h để tiêu hủy
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Xác nhận Đã Hủy Mẫu An Toàn
+                      </>
+                    )}
                   </button>
                 </div>
               ) : (
@@ -809,7 +912,7 @@ export const InspectionDetailPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Nhiệt độ bảo quản:</span>
-                  <span className="font-bold text-blue-600">{record.storageTemp || 3.8}°C (Tủ mát 0-5°C)</span>
+                  <span className="font-bold text-blue-600">{record.storageTemp != null ? `${record.storageTemp}°C` : '0-5°C'} (Tủ mát)</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Người lấy mẫu:</span>

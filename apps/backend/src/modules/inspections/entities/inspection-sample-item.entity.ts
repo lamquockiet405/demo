@@ -4,7 +4,7 @@ import {
   Column,
   CreateDateColumn,
 } from 'typeorm';
-import { BigIntTransformer } from '../../../database/base.entity';
+import { NumericTransformer } from '../../foods/entities/food.entity';
 
 @Entity('food_samples')
 export class InspectionSampleItem {
@@ -28,6 +28,40 @@ export class InspectionSampleItem {
 
   @Column({ length: 20, default: 'STORED' })
   status: string;
+
+  @Column({
+    name: 'fridge_unit',
+    length: 100,
+    nullable: true,
+  })
+  fridgeUnit: string;
+
+  @Column({
+    name: 'sample_weight_g',
+    type: 'numeric',
+    precision: 6,
+    scale: 1,
+    nullable: true,
+    transformer: NumericTransformer,
+  })
+  sampleWeightG: number;
+
+  @Column({
+    name: 'storage_temp',
+    type: 'numeric',
+    precision: 4,
+    scale: 1,
+    nullable: true,
+    transformer: NumericTransformer,
+  })
+  storageTemp: number;
+
+  @Column({
+    name: 'collector_name',
+    length: 100,
+    nullable: true,
+  })
+  collectorName: string;
 
   @Column({ type: 'text', nullable: true })
   note: string;

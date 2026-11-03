@@ -1,468 +1,791 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Scale,
   Calendar,
   Filter,
   Download,
   Printer,
-  AlertTriangle,
   Search,
   ShoppingCart,
   Sparkles,
-  CheckCircle2,
-  FileSpreadsheet,
   RefreshCw,
   Utensils,
+  Users,
+  Layers,
   ChevronDown,
+  Info,
+  CheckCircle2,
+  Trash2,
+  AlertCircle,
+  Eye,
+  X,
 } from 'lucide-react';
-import { weeklyMenusApi, WeeklyMenu } from '../api/weekly-menus.api';
-
-interface IngredientSummary {
-  id: string;
-  name: string;
-  category: string;
-  unit: string;
-  refuseRate: number; // %
-  netTotalG: number;
-  grossTotalG: number;
-  grossTotalKg: number;
-  dishesUsed: string[];
-  missingRecipe?: boolean;
-}
+import * as XLSX from 'xlsx';
+import {
+  purchasingApi,
+  DailyPurchasingSuggestionResponse,
+  PurchasingIngredient,
+  AvailableMenuDay,
+} from '../api/purchasing.api';
 
 export const GrossWeightPurchasingPage: React.FC = () => {
-  // Filters
-  const [selectedWeek, setSelectedWeek] = useState('2026-W42');
-  const [startDate, setStartDate] = useState('2026-10-19');
-  const [endDate, setEndDate] = useState('2026-10-23');
-  const [mealFilter, setMealFilter] = useState<'ALL' | 'LUNCH' | 'AFTERNOON_SNACK' | 'BREAKFAST'>('ALL');
-  const [portionsCount, setPortionsCount] = useState<number>(180);
+  // Query state
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
+  const [mealFilter, setMealFilter] = useState<'ALL' | 'LUNCH' | 'AFTERNOON_SNACK' | 'MORNING_SNACK'>('ALL');
+  const [customPortionsInput, setCustomPortionsInput] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
 
-  // Data & State
-  const [menus, setMenus] = useState<WeeklyMenu[]>([]);
-  const [selectedMenu, setSelectedMenu] = useState<WeeklyMenu | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [exportSuccess, setExportSuccess] = useState<string | null>(null);
-  const [warnings, setWarnings] = useState<string[]>([]);
+  // Data state
+  const [data, setData] = useState<DailyPurchasingSuggestionResponse | null>(null);
+  const [availableDays, setAvailableDays] = useState<AvailableMenuDay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showClassModal, setShowClassModal] = useState(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
 
-  // Load Approved Menus
+  // Fetch Available Menu Days on mount
   useEffect(() => {
-    fetchApprovedMenus();
-  }, [selectedWeek]);
+    purchasingApi
+      .getAvailableMenuDays()
+      .then((days) => setAvailableDays(days))
+      .catch((err) => console.error('Lỗi lấy danh sách ngày thực đơn:', err));
+  }, []);
 
-  const fetchApprovedMenus = async () => {
+  // Fetch purchasing suggestion when date or mealFilter changes
+  const fetchSuggestion = async (portionsOverride?: number) => {
     setLoading(true);
-    setWarnings([]);
+    setError(null);
     try {
-      const data = await weeklyMenusApi.getMenus({ status: 'APPROVED' });
-      setMenus(data);
-      if (data && data.length > 0) {
-        setSelectedMenu(data[0]);
-      } else {
-        setSelectedMenu(null);
+      const portions =
+        portionsOverride !== undefined
+          ? portionsOverride
+          : customPortionsInput.trim() !== ''
+          ? Number(customPortionsInput)
+          : undefined;
+
+      const res = await purchasingApi.getDailySuggestion({
+        date: selectedDate,
+        mealType: mealFilter,
+        customPortions: portions,
+      });
+
+      setData(res);
+      if (customPortionsInput === '' && !portionsOverride) {
+        setCustomPortionsInput(String(res.portionsCount));
       }
-    } catch {
-      // Fallback sample data if backend returns empty
-      const sampleMenu: any = {
-        id: 'sample-approved-1',
-        title: 'Thực đơn Mầm non Tuần 42 - Đã phê duyệt',
-        status: 'APPROVED',
-        startDate: startDate,
-        endDate: endDate,
-        dishes: [
-          {
-            dish: {
-              id: 'd1',
-              name: 'Cơm trắng gạo thơm',
-              recipeItems: [
-                { food: { id: 'f1', name: 'Gạo tẻ thơm ST25', category: 'Ngũ cốc' }, netWeightPerPortionG: 70, grossWeightPerPortionG: 70, shrinkageRatio: 0 },
-              ],
-            },
-            mealTime: 'LUNCH',
-          },
-          {
-            dish: {
-              id: 'd2',
-              name: 'Thịt heo rim nước dừa',
-              recipeItems: [
-                { food: { id: 'f2', name: 'Thịt nạc vai heo', category: 'Thịt các loại' }, netWeightPerPortionG: 45, grossWeightPerPortionG: 50, shrinkageRatio: 0.1 },
-                { food: { id: 'f3', name: 'Nước dừa tươi', category: 'Gia vị & Khác' }, netWeightPerPortionG: 15, grossWeightPerPortionG: 15, shrinkageRatio: 0 },
-              ],
-            },
-            mealTime: 'LUNCH',
-          },
-          {
-            dish: {
-              id: 'd3',
-              name: 'Canh bí đỏ hầm xương heo',
-              recipeItems: [
-                { food: { id: 'f4', name: 'Bí đỏ hồ lô', category: 'Rau củ quả' }, netWeightPerPortionG: 40, grossWeightPerPortionG: 52, shrinkageRatio: 0.23 },
-                { food: { id: 'f5', name: 'Xương ống heo', category: 'Thịt các loại' }, netWeightPerPortionG: 25, grossWeightPerPortionG: 35, shrinkageRatio: 0.28 },
-              ],
-            },
-            mealTime: 'LUNCH',
-          },
-          {
-            dish: {
-              id: 'd4',
-              name: 'Chè hạt sen long nhãn (Xế)',
-              recipeItems: [
-                { food: { id: 'f6', name: 'Hạt sen tươi Huế', category: 'Ngũ cốc & Hạt' }, netWeightPerPortionG: 25, grossWeightPerPortionG: 30, shrinkageRatio: 0.16 },
-                { food: { id: 'f7', name: 'Đường phèn kết tinh', category: 'Gia vị & Khác' }, netWeightPerPortionG: 10, grossWeightPerPortionG: 10, shrinkageRatio: 0 },
-              ],
-            },
-            mealTime: 'AFTERNOON_SNACK',
-          },
-          {
-            dish: {
-              id: 'd5',
-              name: 'Tráng miệng: Chuối tiêu chín',
-              recipeItems: [
-                { food: { id: 'f8', name: 'Chuối tiêu chín cây', category: 'Trái cây' }, netWeightPerPortionG: 60, grossWeightPerPortionG: 90, shrinkageRatio: 0.33 },
-              ],
-            },
-            mealTime: 'LUNCH',
-          },
-        ],
-      };
-      setMenus([sampleMenu]);
-      setSelectedMenu(sampleMenu);
+    } catch (err: any) {
+      console.error('Lỗi tính toán đi chợ:', err);
+      setError(
+        err.response?.data?.message ||
+          'Không thể tải dữ liệu tính toán đi chợ. Vui lòng kiểm tra lại ngày và thực đơn đã phê duyệt.'
+      );
+      setData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Calculation Logic: Net -> Yield / Refuse Rate -> Gross Weight
-  const calculateGrossSummary = (): IngredientSummary[] => {
-    const dishItems = selectedMenu?.menuDishes || (selectedMenu as any)?.dishes;
-    if (!dishItems || dishItems.length === 0) return [];
+  useEffect(() => {
+    fetchSuggestion();
+  }, [selectedDate, mealFilter]);
 
-    const map = new Map<string, IngredientSummary>();
-    const foundWarnings: string[] = [];
-
-    dishItems.forEach((item: any) => {
-      // Filter by meal time if applied
-      if (mealFilter !== 'ALL' && item.mealTime !== mealFilter) {
-        return;
-      }
-
-      const dish = item.dish;
-      if (!dish) return;
-
-      if (!dish.recipeItems || dish.recipeItems.length === 0) {
-        foundWarnings.push(`Món "${dish.name}" chưa có công thức định lượng (EX-01).`);
-        return;
-      }
-
-      dish.recipeItems.forEach((ri: any) => {
-        const food = ri.food;
-        if (!food) return;
-
-        const key = food.id || food.name;
-        const netG = Number(ri.netWeightPerPortionG) || 50;
-        const shrinkage = Number(ri.shrinkageRatio) || 0;
-        // Gross per child: if grossWeightPerPortionG is set, use it; otherwise net / (1 - shrinkage)
-        const grossG = Number(ri.grossWeightPerPortionG) || (shrinkage < 1 ? netG / (1 - shrinkage) : netG);
-
-        const currentNetG = netG * portionsCount;
-        const currentGrossG = grossG * portionsCount;
-
-        if (map.has(key)) {
-          const existing = map.get(key)!;
-          existing.netTotalG += currentNetG;
-          existing.grossTotalG += currentGrossG;
-          existing.grossTotalKg = Number((existing.grossTotalG / 1000).toFixed(2));
-          if (!existing.dishesUsed.includes(dish.name)) {
-            existing.dishesUsed.push(dish.name);
-          }
-        } else {
-          map.set(key, {
-            id: key,
-            name: food.name,
-            category: food.category || 'Nguyên liệu',
-            unit: food.defaultUnit || 'kg',
-            refuseRate: Math.round(shrinkage * 100),
-            netTotalG: currentNetG,
-            grossTotalG: currentGrossG,
-            grossTotalKg: Number((currentGrossG / 1000).toFixed(2)),
-            dishesUsed: [dish.name],
-          });
-        }
-      });
-    });
-
-    if (foundWarnings.length > 0 && warnings.length === 0) {
-      setWarnings(Array.from(new Set(foundWarnings)));
+  // Handle manual portions update
+  const handleApplyCustomPortions = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = Number(customPortionsInput);
+    if (!isNaN(val) && val > 0) {
+      fetchSuggestion(val);
     }
+  };
 
-    let result = Array.from(map.values());
+  const handleResetToTotalStudents = () => {
+    if (data) {
+      setCustomPortionsInput(String(data.totalStudents));
+      fetchSuggestion(data.totalStudents);
+    }
+  };
 
-    // Search filter
+  // Filtered ingredients
+  const filteredIngredients = useMemo(() => {
+    if (!data) return [];
+    let list = data.ingredients;
+
     if (searchQuery.trim()) {
-      result = result.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (i) =>
+          i.name.toLowerCase().includes(q) ||
+          i.category.toLowerCase().includes(q) ||
+          i.dishesUsed.some((d) => d.toLowerCase().includes(q))
       );
     }
 
-    // Category filter
     if (categoryFilter !== 'ALL') {
-      result = result.filter((item) => item.category === categoryFilter);
+      list = list.filter((i) => i.category === categoryFilter);
     }
 
-    return result.sort((a, b) => b.grossTotalKg - a.grossTotalKg);
+    return list;
+  }, [data, searchQuery, categoryFilter]);
+
+  // Export to Excel using xlsx library
+  const handleExportExcel = () => {
+    if (!data || filteredIngredients.length === 0) return;
+
+    try {
+      // 1. Prepare worksheet rows
+      const worksheetData: any[] = [];
+
+      // Header information
+      worksheetData.push(['TRƯỜNG MẦM NON BÁN TRÚ HUỚNG DƯƠNG']);
+      worksheetData.push(['BẢNG DỰ TRÙ MUA HÀNG & KHỐI LƯỢNG THÔ (GROSS WEIGHT)']);
+      worksheetData.push([]);
+      worksheetData.push(['Ngày đi chợ:', data.date, '', 'Thứ:', data.dayOfWeekLabel]);
+      worksheetData.push(['Thực đơn áp dụng:', data.menuTitle]);
+      worksheetData.push(['Ca ăn:', mealFilter === 'ALL' ? 'Tất cả các bữa' : mealFilter]);
+      worksheetData.push(['Tổng sĩ số học sinh các lớp:', `${data.totalStudents} học sinh`]);
+      worksheetData.push(['Số suất tính toán mua hàng:', `${data.portionsCount} suất`]);
+      worksheetData.push([]);
+
+      // Table columns
+      worksheetData.push([
+        'STT',
+        'Tên Nguyên Liệu',
+        'Nhóm Thực Phẩm',
+        'Đơn Vị',
+        'Tỉ Lệ Thải Bỏ (%)',
+        'Định Lượng Tinh/Suất (g)',
+        'Định Lượng Thô/Suất (g)',
+        'Tổng Mua Đi Chợ (kg)',
+        'Hao Hụt Sơ Chế (kg)',
+        'Món Ăn Sử Dụng',
+      ]);
+
+      // Table body
+      filteredIngredients.forEach((item, index) => {
+        worksheetData.push([
+          index + 1,
+          item.name,
+          item.category,
+          item.unit,
+          `${item.refuseRatePercent}%`,
+          item.netPerPortionG,
+          item.grossPerPortionG,
+          item.totalGrossKg,
+          item.refuseLossKg,
+          item.dishesUsed.join(', '),
+        ]);
+      });
+
+      // Total summary row
+      worksheetData.push([]);
+      worksheetData.push([
+        'TỔNG CỘNG',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        data.summary.totalGrossKg,
+        data.summary.totalRefuseLossKg,
+        `${data.summary.totalIngredients} loại nguyên liệu`,
+      ]);
+
+      // Signatures
+      worksheetData.push([]);
+      worksheetData.push([]);
+      worksheetData.push([
+        'NGƯỜI LẬP PHIẾU',
+        '',
+        '',
+        'BẾP TRƯỞNG TIẾP NHẬN',
+        '',
+        '',
+        'BAN GIÁM HIỆU DUYỆT',
+      ]);
+      worksheetData.push(['(Ký và ghi rõ họ tên)', '', '', '(Ký và ghi rõ họ tên)', '', '', '(Ký và đóng dấu)']);
+
+      // 2. Generate worksheet and workbook
+      const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+
+      // Auto-fit column widths
+      ws['!cols'] = [
+        { wch: 6 }, // STT
+        { wch: 30 }, // Tên
+        { wch: 25 }, // Nhóm
+        { wch: 8 }, // Đơn vị
+        { wch: 18 }, // Tỉ lệ
+        { wch: 22 }, // Net
+        { wch: 22 }, // Gross
+        { wch: 20 }, // Tổng kg
+        { wch: 18 }, // Hao hụt
+        { wch: 40 }, // Món ăn
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'DuTruMuaHang');
+
+      // 3. Trigger download
+      const filename = `Bang_Du_Tru_Mua_Hang_${data.date}_${data.portionsCount}_suat.xlsx`;
+      XLSX.writeFile(wb, filename);
+
+      setExportNotice(`Đã xuất file thành công: ${filename}`);
+      setTimeout(() => setExportNotice(null), 4000);
+    } catch (err) {
+      console.error('Lỗi xuất file Excel:', err);
+      alert('Không thể xuất file Excel. Vui lòng thử lại!');
+    }
   };
 
-  const ingredientsList = calculateGrossSummary();
-  const totalGrossKg = ingredientsList.reduce((sum, item) => sum + item.grossTotalKg, 0);
-  const totalItemsCount = ingredientsList.length;
-
-  const categories = Array.from(new Set(ingredientsList.map((i) => i.category)));
-
-  // Mock export action
-  const handleExport = (format: 'Excel' | 'PDF') => {
-    setExportSuccess(`Đã xuất bảng dự trù mua hàng thành công (${format})! Đang tải file...`);
-    setTimeout(() => setExportSuccess(null), 4000);
+  // Print Order Form
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 font-sans">
-      {/* ─── HEADER UC-92 ─── */}
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 font-sans">
+      {/* ─── 1. HEADER SECTION ─── */}
+      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2.5 mb-2">
-            <span className="bg-emerald-400/25 border border-emerald-400/40 text-emerald-300 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              UC-92 • ITERATION 5
+            <span className="bg-emerald-400/25 border border-emerald-400/40 text-emerald-300 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+              <ShoppingCart className="w-3.5 h-3.5" /> BẢNG ĐI CHỢ & MUA HÀNG
             </span>
-            <span className="text-emerald-200 text-xs font-medium">BGH & Chuyên gia Dinh dưỡng</span>
+            <span className="text-emerald-200 text-xs font-medium">Bếp Bán Trú & Dinh Dưỡng</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Dự Trù Mua Hàng & Khối Lượng Thô (Gross Weight)
+            Tính Khối Lượng Đi Chợ Dự Kiến (Gross Weight)
           </h1>
-          <p className="text-sm text-emerald-100/90 mt-1 max-w-2xl">
-            Tự động quy đổi từ định lượng tịnh (Net Weight) sang khối lượng đi chợ nguyên trạng (Gross Weight) dựa trên thực đơn đã duyệt và tỷ lệ thải bỏ sơ chế.
+          <p className="text-sm text-emerald-100/90 mt-1 max-w-3xl leading-relaxed">
+            Hệ thống tự động tính toán số kg nguyên liệu thực tế cần mua dựa trên{' '}
+            <strong className="text-emerald-300">Tổng số học sinh các lớp</strong>, thực đơn đã phê duyệt và{' '}
+            <strong className="text-amber-300">Tỉ lệ thải bỏ sơ chế (%)</strong> theo tiêu chuẩn Viện Dinh Dưỡng.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap">
           <button
-            onClick={() => handleExport('Excel')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-emerald-900 font-bold text-sm shadow hover:bg-emerald-50 transition active:scale-95"
+            onClick={handleExportExcel}
+            disabled={!data || loading}
+            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-bold rounded-2xl shadow-lg transition flex items-center gap-2 text-sm disabled:opacity-50"
+            title="Tải bảng dự trù đi chợ ra file Excel (.xlsx)"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-            Xuất Excel đi chợ
+            <Download className="w-4 h-4" /> Xuất Excel Đi Chợ
           </button>
           <button
-            onClick={() => handleExport('PDF')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-700/60 hover:bg-emerald-700 text-white font-bold text-sm border border-emerald-500/40 transition active:scale-95"
+            onClick={handlePrint}
+            disabled={!data || loading}
+            className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white font-semibold rounded-2xl shadow-sm transition flex items-center gap-2 text-sm disabled:opacity-50"
+            title="In phiếu mua hàng cho nhà bếp"
           >
-            <Printer className="w-4 h-4" />
-            In phiếu dự trù
+            <Printer className="w-4 h-4" /> In Phiếu Mua Hàng
           </button>
         </div>
       </div>
 
-      {/* ─── THÔNG BÁO XUẤT FILE ─── */}
-      {exportSuccess && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl flex items-center gap-3 shadow-xs animate-in fade-in duration-300">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <span className="font-semibold text-sm">{exportSuccess}</span>
+      {/* Export notification popup */}
+      {exportNotice && (
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-3 rounded-2xl flex items-center justify-between text-sm shadow-sm animate-fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span>{exportNotice}</span>
+          </div>
+          <button onClick={() => setExportNotice(null)} className="text-emerald-700 hover:text-emerald-900">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
-      {/* ─── CẢNH BÁO EX-01: MÓN ĂN THIẾU CÔNG THỨC ─── */}
-      {warnings.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-2xl space-y-1.5 shadow-xs">
-          <div className="flex items-center gap-2 font-bold text-sm text-amber-800">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            Cảnh báo thiếu công thức định lượng (EX-01)
+      {/* ─── 2. BANNER SĨ SỐ HỌC SINH CÁC LỚP & ĐIỀU CHỈNH SUẤT ĂN ─── */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        {/* Khối bên trái: Tổng sĩ số các lớp */}
+        <div className="flex items-center gap-4">
+          <div className="w-13 h-13 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 shadow-inner">
+            <Users className="w-7 h-7" />
           </div>
-          <ul className="text-xs list-disc list-inside text-amber-700 space-y-0.5">
-            {warnings.map((w, idx) => (
-              <li key={idx}>{w}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* ─── FILTER CONTROL BAR ─── */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Chọn thực đơn duyệt */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                Thực đơn duyệt (PRE-02)
-              </label>
-              <select
-                value={selectedMenu?.id || ''}
-                onChange={(e) => {
-                  const m = menus.find((item) => item.id === e.target.value);
-                  if (m) setSelectedMenu(m);
-                }}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              >
-                {menus.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.title}
-                  </option>
-                ))}
-              </select>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Sĩ Số Nền (Tổng Học Sinh Các Lớp)
+              </span>
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full">
+                CSDL Thực Tế
+              </span>
             </div>
-
-            {/* Bữa ăn */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                Bữa ăn
-              </label>
-              <select
-                value={mealFilter}
-                onChange={(e: any) => setMealFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              >
-                <option value="ALL">Tất cả các bữa trong ngày</option>
-                <option value="LUNCH">Bữa trưa chính (10h30)</option>
-                <option value="AFTERNOON_SNACK">Bữa xế chiều (14h30)</option>
-                <option value="BREAKFAST">Bữa sáng (7h00)</option>
-              </select>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-3xl font-black text-slate-900">
+                {data ? data.totalStudents : '...'}
+              </span>
+              <span className="text-sm font-semibold text-slate-600">học sinh toàn trường</span>
+              {data && (
+                <button
+                  type="button"
+                  onClick={() => setShowClassModal(true)}
+                  className="ml-2 text-xs font-bold text-emerald-700 hover:text-emerald-800 underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5" /> Xem chi tiết 6 lớp
+                </button>
+              )}
             </div>
-
-            {/* Số suất ăn */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                Số suất ăn dự kiến
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  max="1000"
-                  value={portionsCount}
-                  onChange={(e) => setPortionsCount(Math.max(1, Number(e.target.value)))}
-                  className="w-24 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-                <span className="text-xs text-slate-500 font-medium">trẻ</span>
-              </div>
-            </div>
-          </div>
-
-          {/* KPI Tóm Tắt */}
-          <div className="flex items-center gap-4 border-l border-slate-100 pl-4">
-            <div className="text-right">
-              <span className="text-[11px] font-bold text-slate-400 block uppercase">Tổng loại mặt hàng</span>
-              <span className="text-xl font-black text-slate-800">{totalItemsCount} nguyên liệu</span>
-            </div>
-            <div className="text-right bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
-              <span className="text-[11px] font-bold text-emerald-700 block uppercase">Tổng trọng lượng thô</span>
-              <span className="text-xl font-black text-emerald-800">{totalGrossKg.toFixed(1)} kg</span>
-            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Hệ thống tự động tính khối lượng mua theo tổng số học sinh đang hoạt động của các lớp.
+            </p>
           </div>
         </div>
 
-        {/* Tìm kiếm & lọc phân loại */}
-        <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Khối bên phải: Tùy chỉnh số suất ăn nếu bếp muốn đệm thêm */}
+        <form
+          onSubmit={handleApplyCustomPortions}
+          className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/80 shrink-0"
+        >
+          <div className="text-right pr-1">
+            <label className="block text-xs font-bold text-slate-700">Số suất ăn đi chợ:</label>
+            <span className="text-[11px] text-slate-500">
+              {data && data.isCustomPortions ? '(Đã tùy chỉnh)' : '(Chuẩn theo sĩ số)'}
+            </span>
+          </div>
+
+          <div className="relative">
             <input
-              type="text"
-              placeholder="Tìm kiếm tên thực phẩm / nguyên liệu..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              type="number"
+              min="1"
+              max="999"
+              value={customPortionsInput}
+              onChange={(e) => setCustomPortionsInput(e.target.value)}
+              className="w-24 bg-white border border-slate-300 rounded-xl px-3 py-2 text-base font-black text-slate-900 text-center focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500 font-medium">Nhóm:</span>
+          <button
+            type="submit"
+            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition active:scale-95 shadow-xs"
+          >
+            Tính lại
+          </button>
+
+          {data && data.isCustomPortions && (
+            <button
+              type="button"
+              onClick={handleResetToTotalStudents}
+              className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition"
+              title="Đặt lại theo đúng tổng sĩ số học sinh"
+            >
+              Về sĩ số ({data.totalStudents})
+            </button>
+          )}
+        </form>
+      </div>
+
+      {/* ─── 3. FILTER BAR: NGÀY, CA ĂN, NHÓM THỰC PHẨM & TÌM KIẾM ─── */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Chọn ngày đi chợ */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-emerald-600" /> Ngày đi chợ / nấu ăn:
+            </label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 hover:border-slate-400 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
+          {/* Chọn ca ăn */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+              <Utensils className="w-3.5 h-3.5 text-emerald-600" /> Ca ăn cần mua:
+            </label>
+            <select
+              value={mealFilter}
+              onChange={(e) => setMealFilter(e.target.value as any)}
+              className="w-full bg-slate-50 border border-slate-300 hover:border-slate-400 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            >
+              <option value="ALL">🍽️ Tất cả các ca ăn (Cả ngày)</option>
+              <option value="LUNCH">☀️ Bữa trưa chính (10:30)</option>
+              <option value="AFTERNOON_SNACK">🧁 Bữa xế chiều (14:30)</option>
+              <option value="MORNING_SNACK">🥛 Bữa phụ sáng (08:30)</option>
+            </select>
+          </div>
+
+          {/* Nhóm nguyên liệu */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-emerald-600" /> Nhóm thực phẩm:
+            </label>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-medium text-slate-700 focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-300 hover:border-slate-400 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             >
-              <option value="ALL">Tất cả nhóm ({ingredientsList.length})</option>
-              {categories.map((c) => (
+              <option value="ALL">Tất cả nhóm thực phẩm</option>
+              {data?.categories.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* Tìm kiếm */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5 text-slate-400" /> Tìm nguyên liệu / món ăn:
+            </label>
+            <input
+              type="text"
+              placeholder="Ví dụ: Thịt heo, bí đỏ, cá..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 hover:border-slate-400 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder:text-slate-400"
+            />
+          </div>
         </div>
+
+        {/* Thông tin thực đơn tìm thấy */}
+        {data && (
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700">Thực đơn áp dụng:</span>
+              <span className="bg-slate-100 text-slate-800 font-semibold px-2.5 py-1 rounded-lg border border-slate-200">
+                {data.menuTitle}
+              </span>
+              <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                {data.dayOfWeekLabel}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-500">
+              <span>Các món trong ngày:</span>
+              <span className="font-semibold text-slate-700">
+                {data.dishesInDay.slice(0, 4).join(', ')}
+                {data.dishesInDay.length > 4 ? ` và ${data.dishesInDay.length - 4} món khác` : ''}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ─── DANH SÁCH BẢNG DỰ TRÙ GROSS WEIGHT ─── */}
+      {/* ─── 4. METRIC CARDS ─── */}
+      {data && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Tổng khối lượng Gross cần mua */}
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-700 text-white rounded-3xl p-5 shadow-md flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-100">
+                Tổng Mua Đi Chợ (Gross)
+              </p>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-3xl font-black">{data.summary.totalGrossKg}</span>
+                <span className="text-sm font-bold text-emerald-100">kg</span>
+              </div>
+              <p className="text-[11px] text-emerald-100/90 mt-1">
+                Cho {data.portionsCount} suất ăn trong ngày
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+              <ShoppingCart className="w-6 h-6 text-white" />
+            </div>
+          </div>
+
+          {/* Card 2: Tổng khối lượng Net ăn vào */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Khối Lượng Tinh Tiêu Thụ (Net)
+              </p>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-3xl font-black text-slate-900">{data.summary.totalNetKg}</span>
+                <span className="text-sm font-bold text-slate-500">kg</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">Lượng thực phẩm trẻ ăn vào thực tế</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
+              <Scale className="w-6 h-6" />
+            </div>
+          </div>
+
+          {/* Card 3: Hao hụt sơ chế (Refuse loss) */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Hao Hụt Sơ Chế Thải Bỏ
+              </p>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-3xl font-black text-amber-600">
+                  {data.summary.totalRefuseLossKg}
+                </span>
+                <span className="text-sm font-bold text-slate-500">kg</span>
+              </div>
+              <p className="text-[11px] text-amber-600 font-semibold mt-1">
+                Chiếm ~
+                {data.summary.totalGrossKg > 0
+                  ? Math.round(
+                      (data.summary.totalRefuseLossKg / data.summary.totalGrossKg) * 100
+                    )
+                  : 0}
+                % vỏ, xương, cuống rau bỏ đi
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+              <Trash2 className="w-6 h-6" />
+            </div>
+          </div>
+
+          {/* Card 4: Số loại nguyên liệu */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Chủng Loại Thực Phẩm
+              </p>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-3xl font-black text-slate-900">
+                  {filteredIngredients.length}
+                </span>
+                <span className="text-sm font-bold text-slate-500">loại</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Trong {data.summary.categoriesCount} nhóm dinh dưỡng
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 shrink-0">
+              <Layers className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 5. MAIN DATA TABLE ─── */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
-        {ingredientsList.length === 0 ? (
-          <div className="p-12 text-center space-y-3">
-            <ShoppingCart className="w-12 h-12 text-slate-300 mx-auto" />
-            <h3 className="text-base font-bold text-slate-700">Không tìm thấy dữ liệu nguyên liệu phù hợp (A.1)</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Vui lòng kiểm tra lại bộ lọc bữa ăn hoặc chọn tuần có thực đơn đã được phê duyệt.
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900">
+              Chi Tiết Khối Lượng Nguyên Liệu Cần Mua Hôm Nay
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Công thức: Gross = Net / (1 - Tỉ lệ thải bỏ %). Nhân theo{' '}
+              <strong className="text-slate-700">{data?.portionsCount || 0} suất</strong> ăn.
             </p>
           </div>
-        ) : (
+
+          <div className="text-xs text-slate-500 font-medium">
+            Hiển thị <strong>{filteredIngredients.length}</strong> nguyên liệu
+          </div>
+        </div>
+
+        {/* Loading state */}
+        {loading && (
+          <div className="p-16 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
+            <p className="text-sm font-semibold">Đang truy vấn dữ liệu CSDL và tính toán đi chợ...</p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {!loading && error && (
+          <div className="p-12 text-center flex flex-col items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800">Không thể tải dữ liệu</h3>
+            <p className="text-xs text-slate-500 max-w-md">{error}</p>
+            <button
+              onClick={() => fetchSuggestion()}
+              className="mt-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition"
+            >
+              Thử lại
+            </button>
+          </div>
+        )}
+
+        {/* Data table */}
+        {!loading && !error && data && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 w-12 text-center">STT</th>
-                  <th className="py-3.5 px-4">Tên thực phẩm / Nguyên liệu</th>
-                  <th className="py-3.5 px-4">Nhóm nguyên liệu</th>
-                  <th className="py-3.5 px-4 text-right">Khối lượng Tịnh (Net)</th>
-                  <th className="py-3.5 px-4 text-center">Tỷ lệ thải bỏ sơ chế</th>
-                  <th className="py-3.5 px-4 text-right font-black text-emerald-800">
-                    Khối lượng Thô cần mua (Gross)
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-wider">
+                  <th className="py-3.5 px-4 text-center w-12">STT</th>
+                  <th className="py-3.5 px-4">Tên Nguyên Liệu</th>
+                  <th className="py-3.5 px-4">Nhóm Thực Phẩm</th>
+                  <th className="py-3.5 px-4 text-center">ĐVT</th>
+                  <th className="py-3.5 px-4 text-center">Tỉ Lệ Thải Bỏ</th>
+                  <th className="py-3.5 px-4 text-right">Net / Suất</th>
+                  <th className="py-3.5 px-4 text-right">Gross / Suất</th>
+                  <th className="py-3.5 px-4 text-right bg-emerald-50/80 text-emerald-900 font-black">
+                    Tổng Mua (kg)
                   </th>
-                  <th className="py-3.5 px-4">Món ăn sử dụng</th>
+                  <th className="py-3.5 px-4 text-right text-slate-500">Hao Hụt (kg)</th>
+                  <th className="py-3.5 px-4">Món Ăn Sử Dụng</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {ingredientsList.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition">
-                    <td className="py-3.5 px-4 text-center font-bold text-slate-400">{index + 1}</td>
-                    <td className="py-3.5 px-4 font-bold text-slate-800">
-                      <div className="flex items-center gap-2">
-                        <span>{item.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-slate-100 font-semibold text-slate-600 text-[11px]">
-                        {item.category}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-semibold text-slate-600">
-                      {(item.netTotalG / 1000).toFixed(2)} kg
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60 text-[11px]">
-                        {item.refuseRate}%
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <span className="font-extrabold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200/70">
-                        {item.grossTotalKg} kg
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {item.dishesUsed.map((dishName, dIdx) => (
-                          <span
-                            key={dIdx}
-                            className="bg-teal-50 border border-teal-200/50 text-teal-800 px-2 py-0.5 rounded-lg text-[10px] font-medium"
-                          >
-                            {dishName}
-                          </span>
-                        ))}
-                      </div>
+              <tbody className="divide-y divide-slate-100">
+                {filteredIngredients.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="py-12 text-center text-slate-400">
+                      Không tìm thấy nguyên liệu nào phù hợp với bộ lọc.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredIngredients.map((item, index) => (
+                    <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4 text-center font-bold text-slate-400 text-xs">
+                        {index + 1}
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span className="font-bold text-slate-900">{item.name}</span>
+                      </td>
+
+                      <td className="py-3 px-4">
+                        <span className="inline-block bg-slate-100 text-slate-700 text-[11px] font-semibold px-2 py-0.5 rounded-md">
+                          {item.category}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-4 text-center text-slate-600 font-medium">
+                        {item.unit}
+                      </td>
+
+                      {/* Tỉ lệ thải bỏ % */}
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                            item.refuseRatePercent === 0
+                              ? 'bg-slate-100 text-slate-600'
+                              : item.refuseRatePercent <= 15
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {item.refuseRatePercent}%
+                        </span>
+                      </td>
+
+                      {/* Net mỗi suất */}
+                      <td className="py-3 px-4 text-right text-slate-700 font-medium">
+                        {item.netPerPortionG} g
+                      </td>
+
+                      {/* Gross mỗi suất */}
+                      <td className="py-3 px-4 text-right text-slate-800 font-bold">
+                        {item.grossPerPortionG} g
+                      </td>
+
+                      {/* Cột TỔNG MUA (KG) - Nổi bật nhất */}
+                      <td className="py-3 px-4 text-right bg-emerald-50/80 font-black text-emerald-700 text-sm sm:text-base">
+                        {item.totalGrossKg}{' '}
+                        <span className="text-xs font-semibold text-emerald-600">kg</span>
+                      </td>
+
+                      {/* Hao hụt sơ chế */}
+                      <td className="py-3 px-4 text-right text-slate-500 font-medium text-xs">
+                        {item.refuseLossKg > 0 ? `${item.refuseLossKg} kg` : '0 kg'}
+                      </td>
+
+                      {/* Danh sách món ăn */}
+                      <td className="py-3 px-4">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {item.dishesUsed.map((dish, i) => (
+                            <span
+                              key={i}
+                              className="bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-md"
+                            >
+                              {dish}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
+              {filteredIngredients.length > 0 && (
+                <tfoot>
+                  <tr className="bg-slate-100/90 font-black text-slate-900 border-t-2 border-slate-300">
+                    <td colSpan={7} className="py-3.5 px-4 text-right uppercase tracking-wider text-xs">
+                      TỔNG CỘNG ({filteredIngredients.length} NGUYÊN LIỆU):
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-emerald-800 text-base font-black bg-emerald-100/80">
+                      {data.summary.totalGrossKg} kg
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-amber-700 text-xs font-bold">
+                      {data.summary.totalRefuseLossKg} kg
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         )}
       </div>
+
+      {/* ─── MODAL XEM CHI TIẾT SĨ SỐ 6 LỚP ─── */}
+      {showClassModal && data && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Chi Tiết Sĩ Số Các Lớp</h3>
+                  <p className="text-xs text-slate-500">Cơ sở dữ liệu học sinh đang hoạt động</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowClassModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-2 max-h-80 overflow-y-auto">
+              {data.classesBreakdown.map((cls, idx) => (
+                <div
+                  key={cls.classId}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 text-center text-xs font-bold text-slate-400">
+                      #{idx + 1}
+                    </span>
+                    <div>
+                      <p className="font-bold text-slate-800 text-sm">{cls.className}</p>
+                      <p className="text-[11px] text-slate-500">Khối: {cls.ageGroup}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-base font-black text-emerald-700">
+                      {cls.studentCount}
+                    </span>
+                    <span className="text-xs font-medium text-slate-500 ml-1">học sinh</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-bold uppercase">Tổng Sĩ Số Toàn Trường:</span>
+              <span className="text-lg font-black text-emerald-700">
+                {data.totalStudents} học sinh
+              </span>
+            </div>
+
+            <button
+              onClick={() => setShowClassModal(false)}
+              className="mt-4 w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs transition"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
