@@ -400,6 +400,11 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                 </div>
               </div>
 
+              <div className="sm:col-span-2 lg:col-span-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900">
+                <p className="font-bold">Bữa trưa luôn có cơm</p>
+                <p className="mt-1">Thứ Hai–Thứ Năm: cơm thường kèm món mặn. Thứ Sáu: cơm chiên Dương Châu hoặc cơm chiên hải sản, không kèm món mặn riêng.</p>
+              </div>
+
               {/* Tùy chọn Bữa sáng & Phụ sáng */}
               <div className="sm:col-span-2 lg:col-span-4 flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
                 <div className="flex items-center gap-3">

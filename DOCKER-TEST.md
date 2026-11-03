@@ -1,5 +1,11 @@
 # Docker test với database mới nhất từ kiet
 
+Quy tắc bữa trưa bổ sung ngày 03/11/2026: thứ Hai–thứ Năm có cơm thường và món mặn; thứ Sáu có cơm chiên Dương Châu/hải sản và không có món mặn riêng. Quy tắc áp dụng cho thực đơn tạo tự động mới, cả xem trước và lưu. Thiếu loại cơm đủ dữ liệu thì báo lỗi rõ ràng. Cơm thường được phép lặp lại giữa các ngày.
+
+Migration `20261103-lunch-rice-recipes.sql` phục hồi ba công thức tham khảo từ định lượng seed lưu trữ: cơm thường, một món Dương Châu và một món cơm chiên hải sản. Không thay đổi công thức đã tồn tại. Nguồn, ID công thức cũ và trạng thái tham khảo được lưu trong metadata; đây không phải định lượng bếp mới được đo/xác minh. Chạy `node scripts/prepare-lunch-rice.cjs` để sinh lại migration. Image database mới nạp migration này ở bước 07; volume hiện tại đã áp dụng sau khi sao lưu. Các thực đơn đã lưu trước thay đổi cần tạo lại để áp dụng quy tắc mới.
+
+Kiểm tra quy tắc cơm: 9 test liên quan pass, gồm giữ đúng thứ Sáu khi lưu hai quy ước đánh số ngày, từ chối kế hoạch thiếu cơm hoặc thêm món mặn vào thứ Sáu. Đã kiểm tra API xem trước cho hai tuần 09/11 và 16/11/2026: cả 10 bữa trưa đều đúng cơ cấu; kế hoạch thứ Sáu có món mặn bị từ chối HTTP 400 trước khi lưu. Việc đúng cơ cấu bữa không thay thế các cảnh báo dinh dưỡng còn lại của thực đơn. Migration đã chạy lặp hai lần không nhân đôi công thức.
+
 Đồng bộ ngày 03/11/2026 từ các thay đổi database mới nhất trong working tree nhánh `kiet`, trên nền nhánh `test` commit `1792b0c`. Nhánh `kiet` và Docker cũ không bị sửa.
 
 ## Khởi chạy

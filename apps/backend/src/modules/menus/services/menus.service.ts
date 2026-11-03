@@ -21,6 +21,7 @@ import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
 import { DishFrequencyRule } from '../../nutrition-engine/entities/dish-frequency-rule.entity';
 import { DishSpacingRule } from '../../nutrition-engine/entities/dish-spacing-rule.entity';
 import { NutritionIntakeStandard } from '../../nutrition-engine/entities/nutrition-intake-standard.entity';
+import { isFriedRice, isFriday, validateLunchRice } from './lunch-rice-policy';
 
 // â”€â”€ Helper: Fisher-Yates shuffle for true randomness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function shuffleArray<T>(arr: T[]): T[] {
@@ -1133,6 +1134,16 @@ export class MenusService implements OnModuleInit {
       throw new BadRequestException('Chưa có món ăn có công thức định lượng được xác nhận để tự động lập thực đơn.');
     }
 
+    const plainRicePool = dishPool.RICE.filter(dish => !isFriedRice(dish.name));
+    const friedRicePool = dishPool.RICE.filter(dish => isFriedRice(dish.name));
+    for (let index = 0; index < daysCount; index++) {
+      if (isFriday(weekStartDate, index)) {
+        if (!friedRicePool.length) throw new BadRequestException('Chưa có cơm chiên đủ công thức và dinh dưỡng cho bữa trưa thứ Sáu.');
+      } else if (!plainRicePool.length || !dishPool.MAIN.length) {
+        throw new BadRequestException('Chưa có cơm thường hoặc món mặn đủ công thức và dinh dưỡng cho bữa trưa.');
+      }
+    }
+
     // ── Step 3: Quét chu kỳ 4 tuần qua menu_cycles & lịch sử thực đơn ────────
     const activeCycle = await this.cycleRepo.findOne({
       where: { ageGroup, status: 'ACTIVE' },
@@ -1238,6 +1249,7 @@ export class MenusService implements OnModuleInit {
     for (let dayIndex = 0; dayIndex < daysCount; dayIndex++) {
       const dayOfWeek = dayIndex + 1; // 1 = T2 ... 5 = T6
       const dayName = dayNames[dayIndex] || `Ngày ${dayIndex + 1}`;
+      const fridayLunch = isFriday(weekStartDate, dayIndex);
 
       let bestPlan: DayMealPlan | null = null;
       let bestScore = -Infinity;
@@ -1265,7 +1277,7 @@ export class MenusService implements OnModuleInit {
 
         // 2. Bữa trưa chính (LUNCH): Cơm + Món chính + Canh + Tráng miệng
         // Cơm (RICE) ~172-269 Kcal (cho phép lặp lại vì số lượng món tinh bột hạn chế)
-        const riceDish = this.pickDish(shuffleArray(dishPool.RICE), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 20);
+        const riceDish = this.pickDish(shuffleArray(fridayLunch ? friedRicePool : plainRicePool), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 20);
         if (riceDish) {
           dayDishes.push({
             dishId: String(riceDish.id),
@@ -1282,7 +1294,7 @@ export class MenusService implements OnModuleInit {
         }
 
         // Món chính (MAIN) ~60-144 Kcal (tuyệt đối không lặp lại trong tuần & không vượt chu kỳ 4 tuần)
-        const mainDish = this.pickDish(shuffleArray(dishPool.MAIN), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 35);
+        const mainDish = fridayLunch ? null : this.pickDish(shuffleArray(dishPool.MAIN), usedDishIdsThisWeek, previousDayDishIds, recentDishIds, cycleExclusionDishIds, attempt > 35);
         if (mainDish) {
           dayDishes.push({
             dishId: String(mainDish.id),
@@ -1558,6 +1570,14 @@ export class MenusService implements OnModuleInit {
       ? dto.dailyPlan
       : dailySummary;
 
+    const planDayOffset = planToSave.some(day => day.dayOfWeek === 1) ? 0 : 1;
+    const eligibleDishes = allDishes.filter(dish => hasVerifiedNutrition(dish) && Number(dish.nutrition.energyKcal) > 0);
+    for (let index = 0; index < daysCount; index++) {
+      const dayPlan = planToSave.find(day => day.dayOfWeek === index + 1 + planDayOffset);
+      if (!dayPlan?.dishes) throw new BadRequestException('Kế hoạch thực đơn chưa đủ các ngày yêu cầu.');
+      validateLunchRice(dayPlan.dishes, isFriday(weekStartDate, index), eligibleDishes);
+    }
+
     const created = await this.create(
       {
         title,
@@ -1584,11 +1604,8 @@ export class MenusService implements OnModuleInit {
 
       for (let i = 0; i < days.length; i++) {
         const day = days[i];
-        // Khớp dayPlan qua dayOfWeek (hỗ trợ cả hệ 1..5 và 2..6)
-        const dayPlan = planToSave.find((p: any) =>
-          p.dayOfWeek === day.dayOfWeek ||
-          p.dayOfWeek === (day.dayOfWeek - 1)
-        ) || planToSave[i];
+        // DB uses 2..6; preview uses 1..5. Select one convention for the entire plan.
+        const dayPlan = planToSave.find(p => p.dayOfWeek === day.dayOfWeek - 1 + planDayOffset);
 
         if (!dayPlan || !dayPlan.dishes) continue;
 
@@ -1634,6 +1651,8 @@ export class MenusService implements OnModuleInit {
       return dynamicLimits.get(categoryCode)!;
     }
     switch (categoryCode) {
+      case 'RICE':
+        return 20; // One rice dish per lunch across four school weeks; plain rice may repeat.
       case 'MAIN':
         return 2; // Món mặn tối đa 2 lần trong chu kỳ 4 tuần
       case 'SOUP':
