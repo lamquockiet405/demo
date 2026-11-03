@@ -37,6 +37,27 @@ export class Menu {
   @Column({ name: 'created_by', type: 'bigint', transformer: BigIntTransformer, nullable: true })
   createdBy: number;
 
+  @Column({ name: 'submitted_by', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  submittedBy: number;
+
+  @Column({ name: 'submitted_at', type: 'timestamptz', nullable: true })
+  submittedAt: Date;
+
+  @Column({ name: 'commitment_signed', default: false })
+  commitmentSigned: boolean;
+
+  @Column({ name: 'commitment_text', type: 'text', nullable: true })
+  commitmentText: string;
+
+  @Column({ name: 'commitment_items', type: 'jsonb', default: () => "'[]'::jsonb", nullable: true })
+  commitmentItems: string[];
+
+  @Column({ name: 'override_justification', type: 'text', nullable: true })
+  overrideJustification: string;
+
+  @Column({ name: 'violations_snapshot', type: 'jsonb', default: () => "'[]'::jsonb", nullable: true })
+  violationsSnapshot: any[];
+
   @Column({ name: 'approved_by', type: 'bigint', transformer: BigIntTransformer, nullable: true })
   approvedBy: number;
 
@@ -50,6 +71,10 @@ export class Menu {
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'created_by' })
   creator: User;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'submitted_by' })
+  submitter: User;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'approved_by' })

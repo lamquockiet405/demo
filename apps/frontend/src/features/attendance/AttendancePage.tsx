@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { AttendanceHistoryPage } from './AttendanceHistoryPage';
+import { MealEvaluationPage } from './MealEvaluationPage';
+import { MealCoordinationNotesPage } from './MealCoordinationNotesPage';
 import { AttendanceTopNav } from './components/AttendanceTopNav';
 import { AttendanceSubTabs } from './components/AttendanceSubTabs';
 import { AttendanceHeader } from './components/AttendanceHeader';
@@ -14,17 +17,51 @@ import { AttendanceResponse, ClassItem, ChildAttendanceItem, MealOption } from '
 import { Loader2, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { getKitchenSocket } from '../../core/socket';
 
-export const AttendancePage: React.FC = () => {
+interface AttendancePageProps {
+  initialActiveTab?: string;
+  onTabChange?: (tab: string) => void;
+  hideTopNav?: boolean;
+}
+
+export const AttendancePage: React.FC<AttendancePageProps> = ({
+  initialActiveTab,
+  onTabChange,
+  hideTopNav = false,
+}) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // State
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState<string>('f1000000-0000-0000-0000-000000000001');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-09-25');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [mealFilter, setMealFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<string>('attendance');
+  const [activeTab, setActiveTab] = useState<string>(
+    () => initialActiveTab || searchParams.get('tab') || 'attendance'
+  );
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (t: string) => {
+    setActiveTab(t);
+    onTabChange?.(t);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (t === 'attendance') {
+        next.delete('tab');
+      } else {
+        next.set('tab', t);
+      }
+      return next;
+    });
+  };
 
   // Attendance Data from Real Database
   const [attendanceData, setAttendanceData] = useState<AttendanceResponse | null>(null);
@@ -71,8 +108,9 @@ export const AttendancePage: React.FC = () => {
       try {
         const classList = await attendanceApi.getClasses();
         setClasses(classList);
-        if (classList.length > 0 && !selectedClassId) {
-          setSelectedClassId(classList[0].id);
+        if (classList.length > 0) {
+          const mam1 = classList.find((c) => c.name.includes('Mầm 1'));
+          setSelectedClassId(mam1 ? mam1.id : classList[0].id);
         }
       } catch (err) {
         console.error('Lỗi khi tải danh sách lớp học:', err);
@@ -95,6 +133,9 @@ export const AttendancePage: React.FC = () => {
         limit: 8,
       });
       setAttendanceData(data);
+      if (data?.kitchenConnection?.isLocked !== undefined) {
+        setIsLocked(Boolean(data.kitchenConnection.isLocked));
+      }
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu điểm danh:', err);
       showToast('Không thể kết nối máy chủ dữ liệu điểm danh', 'error');
@@ -200,12 +241,15 @@ export const AttendancePage: React.FC = () => {
     if (!selectedClassId) return;
     setIsLocking(true);
     try {
+      const nextLocked = !isLocked;
       const res = await attendanceApi.lockAndSendToKitchen({
         classId: selectedClassId,
         date: selectedDate,
+        isLocked: nextLocked,
       });
-      setIsLocked(true);
-      showToast(res.message || 'Đã khóa sổ và gửi số lượng suất ăn tới Bếp Trung Tâm');
+      setIsLocked(nextLocked);
+      showToast(res.message || (nextLocked ? 'Đã khóa sổ và gửi số lượng suất ăn tới Bếp Trung Tâm' : 'Đã mở khóa sổ điều chỉnh'));
+      fetchAttendance();
     } catch (err) {
       console.error('Lỗi khi khóa danh sách gửi bếp:', err);
       showToast('Lỗi khi gửi dữ liệu tới bếp', 'error');
@@ -250,6 +294,18 @@ export const AttendancePage: React.FC = () => {
     );
   };
 
+  if (activeTab === 'history') {
+    return <AttendanceHistoryPage onTabChange={handleTabChange} />;
+  }
+  if (activeTab === 'evaluation') {
+    return <MealEvaluationPage onTabChange={handleTabChange} />;
+  }
+    
+
+  if (activeTab === 'notes') {
+    return <MealCoordinationNotesPage onTabChange={handleTabChange} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 flex flex-col font-sans text-slate-800 antialiased selection:bg-teal-500 selection:text-white pb-16">
       {/* Toast Notification */}
@@ -278,18 +334,12 @@ export const AttendancePage: React.FC = () => {
       )}
 
       {/* 1. Top Navigation Bar */}
-      <AttendanceTopNav onSearch={(q) => setSearchQuery(q)} />
+      {!hideTopNav && <AttendanceTopNav onSearch={(q) => setSearchQuery(q)} />}
 
       {/* 2. Sub Navigation Tabs */}
       <AttendanceSubTabs
         activeTab={activeTab}
-        onTabChange={(t) => {
-          setActiveTab(t);
-          if (t === 'notes') navigate('/coordination-notes');
-          else if (t === 'evaluation') navigate('/evaluation');
-          else if (t === 'attendance') navigate('/attendance');
-          else if (t === 'history') navigate('/history');
-        }}
+        onTabChange={handleTabChange}
       />
 
       {/* 3. Main Content Container */}
@@ -364,7 +414,14 @@ export const AttendancePage: React.FC = () => {
               ...attendanceData.kitchenConnection,
               isLocked,
             }}
-            todayMenu={attendanceData.todayMenu}
+            todayMenu={{
+              week: (attendanceData.todayMenu as any)?.week ?? 10,
+              lunchTime: (attendanceData.todayMenu as any)?.lunchTime ?? '10:45 - 11:30',
+              lunchItems: (attendanceData.todayMenu as any)?.lunchItems ?? ['Cơm chiên Dương Châu', 'Cá lóc muối chiên', 'Canh thịt bằm bắp cải', 'Lê đường'],
+              snackTime: (attendanceData.todayMenu as any)?.snackTime ?? '14:30 - 15:00',
+              snackItems: (attendanceData.todayMenu as any)?.snackItems ?? ['Súp cua trứng cút', 'Sữa chua men sống'],
+              estimatedCalories: (attendanceData.todayMenu as any)?.estimatedCalories ?? 680,
+            }}
             onLockKitchen={handleLockKitchen}
             isLocking={isLocking}
           />

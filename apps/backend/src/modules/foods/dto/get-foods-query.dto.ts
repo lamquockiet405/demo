@@ -13,6 +13,20 @@ export class GetFoodsQueryDto {
   @Type(() => Number)
   categoryId?: number;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  category?: any;
+
+  @ApiPropertyOptional({ enum: ['SAFE', 'WARNING'] })
+  @IsOptional()
+  @IsString()
+  allergen?: string;
+
+  @ApiPropertyOptional({ enum: ['HIGH_PROTEIN', 'HIGH_CARB', 'HIGH_CALORIES'] })
+  @IsOptional()
+  @IsString()
+  nutrition?: string;
+
   @ApiPropertyOptional({ enum: ['ACTIVE', 'INACTIVE'] })
   @IsOptional()
   @IsString()

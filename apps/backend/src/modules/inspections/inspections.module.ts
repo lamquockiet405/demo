@@ -6,6 +6,8 @@ import { InspectionImage } from './entities/inspection-image.entity';
 import { InspectionsService } from './inspections.service';
 import { InspectionsController } from './inspections.controller';
 
+import { WebsocketModule } from '../websocket/websocket.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -13,6 +15,7 @@ import { InspectionsController } from './inspections.controller';
       InspectionSampleItem,
       InspectionImage,
     ]),
+    WebsocketModule,
   ],
   controllers: [InspectionsController],
   providers: [

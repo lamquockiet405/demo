@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { EvaluationSidebar } from './components/EvaluationSidebar';
 import { EvaluationHeader } from './components/EvaluationHeader';
 import { EvaluationSummaryCards } from './components/EvaluationSummaryCards';
 import { EvaluationFilterBar } from './components/EvaluationFilterBar';
@@ -13,8 +12,10 @@ import {
   ParentEvaluationSummaryStats,
 } from './types';
 import { ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../../core/stores/auth.store';
 
 export const ParentEvaluationsPage: React.FC = () => {
+  const { user } = useAuthStore();
   // Filter States
   const [search, setSearch] = useState<string>('');
   const [statusTab, setStatusTab] = useState<string>('ALL');
@@ -68,7 +69,7 @@ export const ParentEvaluationsPage: React.FC = () => {
       const updated = await parentEvaluationApi.respondToEvaluation(id, {
         responseContent,
         pushNotification,
-        respondedByName: 'Hiệu trưởng Nguyễn Thu Thủy',
+        respondedByName: user?.fullName || 'Ban Giám Hiệu',
         status: 'RESPONDED',
         isDrafting: false,
       });
@@ -141,8 +142,8 @@ export const ParentEvaluationsPage: React.FC = () => {
   };
 
   // Helper Pagination calculation
-  const totalItems = data?.pagination.totalItems ?? 418;
-  const totalPages = data?.pagination.totalPages ?? 105;
+  const totalItems = data?.pagination?.totalItems ?? 0;
+  const totalPages = data?.pagination?.totalPages ?? 1;
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
@@ -177,8 +178,8 @@ export const ParentEvaluationsPage: React.FC = () => {
               key={idx}
               onClick={() => setCurrentPage(p)}
               className={`w-8 h-8 rounded-xl font-bold text-xs transition ${currentPage === p
-                  ? 'bg-teal-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-teal-600 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-100'
                 }`}
             >
               {p}
@@ -202,112 +203,106 @@ export const ParentEvaluationsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50/60 font-sans">
-      {/* SIDEBAR: KidMeal BGH */}
-      <EvaluationSidebar />
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <EvaluationHeader
+        onExport={handleExport}
+        onOpenConfig={() => setIsSurveyModalOpen(true)}
+      />
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 min-w-0 p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <EvaluationHeader
-          onExport={handleExport}
-          onOpenConfig={() => setIsSurveyModalOpen(true)}
-        />
+      {/* 4 Summary KPI Cards */}
+      <EvaluationSummaryCards stats={data?.summaryStats} />
 
-        {/* 4 Summary KPI Cards */}
-        <EvaluationSummaryCards stats={data?.summaryStats} />
+      {/* Filter Bar */}
+      <EvaluationFilterBar
+        search={search}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setCurrentPage(1);
+        }}
+        statusTab={statusTab}
+        onStatusTabChange={(tab) => {
+          setStatusTab(tab);
+          setCurrentPage(1);
+        }}
+        ratingFilter={ratingFilter}
+        onRatingChange={(r) => {
+          setRatingFilter(r);
+          setCurrentPage(1);
+        }}
+        mealFilter={mealFilter}
+        onMealChange={(m) => {
+          setMealFilter(m);
+          setCurrentPage(1);
+        }}
+        classFilter={classFilter}
+        onClassChange={(c) => {
+          setClassFilter(c);
+          setCurrentPage(1);
+        }}
+        sortBy={sortBy}
+        onSortByChange={(s) => {
+          setSortBy(s);
+          setCurrentPage(1);
+        }}
+        stats={data?.summaryStats}
+      />
 
-        {/* Filter Bar */}
-        <EvaluationFilterBar
-          search={search}
-          onSearchChange={(val) => {
-            setSearch(val);
-            setCurrentPage(1);
-          }}
-          statusTab={statusTab}
-          onStatusTabChange={(tab) => {
-            setStatusTab(tab);
-            setCurrentPage(1);
-          }}
-          ratingFilter={ratingFilter}
-          onRatingChange={(r) => {
-            setRatingFilter(r);
-            setCurrentPage(1);
-          }}
-          mealFilter={mealFilter}
-          onMealChange={(m) => {
-            setMealFilter(m);
-            setCurrentPage(1);
-          }}
-          classFilter={classFilter}
-          onClassChange={(c) => {
-            setClassFilter(c);
-            setCurrentPage(1);
-          }}
-          sortBy={sortBy}
-          onSortByChange={(s) => {
-            setSortBy(s);
-            setCurrentPage(1);
-          }}
-          stats={data?.summaryStats}
-        />
+      {/* Evaluation Cards List */}
+      {isLoading ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-teal-600 animate-spin mx-auto" />
+          <p className="text-xs font-semibold text-slate-500">
+            Đang tải danh sách ý kiến phụ huynh từ cơ sở dữ liệu...
+          </p>
+        </div>
+      ) : !data?.items || data.items.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-2">
+          <p className="font-bold text-sm text-slate-700">Không tìm thấy đánh giá nào phù hợp với bộ lọc</p>
+          <p className="text-xs text-slate-400">Vui lòng điều chỉnh tiêu chí tìm kiếm hoặc thiết lập lại bộ lọc.</p>
+          <button
+            onClick={() => {
+              setSearch('');
+              setStatusTab('ALL');
+              setRatingFilter(0);
+              setMealFilter('ALL');
+              setClassFilter('ALL');
+              setSortBy('NEWEST');
+              setCurrentPage(1);
+            }}
+            className="mt-3 px-4 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 font-bold rounded-xl text-xs transition"
+          >
+            Đặt lại bộ lọc
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {data.items.map((item) => (
+            <EvaluationCard
+              key={item.id}
+              item={item}
+              onRespond={handleRespond}
+              onPhotoClick={(ph) => setActivePhoto(ph)}
+            />
+          ))}
+        </div>
+      )}
 
-        {/* Evaluation Cards List */}
-        {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
-            <Loader2 className="w-8 h-8 text-teal-600 animate-spin mx-auto" />
-            <p className="text-xs font-semibold text-slate-500">
-              Đang tải danh sách ý kiến phụ huynh từ cơ sở dữ liệu...
-            </p>
+      {/* Pagination Section */}
+      {data && data.items.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
+          <div>
+            Đang hiển thị{' '}
+            <span className="font-bold text-slate-800">
+              {startItem} - {endItem}
+            </span>{' '}
+            trong tổng số{' '}
+            <span className="font-bold text-slate-800">{totalItems}</span> đánh giá của Phụ huynh
           </div>
-        ) : !data?.items || data.items.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-2">
-            <p className="font-bold text-sm text-slate-700">Không tìm thấy đánh giá nào phù hợp với bộ lọc</p>
-            <p className="text-xs text-slate-400">Vui lòng điều chỉnh tiêu chí tìm kiếm hoặc thiết lập lại bộ lọc.</p>
-            <button
-              onClick={() => {
-                setSearch('');
-                setStatusTab('ALL');
-                setRatingFilter(0);
-                setMealFilter('ALL');
-                setClassFilter('ALL');
-                setSortBy('NEWEST');
-                setCurrentPage(1);
-              }}
-              className="mt-3 px-4 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 font-bold rounded-xl text-xs transition"
-            >
-              Đặt lại bộ lọc
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {data.items.map((item) => (
-              <EvaluationCard
-                key={item.id}
-                item={item}
-                onRespond={handleRespond}
-                onPhotoClick={(ph) => setActivePhoto(ph)}
-              />
-            ))}
-          </div>
-        )}
 
-        {/* Pagination Section */}
-        {data && data.items.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
-            <div>
-              Đang hiển thị{' '}
-              <span className="font-bold text-slate-800">
-                {startItem} - {endItem}
-              </span>{' '}
-              trong tổng số{' '}
-              <span className="font-bold text-slate-800">{totalItems}</span> đánh giá của Phụ huynh
-            </div>
-
-            {renderPaginationButtons()}
-          </div>
-        )}
-      </main>
+          {renderPaginationButtons()}
+        </div>
+      )}
 
       {/* Image Preview Modal */}
       <ImagePreviewModal

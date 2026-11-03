@@ -18,10 +18,16 @@ export interface DashboardSummary {
   };
   growthStatistics: {
     totalEvaluated: number;
+    normalCount?: number;
+    stuntedCount?: number;
+    underweightCount?: number;
+    overweightCount?: number;
     normalPercent: number;
     stuntedPercent: number;
     underweightPercent: number;
     overweightPercent: number;
+    stuntedLabel?: string;
+    overweightLabel?: string;
   };
   allergenAlerts: {
     allergicChildrenCount: number;

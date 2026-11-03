@@ -32,8 +32,11 @@ export interface GrowthRecordItem {
 }
 
 export interface CreateGrowthDto {
-  childId: string;
-  measurementDate: string;
+  childId?: string;
+  studentId?: number;
+  studentCode?: string;
+  measurementDate?: string;
+  measuredDate?: string;
   weightKg: number;
   heightCm: number;
   healthNotes?: string;
@@ -52,11 +55,38 @@ export interface ClassGrowthOverview {
   overweightPercent: number;
 }
 
+export interface GrowthExportRecord {
+  id?: string;
+  studentCode: string;
+  childName: string;
+  gender: string;
+  className: string;
+  measurementDate: string;
+  ageInMonths: number;
+  weightKg: number;
+  heightCm: number;
+  waz: number | string;
+  haz: number | string;
+  baz: number | string;
+  weightStatus: string;
+  overallStatus: string;
+  notes: string;
+  [key: string]: any;
+}
+
+export interface GrowthExportResponse {
+  totalRecords: number;
+  items: GrowthExportRecord[];
+}
+
 export const growthApi = {
   getRecords: async (params?: {
     childId?: string;
+    studentId?: string;
     classId?: string;
+    status?: string;
     nutritionalStatus?: string;
+    search?: string;
     page?: number;
     limit?: number;
   }) => {
@@ -100,8 +130,8 @@ export const growthApi = {
     return res.data;
   },
 
-  exportReport: async (classId?: string): Promise<{ totalRecords: number; items: any[] }> => {
-    const res = await apiClient.get('/growth/export', { params: { classId } });
+  exportReport: async (classId?: string): Promise<GrowthExportResponse> => {
+    const res = await apiClient.get<GrowthExportResponse>('/growth/export', { params: { classId } });
     return res.data;
   },
 };

@@ -243,6 +243,10 @@ export interface ChildMenuConsumptionData {
   };
   sessions: MealSessionRecord[];
   weeklySummary: WeeklyConsumptionItem[];
+  /** Đã có thực đơn trường công bố (PUBLISHED / ACTIVE) cho ngày đang xem hay chưa */
+  isMenuPublished?: boolean;
+  publishedMenuId?: string | null;
+  publishedMenuTitle?: string | null;
   childId?: string;
   childName?: string;
   className?: string;

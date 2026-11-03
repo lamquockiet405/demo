@@ -29,7 +29,7 @@ export class ParentEvaluationsController {
 
   @Get('portal-data')
   @ApiOperation({ summary: 'Dữ liệu tổng hợp trang đánh giá của phụ huynh' })
-  @Roles('PARENT', 'SCHOOL_MANAGEMENT', 'TEACHER', 'NUTRITIONIST')
+  @Roles('PARENT', 'SCHOOL_MANAGEMENT', 'TEACHER', 'NUTRITIONIST', 'PRINCIPAL', 'SUPER_ADMIN')
   async getPortalData(
     @Query('childId') childId?: string,
     @CurrentUser('id') userId?: number,
@@ -39,7 +39,7 @@ export class ParentEvaluationsController {
 
   @Post('submit')
   @ApiOperation({ summary: 'Phụ huynh gửi đánh giá hoặc kiến nghị bữa ăn' })
-  @Roles('PARENT', 'SCHOOL_MANAGEMENT')
+  @Roles('PARENT', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async submitEvaluation(
     @Body() payload: SubmitEvaluationDto,
     @CurrentUser('id') userId?: number,
@@ -49,17 +49,18 @@ export class ParentEvaluationsController {
 
   @Get('child-menu-consumption')
   @ApiOperation({ summary: 'Theo dõi tình hình ăn uống thực tế của con' })
-  @Roles('PARENT', 'TEACHER', 'SCHOOL_MANAGEMENT')
+  @Roles('PARENT', 'TEACHER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async getChildMenuConsumption(
     @Query('childId') childId?: string,
     @Query('date') date?: string,
+    @CurrentUser('id') userId?: number,
   ) {
-    return this.evalService.getChildMenuConsumption(childId, date);
+    return this.evalService.getChildMenuConsumption(childId, date, userId);
   }
 
   @Post('child-consumption/heart')
   @ApiOperation({ summary: 'Thả tim / cảm ơn bữa ăn của bé' })
-  @Roles('PARENT')
+  @Roles('PARENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async toggleHeartReaction(
     @Body('attendanceId') attendanceId: string,
     @CurrentUser('id') userId?: number,
@@ -69,7 +70,7 @@ export class ParentEvaluationsController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách đánh giá của phụ huynh (kèm bộ lọc & thống kê)' })
-  @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER', 'PARENT')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST', 'TEACHER', 'PARENT')
   async getEvaluations(
     @Query() query: ParentEvaluationQueryParams,
     @CurrentTenant() schoolId?: number,
@@ -79,7 +80,7 @@ export class ParentEvaluationsController {
 
   @Post(':id/respond')
   @ApiOperation({ summary: 'Nhà trường phản hồi ý kiến đánh giá của phụ huynh' })
-  @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST', 'TEACHER')
   async respondToEvaluation(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: RespondEvaluationPayload,
@@ -90,7 +91,7 @@ export class ParentEvaluationsController {
 
   @Put(':id/respond')
   @ApiOperation({ summary: 'Cập nhật nội dung phản hồi của nhà trường' })
-  @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST', 'TEACHER')
   async updateResponse(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: RespondEvaluationPayload,
@@ -101,7 +102,7 @@ export class ParentEvaluationsController {
 
   @Put(':id/draft')
   @ApiOperation({ summary: 'Chuyển trạng thái nháp phản hồi' })
-  @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
+  @Roles('SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST', 'TEACHER')
   async toggleDraft(
     @Param('id', ParseIntPipe) id: number,
     @Body('isDrafting') isDrafting: boolean,

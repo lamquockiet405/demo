@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SubmitMealEvaluationPage } from './SubmitMealEvaluationPage';
 import { parentEvaluationApi } from './api/parentEvaluationApi';
 import { ChildMenuConsumptionData } from './types';
 import { ParentPortalTopNav } from './components/ParentPortalTopNav';
@@ -8,10 +10,15 @@ import { DaySelectorTabs } from './components/DaySelectorTabs';
 import { DailySessionsTimeline } from './components/DailySessionsTimeline';
 import { NutritionOverviewCard } from './components/NutritionOverviewCard';
 import { WeeklyConsumptionHistoryTable } from './components/WeeklyConsumptionHistoryTable';
+import { ParentNutritionAdviceCard } from './components/ParentNutritionAdviceCard';
 import { PortalFooter } from './components/PortalFooter';
 import { Loader2, Utensils, Sparkles, RefreshCw } from 'lucide-react';
 
 export const MonitorChildMenuConsumptionPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  if (searchParams.get('tab') === 'evaluation') {
+    return <SubmitMealEvaluationPage />;
+  }
   const [data, setData] = useState<ChildMenuConsumptionData | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -89,24 +96,25 @@ export const MonitorChildMenuConsumptionPage: React.FC = () => {
   };
 
   const metrics = data.metrics || {
-    consumptionRate: 98,
-    consumptionStatusLabel: 'Bé ăn rất tốt, hết suất',
-    waterIntakeToday: '750 / 800 ml',
-    waterPercentage: 94,
+    consumptionRate: 0,
+    consumptionStatusLabel: 'Chưa có đánh giá sức ăn',
+    waterIntakeToday: 'Chưa ghi nhận',
+    waterPercentage: 0,
     allergyStatusText: 'An toàn, không dị ứng',
-    syncStatusText: 'Đồng bộ',
+    syncStatusText: 'Chưa đồng bộ',
   };
 
   const daysInWeek = Array.isArray(data.daysInWeek) ? data.daysInWeek : [];
   const sessions = Array.isArray(data.sessions) ? data.sessions : [];
   const nutritionSummaryToday = data.nutritionSummaryToday || {
-    calories: 685,
-    proteinG: 28.5,
-    fatG: 22.4,
-    carbG: 92.1,
-    fiberG: 5.8,
-    standardPercent: 52.8,
+    calories: 0,
+    proteinG: 0,
+    fatG: 0,
+    carbG: 0,
+    fiberG: 0,
+    standardPercent: 0,
   };
+  const isMenuPublished = data.isMenuPublished !== false;
   const weeklySummary = Array.isArray(data.weeklySummary) ? data.weeklySummary : [];
 
   return (
@@ -148,6 +156,23 @@ export const MonitorChildMenuConsumptionPage: React.FC = () => {
 
         {/* 3. KPI Metrics Overview Strip */}
         <ConsumptionKPIStrip metrics={metrics} />
+
+        {/* 3.1. Hướng dẫn bổ sung dinh dưỡng tại nhà cho bé kén ăn */}
+        <ParentNutritionAdviceCard childId={child.id} />
+
+        {/* 3.1. Trạng thái đồng bộ với thực đơn trường đã công bố */}
+        {isMenuPublished ? (
+          data.publishedMenuTitle && (
+            <div className="mb-4 px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Đồng bộ thực đơn trường đã công bố: {data.publishedMenuTitle}</span>
+            </div>
+          )
+        ) : (
+          <div className="mb-4 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold">
+            Nhà trường chưa công bố thực đơn cho tuần này. Thực đơn sẽ hiển thị ngay khi Ban Giám Hiệu khóa &amp; công bố.
+          </div>
+        )}
 
         {/* 4. Weekday Selector Tabs */}
         <DaySelectorTabs

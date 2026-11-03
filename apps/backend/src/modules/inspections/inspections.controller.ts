@@ -30,6 +30,15 @@ export class InspectionsController {
     return this.inspectionsService.getInspections(query);
   }
 
+  @Get('meal-ingredients')
+  @ApiOperation({ summary: 'Lấy danh sách nguyên liệu và món ăn theo ca ăn thực đơn' })
+  async getMealIngredients(
+    @Query('mealDate') mealDate?: string,
+    @Query('mealTime') mealTime?: string,
+  ) {
+    return this.inspectionsService.getMealIngredients(mealDate, mealTime);
+  }
+
   @Get('samples')
   @ApiOperation({ summary: 'Lấy danh sách các mẫu thức ăn lưu 24h (QĐ 1246/QĐ-BYT)' })
   async getSamples() {
@@ -43,15 +52,15 @@ export class InspectionsController {
   }
 
   @Patch('samples/:id/dispose')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SCHOOL_MANAGER', 'PRINCIPAL')
-  @ApiOperation({ summary: 'Hủy mẫu lưu an toàn sau 24 giờ' })
+  @Roles('KITCHEN_STAFF', 'KITCHEN_MANAGER', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Hủy mẫu lưu an toàn sau 24 giờ (chỉ nhân viên bếp thực hiện)' })
   async disposeSamplePatch(@Param('id', ParseIntPipe) id: number) {
     return this.inspectionsService.disposeSample(id);
   }
 
   @Post('samples/:id/dispose')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SCHOOL_MANAGER', 'PRINCIPAL')
-  @ApiOperation({ summary: 'Hủy mẫu lưu an toàn sau 24 giờ (POST fallback)' })
+  @Roles('KITCHEN_STAFF', 'KITCHEN_MANAGER', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Hủy mẫu lưu an toàn sau 24 giờ (POST fallback, chỉ nhân viên bếp thực hiện)' })
   async disposeSamplePost(@Param('id', ParseIntPipe) id: number) {
     return this.inspectionsService.disposeSample(id);
   }
@@ -64,7 +73,7 @@ export class InspectionsController {
   }
 
   @Post('step1')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Bước 1: Kiểm tra thực phẩm trước khi chế biến' })
   async createStep1(
     @Body() body: any,
@@ -74,7 +83,7 @@ export class InspectionsController {
   }
 
   @Post()
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Lập mới biên bản kiểm thực 3 bước' })
   async createInspection(
     @Body() body: any,
@@ -84,7 +93,7 @@ export class InspectionsController {
   }
 
   @Patch(':id/step2')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Bước 2: Kiểm tra thực phẩm trong quá trình chế biến' })
   async updateStep2(
     @Param('id') id: string,
@@ -95,7 +104,7 @@ export class InspectionsController {
   }
 
   @Patch(':id/step3')
-  @Roles('KITCHEN_STAFF', 'NUTRITIONIST')
+  @Roles('KITCHEN_STAFF', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
   @ApiOperation({ summary: 'Bước 3: Kiểm tra thức ăn trước khi ăn & lưu mẫu' })
   async updateStep3(
     @Param('id') id: string,
@@ -112,8 +121,8 @@ export class InspectionsController {
   }
 
   @Post('create-session')
-  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Chuyên gia dinh dưỡng lập biên bản kiểm thực mới (chờ bếp chụp ảnh)' })
+  @Roles('KITCHEN_STAFF', 'KITCHEN_MANAGER', 'NUTRITIONIST', 'SUPER_ADMIN', 'PRINCIPAL')
+  @ApiOperation({ summary: 'Lập biên bản kiểm thực mới (chờ bếp chụp ảnh minh chứng)' })
   async createSessionByNutritionist(
     @Body() body: any,
     @CurrentUser('sub') userId: number,
@@ -133,8 +142,8 @@ export class InspectionsController {
   }
 
   @Post(':id/approve')
-  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Chuyên gia dinh dưỡng phê duyệt biên bản kiểm thực đạt chuẩn' })
+  @Roles('NUTRITIONIST', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Chuyên gia dinh dưỡng hoặc Hiệu trưởng phê duyệt biên bản kiểm thực đạt chuẩn' })
   async approveInspection(
     @Param('id') id: string,
     @Body() body: any,
@@ -144,8 +153,8 @@ export class InspectionsController {
   }
 
   @Post(':id/reject')
-  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Chuyên gia dinh dưỡng yêu cầu bếp chụp lại ảnh minh chứng' })
+  @Roles('NUTRITIONIST', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'SUPER_ADMIN')
+  @ApiOperation({ summary: 'Chuyên gia dinh dưỡng hoặc Hiệu trưởng yêu cầu chụp lại ảnh minh chứng' })
   async rejectInspection(
     @Param('id') id: string,
     @Body() body: any,

@@ -94,12 +94,13 @@ export class ClassesService {
       ageGroup = name.includes('nhà trẻ') || name.includes('nha tre') ? 'NHA_TRE' : 'MAU_GIAO';
     }
 
-    const schoolYear = dto.schoolYear || dto.academicYear || '2026-2027';
-    let homeroomTeacherId: number | null = null;
-    const rawTeacherId = dto.homeroomTeacherId !== undefined ? dto.homeroomTeacherId : dto.mainTeacherId;
-    if (rawTeacherId && Number(rawTeacherId) > 0) {
-      homeroomTeacherId = Number(rawTeacherId);
-    }
+    const schoolYear = dto.schoolYear || dto.academicYear || '2025-2026';
+    const homeroomTeacherId =
+      dto.homeroomTeacherId !== undefined
+        ? dto.homeroomTeacherId
+        : dto.mainTeacherId
+        ? Number(dto.mainTeacherId)
+        : null;
 
     // Lớp 2 bảo vệ: kiểm tra trùng tên lớp (case-insensitive) trước khi INSERT
     const existing = await this.classRepo
@@ -120,11 +121,7 @@ export class ClassesService {
       homeroomTeacherId,
       status: dto.status || 'ACTIVE',
     });
-    const saved = await this.classRepo.save(cls);
-    return this.classRepo.findOne({
-      where: { id: saved.id },
-      relations: ['homeroomTeacher'],
-    });
+    return this.classRepo.save(cls);
   }
 
   async update(id: number, dto: UpdateClassDto) {
@@ -142,10 +139,12 @@ export class ClassesService {
     }
 
     const schoolYear = dto.schoolYear || dto.academicYear;
-    if (dto.homeroomTeacherId !== undefined || dto.mainTeacherId !== undefined) {
-      const rawTeacherId = dto.homeroomTeacherId !== undefined ? dto.homeroomTeacherId : dto.mainTeacherId;
-      cls.homeroomTeacherId = rawTeacherId && Number(rawTeacherId) > 0 ? Number(rawTeacherId) : null;
-    }
+    const homeroomTeacherId =
+      dto.homeroomTeacherId !== undefined
+        ? dto.homeroomTeacherId
+        : dto.mainTeacherId
+        ? Number(dto.mainTeacherId)
+        : undefined;
 
     if (dto.name !== undefined) {
       const trimmedName = dto.name.trim();
@@ -162,13 +161,10 @@ export class ClassesService {
     }
     if (ageGroup !== undefined) cls.ageGroup = ageGroup;
     if (schoolYear !== undefined) cls.schoolYear = schoolYear;
+    if (homeroomTeacherId !== undefined) cls.homeroomTeacherId = homeroomTeacherId;
     if (dto.status !== undefined) cls.status = dto.status;
 
-    const updated = await this.classRepo.save(cls);
-    return this.classRepo.findOne({
-      where: { id: updated.id },
-      relations: ['homeroomTeacher'],
-    });
+    return this.classRepo.save(cls);
   }
 
   async remove(id: number) {

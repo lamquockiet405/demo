@@ -1,5 +1,5 @@
 export type MealOption = 'ALL_DAY' | 'LUNCH_ONLY' | 'SNACK_ONLY' | 'ABSENT';
-export type PortionType = 'ALL' | 'HALF' | 'NONE';
+export type PortionType = 'ALL' | 'MOST' | 'HALF' | 'LITTLE' | 'NONE';
 
 export interface ChildAttendanceItem {
   id: string;
@@ -102,7 +102,7 @@ export interface MealEvaluationItem {
   waterIntake: string;
   teacherNote: string;
   sendState: {
-    status: 'SENT' | 'PENDING' | 'URGENT_PARENT';
+    status: 'SENT' | 'PENDING' | 'URGENT_PARENT' | 'ABSENT' | 'NOT_EVALUATED' | string;
     label: string;
   };
   isAbsent: boolean;
@@ -124,6 +124,8 @@ export interface MealEvaluationResponse {
     absentCount: number;
     ateAllCount: number;
     ateAllPercent: number;
+    ateMostCount?: number;
+    ateMostPercent?: number;
     ateHalfCount: number;
     ateHalfPercent: number;
     ateLittleCount: number;

@@ -5,7 +5,6 @@ import { useAuthStore } from '@/core/stores/auth.store';
 import {
   Search,
   Plus,
-  ShieldCheck,
   AlertTriangle,
   RefreshCw,
   Eye,
@@ -16,12 +15,13 @@ import {
   ChevronLeft,
   ChevronRight,
   ListOrdered,
-  Trash2,
   Apple,
   Clock,
   Sparkles,
   Flame,
   Lock,
+  CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 import { FoodModal } from './FoodModal';
 
@@ -41,6 +41,7 @@ interface Food {
   allergens?: string[];
   imageUrl?: string;
   status?: string;
+  refuseRatePercent?: number;
   updatedAt?: string;
 }
 
@@ -49,6 +50,11 @@ interface Stats {
   allergenCount: number;
   categoryCount: number;
   updatedThisWeekCount: number;
+}
+
+export interface FoodCategory {
+  id: string;
+  name: string;
 }
 
 export const FoodIngredientsPage: React.FC = () => {
@@ -61,6 +67,7 @@ export const FoodIngredientsPage: React.FC = () => {
   const isReadOnly = location.pathname.startsWith('/inventory') || (isPrincipalOrManagement && !isNutritionist);
 
   const [foods, setFoods] = useState<Food[]>([]);
+  const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -86,8 +93,10 @@ export const FoodIngredientsPage: React.FC = () => {
       const res = await apiClient.get('/foods', {
         params: {
           search: searchTerm || undefined,
+          categoryId: categoryFilter || undefined,
           category: categoryFilter || undefined,
           allergen: allergenFilter || undefined,
+          nutrition: nutritionFilter || undefined,
           page,
           limit,
         },
@@ -103,6 +112,7 @@ export const FoodIngredientsPage: React.FC = () => {
         proteinG: Number(f.proteinG ?? 0),
         fatG: Number(f.fatG ?? 0),
         carbG: Number(f.carbG ?? 0),
+        refuseRatePercent: Number(f.refuseRatePercent ?? f.refuse_rate_percent ?? 0),
         defaultUnit: f.unit || f.defaultUnit || 'g',
         allergens: Array.isArray(f.allergens)
           ? f.allergens.map((a: any) => typeof a === 'object' && a !== null ? (a.name || a.allergenName || String(a.id)) : String(a))
@@ -126,13 +136,24 @@ export const FoodIngredientsPage: React.FC = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await apiClient.get('/foods/categories');
+      const raw = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.items || []);
+      setCategories(raw);
+    } catch (error) {
+      console.error('Error fetching food categories:', error);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     fetchFoods();
-  }, [page, limit, searchTerm, categoryFilter, allergenFilter]);
+  }, [page, limit, searchTerm, categoryFilter, allergenFilter, nutritionFilter]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -147,57 +168,29 @@ export const FoodIngredientsPage: React.FC = () => {
     setPage(1);
   };
 
-  const handleDeleteFood = async (food: Food) => {
-    if (window.confirm(`Bạn có chắc muốn xóa nguyên liệu "${food.name}" khỏi danh mục?`)) {
-      try {
-        await apiClient.delete(`/foods/${food.id}`);
-        await fetchFoods();
-        await fetchStats();
-      } catch (err: any) {
-        alert('Không thể xóa nguyên liệu: ' + (err.response?.data?.message || err.message));
-      }
-    }
-  };
-
   const getCategoryBadge = (category: any) => {
-    const code = (typeof category === 'object' && category !== null ? (category.code || category.name) : category) || '';
-    const name = (typeof category === 'object' && category !== null ? (category.name || category.code) : category) || '';
-    const str = `${code} ${name}`.toUpperCase();
+    const name = (typeof category === 'object' && category !== null ? (category.name || category.code) : category) || 'Chưa phân nhóm';
+    const str = name.toUpperCase();
 
-    if (str.includes('MEAT') || str.includes('THỊT')) {
-      return <span className="bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Thịt & Gia cầm</span>;
-    }
-    if (str.includes('SEAFOOD') || str.includes('THỦY HẢI SẢN') || str.includes('HẢI SẢN') || str.includes('CÁ') || str.includes('TÔM')) {
-      return <span className="bg-sky-100 text-sky-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Thủy hải sản</span>;
-    }
-    if (str.includes('EGG') || str.includes('TRỨNG')) {
-      return <span className="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Trứng</span>;
-    }
-    if (str.includes('DAIRY') || str.includes('SỮA')) {
-      return <span className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Sữa & Chế phẩm</span>;
-    }
-    if (str.includes('CEREAL') || str.includes('GRAIN') || str.includes('NGŨ CỐC') || str.includes('GẠO')) {
-      return <span className="bg-yellow-100 text-yellow-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Ngũ cốc & Gạo</span>;
-    }
-    if (str.includes('FAT') || str.includes('OIL') || str.includes('DẦU') || str.includes('MỠ')) {
-      return <span className="bg-orange-100 text-orange-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Dầu & Chất béo</span>;
-    }
-    if (str.includes('NUT') || str.includes('SEED') || str.includes('HẠT') || str.includes('ĐẬU')) {
-      return <span className="bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Hạt & Đậu đỗ</span>;
-    }
-    if (str.includes('VEGETABLE') || str.includes('RAU')) {
-      return <span className="bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Rau củ tươi</span>;
-    }
-    if (str.includes('FRUIT') || str.includes('TRÁI CÂY') || str.includes('QUẢ')) {
-      return <span className="bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Trái cây</span>;
-    }
-    if (str.includes('SPICE') || str.includes('CONDIMENT') || str.includes('GIA VỊ')) {
-      return <span className="bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Gia vị mầm non</span>;
-    }
-    if (str.includes('BEVERAGE') || str.includes('DRINK') || str.includes('ĐỒ UỐNG') || str.includes('NƯỚC')) {
-      return <span className="bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-md text-[10px] font-bold">Đồ uống</span>;
-    }
-    return <span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md text-[10px] font-bold">{String(name || code || 'Khác')}</span>;
+    let colorClass = 'bg-slate-100 text-slate-700 border-slate-200';
+    if (str.includes('THỊT')) colorClass = 'bg-rose-50 text-rose-800 border-rose-200';
+    else if (str.includes('THỦY SẢN') || str.includes('CÁ') || str.includes('TÔM')) colorClass = 'bg-sky-50 text-sky-800 border-sky-200';
+    else if (str.includes('TRỨNG')) colorClass = 'bg-amber-50 text-amber-800 border-amber-200';
+    else if (str.includes('SỮA')) colorClass = 'bg-blue-50 text-blue-800 border-blue-200';
+    else if (str.includes('NGŨ CỐC') || str.includes('KHOAI')) colorClass = 'bg-amber-100/70 text-amber-900 border-amber-300';
+    else if (str.includes('DẦU') || str.includes('MỠ') || str.includes('BƠ')) colorClass = 'bg-orange-50 text-orange-800 border-orange-200';
+    else if (str.includes('ĐẬU') || str.includes('HẠT')) colorClass = 'bg-teal-50 text-teal-800 border-teal-200';
+    else if (str.includes('RAU')) colorClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+    else if (str.includes('QUẢ') || str.includes('TRÁI CÂY')) colorClass = 'bg-purple-50 text-purple-800 border-purple-200';
+    else if (str.includes('GIA VỊ')) colorClass = 'bg-slate-100 text-slate-800 border-slate-200';
+    else if (str.includes('ĐỒ UỐNG') || str.includes('NƯỚC')) colorClass = 'bg-indigo-50 text-indigo-800 border-indigo-200';
+    else if (str.includes('NGỌT') || str.includes('ĐƯỜNG')) colorClass = 'bg-pink-50 text-pink-800 border-pink-200';
+
+    return (
+      <span className={`inline-block border px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${colorClass}`} title={name}>
+        {name}
+      </span>
+    );
   };
 
   const getFoodEmoji = (category: any) => {
@@ -329,7 +322,7 @@ export const FoodIngredientsPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.categoryCount || 12}</span>
+              <span className="text-3xl font-black text-slate-900">{categories.length || stats?.categoryCount || 14}</span>
               <span className="text-xs font-bold text-slate-500 ml-1.5">nhóm dinh dưỡng</span>
             </div>
             <p className="text-[11px] text-blue-700 font-bold flex items-center gap-1.5">
@@ -384,7 +377,7 @@ export const FoodIngredientsPage: React.FC = () => {
             </div>
 
             {/* Filter Dropdowns */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Nhóm thực phẩm */}
               <div>
                 <select
@@ -395,18 +388,14 @@ export const FoodIngredientsPage: React.FC = () => {
                     setPage(1);
                   }}
                 >
-                  <option value="">Tất cả các nhóm (12 nhóm)</option>
-                  <option value="MEAT_POULTRY">Thịt & Gia cầm</option>
-                  <option value="SEAFOOD">Thủy hải sản</option>
-                  <option value="EGGS">Trứng các loại</option>
-                  <option value="DAIRY">Sữa & Chế phẩm sữa</option>
-                  <option value="CEREAL_GRAINS">Ngũ cốc & Tinh bột</option>
-                  <option value="VEGETABLES">Rau củ tươi</option>
-                  <option value="FRUITS">Trái cây tươi</option>
-                  <option value="NUTS_SEEDS">Hạt & Đậu đỗ</option>
-                  <option value="FATS_OILS">Dầu & Chất béo</option>
-                  <option value="SPICES_CONDIMENTS">Gia vị mầm non</option>
-                  <option value="BEVERAGES">Đồ uống dinh dưỡng</option>
+                  <option value="">
+                    {categories.length > 0 ? `Tất cả các nhóm (${categories.length} nhóm)` : 'Tất cả các nhóm'}
+                  </option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -431,7 +420,10 @@ export const FoodIngredientsPage: React.FC = () => {
                 <select
                   className="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20"
                   value={nutritionFilter}
-                  onChange={(e) => setNutritionFilter(e.target.value)}
+                  onChange={(e) => {
+                    setNutritionFilter(e.target.value);
+                    setPage(1);
+                  }}
                 >
                   <option value="">Tất cả chỉ số dinh dưỡng</option>
                   <option value="HIGH_PROTEIN">Giàu Đạm (P ≥ 15g)</option>
@@ -510,7 +502,7 @@ export const FoodIngredientsPage: React.FC = () => {
                     const hasAllergens = food.allergens && food.allergens.length > 0;
 
                     return (
-                      <tr key={food.id} className="hover:bg-slate-50/80 transition">
+                      <tr key={food.id} className={`hover:bg-slate-50/80 transition ${food.status === 'INACTIVE' ? 'bg-slate-100/50 text-slate-500' : ''}`}>
                         <td className="py-3 px-3 text-center text-slate-400 font-bold">{stt}</td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
@@ -518,12 +510,19 @@ export const FoodIngredientsPage: React.FC = () => {
                               {getFoodEmoji(food.category)}
                             </div>
                             <div className="truncate max-w-[240px]">
-                              <p className="font-black text-slate-900 text-xs truncate" title={food.name}>
+                              <p className="font-black text-xs truncate text-slate-900" title={food.name}>
                                 {food.name}
                               </p>
-                              <p className="text-[10px] text-slate-400 font-semibold mt-0.5 truncate">
-                                Mã: {food.code}
-                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[10px] text-slate-400 font-semibold truncate">
+                                  Mã: {food.code}
+                                </span>
+                                {Number(food.refuseRatePercent) > 0 && (
+                                  <span className="bg-amber-50 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-200" title="Tỷ lệ thải bỏ sơ chế chuẩn FCT">
+                                    Bỏ {food.refuseRatePercent}%
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </td>
@@ -588,17 +587,9 @@ export const FoodIngredientsPage: React.FC = () => {
                                     setIsModalOpen(true);
                                   }}
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition cursor-pointer"
-                                  title="Chỉnh sửa"
+                                  title="Chỉnh sửa thông tin"
                                 >
                                   <PenSquare className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteFood(food)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                                  title="Xóa nguyên liệu"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </>
                             )}

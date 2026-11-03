@@ -19,6 +19,19 @@ export interface SchoolBranding {
   primaryColor: 'TEAL' | 'YELLOW' | 'ORANGE';
 }
 
+export interface OperationalSettings {
+  mealTimes: string[];
+  standardWeeklyCycleLength: number;
+  foodRetentionHours: number;
+  whoZscoreAutoCalc: boolean;
+}
+
+export interface SchoolStats {
+  totalClasses: number;
+  totalChildren: number;
+  totalStaff: number;
+}
+
 export interface TenantProfile {
   id: string;
   code: string;
@@ -33,22 +46,32 @@ export interface TenantProfile {
   educationDepartmentCode: string;
   schoolIdentifierSgd: string;
   isEducationDbSynced: boolean;
-  syncedAt: string;
+  syncedAt: string | null;
   foodSafetyLicense: FoodSafetyLicense;
   legalRepresentative: LegalRepresentative;
   branding: SchoolBranding;
+  operationalSettings?: OperationalSettings;
+  stats?: SchoolStats;
   updatedAt?: string;
 }
 
 export interface UpdateTenantProfileInput {
+  name?: string;
+  code?: string;
+  domain?: string;
   address?: string;
   phone?: string;
   contactEmail?: string;
+  email?: string;
+  principalName?: string;
+  logo?: string;
+  maxChildren?: number;
   educationDepartmentCode?: string;
   schoolIdentifierSgd?: string;
   foodSafetyLicense?: Partial<FoodSafetyLicense>;
   legalRepresentative?: Partial<LegalRepresentative>;
   branding?: Partial<SchoolBranding>;
+  operationalSettings?: Partial<OperationalSettings>;
 }
 
 export interface UploadLogoInput {

@@ -32,7 +32,7 @@ export class InspectionSampleItem {
   @Column({
     name: 'fridge_unit',
     length: 100,
-    default: 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)',
+    nullable: true,
   })
   fridgeUnit: string;
 
@@ -41,7 +41,7 @@ export class InspectionSampleItem {
     type: 'numeric',
     precision: 6,
     scale: 1,
-    default: 150.0,
+    nullable: true,
     transformer: NumericTransformer,
   })
   sampleWeightG: number;
@@ -51,7 +51,7 @@ export class InspectionSampleItem {
     type: 'numeric',
     precision: 4,
     scale: 1,
-    default: 3.8,
+    nullable: true,
     transformer: NumericTransformer,
   })
   storageTemp: number;
@@ -59,7 +59,7 @@ export class InspectionSampleItem {
   @Column({
     name: 'collector_name',
     length: 100,
-    default: 'Nguyễn Văn Cường (Bếp trưởng)',
+    nullable: true,
   })
   collectorName: string;
 

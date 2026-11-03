@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { isJwtExpired, getJwtRemainingTimeMs } from '../utils/jwt';
 
 /**
  * Auth User — dữ liệu user nhận từ API login response.
@@ -45,20 +46,109 @@ interface AuthState {
   hydrate: () => void;
 }
 
+let autoLogoutTimer: any = null;
+
+const scheduleAutoLogout = (token: string) => {
+  if (autoLogoutTimer) {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = null;
+  }
+
+  const remainingMs = getJwtRemainingTimeMs(token);
+  if (remainingMs <= 0) {
+    useAuthStore.getState().logout();
+    window.location.href = '/home';
+    return;
+  }
+
+  autoLogoutTimer = setTimeout(() => {
+    console.warn('[AuthStore] Access token đã hết hạn, tự động đăng xuất về trang Home...');
+    useAuthStore.getState().logout();
+    window.location.href = '/home';
+  }, remainingMs);
+};
+
+/**
+ * Lấy trạng thái Auth ban đầu từ localStorage một cách đồng bộ
+ * Đảm bảo ngay từ lần render đầu tiên đã xác định chính xác người dùng còn Access Token hay không.
+ */
+const getInitialAuthState = (): {
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  selectedTenantId: string | null;
+  isAuthenticated: boolean;
+} => {
+  if (typeof window === 'undefined') {
+    return {
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      selectedTenantId: null,
+      isAuthenticated: false,
+    };
+  }
+
+  const accessToken = localStorage.getItem('access_token');
+  const refreshToken = localStorage.getItem('refresh_token');
+  const tenantId = localStorage.getItem('tenant_id');
+  const userJson = localStorage.getItem('auth_user');
+
+  if (
+    accessToken &&
+    accessToken !== 'undefined' &&
+    accessToken !== 'null' &&
+    userJson
+  ) {
+    if (isJwtExpired(accessToken)) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('auth_user');
+      return {
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        selectedTenantId: null,
+        isAuthenticated: false,
+      };
+    }
+
+    try {
+      const user = JSON.parse(userJson) as AuthUser;
+      scheduleAutoLogout(accessToken);
+      return {
+        user,
+        accessToken,
+        refreshToken,
+        selectedTenantId: tenantId || '1',
+        isAuthenticated: true,
+      };
+    } catch {
+      localStorage.removeItem('auth_user');
+    }
+  }
+
+  return {
+    user: null,
+    accessToken: null,
+    refreshToken: null,
+    selectedTenantId: null,
+    isAuthenticated: false,
+  };
+};
+
+const initialState = getInitialAuthState();
+
 /**
  * Zustand Auth Store — Quản lý trạng thái xác thực.
- *
- * Performance:
- * - Chỉ lưu token + user info tối thiểu trong memory.
- * - localStorage chỉ write khi login/logout (không mỗi render).
- * - hydrate() gọi 1 lần duy nhất khi app mount.
+ * Tự động tính toán thời hạn Access Token và tự động đăng xuất về /home khi hết hạn.
  */
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  selectedTenantId: null,
-  isAuthenticated: false,
+  user: initialState.user,
+  accessToken: initialState.accessToken,
+  refreshToken: initialState.refreshToken,
+  selectedTenantId: initialState.selectedTenantId,
+  isAuthenticated: initialState.isAuthenticated,
 
   setAuth: (user, accessToken, refreshToken) => {
     // Persist vào localStorage
@@ -74,6 +164,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       selectedTenantId: user.tenantId,
       isAuthenticated: true,
     });
+
+    scheduleAutoLogout(accessToken);
   },
 
   setTenantId: (tenantId) => {
@@ -82,6 +174,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    if (autoLogoutTimer) {
+      clearTimeout(autoLogoutTimer);
+      autoLogoutTimer = null;
+    }
+
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('tenant_id');
@@ -108,6 +205,22 @@ export const useAuthStore = create<AuthState>((set) => ({
       accessToken !== 'null' &&
       userJson
     ) {
+      // Nếu Access Token trong LocalStorage đã hết hạn thì tự động logout
+      if (isJwtExpired(accessToken)) {
+        console.warn('[AuthStore] Access token lưu trong LocalStorage đã hết hạn.');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('auth_user');
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          selectedTenantId: null,
+          isAuthenticated: false,
+        });
+        return;
+      }
+
       try {
         const user = JSON.parse(userJson) as AuthUser;
         set({
@@ -117,8 +230,9 @@ export const useAuthStore = create<AuthState>((set) => ({
           selectedTenantId: tenantId || '1',
           isAuthenticated: true,
         });
+
+        scheduleAutoLogout(accessToken);
       } catch {
-        // JSON parse lỗi → reset
         localStorage.removeItem('auth_user');
       }
     } else if (accessToken === 'undefined' || accessToken === 'null') {

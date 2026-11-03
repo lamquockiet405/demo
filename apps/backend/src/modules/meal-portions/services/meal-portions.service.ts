@@ -12,7 +12,7 @@ export class MealPortionsService {
     private readonly portionRepo: Repository<DailyMealPortion>,
     @InjectRepository(ClassEntity)
     private readonly classRepo: Repository<ClassEntity>,
-  ) { }
+  ) {}
 
   async findAll(query: MealPortionsQueryDto) {
     const date = query.date || new Date().toISOString().split('T')[0];

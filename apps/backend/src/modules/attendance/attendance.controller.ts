@@ -3,9 +3,9 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Param,
   Body,
+  Delete,
   Query,
   UseGuards,
   ParseIntPipe,
@@ -14,17 +14,16 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AttendanceService } from './services/attendance.service';
 import { MealCoordinationService } from './services/meal-coordination.service';
 import { SnackRosterService } from './services/snack-roster.service';
+import { AttendanceHistoryService } from './services/attendance-history.service';
 import { AttendanceQueryDto } from './dto/attendance-query.dto';
 import { UpdateMealAttendanceDto } from './dto/update-meal-attendance.dto';
 import { MealEvaluationQueryDto } from './dto/meal-evaluation-query.dto';
 import { UpdateMealEvaluationDto } from './dto/update-meal-evaluation.dto';
-import { AttendanceHistoryQueryDto } from './dto/attendance-history-query.dto';
+import { AttendanceHistoryFilterDto } from './dto/attendance-history-filter.dto';
 import { MealCoordinationDto } from './dto/meal-coordination.dto';
 import { SnackRosterQueryDto } from './dto/snack-roster-query.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-
-import { InspectionsService } from '../inspections/inspections.service';
 
 @ApiTags('Meal Attendance & Evaluations')
 @Controller()
@@ -35,7 +34,7 @@ export class AttendanceController {
     private readonly attendanceService: AttendanceService,
     private readonly noteService: MealCoordinationService,
     private readonly snackRosterService: SnackRosterService,
-    private readonly inspectionsService: InspectionsService,
+    private readonly historyService: AttendanceHistoryService,
   ) {}
 
   @Get('attendance/classes')
@@ -85,8 +84,8 @@ export class AttendanceController {
   }
 
   @Post('attendance/lock-kitchen')
-  @ApiOperation({ summary: 'Khóa sĩ số chốt số suất ăn gửi xuống bếp' })
-  async lockKitchen(@Body() body: { classId: string; date: string; notes?: string }) {
+  @ApiOperation({ summary: 'Khóa / Mở khóa sĩ số chốt số suất ăn gửi xuống bếp' })
+  async lockKitchen(@Body() body: { classId: string; date: string; notes?: string; isLocked?: boolean }) {
     return this.attendanceService.lockAndSendToKitchen(body);
   }
 
@@ -128,9 +127,9 @@ export class AttendanceController {
   }
 
   @Get('attendance/history')
-  @ApiOperation({ summary: 'Xem lịch sử điểm danh và sức ăn' })
-  async getHistory(@Query() query: AttendanceHistoryQueryDto) {
-    return this.attendanceService.getHistoryList(query);
+  @ApiOperation({ summary: 'Xem và lọc lịch sử điểm danh và sức ăn' })
+  async getHistory(@Query() query: AttendanceHistoryFilterDto) {
+    return this.historyService.getHistoryList(query);
   }
 
   @Get('attendance/kitchen-kds')
@@ -155,35 +154,34 @@ export class AttendanceController {
   }
 
   @Put('attendance/coordination-notes/:id')
-  @ApiOperation({ summary: 'Cập nhật ghi chú điều phối suất ăn' })
+  @ApiOperation({ summary: 'Cập nhật ghi chú phối hợp' })
   async updateNote(
     @Param('id') id: string,
-    @Body() dto: any,
+    @Body() body: any,
   ) {
-    return this.noteService.update(id, dto);
+    return this.noteService.update(id, body);
   }
 
   @Post('attendance/coordination-notes/:id/acknowledge')
-  @ApiOperation({ summary: 'Bếp xác nhận đã tiếp nhận ghi chú điều phối' })
+  @ApiOperation({ summary: 'Tiếp nhận xử lý ghi chú phối hợp' })
   async acknowledgeNote(
     @Param('id') id: string,
-    @Body() data: any,
-    @CurrentUser('sub') userId: number,
+    @Body() body: any,
   ) {
-    return this.noteService.acknowledge(id, data, userId);
+    return this.noteService.acknowledge(id, body);
   }
 
   @Post('attendance/coordination-notes/:id/resolve')
-  @ApiOperation({ summary: 'Hoàn tất xử lý điều phối suất ăn' })
+  @ApiOperation({ summary: 'Đánh dấu hoàn tất xử lý suất ăn' })
   async resolveNote(
     @Param('id') id: string,
-    @Body() data: any,
+    @Body() body: any,
   ) {
-    return this.noteService.resolve(id, data);
+    return this.noteService.resolve(id, body);
   }
 
   @Delete('attendance/coordination-notes/:id')
-  @ApiOperation({ summary: 'Xóa ghi chú điều phối' })
+  @ApiOperation({ summary: 'Xóa ghi chú phối hợp' })
   async deleteNote(@Param('id') id: string) {
     return this.noteService.delete(id);
   }
@@ -192,39 +190,5 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Lấy danh sách suất ăn xế chiều của trẻ' })
   async getSnackRoster(@Query() query: SnackRosterQueryDto) {
     return this.snackRosterService.findAll(query);
-  }
-
-  // =========================================================================
-  // KDS FOOD SAFETY INSPECTION & 24H SAMPLE RETENTION ALIASES
-  // =========================================================================
-
-  @Get('attendance/food-safety-logs')
-  @ApiOperation({ summary: 'Lấy danh sách nhật ký kiểm thực 3 bước cho KDS Bếp' })
-  async getFoodSafetyLogs() {
-    return this.inspectionsService.getFoodSafetyLogs();
-  }
-
-  @Post('attendance/food-safety-logs')
-  @ApiOperation({ summary: 'Tạo hoặc cập nhật bước kiểm thực an toàn thực phẩm từ KDS Bếp' })
-  async createFoodSafetyLog(@Body() body: any) {
-    return this.inspectionsService.createFoodSafetyLog(body);
-  }
-
-  @Get('attendance/sample-retention-records')
-  @ApiOperation({ summary: 'Lấy danh sách mẫu lưu thức ăn 24h cho KDS Bếp' })
-  async getSampleRetentionRecords() {
-    return this.inspectionsService.getSampleRetentionRecords();
-  }
-
-  @Post('attendance/sample-retention-records')
-  @ApiOperation({ summary: 'Lưu mẫu thức ăn 24h mới từ KDS Bếp' })
-  async createSampleRetentionRecord(@Body() body: any) {
-    return this.inspectionsService.createSampleRetentionRecord(body);
-  }
-
-  @Post('attendance/sample-retention-records/:id/dispose')
-  @ApiOperation({ summary: 'Hủy mẫu lưu an toàn sau 24h từ KDS Bếp' })
-  async disposeSampleRetentionRecord(@Param('id') id: string) {
-    return this.inspectionsService.disposeSampleRetentionRecord(id);
   }
 }

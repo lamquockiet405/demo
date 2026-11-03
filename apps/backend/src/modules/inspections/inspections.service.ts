@@ -14,8 +14,8 @@ export interface FormattedInspectionSession {
   mealDate: string;
   mealTime: string;
   performerName: string;
-  totalPortions: number;
-  storageTemp: number;
+  totalPortions: number | null;
+  storageTemp: number | null;
   status: 'Hoàn tất' | 'Chưa hoàn tất' | 'Có cảnh báo' | 'Chờ bếp tải ảnh' | 'Chờ duyệt' | 'Đã duyệt' | 'Yêu cầu chụp lại';
   approvalStatus?: 'CHO_BEP_TAI_ANH' | 'CHO_DUYET' | 'DA_DUYET' | 'YEU_CAU_CHUP_LAI';
   approvalStatusLabel?: string;
@@ -27,18 +27,18 @@ export interface FormattedInspectionSession {
   sealedAt: string | null;
   disposedAt: string | null;
   step1Status: 'Đạt chuẩn' | 'Không đạt' | 'Chưa thực hiện';
-  step1Time: string;
+  step1Time: string | null;
   step1Note: string;
   step1PhotoUrl: string | null;
   step1Photos?: string[];
   step2Status: 'Đạt chuẩn' | 'Không đạt' | 'Chưa thực hiện';
-  step2Time: string;
+  step2Time: string | null;
   step2Temperature: number | null;
   step2Note: string;
   step2PhotoUrl: string | null;
   step2Photos?: string[];
   step3Status: 'Đạt chuẩn' | 'Không đạt' | 'Chưa thực hiện';
-  step3Time: string;
+  step3Time: string | null;
   step3Temperature: number | null;
   step3Note: string;
   step3PhotoUrl: string | null;
@@ -48,7 +48,7 @@ export interface FormattedInspectionSession {
     dishName: string;
     sampleCode: string;
     quantityGrams: number;
-    temperatureC: number;
+    temperatureC: number | null;
     containerType: string;
     status: string;
     storedAt: string | null;
@@ -57,7 +57,7 @@ export interface FormattedInspectionSession {
 }
 
 export interface WorkflowMeta {
-  approvalStatus: 'CHO_BEP_TAI_ANH' | 'CHO_DUYET' | 'DA_DUYET' | 'YEU_CAU_CHUP_LAI';
+  approvalStatus: 'CHO_DUYET' | 'DA_DUYET' | 'YEU_CAU_CHUP_LAI';
   dishes?: string[];
   rejectionReason?: string;
   approvedBy?: string;
@@ -187,32 +187,18 @@ export class InspectionsService {
       const hasFail = records.some((r) => r.result === 'FAIL');
       const hasAll3 = !!step1 && !!step2 && !!step3;
 
-      const approvalStatus: 'CHO_BEP_TAI_ANH' | 'CHO_DUYET' | 'DA_DUYET' | 'YEU_CAU_CHUP_LAI' =
-        workflowMeta?.approvalStatus || 'DA_DUYET';
-
-      let status: 'Hoàn tất' | 'Chưa hoàn tất' | 'Có cảnh báo' = hasFail
-        ? 'Có cảnh báo'
-        : hasAll3 || matchingSamples.length > 0
-        ? 'Hoàn tất'
-        : 'Chưa hoàn tất';
-
-      let approvalStatusLabel = 'Đã hoàn tất';
-      if (hasFail) {
-        status = 'Có cảnh báo';
-        approvalStatusLabel = 'Có cảnh báo';
-      } else if (approvalStatus === 'CHO_BEP_TAI_ANH') {
-        approvalStatusLabel = 'Chờ bếp tải ảnh';
-        status = 'Chưa hoàn tất';
-      } else if (approvalStatus === 'CHO_DUYET') {
-        approvalStatusLabel = 'Chờ duyệt';
-        status = 'Chưa hoàn tất';
-      } else if (approvalStatus === 'YEU_CAU_CHUP_LAI') {
-        approvalStatusLabel = 'Yêu cầu chụp lại';
-        status = 'Có cảnh báo';
-      } else if (approvalStatus === 'DA_DUYET') {
-        approvalStatusLabel = 'Đã duyệt';
-        status = 'Hoàn tất';
+      // Chỉ có 2 trạng thái chính: 'Đã duyệt' và 'Chờ duyệt'
+      // - Nếu có workflowMeta: tuân thủ theo workflow (DA_DUYET hoặc CHO_DUYET)
+      // - Nếu không có workflowMeta (các biên bản lịch sử đã hoàn tất / đã lưu mẫu): mặc định là 'DA_DUYET'
+      let approvalStatus: 'CHO_DUYET' | 'DA_DUYET' = 'DA_DUYET';
+      if (workflowMeta?.approvalStatus) {
+        approvalStatus = workflowMeta.approvalStatus === 'DA_DUYET' ? 'DA_DUYET' : 'CHO_DUYET';
+      } else {
+        approvalStatus = (hasAll3 || matchingSamples.length > 0) ? 'DA_DUYET' : 'CHO_DUYET';
       }
+
+      const approvalStatusLabel = approvalStatus === 'DA_DUYET' ? 'Đã duyệt' : 'Chờ duyệt';
+      const status: 'Hoàn tất' | 'Chưa hoàn tất' = approvalStatus === 'DA_DUYET' ? 'Hoàn tất' : 'Chưa hoàn tất';
 
       const mealTimeLabel =
         mealSession === 'BREAKFAST'
@@ -226,7 +212,7 @@ export class InspectionsService {
         step2?.inspector?.fullName ||
         step1?.inspector?.fullName ||
         (matchingSamples.length > 0 ? matchingSamples[0].collectorName : null) ||
-        'Nguyễn Văn Cường (Bếp trưởng)';
+        'Chưa cập nhật';
 
       const dateSlug = date.replace(/-/g, '');
       const code = records[0]?.sessionCode || `BB-KT-${dateSlug}-0${sessionCounter}`;
@@ -238,13 +224,39 @@ export class InspectionsService {
 
       const cleanStep1Note = (step1?.note || '')
         .replace(/__WORKFLOW__:.*?:__END__\s*/g, '')
-        .trim() || 'Tiếp nhận nguyên liệu rau, củ, thịt, cá từ nhà cung cấp có đủ hóa đơn kiểm dịch ATTP, cảm quan tươi sống tốt.';
+        .trim();
       const cleanStep2Note = (step2?.note || '')
         .replace(/__WORKFLOW__:.*?:__END__\s*/g, '')
-        .trim() || 'Bếp vận hành theo nguyên tắc 1 chiều. Dụng cụ dao thớt sống chín phân biệt rõ ràng. Nhiệt độ nấu chín > 75°C.';
+        .trim();
       const cleanStep3Note = (step3?.note || '')
         .replace(/__WORKFLOW__:.*?:__END__\s*/g, '')
-        .trim() || 'Cảm quan thức ăn chín thơm ngon vừa miệng, nhiệt độ phân chia > 60°C. Đã lấy mẫu lưu 24h niêm phong vào tủ mát.';
+        .trim();
+
+      const sealedAt = matchingSamples[0]?.storedAt
+        ? matchingSamples[0].storedAt.toISOString()
+        : step3?.images?.[0]?.uploadedAt
+        ? step3.images[0].uploadedAt.toISOString()
+        : null;
+
+      const step1Time = step1?.images?.[0]?.uploadedAt
+        ? step1.images[0].uploadedAt.toISOString()
+        : step1
+        ? `${date}T00:00:00.000Z`
+        : null;
+
+      const step2Time = step2?.images?.[0]?.uploadedAt
+        ? step2.images[0].uploadedAt.toISOString()
+        : step2
+        ? `${date}T00:00:00.000Z`
+        : null;
+
+      const step3Time = matchingSamples[0]?.storedAt
+        ? matchingSamples[0].storedAt.toISOString()
+        : step3?.images?.[0]?.uploadedAt
+        ? step3.images[0].uploadedAt.toISOString()
+        : step3
+        ? `${date}T00:00:00.000Z`
+        : null;
 
       sessions.push({
         id: firstId,
@@ -253,8 +265,8 @@ export class InspectionsService {
         mealDate: date,
         mealTime: mealTimeLabel,
         performerName: inspectorName,
-        totalPortions: 380,
-        storageTemp: matchingSamples[0]?.storageTemp ? Number(matchingSamples[0].storageTemp) : 3.8,
+        totalPortions: null,
+        storageTemp: matchingSamples[0]?.storageTemp != null ? Number(matchingSamples[0].storageTemp) : null,
         status,
         approvalStatus,
         approvalStatusLabel,
@@ -262,32 +274,36 @@ export class InspectionsService {
         approvedBy: workflowMeta?.approvedBy || null,
         approvedAt: workflowMeta?.approvedAt || null,
         kitchenSubmittedAt: workflowMeta?.kitchenSubmittedAt || null,
-        dishes: workflowMeta?.dishes || ['Thịt bò xào củ quả', 'Canh bí đỏ thịt bằm', 'Cơm trắng', 'Chuối tiêu'],
-        sealedAt: matchingSamples[0]?.storedAt ? matchingSamples[0].storedAt.toISOString() : `${date}T10:45:00.000Z`,
+        dishes: (workflowMeta?.dishes && workflowMeta.dishes.length > 0)
+          ? workflowMeta.dishes
+          : matchingSamples.length > 0
+          ? matchingSamples.map((s) => s.dishName)
+          : [],
+        sealedAt,
         disposedAt: matchingSamples[0]?.disposeAt ? matchingSamples[0].disposeAt.toISOString() : null,
-        step1Status: step1?.result === 'PASS' || matchingSamples.length > 0 ? 'Đạt chuẩn' : step1?.result === 'FAIL' ? 'Không đạt' : 'Chưa thực hiện',
-        step1Time: `${date}T06:30:00.000Z`,
+        step1Status: step1?.result === 'PASS' || (records.length === 0 && matchingSamples.length > 0) ? 'Đạt chuẩn' : step1?.result === 'FAIL' ? 'Không đạt' : 'Chưa thực hiện',
+        step1Time,
         step1Note: cleanStep1Note,
-        step1PhotoUrl: step1Photos[0] || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        step1PhotoUrl: step1Photos[0] || null,
         step1Photos,
-        step2Status: step2?.result === 'PASS' || matchingSamples.length > 0 ? 'Đạt chuẩn' : step2?.result === 'FAIL' ? 'Không đạt' : 'Chưa thực hiện',
-        step2Time: `${date}T09:15:00.000Z`,
-        step2Temperature: 88,
+        step2Status: step2?.result === 'PASS' || (records.length === 0 && matchingSamples.length > 0) ? 'Đạt chuẩn' : step2?.result === 'FAIL' ? 'Không đạt' : 'Chưa thực hiện',
+        step2Time,
+        step2Temperature: null,
         step2Note: cleanStep2Note,
-        step2PhotoUrl: step2Photos[0] || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=600&q=80',
+        step2PhotoUrl: step2Photos[0] || null,
         step2Photos,
         step3Status: step3?.result === 'PASS' || matchingSamples.length > 0 ? 'Đạt chuẩn' : step3?.result === 'FAIL' ? 'Không đạt' : 'Chưa thực hiện',
-        step3Time: `${date}T10:30:00.000Z`,
-        step3Temperature: 68,
+        step3Time,
+        step3Temperature: null,
         step3Note: cleanStep3Note,
-        step3PhotoUrl: step3Photos[0] || 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=600&q=80',
+        step3PhotoUrl: step3Photos[0] || null,
         step3Photos,
         sampleItems: matchingSamples.map((s) => ({
           id: String(s.id),
           dishName: s.dishName,
           sampleCode: s.sampleCode,
           quantityGrams: Number(s.sampleWeightG) || 150,
-          temperatureC: Number(s.storageTemp) || 3.8,
+          temperatureC: s.storageTemp != null ? Number(s.storageTemp) : null,
           containerType: 'Hộp Inox vô trùng niêm phong tem',
           status: s.status,
           storedAt: s.storedAt ? s.storedAt.toISOString() : null,
@@ -327,7 +343,6 @@ export class InspectionsService {
       }
     }
 
-    if (all.length > 0) return all[0];
     throw new NotFoundException(`Không tìm thấy biên bản kiểm thực với mã/ID: ${idOrCode}`);
   }
 
@@ -353,10 +368,10 @@ export class InspectionsService {
         disposeAt: s.disposeAt ? s.disposeAt.toISOString() : null,
         status: s.status,
         sampleWeight: Number(s.sampleWeightG) || 150,
-        storageTemp: Number(s.storageTemp) || 3.8,
-        temperatureC: Number(s.storageTemp) || 3.8,
+        storageTemp: s.storageTemp != null ? Number(s.storageTemp) : null,
+        temperatureC: s.storageTemp != null ? Number(s.storageTemp) : null,
         fridgeUnit: s.fridgeUnit || 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)',
-        collectorName: s.collectorName || 'Nguyễn Văn Cường (Bếp trưởng)',
+        collectorName: s.collectorName || 'Chưa cập nhật',
         countdownHours: parseFloat(hoursRemaining.toFixed(1)),
         note: s.note,
       };
@@ -384,11 +399,11 @@ export class InspectionsService {
       storedAt: s.storedAt ? s.storedAt.toISOString() : null,
       disposeAt: s.disposeAt ? s.disposeAt.toISOString() : null,
       status: s.status,
-      temperatureC: Number(s.storageTemp) || 3.8,
-      storageTemp: Number(s.storageTemp) || 3.8,
+      temperatureC: s.storageTemp != null ? Number(s.storageTemp) : null,
+      storageTemp: s.storageTemp != null ? Number(s.storageTemp) : null,
       sampleWeight: Number(s.sampleWeightG) || 150,
       fridgeUnit: s.fridgeUnit || 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)',
-      collectorName: s.collectorName || 'Nguyễn Văn Cường (Bếp trưởng)',
+      collectorName: s.collectorName || 'Chưa cập nhật',
       countdownHours: parseFloat(hoursRemaining.toFixed(1)),
       note: s.note,
       sealIntegrity: 'NGUYÊN VẸN',
@@ -429,10 +444,10 @@ export class InspectionsService {
       date: dto.date,
       sampleCode,
       status: 'STORED',
-      sampleWeightG: 150.0,
-      storageTemp: 3.8,
-      fridgeUnit: 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)',
-      collectorName: 'Nguyễn Văn Cường (Bếp trưởng)',
+      sampleWeightG: dto.sampleWeightG || 150.0,
+      storageTemp: dto.storageTemp || 3.8,
+      fridgeUnit: dto.fridgeUnit || 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)',
+      collectorName: dto.collectorName || 'Nhân viên nhà bếp',
       note: dto.note || 'Lưu mẫu 24h theo Quyết định 1246/QĐ-BYT',
     });
     const saved = await this.sampleRepo.save(sample);
@@ -463,7 +478,7 @@ export class InspectionsService {
       result: data.result || 'PASS',
       mealSession: data.mealSession || 'LUNCH',
       sessionCode,
-      note: data.note || data.notes || 'Kiểm tra cảm quan nguyên liệu tươi sống đạt yêu cầu, đầy đủ giấy tờ kiểm dịch',
+      note: embedWorkflowMeta(data.note !== undefined ? data.note : (data.notes || ''), { approvalStatus: 'CHO_DUYET' }),
     });
     const saved = await this.inspectionRepo.save(rec);
 
@@ -471,7 +486,7 @@ export class InspectionsService {
       await this.imageRepo.save(
         this.imageRepo.create({
           inspectionId: saved.id,
-          imageUrl: data.imageUrl || data.photoBase64 || 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+          imageUrl: data.imageUrl || data.photoBase64 || '',
         }),
       );
     }
@@ -507,7 +522,7 @@ export class InspectionsService {
       result: data.result || 'PASS',
       mealSession: data.mealSession || 'LUNCH',
       sessionCode,
-      note: data.note || data.notes || `Nhiệt độ tâm món: ${data.temperature || 88}°C. Vệ sinh dao thớt sống chín riêng biệt, trang phục bảo hộ đầy đủ.`,
+      note: embedWorkflowMeta(data.note !== undefined ? data.note : (data.notes || ''), { approvalStatus: 'CHO_DUYET' }),
     });
     const saved = await this.inspectionRepo.save(rec);
 
@@ -515,7 +530,7 @@ export class InspectionsService {
       await this.imageRepo.save(
         this.imageRepo.create({
           inspectionId: saved.id,
-          imageUrl: data.imageUrl || data.photoBase64 || 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=600&q=80',
+          imageUrl: data.imageUrl || data.photoBase64 || '',
         }),
       );
     }
@@ -550,7 +565,7 @@ export class InspectionsService {
       result: data.result || 'PASS',
       mealSession: data.mealSession || 'LUNCH',
       sessionCode,
-      note: data.note || data.notes || 'Cảm quan món ăn thơm ngon đạt chuẩn, nhiệt độ chia suất > 65°C, đã niêm phong mẫu lưu 24h.',
+      note: data.note !== undefined ? data.note : (data.notes || ''),
     });
     const saved = await this.inspectionRepo.save(rec);
 
@@ -571,6 +586,15 @@ export class InspectionsService {
         date: mealDate,
         note: `Lưu mẫu 24h từ Biên bản ${sessionCode}`,
       });
+    }
+
+    if (data.photoBase64 || data.imageUrl) {
+      await this.imageRepo.save(
+        this.imageRepo.create({
+          inspectionId: saved.id,
+          imageUrl: data.imageUrl || data.photoBase64 || '',
+        }),
+      );
     }
 
     this.kitchenGateway.broadcastSafetyAlert(1, {
@@ -620,16 +644,16 @@ export class InspectionsService {
 
     const dishes = Array.isArray(data.dishes)
       ? data.dishes.map((d: any) => (typeof d === 'string' ? d : d.name || d.dishName))
-      : ['Thịt heo xốt cà chua', 'Canh rau cải cá thác lác', 'Cơm trắng', 'Chuối tiêu tráng miệng'];
+      : [];
 
     const meta: WorkflowMeta = {
-      approvalStatus: 'CHO_BEP_TAI_ANH',
+      approvalStatus: 'CHO_DUYET',
       dishes,
-      nutritionistName: data.nutritionistName || 'BS. Hoàng Mai Trang (Chuyên gia Dinh dưỡng)',
+      nutritionistName: data.nutritionistName || 'Chuyên gia Dinh dưỡng',
     };
 
     const initialNote = embedWorkflowMeta(
-      data.note || 'Biên bản kiểm thực được khởi tạo bởi Chuyên gia dinh dưỡng. Nhà bếp vui lòng chụp đầy đủ ảnh 3 bước và gửi duyệt.',
+      data.note !== undefined ? data.note : '',
       meta,
     );
 
@@ -657,7 +681,7 @@ export class InspectionsService {
       success: true,
       recordId: String(saved.id),
       code: sessionCode,
-      approvalStatus: 'CHO_BEP_TAI_ANH',
+      approvalStatus: 'CHO_DUYET',
       dishes: data.dishes || [],
       message: `Đã tạo biên bản kiểm thực ${sessionCode}. Đã gửi yêu cầu đến nhà bếp để tải ảnh minh chứng.`,
     };
@@ -692,7 +716,7 @@ export class InspectionsService {
         result: 'PASS',
         mealSession: detail.mealTime?.includes('sáng') ? 'BREAKFAST' : 'LUNCH',
         sessionCode,
-        note: data.step1Note || 'Kiểm tra nguyên liệu tươi sống đạt chuẩn',
+        note: data.step1Note || '',
       });
       step1 = await this.inspectionRepo.save(step1);
     }
@@ -705,7 +729,7 @@ export class InspectionsService {
         result: 'PASS',
         mealSession: step1.mealSession,
         sessionCode,
-        note: data.step2Note || `Nhiệt độ sôi: ${data.step2Temperature || 88}°C. Quy trình 1 chiều.`,
+        note: data.step2Note || (data.step2Temperature ? `Nhiệt độ sôi: ${data.step2Temperature}°C.` : ''),
       });
       step2 = await this.inspectionRepo.save(step2);
     }
@@ -718,7 +742,7 @@ export class InspectionsService {
         result: 'PASS',
         mealSession: step1.mealSession,
         sessionCode,
-        note: data.step3Note || 'Cảm quan thức ăn chín đạt chuẩn, nhiệt độ chia suất > 65°C.',
+        note: data.step3Note !== undefined ? data.step3Note : '',
       });
       step3 = await this.inspectionRepo.save(step3);
     }
@@ -761,7 +785,7 @@ export class InspectionsService {
     }
 
     // Update workflow meta to CHO_DUYET
-    const currentMeta = parseWorkflowMeta(step1.note) || { approvalStatus: 'CHO_BEP_TAI_ANH' };
+    const currentMeta = parseWorkflowMeta(step1.note) || { approvalStatus: 'CHO_DUYET' as const, dishes: [] };
     const updatedMeta: WorkflowMeta = {
       ...currentMeta,
       approvalStatus: 'CHO_DUYET',
@@ -805,11 +829,22 @@ export class InspectionsService {
     ) || records[0];
     if (step1) {
       const currentMeta = parseWorkflowMeta(step1.note) || { approvalStatus: 'CHO_DUYET' };
+      let approverName = 'Chuyên gia Dinh dưỡng';
+      if (userId) {
+        try {
+          const u = await this.inspectionRepo.manager.query(
+            `SELECT full_name FROM users WHERE id = $1`,
+            [userId]
+          );
+          if (u[0]?.full_name) approverName = u[0].full_name;
+        } catch (e) {}
+      }
+
       const updatedMeta: WorkflowMeta = {
         ...currentMeta,
         approvalStatus: 'DA_DUYET',
         approvedAt: new Date().toISOString(),
-        approvedBy: 'Chuyên gia Dinh dưỡng',
+        approvedBy: approverName,
       };
       step1.note = embedWorkflowMeta(step1.note, updatedMeta);
       await this.inspectionRepo.update(step1.id, { note: step1.note });
@@ -910,5 +945,107 @@ export class InspectionsService {
   async disposeSampleRetentionRecord(id: string | number) {
     const numId = parseInt(String(id), 10);
     return this.disposeSample(numId);
+  }
+
+  async getMealIngredients(mealDate?: string, mealTime?: string) {
+    const session = (mealTime || '').toLowerCase();
+    let mealType = 'LUNCH';
+    if (session.includes('sáng') || session.includes('morning') || session.includes('07:')) {
+      mealType = 'MORNING_SNACK';
+    } else if (session.includes('xế') || session.includes('afternoon') || session.includes('14:')) {
+      mealType = 'AFTERNOON_SNACK';
+    }
+
+    try {
+      let dishesRes: any[] = [];
+      let ingRes: any[] = [];
+
+      // 1. Tra cứu thực đơn chính xác theo ngày nếu có mealDate
+      if (mealDate) {
+        dishesRes = await this.inspectionRepo.manager.query(`
+          SELECT DISTINCT d.id, d.name as dish_name
+          FROM menu_days md_day
+          JOIN menu_meals mm ON mm.menu_day_id = md_day.id
+          JOIN menu_dishes md ON md.menu_meal_id = mm.id
+          JOIN dishes d ON d.id = md.dish_id
+          WHERE md_day.date = $1 AND mm.meal_type = $2
+          ORDER BY d.id ASC
+          LIMIT 10
+        `, [mealDate, mealType]);
+
+        if (dishesRes.length > 0) {
+          ingRes = await this.inspectionRepo.manager.query(`
+            SELECT fi.id as ingredient_id, fi.name as ingredient_name, fi.unit, SUM(dr.gross_weight_g) as gross_weight_g
+            FROM menu_days md_day
+            JOIN menu_meals mm ON mm.menu_day_id = md_day.id
+            JOIN menu_dishes md ON md.menu_meal_id = mm.id
+            JOIN dishes d ON d.id = md.dish_id
+            JOIN dish_recipes dr ON dr.dish_id = d.id
+            JOIN food_ingredients fi ON fi.id = dr.ingredient_id
+            WHERE md_day.date = $1 AND mm.meal_type = $2
+            GROUP BY fi.id, fi.name, fi.unit
+            ORDER BY fi.name ASC
+            LIMIT 20
+          `, [mealDate, mealType]);
+        }
+      }
+
+      // 2. Nếu ngày cụ thể chưa có thực đơn, lấy món theo ca ăn (mealType) từ menu_meals
+      if (!dishesRes || dishesRes.length === 0) {
+        dishesRes = await this.inspectionRepo.manager.query(`
+          SELECT DISTINCT d.id, d.name as dish_name
+          FROM menu_meals mm
+          JOIN menu_dishes md ON md.menu_meal_id = mm.id
+          JOIN dishes d ON d.id = md.dish_id
+          WHERE mm.meal_type = $1
+          ORDER BY d.id ASC
+          LIMIT 6
+        `, [mealType]);
+
+        if (dishesRes.length > 0) {
+          ingRes = await this.inspectionRepo.manager.query(`
+            SELECT fi.id as ingredient_id, fi.name as ingredient_name, fi.unit, SUM(dr.gross_weight_g) as gross_weight_g
+            FROM menu_meals mm
+            JOIN menu_dishes md ON md.menu_meal_id = mm.id
+            JOIN dishes d ON d.id = md.dish_id
+            JOIN dish_recipes dr ON dr.dish_id = d.id
+            JOIN food_ingredients fi ON fi.id = dr.ingredient_id
+            WHERE mm.meal_type = $1
+            GROUP BY fi.id, fi.name, fi.unit
+            ORDER BY fi.name ASC
+            LIMIT 20
+          `, [mealType]);
+        }
+      }
+
+      // 3. Nếu chưa có liên kết thực đơn, lấy trực tiếp từ bảng dishes trong CSDL
+      if (!dishesRes || dishesRes.length === 0) {
+        dishesRes = await this.inspectionRepo.manager.query(`
+          SELECT d.id, d.name as dish_name
+          FROM dishes d
+          ORDER BY d.id ASC
+          LIMIT 6
+        `);
+      }
+
+      // 4. Nếu chưa có liên kết nguyên liệu, lấy trực tiếp từ bảng food_ingredients trong CSDL
+      if (!ingRes || ingRes.length === 0) {
+        ingRes = await this.inspectionRepo.manager.query(`
+          SELECT fi.id as ingredient_id, fi.name as ingredient_name, fi.unit, 15.0 as gross_weight_g
+          FROM food_ingredients fi
+          ORDER BY fi.id ASC
+          LIMIT 8
+        `);
+      }
+
+      return {
+        mealType,
+        mealTime: mealTime || (mealType === 'MORNING_SNACK' ? 'Bữa sáng (07:15)' : mealType === 'AFTERNOON_SNACK' ? 'Bữa xế chiều (14:30)' : 'Trưa chính (10:30)'),
+        dishes: dishesRes,
+        ingredients: ingRes,
+      };
+    } catch (e) {
+      return { mealType, dishes: [], ingredients: [] };
+    }
   }
 }

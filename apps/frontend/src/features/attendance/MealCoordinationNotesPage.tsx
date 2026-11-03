@@ -16,7 +16,6 @@ import { CoordinationKPIStrip } from './components/CoordinationKPIStrip';
 import { CoordinationFilterBar } from './components/CoordinationFilterBar';
 import { CoordinationNotesList } from './components/CoordinationNotesList';
 import { CreateEditCoordinationNoteModal } from './components/CreateEditCoordinationNoteModal';
-import { KitchenResponseModal } from './components/KitchenResponseModal';
 import { coordinationApi } from './api/coordinationApi';
 import {
   MealCoordinationData,
@@ -26,7 +25,11 @@ import {
   UpdateCoordinationNotePayload,
 } from './types';
 
-export const MealCoordinationNotesPage: React.FC = () => {
+interface MealCoordinationNotesPageProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps> = ({ onTabChange }) => {
   const navigate = useNavigate();
 
   const [data, setData] = useState<MealCoordinationData | null>(null);
@@ -45,16 +48,6 @@ export const MealCoordinationNotesPage: React.FC = () => {
   // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [noteToEdit, setNoteToEdit] = useState<CoordinationNoteItem | null>(null);
-
-  const [kitchenModalConfig, setKitchenModalConfig] = useState<{
-    isOpen: boolean;
-    note: CoordinationNoteItem | null;
-    mode: 'ACKNOWLEDGE' | 'RESOLVE';
-  }>({
-    isOpen: false,
-    note: null,
-    mode: 'ACKNOWLEDGE',
-  });
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToastMessage({ text, type });
@@ -100,10 +93,14 @@ export const MealCoordinationNotesPage: React.FC = () => {
   };
 
   const handleTabChange = (tabId: string) => {
-    if (tabId === 'attendance') navigate('/attendance');
-    else if (tabId === 'evaluation') navigate('/evaluation');
-    else if (tabId === 'history') navigate('/history');
-    else if (tabId === 'notes') navigate('/coordination-notes');
+    if (onTabChange) {
+      onTabChange(tabId);
+      return;
+    }
+    if (tabId === 'notes') navigate('/coordination-notes');
+    else if (tabId === 'attendance') navigate('/tablet');
+    else if (tabId === 'evaluation') navigate('/tablet/record');
+    else if (tabId === 'history') navigate('/tablet?tab=history');
   };
 
   // Handlers for Note CRUD
@@ -132,41 +129,6 @@ export const MealCoordinationNotesPage: React.FC = () => {
     } catch (err: any) {
       showToast('Lỗi khi xóa ghi chú: ' + err.message, 'error');
     }
-  };
-
-  const handleAcknowledgeClick = (note: CoordinationNoteItem) => {
-    setKitchenModalConfig({
-      isOpen: true,
-      note,
-      mode: 'ACKNOWLEDGE',
-    });
-  };
-
-  const handleResolveClick = (note: CoordinationNoteItem) => {
-    setKitchenModalConfig({
-      isOpen: true,
-      note,
-      mode: 'RESOLVE',
-    });
-  };
-
-  const handleKitchenModalSubmit = async (responseNote: string) => {
-    if (!kitchenModalConfig.note) return;
-    const noteId = kitchenModalConfig.note.id;
-
-    if (kitchenModalConfig.mode === 'ACKNOWLEDGE') {
-      await coordinationApi.acknowledgeCoordinationNote(noteId, {
-        acknowledgedBy: 'Bếp trưởng Trần Văn Bếp',
-        kitchenResponse: responseNote || undefined,
-      });
-      showToast('Nhà bếp đã xác nhận tiếp nhận yêu cầu điều phối!');
-    } else {
-      await coordinationApi.resolveCoordinationNote(noteId, {
-        resolutionNote: responseNote || undefined,
-      });
-      showToast('Đã đánh dấu hoàn thành điều phối suất ăn!');
-    }
-    await loadData(true);
   };
 
   return (
@@ -298,8 +260,6 @@ export const MealCoordinationNotesPage: React.FC = () => {
             setIsCreateModalOpen(true);
           }}
           onDeleteNote={handleDeleteNote}
-          onAcknowledgeNote={handleAcknowledgeClick}
-          onResolveNote={handleResolveClick}
         />
       </main>
 
@@ -315,14 +275,6 @@ export const MealCoordinationNotesPage: React.FC = () => {
         availableClasses={data?.availableClasses || []}
         availableChildren={data?.availableChildren || []}
         onSave={handleSaveNote}
-      />
-
-      <KitchenResponseModal
-        isOpen={kitchenModalConfig.isOpen}
-        onClose={() => setKitchenModalConfig((prev) => ({ ...prev, isOpen: false }))}
-        note={kitchenModalConfig.note}
-        mode={kitchenModalConfig.mode}
-        onSubmit={handleKitchenModalSubmit}
       />
     </div>
   );
