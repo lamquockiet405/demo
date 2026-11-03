@@ -1297,15 +1297,22 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           return (
                             <div
                               key={md.id}
-                              className="rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border bg-white border-slate-200/80 hover:border-emerald-300"
+                              className={`rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border ${hasAllergyConflict ? 'bg-rose-50/40 border-rose-300' : 'bg-white border-slate-200/80 hover:border-emerald-300'}`}
                             >
                               {/* HUY HIỆU PHÂN LOẠI: SUẤT CHUNG */}
                               <div className="mb-1 flex items-center justify-between gap-1">
-                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                                  <span>Suất chung (Trẻ bình thường)</span>
+                                <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${hasAllergyConflict ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                                  {hasAllergyConflict && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
+                                  <span>{hasAllergyConflict ? 'Dị ứng / kiêng cữ' : 'Suất chung'}</span>
                                 </span>
                               </div>
+
+                              {hasAllergyConflict && (
+                                <div role="note" className="mb-2 space-y-0.5 text-[10px] leading-snug text-rose-800">
+                                  <p className="font-semibold">Không dùng cho: {Array.from(new Set(conflictsForDish.map(c => c.childName))).join(', ')}</p>
+                                  <p>Khai báo: {Array.from(new Set(conflictsForDish.map(c => c.allergenDetected))).join(', ')}</p>
+                                </div>
+                              )}
 
                               <div className="flex items-start justify-between gap-1">
                                 <span 

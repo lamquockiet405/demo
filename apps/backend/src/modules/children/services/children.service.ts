@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Child } from '../entities/child.entity';
@@ -9,6 +9,8 @@ import { UpdateChildDto } from '../dto/update-child.dto';
 import { GetChildrenQueryDto } from '../dto/get-children-query.dto';
 import { DeclareAllergyDto } from '../dto/declare-allergy.dto';
 import { UpdateAllergyDto } from '../dto/update-allergy.dto';
+
+export interface ChildAccessActor { sub: number; roles?: (string | { code?: string })[]; }
 
 @Injectable()
 export class ChildrenService {
@@ -58,12 +60,52 @@ export class ChildrenService {
     };
   }
 
-  async findAll(query: GetChildrenQueryDto) {
+  private parentOnly(actor?: ChildAccessActor) {
+    const roles = (actor?.roles || []).map(role => (typeof role === 'string' ? role : role.code || '').toUpperCase());
+    return roles.includes('PARENT') && !roles.some(role =>
+      ['SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'TEACHER', 'NUTRITIONIST', 'KITCHEN_STAFF'].includes(role));
+  }
+
+  private async assertChildAccess(childId: number, actor?: ChildAccessActor) {
+    if (!this.parentOnly(actor)) return;
+    const links = await this.childRepo.query('SELECT 1 FROM student_parents WHERE student_id=$1 AND parent_id=$2', [childId, actor.sub]);
+    if (!links.length) throw new ForbiddenException('Tài khoản chưa được liên kết với hồ sơ học sinh này');
+  }
+
+  private async allergyTarget(dto: DeclareAllergyDto | UpdateAllergyDto, current?: ChildAllergy) {
+    let allergenId = current?.allergenId ?? null;
+    if (dto.allergenId !== undefined) {
+      if (dto.allergenId === null || dto.allergenId === '') allergenId = null;
+      else {
+        const parsed = Number(dto.allergenId);
+        if (!Number.isSafeInteger(parsed) || parsed <= 0) throw new BadRequestException('Dị nguyên được chọn không hợp lệ');
+        if (!await this.catalogRepo.findOne({ where: { id: parsed } })) throw new NotFoundException('Không tìm thấy dị nguyên trong danh mục');
+        allergenId = parsed;
+      }
+    }
+    const customAllergenName = dto.customAllergenName === undefined ? current?.customAllergenName ?? null : dto.customAllergenName?.trim() || null;
+    if (!allergenId && !customAllergenName) throw new BadRequestException('Vui lòng chọn dị nguyên hoặc nhập thực phẩm cần tránh');
+    return { allergenId, customAllergenName: allergenId ? null : customAllergenName };
+  }
+
+  private async assertNoDuplicate(childId: number, target: { allergenId: number | null; customAllergenName: string | null }, exceptId?: number) {
+    const active = await this.allergyRepo.find({ where: { studentId: childId, isActive: true } });
+    const duplicate = active.some(item => Number(item.id) !== Number(exceptId) &&
+      (target.allergenId ? Number(item.allergenId) === target.allergenId :
+        !item.allergenId && (item.customAllergenName || '').trim().toLocaleLowerCase('vi') === target.customAllergenName.toLocaleLowerCase('vi')));
+    if (duplicate) throw new ConflictException('Thực phẩm này đã có trong hồ sơ đang áp dụng của bé');
+  }
+
+  async findAll(query: GetChildrenQueryDto, actor?: ChildAccessActor) {
     const qb = this.childRepo
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.class', 'cls')
-      .leftJoinAndSelect('c.allergies', 'alg')
+      .leftJoinAndSelect('c.allergies', 'alg', 'alg.isActive = :allergyActive', { allergyActive: true })
       .leftJoinAndSelect('alg.allergen', 'ac');
+
+    if (this.parentOnly(actor)) {
+      qb.andWhere('EXISTS (SELECT 1 FROM student_parents sp WHERE sp.student_id=c.id AND sp.parent_id=:parentId)', { parentId: actor.sub });
+    }
 
     if (query.search) {
       qb.andWhere(
@@ -114,13 +156,13 @@ export class ChildrenService {
     const total = await this.childRepo.count();
     const allergicCount = await this.childRepo
       .createQueryBuilder('c')
-      .innerJoin('c.allergies', 'a')
+      .innerJoin('c.allergies', 'a', 'a.isActive = true')
       .select('COUNT(DISTINCT c.id)', 'cnt')
       .getRawOne();
 
     const severeCount = await this.childRepo
       .createQueryBuilder('c')
-      .innerJoin('c.allergies', 'a')
+      .innerJoin('c.allergies', 'a', 'a.isActive = true')
       .where("a.severity IN ('HIGH', 'SEVERE', 'ANAPHYLACTIC')")
       .select('COUNT(DISTINCT c.id)', 'cnt')
       .getRawOne();
@@ -151,7 +193,8 @@ export class ChildrenService {
     }));
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, actor?: ChildAccessActor) {
+    await this.assertChildAccess(id, actor);
     const child = await this.childRepo.findOne({
       where: { id },
       relations: ['class', 'allergies', 'allergies.allergen'],
@@ -221,33 +264,19 @@ export class ChildrenService {
     return this.findOne(id);
   }
 
-  async declareAllergy(childId: number, dto: DeclareAllergyDto, declaredBy?: number) {
+  async declareAllergy(childId: number, dto: DeclareAllergyDto, declaredBy?: number, actor?: ChildAccessActor) {
+    await this.assertChildAccess(childId, actor);
     const child = await this.childRepo.findOne({ where: { id: childId } });
     if (!child) {
       throw new NotFoundException(`Không tìm thấy trẻ với ID: ${childId}`);
     }
 
-    let allergenId: number | null = null;
-    if (dto.allergenId !== undefined && dto.allergenId !== null && dto.allergenId !== '') {
-      const parsed = Number(dto.allergenId);
-      if (!isNaN(parsed) && parsed > 0) {
-        allergenId = parsed;
-      }
-    }
-
-    if (!allergenId && dto.customAllergenName) {
-      const match = await this.catalogRepo.findOne({
-        where: { name: dto.customAllergenName.trim() },
-      });
-      if (match) {
-        allergenId = match.id;
-      }
-    }
+    const target = await this.allergyTarget(dto);
+    await this.assertNoDuplicate(childId, target);
 
     const allergy = this.allergyRepo.create({
       studentId: childId,
-      allergenId,
-      customAllergenName: dto.customAllergenName || null,
+      ...target,
       allergyType: dto.allergyType || 'ALLERGY',
       severity: dto.severity || 'MEDIUM',
       symptoms: dto.symptoms || null,
@@ -264,10 +293,10 @@ export class ChildrenService {
       relations: ['allergen'],
     });
 
-    return this.mapChildAllergy(reloaded);
+    return this.mapChildAllergy(reloaded || saved);
   }
 
-  async updateAllergy(allergyId: number, dto: UpdateAllergyDto) {
+  async updateAllergy(allergyId: number, dto: UpdateAllergyDto, actor?: ChildAccessActor) {
     const allergy = await this.allergyRepo.findOne({
       where: { id: allergyId },
       relations: ['allergen'],
@@ -276,11 +305,11 @@ export class ChildrenService {
       throw new NotFoundException(`Không tìm thấy thông tin dị ứng với ID: ${allergyId}`);
     }
 
-    if (dto.allergenId !== undefined) {
-      const parsed = Number(dto.allergenId);
-      allergy.allergenId = !isNaN(parsed) && parsed > 0 ? parsed : null;
-    }
-    if (dto.customAllergenName !== undefined) allergy.customAllergenName = dto.customAllergenName || null;
+    await this.assertChildAccess(allergy.studentId, actor);
+    const target = await this.allergyTarget(dto, allergy);
+    if (dto.isActive !== false && (dto.isActive === true || allergy.isActive)) await this.assertNoDuplicate(allergy.studentId, target, allergy.id);
+    Object.assign(allergy, target);
+    allergy.allergen = target.allergenId ? { id: target.allergenId } as AllergenCatalog : null;
     if (dto.allergyType !== undefined) allergy.allergyType = dto.allergyType;
     if (dto.severity !== undefined) allergy.severity = dto.severity;
     if (dto.symptoms !== undefined) allergy.symptoms = dto.symptoms || null;
@@ -294,16 +323,18 @@ export class ChildrenService {
       where: { id: allergy.id },
       relations: ['allergen'],
     });
-    return this.mapChildAllergy(reloaded);
+    return this.mapChildAllergy(reloaded || allergy);
   }
 
-  async deleteAllergy(allergyId: number) {
+  async deleteAllergy(allergyId: number, actor?: ChildAccessActor) {
     const allergy = await this.allergyRepo.findOne({ where: { id: allergyId } });
     if (!allergy) {
       throw new NotFoundException(`Không tìm thấy thông tin dị ứng với ID: ${allergyId}`);
     }
-    await this.allergyRepo.remove(allergy);
-    return { success: true, message: 'Đã xóa bản ghi dị ứng' };
+    await this.assertChildAccess(allergy.studentId, actor);
+    allergy.isActive = false;
+    await this.allergyRepo.save(allergy);
+    return { success: true, message: 'Đã ngưng áp dụng thông tin dị ứng, hồ sơ được giữ lại' };
   }
 
   async rescanAllergies() {
@@ -313,7 +344,8 @@ export class ChildrenService {
     };
   }
 
-  async getAllergyHistory(childId: number) {
+  async getAllergyHistory(childId: number, actor?: ChildAccessActor) {
+    await this.assertChildAccess(childId, actor);
     const allergies = await this.allergyRepo.find({
       where: { studentId: childId },
       relations: ['allergen'],

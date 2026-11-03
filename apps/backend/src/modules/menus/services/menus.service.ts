@@ -22,6 +22,7 @@ import { DishFrequencyRule } from '../../nutrition-engine/entities/dish-frequenc
 import { DishSpacingRule } from '../../nutrition-engine/entities/dish-spacing-rule.entity';
 import { NutritionIntakeStandard } from '../../nutrition-engine/entities/nutrition-intake-standard.entity';
 import { isFriedRice, isFriday, validateLunchRice } from './lunch-rice-policy';
+import { advisorySeverity, matchesDeclaredAllergy } from './allergy-matching';
 
 // ── Helper: Fisher-Yates shuffle for true randomness ───────────────────────
 function shuffleArray<T>(arr: T[]): T[] {
@@ -486,11 +487,14 @@ export class MenusService implements OnModuleInit {
 
     // 1. Tải danh sách dị ứng học sinh từ database
     const studentAllergiesRaw = await this.menuDishRepo.manager.query(`
-      SELECT s.id as student_id, s.full_name, c.id as class_id, c.name as class_name, a.name as allergen_name, a.code as allergen_code, sa.severity
+      SELECT s.id as student_id, s.full_name, c.id as class_id, c.name as class_name,
+        sa.allergen_id, COALESCE(a.name,NULLIF(btrim(sa.custom_allergen_name),'')) as allergen_name,
+        COALESCE(a.code,'CUSTOM') as allergen_code, sa.severity, sa.reaction_treatment, sa.allergy_type
       FROM student_allergies sa
       JOIN students s ON sa.student_id = s.id
-      JOIN allergens a ON sa.allergen_id = a.id
+      LEFT JOIN allergens a ON sa.allergen_id = a.id
       LEFT JOIN classes c ON s.class_id = c.id
+      WHERE sa.is_active = TRUE AND s.status = 'ACTIVE'
       ORDER BY s.full_name ASC
     `);
 
@@ -506,31 +510,22 @@ export class MenusService implements OnModuleInit {
 
     // 3. Quét xung đột dị ứng giữa món ăn trong tuần và các bé
     const allergyConflicts: any[] = [];
-    const allergenKeywords: Record<string, string[]> = {
-      'Hải sản': ['hải sản', 'tôm', 'cua', 'cá', 'mực', 'nghêu', 'hến', 'sò', 'chả cá', 'cá hồi'],
-      'SEAFOOD': ['hải sản', 'tôm', 'cua', 'cá', 'mực', 'nghêu', 'hến', 'sò', 'chả cá', 'cá hồi'],
-      'CRUSTACEAN': ['tôm', 'cua', 'hải sản'],
-      'Sữa bò': ['sữa', 'yaourt', 'phô mai', 'flan', 'bơ'],
-      'MILK': ['sữa', 'yaourt', 'phô mai', 'flan', 'bơ'],
-      'Đậu phộng': ['đậu phộng', 'lạc', 'bơ đậu phộng'],
-      'PEANUT': ['đậu phộng', 'lạc', 'bơ đậu phộng'],
-      'Trứng': ['trứng', 'hột gà', 'hột vịt'],
-      'EGG': ['trứng', 'hột gà', 'hột vịt'],
-      'Đậu nành': ['đậu nành', 'đậu phụ', 'tàu hũ', 'đậu hũ'],
-      'SOY': ['đậu nành', 'đậu phụ', 'tàu hũ', 'đậu hũ'],
-      'Lúa mì': ['lúa mì', 'bánh mì', 'bánh bao', 'mì sợi', 'hoành thánh'],
-      'WHEAT': ['lúa mì', 'bánh mì', 'bánh bao', 'mì sợi', 'hoành thánh'],
-      'Mè (vừng)': ['mè', 'vừng', 'dầu mè'],
-      'SESAME': ['mè', 'vừng', 'dầu mè'],
-    };
+    const dishIds = [...new Set((menuDetail.menuDishes || []).map(item => Number(item.dishId)))];
+    const recipeDishes = dishIds.length ? await this.dishRepo.find({
+      where: { id: In(dishIds) }, relations: ['recipes', 'recipes.ingredient', 'dishAllergens'],
+    }) : [];
+    const recipeById = new Map(recipeDishes.map(dish => [Number(dish.id), dish]));
 
     let cflCounter = 1;
     for (const md of menuDetail.menuDishes || []) {
-      const dishNameLower = (md.dish?.name || '').toLowerCase();
+      const recipe = recipeById.get(Number(md.dishId));
 
       for (const sa of studentAllergiesRaw) {
-        const keywords = allergenKeywords[sa.allergen_name] || allergenKeywords[sa.allergen_code] || [sa.allergen_name.toLowerCase()];
-        const isMatched = keywords.some((kw) => dishNameLower.includes(kw.toLowerCase()));
+        const isMatched = matchesDeclaredAllergy(
+          { name: sa.allergen_name || '', code: sa.allergen_code, catalogId: sa.allergen_id },
+          { name: md.dish?.name || '', ingredients: (recipe?.recipes || []).map(item => item.ingredient?.name || ''),
+            allergenIds: (recipe?.dishAllergens || []).map(item => Number(item.allergenId)) },
+        );
 
         if (isMatched) {
           allergyConflicts.push({
@@ -541,8 +536,8 @@ export class MenusService implements OnModuleInit {
             className: sa.class_name || 'Chưa có lớp',
             allergenDetected: sa.allergen_name,
             allergenCode: sa.allergen_code || 'ALLERGEN',
-            severity: sa.severity === 'HIGH' ? 'SEVERE' : (sa.severity === 'MEDIUM' ? 'WARNING' : 'MILD'),
-            reactionTreatment: sa.severity === 'HIGH' ? 'Báo y tế trường ngay, sẵn sàng thuốc kháng histamine / Epipen' : 'Theo dõi biểu hiện ngoài da / tiêu hóa',
+            severity: advisorySeverity(sa.severity),
+            reactionTreatment: sa.reaction_treatment || null,
             menuDishId: String(md.id),
             dishId: String(md.dishId),
             dishName: md.dish?.name || 'Món ăn',
@@ -613,8 +608,8 @@ export class MenusService implements OnModuleInit {
       targetAgeGroup: menu?.ageGroup || 'MAU_GIAO',
       allergySummary: {
         totalConflicts: allergyConflicts.length,
-        criticalCount: allergyConflicts.filter((c) => c.severity === 'SEVERE').length,
-        warningCount: allergyConflicts.filter((c) => c.severity !== 'SEVERE').length,
+        criticalCount: allergyConflicts.filter((c) => ['SEVERE', 'ANAPHYLACTIC'].includes(c.severity)).length,
+        warningCount: allergyConflicts.filter((c) => !['SEVERE', 'ANAPHYLACTIC'].includes(c.severity)).length,
         affectedChildrenCount: affectedChildrenSet.size,
         affectedDishesCount: affectedDishesSet.size,
       },

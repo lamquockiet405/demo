@@ -8,7 +8,7 @@ import { UserProfileModal } from '../../auth/components/UserProfileModal';
 import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 
 interface ParentPortalTopNavProps {
-  child?: ChildProfile;
+  child?: Partial<ChildProfile>;
   activeTab?: 'menu-consumption' | 'allergies' | 'snacks' | 'breakfast' | 'tuition' | 'evaluation';
 }
 
@@ -52,10 +52,9 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
             </span>
 
             {/* Child Selector Dropdown */}
-            <div className="ml-3 hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full cursor-pointer transition text-xs font-semibold text-slate-700">
+            <div className="ml-3 hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs font-semibold text-slate-700">
               <Baby className="w-4 h-4 text-teal-600" />
-              <span>{child?.name ? `Bé ${child.name.split(' ').slice(-2).join(' ')}` : 'Bé Bảo Nam'} - {child?.className || 'Lớp Thỏ Trắng'} ({child?.gradeLevel || '4–5T'})</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <span>{child?.name || 'Hồ sơ học sinh'}{child?.className ? ` · ${child.className}` : ''}</span>
             </div>
           </div>
 
@@ -131,23 +130,19 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
               title="Xem và chỉnh sửa hồ sơ phụ huynh"
             >
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 p-0.5 shadow-xs overflow-hidden">
-                {(user as any)?.avatar ? (
+                {user?.avatarUrl ? (
                   <img
-                    src={(user as any).avatar}
-                    alt={user?.fullName || child?.parentName || 'Phụ huynh'}
+                    src={user.avatarUrl}
+                    alt={user?.fullName || 'Phụ huynh'}
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
-                  <img
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80"
-                    alt={child?.parentName || 'Chị Hoàng Yến'}
-                    className="w-full h-full object-cover rounded-full"
-                  />
+                  <div className="w-full h-full flex items-center justify-center bg-teal-50 text-teal-700"><User className="h-5 w-5" /></div>
                 )}
               </div>
               <div className="text-left hidden sm:block">
                 <p className="text-xs font-bold text-slate-800 leading-tight">
-                  {user?.fullName || child?.parentName || 'Chị Hoàng Yến'}
+                  {user?.fullName || 'Tài khoản đang đăng nhập'}
                 </p>
                 <p className="text-[11px] text-slate-500 font-medium">
                   {child?.parentRole || 'Phụ huynh'}

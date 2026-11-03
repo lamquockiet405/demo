@@ -21,6 +21,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { useAuthStore } from '../../../core/stores/auth.store';
+import { ALLERGIES_CHANGED, ALLERGIES_STORAGE_KEY } from '../../../core/events/allergies';
 import {
   weeklyMenusApi,
   WeeklyMenu,
@@ -131,6 +132,37 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
   useEffect(() => {
     fetchInitialData();
   }, [statusFilter, ageGroupFilter, showDeleted]);
+
+  useEffect(() => {
+    if (!selectedMenu?.id) return;
+    const menuId = selectedMenu.id;
+    let alive = true;
+    let pending = false;
+    const refresh = async () => {
+      if (pending || document.visibilityState === 'hidden') return;
+      pending = true;
+      try {
+        const result = await weeklyMenusApi.getAdvisory(menuId);
+        if (alive && result) setAdvisory(result);
+      } catch (error) { console.warn('Chưa cập nhật được cảnh báo dị ứng:', error); }
+      finally { pending = false; }
+    };
+    const onStorage = (event: StorageEvent) => { if (event.key === ALLERGIES_STORAGE_KEY) void refresh(); };
+    const onVisible = () => { if (document.visibilityState === 'visible') void refresh(); };
+    window.addEventListener('focus', refresh);
+    window.addEventListener(ALLERGIES_CHANGED, refresh);
+    window.addEventListener('storage', onStorage);
+    document.addEventListener('visibilitychange', onVisible);
+    const interval = window.setInterval(refresh, 30000);
+    return () => {
+      alive = false;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener(ALLERGIES_CHANGED, refresh);
+      window.removeEventListener('storage', onStorage);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [selectedMenu?.id]);
 
   // 2. Chọn thực đơn cụ thể
   const handleSelectMenu = async (menuId: string) => {

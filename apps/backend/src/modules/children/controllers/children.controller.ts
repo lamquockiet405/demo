@@ -12,7 +12,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { ChildrenService } from '../services/children.service';
+import { ChildAccessActor, ChildrenService } from '../services/children.service';
 import { CreateChildDto } from '../dto/create-child.dto';
 import { UpdateChildDto } from '../dto/update-child.dto';
 import { GetChildrenQueryDto } from '../dto/get-children-query.dto';
@@ -30,8 +30,8 @@ export class ChildrenController {
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách hồ sơ trẻ (Phân trang, tìm kiếm, lọc theo lớp/dị ứng)' })
-  async findAll(@Query() query: GetChildrenQueryDto) {
-    return this.childrenService.findAll(query);
+  async findAll(@Query() query: GetChildrenQueryDto, @CurrentUser() actor: ChildAccessActor) {
+    return this.childrenService.findAll(query, actor);
   }
 
   @Get('stats')
@@ -60,14 +60,14 @@ export class ChildrenController {
 
   @Get(':id/allergy-history')
   @ApiOperation({ summary: 'Xem lịch sử khai báo và cảnh báo dị ứng của trẻ' })
-  async getAllergyHistory(@Param('id', ParseIntPipe) id: number) {
-    return this.childrenService.getAllergyHistory(id);
+  async getAllergyHistory(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: ChildAccessActor) {
+    return this.childrenService.getAllergyHistory(id, actor);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Xem chi tiết hồ sơ một trẻ' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.childrenService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: ChildAccessActor) {
+    return this.childrenService.findOne(id, actor);
   }
 
   @Post()
@@ -91,8 +91,9 @@ export class ChildrenController {
     @Param('childId', ParseIntPipe) childId: number,
     @Body() dto: DeclareAllergyDto,
     @CurrentUser('sub') userId: number,
+    @CurrentUser() actor: ChildAccessActor,
   ) {
-    return this.childrenService.declareAllergy(childId, dto, userId);
+    return this.childrenService.declareAllergy(childId, dto, userId, actor);
   }
 
   @Put('allergies/:allergyId')
@@ -100,13 +101,14 @@ export class ChildrenController {
   async updateAllergy(
     @Param('allergyId', ParseIntPipe) allergyId: number,
     @Body() dto: UpdateAllergyDto,
+    @CurrentUser() actor: ChildAccessActor,
   ) {
-    return this.childrenService.updateAllergy(allergyId, dto);
+    return this.childrenService.updateAllergy(allergyId, dto, actor);
   }
 
   @Delete('allergies/:allergyId')
   @ApiOperation({ summary: 'Xóa bản ghi dị ứng' })
-  async deleteAllergy(@Param('allergyId', ParseIntPipe) allergyId: number) {
-    return this.childrenService.deleteAllergy(allergyId);
+  async deleteAllergy(@Param('allergyId', ParseIntPipe) allergyId: number, @CurrentUser() actor: ChildAccessActor) {
+    return this.childrenService.deleteAllergy(allergyId, actor);
   }
 }

@@ -8,3 +8,4 @@ COPY database/migrations/20261103-relational-integrity.sql /docker-entrypoint-in
 COPY database/reset_sequences.sql /docker-entrypoint-initdb.d/05-reset-sequences.sql
 COPY database/docker-test-runtime.sql /docker-entrypoint-initdb.d/06-test-runtime.sql
 COPY database/migrations/20261103-lunch-rice-recipes.sql /docker-entrypoint-initdb.d/07-lunch-rice-recipes.sql
+COPY database/migrations/20261103-allergy-declaration.sql /docker-entrypoint-initdb.d/08-allergy-declaration.sql

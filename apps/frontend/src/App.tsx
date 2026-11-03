@@ -128,7 +128,7 @@ export const App: React.FC = () => {
 
           <span className="text-slate-300 flex items-center gap-1.5 font-bold">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            {user?.fullName} ({isNutritionist ? 'Dinh dưỡng' : isPrincipal ? 'Hiệu trưởng' : 'Nhân sự'})
+            {user?.fullName} ({isNutritionist ? 'Dinh dưỡng' : isPrincipal ? 'Hiệu trưởng' : roles.includes('PARENT') ? 'Phụ huynh' : 'Nhân sự'})
           </span>
 
           <span className="text-slate-600">|</span>

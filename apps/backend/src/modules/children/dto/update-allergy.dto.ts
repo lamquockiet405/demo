@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateAllergyDto {
@@ -9,16 +9,19 @@ export class UpdateAllergyDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  @MaxLength(150)
   customAllergenName?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  @IsIn(['ALLERGY', 'INTOLERANCE', 'RELIGIOUS_RESTRICTION', 'MEDICAL_RESTRICTION'])
   allergyType?: string;
 
   @ApiPropertyOptional({ example: 'MEDIUM' })
   @IsOptional()
   @IsString()
+  @IsIn(['LOW', 'MEDIUM', 'HIGH', 'MILD', 'MODERATE', 'SEVERE', 'ANAPHYLACTIC'])
   severity?: string;
 
   @ApiPropertyOptional()
@@ -33,7 +36,7 @@ export class UpdateAllergyDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
+  @IsDateString()
   diagnosedDate?: string;
 
   @ApiPropertyOptional()
@@ -43,5 +46,6 @@ export class UpdateAllergyDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 }

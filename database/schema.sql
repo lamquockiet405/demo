@@ -148,7 +148,7 @@ CREATE TABLE student_allergies (
     student_id  BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     allergen_id BIGINT NOT NULL REFERENCES allergens(id) ON DELETE CASCADE,
     severity    VARCHAR(20) NOT NULL DEFAULT 'MEDIUM'
-                    CHECK (severity IN ('LOW', 'MEDIUM', 'HIGH')),
+                      CHECK (severity IN ('LOW', 'MEDIUM', 'HIGH', 'MILD', 'MODERATE', 'SEVERE', 'ANAPHYLACTIC')),
     note        TEXT,
     declared_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
     declared_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP

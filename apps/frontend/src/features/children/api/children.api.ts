@@ -16,17 +16,21 @@ export interface ChildAllergyItem {
   customAllergenName?: string;
   allergen?: AllergenCatalogItem;
   allergyType: string;
-  severity: 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC';
   symptoms?: string;
   reactionTreatment?: string;
   diagnosedDate?: string;
   isActive: boolean;
+  declaredAt?: string | null;
+  note?: string;
 }
 
 export interface ChildItem {
   id: string;
   tenantId: string;
   classId?: string;
+  className?: string;
+  ageGroup?: string;
   class?: {
     id: string;
     name: string;
@@ -66,13 +70,14 @@ export interface CreateChildDto {
 }
 
 export interface DeclareAllergyDto {
-  allergenId?: string;
+  allergenId?: string | null;
   customAllergenName?: string;
   allergyType?: string;
   severity: 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC';
   symptoms?: string;
   reactionTreatment?: string;
   diagnosedDate?: string;
+  note?: string;
 }
 
 export const childrenApi = {
@@ -143,7 +148,7 @@ export const childrenApi = {
     return res.data;
   },
 
-  updateAllergy: async (allergyId: string, dto: Partial<DeclareAllergyDto>): Promise<ChildAllergyItem> => {
+  updateAllergy: async (allergyId: string, dto: Partial<DeclareAllergyDto> & { isActive?: boolean }): Promise<ChildAllergyItem> => {
     const res = await apiClient.put<ChildAllergyItem>(`/children/allergies/${allergyId}`, dto);
     return res.data;
   },
