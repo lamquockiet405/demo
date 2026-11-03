@@ -17,20 +17,33 @@ const aliases: Record<string, string> = {
   'thịt bò': 'BEEF', 'bò': 'BEEF', 'beef': 'BEEF',
 };
 
-export function matchesDeclaredAllergy(
-  declaration: { name: string; code?: string; catalogId?: number | null },
-  dish: { name: string; ingredients?: string[]; allergenIds?: number[] },
-): boolean {
-  if (declaration.catalogId && dish.allergenIds?.some(id => Number(id) === Number(declaration.catalogId))) return true;
+type Declaration = { name: string; code?: string; catalogId?: number | null };
+type AllergyDish = { name: string; ingredients?: string[]; allergenIds?: number[]; allergenTags?: { allergenId: number; note?: string | null }[] };
+
+export function getAllergyMatchReasons(declaration: Declaration, dish: AllergyDish): string[] {
+  const reasons: string[] = [];
+  if (declaration.catalogId && dish.allergenIds?.some(id => Number(id) === Number(declaration.catalogId))) {
+    const tag = dish.allergenTags?.find(item => Number(item.allergenId) === Number(declaration.catalogId));
+    reasons.push(`Nhãn dị nguyên: ${declaration.name}${tag?.note ? ` — ${tag.note}` : ''}`);
+  }
   const name = normalize(declaration.name);
-  if (!name) return false;
+  if (!name) return reasons;
   const group = groups[declaration.code] ? declaration.code : aliases[name];
   const phrases = group ? groups[group] : declaration.name.split(/[,;\/]+/).map(normalize).filter(Boolean);
-  return [dish.name, ...(dish.ingredients || [])].some(text => {
+  const matches = (text: string) => {
     // A beef declaration is not a declaration about cow's milk.
     const target = group === 'BEEF' ? normalize(text).replace(/sữa bò/g, '') : text;
     return phrases.some(phrase => contains(target, phrase));
-  });
+  };
+  if (matches(dish.name)) reasons.push(`Tên món: ${dish.name}`);
+  for (const ingredient of dish.ingredients || []) {
+    if (matches(ingredient)) reasons.push(`Nguyên liệu: ${ingredient}`);
+  }
+  return [...new Set(reasons)];
+}
+
+export function matchesDeclaredAllergy(declaration: Declaration, dish: AllergyDish): boolean {
+  return getAllergyMatchReasons(declaration, dish).length > 0;
 }
 
 export function advisorySeverity(value: string): 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC' {

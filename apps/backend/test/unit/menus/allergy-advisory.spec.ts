@@ -1,7 +1,13 @@
-import { advisorySeverity, matchesDeclaredAllergy } from '../../../src/modules/menus/services/allergy-matching';
+import { advisorySeverity, getAllergyMatchReasons, matchesDeclaredAllergy } from '../../../src/modules/menus/services/allergy-matching';
 import { MenusService } from '../../../src/modules/menus/services/menus.service';
 
 describe('Declared allergy matching', () => {
+  it('explains seafood matching for pork with anchovy fish sauce without inventing a beef conflict', () => {
+    const pork = { name: 'Thịt heo ram mặn cà rốt', ingredients: ['Cà rốt (củ đỏ, vàng)', 'Dầu thực vật tinh luyện', 'Thịt lợn nạc (thăn lợn)', 'Nước mắm cá cơm truyền thống'] };
+    expect(getAllergyMatchReasons({ name: 'Hải sản', code: 'SEAFOOD' }, pork)).toEqual(['Nguyên liệu: Nước mắm cá cơm truyền thống']);
+    expect(matchesDeclaredAllergy({ name: 'thịt bò', code: 'CUSTOM' }, pork)).toBe(false);
+    expect(matchesDeclaredAllergy({ name: 'Hải sản', code: 'SEAFOOD' }, { ...pork, ingredients: pork.ingredients.slice(0, 3) })).toBe(false);
+  });
   it.each(['Thịt bò xào khóm', 'Bò hầm rau củ', 'Cháo thịt bò'])('matches custom beef against %s', name => {
     expect(matchesDeclaredAllergy({ name: '  THỊT BÒ ', code: 'CUSTOM' }, { name })).toBe(true);
   });

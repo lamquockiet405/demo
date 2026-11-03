@@ -560,6 +560,7 @@ export interface SuggestedSubstituteDish {
 }
 
 export interface AllergyConflictItem {
+  matchReasons?: string[];
   conflictId: string;
   childId: string;
   childName: string;

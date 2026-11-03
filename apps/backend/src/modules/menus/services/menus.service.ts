@@ -22,7 +22,7 @@ import { DishFrequencyRule } from '../../nutrition-engine/entities/dish-frequenc
 import { DishSpacingRule } from '../../nutrition-engine/entities/dish-spacing-rule.entity';
 import { NutritionIntakeStandard } from '../../nutrition-engine/entities/nutrition-intake-standard.entity';
 import { isFriedRice, isFriday, validateLunchRice } from './lunch-rice-policy';
-import { advisorySeverity, matchesDeclaredAllergy } from './allergy-matching';
+import { advisorySeverity, getAllergyMatchReasons, matchesDeclaredAllergy } from './allergy-matching';
 
 // ── Helper: Fisher-Yates shuffle for true randomness ───────────────────────
 function shuffleArray<T>(arr: T[]): T[] {
@@ -561,13 +561,14 @@ export class MenusService implements OnModuleInit {
       const recipe = recipeById.get(Number(md.dishId));
 
       for (const sa of studentAllergiesRaw) {
-        const isMatched = matchesDeclaredAllergy(
+        const matchReasons = getAllergyMatchReasons(
           { name: sa.allergen_name || '', code: sa.allergen_code, catalogId: sa.allergen_id },
           { name: md.dish?.name || '', ingredients: (recipe?.recipes || []).map(item => item.ingredient?.name || ''),
-            allergenIds: (recipe?.dishAllergens || []).map(item => Number(item.allergenId)) },
+            allergenIds: (recipe?.dishAllergens || []).map(item => Number(item.allergenId)),
+            allergenTags: (recipe?.dishAllergens || []).map(item => ({ allergenId: Number(item.allergenId), note: item.note })) },
         );
 
-        if (isMatched) {
+        if (matchReasons.length) {
           allergyConflicts.push({
             conflictId: `cfl-${cflCounter++}`,
             childId: String(sa.student_id),
@@ -575,6 +576,7 @@ export class MenusService implements OnModuleInit {
             classId: sa.class_id ? String(sa.class_id) : null,
             className: sa.class_name || 'Chưa có lớp',
             allergenDetected: sa.allergen_name,
+            matchReasons,
             allergenCode: sa.allergen_code || 'ALLERGEN',
             severity: advisorySeverity(sa.severity),
             reactionTreatment: sa.reaction_treatment || null,

@@ -31,6 +31,7 @@ import {
 import { WeeklyMenu, MenuDishItem, MenuAdvisoryResponse, DishItem, weeklyMenusApi } from '../api/weekly-menus.api';
 import { RecipeInspectionModal } from './RecipeInspectionModal';
 import { buildSubstituteCandidates, detectDishCategory } from '../utils/substitute-candidates';
+import { getDishAllergyConflicts, groupAllergyConflictsByChild } from '../utils/allergy-conflicts';
 export { detectDishCategory } from '../utils/substitute-candidates';
 
 interface WeeklyGridTableProps {
@@ -61,8 +62,7 @@ export const resolveSubstituteInfo = (
   advisory?: MenuAdvisoryResponse | null,
 ): ResolvedSubstituteInfo => {
   const notes = (md.specialDietNotes || '').toUpperCase();
-  const conflictsForDish =
-    advisory?.allergyConflicts?.filter((c) => c.menuDishId === md.id || c.dishId === md.dishId) || [];
+  const conflictsForDish = getDishAllergyConflicts(advisory?.allergyConflicts, md);
 
   // 1. Kiểm tra qua specialDietNotes nếu đã ghi rõ tag
   const isExplicitAllergy =
@@ -246,14 +246,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
       ];
 
   // Danh sách các bé có cơ địa dị ứng thực phẩm
-  const allergicChildrenList = [
-    { childName: 'Nguyễn Gia Huy', className: 'Lớp Mầm 1', allergen: 'Hải sản (Tôm, Cua, Cá)', severity: 'SEVERE' },
-    { childName: 'Lê Bảo An', className: 'Lớp Mầm 1', allergen: 'Đậu phộng (Lạc)', severity: 'SEVERE' },
-    { childName: 'Vũ Ngọc Diệp', className: 'Lớp Chồi 1', allergen: 'Hải sản (Tôm, Mực)', severity: 'WARNING' },
-    { childName: 'Dương Quốc Bảo', className: 'Lớp Chồi 2', allergen: 'Hải sản & Mè (Vừng)', severity: 'SEVERE' },
-    { childName: 'Trần Phương Linh', className: 'Lớp Mầm 1', allergen: 'Sữa bò', severity: 'WARNING' },
-    { childName: 'Hoàng Minh Khôi', className: 'Lớp Lá 1', allergen: 'Sữa bò & Đậu nành', severity: 'WARNING' },
-  ];
+  const allergicChildrenList = groupAllergyConflictsByChild(advisory?.allergyConflicts);
 
   // Hiển thị đầy đủ 7 ngày trong tuần theo chuẩn trường mầm non & bán trú
   const days = [
@@ -1269,11 +1262,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           const gVal = ((Number(md.dish?.totalCarbG) || 0) * ratio).toFixed(1);
 
                           const dishNameLower = (md.dish?.name || '').toLowerCase().trim();
-                          const conflictsForDish = advisory?.allergyConflicts?.filter((c) => 
-                            c.menuDishId === md.id || 
-                            c.dishId === md.dishId || 
-                            (c.dishName && dishNameLower && c.dishName.toLowerCase().trim() === dishNameLower)
-                          ) || [];
+                          const conflictsForDish = getDishAllergyConflicts(advisory?.allergyConflicts, md);
+                          const affectedChildren = groupAllergyConflictsByChild(conflictsForDish);
                           const hasAllergyConflict = conflictsForDish.length > 0;
                           const isFriedOrHighFat = Number(md.dish?.totalFatG || 0) >= 5.0 || /chiên|rán|mỡ|xào mặn|kho tàu/i.test(dishNameLower);
                           const isHighProteinOrSoup = Number(md.dish?.totalProteinG || 0) >= 7.5 || /hầm|súp|bò|sườn|gà|cháo/i.test(dishNameLower);
@@ -1296,22 +1286,14 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           return (
                             <div
                               key={md.id}
-                              className={`rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border ${hasAllergyConflict ? 'bg-rose-50/40 border-rose-300' : 'bg-white border-slate-200/80 hover:border-emerald-300'}`}
+                              className="rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border bg-white border-slate-200/80 hover:border-emerald-300"
                             >
                               {/* HUY HIỆU PHÂN LOẠI: SUẤT CHUNG */}
                               <div className="mb-1 flex items-center justify-between gap-1">
-                                <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${hasAllergyConflict ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
-                                  {hasAllergyConflict && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
-                                  <span>{hasAllergyConflict ? 'Dị ứng / kiêng cữ' : 'Suất chung'}</span>
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border flex items-center gap-1 bg-slate-50 text-slate-600 border-slate-200">
+                                  <span>Suất chung</span>
                                 </span>
                               </div>
-
-                              {hasAllergyConflict && (
-                                <div role="note" className="mb-2 space-y-0.5 text-[10px] leading-snug text-rose-800">
-                                  <p className="font-semibold">Không dùng cho: {Array.from(new Set(conflictsForDish.map(c => c.childName))).join(', ')}</p>
-                                  <p>Khai báo: {Array.from(new Set(conflictsForDish.map(c => c.allergenDetected))).join(', ')}</p>
-                                </div>
-                              )}
 
                               <div className="flex items-start justify-between gap-1">
                                 <span 
@@ -1454,11 +1436,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                                       });
                                     }}
                                     className="w-full text-left px-2 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 hover:bg-rose-100 transition cursor-pointer flex items-center justify-between gap-1 shadow-2xs"
-                                    title={`Phát hiện ${conflictsForDish.length} bé dị ứng: ${conflictsForDish.map((c) => `${c.childName} (${c.allergenDetected})`).join(', ')}. Bấm để đổi món.`}
+                                    title={`Phát hiện ${affectedChildren.length} bé có khai báo khớp món này: ${affectedChildren.map(c => `${c.childName} (${c.allergen})`).join(', ')}. Bấm để đổi món.`}
                                   >
                                     <div className="flex items-center gap-1 truncate text-[10px] font-bold text-rose-700">
                                       <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
-                                      <span className="truncate">Loại 3: Dị ứng ({conflictsForDish[0]?.allergenDetected || 'Hải sản'} • {conflictsForDish.length} bé)</span>
+                                      <span className="truncate">Loại 3: Dị ứng ({Array.from(new Set(conflictsForDish.map(c => c.allergenDetected))).join(', ')} • {affectedChildren.length} bé)</span>
                                     </div>
                                     <span className="text-[8px] bg-rose-600 text-white px-1.5 py-0.5 rounded font-extrabold shrink-0">
                                       Đổi món
@@ -2101,7 +2083,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
         slotName={inspectingDish?.slotName || ''}
         allergyConflicts={
           inspectingDish
-            ? advisory?.allergyConflicts?.filter((c) => c.menuDishId === inspectingDish.menuDish.id) || []
+            ? getDishAllergyConflicts(advisory?.allergyConflicts, inspectingDish.menuDish)
             : []
         }
         onOpenAdvisory={
@@ -2143,11 +2125,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
         const lockedType = universalModalDish.targetType || modalActiveTab || 'COMMON';
 
         // Tìm các xung đột dị ứng của món này
-        const conflictsForThisDish = advisory?.allergyConflicts?.filter((c) =>
-          c.menuDishId === universalModalDish.menuDish.id ||
-          c.dishId === universalModalDish.menuDish.dishId ||
-          (c.dishName && c.dishName.toLowerCase().trim() === currentDishName.toLowerCase().trim())
-        ) || [];
+        const conflictsForThisDish = getDishAllergyConflicts(advisory?.allergyConflicts, universalModalDish.menuDish);
+        const affectedChildrenForThisDish = groupAllergyConflictsByChild(conflictsForThisDish);
 
         const candidates = buildSubstituteCandidates(substituteCatalog, universalModalDish.menuDish, lockedType);
         const activeSub = candidates.find(dish => dish.id === selectedSubDish?.id) || candidates[0];
@@ -2264,11 +2243,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 )}
 
-                {lockedType === 'ALLERGIES' && (
+                {lockedType === 'ALLERGIES' && affectedChildrenForThisDish.length > 0 && (
                   <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-rose-200">
                     <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md shadow-rose-600/30 flex items-center gap-1.5">
                       <ShieldAlert className="w-4 h-4" />
-                      <span>Loại 3: Dị Ứng Thực Phẩm ({conflictsForThisDish.length > 0 ? conflictsForThisDish.length : allergicChildrenList.length} bé)</span>
+                      <span>Loại 3: Dị Ứng Thực Phẩm ({affectedChildrenForThisDish.length} bé)</span>
                     </span>
                     <span className="text-xs text-rose-900 font-bold bg-rose-100/90 px-2.5 py-1 rounded-lg">
                       🛡️ An toàn tuyệt đối: 100% loại bỏ dị nguyên nguy cơ
@@ -2288,7 +2267,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                   </div>
                 )}
                 {/* 2. THÔNG TIN TRẺ EM THEO ĐÚNG LOẠI ĐÃ CHỌN */}
-                {lockedType === 'ALLERGIES' && (
+                {lockedType === 'ALLERGIES' && affectedChildrenForThisDish.length > 0 && (
                   <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 animate-in fade-in duration-150">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-black text-rose-950 text-xs uppercase tracking-wide">
@@ -2296,19 +2275,19 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                         <span>Trẻ em có cơ địa dị ứng bị ảnh hưởng bởi món này:</span>
                       </div>
                       <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full">
-                        {conflictsForThisDish.length > 0 ? `${conflictsForThisDish.length} bé chạm dị nguyên` : 'Tất cả trẻ dị ứng'}
+                        {affectedChildrenForThisDish.length} bé có khai báo khớp món này
                       </span>
                     </div>
 
                     <div className="mt-2 space-y-1.5 max-h-32 overflow-y-auto pr-1">
-                      {(conflictsForThisDish.length > 0 ? conflictsForThisDish : allergicChildrenList.slice(0, 3)).map((c: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-white rounded-xl border border-rose-200 text-xs flex items-center justify-between shadow-2xs">
+                      {affectedChildrenForThisDish.map(c => (
+                        <div key={c.childId || `${c.childName}-${c.className}`} className="p-2 bg-white rounded-xl border border-rose-200 text-xs flex items-center justify-between gap-2 shadow-2xs">
                           <div>
                             <span className="font-bold text-rose-950">{c.childName}</span>
                             <span className="text-rose-700 ml-1.5 font-medium">({c.className})</span>
                           </div>
-                          <span className="text-[10px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                            Dị ứng: {c.allergenDetected || c.allergen}
+                          <span title={c.matchReasons.join(' · ')} className="text-[10px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                            Dị ứng: {c.allergen}
                           </span>
                         </div>
                       ))}
