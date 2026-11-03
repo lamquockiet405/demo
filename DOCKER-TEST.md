@@ -1,5 +1,7 @@
 # Docker test với database mới nhất từ kiet
 
+Đã bổ sung hai route phụ huynh bị thiếu: `/submit-evaluation` (Đánh giá & Góp ý) và `/declare-allergy` (Khai báo Dị ứng). Các liên kết trên thanh điều hướng trỏ đúng vào hai component hiện có, cùng quyền truy cập với cổng phụ huynh. Frontend Docker build thành công; các API tải dữ liệu góp ý, danh sách trẻ, danh mục dị ứng, chi tiết trẻ và lịch sử dị ứng trả HTTP 200 khi đăng nhập PARENT.
+
 Sửa mã hóa tiếng Việt ngày 03/11/2026: đã sao lưu và sửa 525 bản ghi hiển thị, gồm tên người dùng/học sinh/lớp, tên trường, thực đơn, thông báo, bản dịch, địa chỉ và ghi chú. Các chuỗi như `L├¬ Ho├ái Nam` được khôi phục thành `Lê Hoài Nam`. Các cột mật khẩu, token, email, URL và bản lưu trữ nguồn được giữ nguyên. Frontend làm mới thông tin tên/hồ sơ từ API khi tải trang, giữ các role alias và phiên đăng nhập.
 
 Chạy `node scripts/repair-vietnamese.cjs` để rà soát, không ghi dữ liệu; thêm `--apply` để sao lưu database Docker test và áp dụng sửa mã hóa theo transaction, kèm kiểm tra chống ghi đè thay đổi đồng thời. Script chỉ kết nối database test cục bộ trên cổng 55432. Sau sửa, lượt rà soát trả 0 bản ghi và 0 file nguồn cần sửa. 25 test công cụ/profile/encoding pass; API đăng nhập, hồ sơ, trường, lớp, thực đơn, phụ huynh và món ăn đã kiểm tra trả tiếng Việt đúng.

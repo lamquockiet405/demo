@@ -21,6 +21,8 @@ import { ChildGrowthMonitoringPage } from './features/growth/pages/ChildGrowthMo
 import { AttendancePage } from './features/attendance/AttendancePage';
 import { MealEvaluationPage } from './features/attendance/MealEvaluationPage';
 import { MonitorChildMenuConsumptionPage } from './features/parent-evaluations/MonitorChildMenuConsumptionPage';
+import { SubmitMealEvaluationPage } from './features/parent-evaluations/SubmitMealEvaluationPage';
+import { ParentAllergyDeclarationPage } from './features/children/pages/ParentAllergyDeclarationPage';
 import { HomePage } from './features/home/HomePage';
 import { AuditLogsPage } from './features/audit-logs/pages/AuditLogsPage';
 import { FoodGroupRulesPage } from './features/menus/pages/FoodGroupRulesPage';
@@ -345,8 +347,23 @@ export const App: React.FC = () => {
           }
         />
 
-        {/* Catch-all: Điều hướng về /home */}
-                <Route
+        <Route
+          path="/submit-evaluation"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER']}>
+              <SubmitMealEvaluationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/declare-allergy"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER']}>
+              <ParentAllergyDeclarationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/parent-snack-payment"
           element={
             <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER']}>
@@ -363,6 +380,7 @@ export const App: React.FC = () => {
           }
         />
         <Route path="/payments/vnpay-return" element={<VnpayReturnPage />} />
+        {/* Catch-all: Điều hướng về /home */}
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
