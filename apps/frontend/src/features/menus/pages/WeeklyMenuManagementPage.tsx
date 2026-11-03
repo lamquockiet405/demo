@@ -1,37 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Plus,
-  FileSpreadsheet,
-  Printer,
-  Copy,
-  Send,
-  CheckCircle2,
-  Lock,
-  Trash2,
-  RotateCcw,
-  Filter,
-  Search,
-  Eye,
-  Calendar,
-  Layers,
-  Sparkles,
-  AlertCircle,
-  Clock,
-  ChevronDown,
-  ShieldAlert,
-} from 'lucide-react';
+import { Plus, FileSpreadsheet, Printer, Copy, Send, CheckCircle2, Lock, Trash2, RotateCcw, Sparkles, AlertCircle, Clock, ShieldAlert } from 'lucide-react';
 import { useAuthStore } from '../../../core/stores/auth.store';
 import { ALLERGIES_CHANGED, ALLERGIES_STORAGE_KEY } from '../../../core/events/allergies';
-import {
-  weeklyMenusApi,
-  WeeklyMenu,
-  MenuStatistics,
-  DishItem,
-  MenuDishItem,
-  ExportDataResponse,
-  MenuAdvisoryResponse,
-} from '../api/weekly-menus.api';
-import { NutriKidHeader } from '../components/NutriKidHeader';
+import { weeklyMenusApi, WeeklyMenu, MenuStatistics, DishItem, MenuDishItem, ExportDataResponse, MenuAdvisoryResponse } from '../api/weekly-menus.api';
 import { MenuStatsCards } from '../components/MenuStatsCards';
 import { WeeklyGridTable } from '../components/WeeklyGridTable';
 import { MenuDrawer } from '../components/MenuDrawer';
@@ -46,11 +17,7 @@ import { RespondEditRequestModal } from '../components/RespondEditRequestModal';
 import { SubmitMenuModal } from '../components/SubmitMenuModal';
 import { SubmitMenuPayload } from '../api/weekly-menus.api';
 
-interface WeeklyMenuManagementPageProps {
-  hideHeader?: boolean;
-}
-
-export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> = ({ hideHeader = true }) => {
+export const WeeklyMenuManagementPage: React.FC = () => {
   const { user } = useAuthStore();
   const isPrincipal = user?.roles?.includes('PRINCIPAL') || user?.roles?.includes('SUPER_ADMIN');
 
@@ -65,7 +32,6 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Bộ lọc
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [ageGroupFilter, setAgeGroupFilter] = useState<string>('ALL');
   const [showDeleted, setShowDeleted] = useState<boolean>(false);
@@ -101,7 +67,6 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
         weeklyMenusApi.getStatistics(),
         weeklyMenusApi.getAvailableDishes(),
         weeklyMenusApi.getMenus({
-          search: searchTerm,
           status: statusFilter,
           targetAgeGroup: ageGroupFilter,
           includeDeleted: showDeleted,
@@ -200,7 +165,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
    * - Sau khi Backend phản hồi thành công:
    *   1. Hiển thị thông báo Toast thành công (`showNotify`).
    *   2. Tự động tải lại danh sách thực đơn (`fetchInitialData`).
-   *   3. Nạp thực đơn vừa tạo lên bảng ma trận `WeeklyGridTable.tsx` và `NutritionBar.tsx`.
+   *   3. Nạp thực đơn vừa tạo lên bảng ma trận `WeeklyGridTable.tsx`.
    * =========================================================================================
    */
   const handleSaveMenu = async (payload: any) => {
@@ -501,21 +466,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
   };
 
   return (
-    <div className={`text-slate-800 flex flex-col font-sans pb-16 ${!hideHeader ? 'min-h-screen bg-[#f8fafc]' : ''}`}>
-      {/* 1. TOPBAR HEADER (chỉ hiện khi không bọc bởi NutritionistLayout) */}
-      {!hideHeader && (
-        <NutriKidHeader
-          breadcrumbTitle="Quản lý thực đơn tuần"
-          searchValue={searchTerm}
-          onSearchChange={(val) => {
-            setSearchTerm(val);
-            weeklyMenusApi
-              .getMenus({ search: val, status: statusFilter, targetAgeGroup: ageGroupFilter })
-              .then(setMenus);
-          }}
-        />
-      )}
-
+    <div className="text-slate-800 flex flex-col font-sans">
       {/* Thông báo Alert */}
       {notification && (
         <div className="fixed top-20 right-6 z-50 animate-in fade-in slide-in-from-top-4 duration-300">

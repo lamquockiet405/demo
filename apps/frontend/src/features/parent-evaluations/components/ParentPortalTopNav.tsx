@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Bell, ChevronDown, Utensils, ShieldAlert, Coffee, CreditCard, MessageSquare, Baby, User } from 'lucide-react';
+import { Utensils, ShieldAlert, Coffee, MessageSquare, Baby, User } from 'lucide-react';
 import { ChildProfile } from '../types';
 import { useAuthStore } from '../../../core/stores/auth.store';
 import { UserProfileModal } from '../../auth/components/UserProfileModal';
+import { LogoutButton } from '../../../core/components/LogoutButton';
 import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 
 interface ParentPortalTopNavProps {
@@ -111,16 +112,7 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
 
           {/* Right: Notifications & Parent Profile */}
           <div className="flex items-center gap-4">
-            {/* Notification Bell */}
-            <button
-              type="button"
-              className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition"
-              title="Thông báo"
-            >
-              <Bell className="w-5 h-5 text-slate-600" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-            </button>
-
+            <LogoutButton />
             {/* Parent Profile */}
 
             <button

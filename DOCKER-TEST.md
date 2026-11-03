@@ -1,5 +1,11 @@
 # Docker test với database mới nhất từ kiet
 
+Dọn giao diện ngày 03/11/2026: bỏ 61 file giao diện cũ và phần hỗ trợ không còn được gọi, gồm các bản sao điểm danh/đánh giá/ăn xế, các trang độc lập chưa được gắn route và hai header trùng. Bỏ thanh chuyển cổng nổi, menu trùng, menu dẫn tới chức năng chưa được đăng ký và các nút thông báo/tin nhắn/tìm kiếm minh họa trên header. Nút đăng xuất được đặt trong các cổng đang dùng; giáo viên dùng chung một header và các tab điểm danh hiện có.
+
+Các trang ý kiến phụ huynh, tổng quan suất ăn và phục vụ ăn xế của BGH được gắn trực tiếp vào router, thay cho điều kiện pathname trong layout. `/tablet/record` chuyển về tab đánh giá hiện có; các liên kết ghi chú điều phối đi qua `/tablet?tab=notes`. Các alias cũ vẫn được giữ khi có trang đích phù hợp.
+
+Chạy `npm run check:frontend` để rà soát import, file không được dùng và liên kết nội bộ tĩnh. Sau dọn, 164 file nguồn được kiểm tra, 99 liên kết tĩnh có route đích; không có import thiếu hoặc file nguồn không được gọi (trừ khai báo kiểu ambient). Frontend build thành công; Docker frontend đã được cập nhật. Kiểm tra này không thay thế kiểm tra bố cục/tương tác trong trình duyệt.
+
 Trang `/parents` đã được đăng ký dưới cổng BGH, cùng mục “Tài khoản phụ huynh” ngay dưới “Nhân sự & Bếp”. Chỉ các vai trò quản lý trường/hiệu trưởng/quản trị được mở trang này. Nút “Tạo tài khoản phụ huynh” dùng form hiện có; backend đã được sửa để lưu quan hệ vai trò PARENT cho tài khoản mới. Hai unit test liên quan pass; đã tạo một tài khoản thử qua API, đăng nhập bằng email/mật khẩu và xác nhận vai trò PARENT, sau đó xóa đúng tài khoản thử này. Frontend/backend Docker build thành công.
 
 Đã bổ sung hai route phụ huynh bị thiếu: `/submit-evaluation` (Đánh giá & Góp ý) và `/declare-allergy` (Khai báo Dị ứng). Các liên kết trên thanh điều hướng trỏ đúng vào hai component hiện có, cùng quyền truy cập với cổng phụ huynh. Frontend Docker build thành công; các API tải dữ liệu góp ý, danh sách trẻ, danh mục dị ứng, chi tiết trẻ và lịch sử dị ứng trả HTTP 200 khi đăng nhập PARENT.

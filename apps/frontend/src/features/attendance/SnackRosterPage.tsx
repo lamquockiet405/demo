@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SnackRosterTopNav } from './components/SnackRosterTopNav';
+
 import { SnackRosterHeader } from './components/SnackRosterHeader';
 import { SnackRosterSummaryCards } from './components/SnackRosterSummaryCards';
 import { SnackRosterFilterBar } from './components/SnackRosterFilterBar';
@@ -124,15 +124,6 @@ export const SnackRosterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
-      {/* 1. Header & Secondary Navigation */}
-      <SnackRosterTopNav
-        searchValue={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setCurrentPage(1);
-        }}
-      />
-
       {/* 2. Main Content Container */}
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-5">
         {/* Page Title & Breadcrumb */}

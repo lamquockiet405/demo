@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AdminDashboardLayout } from './layouts/AdminDashboardLayout';
 import { NutritionistLayout } from './layouts/NutritionistLayout';
 import { TeacherTabletLayout } from './layouts/TeacherTabletLayout';
@@ -14,12 +14,12 @@ import { NutritionistAllergyManagementPage } from './features/menus/pages/Nutrit
 import { SchoolSettingsPage } from './features/tenant/pages/SchoolSettingsPage';
 import { StaffManagementPage } from './features/staff/pages/StaffManagementPage';
 import { PrincipalMenuApprovalPage } from './features/menus/pages/PrincipalMenuApprovalPage';
-import { MenuPlanningPage } from './features/menus/pages/MenuPlanningPage';
 
-import { TeacherTabletPage } from './features/attendance/pages/TeacherTabletPage';
 import { ChildGrowthMonitoringPage } from './features/growth/pages/ChildGrowthMonitoringPage';
 import { AttendancePage } from './features/attendance/AttendancePage';
-import { MealEvaluationPage } from './features/attendance/MealEvaluationPage';
+import { ParentEvaluationsPage } from './features/parent-evaluations/ParentEvaluationsPage';
+import { BghMealPortionsOverviewPage } from './features/attendance/pages/BghMealPortionsOverviewPage';
+import { SnackRosterPage } from './features/attendance/SnackRosterPage';
 import { MonitorChildMenuConsumptionPage } from './features/parent-evaluations/MonitorChildMenuConsumptionPage';
 import { SubmitMealEvaluationPage } from './features/parent-evaluations/SubmitMealEvaluationPage';
 import { ParentAllergyDeclarationPage } from './features/children/pages/ParentAllergyDeclarationPage';
@@ -44,7 +44,6 @@ import { ParentManagementPage } from './features/parents/pages/ParentManagementP
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
 import { isJwtExpired } from './core/utils/jwt';
-import { ChefHat, Tablet, LayoutDashboard, Sparkles, LogOut, Users, Scale, UtensilsCrossed, Home } from 'lucide-react';
 
 /**
  * Lấy đường dẫn phân hệ tương ứng với Role của tài khoản
@@ -104,7 +103,7 @@ const HomeOrPortalRedirect: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-  const { hydrate, refreshProfile, isAuthenticated, logout, user } = useAuthStore();
+  const { hydrate, refreshProfile } = useAuthStore();
 
   // Hydrate auth state từ localStorage 1 lần khi app mount & kiểm tra token hết hạn
   useEffect(() => {
@@ -112,81 +111,8 @@ export const App: React.FC = () => {
     void refreshProfile();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const roles = user?.roles || [];
-  const isNutritionist = roles.includes('NUTRITIONIST');
-  const isPrincipal = roles.includes('PRINCIPAL') || roles.includes('SUPER_ADMIN');
-
   return (
     <BrowserRouter>
-      {/* Quick Navigation Floating Bar — chỉ hiện khi đã login */}
-      {isAuthenticated && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700 text-xs font-semibold">
-          <Link to="/landing" className="flex items-center gap-1 text-slate-300 hover:text-white transition" title="Xem trang giới thiệu giải pháp">
-            <Home className="w-3.5 h-3.5" /> Giới thiệu
-          </Link>
-          <span className="text-slate-600">|</span>
-
-          <span className="text-slate-300 flex items-center gap-1.5 font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            {user?.fullName} ({isNutritionist ? 'Dinh dưỡng' : isPrincipal ? 'Hiệu trưởng' : roles.includes('PARENT') ? 'Phụ huynh' : 'Nhân sự'})
-          </span>
-
-          <span className="text-slate-600">|</span>
-
-          {/* Nút dành riêng cho Chuyên gia Dinh dưỡng */}
-          {isNutritionist && (
-            <>
-              <Link to="/nutritionist/menus" className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition font-bold">
-                <UtensilsCrossed className="w-3.5 h-3.5" /> Cổng Dinh Dưỡng
-              </Link>
-              <span className="text-slate-600">|</span>
-              <Link to="/nutritionist/rules" className="flex items-center gap-1 hover:text-teal-300 transition">
-                <Scale className="w-3.5 h-3.5" /> Quy chuẩn & Dị ứng
-              </Link>
-              <span className="text-slate-600">|</span>
-            </>
-          )}
-
-          {/* Nút dành riêng cho Ban Giám Hiệu */}
-          {isPrincipal && (
-            <>
-              <Link to="/dashboard" className="flex items-center gap-1 text-teal-400 hover:text-teal-300 transition font-bold">
-                <LayoutDashboard className="w-3.5 h-3.5" /> Cổng BGH
-              </Link>
-              <span className="text-slate-600">|</span>
-              <Link to="/staff" className="flex items-center gap-1 hover:text-teal-300 transition">
-                <Users className="w-3.5 h-3.5" /> Nhân sự & Bếp
-              </Link>
-              <span className="text-slate-600">|</span>
-              <Link to="/menu-approval" className="flex items-center gap-1 hover:text-emerald-300 transition">
-                <UtensilsCrossed className="w-3.5 h-3.5" /> Duyệt thực đơn DD
-              </Link>
-              <span className="text-slate-600">|</span>
-            </>
-          )}
-
-          {/* Các cổng khác */}
-          <Link to="/tablet" className="flex items-center gap-1 hover:text-emerald-300 transition">
-            <Tablet className="w-3.5 h-3.5" /> Tablet GV
-          </Link>
-          <span className="text-slate-600">|</span>
-          <Link to="/kitchen" className="flex items-center gap-1 hover:text-amber-300 transition">
-            <ChefHat className="w-3.5 h-3.5" /> KDS Bếp
-          </Link>
-
-          <span className="text-slate-600">|</span>
-          <button
-            onClick={() => {
-              logout();
-              window.location.href = '/home';
-            }}
-            className="flex items-center gap-1 text-rose-400 hover:text-rose-300 transition font-bold"
-          >
-            <LogOut className="w-3.5 h-3.5" /> Thoát
-          </button>
-        </div>
-      )}
-
       <Routes>
         {/* Điểm vào:
             - Nếu còn Access Token hợp lệ -> Vào THẲNG trang quản lý của tài khoản đó.
@@ -227,7 +153,7 @@ export const App: React.FC = () => {
           <Route path="allergens" element={<NutritionistAllergyManagementPage />} />
           <Route path="foods" element={<FoodIngredientsPage />} />
           <Route path="dishes" element={<DishesPage />} />
-          <Route path="children" element={<NutritionistDashboardPage />} />
+          <Route path="children" element={<Navigate to="/nutritionist/allergens" replace />} />
           <Route path="food-safety" element={<FoodSafetyComplianceReportPage />} />
           <Route path="food-safety-report" element={<FoodSafetyComplianceReportPage />} />
           <Route path="growth" element={<ChildGrowthMonitoringPage />} />
@@ -239,7 +165,7 @@ export const App: React.FC = () => {
           <Route path="growth-notifications" element={<RoleBasedGrowthNotificationsPage />} />
           <Route path="snack-services" element={<SnackServicesPage />} />
           <Route path="services" element={<SnackServicesPage />} />
-          <Route path="reports" element={<NutritionistDashboardPage />} />
+          <Route path="reports" element={<Navigate to="/nutritionist/dashboard" replace />} />
         </Route>
 
         {/* Tương thích ngược đường dẫn cũ /menus -> chuyển sang Cổng Dinh Dưỡng */}
@@ -279,7 +205,7 @@ export const App: React.FC = () => {
           <Route path="/dashboard" element={<SchoolSettingsPage />} />
           <Route path="/tenant/settings" element={<SchoolSettingsPage />} />
           <Route path="/settings" element={<SchoolSettingsPage />} />
-          <Route path="/classes" element={<SchoolSettingsPage />} />
+          <Route path="/classes" element={<Navigate to="/settings" replace />} />
           <Route path="/staff" element={<StaffManagementPage />} />
           <Route
             path="/parents"
@@ -291,8 +217,9 @@ export const App: React.FC = () => {
           />
           <Route path="/inventory" element={<NutritionRulesPage />} />
           <Route path="/menu-approval" element={<PrincipalMenuApprovalPage />} />
-          <Route path="/menu-planning" element={<MenuPlanningPage />} />
-          <Route path="/services" element={<SnackServicesPage />} />
+          <Route path="/menu-planning" element={<WeeklyMenuManagementPage />} />
+          <Route path="/services" element={<ParentEvaluationsPage />} />
+          <Route path="/snack-roster" element={<SnackRosterPage />} />
           <Route path="/snack-services" element={<SnackServicesPage />} />
           <Route path="/food-safety" element={<FoodSafetyComplianceReportPage />} />
           <Route path="/food-safety-report" element={<FoodSafetyComplianceReportPage />} />
@@ -303,7 +230,7 @@ export const App: React.FC = () => {
           <Route path="/snack-revenue" element={<SnackServiceRevenueReportPage />} />
           <Route path="/parent-evaluation-report" element={<ParentEvaluationSummaryReportPage />} />
           <Route path="/parent-evaluations" element={<ParentEvaluationSummaryReportPage />} />
-          <Route path="/children" element={<WeeklyMenuManagementPage />} />
+          <Route path="/children" element={<BghMealPortionsOverviewPage />} />
           <Route path="/growth" element={<ChildGrowthMonitoringPage />} />
           <Route path="/growth-notifications" element={<RoleBasedGrowthNotificationsPage />} />
           <Route path="/growth-alerts" element={<RoleBasedGrowthNotificationsPage />} />
@@ -325,7 +252,7 @@ export const App: React.FC = () => {
           }
         >
           <Route index element={<AttendancePage />} />
-          <Route path="record" element={<MealEvaluationPage />} />
+          <Route path="record" element={<Navigate to="/tablet?tab=evaluation" replace />} />
         </Route>
 
         {/* ─── 4. PHÂN HỆ MÀN HÌNH BẾP (KDS) & KITCHEN ─── */}

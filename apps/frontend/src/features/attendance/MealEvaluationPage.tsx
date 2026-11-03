@@ -101,7 +101,7 @@ export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabCha
       onTabChange(tabId);
       return;
     }
-    if (tabId === 'notes') navigate('/coordination-notes');
+    if (tabId === 'notes') navigate('/tablet?tab=notes');
     else if (tabId === 'attendance') navigate('/tablet');
     else if (tabId === 'evaluation') navigate('/tablet/record');
     else if (tabId === 'history') navigate('/tablet?tab=history');

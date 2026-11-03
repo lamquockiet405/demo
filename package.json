@@ -25,6 +25,7 @@
     "db:relations:apply": "node scripts/migrate-relations.cjs --apply",
     "db:relations:test": "node scripts/test-relations-docker.cjs",
     "test:database": "node --test scripts/test/*.test.cjs",
+    "check:frontend": "node scripts/check-frontend-navigation.cjs",
     "docker:test:up": "node scripts/prepare-docker-test.cjs && docker compose --env-file .docker-test/test.env -f compose.test.yml up -d --build --wait"
   },
   "devDependencies": {

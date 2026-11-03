@@ -1,32 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  ChefHat,
-  AlertOctagon,
-  CheckCircle2,
-  Clock,
-  Wifi,
-  WifiOff,
-  Flame,
-  Truck,
-  RotateCcw,
-  Sparkles,
-  Search,
-  Filter,
-  Users,
-  UtensilsCrossed,
-  Volume2,
-  VolumeX,
-  Radio,
-  Check,
-  Timer,
-  ChevronRight,
-  ShieldCheck,
-  Calendar,
-  User,
-} from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChefHat, AlertOctagon, CheckCircle2, Clock, WifiOff, Flame, Truck, RotateCcw, Search, Users, UtensilsCrossed, Volume2, VolumeX, Radio, Calendar, User } from 'lucide-react';
 import { attendanceApi } from '../features/attendance/api/attendanceApi';
 import { getKitchenSocket } from '../core/socket';
-import { Link } from 'react-router-dom';
+import { LogoutButton } from '../core/components/LogoutButton';
 import { useAuthStore } from '../core/stores/auth.store';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 
@@ -354,55 +330,6 @@ export const KitchenDisplayLayout: React.FC = () => {
 
         {/* Header Right Controls */}
         <div className="flex items-center gap-4 flex-wrap">
-          {/* Quick links to other modules */}
-          <div className="hidden md:flex items-center gap-2 bg-slate-800/80 p-1.5 rounded-xl border border-slate-700 text-xs font-semibold">
-            <Link
-              to="/kitchen/inspections"
-              className="px-3 py-1.5 rounded-lg text-emerald-400 bg-emerald-950/70 border border-emerald-500/40 hover:bg-emerald-900/90 hover:text-emerald-300 font-bold transition flex items-center gap-1.5 shadow-sm"
-              title="Lập và quản lý biên bản kiểm thực 3 bước ATTP"
-            >
-              🛡️ Kiểm Thực 3 Bước
-            </Link>
-            <Link
-              to="/kitchen/purchasing"
-              className="px-3 py-1.5 rounded-lg text-amber-400 bg-amber-950/70 border border-amber-500/40 hover:bg-amber-900/90 hover:text-amber-300 font-bold transition flex items-center gap-1.5 shadow-sm"
-              title="Tính khối lượng thô dự kiến mua hàng theo tổng học sinh các lớp"
-            >
-              🛒 Đi Chợ (Gross)
-            </Link>
-            <Link
-              to="/kitchen/samples"
-              className="px-3 py-1.5 rounded-lg text-blue-400 bg-blue-950/70 border border-blue-500/40 hover:bg-blue-900/90 hover:text-blue-300 font-bold transition flex items-center gap-1.5 shadow-sm"
-              title="Quản lý và tiêu hủy các mẫu lưu thức ăn 24 giờ"
-            >
-              🧊 Mẫu Lưu 24H
-            </Link>
-            <Link
-              to="/attendance"
-              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"
-            >
-              📋 Điểm Danh GV
-            </Link>
-            <Link
-              to="/coordination-notes"
-              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"
-            >
-              🔔 Điều Phối Dị Ứng
-            </Link>
-            <Link
-              to="/meal-portions"
-              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"
-            >
-              ⚖️ Định Lượng Suất Ăn
-            </Link>
-            <Link
-              to="/snack-roster"
-              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"
-            >
-              🥛 Phục Vụ Ăn Xế
-            </Link>
-          </div>
-
           {/* Sound Mute Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
@@ -433,6 +360,7 @@ export const KitchenDisplayLayout: React.FC = () => {
             <span>{currentDate}</span>
           </div>
 
+          <LogoutButton className="text-slate-300 hover:bg-slate-800 hover:text-white" />
           {/* User Profile Button */}
           <button
             onClick={() => setIsProfileModalOpen(true)}

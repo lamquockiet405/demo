@@ -117,7 +117,7 @@ export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ on
       onTabChange(tab);
       return;
     }
-    if (tab === 'notes') navigate('/coordination-notes');
+    if (tab === 'notes') navigate('/tablet?tab=notes');
     else if (tab === 'attendance') navigate('/tablet');
     else if (tab === 'evaluation') navigate('/tablet/record');
     else if (tab === 'history') navigate('/tablet?tab=history');

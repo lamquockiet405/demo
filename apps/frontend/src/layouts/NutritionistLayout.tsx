@@ -1,19 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Search,
-  Bell,
-  MessageSquare,
-  ChevronDown,
-  User,
-  Home,
-  CheckCircle2,
-  LogOut,
-  Settings,
-  Sparkles,
-  ShieldCheck,
-  Flame,
-} from 'lucide-react';
+import { ChevronDown, User, Home, CheckCircle2, LogOut, Settings } from 'lucide-react';
 import { useAuthStore } from '../core/stores/auth.store';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
 
@@ -23,28 +10,21 @@ export const NutritionistLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
 
   // 10 Tabs ngang chuẩn xác theo ảnh thiết kế NutriKid
   const navTabs = [
     { label: 'Tổng quan', path: '/nutritionist/dashboard' },
     { label: 'Chỉ huy Dinh dưỡng (UC92)', path: '/nutritionist/nutrition-physical' },
     { label: 'Cảnh báo trẻ (UC93)', path: '/nutritionist/alerts' },
-    { label: 'Vận hành Bữa ăn (UC94)', path: '/meal-operations-report' },
-    { label: 'Học sinh', path: '/nutritionist/children' },
+    { label: 'Vận hành Bữa ăn (UC94)', path: '/nutritionist/meal-operations' },
     { label: 'Dị ứng', path: '/nutritionist/allergens' },
-    { label: 'Kén ăn & Tư vấn', path: '/nutritionist/picky-eating' },
     { label: 'Nguyên liệu', path: '/nutritionist/foods' },
     { label: 'Món ăn & Công thức', path: '/nutritionist/dishes' },
     { label: 'Quy tắc dinh dưỡng', path: '/nutritionist/rules' },
     { label: 'Quy tắc Tần suất & Món', path: '/nutritionist/food-group-rules' },
     { label: 'Thực đơn', path: '/nutritionist/menus' },
     { label: 'Tuân thủ ATTP (UC95)', path: '/nutritionist/food-safety' },
-    { label: 'Đi chợ (Gross)', path: '/nutritionist/purchasing' },
-    { label: 'Kiểm thực', path: '/nutritionist/food-safety' },
-    { label: 'Lưu mẫu 24h', path: '/nutritionist/samples' },
     { label: 'Tăng trưởng', path: '/nutritionist/growth' },
-    { label: 'Báo cáo', path: '/nutritionist/reports' },
     { label: 'Đánh giá Phụ huynh (UC97)', path: '/nutritionist/parent-evaluations' },
   ];
 
@@ -83,41 +63,8 @@ export const NutritionistLayout: React.FC = () => {
               </Link>
             </div>
 
-            {/* Ô tìm kiếm ở trung tâm: Bo tròn nền #f1f5f9 */}
-            <div className="flex-1 max-w-xl mx-2 hidden md:block">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm học sinh, thực đơn, thực phẩm..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-full bg-[#f1f5f9] hover:bg-[#ebf0f6] focus:bg-white text-slate-800 placeholder-slate-400 text-xs sm:text-sm pl-10 pr-4 py-2 rounded-2xl border border-transparent focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-inner"
-                />
-              </div>
-            </div>
-
             {/* Bên phải: Chuông thông báo, Tin nhắn, Profile Chuyên gia Dinh dưỡng */}
             <div className="flex items-center gap-3">
-              {/* Icon chuông thông báo (Bell) có chấm đỏ */}
-              <button
-                title="Thông báo cảnh báo dinh dưỡng & duyệt thực đơn"
-                className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
-              >
-                <Bell className="w-5 h-5" />
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white absolute top-1.5 right-1.5 animate-pulse"></span>
-              </button>
-
-              {/* Icon tin nhắn chat (MessageSquare) */}
-              <button
-                title="Tin nhắn & Trao đổi với Bếp / BGH"
-                className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition hidden sm:block"
-              >
-                <MessageSquare className="w-5 h-5" />
-              </button>
-
-              <div className="h-6 w-px bg-slate-200 mx-1"></div>
-
               {/* Profile User: BS. Hoàng Mai Trang - Chuyên viên dinh dưỡng */}
               <div className="relative">
                 <button

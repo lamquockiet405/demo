@@ -1,33 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Refrigerator,
-  GraduationCap,
-  Users2,
-  Coffee,
-  FileCheck2,
-  PackageOpen,
-  ShieldCheck,
-  ShieldAlert,
-  CircleDollarSign,
-  Settings,
-  Headphones,
-  MoreVertical,
-  ChevronDown,
-  Bell,
-  UtensilsCrossed,
-  Scale,
-  Activity,
-  Star,
-  MessageSquareText,
-  ClipboardCheck,
-  Sparkles,
-} from 'lucide-react';
+import { LayoutDashboard, Users2, Coffee, FileCheck2, PackageOpen, ShieldCheck, ShieldAlert, CircleDollarSign, Headphones, MoreVertical, Bell, UtensilsCrossed, Scale, Activity, Star, MessageSquareText, ClipboardCheck } from 'lucide-react';
 import { UserProfileModal } from '../features/auth/components/UserProfileModal';
-import { ParentEvaluationsPage } from '../features/parent-evaluations/ParentEvaluationsPage';
-import { BghMealPortionsOverviewPage } from '../features/attendance/pages/BghMealPortionsOverviewPage';
-import { SnackRosterPage } from '../features/attendance/SnackRosterPage';
+import { LogoutButton } from '../core/components/LogoutButton';
 import { useAuthStore } from '../core/stores/auth.store';
 import { tenantApi, TenantProfile } from '../core/api/tenant.api';
 
@@ -85,28 +60,23 @@ export const AdminDashboardLayout: React.FC = () => {
 
   // Danh mục menu Ban Giám Hiệu
   const navItems = [
-    { label: 'Dashboard Tổng quan', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Thông tin trường', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Chỉ huy Dinh dưỡng & Thể trạng', path: '/nutrition-physical-dashboard', icon: Activity },
     { label: 'Cảnh báo an toàn trẻ (UC93)', path: '/child-alerts', icon: ShieldAlert },
     { label: 'Báo cáo Vận hành Bữa ăn (UC94)', path: '/meal-operations-report', icon: UtensilsCrossed },
-    { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
     { label: 'Điều phối cảnh báo thể trạng (UC85)', path: '/growth-notifications', icon: Bell },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
     ...(canManageParents ? [{ label: 'Tài khoản phụ huynh', path: '/parents', icon: Users2 }] : []),
     { label: 'Kế hoạch suất ăn bán trú', path: '/children', icon: ClipboardCheck },
     { label: 'Phục vụ ăn xế (Roster)', path: '/snack-roster', icon: Coffee },
-    { label: 'Bé kén ăn & Tư vấn dinh dưỡng', path: '/picky-eating', icon: Sparkles },
     { label: 'Ý kiến & Đánh giá PH', path: '/services', icon: MessageSquareText },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
     { label: 'Tuân thủ ATTP & Kiểm thực (UC95)', path: '/food-safety', icon: ShieldCheck },
-    { label: 'Sổ kiểm thực 3 bước', path: '/food-safety', icon: ShieldCheck },
-    { label: 'Sổ lưu mẫu 24h', path: '/food-safety/samples', icon: Refrigerator },
     { label: 'Nhật ký kiểm toán', path: '/audit-logs', icon: ShieldAlert },
     { label: 'Báo cáo tài chính & Ăn sáng (UC96)', path: '/snack-revenue-report', icon: CircleDollarSign },
     { label: 'Đánh giá Phụ huynh & CSAT (UC97)', path: '/parent-evaluation-report', icon: Star },
-    { label: 'Cài đặt trường học', path: '/settings', icon: Settings },
   ];
 
   const getBreadcrumbTitle = () => {
@@ -116,10 +86,8 @@ export const AdminDashboardLayout: React.FC = () => {
     if (location.pathname.startsWith('/growth-notifications')) return 'Điều Phối Thông Báo Bất Thường Thể Trạng (UC85)';
     if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
-    if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
     if (location.pathname.startsWith('/parents')) return 'Quản lý Tài khoản Phụ huynh';
-    if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Suất ăn sáng';
     if (location.pathname.startsWith('/children')) return 'Kế hoạch Suất ăn & Điểm danh Bán trú';
     if (location.pathname.startsWith('/snack-roster')) return 'Danh sách Phục vụ Suất ăn Xế (Snack Service Roster)';
     if (location.pathname.startsWith('/services')) return 'Ý kiến & Đánh giá của Phụ huynh';
@@ -132,7 +100,7 @@ export const AdminDashboardLayout: React.FC = () => {
       return 'Báo Cáo Doanh Thu Dịch Vụ Suất Ăn Sáng (UC96)';
     if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/tenant/settings'))
       return 'Cài đặt thông tin Trường mầm non';
-    if (location.pathname.startsWith('/dashboard')) return 'Dashboard Tổng quan';
+    if (location.pathname.startsWith('/dashboard')) return 'Thông tin trường';
     return 'Cài đặt hệ thống & Quản trị tài khoản';
   };
 
@@ -175,8 +143,8 @@ export const AdminDashboardLayout: React.FC = () => {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
-                item.path === '/settings'
-                  ? location.pathname === '/settings' ||
+                  item.path === '/dashboard'
+                  ? location.pathname === '/dashboard' || location.pathname === '/settings' ||
                     location.pathname === '/tenant/settings' ||
                     location.pathname === '/'
                   : location.pathname.startsWith(item.path);
@@ -256,20 +224,7 @@ export const AdminDashboardLayout: React.FC = () => {
 
           {/* Right Header items */}
           <div className="flex items-center gap-4">
-            {/* Học kỳ Selector */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer transition">
-              <span>📅 Năm học 2025 - 2026</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </div>
-
-            {/* Notification Bell */}
-            <div className="relative">
-              <button className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition relative">
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-              </button>
-            </div>
-
+            <LogoutButton />
             {/* User Profile Pill */}
             <button
               onClick={() => setIsProfileModalOpen(true)}
@@ -292,7 +247,7 @@ export const AdminDashboardLayout: React.FC = () => {
 
         {/* Scrollable Page Container */}
         <main className="flex-1 overflow-y-auto p-8">
-          {location.pathname === '/services' ? <ParentEvaluationsPage /> : location.pathname === '/children' ? <BghMealPortionsOverviewPage /> : location.pathname === '/snack-roster' ? <SnackRosterPage /> : <Outlet />}
+          <Outlet />
         </main>
       </div>
 
