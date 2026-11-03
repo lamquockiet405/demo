@@ -1,0 +1,5397 @@
+{
+  "sourceDirectory": "docs/dử liệu chính",
+  "sourceFileCount": 5,
+  "occurrences": 347,
+  "duplicateOccurrencesSkipped": 175,
+  "dishes": [
+    {
+      "key": "sữa dinh dưỡng",
+      "name": "Sữa dinh dưỡng",
+      "categoryCode": "SNACK_MORNING",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-26",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-24",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-07",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "MORNING_SNACK",
+          "rawName": "Sữa dinh dưỡng"
+        }
+      ]
+    },
+    {
+      "key": "cơm",
+      "name": "Cơm",
+      "categoryCode": "RICE",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm-"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm"
+        }
+      ]
+    },
+    {
+      "key": "cá lóc muối chiên",
+      "name": "Cá lóc muối chiên",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "LUNCH",
+          "rawName": "Cá lóc muối chiên"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "LUNCH",
+          "rawName": "Cá lóc muối chiên"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "LUNCH",
+          "rawName": "Cá lóc muối chiên"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "LUNCH",
+          "rawName": "Cá lóc muối chiên"
+        }
+      ]
+    },
+    {
+      "key": "canh tôm thẻ nấu khoai ngọt khoai cau",
+      "name": "Canh tôm thẻ nấu khoai ngọt, khoai cau",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "LUNCH",
+          "rawName": "Canh tôm thẻ nấu khoai ngọt, khoai cau."
+        }
+      ]
+    },
+    {
+      "key": "nho",
+      "name": "Nho",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "LUNCH",
+          "rawName": "Nho"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "LUNCH",
+          "rawName": "Nho"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "LUNCH",
+          "rawName": "Nho"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "LUNCH",
+          "rawName": "Nho"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "LUNCH",
+          "rawName": "Nho"
+        }
+      ]
+    },
+    {
+      "key": "thịt gà rô ti",
+      "name": "Thịt gà rô ti",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà rôti"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà rô ti"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà rô ti"
+        }
+      ]
+    },
+    {
+      "key": "canh cá lóc cải ngọt non",
+      "name": "Canh cá lóc cải ngọt non",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "LUNCH",
+          "rawName": "Canh cá lóc cải ngọt non."
+        }
+      ]
+    },
+    {
+      "key": "bánh su kem",
+      "name": "Bánh su kem",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "LUNCH",
+          "rawName": "Bánh su kem"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "LUNCH",
+          "rawName": "Bánh su kem"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "LUNCH",
+          "rawName": "Bánh su kem"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "LUNCH",
+          "rawName": "Bánh su kem"
+        }
+      ]
+    },
+    {
+      "key": "cá lóc kho",
+      "name": "Cá lóc kho",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "LUNCH",
+          "rawName": "Cá lóc kho"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt sườn hầm bắp bàu",
+      "name": "Canh thịt sườn hầm bắp bàu",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt sườn hầm bắp bàu"
+        }
+      ]
+    },
+    {
+      "key": "lê đường",
+      "name": "Lê đường",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "LUNCH",
+          "rawName": "Lê đường"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "LUNCH",
+          "rawName": "Lê đường"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "LUNCH",
+          "rawName": "Lê đường"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "LUNCH",
+          "rawName": "Lê đường"
+        }
+      ]
+    },
+    {
+      "key": "thịt bò kho mặn tràng bắp cà rốt",
+      "name": "Thịt bò kho mặn tràng bắp, cà rốt",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "LUNCH",
+          "rawName": "Thịt bò kho mặn tràng bắp, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "canh bầu cá lóc",
+      "name": "Canh bầu, cá lóc",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "LUNCH",
+          "rawName": "Canh bầu, cá lóc"
+        }
+      ]
+    },
+    {
+      "key": "rau câu dừa",
+      "name": "Rau câu dừa",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "LUNCH",
+          "rawName": "Rau câu dừa"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "LUNCH",
+          "rawName": "Rau câu dừa"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "LUNCH",
+          "rawName": "Rau câu dừa"
+        }
+      ]
+    },
+    {
+      "key": "thịt gà chiên nước mắm",
+      "name": "Thịt gà chiên nước mắm",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "LUNCH",
+          "rawName": "Gà chiên nước mắm"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà chiên nước mắm"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "LUNCH",
+          "rawName": "Thị gà chiên nước mắm."
+        }
+      ]
+    },
+    {
+      "key": "canh cải bó xôi nấu thịt bò",
+      "name": "Canh cải bó xôi nấu thịt bò",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "LUNCH",
+          "rawName": "Canh cải bó xôi nấu thịt bò."
+        }
+      ]
+    },
+    {
+      "key": "thanh long",
+      "name": "Thanh Long",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "LUNCH",
+          "rawName": "Thanh Long"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-26",
+          "mealType": "LUNCH",
+          "rawName": "Thanh long"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "LUNCH",
+          "rawName": "Thanh long"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "LUNCH",
+          "rawName": "Thanh long"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "LUNCH",
+          "rawName": "Thanh long trắng"
+        }
+      ]
+    },
+    {
+      "key": "nước đậu rang",
+      "name": "Nước đậu rang",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước đậu rang"
+        }
+      ]
+    },
+    {
+      "key": "bún suông thịt heo trứng cút cà rốt",
+      "name": "Bún suông thịt heo, trứng cút, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-08",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún suông thịt heo, trứng cút, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "nước cam",
+      "name": "Nước cam",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước cam"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước cam"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nước cam"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước cam"
+        }
+      ]
+    },
+    {
+      "key": "cháo bò bí hồ lô",
+      "name": "Cháo bò bí hồ lô",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-09",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo bò bí hồ lô"
+        }
+      ]
+    },
+    {
+      "key": "yaourt",
+      "name": "Yaourt",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "-  Yaourt"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt."
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Yaourt"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Yaourt"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Yaourt."
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Yaourt"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Yaourt"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Yaourt"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Yaourt"
+        }
+      ]
+    },
+    {
+      "key": "hủ tiếu nam vang (mực tim gan tôm)- cần tây",
+      "name": "Hủ tiếu nam vang (mực, tim, gan, tôm)- cần tây",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-10",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Hủ tiếu nam vang (mực, tim, gan, tôm)- cần tây"
+        }
+      ]
+    },
+    {
+      "key": "nha đam hạt chia đường phèn",
+      "name": "Nha đam, hạt chia, đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nha đam, hạt chia, đường phèn"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước nha đam, hạt chia, đường phèn."
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nha đam hạt chia, đường phèn"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nha đam, hạt chia, đường phèn."
+        }
+      ]
+    },
+    {
+      "key": "súp óc heo gà xé trứng cút cải đỏ",
+      "name": "Súp óc heo, gà xé, trứng cút, cải đỏ",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-11",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Súp óc heo, gà xé, trứng cút, cải đỏ"
+        }
+      ]
+    },
+    {
+      "key": "sữa đậu nành",
+      "name": "Sữa đậu nành",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sữa đậu nành"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Sữa đậu nành"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sữa đậu nành"
+        }
+      ]
+    },
+    {
+      "key": "bánh bao thịt",
+      "name": "Bánh bao thịt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 1,
+          "date": "2025-09-12",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh bao thịt"
+        }
+      ]
+    },
+    {
+      "key": "thịt heo ram mặn cà rốt",
+      "name": "Thịt heo ram mặn cà rốt",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "LUNCH",
+          "rawName": "Thịt heo ram mặn cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "canh chua cá hú khóm đậu bắp cà chua bạc hà",
+      "name": "Canh chua cá hú, khóm, đậu bắp, cà chua, bạc hà",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "LUNCH",
+          "rawName": "Canh chua cá hú, khóm, đậu bắp, cà chua, bạc hà."
+        }
+      ]
+    },
+    {
+      "key": "táo tây",
+      "name": "Táo tây",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "LUNCH",
+          "rawName": "Táo tây"
+        }
+      ]
+    },
+    {
+      "key": "cá ngừ chiên sốt cà chua",
+      "name": "Cá Ngừ chiên sốt cà chua",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "LUNCH",
+          "rawName": "Cá Ngừ chiên sốt cà chua"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "LUNCH",
+          "rawName": "Cá ngừ chiên sốt cà chua."
+        }
+      ]
+    },
+    {
+      "key": "canh gà hầm bách vị (hạt sen cà rốt nấm hương sup lơ)",
+      "name": "Canh gà hầm bách vị (hạt sen, cà rốt, nấm hương, sup lơ)",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "LUNCH",
+          "rawName": "Canh gà hầm bách vị (hạt sen, cà rốt, nấm hương, sup lơ)"
+        }
+      ]
+    },
+    {
+      "key": "đu đủ chín",
+      "name": "Đu đủ chín",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "LUNCH",
+          "rawName": "Đu đủ"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-24",
+          "mealType": "LUNCH",
+          "rawName": "Đu đủ"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "LUNCH",
+          "rawName": "Đu đủ chín"
+        }
+      ]
+    },
+    {
+      "key": "thịt heo tôm rim nước dừa",
+      "name": "Thịt heo, tôm rim nước dừa",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "LUNCH",
+          "rawName": "Thịt heo, tôm rim nước dừa"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bò cải bó xôi",
+      "name": "Canh thịt bò, cải bó xôi",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bò, cải bó xôi"
+        }
+      ]
+    },
+    {
+      "key": "bánh flan",
+      "name": "Bánh Flan",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "LUNCH",
+          "rawName": "Bánh Flan"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "LUNCH",
+          "rawName": "Bánh Flan"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "LUNCH",
+          "rawName": "Bánh Flan"
+        }
+      ]
+    },
+    {
+      "key": "thịt gà xào mặn sả đậu phọng",
+      "name": "Thịt gà xào mặn, sả, đậu phọng",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà xào mặn, sả, đậu phọng."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt heo nấm rơm mướp tôm khô",
+      "name": "Canh thịt heo nấm rơm, mướp, tôm khô",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt heo nấm rơm, mướp, tôm khô"
+        }
+      ]
+    },
+    {
+      "key": "dưa hấu",
+      "name": "Dưa hấu",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "LUNCH",
+          "rawName": "Dưa hấu"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "LUNCH",
+          "rawName": "Dưa hấu."
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "LUNCH",
+          "rawName": "Dưa hấu."
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-07",
+          "mealType": "LUNCH",
+          "rawName": "Dưa hấu"
+        }
+      ]
+    },
+    {
+      "key": "trứng vịt chiên thịt cà chua",
+      "name": "Trứng vịt chiên thịt, cà chua",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "LUNCH",
+          "rawName": "Trứng vịt chiên thịt, cà chua"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "LUNCH",
+          "rawName": "Trứng vịt chiên thịt, cà chua"
+        }
+      ]
+    },
+    {
+      "key": "canh rau ngót cá lóc tôm khô",
+      "name": "Canh rau ngót cá lóc, tôm khô",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "LUNCH",
+          "rawName": "Canh rau ngót cá lóc, tôm khô"
+        }
+      ]
+    },
+    {
+      "key": "quýt",
+      "name": "Quýt",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "LUNCH",
+          "rawName": "Quýt"
+        }
+      ]
+    },
+    {
+      "key": "chanh dây hạt chia đường phèn",
+      "name": "Chanh dây, hạt chia, đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Chanh dây, hạt chia, đường phèn"
+        }
+      ]
+    },
+    {
+      "key": "miến gà tôm khô cần tàu",
+      "name": "Miến gà, tôm khô, cần tàu",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-15",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Miến gà, tôm khô, cần tàu"
+        }
+      ]
+    },
+    {
+      "key": "nui thịt bằm tôm cà rốt",
+      "name": "Nui thịt bằm, tôm, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-16",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nui thịt bằm, tôm, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "sâm bí đao",
+      "name": "Sâm bí đao",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sâm bí đao"
+        }
+      ]
+    },
+    {
+      "key": "bánh canh bột xắt tôm khô cá lóc",
+      "name": "Bánh canh bột xắt tôm khô, cá lóc",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-17",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh canh bột xắt tôm khô, cá lóc."
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh canh bột xắt, cá lóc, tôm khô."
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh canh bột xắt cá lóc, tôm khô"
+        }
+      ]
+    },
+    {
+      "key": "phở bò ngò gai quế",
+      "name": "Phở bò, ngò gai, quế",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-18",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Phở bò, ngò gai, quế"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Phở bò ngò gai, quế"
+        }
+      ]
+    },
+    {
+      "key": "sữa trái cây",
+      "name": "Sữa trái cây",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sữa trái cây"
+        },
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sữa trái cây"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Sữa trái cây"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-24",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sữa trái cây"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Sữa trái cây."
+        }
+      ]
+    },
+    {
+      "key": "bánh pateso thịt",
+      "name": "Bánh pateso thịt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+          "sourceSha256": "377467bb802df28ae8fe480fb6e2a3c18d0a72e14c49cda5deb46df542d88e63",
+          "weekNumber": 2,
+          "date": "2025-09-19",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh pateso thịt"
+        }
+      ]
+    },
+    {
+      "key": "thịt sườn heo khìa nước dừa",
+      "name": "Thịt sườn heo khìa nước dừa",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "LUNCH",
+          "rawName": "Thịt sườn heo khìa nước dừa"
+        }
+      ]
+    },
+    {
+      "key": "canh bí đao cá lóc tôm khô",
+      "name": "Canh bí đao cá lóc, tôm khô",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "LUNCH",
+          "rawName": "Canh bí đao cá lóc, tôm khô."
+        }
+      ]
+    },
+    {
+      "key": "thịt bò xào đậu que",
+      "name": "Thịt bò xào đậu que",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "LUNCH",
+          "rawName": "Thịt bò xào đậu que"
+        }
+      ]
+    },
+    {
+      "key": "canh chua cá hú cà chua đậu bắp khóm",
+      "name": "Canh chua cá hú, cà chua, đậu bắp, khóm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "LUNCH",
+          "rawName": "Canh chua cá hú, cà chua, đậu bắp, khóm"
+        }
+      ]
+    },
+    {
+      "key": "dưa hoàng kim",
+      "name": "Dưa hoàng kim",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "LUNCH",
+          "rawName": "Dưa hoàng kim"
+        }
+      ]
+    },
+    {
+      "key": "thịt kho trứng cút",
+      "name": "Thịt kho trứng cút",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "LUNCH",
+          "rawName": "Thịt kho trứng cút"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "LUNCH",
+          "rawName": "Thịt kho trứng cút"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "LUNCH",
+          "rawName": "Thịt kho trứng cút"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "LUNCH",
+          "rawName": "Thịt kho trứng cút"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bò hầm đậu đỏ",
+      "name": "Canh thịt bò hầm đậu đỏ",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bò hầm đậu đỏ"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm rau dền muồng tơi",
+      "name": "Canh thịt bằm rau dền, muồng tơi",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm rau dền, muồng tơi."
+        }
+      ]
+    },
+    {
+      "key": "rau câu giòn sơn thủy",
+      "name": "Rau câu giòn sơn thủy",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "LUNCH",
+          "rawName": "Rau câu giòn sơn thủy"
+        }
+      ]
+    },
+    {
+      "key": "cơm dương châu (đậu đũa cà rốt lạp xưởng thịt nạc trứng)",
+      "name": "Cơm Dương Châu (đậu đũa, cà rốt, lạp xưởng, thịt nạc, trứng)",
+      "categoryCode": "RICE",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-26",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm Dương Châu\n(đậu đũa, cà rốt, lạp xưởng, thịt nạc, trứng)"
+        }
+      ]
+    },
+    {
+      "key": "canh gà nấu nấm linh chi cà rốt táo đỏ",
+      "name": "Canh gà nấu nấm linh chi, cà rốt, táo đỏ",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-26",
+          "mealType": "LUNCH",
+          "rawName": "Canh gà nấu nấm linh chi, cà rốt, táo đỏ"
+        }
+      ]
+    },
+    {
+      "key": "mì gà tiềm hạt sen",
+      "name": "Mì gà tiềm, hạt sen",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-22",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Mì gà tiềm, hạt sen."
+        }
+      ]
+    },
+    {
+      "key": "cháo thịt bằm cải bó xôi cà rốt",
+      "name": "Cháo thịt bằm, cải bó xôi, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-23",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo thịt bằm, cải bó xôi, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "bánh canh cá lóc cà rốt",
+      "name": "Bánh canh cá lóc, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-24",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh canh cá lóc, cà rốt"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh canh cá lóc, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "trà đào hạt chia đường phèn",
+      "name": "Trà đào, hạt chia, đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Trà đào, hạt chia, đường phèn."
+        }
+      ]
+    },
+    {
+      "key": "hủ tiếu (gà tôm mực) cà rốt",
+      "name": "Hủ tiếu (gà, tôm, mực) cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-25",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Hủ tiếu (gà, tôm, mực) cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "sữa đậu xanh",
+      "name": "Sữa đậu xanh",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-26",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sữa đậu xanh"
+        },
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Sữa đậu xanh"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Sữa đậu xanh"
+        }
+      ]
+    },
+    {
+      "key": "bánh mêxico mặn",
+      "name": "Bánh mêxico mặn",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 3,
+          "date": "2025-09-26",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh mêxico mặn"
+        }
+      ]
+    },
+    {
+      "key": "thịt ram mặn",
+      "name": "Thịt ram mặn",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "LUNCH",
+          "rawName": "Thịt ram mặn"
+        }
+      ]
+    },
+    {
+      "key": "canh cá lóc nấu bầu",
+      "name": "Canh cá lóc nấu bầu",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "LUNCH",
+          "rawName": "Canh cá lóc nấu bầu"
+        }
+      ]
+    },
+    {
+      "key": "hồng trứng",
+      "name": "Hồng trứng",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "LUNCH",
+          "rawName": "Hồng trứng"
+        }
+      ]
+    },
+    {
+      "key": "trứng chưng thịt bún tàu nấm mèo cải đỏ",
+      "name": "Trứng chưng thịt, bún tàu, nấm mèo, cải đỏ",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "LUNCH",
+          "rawName": "Trứng chưng thịt, bún tàu, nấm mèo, cải đỏ."
+        }
+      ]
+    },
+    {
+      "key": "canh gà nấu ngũ vị (cà rốt nấm bông cải…)",
+      "name": "Canh gà nấu ngũ vị (cà rốt, nấm, bông cải…)",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "LUNCH",
+          "rawName": "Canh gà nấu ngũ vị (cà rốt, nấm, bông cải…)"
+        }
+      ]
+    },
+    {
+      "key": "táo",
+      "name": "Táo",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "LUNCH",
+          "rawName": "Táo"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "LUNCH",
+          "rawName": "Táo"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt rau cải cúc",
+      "name": "Canh thịt rau cải cúc",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt rau cải cúc."
+        }
+      ]
+    },
+    {
+      "key": "bánh gang",
+      "name": "Bánh gang",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "LUNCH",
+          "rawName": "Bánh gang"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "LUNCH",
+          "rawName": "Bánh gang"
+        }
+      ]
+    },
+    {
+      "key": "cá điêu hồng chiên sốt cà chua",
+      "name": "Cá điêu hồng chiên sốt cà chua",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "LUNCH",
+          "rawName": "Cá điêu hồng chiên sốt cà chua"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bò hầm khoai môn ngò gai",
+      "name": "Canh thịt bò hầm khoai môn, ngò gai",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bò hầm khoai môn, ngò gai."
+        }
+      ]
+    },
+    {
+      "key": "dưa lê",
+      "name": "Dưa lê",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "LUNCH",
+          "rawName": "Dưa lê"
+        }
+      ]
+    },
+    {
+      "key": "thịt trứng chiên",
+      "name": "Thịt trứng chiên",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "LUNCH",
+          "rawName": "Thịt trứng chiên"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm bắp bàu muồng tơi",
+      "name": "Canh thịt bằm, bắp bàu, muồng tơi",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm, bắp bàu, muồng tơi."
+        }
+      ]
+    },
+    {
+      "key": "quýt đường",
+      "name": "Quýt đường",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "LUNCH",
+          "rawName": "Quýt đường"
+        }
+      ]
+    },
+    {
+      "key": "nước sâm rong biển hoa cúc",
+      "name": "Nước Sâm rong biển, hoa cúc",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước Sâm rong biển, hoa cúc."
+        }
+      ]
+    },
+    {
+      "key": "bún bò huế ngò gai quế",
+      "name": "Bún bò huế, ngò gai, quế",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-29",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún bò huế, ngò gai, quế"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún bò huế, ngò gai, quế."
+        }
+      ]
+    },
+    {
+      "key": "nui nấu gan tôm mực cải đỏ",
+      "name": "Nui nấu gan, tôm, mực cải đỏ",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-09-30",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nui nấu gan, tôm, mực cải đỏ."
+        }
+      ]
+    },
+    {
+      "key": "nước trà sả tắc hạt chia mật ong",
+      "name": "Nước trà sả tắc, hạt chia, mật ong",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước trà sả tắc, hạt chia, mật ong"
+        }
+      ]
+    },
+    {
+      "key": "bún cá lóc rau muống non",
+      "name": "Bún cá lóc, rau muống non",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-01",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún cá lóc, rau muống non"
+        }
+      ]
+    },
+    {
+      "key": "súp trứng cút gà xé tôm cải đỏ",
+      "name": "Súp trứng cút, gà xé, tôm, cải đỏ",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-02",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Súp trứng cút, gà xé, tôm, cải đỏ."
+        }
+      ]
+    },
+    {
+      "key": "bánh bông lan thịt chà bông",
+      "name": "Bánh bông lan thịt chà bông",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+          "sourceSha256": "25fa493ed6cb04357a55c795f594c8105eb885c7f0193da668dfa5d01cf12cd2",
+          "weekNumber": 4,
+          "date": "2025-10-03",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh bông lan thịt chà bong"
+        }
+      ]
+    },
+    {
+      "key": "canh khoai mỡ thịt bằm tôm khô",
+      "name": "Canh khoai mỡ thịt bằm, tôm khô",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "LUNCH",
+          "rawName": "Canh khoai mỡ thịt bằm, tôm khô."
+        }
+      ]
+    },
+    {
+      "key": "chuối cau",
+      "name": "Chuối cau",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-06",
+          "mealType": "LUNCH",
+          "rawName": "Chuối cau"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "LUNCH",
+          "rawName": "Chuối cau"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "LUNCH",
+          "rawName": "Chuối cau"
+        }
+      ]
+    },
+    {
+      "key": "gà muối sả chiên",
+      "name": "Gà muối sả chiên",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "LUNCH",
+          "rawName": "Gà muối sả chiên"
+        }
+      ]
+    },
+    {
+      "key": "canh chả cá tần ô",
+      "name": "Canh chả cá, tần ô",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "LUNCH",
+          "rawName": "Canh chả cá, tần ô"
+        }
+      ]
+    },
+    {
+      "key": "thịt bò xào khóm",
+      "name": "Thịt bò xào khóm",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "LUNCH",
+          "rawName": "Thịt bò xào khóm"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt gà hầm nấm các loại",
+      "name": "Canh thịt gà hầm nấm các loại",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt gà hầm nấm các loại"
+        }
+      ]
+    },
+    {
+      "key": "thịt heo kho",
+      "name": "Thịt heo kho",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "LUNCH",
+          "rawName": "Thịt heo kho"
+        }
+      ]
+    },
+    {
+      "key": "canh chua cá hú khóm cà chua đậu bắp",
+      "name": "Canh chua cá hú, khóm, cà chua, đậu bắp",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "LUNCH",
+          "rawName": "Canh chua cá hú, khóm, cà chua, đậu bắp."
+        }
+      ]
+    },
+    {
+      "key": "canh cá lóc cải xanh non",
+      "name": "Canh cá lóc cải xanh non",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "LUNCH",
+          "rawName": "Canh cá lóc cải xanh non"
+        }
+      ]
+    },
+    {
+      "key": "hủ tiếu thập cẩm (thịt bằm tôm mực) cải cúc",
+      "name": "Hủ tiếu thập cẩm (thịt bằm, tôm, mực) cải cúc",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-07",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Hủ tiếu thập cẩm (thịt bằm, tôm, mực) cải cúc"
+        }
+      ]
+    },
+    {
+      "key": "nước chanh dây hạt chia mật ong",
+      "name": "Nước chanh dây, hạt chia, mật ong",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nước chanh dây, hạt chia, mật ong."
+        }
+      ]
+    },
+    {
+      "key": "cháo cá bí đỏ",
+      "name": "Cháo cá, bí đỏ",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-08",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo cá, bí đỏ"
+        }
+      ]
+    },
+    {
+      "key": "bún mọc sườn heo tôm khô cà rốt",
+      "name": "Bún mọc, sườn heo tôm khô, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-09",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún mọc, sườn heo tôm khô, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "bánh ngọt kẹp chà bông",
+      "name": "Bánh ngọt kẹp chà bông",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 5,
+          "date": "2025-10-10",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh ngọt kẹp chà bông"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-07",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh ngọt kẹp chà bong"
+        }
+      ]
+    },
+    {
+      "key": "tôm sườn heo rim mặn",
+      "name": "Tôm, sườn heo rim mặn",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "LUNCH",
+          "rawName": "Tôm, sườn heo rim mặn."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm rau ngót",
+      "name": "Canh thịt bằm rau ngót",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm rau ngót"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm rau ngót"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm tôm khô mướp mấm rơm",
+      "name": "Canh thịt bằm, tôm khô, mướp, mấm rơm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm, tôm khô, mướp, mấm rơm."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm bắp cải cải đỏ",
+      "name": "Canh thịt bằm bắp cải, cải đỏ",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm bắp cải, cải đỏ."
+        }
+      ]
+    },
+    {
+      "key": "hồng giòn",
+      "name": "Hồng giòn",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "LUNCH",
+          "rawName": "Hồng giòn"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "LUNCH",
+          "rawName": "Hồng giòn"
+        }
+      ]
+    },
+    {
+      "key": "cá điêu hồng chiên tươi nước mắm chua ngọt",
+      "name": "Cá điêu hồng chiên tươi, nước mắm chua ngọt",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "LUNCH",
+          "rawName": "Cá điêu hồng chiên tươi, nước mắm chua ngọt."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bò hầm khoai môn",
+      "name": "Canh thịt bò hầm khoai môn",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bò hầm khoai môn"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bò hầm khoai môn"
+        }
+      ]
+    },
+    {
+      "key": "hồng xiêm",
+      "name": "Hồng xiêm",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-16",
+          "mealType": "LUNCH",
+          "rawName": "Hồng xiêm"
+        }
+      ]
+    },
+    {
+      "key": "sườn cốt lết khìa",
+      "name": "Sườn cốt lết khìa",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "LUNCH",
+          "rawName": "Sườn cốt lết khìa"
+        }
+      ]
+    },
+    {
+      "key": "canh tôm thẻ cải dún",
+      "name": "Canh tôm thẻ, cải dún",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "LUNCH",
+          "rawName": "Canh tôm thẻ, cải dún"
+        }
+      ]
+    },
+    {
+      "key": "sâm bí đao hạt chia đường phèn",
+      "name": "Sâm bí đao, hạt chia, đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Sâm bí đao, hạt chia, đường phèn"
+        },
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Sâm bí đao, hạt chia, đường phèn"
+        }
+      ]
+    },
+    {
+      "key": "miến gà bó xôi",
+      "name": "Miến gà, bó xôi",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-13",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Miến gà, bó xôi"
+        }
+      ]
+    },
+    {
+      "key": "súp trứng cút gà xé tôm bắp cà rốt",
+      "name": "Súp trứng cút, gà xé, tôm, bắp, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-14",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Súp trứng cút, gà xé, tôm, bắp, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "nước đậu rang đường phèn",
+      "name": "Nước đậu rang, đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nước đậu rang, đường phèn."
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-07",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nước đậu rang, đường phèn"
+        }
+      ]
+    },
+    {
+      "key": "cháo cá hồi phô mai",
+      "name": "Cháo cá hồi phô mai",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-15",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo cá hồi phô mai."
+        }
+      ]
+    },
+    {
+      "key": "bánh bao xá xíu",
+      "name": "Bánh bao xá xíu",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+          "sourceSha256": "0c90adc1ace86c3fdcf9d06c04da3fcff9977f64c91db718955f370ed17442f4",
+          "weekNumber": 6,
+          "date": "2025-10-17",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh bao xá xíu"
+        }
+      ]
+    },
+    {
+      "key": "thịt ba rọi kho",
+      "name": "Thịt ba rọi kho",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "LUNCH",
+          "rawName": "Thịt ba rọi kho"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "LUNCH",
+          "rawName": "Thịt ba rọi kho"
+        }
+      ]
+    },
+    {
+      "key": "canh chua cá lóc cà chua khóm đậu bắp",
+      "name": "Canh chua cá lóc cà chua, khóm, đậu bắp",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "LUNCH",
+          "rawName": "Canh chua cá lóc cà chua, khóm, đậu bắp."
+        }
+      ]
+    },
+    {
+      "key": "thịt gà xào đậu phọng",
+      "name": "Thịt gà xào đậu phọng",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà xào đậu phọng"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "LUNCH",
+          "rawName": "Thịt gà xào đậu phọng"
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm cải dún đà lạt",
+      "name": "Canh thịt bằm, cải dún đà lạt",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm, cải dún đà lạt."
+        }
+      ]
+    },
+    {
+      "key": "dưa lưới",
+      "name": "Dưa lưới",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "LUNCH",
+          "rawName": "Dưa lưới"
+        }
+      ]
+    },
+    {
+      "key": "canh gà hầm củ sen cà rốt",
+      "name": "Canh gà hầm củ sen, cà rốt",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "LUNCH",
+          "rawName": "Canh gà hầm củ sen, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "rau câu lá dứa sữa",
+      "name": "Rau câu lá dứa sữa",
+      "categoryCode": "DESSERT",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "LUNCH",
+          "rawName": "Rau câu lá dứa sữa"
+        }
+      ]
+    },
+    {
+      "key": "tôm thịt rim dứa",
+      "name": "Tôm thịt rim dứa",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "LUNCH",
+          "rawName": "Tôm thịt rim dứa"
+        }
+      ]
+    },
+    {
+      "key": "canh cá lóc cải ngọt",
+      "name": "Canh cá lóc cải ngọt",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "LUNCH",
+          "rawName": "Canh cá lóc cải ngọt"
+        }
+      ]
+    },
+    {
+      "key": "cơm chiên hải sản (thịt nạc tôm mực cà rốt đậu que)",
+      "name": "Cơm chiên hải sản (thịt nạc, tôm, mực, cà rốt, đậu que)",
+      "categoryCode": "RICE",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-24",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm chiên hải sản (thịt nạc, tôm, mực, cà rốt, đậu que)"
+        }
+      ]
+    },
+    {
+      "key": "canh nghêu nấu bầu",
+      "name": "Canh nghêu nấu bầu",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-24",
+          "mealType": "LUNCH",
+          "rawName": "Canh nghêu nấu bầu"
+        }
+      ]
+    },
+    {
+      "key": "cháo thịt gà nấm rơm cà rốt",
+      "name": "Cháo thịt gà, nấm rơm, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-20",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo thịt gà, nấm rơm, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "bánh canh cá lóc tôm khô cà rốt",
+      "name": "Bánh canh cá lóc, tôm khô, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-21",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh canh cá lóc, tôm khô, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "phở bò quế ngò gai ngò om",
+      "name": "Phở bò, quế, ngò gai, ngò om",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-22",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Phở bò, quế, ngò gai, ngò om."
+        }
+      ]
+    },
+    {
+      "key": "bún mọc thịt băm cà rốt",
+      "name": "Bún mọc, thịt băm cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-23",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún mọc, thịt băm cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "bánh bông lan chà bông",
+      "name": "Bánh bông lan chà bông",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 7,
+          "date": "2025-10-24",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh bông lan chà bong"
+        }
+      ]
+    },
+    {
+      "key": "cá hú muối sả chiên",
+      "name": "Cá hú muối sả chiên",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "LUNCH",
+          "rawName": "Cá hú muối sả chiên"
+        },
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "LUNCH",
+          "rawName": "Cá hú muối sả chiên"
+        }
+      ]
+    },
+    {
+      "key": "canh cải bó xôi thịt bằm",
+      "name": "Canh cải bó xôi, thịt bằm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-27",
+          "mealType": "LUNCH",
+          "rawName": "Canh cải bó xôi, thịt bằm."
+        }
+      ]
+    },
+    {
+      "key": "canh khoai môn hầm sườn heo",
+      "name": "Canh khoai môn hầm sườn heo",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "LUNCH",
+          "rawName": "Canh khoai môn hầm sườn heo."
+        }
+      ]
+    },
+    {
+      "key": "thịt bò xào su su",
+      "name": "Thịt bò xào su su",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "LUNCH",
+          "rawName": "Thịt bò xào su su"
+        }
+      ]
+    },
+    {
+      "key": "canh cua đồng rau ngót",
+      "name": "Canh cua đồng rau ngót",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "LUNCH",
+          "rawName": "Canh cua đồng rau ngót"
+        }
+      ]
+    },
+    {
+      "key": "canh bí hồ lô thịt bằm",
+      "name": "Canh bí hồ lô thịt bằm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "LUNCH",
+          "rawName": "Canh bí hồ lô thịt bằm."
+        }
+      ]
+    },
+    {
+      "key": "trứng thịt chưng bún tàu nấm mèo cà rốt",
+      "name": "Trứng thịt chưng bún tàu, nấm mèo, cà rốt",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "LUNCH",
+          "rawName": "Trứng thịt chưng bún tàu, nấm mèo, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm cải xoang",
+      "name": "Canh thịt bằm, cải xoang",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm, cải xoang."
+        }
+      ]
+    },
+    {
+      "key": "nui thịt bằm tôm khô cà rốt",
+      "name": "Nui thịt bằm, tôm khô, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-28",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nui thịt bằm, tôm khô, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "cháo thịt bằm nghêu rau mùi",
+      "name": "Cháo thịt bằm, nghêu, rau mùi",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-29",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo thịt bằm, nghêu, rau mùi"
+        }
+      ]
+    },
+    {
+      "key": "trà đào cam sả đường phèn",
+      "name": "Trà đào, cam, sả, đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-30",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Trà đào, cam, sả, đường phèn."
+        }
+      ]
+    },
+    {
+      "key": "nước mía",
+      "name": "Nước mía",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "- Nước mía"
+        }
+      ]
+    },
+    {
+      "key": "bánh mexico thịt",
+      "name": "Bánh mexico thịt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+          "sourceSha256": "fa27ac04ae7adfd4c5ab648f82705b8078c3c333547ffe9650ea41b67af4e96c",
+          "weekNumber": 8,
+          "date": "2025-10-31",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh mexico thịt"
+        }
+      ]
+    },
+    {
+      "key": "canh chua cá hú bông súng",
+      "name": "Canh chua cá hú, bông súng",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "LUNCH",
+          "rawName": "Canh chua cá hú, bông súng"
+        }
+      ]
+    },
+    {
+      "key": "canh hẹ đậu phụ thịt bằm",
+      "name": "Canh hẹ, đậu phụ, thịt bằm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "LUNCH",
+          "rawName": "Canh hẹ, đậu phụ, thịt bằm"
+        }
+      ]
+    },
+    {
+      "key": "thịt bò nấu khoai tây cà rốt",
+      "name": "Thịt bò nấu khoai tây, cà rốt",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "LUNCH",
+          "rawName": "Thịt bò nấu khoai tây, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "canh cà chua cá diêu hồng ngò gai",
+      "name": "Canh cà chua cá diêu hồng, ngò gai",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "LUNCH",
+          "rawName": "Canh cà chua cá diêu hồng, ngò gai"
+        }
+      ]
+    },
+    {
+      "key": "cơm dương châu thịt nạc chả lụa tôm cà tốt đậu đũa",
+      "name": "Cơm Dương Châu thịt nạc, chả lụa, tôm, cà tốt, đậu đũa",
+      "categoryCode": "RICE",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-07",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm Dương Châu thịt nạc, chả lụa, tôm, cà tốt, đậu đũa."
+        }
+      ]
+    },
+    {
+      "key": "canh bí đao thịt bằm",
+      "name": "Canh bí đao thịt bằm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-07",
+          "mealType": "LUNCH",
+          "rawName": "Canh bí đao thịt bằm"
+        }
+      ]
+    },
+    {
+      "key": "cháo bí đỏ thịt bò bằm",
+      "name": "Cháo bí đỏ, thịt bò bằm",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-03",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo bí đỏ, thịt bò bằm"
+        }
+      ]
+    },
+    {
+      "key": "nước ép cam",
+      "name": "Nước ép cam",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nước ép cam"
+        }
+      ]
+    },
+    {
+      "key": "bún nước lèo cá lóc rau râm",
+      "name": "Bún nước lèo cá lóc, rau râm",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-04",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bún nước lèo cá lóc, rau râm"
+        }
+      ]
+    },
+    {
+      "key": "mì thịt bằm tôm cà rốt",
+      "name": "Mì thịt bằm, tôm, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-05",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Mì thịt bằm, tôm, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "miến gà cần tây cà rốt",
+      "name": "Miến gà cần tây, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 9,
+          "date": "2025-11-06",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Miến gà cần tây, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm cải cúc",
+      "name": "Canh thịt bằm, cải Cúc",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm, cải Cúc"
+        }
+      ]
+    },
+    {
+      "key": "canh rong biển thịt heo bằm đậu hủ cà rốt",
+      "name": "Canh rong biển, thịt heo bằm, đậu hủ, cà rốt",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "LUNCH",
+          "rawName": "Canh rong biển, thịt heo bằm, đậu hủ, cà rốt."
+        }
+      ]
+    },
+    {
+      "key": "thịt bò xào bắp mỹ đậu que",
+      "name": "Thịt bò xào, bắp mỹ, đậu que",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "LUNCH",
+          "rawName": "Thịt bò xào, bắp mỹ, đậu que."
+        }
+      ]
+    },
+    {
+      "key": "canh thịt bằm bắp cải",
+      "name": "Canh thịt bằm bắp cải",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "LUNCH",
+          "rawName": "Canh thịt bằm bắp cải"
+        }
+      ]
+    },
+    {
+      "key": "cơm tấm",
+      "name": "Cơm tấm",
+      "categoryCode": "RICE",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "LUNCH",
+          "rawName": "- Cơm tấm"
+        }
+      ]
+    },
+    {
+      "key": "sườn khìa trứng gà xắt",
+      "name": "Sườn khìa, trứng gà xắt",
+      "categoryCode": "MAIN",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "LUNCH",
+          "rawName": "Sườn khìa, trứng gà xắt."
+        }
+      ]
+    },
+    {
+      "key": "canh bắp cải cà rốt thịt bằm",
+      "name": "Canh bắp cải, cà rốt thịt bằm",
+      "categoryCode": "SOUP",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "LUNCH",
+          "rawName": "Canh bắp cải, cà rốt thịt bằm."
+        }
+      ]
+    },
+    {
+      "key": "chanh dây đường phèn",
+      "name": "Chanh dây đường phèn",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-10",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Chanh dây đường phèn"
+        }
+      ]
+    },
+    {
+      "key": "súp thịt gà xé bắp hạt trứng cút cà rốt",
+      "name": "Súp thịt gà xé, bắp hạt, trứng cút, cà rốt",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-11",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Súp thịt gà xé, bắp hạt, trứng cút, cà rốt"
+        }
+      ]
+    },
+    {
+      "key": "hủ tiếu gan mực tôm hẹ",
+      "name": "Hủ tiếu gan, mực, tôm, hẹ",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-12",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Hủ tiếu gan, mực, tôm, hẹ."
+        }
+      ]
+    },
+    {
+      "key": "nước sâm bí đao",
+      "name": "Nước sâm bí đao",
+      "categoryCode": "DRINK",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Nước sâm bí đao"
+        }
+      ]
+    },
+    {
+      "key": "cháo thịt bằm đậu xanh",
+      "name": "Cháo thịt bằm đậu xanh",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-13",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Cháo thịt bằm đậu xanh"
+        }
+      ]
+    },
+    {
+      "key": "bánh bao kim sa",
+      "name": "Bánh bao kim sa",
+      "categoryCode": "SNACK_AFTERNOON",
+      "sources": [
+        {
+          "file": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+          "sourceSha256": "ed496d506a47e7e621c7f5913128966b92b35e69ebde9c8c7fe4eec76de8bdb8",
+          "weekNumber": 10,
+          "date": "2025-11-14",
+          "mealType": "AFTERNOON_SNACK",
+          "rawName": "Bánh bao kim sa"
+        }
+      ]
+    }
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "sourceFile": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+      "days": [
+        {
+          "date": "2025-09-08",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá lóc muối chiên",
+                "canh tôm thẻ nấu khoai ngọt khoai cau",
+                "nho"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước đậu rang",
+                "bún suông thịt heo trứng cút cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-09",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà rô ti",
+                "canh cá lóc cải ngọt non",
+                "bánh su kem"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước cam",
+                "cháo bò bí hồ lô"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-10",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá lóc kho",
+                "canh thịt sườn hầm bắp bàu",
+                "lê đường"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "hủ tiếu nam vang (mực tim gan tôm)- cần tây"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-11",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt bò kho mặn tràng bắp cà rốt",
+                "canh bầu cá lóc",
+                "rau câu dừa"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nha đam hạt chia đường phèn",
+                "súp óc heo gà xé trứng cút cải đỏ"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-12",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà chiên nước mắm",
+                "canh cải bó xôi nấu thịt bò",
+                "thanh long"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa đậu nành",
+                "bánh bao thịt"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 2,
+      "sourceFile": "Tuần 1,2 tháng 9 (từ 8 đến 19-9-2025) (DIEU CHINH).doc",
+      "days": [
+        {
+          "date": "2025-09-15",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt heo ram mặn cà rốt",
+                "canh chua cá hú khóm đậu bắp cà chua bạc hà",
+                "táo tây"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "chanh dây hạt chia đường phèn",
+                "miến gà tôm khô cần tàu"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-16",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá ngừ chiên sốt cà chua",
+                "canh gà hầm bách vị (hạt sen cà rốt nấm hương sup lơ)",
+                "đu đủ chín"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "nui thịt bằm tôm cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-17",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt heo tôm rim nước dừa",
+                "canh thịt bò cải bó xôi",
+                "bánh flan"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sâm bí đao",
+                "bánh canh bột xắt tôm khô cá lóc"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-18",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà xào mặn sả đậu phọng",
+                "canh thịt heo nấm rơm mướp tôm khô",
+                "dưa hấu"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "phở bò ngò gai quế"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-19",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "trứng vịt chiên thịt cà chua",
+                "canh rau ngót cá lóc tôm khô",
+                "quýt"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa trái cây",
+                "bánh pateso thịt"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 3,
+      "sourceFile": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+      "days": [
+        {
+          "date": "2025-09-22",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt sườn heo khìa nước dừa",
+                "canh bí đao cá lóc tôm khô",
+                "lê đường"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nha đam hạt chia đường phèn",
+                "mì gà tiềm hạt sen"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-23",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt bò xào đậu que",
+                "canh chua cá hú cà chua đậu bắp khóm",
+                "dưa hoàng kim"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước cam",
+                "cháo thịt bằm cải bó xôi cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-24",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt kho trứng cút",
+                "canh thịt bò hầm đậu đỏ",
+                "nho"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "bánh canh cá lóc cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-25",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá lóc muối chiên",
+                "canh thịt bằm rau dền muồng tơi",
+                "rau câu giòn sơn thủy"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "trà đào hạt chia đường phèn",
+                "hủ tiếu (gà tôm mực) cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-26",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm dương châu (đậu đũa cà rốt lạp xưởng thịt nạc trứng)",
+                "canh gà nấu nấm linh chi cà rốt táo đỏ",
+                "thanh long"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa đậu xanh",
+                "bánh mêxico mặn"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 4,
+      "sourceFile": "Tuần 3,4 tháng 9 (từ 22 đến 03 - 10-2025) Điều Chỉnh.doc",
+      "days": [
+        {
+          "date": "2025-09-29",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt ram mặn",
+                "canh cá lóc nấu bầu",
+                "hồng trứng"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước sâm rong biển hoa cúc",
+                "bún bò huế ngò gai quế"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-09-30",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "trứng chưng thịt bún tàu nấm mèo cải đỏ",
+                "canh gà nấu ngũ vị (cà rốt nấm bông cải…)",
+                "táo"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "nui nấu gan tôm mực cải đỏ"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-01",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà chiên nước mắm",
+                "canh thịt rau cải cúc",
+                "bánh gang"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước trà sả tắc hạt chia mật ong",
+                "bún cá lóc rau muống non"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-02",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá điêu hồng chiên sốt cà chua",
+                "canh thịt bò hầm khoai môn ngò gai",
+                "dưa lê"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "súp trứng cút gà xé tôm cải đỏ"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-03",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt trứng chiên",
+                "canh thịt bằm bắp bàu muồng tơi",
+                "quýt đường"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa trái cây",
+                "bánh bông lan thịt chà bông"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 5,
+      "sourceFile": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+      "days": [
+        {
+          "date": "2025-10-06",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt kho trứng cút",
+                "canh khoai mỡ thịt bằm tôm khô",
+                "chuối cau"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước cam",
+                "bánh canh cá lóc cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-07",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "gà muối sả chiên",
+                "canh chả cá tần ô",
+                "bánh su kem"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "hủ tiếu thập cẩm (thịt bằm tôm mực) cải cúc"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-08",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt bò xào khóm",
+                "canh thịt gà hầm nấm các loại",
+                "lê đường"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước chanh dây hạt chia mật ong",
+                "cháo cá bí đỏ"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-09",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt heo kho",
+                "canh chua cá hú khóm cà chua đậu bắp",
+                "rau câu dừa"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "bún mọc sườn heo tôm khô cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-10",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "trứng vịt chiên thịt cà chua",
+                "canh cá lóc cải xanh non",
+                "dưa hấu"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa đậu nành",
+                "bánh ngọt kẹp chà bông"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 6,
+      "sourceFile": "Tuần 5,6 tháng 10 (từ 6 đến 17 - 10-2025) (ĐIỀU CHỈNH).doc",
+      "days": [
+        {
+          "date": "2025-10-13",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "tôm sườn heo rim mặn",
+                "canh thịt bằm rau ngót",
+                "nho"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sâm bí đao hạt chia đường phèn",
+                "miến gà bó xôi"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-14",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá lóc muối chiên",
+                "canh thịt bằm tôm khô mướp mấm rơm",
+                "bánh flan"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa đậu xanh",
+                "súp trứng cút gà xé tôm bắp cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-15",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà rô ti",
+                "canh thịt bằm bắp cải cải đỏ",
+                "hồng giòn"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước đậu rang đường phèn",
+                "cháo cá hồi phô mai"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-16",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá điêu hồng chiên tươi nước mắm chua ngọt",
+                "canh thịt bò hầm khoai môn",
+                "hồng xiêm"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "bánh canh bột xắt tôm khô cá lóc"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "sườn cốt lết khìa",
+                "canh tôm thẻ cải dún",
+                "thanh long"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa trái cây",
+                "bánh bao xá xíu"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 7,
+      "sourceFile": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+      "days": [
+        {
+          "date": "2025-10-20",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt ba rọi kho",
+                "canh chua cá lóc cà chua khóm đậu bắp",
+                "bánh su kem"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước cam",
+                "cháo thịt gà nấm rơm cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-21",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà xào đậu phọng",
+                "canh thịt bằm cải dún đà lạt",
+                "dưa lưới"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "bánh canh cá lóc tôm khô cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-22",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá ngừ chiên sốt cà chua",
+                "canh gà hầm củ sen cà rốt",
+                "rau câu lá dứa sữa"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nha đam hạt chia đường phèn",
+                "phở bò quế ngò gai ngò om"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-23",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "tôm thịt rim dứa",
+                "canh cá lóc cải ngọt",
+                "dưa hấu"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "bún mọc thịt băm cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm chiên hải sản (thịt nạc tôm mực cà rốt đậu que)",
+                "canh nghêu nấu bầu",
+                "đu đủ chín"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa trái cây",
+                "bánh bông lan chà bông"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 8,
+      "sourceFile": "Tuần 7,8 tháng 10 (từ 20 đến 31-10-2025) (Điều Chỉnh).doc",
+      "days": [
+        {
+          "date": "2025-10-27",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá hú muối sả chiên",
+                "canh cải bó xôi thịt bằm",
+                "chuối cau"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa đậu nành",
+                "bún bò huế ngò gai quế"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt kho trứng cút",
+                "canh khoai môn hầm sườn heo",
+                "bánh gang"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sâm bí đao hạt chia đường phèn",
+                "nui thịt bằm tôm khô cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-29",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt bò xào su su",
+                "canh cua đồng rau ngót",
+                "lê đường"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "cháo thịt bằm nghêu rau mùi"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-30",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà chiên nước mắm",
+                "canh bí hồ lô thịt bằm",
+                "nho"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "trà đào cam sả đường phèn",
+                "bánh canh bột xắt tôm khô cá lóc"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-10-31",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "trứng thịt chưng bún tàu nấm mèo cà rốt",
+                "canh thịt bằm cải xoang",
+                "thanh long"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước mía",
+                "bánh mexico thịt"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 9,
+      "sourceFile": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+      "days": [
+        {
+          "date": "2025-11-03",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt ba rọi kho",
+                "canh chua cá hú bông súng",
+                "hồng giòn"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "cháo bí đỏ thịt bò bằm"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-04",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà xào đậu phọng",
+                "canh hẹ đậu phụ thịt bằm",
+                "bánh flan"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước ép cam",
+                "bún nước lèo cá lóc rau râm"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-05",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt bò nấu khoai tây cà rốt",
+                "canh cà chua cá diêu hồng ngò gai",
+                "đu đủ chín"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa đậu xanh",
+                "mì thịt bằm tôm cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-06",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá lóc muối chiên",
+                "canh thịt bằm rau ngót",
+                "rau câu dừa"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "miến gà cần tây cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-07",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm dương châu thịt nạc chả lụa tôm cà tốt đậu đũa",
+                "canh bí đao thịt bằm",
+                "dưa hấu"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước đậu rang đường phèn",
+                "bánh ngọt kẹp chà bông"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "weekNumber": 10,
+      "sourceFile": "Tuần 9,10 tháng 11 (từ 03 đến 14 - 11 - 2025).doc",
+      "days": [
+        {
+          "date": "2025-11-10",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt gà rô ti",
+                "canh thịt bằm cải cúc",
+                "chuối cau"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "chanh dây đường phèn",
+                "phở bò ngò gai quế"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-11",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "cá hú muối sả chiên",
+                "canh thịt bò hầm khoai môn",
+                "thanh long"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nha đam hạt chia đường phèn",
+                "súp thịt gà xé bắp hạt trứng cút cà rốt"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-12",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt kho trứng cút",
+                "canh rong biển thịt heo bằm đậu hủ cà rốt",
+                "nho"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "yaourt",
+                "hủ tiếu gan mực tôm hẹ"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm",
+                "thịt bò xào bắp mỹ đậu que",
+                "canh thịt bằm bắp cải",
+                "bánh su kem"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "nước sâm bí đao",
+                "cháo thịt bằm đậu xanh"
+              ]
+            }
+          ]
+        },
+        {
+          "date": "2025-11-14",
+          "meals": [
+            {
+              "mealType": "MORNING_SNACK",
+              "dishes": [
+                "sữa dinh dưỡng"
+              ]
+            },
+            {
+              "mealType": "LUNCH",
+              "dishes": [
+                "cơm tấm",
+                "sườn khìa trứng gà xắt",
+                "canh bắp cải cà rốt thịt bằm",
+                "táo"
+              ]
+            },
+            {
+              "mealType": "AFTERNOON_SNACK",
+              "dishes": [
+                "sữa trái cây",
+                "bánh bao kim sa"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

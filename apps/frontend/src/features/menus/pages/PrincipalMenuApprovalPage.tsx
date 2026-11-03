@@ -50,7 +50,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
 
   // Bộ lọc bảng
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL_SUBMITTED');
   const [ageGroupFilter, setAgeGroupFilter] = useState<string>('ALL');
 
   // Popup Right Slide-over Drawer xem chi tiết
@@ -99,9 +99,9 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
 
       if (!target) {
         target =
-          menusList.find((m: any) => m.status === 'SUBMITTED_FOR_REVIEW') ||
+          menusList.find((m: any) => m.status === 'SUBMITTED_FOR_REVIEW' || m.status === 'PENDING') ||
           menusList.find((m: any) => m.status === 'APPROVED') ||
-          menusList.find((m: any) => m.status === 'ACTIVE') ||
+          menusList.find((m: any) => m.status === 'ACTIVE' || m.status === 'PUBLISHED') ||
           menusList[0];
       }
 
@@ -270,6 +270,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'SUBMITTED_FOR_REVIEW':
+      case 'PENDING':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
@@ -284,6 +285,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
           </span>
         );
       case 'ACTIVE':
+      case 'PUBLISHED':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
             <Lock className="w-3.5 h-3.5 text-emerald-700" />
@@ -300,7 +302,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
       case 'DRAFT':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-            Bản dự thảo
+            Bản dự thảo (Chưa gửi)
           </span>
         );
       default:
@@ -404,13 +406,12 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               >
-                <option value="ALL">Tất cả ({menus.length})</option>
-                <option value="SUBMITTED_FOR_REVIEW">
-                  Chờ BGH duyệt ({stats?.submitted || 0})
-                </option>
+                <option value="ALL_SUBMITTED">Tất cả đã gửi BGH ({stats?.submitted || 0} chờ duyệt)</option>
+                <option value="SUBMITTED_FOR_REVIEW">Chờ BGH duyệt ({stats?.submitted || 0})</option>
                 <option value="APPROVED">Đã duyệt ({stats?.approved || 0})</option>
                 <option value="ACTIVE">Đang áp dụng ({stats?.active || 0})</option>
                 <option value="REJECTED">Bị từ chối ({stats?.rejected || 0})</option>
+                <option value="ALL">Tất cả (gồm cả Dự thảo)</option>
                 <option value="DRAFT">Bản dự thảo ({stats?.draft || 0})</option>
               </select>
             </div>
@@ -450,7 +451,8 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 <th className="py-3.5 px-4">Thời gian áp dụng</th>
                 <th className="py-3.5 px-4">Nhóm tuổi</th>
                 <th className="py-3.5 px-4 text-center">Năng lượng TB</th>
-                <th className="py-3.5 px-4">Người lập & Ngày gửi</th>
+                <th className="py-3.5 px-4">Người lập hồ sơ</th>
+                <th className="py-3.5 px-4 text-center">Thời gian gửi</th>
                 <th className="py-3.5 px-4 text-center">Trạng thái</th>
                 <th className="py-3.5 px-4 text-right">Thao tác</th>
               </tr>
@@ -458,7 +460,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
             <tbody className="divide-y divide-slate-100 text-xs font-medium">
               {menus.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-50" />
                     <p className="font-bold text-slate-700">Không tìm thấy thực đơn nào!</p>
                     <p className="text-xs mt-0.5">Vui lòng điều chỉnh lại bộ lọc hoặc từ khóa tìm kiếm.</p>
@@ -467,7 +469,8 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
               ) : (
                 menus.map((menu, idx) => {
                   const isSelected = selectedMenu?.id === menu.id;
-                  const isPending = menu.status === 'SUBMITTED_FOR_REVIEW';
+                  const isPending = menu.status === 'SUBMITTED_FOR_REVIEW' || menu.status === 'PENDING';
+                  const isApproved = menu.status === 'APPROVED';
 
                   return (
                     <tr
@@ -543,15 +546,34 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                         </div>
                       </td>
 
-                      {/* Người lập & Ngày gửi */}
+                      {/* Người lập hồ sơ */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-1.5 text-xs text-slate-700">
                           <User className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span className="font-bold">BS. Hoàng Mai Trang</span>
+                          <span className="font-bold">
+                            {menu.submittedByName || menu.createdByName || 'BS. Hoàng Mai Trang'}
+                          </span>
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                          {new Date(menu.updatedAt || menu.createdAt).toLocaleDateString('vi-VN')}
-                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Chuyên viên Dinh dưỡng</p>
+                      </td>
+
+                      {/* Cột riêng: Thời gian gửi BGH */}
+                      <td className="py-3.5 px-4 text-center">
+                        {menu.submittedAt ? (
+                          <div className="inline-flex flex-col items-center">
+                            <span className="font-bold text-slate-800 text-xs flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-teal-600" />
+                              {new Date(menu.submittedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-medium mt-0.5">
+                              {new Date(menu.submittedAt).toLocaleDateString('vi-VN')}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                            Chưa gửi BGH
+                          </span>
+                        )}
                       </td>
 
                       {/* Trạng thái */}
@@ -588,13 +610,13 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                           )}
 
                           {/* Nút Duyệt nhanh nếu đang chờ duyệt */}
-                          {menu.status === 'SUBMITTED_FOR_REVIEW' && (
+                          {isPending && (
                             <button
                               onClick={() => {
                                 handleSelectMenu(menu.id, false);
                                 setIsApprovalModalOpen(true);
                               }}
-                              className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1 transition shadow-xs"
+                              className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1 transition shadow-xs cursor-pointer"
                               title="Hiệu trưởng phê duyệt thực đơn"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -603,13 +625,13 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                           )}
 
                           {/* Nút Công bố nhanh nếu đã duyệt */}
-                          {menu.status === 'APPROVED' && (
+                          {isApproved && (
                             <button
                               onClick={() => {
                                 handleSelectMenu(menu.id, false);
                                 handlePublish();
                               }}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 transition shadow-xs"
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 transition shadow-xs cursor-pointer"
                               title="Khóa & Công bố thực đơn toàn trường"
                             >
                               <Lock className="w-3.5 h-3.5" />
@@ -715,6 +737,38 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Ghi chú lý do từ chối nếu có */}
+              {selectedMenu.status === 'REJECTED' && selectedMenu.rejectionReason && (
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 shadow-xs">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs font-bold text-rose-900 block">Lý do Hiệu trưởng từ chối:</span>
+                    <p className="text-xs text-rose-800 mt-0.5">{selectedMenu.rejectionReason}</p>
+                    {selectedMenu.rejectedAt && (
+                      <span className="text-[10px] text-rose-600 mt-1 block">
+                        Từ chối lúc: {new Date(selectedMenu.rejectedAt).toLocaleString('vi-VN')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Ghi chú phê duyệt nếu có */}
+              {(selectedMenu.status === 'APPROVED' || selectedMenu.status === 'PUBLISHED' || selectedMenu.status === 'ACTIVE') && selectedMenu.approvalNotes && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3 shadow-xs">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs font-bold text-emerald-900 block">Ý kiến chỉ đạo của Hiệu trưởng:</span>
+                    <p className="text-xs text-emerald-800 mt-0.5">{selectedMenu.approvalNotes}</p>
+                    {selectedMenu.approvedAt && (
+                      <span className="text-[10px] text-emerald-600 mt-1 block">
+                        Phê duyệt lúc: {new Date(selectedMenu.approvedAt).toLocaleString('vi-VN')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Thẻ thẩm định nhanh 4 tiêu chí */}
               {/* Thẻ thẩm định nhanh 4 tiêu chí */}
               {(() => {
@@ -759,11 +813,15 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 </div>
 
                 <div className="bg-purple-50/80 border border-purple-200/80 p-3.5 rounded-2xl text-center">
-                  <span className="text-[10px] uppercase font-bold text-purple-800 block">Người lập hồ sơ</span>
+                  <span className="text-[10px] uppercase font-bold text-purple-800 block">Người gửi hồ sơ</span>
                   <span className="text-sm font-black text-purple-950 mt-1 block truncate">
-                    BS. Hoàng Mai Trang
+                    {selectedMenu.submittedByName || selectedMenu.createdByName || 'BS. Hoàng Mai Trang'}
                   </span>
-                  <span className="text-[10px] text-purple-700 font-medium">Chuyên viên Dinh dưỡng</span>
+                  <span className="text-[10px] text-purple-700 font-medium">
+                    {selectedMenu.submittedAt
+                      ? `Gửi lúc: ${new Date(selectedMenu.submittedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} • ${new Date(selectedMenu.submittedAt).toLocaleDateString('vi-VN')}`
+                      : 'Chuyên viên Dinh dưỡng'}
+                  </span>
                 </div>
               </div>
 
@@ -775,10 +833,10 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {selectedMenu.status === 'SUBMITTED_FOR_REVIEW' && (
+                  {(selectedMenu.status === 'SUBMITTED_FOR_REVIEW' || selectedMenu.status === 'PENDING') && (
                     <button
                       onClick={() => setIsApprovalModalOpen(true)}
-                      className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition"
+                      className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Phê duyệt / Từ chối</span>

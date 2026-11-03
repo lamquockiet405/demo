@@ -16,4 +16,10 @@ pnpm-debug.log*
 tmp
 .vscode
 .idea
+.docker-test
+*-test-results.json
+TEST-REPORT.md
+database/backups
+docs/database-snapshot
+*.log
 

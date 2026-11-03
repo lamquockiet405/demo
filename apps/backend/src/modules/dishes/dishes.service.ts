@@ -9,6 +9,7 @@ import { Food } from '../foods/entities/food.entity';
 import { CreateDishDto } from './dto/create-dish.dto';
 import { UpdateDishDto } from './dto/update-dish.dto';
 import { GetDishesQueryDto } from './dto/get-dishes-query.dto';
+import { hasReferenceNutrition, hasVerifiedNutrition } from './nutrition.util';
 
 @Injectable()
 export class DishesService {
@@ -43,6 +44,13 @@ export class DishesService {
       qb.andWhere('d.categoryId = :catId', { catId: query.categoryId });
     }
 
+    if (query.dishType) {
+      qb.andWhere('cat.code = :dishType', { dishType: query.dishType });
+    }
+    if (query.isActive !== undefined && !query.status) {
+      qb.andWhere('d.status = :activeStatus', { activeStatus: query.isActive === 'true' ? 'ACTIVE' : 'INACTIVE' });
+    }
+
     if (query.status) {
       qb.andWhere('d.status = :status', { status: query.status });
     }
@@ -64,7 +72,11 @@ export class DishesService {
       standardServingSizeG: d.standardServingSizeG || 100,
       status: d.status,
       isActive: d.status === 'ACTIVE',
-      nutrition: d.nutrition
+      sourceMetadata: d.sourceMetadata,
+      nutritionAvailable: hasVerifiedNutrition(d),
+      nutritionStatus: hasVerifiedNutrition(d) ? 'VERIFIED' : hasReferenceNutrition(d) ? 'REFERENCE' : 'MISSING',
+      referenceNutrition: hasReferenceNutrition(d) ? d.nutrition : null,
+      nutrition: hasVerifiedNutrition(d)
         ? {
             energyKcal: d.nutrition.energyKcal,
             proteinG: d.nutrition.proteinG,
@@ -105,13 +117,13 @@ export class DishesService {
       where: { category: { code: 'MAIN' } },
     });
     const sideDishes = await this.dishRepo.count({
-      where: { category: { code: 'SNACK' } },
+      where: [{ category: { code: 'SNACK_MORNING' } }, { category: { code: 'SNACK_AFTERNOON' } }],
     });
 
     const stats = {
       totalDishes: total,
-      mainDishes: mainDishes || Math.round(total * 0.4),
-      sideDishes: sideDishes || Math.round(total * 0.3),
+      mainDishes,
+      sideDishes,
       allergenDishesCount: parseInt(allergenDishesCountResult?.count || '0', 10),
     };
 
@@ -156,6 +168,10 @@ export class DishesService {
       standardServingSizeG: dish.standardServingSizeG,
       status: dish.status,
       isActive: dish.status === 'ACTIVE',
+      sourceMetadata: dish.sourceMetadata,
+      nutritionAvailable: hasVerifiedNutrition(dish),
+      nutritionStatus: hasVerifiedNutrition(dish) ? 'VERIFIED' : hasReferenceNutrition(dish) ? 'REFERENCE' : 'MISSING',
+      referenceNutrition: hasReferenceNutrition(dish) ? dish.nutrition : null,
       allergens: (dish.dishAllergens || []).map((da) => ({
         id: String(da.allergenId),
         code: da.allergen?.code || '',
@@ -163,7 +179,7 @@ export class DishesService {
         riskLevel: da.riskLevel,
         note: da.note || null,
       })),
-      nutrition: dish.nutrition || {
+      nutrition: (hasVerifiedNutrition(dish) ? dish.nutrition : null) || {
         energyKcal: 0,
         proteinG: 0,
         fatG: 0,
@@ -181,6 +197,7 @@ export class DishesService {
         grossWeightG: r.grossWeightG,
         netWeightG: r.netWeightG,
         note: r.note,
+        sourceMetadata: r.sourceMetadata,
       })),
     };
   }
@@ -192,6 +209,7 @@ export class DishesService {
       description: dto.description || null,
       standardServingSizeG: dto.standardServingSizeG || 100,
       status: dto.status || 'ACTIVE',
+      nutritionVerified: Boolean(dto.recipes?.length),
     });
 
     const savedDish = await this.dishRepo.save(dish);
@@ -209,7 +227,8 @@ export class DishesService {
       await this.recipeRepo.save(items);
     }
 
-    await this.recalculateDishNutrition(savedDish.id);
+    savedDish.nutritionVerified = await this.recalculateDishNutrition(savedDish.id);
+    await this.dishRepo.save(savedDish);
     return this.findOne(savedDish.id);
   }
 
@@ -242,7 +261,13 @@ export class DishesService {
         );
         await this.recipeRepo.save(items);
       }
-      await this.recalculateDishNutrition(id);
+      dish.nutritionVerified = await this.recalculateDishNutrition(id);
+      if (dish.sourceMetadata) {
+        dish.sourceMetadata = { ...dish.sourceMetadata,
+          recipeStatus: dish.nutritionVerified ? 'VERIFIED_MANUAL' : 'INCOMPLETE_RECIPE',
+          servingSizeStatus: 'MANUAL' };
+      }
+      await this.dishRepo.save(dish);
     }
 
     return this.findOne(id);
@@ -302,6 +327,12 @@ export class DishesService {
     nutrition.ironMg = round2(ironMg);
     nutrition.zincMg = round2(zincMg);
 
+    const requiredNutrients = ['energyKcal100g', 'proteinG', 'fatG', 'carbG', 'fiberG', 'calciumMg', 'ironMg', 'zincMg'];
+    const complete = recipes.length > 0 && recipes.every((recipe) => recipe.ingredient &&
+      !(recipe.ingredient.sourceMetadata?.missingNutrients || []).some((key: string) => requiredNutrients.includes(key)));
+    nutrition.sourceMetadata = { status: complete ? 'COMPUTED_FROM_RECIPE' : 'INCOMPLETE_RECIPE',
+      basis: 'ONE_STANDARD_SERVING', calculation: 'SUM(ingredient nutrient per 100g * netWeightG / 100)' };
     await this.nutritionRepo.save(nutrition);
+    return complete;
   }
 }

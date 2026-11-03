@@ -358,7 +358,7 @@ function verifySuite5() {
   const requiredSeeds = [
     'roles', 'allergens', 'dish_categories', 'nutrition_conversion_factors',
     'nutrition_rule_codes', 'users', 'schools', 'classes', 'students',
-    'food_categories', 'food_ingredients', 'dishes', 'dish_recipes',
+    'food_categories', 'food_ingredients', 'dishes',
     'who_growth_standards',
   ];
 
@@ -368,6 +368,8 @@ function verifySuite5() {
       seeded++;
     }
   }
+  assert(!catalog.seedInserts.dish_recipes,
+    'Unverified sample recipes must not be seeded without source quantities');
 
   passedSuites.push(`Suite 5: Seed Data Completeness (${seeded}/${requiredSeeds.length} tables seeded)`);
 }

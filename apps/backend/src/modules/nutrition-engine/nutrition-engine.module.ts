@@ -6,6 +6,7 @@ import { AllergenCatalog } from '../children/entities/allergen-catalog.entity';
 import { Dish } from '../dishes/entities/dish.entity';
 import { DishCategory } from '../dishes/entities/dish-category.entity';
 import { FoodCategory } from '../foods/entities/food-category.entity';
+import { MenuVersion } from '../menus/entities/menu-version.entity';
 
 // 3 Entities mới cho Cơ cấu Bữa ăn, Tần suất & Giãn cách
 import { DishFrequencyRule } from './entities/dish-frequency-rule.entity';
@@ -40,6 +41,7 @@ import { IntakeStandardsController } from './controllers/intake-standards.contro
       Dish,
       DishCategory,
       FoodCategory,
+      MenuVersion,
       DishFrequencyRule,
       DishSpacingRule,
       NutritionIntakeStandard,

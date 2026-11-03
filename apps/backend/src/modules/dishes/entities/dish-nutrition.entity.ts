@@ -5,6 +5,8 @@ import { Dish } from './dish.entity';
 
 @Entity('dish_nutrition')
 export class DishNutrition {
+  @Column({ name: 'source_metadata', type: 'jsonb', nullable: true })
+  sourceMetadata: Record<string, any> | null;
   @PrimaryColumn({ name: 'dish_id', type: 'bigint', transformer: BigIntTransformer })
   dishId: number;
 

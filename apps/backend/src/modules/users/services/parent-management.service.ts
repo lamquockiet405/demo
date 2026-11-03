@@ -132,17 +132,13 @@ export class ParentManagementService {
       const p = profileMap.get(uId);
       return {
         id: uId,
-        tenantId: u.tenantId,
         email: u.email,
         fullName: u.fullName,
         phone: u.phone,
         avatarUrl: u.avatar,
         status: u.status,
-        twoFactorEnabled: u.twoFactorEnabled,
         lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : null,
         createdAt: u.createdAt,
-        updatedAt: u.updatedAt,
-        deletedAt: u.status === 'INACTIVE' ? u.updatedAt : null,
         isDeleted: u.status === 'INACTIVE',
         address: p?.address || '',
         occupation: p?.occupation || '',
@@ -283,7 +279,8 @@ export class ParentManagementService {
 
   async getStats() {
     const parentQuery = `
-      SELECT DISTINCT u.id, u.status
+      SELECT DISTINCT u.id, u.status,
+        EXISTS (SELECT 1 FROM student_parents child_link WHERE child_link.parent_id = u.id) AS has_children
       FROM users u
       LEFT JOIN parent_profiles pp ON pp.user_id = u.id
       LEFT JOIN user_roles ur ON ur.user_id = u.id
@@ -296,6 +293,7 @@ export class ParentManagementService {
     const totalParents = parentUsers.length;
     const activeParents = parentUsers.filter((u: any) => u.status === 'ACTIVE').length;
     const inactiveParents = parentUsers.filter((u: any) => u.status === 'INACTIVE').length;
+    const parentsWithChildren = parentUsers.filter((u: any) => u.has_children).length;
 
     return {
       totalParents,

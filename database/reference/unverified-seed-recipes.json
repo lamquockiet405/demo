@@ -1,0 +1,2350 @@
+{
+  "source": "database/seed.sql before source catalog correction",
+  "status": "UNVERIFIED_SEED_RECIPE",
+  "rows": [
+    {
+      "id": 1,
+      "dishId": 1,
+      "ingredientId": 1,
+      "grossWeightG": 50.0,
+      "netWeightG": 50.0,
+      "note": "Gạo tẻ vo sạch nấu mềm"
+    },
+    {
+      "id": 2,
+      "dishId": 2,
+      "ingredientId": 1,
+      "grossWeightG": 45.0,
+      "netWeightG": 45.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 3,
+      "dishId": 2,
+      "ingredientId": 77,
+      "grossWeightG": 10.0,
+      "netWeightG": 10.0,
+      "note": "Lạp xưởng thái hạt lựu"
+    },
+    {
+      "id": 4,
+      "dishId": 2,
+      "ingredientId": 76,
+      "grossWeightG": 10.0,
+      "netWeightG": 10.0,
+      "note": "Chả lụa"
+    },
+    {
+      "id": 5,
+      "dishId": 2,
+      "ingredientId": 90,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Trứng gà"
+    },
+    {
+      "id": 6,
+      "dishId": 2,
+      "ingredientId": 84,
+      "grossWeightG": 15.0,
+      "netWeightG": 10.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 7,
+      "dishId": 2,
+      "ingredientId": 39,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 8,
+      "dishId": 2,
+      "ingredientId": 41,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Đậu que"
+    },
+    {
+      "id": 9,
+      "dishId": 2,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 10,
+      "dishId": 3,
+      "ingredientId": 1,
+      "grossWeightG": 45.0,
+      "netWeightG": 45.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 11,
+      "dishId": 3,
+      "ingredientId": 84,
+      "grossWeightG": 20.0,
+      "netWeightG": 15.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 12,
+      "dishId": 3,
+      "ingredientId": 86,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Mực tươi"
+    },
+    {
+      "id": 13,
+      "dishId": 3,
+      "ingredientId": 90,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Trứng gà"
+    },
+    {
+      "id": 14,
+      "dishId": 3,
+      "ingredientId": 39,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 15,
+      "dishId": 3,
+      "ingredientId": 41,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Đậu que"
+    },
+    {
+      "id": 16,
+      "dishId": 3,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 17,
+      "dishId": 4,
+      "ingredientId": 3,
+      "grossWeightG": 50.0,
+      "netWeightG": 50.0,
+      "note": "Gạo tấm"
+    },
+    {
+      "id": 18,
+      "dishId": 4,
+      "ingredientId": 70,
+      "grossWeightG": 45.0,
+      "netWeightG": 35.0,
+      "note": "Sườn cốt lết"
+    },
+    {
+      "id": 19,
+      "dishId": 4,
+      "ingredientId": 90,
+      "grossWeightG": 20.0,
+      "netWeightG": 20.0,
+      "note": "Trứng gà"
+    },
+    {
+      "id": 20,
+      "dishId": 4,
+      "ingredientId": 107,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Nước dừa"
+    },
+    {
+      "id": 21,
+      "dishId": 5,
+      "ingredientId": 79,
+      "grossWeightG": 60.0,
+      "netWeightG": 48.0,
+      "note": "Cá lóc phi lê sạch xương"
+    },
+    {
+      "id": 22,
+      "dishId": 5,
+      "ingredientId": 101,
+      "grossWeightG": 0.5,
+      "netWeightG": 0.5,
+      "note": "Muối i-ốt"
+    },
+    {
+      "id": 23,
+      "dishId": 5,
+      "ingredientId": 65,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 24,
+      "dishId": 6,
+      "ingredientId": 72,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Thịt gà ta"
+    },
+    {
+      "id": 25,
+      "dishId": 6,
+      "ingredientId": 107,
+      "grossWeightG": 20.0,
+      "netWeightG": 20.0,
+      "note": "Nước dừa tươi"
+    },
+    {
+      "id": 26,
+      "dishId": 6,
+      "ingredientId": 102,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Tỏi phi"
+    },
+    {
+      "id": 27,
+      "dishId": 6,
+      "ingredientId": 100,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 28,
+      "dishId": 6,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 29,
+      "dishId": 7,
+      "ingredientId": 79,
+      "grossWeightG": 60.0,
+      "netWeightG": 48.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 30,
+      "dishId": 7,
+      "ingredientId": 100,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 31,
+      "dishId": 7,
+      "ingredientId": 96,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 32,
+      "dishId": 7,
+      "ingredientId": 103,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Hành tím"
+    },
+    {
+      "id": 33,
+      "dishId": 7,
+      "ingredientId": 65,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 34,
+      "dishId": 8,
+      "ingredientId": 71,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt bò bắp"
+    },
+    {
+      "id": 35,
+      "dishId": 8,
+      "ingredientId": 14,
+      "grossWeightG": 25.0,
+      "netWeightG": 15.0,
+      "note": "Ngô ngọt"
+    },
+    {
+      "id": 36,
+      "dishId": 8,
+      "ingredientId": 39,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 37,
+      "dishId": 8,
+      "ingredientId": 100,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 38,
+      "dishId": 9,
+      "ingredientId": 72,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 39,
+      "dishId": 9,
+      "ingredientId": 100,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 40,
+      "dishId": 9,
+      "ingredientId": 96,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 41,
+      "dishId": 9,
+      "ingredientId": 65,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 42,
+      "dishId": 10,
+      "ingredientId": 67,
+      "grossWeightG": 48.0,
+      "netWeightG": 45.0,
+      "note": "Thịt lợn nạc"
+    },
+    {
+      "id": 43,
+      "dishId": 10,
+      "ingredientId": 39,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 44,
+      "dishId": 10,
+      "ingredientId": 100,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 45,
+      "dishId": 10,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 46,
+      "dishId": 11,
+      "ingredientId": 82,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Cá ngừ"
+    },
+    {
+      "id": 47,
+      "dishId": 11,
+      "ingredientId": 40,
+      "grossWeightG": 26.0,
+      "netWeightG": 25.0,
+      "note": "Cà chua"
+    },
+    {
+      "id": 48,
+      "dishId": 11,
+      "ingredientId": 103,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Hành tím"
+    },
+    {
+      "id": 49,
+      "dishId": 11,
+      "ingredientId": 65,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 50,
+      "dishId": 12,
+      "ingredientId": 67,
+      "grossWeightG": 32.0,
+      "netWeightG": 30.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 51,
+      "dishId": 12,
+      "ingredientId": 84,
+      "grossWeightG": 28.0,
+      "netWeightG": 20.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 52,
+      "dishId": 12,
+      "ingredientId": 107,
+      "grossWeightG": 20.0,
+      "netWeightG": 20.0,
+      "note": "Nước dừa"
+    },
+    {
+      "id": 53,
+      "dishId": 12,
+      "ingredientId": 100,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 54,
+      "dishId": 13,
+      "ingredientId": 72,
+      "grossWeightG": 50.0,
+      "netWeightG": 42.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 55,
+      "dishId": 13,
+      "ingredientId": 104,
+      "grossWeightG": 6.0,
+      "netWeightG": 5.0,
+      "note": "Sả non"
+    },
+    {
+      "id": 56,
+      "dishId": 13,
+      "ingredientId": 23,
+      "grossWeightG": 6.0,
+      "netWeightG": 5.0,
+      "note": "Đậu phộng"
+    },
+    {
+      "id": 57,
+      "dishId": 13,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 58,
+      "dishId": 14,
+      "ingredientId": 91,
+      "grossWeightG": 40.0,
+      "netWeightG": 35.0,
+      "note": "Trứng vịt"
+    },
+    {
+      "id": 59,
+      "dishId": 14,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 17.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 60,
+      "dishId": 14,
+      "ingredientId": 40,
+      "grossWeightG": 15.0,
+      "netWeightG": 14.0,
+      "note": "Cà chua"
+    },
+    {
+      "id": 61,
+      "dishId": 14,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 62,
+      "dishId": 15,
+      "ingredientId": 69,
+      "grossWeightG": 65.0,
+      "netWeightG": 45.0,
+      "note": "Sườn non"
+    },
+    {
+      "id": 63,
+      "dishId": 15,
+      "ingredientId": 107,
+      "grossWeightG": 20.0,
+      "netWeightG": 20.0,
+      "note": "Nước dừa"
+    },
+    {
+      "id": 64,
+      "dishId": 15,
+      "ingredientId": 102,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Tỏi"
+    },
+    {
+      "id": 65,
+      "dishId": 15,
+      "ingredientId": 100,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 66,
+      "dishId": 16,
+      "ingredientId": 71,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 67,
+      "dishId": 16,
+      "ingredientId": 41,
+      "grossWeightG": 35.0,
+      "netWeightG": 30.0,
+      "note": "Đậu que"
+    },
+    {
+      "id": 68,
+      "dishId": 16,
+      "ingredientId": 102,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Tỏi"
+    },
+    {
+      "id": 69,
+      "dishId": 16,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 70,
+      "dishId": 17,
+      "ingredientId": 68,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt ba chỉ"
+    },
+    {
+      "id": 71,
+      "dishId": 17,
+      "ingredientId": 92,
+      "grossWeightG": 25.0,
+      "netWeightG": 22.0,
+      "note": "Trứng cút"
+    },
+    {
+      "id": 72,
+      "dishId": 17,
+      "ingredientId": 107,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Nước dừa"
+    },
+    {
+      "id": 73,
+      "dishId": 17,
+      "ingredientId": 100,
+      "grossWeightG": 2.5,
+      "netWeightG": 2.5,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 74,
+      "dishId": 18,
+      "ingredientId": 90,
+      "grossWeightG": 35.0,
+      "netWeightG": 30.0,
+      "note": "Trứng gà"
+    },
+    {
+      "id": 75,
+      "dishId": 18,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 76,
+      "dishId": 18,
+      "ingredientId": 11,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Bún tàu"
+    },
+    {
+      "id": 77,
+      "dishId": 18,
+      "ingredientId": 47,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Nấm mèo"
+    },
+    {
+      "id": 78,
+      "dishId": 18,
+      "ingredientId": 39,
+      "grossWeightG": 8.0,
+      "netWeightG": 7.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 79,
+      "dishId": 19,
+      "ingredientId": 72,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 80,
+      "dishId": 19,
+      "ingredientId": 104,
+      "grossWeightG": 6.0,
+      "netWeightG": 5.0,
+      "note": "Sả non"
+    },
+    {
+      "id": 81,
+      "dishId": 19,
+      "ingredientId": 65,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 82,
+      "dishId": 20,
+      "ingredientId": 71,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 83,
+      "dishId": 20,
+      "ingredientId": 44,
+      "grossWeightG": 45.0,
+      "netWeightG": 28.0,
+      "note": "Khóm"
+    },
+    {
+      "id": 84,
+      "dishId": 20,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 85,
+      "dishId": 21,
+      "ingredientId": 67,
+      "grossWeightG": 48.0,
+      "netWeightG": 45.0,
+      "note": "Thịt lợn"
+    },
+    {
+      "id": 86,
+      "dishId": 21,
+      "ingredientId": 100,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 87,
+      "dishId": 21,
+      "ingredientId": 96,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Đường"
+    },
+    {
+      "id": 88,
+      "dishId": 21,
+      "ingredientId": 65,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 89,
+      "dishId": 22,
+      "ingredientId": 70,
+      "grossWeightG": 60.0,
+      "netWeightG": 48.0,
+      "note": "Sườn cốt lết"
+    },
+    {
+      "id": 90,
+      "dishId": 22,
+      "ingredientId": 107,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Nước dừa"
+    },
+    {
+      "id": 91,
+      "dishId": 22,
+      "ingredientId": 100,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 92,
+      "dishId": 23,
+      "ingredientId": 68,
+      "grossWeightG": 48.0,
+      "netWeightG": 45.0,
+      "note": "Thịt ba chỉ"
+    },
+    {
+      "id": 93,
+      "dishId": 23,
+      "ingredientId": 100,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 94,
+      "dishId": 23,
+      "ingredientId": 96,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Đường"
+    },
+    {
+      "id": 95,
+      "dishId": 24,
+      "ingredientId": 84,
+      "grossWeightG": 25.0,
+      "netWeightG": 18.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 96,
+      "dishId": 24,
+      "ingredientId": 67,
+      "grossWeightG": 30.0,
+      "netWeightG": 28.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 97,
+      "dishId": 24,
+      "ingredientId": 44,
+      "grossWeightG": 30.0,
+      "netWeightG": 18.0,
+      "note": "Khóm"
+    },
+    {
+      "id": 98,
+      "dishId": 25,
+      "ingredientId": 83,
+      "grossWeightG": 65.0,
+      "netWeightG": 50.0,
+      "note": "Cá hú"
+    },
+    {
+      "id": 99,
+      "dishId": 25,
+      "ingredientId": 104,
+      "grossWeightG": 6.0,
+      "netWeightG": 5.0,
+      "note": "Sả băm"
+    },
+    {
+      "id": 100,
+      "dishId": 25,
+      "ingredientId": 65,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 101,
+      "dishId": 26,
+      "ingredientId": 71,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 102,
+      "dishId": 26,
+      "ingredientId": 45,
+      "grossWeightG": 40.0,
+      "netWeightG": 32.0,
+      "note": "Su su"
+    },
+    {
+      "id": 103,
+      "dishId": 26,
+      "ingredientId": 65,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 104,
+      "dishId": 27,
+      "ingredientId": 71,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 105,
+      "dishId": 27,
+      "ingredientId": 16,
+      "grossWeightG": 25.0,
+      "netWeightG": 22.0,
+      "note": "Khoai tây"
+    },
+    {
+      "id": 106,
+      "dishId": 27,
+      "ingredientId": 39,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 107,
+      "dishId": 28,
+      "ingredientId": 71,
+      "grossWeightG": 40.0,
+      "netWeightG": 38.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 108,
+      "dishId": 28,
+      "ingredientId": 14,
+      "grossWeightG": 20.0,
+      "netWeightG": 12.0,
+      "note": "Ngô ngọt"
+    },
+    {
+      "id": 109,
+      "dishId": 28,
+      "ingredientId": 41,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Đậu que"
+    },
+    {
+      "id": 110,
+      "dishId": 29,
+      "ingredientId": 81,
+      "grossWeightG": 65.0,
+      "netWeightG": 45.0,
+      "note": "Cá điêu hồng"
+    },
+    {
+      "id": 111,
+      "dishId": 29,
+      "ingredientId": 40,
+      "grossWeightG": 28.0,
+      "netWeightG": 25.0,
+      "note": "Cà chua"
+    },
+    {
+      "id": 112,
+      "dishId": 29,
+      "ingredientId": 65,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 113,
+      "dishId": 30,
+      "ingredientId": 81,
+      "grossWeightG": 65.0,
+      "netWeightG": 45.0,
+      "note": "Cá điêu hồng"
+    },
+    {
+      "id": 114,
+      "dishId": 30,
+      "ingredientId": 100,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Nước mắm"
+    },
+    {
+      "id": 115,
+      "dishId": 30,
+      "ingredientId": 65,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Dầu ăn"
+    },
+    {
+      "id": 116,
+      "dishId": 31,
+      "ingredientId": 84,
+      "grossWeightG": 20.0,
+      "netWeightG": 15.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 117,
+      "dishId": 31,
+      "ingredientId": 17,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Khoai sọ"
+    },
+    {
+      "id": 118,
+      "dishId": 31,
+      "ingredientId": 106,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Hành ngò"
+    },
+    {
+      "id": 119,
+      "dishId": 32,
+      "ingredientId": 79,
+      "grossWeightG": 25.0,
+      "netWeightG": 20.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 120,
+      "dishId": 32,
+      "ingredientId": 30,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Cải ngọt"
+    },
+    {
+      "id": 121,
+      "dishId": 32,
+      "ingredientId": 105,
+      "grossWeightG": 1.0,
+      "netWeightG": 1.0,
+      "note": "Gừng khử tanh"
+    },
+    {
+      "id": 122,
+      "dishId": 33,
+      "ingredientId": 69,
+      "grossWeightG": 35.0,
+      "netWeightG": 25.0,
+      "note": "Sườn heo"
+    },
+    {
+      "id": 123,
+      "dishId": 33,
+      "ingredientId": 14,
+      "grossWeightG": 25.0,
+      "netWeightG": 15.0,
+      "note": "Ngô ngọt"
+    },
+    {
+      "id": 124,
+      "dishId": 33,
+      "ingredientId": 37,
+      "grossWeightG": 35.0,
+      "netWeightG": 30.0,
+      "note": "Bầu non"
+    },
+    {
+      "id": 125,
+      "dishId": 34,
+      "ingredientId": 79,
+      "grossWeightG": 25.0,
+      "netWeightG": 20.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 126,
+      "dishId": 34,
+      "ingredientId": 37,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Bầu non"
+    },
+    {
+      "id": 127,
+      "dishId": 35,
+      "ingredientId": 71,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt bò băm"
+    },
+    {
+      "id": 128,
+      "dishId": 35,
+      "ingredientId": 31,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Cải bó xôi"
+    },
+    {
+      "id": 129,
+      "dishId": 36,
+      "ingredientId": 83,
+      "grossWeightG": 32.0,
+      "netWeightG": 25.0,
+      "note": "Cá hú"
+    },
+    {
+      "id": 130,
+      "dishId": 36,
+      "ingredientId": 44,
+      "grossWeightG": 25.0,
+      "netWeightG": 15.0,
+      "note": "Khóm"
+    },
+    {
+      "id": 131,
+      "dishId": 36,
+      "ingredientId": 42,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Đậu bắp"
+    },
+    {
+      "id": 132,
+      "dishId": 36,
+      "ingredientId": 40,
+      "grossWeightG": 16.0,
+      "netWeightG": 15.0,
+      "note": "Cà chua"
+    },
+    {
+      "id": 133,
+      "dishId": 36,
+      "ingredientId": 43,
+      "grossWeightG": 20.0,
+      "netWeightG": 15.0,
+      "note": "Dọc mùng"
+    },
+    {
+      "id": 134,
+      "dishId": 37,
+      "ingredientId": 72,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 135,
+      "dishId": 37,
+      "ingredientId": 24,
+      "grossWeightG": 10.0,
+      "netWeightG": 10.0,
+      "note": "Hạt sen"
+    },
+    {
+      "id": 136,
+      "dishId": 37,
+      "ingredientId": 39,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 137,
+      "dishId": 37,
+      "ingredientId": 48,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Nấm hương"
+    },
+    {
+      "id": 138,
+      "dishId": 37,
+      "ingredientId": 34,
+      "grossWeightG": 20.0,
+      "netWeightG": 15.0,
+      "note": "Súp lơ xanh"
+    },
+    {
+      "id": 139,
+      "dishId": 38,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 140,
+      "dishId": 38,
+      "ingredientId": 85,
+      "grossWeightG": 4.0,
+      "netWeightG": 4.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 141,
+      "dishId": 38,
+      "ingredientId": 38,
+      "grossWeightG": 36.0,
+      "netWeightG": 30.0,
+      "note": "Mướp hương"
+    },
+    {
+      "id": 142,
+      "dishId": 38,
+      "ingredientId": 46,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Nấm rơm"
+    },
+    {
+      "id": 143,
+      "dishId": 39,
+      "ingredientId": 79,
+      "grossWeightG": 20.0,
+      "netWeightG": 15.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 144,
+      "dishId": 39,
+      "ingredientId": 85,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 145,
+      "dishId": 39,
+      "ingredientId": 26,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Rau ngót"
+    },
+    {
+      "id": 146,
+      "dishId": 40,
+      "ingredientId": 79,
+      "grossWeightG": 20.0,
+      "netWeightG": 15.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 147,
+      "dishId": 40,
+      "ingredientId": 85,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 148,
+      "dishId": 40,
+      "ingredientId": 36,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Bí đao"
+    },
+    {
+      "id": 149,
+      "dishId": 41,
+      "ingredientId": 71,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 150,
+      "dishId": 41,
+      "ingredientId": 22,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Đậu đỏ ninh nhừ"
+    },
+    {
+      "id": 151,
+      "dishId": 41,
+      "ingredientId": 39,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 152,
+      "dishId": 42,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 153,
+      "dishId": 42,
+      "ingredientId": 28,
+      "grossWeightG": 32.0,
+      "netWeightG": 25.0,
+      "note": "Rau dền đỏ"
+    },
+    {
+      "id": 154,
+      "dishId": 42,
+      "ingredientId": 27,
+      "grossWeightG": 34.0,
+      "netWeightG": 25.0,
+      "note": "Rau mồng tơi"
+    },
+    {
+      "id": 155,
+      "dishId": 43,
+      "ingredientId": 67,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 156,
+      "dishId": 43,
+      "ingredientId": 29,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Rau cải cúc"
+    },
+    {
+      "id": 157,
+      "dishId": 44,
+      "ingredientId": 71,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 158,
+      "dishId": 44,
+      "ingredientId": 17,
+      "grossWeightG": 55.0,
+      "netWeightG": 45.0,
+      "note": "Khoai môn"
+    },
+    {
+      "id": 159,
+      "dishId": 44,
+      "ingredientId": 106,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Ngò gai"
+    },
+    {
+      "id": 160,
+      "dishId": 45,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 161,
+      "dishId": 45,
+      "ingredientId": 85,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 162,
+      "dishId": 45,
+      "ingredientId": 18,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Khoai mỡ"
+    },
+    {
+      "id": 163,
+      "dishId": 46,
+      "ingredientId": 89,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Chả cá"
+    },
+    {
+      "id": 164,
+      "dishId": 46,
+      "ingredientId": 29,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Cải cúc"
+    },
+    {
+      "id": 165,
+      "dishId": 47,
+      "ingredientId": 67,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 166,
+      "dishId": 47,
+      "ingredientId": 26,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Rau ngót"
+    },
+    {
+      "id": 167,
+      "dishId": 48,
+      "ingredientId": 67,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 168,
+      "dishId": 48,
+      "ingredientId": 33,
+      "grossWeightG": 40.0,
+      "netWeightG": 35.0,
+      "note": "Bắp cải"
+    },
+    {
+      "id": 169,
+      "dishId": 48,
+      "ingredientId": 39,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 170,
+      "dishId": 49,
+      "ingredientId": 84,
+      "grossWeightG": 22.0,
+      "netWeightG": 16.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 171,
+      "dishId": 49,
+      "ingredientId": 32,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Cải dún"
+    },
+    {
+      "id": 172,
+      "dishId": 50,
+      "ingredientId": 72,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 173,
+      "dishId": 50,
+      "ingredientId": 19,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Củ sen"
+    },
+    {
+      "id": 174,
+      "dishId": 50,
+      "ingredientId": 39,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 175,
+      "dishId": 51,
+      "ingredientId": 88,
+      "grossWeightG": 80.0,
+      "netWeightG": 20.0,
+      "note": "Nghêu thịt"
+    },
+    {
+      "id": 176,
+      "dishId": 51,
+      "ingredientId": 37,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Bầu non"
+    },
+    {
+      "id": 177,
+      "dishId": 52,
+      "ingredientId": 87,
+      "grossWeightG": 60.0,
+      "netWeightG": 30.0,
+      "note": "Cua đồng giã"
+    },
+    {
+      "id": 178,
+      "dishId": 52,
+      "ingredientId": 26,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Rau ngót"
+    },
+    {
+      "id": 179,
+      "dishId": 53,
+      "ingredientId": 67,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 180,
+      "dishId": 53,
+      "ingredientId": 35,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Bí đỏ"
+    },
+    {
+      "id": 181,
+      "dishId": 54,
+      "ingredientId": 83,
+      "grossWeightG": 32.0,
+      "netWeightG": 25.0,
+      "note": "Cá hú"
+    },
+    {
+      "id": 182,
+      "dishId": 54,
+      "ingredientId": 51,
+      "grossWeightG": 45.0,
+      "netWeightG": 40.0,
+      "note": "Bông súng"
+    },
+    {
+      "id": 183,
+      "dishId": 54,
+      "ingredientId": 40,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Cà chua"
+    },
+    {
+      "id": 184,
+      "dishId": 55,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 185,
+      "dishId": 55,
+      "ingredientId": 20,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Đậu phụ"
+    },
+    {
+      "id": 186,
+      "dishId": 55,
+      "ingredientId": 49,
+      "grossWeightG": 35.0,
+      "netWeightG": 30.0,
+      "note": "Hẹ lá"
+    },
+    {
+      "id": 187,
+      "dishId": 56,
+      "ingredientId": 81,
+      "grossWeightG": 35.0,
+      "netWeightG": 25.0,
+      "note": "Cá diêu hồng"
+    },
+    {
+      "id": 188,
+      "dishId": 56,
+      "ingredientId": 40,
+      "grossWeightG": 35.0,
+      "netWeightG": 30.0,
+      "note": "Cà chua"
+    },
+    {
+      "id": 189,
+      "dishId": 56,
+      "ingredientId": 106,
+      "grossWeightG": 2.0,
+      "netWeightG": 2.0,
+      "note": "Ngò gai"
+    },
+    {
+      "id": 190,
+      "dishId": 57,
+      "ingredientId": 67,
+      "grossWeightG": 20.0,
+      "netWeightG": 18.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 191,
+      "dishId": 57,
+      "ingredientId": 36,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Bí đao"
+    },
+    {
+      "id": 192,
+      "dishId": 58,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 193,
+      "dishId": 58,
+      "ingredientId": 20,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Đậu phụ"
+    },
+    {
+      "id": 194,
+      "dishId": 58,
+      "ingredientId": 52,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Rong biển"
+    },
+    {
+      "id": 195,
+      "dishId": 58,
+      "ingredientId": 39,
+      "grossWeightG": 16.0,
+      "netWeightG": 14.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 196,
+      "dishId": 59,
+      "ingredientId": 53,
+      "grossWeightG": 55.0,
+      "netWeightG": 50.0,
+      "note": "Nho tươi"
+    },
+    {
+      "id": 197,
+      "dishId": 60,
+      "ingredientId": 98,
+      "grossWeightG": 35.0,
+      "netWeightG": 35.0,
+      "note": "Bánh su kem"
+    },
+    {
+      "id": 198,
+      "dishId": 61,
+      "ingredientId": 54,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Lê đường"
+    },
+    {
+      "id": 199,
+      "dishId": 62,
+      "ingredientId": 97,
+      "grossWeightG": 50.0,
+      "netWeightG": 50.0,
+      "note": "Rau câu dừa"
+    },
+    {
+      "id": 200,
+      "dishId": 63,
+      "ingredientId": 56,
+      "grossWeightG": 80.0,
+      "netWeightG": 60.0,
+      "note": "Thanh long"
+    },
+    {
+      "id": 201,
+      "dishId": 64,
+      "ingredientId": 55,
+      "grossWeightG": 58.0,
+      "netWeightG": 50.0,
+      "note": "Táo tây"
+    },
+    {
+      "id": 202,
+      "dishId": 65,
+      "ingredientId": 57,
+      "grossWeightG": 80.0,
+      "netWeightG": 60.0,
+      "note": "Đu đủ"
+    },
+    {
+      "id": 203,
+      "dishId": 66,
+      "ingredientId": 99,
+      "grossWeightG": 50.0,
+      "netWeightG": 50.0,
+      "note": "Bánh flan"
+    },
+    {
+      "id": 204,
+      "dishId": 67,
+      "ingredientId": 58,
+      "grossWeightG": 125.0,
+      "netWeightG": 70.0,
+      "note": "Dưa hấu"
+    },
+    {
+      "id": 205,
+      "dishId": 68,
+      "ingredientId": 59,
+      "grossWeightG": 80.0,
+      "netWeightG": 60.0,
+      "note": "Quýt đường"
+    },
+    {
+      "id": 206,
+      "dishId": 69,
+      "ingredientId": 60,
+      "grossWeightG": 85.0,
+      "netWeightG": 60.0,
+      "note": "Dưa lưới"
+    },
+    {
+      "id": 207,
+      "dishId": 70,
+      "ingredientId": 61,
+      "grossWeightG": 80.0,
+      "netWeightG": 60.0,
+      "note": "Dưa lê"
+    },
+    {
+      "id": 208,
+      "dishId": 71,
+      "ingredientId": 62,
+      "grossWeightG": 65.0,
+      "netWeightG": 50.0,
+      "note": "Chuối cau"
+    },
+    {
+      "id": 209,
+      "dishId": 72,
+      "ingredientId": 63,
+      "grossWeightG": 60.0,
+      "netWeightG": 50.0,
+      "note": "Hồng giòn"
+    },
+    {
+      "id": 210,
+      "dishId": 73,
+      "ingredientId": 64,
+      "grossWeightG": 62.0,
+      "netWeightG": 50.0,
+      "note": "Hồng xiêm"
+    },
+    {
+      "id": 211,
+      "dishId": 74,
+      "ingredientId": 8,
+      "grossWeightG": 60.0,
+      "netWeightG": 60.0,
+      "note": "Bún tươi"
+    },
+    {
+      "id": 212,
+      "dishId": 74,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc băm"
+    },
+    {
+      "id": 213,
+      "dishId": 74,
+      "ingredientId": 92,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Trứng cút"
+    },
+    {
+      "id": 214,
+      "dishId": 74,
+      "ingredientId": 39,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 215,
+      "dishId": 75,
+      "ingredientId": 1,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 216,
+      "dishId": 75,
+      "ingredientId": 71,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt bò băm"
+    },
+    {
+      "id": 217,
+      "dishId": 75,
+      "ingredientId": 35,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Bí đỏ"
+    },
+    {
+      "id": 218,
+      "dishId": 76,
+      "ingredientId": 9,
+      "grossWeightG": 50.0,
+      "netWeightG": 50.0,
+      "note": "Hủ tiếu"
+    },
+    {
+      "id": 219,
+      "dishId": 76,
+      "ingredientId": 86,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Mực"
+    },
+    {
+      "id": 220,
+      "dishId": 76,
+      "ingredientId": 74,
+      "grossWeightG": 11.0,
+      "netWeightG": 10.0,
+      "note": "Tim heo"
+    },
+    {
+      "id": 221,
+      "dishId": 76,
+      "ingredientId": 73,
+      "grossWeightG": 11.0,
+      "netWeightG": 10.0,
+      "note": "Gan heo"
+    },
+    {
+      "id": 222,
+      "dishId": 76,
+      "ingredientId": 84,
+      "grossWeightG": 15.0,
+      "netWeightG": 10.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 223,
+      "dishId": 76,
+      "ingredientId": 50,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cần tây"
+    },
+    {
+      "id": 224,
+      "dishId": 77,
+      "ingredientId": 75,
+      "grossWeightG": 16.0,
+      "netWeightG": 15.0,
+      "note": "Óc heo"
+    },
+    {
+      "id": 225,
+      "dishId": 77,
+      "ingredientId": 72,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Thịt gà xé"
+    },
+    {
+      "id": 226,
+      "dishId": 77,
+      "ingredientId": 92,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Trứng cút"
+    },
+    {
+      "id": 227,
+      "dishId": 77,
+      "ingredientId": 14,
+      "grossWeightG": 20.0,
+      "netWeightG": 12.0,
+      "note": "Ngô ngọt"
+    },
+    {
+      "id": 228,
+      "dishId": 77,
+      "ingredientId": 6,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Bột năng"
+    },
+    {
+      "id": 229,
+      "dishId": 78,
+      "ingredientId": 4,
+      "grossWeightG": 35.0,
+      "netWeightG": 35.0,
+      "note": "Bột mì"
+    },
+    {
+      "id": 230,
+      "dishId": 78,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 231,
+      "dishId": 78,
+      "ingredientId": 92,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Trứng cút"
+    },
+    {
+      "id": 232,
+      "dishId": 79,
+      "ingredientId": 11,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Miến dong"
+    },
+    {
+      "id": 233,
+      "dishId": 79,
+      "ingredientId": 72,
+      "grossWeightG": 25.0,
+      "netWeightG": 20.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 234,
+      "dishId": 79,
+      "ingredientId": 85,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 235,
+      "dishId": 79,
+      "ingredientId": 50,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cần tây"
+    },
+    {
+      "id": 236,
+      "dishId": 80,
+      "ingredientId": 12,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Nui"
+    },
+    {
+      "id": 237,
+      "dishId": 80,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 238,
+      "dishId": 80,
+      "ingredientId": 84,
+      "grossWeightG": 15.0,
+      "netWeightG": 10.0,
+      "note": "Tôm thẻ"
+    },
+    {
+      "id": 239,
+      "dishId": 80,
+      "ingredientId": 39,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 240,
+      "dishId": 81,
+      "ingredientId": 10,
+      "grossWeightG": 60.0,
+      "netWeightG": 60.0,
+      "note": "Bánh canh"
+    },
+    {
+      "id": 241,
+      "dishId": 81,
+      "ingredientId": 79,
+      "grossWeightG": 25.0,
+      "netWeightG": 20.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 242,
+      "dishId": 81,
+      "ingredientId": 85,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 243,
+      "dishId": 82,
+      "ingredientId": 7,
+      "grossWeightG": 60.0,
+      "netWeightG": 60.0,
+      "note": "Bánh phở"
+    },
+    {
+      "id": 244,
+      "dishId": 82,
+      "ingredientId": 71,
+      "grossWeightG": 28.0,
+      "netWeightG": 25.0,
+      "note": "Thịt bò bắp"
+    },
+    {
+      "id": 245,
+      "dishId": 82,
+      "ingredientId": 106,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Hành ngò"
+    },
+    {
+      "id": 246,
+      "dishId": 83,
+      "ingredientId": 13,
+      "grossWeightG": 40.0,
+      "netWeightG": 40.0,
+      "note": "Mì trứng"
+    },
+    {
+      "id": 247,
+      "dishId": 83,
+      "ingredientId": 72,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 248,
+      "dishId": 83,
+      "ingredientId": 24,
+      "grossWeightG": 10.0,
+      "netWeightG": 10.0,
+      "note": "Hạt sen"
+    },
+    {
+      "id": 249,
+      "dishId": 84,
+      "ingredientId": 1,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 250,
+      "dishId": 84,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 251,
+      "dishId": 84,
+      "ingredientId": 31,
+      "grossWeightG": 24.0,
+      "netWeightG": 20.0,
+      "note": "Cải bó xôi"
+    },
+    {
+      "id": 252,
+      "dishId": 84,
+      "ingredientId": 39,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 253,
+      "dishId": 85,
+      "ingredientId": 8,
+      "grossWeightG": 60.0,
+      "netWeightG": 60.0,
+      "note": "Bún tươi"
+    },
+    {
+      "id": 254,
+      "dishId": 85,
+      "ingredientId": 71,
+      "grossWeightG": 28.0,
+      "netWeightG": 25.0,
+      "note": "Thịt bò"
+    },
+    {
+      "id": 255,
+      "dishId": 85,
+      "ingredientId": 104,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Sả thơm"
+    },
+    {
+      "id": 256,
+      "dishId": 86,
+      "ingredientId": 8,
+      "grossWeightG": 60.0,
+      "netWeightG": 60.0,
+      "note": "Bún tươi"
+    },
+    {
+      "id": 257,
+      "dishId": 86,
+      "ingredientId": 79,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Cá lóc"
+    },
+    {
+      "id": 258,
+      "dishId": 86,
+      "ingredientId": 28,
+      "grossWeightG": 30.0,
+      "netWeightG": 25.0,
+      "note": "Rau muống non"
+    },
+    {
+      "id": 259,
+      "dishId": 87,
+      "ingredientId": 8,
+      "grossWeightG": 60.0,
+      "netWeightG": 60.0,
+      "note": "Bún tươi"
+    },
+    {
+      "id": 260,
+      "dishId": 87,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc mọc"
+    },
+    {
+      "id": 261,
+      "dishId": 87,
+      "ingredientId": 69,
+      "grossWeightG": 28.0,
+      "netWeightG": 20.0,
+      "note": "Sườn heo"
+    },
+    {
+      "id": 262,
+      "dishId": 87,
+      "ingredientId": 85,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Tôm khô"
+    },
+    {
+      "id": 263,
+      "dishId": 88,
+      "ingredientId": 1,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 264,
+      "dishId": 88,
+      "ingredientId": 80,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Cá hồi"
+    },
+    {
+      "id": 265,
+      "dishId": 88,
+      "ingredientId": 95,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Phô mai"
+    },
+    {
+      "id": 266,
+      "dishId": 88,
+      "ingredientId": 39,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 267,
+      "dishId": 89,
+      "ingredientId": 1,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 268,
+      "dishId": 89,
+      "ingredientId": 72,
+      "grossWeightG": 25.0,
+      "netWeightG": 20.0,
+      "note": "Thịt gà"
+    },
+    {
+      "id": 269,
+      "dishId": 89,
+      "ingredientId": 46,
+      "grossWeightG": 18.0,
+      "netWeightG": 15.0,
+      "note": "Nấm rơm"
+    },
+    {
+      "id": 270,
+      "dishId": 89,
+      "ingredientId": 39,
+      "grossWeightG": 12.0,
+      "netWeightG": 10.0,
+      "note": "Cà rốt"
+    },
+    {
+      "id": 271,
+      "dishId": 90,
+      "ingredientId": 1,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 272,
+      "dishId": 90,
+      "ingredientId": 67,
+      "grossWeightG": 18.0,
+      "netWeightG": 16.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 273,
+      "dishId": 90,
+      "ingredientId": 88,
+      "grossWeightG": 60.0,
+      "netWeightG": 15.0,
+      "note": "Nghêu thịt"
+    },
+    {
+      "id": 274,
+      "dishId": 91,
+      "ingredientId": 1,
+      "grossWeightG": 20.0,
+      "netWeightG": 20.0,
+      "note": "Gạo tẻ"
+    },
+    {
+      "id": 275,
+      "dishId": 91,
+      "ingredientId": 21,
+      "grossWeightG": 10.0,
+      "netWeightG": 10.0,
+      "note": "Đậu xanh"
+    },
+    {
+      "id": 276,
+      "dishId": 91,
+      "ingredientId": 67,
+      "grossWeightG": 22.0,
+      "netWeightG": 20.0,
+      "note": "Thịt nạc"
+    },
+    {
+      "id": 277,
+      "dishId": 92,
+      "ingredientId": 4,
+      "grossWeightG": 25.0,
+      "netWeightG": 25.0,
+      "note": "Bột mì"
+    },
+    {
+      "id": 278,
+      "dishId": 92,
+      "ingredientId": 90,
+      "grossWeightG": 20.0,
+      "netWeightG": 20.0,
+      "note": "Trứng gà"
+    },
+    {
+      "id": 279,
+      "dishId": 92,
+      "ingredientId": 78,
+      "grossWeightG": 10.0,
+      "netWeightG": 10.0,
+      "note": "Chà bông"
+    },
+    {
+      "id": 280,
+      "dishId": 93,
+      "ingredientId": 93,
+      "grossWeightG": 150.0,
+      "netWeightG": 150.0,
+      "note": "Sữa tươi"
+    },
+    {
+      "id": 281,
+      "dishId": 94,
+      "ingredientId": 94,
+      "grossWeightG": 100.0,
+      "netWeightG": 100.0,
+      "note": "Sữa chua"
+    },
+    {
+      "id": 282,
+      "dishId": 95,
+      "ingredientId": 108,
+      "grossWeightG": 120.0,
+      "netWeightG": 120.0,
+      "note": "Nước cam"
+    },
+    {
+      "id": 283,
+      "dishId": 95,
+      "ingredientId": 96,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 284,
+      "dishId": 96,
+      "ingredientId": 109,
+      "grossWeightG": 150.0,
+      "netWeightG": 150.0,
+      "note": "Sữa đậu nành"
+    },
+    {
+      "id": 285,
+      "dishId": 96,
+      "ingredientId": 96,
+      "grossWeightG": 5.0,
+      "netWeightG": 5.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 286,
+      "dishId": 97,
+      "ingredientId": 25,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Hạt chia"
+    },
+    {
+      "id": 287,
+      "dishId": 97,
+      "ingredientId": 96,
+      "grossWeightG": 8.0,
+      "netWeightG": 8.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 288,
+      "dishId": 98,
+      "ingredientId": 36,
+      "grossWeightG": 50.0,
+      "netWeightG": 40.0,
+      "note": "Bí đao"
+    },
+    {
+      "id": 289,
+      "dishId": 98,
+      "ingredientId": 25,
+      "grossWeightG": 3.0,
+      "netWeightG": 3.0,
+      "note": "Hạt chia"
+    },
+    {
+      "id": 290,
+      "dishId": 98,
+      "ingredientId": 96,
+      "grossWeightG": 8.0,
+      "netWeightG": 8.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 291,
+      "dishId": 99,
+      "ingredientId": 22,
+      "grossWeightG": 15.0,
+      "netWeightG": 15.0,
+      "note": "Đậu đen"
+    },
+    {
+      "id": 292,
+      "dishId": 99,
+      "ingredientId": 96,
+      "grossWeightG": 8.0,
+      "netWeightG": 8.0,
+      "note": "Đường phèn"
+    },
+    {
+      "id": 293,
+      "dishId": 100,
+      "ingredientId": 110,
+      "grossWeightG": 120.0,
+      "netWeightG": 120.0,
+      "note": "Nước mía"
+    }
+  ]
+}

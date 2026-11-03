@@ -331,6 +331,9 @@ export class GrowthService {
       zscore.haz = growth.haz;
       zscore.baz = growth.baz;
       zscore.classification = growth.classification;
+      zscore.wazStandardId = growth.wazStandardId;
+      zscore.hazStandardId = growth.hazStandardId;
+      zscore.bazStandardId = growth.bazStandardId;
       await this.zscoreRepo.save(zscore);
     } else {
       zscore = this.zscoreRepo.create({
@@ -339,6 +342,9 @@ export class GrowthService {
         haz: growth.haz,
         baz: growth.baz,
         classification: growth.classification,
+        wazStandardId: growth.wazStandardId,
+        hazStandardId: growth.hazStandardId,
+        bazStandardId: growth.bazStandardId,
       });
       await this.zscoreRepo.save(zscore);
     }
@@ -382,6 +388,9 @@ export class GrowthService {
       zscore.haz = growth.haz;
       zscore.baz = growth.baz;
       zscore.classification = growth.classification;
+      zscore.wazStandardId = growth.wazStandardId;
+      zscore.hazStandardId = growth.hazStandardId;
+      zscore.bazStandardId = growth.bazStandardId;
       await this.zscoreRepo.save(zscore);
       record.zscore = zscore;
     }

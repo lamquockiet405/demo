@@ -23,14 +23,14 @@ const DEFAULT_FORM: Partial<NutritionIntakeStandard> = {
   lipidRatioMax: 35,
   carbohydrateRatioMin: 52,
   carbohydrateRatioMax: 60,
-  fiberGMin: 10,
-  fiberGMax: 15,
-  calciumMgMin: 350,
-  ironAbsorptionRate: '10%',
-  ironMgMin: 4.8,
-  zincAbsorptionLevel: 'MEDIUM',
-  zincMgMin: 3.3,
-  vitaminARaeMcgMin: 250,
+  fiberGMin: null,
+  fiberGMax: null,
+  calciumMgMin: null,
+  ironAbsorptionRate: null,
+  ironMgMin: null,
+  zincAbsorptionLevel: null,
+  zincMgMin: null,
+  vitaminARaeMcgMin: null,
   isActive: true,
   note: '',
 };
@@ -68,6 +68,7 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
     }
     if ((form.energyKcalMin ?? 0) > (form.energyKcalMax ?? 0)) {
       setErrorMessage('Năng lượng tối thiểu không được lớn hơn năng lượng tối đa');
+      return;
     }
 
     try {
@@ -275,6 +276,7 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
             </div>
           </div>
 
+          <p className="text-xs text-slate-500">Để trống chỉ tiêu chưa có nguồn định mức. Không tự điền số 0 hoặc dùng giá trị mặc định.</p>
           {/* Phụ lục 2 & 3: Chất xơ (g) & Canxi (mg) */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-1">
@@ -283,15 +285,15 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
                 <input
                   type="number"
                   placeholder="Min"
-                  value={form.fiberGMin ?? 10}
-                  onChange={(e) => setForm((prev) => ({ ...prev, fiberGMin: parseFloat(e.target.value) || 0 }))}
+                  value={form.fiberGMin ?? ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, fiberGMin: e.target.value === '' ? null : Number(e.target.value) }))}
                   className="w-1/2 px-2 py-1 text-xs border border-emerald-300 rounded bg-white text-center"
                 />
                 <input
                   type="number"
                   placeholder="Max"
-                  value={form.fiberGMax ?? 15}
-                  onChange={(e) => setForm((prev) => ({ ...prev, fiberGMax: parseFloat(e.target.value) || 0 }))}
+                  value={form.fiberGMax ?? ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, fiberGMax: e.target.value === '' ? null : Number(e.target.value) }))}
                   className="w-1/2 px-2 py-1 text-xs border border-emerald-300 rounded bg-white text-center"
                 />
               </div>
@@ -302,10 +304,10 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
               <input
                 type="number"
                 placeholder="Canxi tối thiểu (mg)"
-                value={form.calciumMgMin ?? 350}
-                onChange={(e) => setForm((prev) => ({ ...prev, calciumMgMin: parseFloat(e.target.value) || 0 }))}
+                value={form.calciumMgMin ?? ''}
+                onChange={(e) => setForm((prev) => ({ ...prev, calciumMgMin: e.target.value === '' ? null : Number(e.target.value) }))}
                 className="w-full px-2.5 py-1 text-xs border border-blue-300 rounded bg-white"
-                required
+
               />
             </div>
           </div>
@@ -316,20 +318,21 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
               <span className="text-[11px] font-bold text-rose-900 block">🥩 Phụ lục 4: Sắt (mg)</span>
               <div className="flex gap-1.5 items-center">
                 <select
-                  value={form.ironAbsorptionRate}
-                  onChange={(e) => setForm((prev) => ({ ...prev, ironAbsorptionRate: e.target.value }))}
+                  value={form.ironAbsorptionRate ?? ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, ironAbsorptionRate: e.target.value || null }))}
                   className="w-1/2 px-1.5 py-1 text-[11px] border border-rose-300 rounded bg-white"
                 >
+                  <option value="">Chưa xác định</option>
                   <option value="10%">Hấp thu 10%</option>
                   <option value="15%">Hấp thu 15%</option>
                 </select>
                 <input
                   type="number"
                   step="0.1"
-                  value={form.ironMgMin ?? 4.8}
-                  onChange={(e) => setForm((prev) => ({ ...prev, ironMgMin: parseFloat(e.target.value) || 0 }))}
+                  value={form.ironMgMin ?? ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, ironMgMin: e.target.value === '' ? null : Number(e.target.value) }))}
                   className="w-1/2 px-2 py-1 text-xs border border-rose-300 rounded bg-white text-center"
-                  required
+
                 />
               </div>
             </div>
@@ -338,10 +341,11 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
               <span className="text-[11px] font-bold text-indigo-900 block">🛡️ Phụ lục 5: Kẽm (mg)</span>
               <div className="flex gap-1.5 items-center">
                 <select
-                  value={form.zincAbsorptionLevel}
-                  onChange={(e) => setForm((prev) => ({ ...prev, zincAbsorptionLevel: e.target.value }))}
+                  value={form.zincAbsorptionLevel ?? ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, zincAbsorptionLevel: e.target.value || null }))}
                   className="w-1/2 px-1.5 py-1 text-[11px] border border-indigo-300 rounded bg-white"
                 >
+                  <option value="">Chưa xác định</option>
                   <option value="MEDIUM">Vừa 30%</option>
                   <option value="GOOD">Tốt 50%</option>
                   <option value="POOR">Kém 15%</option>
@@ -349,10 +353,10 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
                 <input
                   type="number"
                   step="0.1"
-                  value={form.zincMgMin ?? 3.3}
-                  onChange={(e) => setForm((prev) => ({ ...prev, zincMgMin: parseFloat(e.target.value) || 0 }))}
+                  value={form.zincMgMin ?? ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, zincMgMin: e.target.value === '' ? null : Number(e.target.value) }))}
                   className="w-1/2 px-2 py-1 text-xs border border-indigo-300 rounded bg-white text-center"
-                  required
+
                 />
               </div>
             </div>
@@ -363,10 +367,10 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
             <span className="text-[11px] font-bold text-teal-900 block">🥕 Phụ lục 6: Vitamin A RAE (µg)</span>
             <input
               type="number"
-              value={form.vitaminARaeMcgMin ?? 250}
-              onChange={(e) => setForm((prev) => ({ ...prev, vitaminARaeMcgMin: parseFloat(e.target.value) || 0 }))}
+              value={form.vitaminARaeMcgMin ?? ''}
+              onChange={(e) => setForm((prev) => ({ ...prev, vitaminARaeMcgMin: e.target.value === '' ? null : Number(e.target.value) }))}
               className="w-full px-2.5 py-1 text-xs border border-teal-300 rounded bg-white"
-              required
+
             />
           </div>
 

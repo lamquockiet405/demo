@@ -2,6 +2,8 @@
 -- KidMeal — PostgreSQL Schema DDL (Simplified BIGSERIAL)
 -- Standards: Circular 28/2016/TT-BGDĐT, Decision 1246/QĐ-BYT, WHO Child Growth
 -- Target RDBMS: PostgreSQL 16
+-- Base DDL: final optional references are added by migrations/20261103-relational-integrity.sql
+-- after seed/source catalog initialization (included in Docker and the source import script).
 -- ============================================================================
 
 BEGIN;
@@ -185,6 +187,7 @@ CREATE TABLE food_ingredients (
     vitamin_c_mg        NUMERIC(8,2) NOT NULL DEFAULT 0,
     refuse_rate_percent NUMERIC(5,2) NOT NULL DEFAULT 0
                             CHECK (refuse_rate_percent >= 0 AND refuse_rate_percent <= 100),
+    source_metadata     JSONB,
     status              VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
                             CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
@@ -211,6 +214,8 @@ CREATE TABLE dishes (
     name                    VARCHAR(150) NOT NULL,
     description             TEXT,
     standard_serving_size_g NUMERIC(8,2) NOT NULL DEFAULT 100,
+    source_metadata         JSONB,
+    nutrition_verified      BOOLEAN NOT NULL DEFAULT TRUE,
     status                  VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
                                 CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
@@ -227,6 +232,7 @@ CREATE TABLE dish_recipes (
     gross_weight_g NUMERIC(8,2) NOT NULL DEFAULT 0,
     net_weight_g   NUMERIC(8,2) NOT NULL DEFAULT 0,
     note          TEXT,
+    source_metadata JSONB,
     CONSTRAINT uq_dish_recipes_dish_ingredient UNIQUE (dish_id, ingredient_id)
 );
 
@@ -243,7 +249,8 @@ CREATE TABLE dish_nutrition (
     fiber_g     NUMERIC(8,2) NOT NULL DEFAULT 0,
     calcium_mg  NUMERIC(8,2) NOT NULL DEFAULT 0,
     iron_mg     NUMERIC(8,2) NOT NULL DEFAULT 0,
-    zinc_mg     NUMERIC(8,2) NOT NULL DEFAULT 0
+    zinc_mg     NUMERIC(8,2) NOT NULL DEFAULT 0,
+    source_metadata JSONB
 );
 
 -- dish_allergens: Liên kết món ăn với các chất gây dị ứng (SEAFOOD, EGG, MILK, SOY, PEANUT...)
@@ -341,6 +348,10 @@ CREATE TABLE menus (
     violations_snapshot JSONB DEFAULT '[]'::jsonb,
     approved_by     BIGINT REFERENCES users(id) ON DELETE SET NULL,
     approved_at     TIMESTAMPTZ,
+    approval_notes  TEXT,
+    rejection_reason TEXT,
+    rejected_at     TIMESTAMPTZ,
+    published_at    TIMESTAMPTZ,
     CONSTRAINT chk_menus_dates CHECK (week_end_date >= week_start_date)
 );
 
@@ -918,12 +929,12 @@ CREATE TABLE IF NOT EXISTS nutrition_intake_standards (
     carbohydrate_ratio_max  NUMERIC(5,2) NOT NULL DEFAULT 60.0,
     fiber_g_min             NUMERIC(6,2),
     fiber_g_max             NUMERIC(6,2),
-    calcium_mg_min          NUMERIC(8,2) NOT NULL,
+    calcium_mg_min          NUMERIC(8,2), -- NULL when the source does not specify the requirement
     iron_absorption_rate    VARCHAR(10) DEFAULT '10%',
-    iron_mg_min             NUMERIC(6,2) NOT NULL,
+    iron_mg_min             NUMERIC(6,2),
     zinc_absorption_level   VARCHAR(10) DEFAULT 'MEDIUM',
-    zinc_mg_min             NUMERIC(6,2) NOT NULL,
-    vitamin_a_rae_mcg_min   NUMERIC(8,2) NOT NULL,
+    zinc_mg_min             NUMERIC(6,2),
+    vitamin_a_rae_mcg_min   NUMERIC(8,2),
     is_active               BOOLEAN NOT NULL DEFAULT TRUE,
     note                    TEXT,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

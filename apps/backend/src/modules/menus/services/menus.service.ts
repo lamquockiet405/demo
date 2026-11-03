@@ -8,6 +8,7 @@ import { MenuMeal } from '../entities/menu-meal.entity';
 import { MenuDish } from '../entities/menu-dish.entity';
 import { MenuCycle } from '../entities/menu-cycle.entity';
 import { Dish } from '../../dishes/entities/dish.entity';
+import { getPortionNutrition, hasVerifiedNutrition } from '../../dishes/nutrition.util';
 import { NutritionalStandard } from '../entities/nutritional-standard.entity';
 import { MenuRuleViolation } from '../entities/menu-rule-violation.entity';
 import { QueryMenuDto } from '../dto/query-menu.dto';
@@ -85,7 +86,11 @@ export class MenusService implements OnModuleInit {
         ADD COLUMN IF NOT EXISTS commitment_text TEXT,
         ADD COLUMN IF NOT EXISTS commitment_items JSONB DEFAULT '[]'::jsonb,
         ADD COLUMN IF NOT EXISTS override_justification TEXT,
-        ADD COLUMN IF NOT EXISTS violations_snapshot JSONB DEFAULT '[]'::jsonb;
+        ADD COLUMN IF NOT EXISTS violations_snapshot JSONB DEFAULT '[]'::jsonb,
+        ADD COLUMN IF NOT EXISTS approval_notes TEXT,
+        ADD COLUMN IF NOT EXISTS rejection_reason TEXT,
+        ADD COLUMN IF NOT EXISTS rejected_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ;
 
         CREATE INDEX IF NOT EXISTS idx_menus_submitted_by ON menus(submitted_by);
         CREATE INDEX IF NOT EXISTS idx_menus_submitted_at ON menus(submitted_at);
@@ -133,8 +138,18 @@ export class MenusService implements OnModuleInit {
       qb.andWhere('LOWER(m.title) LIKE :s', { s: `%${query.search.toLowerCase()}%` });
     }
 
-    if (query.status && query.status !== 'ALL') {
-      qb.andWhere('m.status = :status', { status: query.status });
+    if (query.status === 'ALL_SUBMITTED') {
+      qb.andWhere('m.status IN (:...submittedStatuses)', {
+        submittedStatuses: ['PENDING', 'SUBMITTED_FOR_REVIEW', 'APPROVED', 'ACTIVE', 'PUBLISHED', 'REJECTED'],
+      });
+    } else if (query.status && query.status !== 'ALL') {
+      if (query.status === 'SUBMITTED_FOR_REVIEW' || query.status === 'PENDING') {
+        qb.andWhere('m.status IN (:...pendingStatuses)', { pendingStatuses: ['PENDING', 'SUBMITTED_FOR_REVIEW'] });
+      } else if (query.status === 'ACTIVE' || query.status === 'PUBLISHED') {
+        qb.andWhere('m.status IN (:...activeStatuses)', { activeStatuses: ['ACTIVE', 'PUBLISHED'] });
+      } else {
+        qb.andWhere('m.status = :status', { status: query.status });
+      }
     }
 
     const ageGroup = query.ageGroup || query.targetAgeGroup;
@@ -156,23 +171,26 @@ export class MenusService implements OnModuleInit {
 
     // Tính toán dinh dưỡng thực tế 100% từ cơ sở dữ liệu dish_nutrition
     const menuIds = items.map((m) => m.id);
-    const nutritionMap: Record<number, { cal: number; prot: number; fat: number; carb: number }> = {};
+    const nutritionMap: Record<number, { cal: number; prot: number; fat: number; carb: number; available: boolean }> = {};
 
     if (menuIds.length > 0) {
       try {
         const nutRows = await this.menuRepo.query(
           `SELECT 
              mv.menu_id,
-             ROUND(COALESCE(SUM(dn.energy_kcal) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_cal,
-             ROUND(COALESCE(SUM(dn.protein_g) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_prot,
-             ROUND(COALESCE(SUM(dn.fat_g) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_fat,
-             ROUND(COALESCE(SUM(dn.carb_g) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_carb
+             ROUND(COALESCE(SUM(dn.energy_kcal * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_cal,
+             ROUND(COALESCE(SUM(dn.protein_g * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_prot,
+             ROUND(COALESCE(SUM(dn.fat_g * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_fat,
+             ROUND(COALESCE(SUM(dn.carb_g * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_carb,
+             COUNT(mdi.id) > 0 AND COUNT(dn.dish_id) = COUNT(mdi.id) AS available
            FROM menu_versions mv
            JOIN menu_days md ON md.menu_version_id = mv.id
-           JOIN menu_meals mm ON mm.menu_day_id = md.id
-           JOIN menu_dishes mdi ON mdi.menu_meal_id = mm.id
-           JOIN dish_nutrition dn ON dn.dish_id = mdi.dish_id
+           LEFT JOIN menu_meals mm ON mm.menu_day_id = md.id
+           LEFT JOIN menu_dishes mdi ON mdi.menu_meal_id = mm.id
+           LEFT JOIN dishes d ON d.id = mdi.dish_id
+           LEFT JOIN dish_nutrition dn ON dn.dish_id = mdi.dish_id AND d.nutrition_verified = TRUE
            WHERE mv.menu_id = ANY($1)
+             AND mv.version_number = (SELECT MAX(latest.version_number) FROM menu_versions latest WHERE latest.menu_id = mv.menu_id)
            GROUP BY mv.menu_id`,
           [menuIds],
         );
@@ -182,6 +200,7 @@ export class MenusService implements OnModuleInit {
             prot: Number(row.avg_prot) || 0,
             fat: Number(row.avg_fat) || 0,
             carb: Number(row.avg_carb) || 0,
+            available: row.available === true,
           };
         }
       } catch (err: any) {
@@ -190,7 +209,7 @@ export class MenusService implements OnModuleInit {
     }
 
     const mapped = items.map((m) => {
-      const nut = nutritionMap[m.id] || { cal: 0, prot: 0, fat: 0, carb: 0 };
+      const nut = nutritionMap[m.id] || { cal: 0, prot: 0, fat: 0, carb: 0, available: false };
       return {
         id: String(m.id),
         tenantId: '1',
@@ -210,6 +229,12 @@ export class MenusService implements OnModuleInit {
         submittedBy: m.submittedBy ? String(m.submittedBy) : null,
         submittedByName: m.submitter?.fullName || (m.submittedBy ? 'Chuyên viên Dinh dưỡng' : null),
         submittedAt: m.submittedAt ? m.submittedAt.toISOString() : null,
+        createdAt: m.submittedAt ? m.submittedAt.toISOString() : null,
+        updatedAt: m.approvedAt ? m.approvedAt.toISOString() : (m.submittedAt ? m.submittedAt.toISOString() : null),
+        approvalNotes: m.approvalNotes || null,
+        rejectionReason: m.rejectionReason || null,
+        rejectedAt: m.rejectedAt ? m.rejectedAt.toISOString() : null,
+        publishedAt: m.publishedAt ? m.publishedAt.toISOString() : null,
         commitmentSigned: m.commitmentSigned ?? false,
         commitmentText: m.commitmentText || null,
         commitmentItems: m.commitmentItems || [],
@@ -221,6 +246,7 @@ export class MenusService implements OnModuleInit {
         dailyAverageProteinG: nut.prot,
         dailyAverageFatG: nut.fat,
         dailyAverageCarbG: nut.carb,
+        nutritionAvailable: nut.available,
       };
     });
 
@@ -230,16 +256,17 @@ export class MenusService implements OnModuleInit {
   async getStatistics() {
     const total = await this.menuRepo.count();
     const approved = await this.menuRepo.count({ where: { status: 'APPROVED' } });
-    const pending = await this.menuRepo.count({ where: { status: 'SUBMITTED_FOR_REVIEW' } });
+    const pending = await this.menuRepo.count({ where: [{ status: 'SUBMITTED_FOR_REVIEW' }, { status: 'PENDING' }] });
     const draft = await this.menuRepo.count({ where: { status: 'DRAFT' } });
-    const active = await this.menuRepo.count({ where: { status: 'ACTIVE' } });
+    const active = await this.menuRepo.count({ where: [{ status: 'ACTIVE' }, { status: 'PUBLISHED' }] });
     const published = await this.menuRepo.count({ where: { status: 'PUBLISHED' } });
 
     let realAvgCalories = 0;
     try {
       const avgRows = await this.menuRepo.query(
-        `SELECT ROUND(COALESCE(AVG(dn.energy_kcal), 0), 1) as avg_cal
+        `SELECT ROUND(COALESCE(AVG(dn.energy_kcal * COALESCE(md.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)), 0), 1) as avg_cal
          FROM menu_dishes md
+         JOIN dishes d ON d.id = md.dish_id AND d.nutrition_verified = TRUE
          JOIN dish_nutrition dn ON dn.dish_id = md.dish_id`
       );
       realAvgCalories = Number(avgRows?.[0]?.avg_cal) || 0;
@@ -266,6 +293,7 @@ export class MenusService implements OnModuleInit {
 
   async getAvailableDishes() {
     const dishes = await this.dishRepo.find({
+      where: { status: 'ACTIVE' },
       relations: ['category', 'nutrition'],
       order: { name: 'ASC' },
     });
@@ -275,10 +303,8 @@ export class MenusService implements OnModuleInit {
       name: d.name,
       categoryCode: d.category?.code || 'MAIN',
       categoryName: d.category?.name || 'MÃ³n Äƒn',
-      energyKcal: d.nutrition?.energyKcal || 0,
-      proteinG: d.nutrition?.proteinG || 0,
-      fatG: d.nutrition?.fatG || 0,
-      carbG: d.nutrition?.carbG || 0,
+      nutritionAvailable: hasVerifiedNutrition(d),
+      ...getPortionNutrition(d),
     }));
   }
 
@@ -322,10 +348,8 @@ export class MenusService implements OnModuleInit {
       const frontendDayOfWeek = d.dayOfWeek >= 2 && d.dayOfWeek <= 6 ? d.dayOfWeek - 1 : d.dayOfWeek;
       for (const m of (d.meals || [])) {
         for (const md of (m.dishes || [])) {
-          const cal = Number(md.dish?.nutrition?.energyKcal) || 0;
-          const prot = Number(md.dish?.nutrition?.proteinG) || 0;
-          const fat = Number(md.dish?.nutrition?.fatG) || 0;
-          const carb = Number(md.dish?.nutrition?.carbG) || 0;
+          const nutrients = getPortionNutrition(md.dish, md.portionSizeG);
+          const { energyKcal: cal, proteinG: prot, fatG: fat, carbG: carb } = nutrients;
 
           totalMenuCalories += cal;
           totalMenuProtein += prot;
@@ -340,7 +364,8 @@ export class MenusService implements OnModuleInit {
             dayOfWeek: frontendDayOfWeek,
             mealTime: m.mealType,
             servingOrder: md.displayOrder || 1,
-            portionSizeG: md.portionSizeG || 100,
+            portionSizeG: md.portionSizeG ?? md.dish?.standardServingSizeG ?? 100,
+            nutritionAvailable: hasVerifiedNutrition(md.dish),
             plannedCalories: cal,
             specialDietNotes: md.specialDietNotes || null,
             dish: {
@@ -348,11 +373,12 @@ export class MenusService implements OnModuleInit {
               name: md.dish?.name || 'Món ăn',
               dishType: md.dish?.category?.code || 'MAIN',
               targetAgeGroup: menu.ageGroup,
-              standardServingSizeG: md.portionSizeG || 100,
-              totalCalories: cal,
-              totalProteinG: prot,
-              totalFatG: fat,
-              totalCarbG: carb,
+              standardServingSizeG: md.dish?.standardServingSizeG ?? 100,
+              nutritionAvailable: hasVerifiedNutrition(md.dish),
+              totalCalories: getPortionNutrition(md.dish).energyKcal,
+              totalProteinG: getPortionNutrition(md.dish).proteinG,
+              totalFatG: getPortionNutrition(md.dish).fatG,
+              totalCarbG: getPortionNutrition(md.dish).carbG,
               isActive: true,
             },
           });
@@ -382,6 +408,10 @@ export class MenusService implements OnModuleInit {
       submittedBy: menu.submittedBy ? String(menu.submittedBy) : null,
       submittedByName: menu.submitter?.fullName || (menu.submittedBy ? 'Chuyên viên Dinh dưỡng' : null),
       submittedAt: menu.submittedAt ? menu.submittedAt.toISOString() : null,
+      approvalNotes: menu.approvalNotes || null,
+      rejectionReason: menu.rejectionReason || null,
+      rejectedAt: menu.rejectedAt ? menu.rejectedAt.toISOString() : null,
+      publishedAt: menu.publishedAt ? menu.publishedAt.toISOString() : null,
       commitmentSigned: menu.commitmentSigned ?? false,
       commitmentText: menu.commitmentText || null,
       commitmentItems: menu.commitmentItems || [],
@@ -393,6 +423,7 @@ export class MenusService implements OnModuleInit {
       dailyAverageProteinG: avgProt,
       dailyAverageFatG: avgFat,
       dailyAverageCarbG: avgCarb,
+      nutritionAvailable: menuDishes.length > 0 && menuDishes.every((item) => item.nutritionAvailable),
       menuDishes,
       days: days.map((d) => ({
         id: String(d.id),
@@ -408,10 +439,8 @@ export class MenusService implements OnModuleInit {
             categoryCode: md.dish?.category?.code || 'MAIN',
             categoryName: md.dish?.category?.name || 'Món ăn',
             portionSizeG: md.portionSizeG,
-            energyKcal: md.dish?.nutrition?.energyKcal || 0,
-            proteinG: md.dish?.nutrition?.proteinG || 0,
-            fatG: md.dish?.nutrition?.fatG || 0,
-            carbG: md.dish?.nutrition?.carbG || 0,
+            nutritionAvailable: hasVerifiedNutrition(md.dish),
+            ...getPortionNutrition(md.dish, md.portionSizeG),
           })),
         })),
       })),
@@ -456,7 +485,7 @@ export class MenusService implements OnModuleInit {
 
     // 1. Tải danh sách dị ứng học sinh từ database
     const studentAllergiesRaw = await this.menuDishRepo.manager.query(`
-      SELECT s.id as student_id, s.full_name, c.name as class_name, a.name as allergen_name, a.code as allergen_code, sa.severity
+      SELECT s.id as student_id, s.full_name, c.id as class_id, c.name as class_name, a.name as allergen_name, a.code as allergen_code, sa.severity
       FROM student_allergies sa
       JOIN students s ON sa.student_id = s.id
       JOIN allergens a ON sa.allergen_id = a.id
@@ -507,8 +536,8 @@ export class MenusService implements OnModuleInit {
             conflictId: `cfl-${cflCounter++}`,
             childId: String(sa.student_id),
             childName: sa.full_name,
-            classId: String(sa.class_id || 1),
-            className: sa.class_name || 'Lớp Mầm 1',
+            classId: sa.class_id ? String(sa.class_id) : null,
+            className: sa.class_name || 'Chưa có lớp',
             allergenDetected: sa.allergen_name,
             allergenCode: sa.allergen_code || 'ALLERGEN',
             severity: sa.severity === 'HIGH' ? 'SEVERE' : (sa.severity === 'MEDIUM' ? 'WARNING' : 'MILD'),
@@ -520,39 +549,13 @@ export class MenusService implements OnModuleInit {
             dayOfWeek: md.dayOfWeek,
             mealTime: md.mealTime,
             portionSizeG: md.portionSizeG || 100,
-            plannedCalories: md.plannedCalories || 100,
+            plannedCalories: md.plannedCalories,
             substituteDishId: null,
             currentSubstituteDishName: null,
-            problematicIngredients: [
-              {
-                foodId: 'f-1',
-                foodName: sa.allergen_name,
-                netWeightPerPortionG: 20,
-                allergens: [sa.allergen_code || 'ALLERGEN'],
-              },
-            ],
-            suggestedIngredientSubstitutions: [
-              {
-                originalIngredient: sa.allergen_name,
-                substituteIngredient: 'Thịt heo nạc / Thịt gà nạc băm',
-                suggestedGram: 25,
-                nutritionNote: 'Đảm bảo giữ nguyên lượng đạm an toàn cho trẻ',
-                preparationAdvice: 'Nấu riêng phần ăn không có dị nguyên cho bé',
-              },
-            ],
-            suggestedSubstituteDishes: [
-              {
-                dishId: '10',
-                dishName: 'Thịt heo rim nước dừa / Canh thịt bằm',
-                dishType: md.dish?.dishType || 'MAIN',
-                standardServingSizeG: 100,
-                totalCalories: 95,
-                totalProteinG: 6.5,
-                totalFatG: 3.2,
-                totalCarbG: 4.0,
-                ingredientsSummary: 'Thịt nạc, rau củ tươi, không có dị nguyên',
-              },
-            ],
+            // Source menus do not provide verified recipes or substitutions.
+            problematicIngredients: [],
+            suggestedIngredientSubstitutions: [],
+            suggestedSubstituteDishes: [],
           });
         }
       }
@@ -616,10 +619,10 @@ export class MenusService implements OnModuleInit {
       },
       allergyConflicts,
       bmiSummary: {
-        totalEvaluated: bmiStudentsRaw.length || 14,
+        totalEvaluated: bmiStudentsRaw.length,
         overweightObeseCount: overweightChildren.length,
         wastedUnderweightCount: wastedChildren.length,
-        normalCount: Math.max(0, (bmiStudentsRaw.length || 14) - overweightChildren.length - wastedChildren.length),
+        normalCount: Math.max(0, bmiStudentsRaw.length - overweightChildren.length - wastedChildren.length),
       },
       bmiRecommendations: {
         overweightGroup: {
@@ -629,16 +632,7 @@ export class MenusService implements OnModuleInit {
           clinicalStrategy: 'Giảm 10–15% tinh bột & chất béo bão hòa, hạn chế món chiên xào mặn, tăng rau củ theo Thông tư 28',
           portionAdvice: 'Khuyến khích ăn nhiều canh rau trước, giảm cơm & nước ngọt',
           children: overweightChildren,
-          recommendedSubstituteDishes: [
-            {
-              dishId: '50',
-              dishName: 'Thịt heo luộc chấm sốt cà chua / Canh rau củ thanh đạm',
-              totalCalories: 85,
-              totalProteinG: 7.2,
-              totalFatG: 2.1,
-              reason: 'Giảm 35% chất béo so với món chiên rán, thanh nhẹ dễ tiêu hóa',
-            },
-          ],
+          recommendedSubstituteDishes: [],
         },
         wastedGroup: {
           label: 'Nhóm Còi xương & Suy dinh dưỡng',
@@ -647,27 +641,19 @@ export class MenusService implements OnModuleInit {
           clinicalStrategy: 'Tăng cường chất đạm sinh học cao, bổ sung dầu oliu/dầu gấc, tăng 15–20% khẩu phần theo QĐ 1246 & TT 28',
           portionAdvice: 'Chia nhỏ bữa ăn, khuyến khích uống thêm sữa và món xế bổ dưỡng',
           children: wastedChildren,
-          recommendedSubstituteDishes: [
-            {
-              dishId: '51',
-              dishName: 'Cháo sườn non hầm hạt sen phô mai / Súp thịt bò trứng cút',
-              totalCalories: 155,
-              totalProteinG: 9.8,
-              totalFatG: 5.5,
-              reason: 'Giàu đạm & năng lượng cao, bổ sung vi chất kẽm, canxi và sắt',
-            },
-          ],
+          recommendedSubstituteDishes: [],
         },
       },
     };
   }
 
-    async create(dto: CreateMenuDto, userId?: number) {
+    async create(dto: CreateMenuDto, userId?: number, nutritionalStandardId?: number) {
     const menu = this.menuRepo.create({
       title: dto.title,
       weekStartDate: dto.weekStartDate,
       weekEndDate: dto.weekEndDate,
       ageGroup: dto.ageGroup,
+      nutritionalStandardId: nutritionalStandardId ?? null,
       cycleId: dto.cycleId || null,
       status: dto.status || 'DRAFT',
       createdBy: userId || 3,
@@ -930,10 +916,19 @@ export class MenusService implements OnModuleInit {
 
   async approveMenu(id: number, approverId: number, notes?: string) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n');
+    if (!menu) throw new NotFoundException('Không tìm thấy thực đơn');
+
+    // Chỉ thực đơn đang PENDING hoặc SUBMITTED_FOR_REVIEW mới được phê duyệt
+    if (menu.status !== 'PENDING' && menu.status !== 'SUBMITTED_FOR_REVIEW') {
+      throw new BadRequestException(
+        `Chỉ thực đơn đang "Chờ BGH duyệt" mới có thể phê duyệt. Trạng thái hiện tại: ${menu.status}`
+      );
+    }
+
     menu.status = 'APPROVED';
     menu.approvedBy = approverId || 1;
     menu.approvedAt = new Date();
+    menu.approvalNotes = notes || null;
     await this.menuRepo.save(menu);
 
     this.auditLogsService?.logAction({
@@ -958,8 +953,18 @@ export class MenusService implements OnModuleInit {
 
   async rejectMenu(id: number, approverId: number, reason: string) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n');
+    if (!menu) throw new NotFoundException('Không tìm thấy thực đơn');
+
+    // Chỉ thực đơn đang PENDING hoặc SUBMITTED_FOR_REVIEW mới được từ chối
+    if (menu.status !== 'PENDING' && menu.status !== 'SUBMITTED_FOR_REVIEW') {
+      throw new BadRequestException(
+        `Chỉ thực đơn đang "Chờ BGH duyệt" mới có thể từ chối. Trạng thái hiện tại: ${menu.status}`
+      );
+    }
+
     menu.status = 'REJECTED';
+    menu.rejectionReason = reason;
+    menu.rejectedAt = new Date();
     await this.menuRepo.save(menu);
 
     this.auditLogsService?.logAction({
@@ -978,9 +983,36 @@ export class MenusService implements OnModuleInit {
 
   async publishMenu(id: number) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n');
+    if (!menu) throw new NotFoundException('Không tìm thấy thực đơn');
+
+    // Chỉ thực đơn đã APPROVED mới được công bố toàn trường
+    if (menu.status !== 'APPROVED') {
+      throw new BadRequestException(
+        `Chỉ thực đơn "Đã duyệt" mới có thể công bố toàn trường. Trạng thái hiện tại: ${menu.status}`
+      );
+    }
+
     menu.status = 'PUBLISHED';
+    menu.publishedAt = new Date();
     await this.menuRepo.save(menu);
+
+    this.auditLogsService?.logAction({
+      tenantId: 1,
+      userId: 1,
+      userName: 'Ban Giám Hiệu',
+      userRole: 'PRINCIPAL',
+      action: 'PUBLISH_MENU',
+      targetEntity: 'MENU',
+      targetId: String(id),
+      ipAddress: '127.0.0.1',
+      details: {
+        menuId: id,
+        title: menu.title,
+        status: 'PUBLISHED',
+        publishedAt: menu.publishedAt,
+      },
+    }).catch(() => {});
+
     return this.findOne(id);
   }
 
@@ -1079,6 +1111,7 @@ export class MenusService implements OnModuleInit {
     };
 
     for (const d of allDishes) {
+      if (!hasVerifiedNutrition(d) || Number(d.nutrition.energyKcal) <= 0) continue;
       const code = d.category?.code || 'MAIN';
       const entry: DishWithNutrition = {
         id: d.id,
@@ -1094,6 +1127,10 @@ export class MenusService implements OnModuleInit {
       if (dishPool[code]) {
         dishPool[code].push(entry);
       }
+    }
+
+    if (Object.values(dishPool).every((pool) => pool.length === 0)) {
+      throw new BadRequestException('Chưa có món ăn có công thức định lượng được xác nhận để tự động lập thực đơn.');
     }
 
     // ── Step 3: Quét chu kỳ 4 tuần qua menu_cycles & lịch sử thực đơn ────────
@@ -1136,8 +1173,8 @@ export class MenusService implements OnModuleInit {
       try {
         const customRules = await this.freqRuleRepo.find({
           where: [
-            { targetType: 'DISH_CATEGORY', ageGroup, isActive: true },
-            { targetType: 'DISH_CATEGORY', ageGroup: 'ALL', isActive: true },
+            { targetType: 'DISH_CATEGORY', ageGroup, isActive: true, periodType: 'PER_CYCLE_4_WEEKS' },
+            { targetType: 'DISH_CATEGORY', ageGroup: 'ALL', isActive: true, periodType: 'PER_CYCLE_4_WEEKS' },
           ],
         });
         for (const cr of customRules) {
@@ -1530,6 +1567,7 @@ export class MenusService implements OnModuleInit {
         cycleId: activeCycle?.id ? Number(activeCycle.id) : (dto.cycleWeekNumber ? Number(dto.cycleWeekNumber) : undefined),
       },
       userId,
+      standard?.id ? Number(standard.id) : undefined,
     );
 
     const version = await this.versionRepo.findOne({

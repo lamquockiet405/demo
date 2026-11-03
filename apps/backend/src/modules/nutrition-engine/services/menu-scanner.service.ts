@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { NutritionalStandard } from '../entities/nutrition-rule.entity';
 import { NutritionCalculatorService } from './nutrition-calculator.service';
 import { Dish } from '../../dishes/entities/dish.entity';
 import { EvaluateMenuDto } from '../dto/evaluate-menu.dto';
+import { MenuVersion } from '../../menus/entities/menu-version.entity';
+import { getPortionNutrition, hasVerifiedNutrition } from '../../dishes/nutrition.util';
 
 export interface ViolationItem {
   ruleCode: string;
@@ -23,10 +25,44 @@ export class MenuScannerService {
     @InjectRepository(Dish)
     private readonly dishRepo: Repository<Dish>,
     private readonly calculator: NutritionCalculatorService,
+    @InjectRepository(MenuVersion)
+    private readonly versionRepo: Repository<MenuVersion>,
   ) {}
 
   async evaluateMenu(dto: EvaluateMenuDto) {
-    const ageGroup = dto.ageGroup || dto.targetAgeGroup || 'MAU_GIAO';
+    let ageGroup = dto.ageGroup || dto.targetAgeGroup || 'MAU_GIAO';
+    let dayCount = 1;
+    let menuTitle = '';
+    const selections: Array<{ dish: Dish; portionSizeG?: number }> = [];
+
+    if (dto.dishes !== undefined) {
+      const loaded = dto.dishes.length ? await this.dishRepo.find({
+        where: { id: In(dto.dishes.map((item) => item.dishId)) }, relations: ['nutrition'],
+      }) : [];
+      for (const item of dto.dishes) {
+        const dish = loaded.find((candidate) => Number(candidate.id) === Number(item.dishId));
+        if (!dish) throw new NotFoundException(`Không tìm thấy món ăn ${item.dishId}`);
+        selections.push({ dish, portionSizeG: item.portionSizeG });
+      }
+    } else if (dto.menuId) {
+      const version = await this.versionRepo.findOne({
+        where: { menuId: dto.menuId }, order: { versionNumber: 'DESC' },
+        relations: ['menu', 'days', 'days.meals', 'days.meals.dishes', 'days.meals.dishes.dish', 'days.meals.dishes.dish.nutrition'],
+      });
+      if (!version) throw new NotFoundException('Không tìm thấy phiên bản thực đơn');
+      ageGroup = version.menu.ageGroup;
+      menuTitle = version.menu.title;
+      const days = (version.days || []).filter((day) => !dto.targetDate || day.date === dto.targetDate);
+      if (dto.targetDate && !days.length) throw new NotFoundException('Ngày đánh giá không thuộc thực đơn');
+      dayCount = Math.max(days.length, 1);
+      for (const day of days) for (const meal of day.meals || []) for (const item of meal.dishes || []) {
+        selections.push({ dish: item.dish, portionSizeG: item.portionSizeG });
+      }
+    }
+    const missing = selections.filter(({ dish }) => !hasVerifiedNutrition(dish));
+    if (missing.length) {
+      throw new BadRequestException(`Chưa có công thức định lượng được xác nhận: ${[...new Set(missing.map(({ dish }) => dish?.name || 'Món ăn'))].join(', ')}`);
+    }
 
     const standard = await this.standardRepo.findOne({
       where: [
@@ -36,35 +72,18 @@ export class MenuScannerService {
       ],
     });
 
-    const dishIds = dto.dishes?.map((d) => d.dishId) || [];
-    let dishes: Dish[] = [];
-
-    if (dishIds.length > 0) {
-      dishes = await this.dishRepo.find({
-        where: { id: In(dishIds) },
-        relations: ['nutrition', 'recipes', 'recipes.ingredient'],
-      });
-    } else {
-      // Default: fetch up to 6 available dishes to evaluate current day/week meal
-      dishes = await this.dishRepo.find({
-        take: 6,
-        relations: ['nutrition', 'recipes', 'recipes.ingredient'],
-      });
-    }
-
-    const dishesNutrition = dishes.map((d) => ({
-      energyKcal: Number(d.nutrition?.energyKcal) || 120,
-      proteinG: Number(d.nutrition?.proteinG) || 6,
-      fatG: Number(d.nutrition?.fatG) || 5,
-      carbG: Number(d.nutrition?.carbG) || 18,
-      fiberG: Number(d.nutrition?.fiberG) || 1.5,
-      calciumMg: Number(d.nutrition?.calciumMg) || 60,
-      ironMg: Number(d.nutrition?.ironMg) || 0.8,
-      zincMg: Number(d.nutrition?.zincMg) || 0.6,
-    }));
+    const dishesNutrition = selections.map(({ dish, portionSizeG }) => {
+      const nutrients = getPortionNutrition(dish, portionSizeG);
+      // Weekly evaluation compares the daily average with daily standards.
+      return Object.fromEntries(Object.entries(nutrients).map(([key, value]) => [key, value / dayCount])) as typeof nutrients;
+    });
 
     const summary = this.calculator.calculateMacros(dishesNutrition);
     const violations: ViolationItem[] = [];
+    if (!selections.length) violations.push({
+      ruleCode: 'NO_DISHES', ruleName: 'Chưa có món ăn', severity: 'ERROR',
+      message: 'Chọn thực đơn hoặc món ăn cần đánh giá.',
+    });
 
     const minEnergy = standard ? standard.minEnergyKcal : (ageGroup === 'MAU_GIAO' ? 615 : 600);
     const maxEnergy = standard ? standard.maxEnergyKcal : (ageGroup === 'MAU_GIAO' ? 738 : 651);
@@ -152,27 +171,27 @@ export class MenuScannerService {
     }));
 
     return {
-      menuId: String(dto.menuId || 1),
-      menuTitle: `Thực đơn tuần ${ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo'} bán trú`,
+      menuId: dto.menuId ? String(dto.menuId) : null,
+      menuTitle: menuTitle || `Thực đơn ${ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo'} bán trú`,
       targetAgeGroup: ageGroup,
       appliedRuleName: `Thông tư 28/2016/TT-BGDĐT (${ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo'})`,
       complianceScore,
       overallStatus,
       summaryNutrition: {
-        totalEnergyKcal: Math.round(summary.energyKcal || 685),
-        totalProteinG: Number((summary.proteinG || 24).toFixed(1)),
-        totalLipidG: Number((summary.fatG || 22).toFixed(1)),
-        totalGlucidG: Number((summary.carbG || 88).toFixed(1)),
-        proteinCalories: Math.round((summary.proteinG || 24) * 4),
-        lipidCalories: Math.round((summary.fatG || 22) * 9),
-        glucidCalories: Math.round((summary.carbG || 88) * 4),
-        proteinRatioPercent: Math.round(summary.proteinPct || 15),
-        lipidRatioPercent: Math.round(summary.fatPct || 30),
-        glucidRatioPercent: Math.round(summary.carbPct || 55),
-        calciumMg: Math.round(summary.calciumMg || 310),
-        ironMg: Number((summary.ironMg || 3.8).toFixed(1)),
-        zincMg: Number((summary.zincMg || 2.7).toFixed(1)),
-        caPRatio: 1.25,
+        totalEnergyKcal: Math.round(summary.energyKcal),
+        totalProteinG: summary.proteinG,
+        totalLipidG: summary.fatG,
+        totalGlucidG: summary.carbG,
+        proteinCalories: Math.round(summary.proteinG * 4),
+        lipidCalories: Math.round(summary.fatG * 9),
+        glucidCalories: Math.round(summary.carbG * 4),
+        proteinRatioPercent: summary.proteinPct,
+        lipidRatioPercent: summary.fatPct,
+        glucidRatioPercent: summary.carbPct,
+        calciumMg: summary.calciumMg,
+        ironMg: summary.ironMg,
+        zincMg: summary.zincMg,
+        caPRatio: null,
       },
       standardReference: {
         minEnergyKcal: minEnergy,

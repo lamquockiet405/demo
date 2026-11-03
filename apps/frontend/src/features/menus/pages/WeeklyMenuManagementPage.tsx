@@ -707,7 +707,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
             )}
 
             {/* Nút CẬP NHẬT & GỬI LẠI DUYỆT cho Chuyên gia Dinh dưỡng khi thực đơn đang SUBMITTED_FOR_REVIEW */}
-            {selectedMenu && selectedMenu.status === 'SUBMITTED_FOR_REVIEW' && !isPrincipal && (
+            {selectedMenu && (selectedMenu.status === 'SUBMITTED_FOR_REVIEW' || selectedMenu.status === 'PENDING') && !isPrincipal && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleSubmitForReview}
@@ -726,7 +726,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
             )}
 
             {/* Nút XIN PHÉP HIỆU TRƯỞNG CHỈNH SỬA (Dành cho CV Dinh dưỡng khi menu đã APPROVED hoặc ACTIVE) */}
-            {selectedMenu && (selectedMenu.status === 'APPROVED' || selectedMenu.status === 'ACTIVE') && !isPrincipal && (
+            {selectedMenu && (selectedMenu.status === 'APPROVED' || selectedMenu.status === 'ACTIVE' || selectedMenu.status === 'PUBLISHED') && !isPrincipal && (
               <>
                 {selectedMenu.editRequestStatus === 'PENDING' ? (
                   <div className="flex items-center gap-2">
@@ -758,7 +758,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
             )}
 
             {/* Nút cho HIỆU TRƯỞNG khi CV Dinh dưỡng gửi Yêu cầu xin phép chỉnh sửa thực đơn */}
-            {selectedMenu && (selectedMenu.status === 'APPROVED' || selectedMenu.status === 'ACTIVE') && isPrincipal && selectedMenu.editRequestStatus === 'PENDING' && (
+            {selectedMenu && (selectedMenu.status === 'APPROVED' || selectedMenu.status === 'ACTIVE' || selectedMenu.status === 'PUBLISHED') && isPrincipal && selectedMenu.editRequestStatus === 'PENDING' && (
               <button
                 onClick={() => setIsRespondEditModalOpen(true)}
                 className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-purple-600 hover:from-amber-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition animate-pulse cursor-pointer"
@@ -786,7 +786,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
             )}
 
             {/* Nút Duyệt / Từ chối (CHỈ DÀNH CHO HIỆU TRƯỞNG / BGH khi SUBMITTED_FOR_REVIEW) */}
-            {selectedMenu && selectedMenu.status === 'SUBMITTED_FOR_REVIEW' && isPrincipal && (
+            {selectedMenu && (selectedMenu.status === 'SUBMITTED_FOR_REVIEW' || selectedMenu.status === 'PENDING') && isPrincipal && (
               <button
                 onClick={() => setIsApprovalModalOpen(true)}
                 className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
@@ -817,7 +817,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
             )}
 
             {/* Badge ĐÃ KHÓA & CÔNG BỐ TOÀN TRƯỜNG */}
-            {selectedMenu && selectedMenu.status === 'ACTIVE' && (
+            {selectedMenu && (selectedMenu.status === 'ACTIVE' || selectedMenu.status === 'PUBLISHED') && (
               <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                 <Lock className="w-4 h-4 text-emerald-700" />
                 <span>Đã khóa & Công bố toàn trường</span>
@@ -870,7 +870,7 @@ export const WeeklyMenuManagementPage: React.FC<WeeklyMenuManagementPageProps> =
           onAdjustDish={handleAdjustDish}
           readOnly={
             isPrincipal ||
-            selectedMenu?.status === 'ACTIVE' ||
+            selectedMenu?.status === 'ACTIVE' || selectedMenu?.status === 'PUBLISHED' ||
             selectedMenu?.status === 'APPROVED' ||
             showDeleted
           }

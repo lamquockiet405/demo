@@ -8,6 +8,11 @@ import {
 import { BigIntTransformer } from '../../../database/base.entity';
 import { NumericTransformer } from '../../foods/entities/food.entity';
 
+export const NullableIntakeNumericTransformer = {
+  to: NumericTransformer.to,
+  from: (value?: string | number | null): number | null => value == null ? null : Number(value),
+};
+
 @Entity('nutrition_intake_standards')
 export class NutritionIntakeStandard {
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -55,39 +60,42 @@ export class NutritionIntakeStandard {
   carbohydrateRatioMax: number;
 
   // Phụ lục 2: Chất xơ (g/ngày)
-  @Column({ name: 'fiber_g_min', type: 'numeric', precision: 6, scale: 2, nullable: true, transformer: NumericTransformer })
+  @Column({ name: 'fiber_g_min', type: 'numeric', precision: 6, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
   fiberGMin: number | null;
 
-  @Column({ name: 'fiber_g_max', type: 'numeric', precision: 6, scale: 2, nullable: true, transformer: NumericTransformer })
+  @Column({ name: 'fiber_g_max', type: 'numeric', precision: 6, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
   fiberGMax: number | null;
 
   // Phụ lục 3: Canxi (mg/ngày)
-  @Column({ name: 'calcium_mg_min', type: 'numeric', precision: 8, scale: 2, transformer: NumericTransformer })
-  calciumMgMin: number;
+  @Column({ name: 'calcium_mg_min', type: 'numeric', precision: 8, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
+  calciumMgMin: number | null;
 
   // Phụ lục 4: Sắt (mg/ngày) theo mức hấp thu
-  @Column({ name: 'iron_absorption_rate', length: 10, default: '10%' })
-  ironAbsorptionRate: string; // '10%', '15%'
+  @Column({ name: 'iron_absorption_rate', length: 10, nullable: true, default: '10%' })
+  ironAbsorptionRate: string | null; // '10%', '15%'
 
-  @Column({ name: 'iron_mg_min', type: 'numeric', precision: 6, scale: 2, transformer: NumericTransformer })
-  ironMgMin: number;
+  @Column({ name: 'iron_mg_min', type: 'numeric', precision: 6, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
+  ironMgMin: number | null;
 
   // Phụ lục 5: Kẽm (mg/ngày) theo 3 mức hấp thu sinh học
-  @Column({ name: 'zinc_absorption_level', length: 10, default: 'MEDIUM' })
-  zincAbsorptionLevel: string; // 'POOR', 'MEDIUM', 'GOOD'
+  @Column({ name: 'zinc_absorption_level', length: 10, nullable: true, default: 'MEDIUM' })
+  zincAbsorptionLevel: string | null; // 'POOR', 'MEDIUM', 'GOOD'
 
-  @Column({ name: 'zinc_mg_min', type: 'numeric', precision: 6, scale: 2, transformer: NumericTransformer })
-  zincMgMin: number;
+  @Column({ name: 'zinc_mg_min', type: 'numeric', precision: 6, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
+  zincMgMin: number | null;
 
   // Phụ lục 6: Vitamin A (µg RAE/ngày)
-  @Column({ name: 'vitamin_a_rae_mcg_min', type: 'numeric', precision: 8, scale: 2, transformer: NumericTransformer })
-  vitaminARaeMcgMin: number;
+  @Column({ name: 'vitamin_a_rae_mcg_min', type: 'numeric', precision: 8, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
+  vitaminARaeMcgMin: number | null;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
   @Column({ type: 'text', nullable: true })
   note: string | null;
+
+  @Column({ name: 'source_metadata', type: 'jsonb', nullable: true })
+  sourceMetadata: Record<string, unknown> | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

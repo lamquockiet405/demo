@@ -158,7 +158,7 @@ export class MenusController {
   }
 
   @Post(':id/publish')
-  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'NUTRITIONIST')
+  @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Công bố thực đơn tuần cho phụ huynh & giáo viên' })
   async publishMenu(@Param('id', ParseIntPipe) id: number) {
     return this.menusService.publishMenu(id);

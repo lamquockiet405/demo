@@ -46,3 +46,12 @@ tmp/
 .DS_Store
 Thumbs.db
 
+
+.docker-test/
+database/backups/
+docs/database-snapshot/
+*-test-results*.json
+*-test-results.json
+api-test-results*.json
+unit-test-results*.json
+TEST-REPORT.md

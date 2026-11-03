@@ -146,6 +146,15 @@ export class WhoZscoreService {
     ageInMonths: number,
     value: number,
   ): Promise<number> {
+    return (await this.calculateZscoreWithReference(indicator, gender, ageInMonths, value)).value;
+  }
+
+  private async calculateZscoreWithReference(
+    indicator: 'WAZ' | 'HAZ' | 'BAZ',
+    gender: 'MALE' | 'FEMALE',
+    ageInMonths: number,
+    value: number,
+  ): Promise<{ value: number; standardId: number | null }> {
     const clampedAge = Math.min(Math.max(ageInMonths, 0), 84);
     const standard = await this.standardRepo.findOne({
       where: { indicator, gender, ageInMonths: clampedAge },
@@ -167,7 +176,10 @@ export class WhoZscoreService {
       S = lms.S;
     }
 
-    return computeLmsZscore(value, L, M, S);
+    return {
+      value: computeLmsZscore(value, L, M, S),
+      standardId: standard && Number(standard.mValue) > 0 && Number(standard.sValue) > 0 ? Number(standard.id) : null,
+    };
   }
 
   classifyStatus(waz: number, haz: number, baz: number, bmi?: number): string {
@@ -199,9 +211,12 @@ export class WhoZscoreService {
     const heightM = heightCm / 100;
     const bmi = heightM > 0 ? Math.round((weightKg / (heightM * heightM)) * 100) / 100 : 0;
 
-    const waz = await this.calculateZscore('WAZ', gender, ageInMonths, weightKg);
-    const haz = await this.calculateZscore('HAZ', gender, ageInMonths, heightCm);
-    const baz = await this.calculateZscore('BAZ', gender, ageInMonths, bmi);
+    const wazResult = await this.calculateZscoreWithReference('WAZ', gender, ageInMonths, weightKg);
+    const hazResult = await this.calculateZscoreWithReference('HAZ', gender, ageInMonths, heightCm);
+    const bazResult = await this.calculateZscoreWithReference('BAZ', gender, ageInMonths, bmi);
+    const waz = wazResult.value;
+    const haz = hazResult.value;
+    const baz = bazResult.value;
 
     const classification = this.classifyStatus(waz, haz, baz, bmi);
 
@@ -212,6 +227,9 @@ export class WhoZscoreService {
       haz,
       baz,
       classification,
+      wazStandardId: wazResult.standardId,
+      hazStandardId: hazResult.standardId,
+      bazStandardId: bazResult.standardId,
     };
   }
 }

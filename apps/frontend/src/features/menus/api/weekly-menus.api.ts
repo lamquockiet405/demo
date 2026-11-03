@@ -1,6 +1,7 @@
 import { apiClient } from '../../../core/api/axios';
 
 export interface DishItem {
+  nutritionAvailable?: boolean;
   id: string;
   name: string;
   dishType: string;
@@ -38,6 +39,7 @@ export interface DishItem {
 }
 
 export interface MenuDishItem {
+  nutritionAvailable?: boolean;
   id: string;
   tenantId: string;
   menuId: string;
@@ -55,6 +57,7 @@ export interface MenuDishItem {
 }
 
 export interface WeeklyMenu {
+  nutritionAvailable?: boolean;
   id: string;
   tenantId: string;
   title: string;
@@ -63,12 +66,14 @@ export interface WeeklyMenu {
   startDate: string;
   endDate: string;
   cycleWeekNumber: number;
-  status: 'DRAFT' | 'SUBMITTED_FOR_REVIEW' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'ARCHIVED';
+  status: 'DRAFT' | 'SUBMITTED_FOR_REVIEW' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'PUBLISHED' | 'ARCHIVED';
   createdBy: string;
   approvedBy?: string | null;
   approvedAt?: string | null;
   approvalNotes?: string | null;
   rejectionReason?: string | null;
+  rejectedAt?: string | null;
+  publishedAt?: string | null;
   createdByName?: string | null;
   submittedBy?: string | null;
   submittedByName?: string | null;

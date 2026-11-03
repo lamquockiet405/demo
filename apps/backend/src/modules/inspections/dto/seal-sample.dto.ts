@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsInt, IsNumber, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SealSampleDto {
@@ -6,6 +7,13 @@ export class SealSampleDto {
   @IsNotEmpty()
   @IsString()
   dishName: string;
+
+  @ApiPropertyOptional({ description: 'Món hiện tại; tên món vẫn được lưu làm bản chụp lịch sử' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  dishId?: number;
 
   @ApiProperty({ example: '2025-09-08' })
   @IsNotEmpty()

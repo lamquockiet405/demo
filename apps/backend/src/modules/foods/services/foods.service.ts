@@ -9,6 +9,18 @@ import { GetFoodsQueryDto } from '../dto/get-foods-query.dto';
 
 @Injectable()
 export class FoodsService {
+  private serializeFood(food: Food) {
+    const missing = food.sourceMetadata?.missingNutrients || [];
+    return {
+      ...food,
+      ...Object.fromEntries(missing.map((key: string) => [key, null])),
+      nutritionComplete: missing.length === 0,
+      referenceValues: food.sourceMetadata?.kind === 'LEGACY_UNVERIFIED' ? {
+        energyKcal100g: food.energyKcal100g, proteinG: food.proteinG, fatG: food.fatG, carbG: food.carbG,
+        fiberG: food.fiberG, calciumMg: food.calciumMg, ironMg: food.ironMg, zincMg: food.zincMg,
+      } : null,
+    };
+  }
   constructor(
     @InjectRepository(Food)
     private readonly foodRepo: Repository<Food>,
@@ -126,12 +138,12 @@ export class FoodsService {
       }
 
       return {
-        ...f,
+        ...this.serializeFood(f),
         id: String(f.id),
         code: `NL-${f.id}`,
         categoryId: f.categoryId ? String(f.categoryId) : null,
         categoryName: f.category?.name || 'Khác',
-        energyKcal: Number(f.energyKcal100g || 0),
+        energyKcal: this.serializeFood(f).energyKcal100g,
         allergens: detectedAllergens,
       };
     });
@@ -182,7 +194,7 @@ export class FoodsService {
     }
 
     return {
-      ...food,
+      ...this.serializeFood(food),
       id: String(food.id),
       categoryId: food.categoryId ? String(food.categoryId) : null,
       categoryName: food.category?.name || null,
@@ -229,6 +241,13 @@ export class FoodsService {
     if (dto.zincMg !== undefined) food.zincMg = dto.zincMg;
     if (dto.refuseRatePercent !== undefined) food.refuseRatePercent = dto.refuseRatePercent;
     if (dto.status !== undefined) food.status = dto.status;
+
+    if (food.sourceMetadata?.missingNutrients) {
+      food.sourceMetadata = {
+        ...food.sourceMetadata,
+        missingNutrients: food.sourceMetadata.missingNutrients.filter((key: string) => dto[key] === undefined),
+      };
+    }
 
     await this.foodRepo.save(food);
     return this.findOne(id);

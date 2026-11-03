@@ -361,6 +361,8 @@ export class InspectionsService {
         code: s.sampleCode,
         sampleCode: s.sampleCode,
         dishName: s.dishName,
+        dishId: s.dishId != null ? String(s.dishId) : null,
+        inspectionId: s.inspectionId != null ? String(s.inspectionId) : null,
         date: s.date,
         mealDate: s.date,
         mealSession: s.dishName.toLowerCase().includes('phở') || s.dishName.toLowerCase().includes('bún') ? 'Xế chiều' : 'Trưa chính',
@@ -394,6 +396,8 @@ export class InspectionsService {
       code: s.sampleCode,
       sampleCode: s.sampleCode,
       dishName: s.dishName,
+      dishId: s.dishId != null ? String(s.dishId) : null,
+      inspectionId: s.inspectionId != null ? String(s.inspectionId) : null,
       date: s.date,
       mealDate: s.date,
       storedAt: s.storedAt ? s.storedAt.toISOString() : null,
@@ -434,13 +438,16 @@ export class InspectionsService {
     return { success: true, message: 'Đã hủy mẫu lưu 24h an toàn' };
   }
 
-  /**
-   * Niêm phong mẫu lưu mới vào tủ mát
-   */
-  async sealSample(dto: SealSampleDto) {
+  async sealSample(dto: SealSampleDto, inspectionId?: number) {
+    if (dto.dishId != null) {
+      const matches = await this.sampleRepo.manager.query('SELECT id FROM dishes WHERE id=$1', [dto.dishId]);
+      if (!matches.length) throw new NotFoundException('Không tìm thấy món ăn được chọn');
+    }
     const sampleCode = dto.sampleCode || `HD-LM-${dto.date?.replace(/-/g, '') || '2026'}-${Date.now().toString().slice(-2)}`;
     const sample = this.sampleRepo.create({
       dishName: dto.dishName,
+      dishId: dto.dishId ?? null,
+      inspectionId: inspectionId ?? null,
       date: dto.date,
       sampleCode,
       status: 'STORED',
@@ -461,7 +468,8 @@ export class InspectionsService {
       timestamp: new Date().toISOString(),
     });
 
-    return saved;
+    // Reload columns filled by database triggers (including an unambiguous dish match).
+    return (await this.sampleRepo.findOne({ where: { id: saved.id } })) || saved;
   }
 
   /**
@@ -575,17 +583,19 @@ export class InspectionsService {
         if (d.name || d.dishName) {
           await this.sealSample({
             dishName: d.name || d.dishName,
+            dishId: d.dishId,
             date: mealDate,
             note: `Lưu mẫu 24h từ Biên bản ${sessionCode}`,
-          });
+          }, Number(saved.id));
         }
       }
     } else if (data.dishName) {
       await this.sealSample({
         dishName: data.dishName,
+        dishId: data.dishId,
         date: mealDate,
         note: `Lưu mẫu 24h từ Biên bản ${sessionCode}`,
-      });
+      }, Number(saved.id));
     }
 
     if (data.photoBase64 || data.imageUrl) {

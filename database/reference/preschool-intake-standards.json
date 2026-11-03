@@ -1,0 +1,13 @@
+{
+  "source": {
+    "title": "Chương trình Giáo dục mầm non — Văn bản hợp nhất 01/VBHN-BGDĐT ngày 13/4/2021",
+    "url": "https://congbaocdn.chinhphu.vn/CongBaoCP/CongBao/2021/4/33649/35633-1-565-566.pdf",
+    "gazette": "Công báo số 565 + 566 ngày 28/4/2021",
+    "pages": { "NHA_TRE": 24, "MAU_GIAO": 50 },
+    "scope": "Năng lượng và tỷ lệ các chất sinh năng lượng; không có định mức vi chất trong phần được trích."
+  },
+  "groups": [
+    { "ageGroup": "NHA_TRE", "label": "Nhà trẻ 12–36 tháng", "ageMonthsMin": 12, "ageMonthsMax": 36, "allDay": [930, 1000], "dayboarding": [600, 651], "protein": [13, 20], "lipid": [30, 40], "carbohydrate": [47, 50] },
+    { "ageGroup": "MAU_GIAO", "label": "Mẫu giáo 3–6 tuổi", "ageMonthsMin": 36, "ageMonthsMax": 72, "allDay": [1230, 1320], "dayboarding": [615, 726], "protein": [13, 20], "lipid": [25, 35], "carbohydrate": [52, 60] }
+  ]
+}

@@ -66,6 +66,15 @@ export class GrowthZscore {
   @Column({ length: 30, default: 'NORMAL' })
   classification: string;
 
+  @Column({ name: 'waz_standard_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  wazStandardId: number | null;
+
+  @Column({ name: 'haz_standard_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  hazStandardId: number | null;
+
+  @Column({ name: 'baz_standard_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  bazStandardId: number | null;
+
   @OneToOne(() => GrowthRecord, (m) => m.zscore, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'measurement_id' })
   measurement: Relation<GrowthRecord>;

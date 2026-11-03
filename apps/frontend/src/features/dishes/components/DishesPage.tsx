@@ -54,6 +54,9 @@ interface Dish {
   totalIronMg?: number;
   totalZincMg?: number;
   nutrition?: DishNutrition;
+  nutritionAvailable?: boolean;
+  nutritionStatus?: 'VERIFIED' | 'REFERENCE' | 'MISSING';
+  referenceNutrition?: DishNutrition;
   standardServingSizeG?: number;
   photoUrl?: string;
   isActive: boolean;
@@ -174,14 +177,18 @@ export const DishesPage: React.FC = () => {
   };
 
   const getDishNutrition = (dish: Dish) => {
-    const calories = formatExact(dish.totalCalories ?? dish.nutrition?.energyKcal);
-    const protein = formatExact(dish.totalProteinG ?? dish.nutrition?.proteinG);
-    const fat = formatExact(dish.totalFatG ?? dish.nutrition?.fatG);
-    const carb = formatExact(dish.totalCarbG ?? dish.nutrition?.carbG);
-    const fiber = formatExact(dish.totalFiberG ?? dish.nutrition?.fiberG);
-    const calcium = formatExact(dish.totalCalciumMg ?? dish.nutrition?.calciumMg);
-    const iron = formatExact(dish.totalIronMg ?? dish.nutrition?.ironMg);
-    const zinc = formatExact(dish.totalZincMg ?? dish.nutrition?.zincMg);
+    if (dish.nutritionAvailable === false && !dish.referenceNutrition) {
+      return { calories: '—', protein: '—', fat: '—', carb: '—', fiber: '—', calcium: '—', iron: '—', zinc: '—' };
+    }
+    const nutrition = dish.referenceNutrition || dish.nutrition;
+    const calories = formatExact(dish.totalCalories ?? nutrition?.energyKcal);
+    const protein = formatExact(dish.totalProteinG ?? nutrition?.proteinG);
+    const fat = formatExact(dish.totalFatG ?? nutrition?.fatG);
+    const carb = formatExact(dish.totalCarbG ?? nutrition?.carbG);
+    const fiber = formatExact(dish.totalFiberG ?? nutrition?.fiberG);
+    const calcium = formatExact(dish.totalCalciumMg ?? nutrition?.calciumMg);
+    const iron = formatExact(dish.totalIronMg ?? nutrition?.ironMg);
+    const zinc = formatExact(dish.totalZincMg ?? nutrition?.zincMg);
 
     return { calories, protein, fat, carb, fiber, calcium, iron, zinc };
   };
@@ -575,6 +582,9 @@ export const DishesPage: React.FC = () => {
                       >
                         {dish.name}
                       </h3>
+                      {dish.nutritionAvailable === false && (
+                        <p className="mt-1 text-xs text-amber-700">{dish.nutritionStatus === 'REFERENCE' ? 'Công thức tham khảo — chưa xác minh thực tế' : 'Chưa có công thức định lượng được xác nhận'}</p>
+                      )}
                       <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500 font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         <span>{dish.targetAgeGroup === 'TODDLER_18_36M' ? 'Nhà trẻ (18-36T)' : 'Mẫu giáo (3-6T)'}</span>

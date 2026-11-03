@@ -385,6 +385,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
       };
     }
 
+    if (dayMasterDishes.some((item) => item.nutritionAvailable === false)) {
+      const missing = { ...emptyResult, statusText: 'Chưa đủ định lượng', noteText: 'Cần xác nhận công thức món ăn' };
+      return { master: missing, type1: missing, type2: missing, type3: missing };
+    }
+
     let totalP = 0;
     let totalL = 0;
     let totalG = 0;
@@ -412,18 +417,15 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
     const caloP = totalP * 4;
     const caloL = totalL * 9;
     const caloG = totalG * 4;
-    let totalCalo = Math.round(caloP + caloL + caloG);
-
-    if (totalCalo === 0 && sumCaloPlanned > 0) {
-      totalCalo = Math.round(sumCaloPlanned);
-    }
+    const totalCalo = Math.round(sumCaloPlanned);
 
     // ─────────────────────────────────────────────────────────────
     // 1. THỰC ĐƠN TỔNG (TRẺ BÌNH THƯỜNG • CHUẨN TT 28/2016)
     // ─────────────────────────────────────────────────────────────
-    const pPct = totalCalo > 0 ? Math.round((caloP / totalCalo) * 100) : 0;
-    const lPct = totalCalo > 0 ? Math.round((caloL / totalCalo) * 100) : 0;
-    const gPct = totalCalo > 0 ? Math.max(0, 100 - pPct - lPct) : 0;
+    const macroCalo = caloP + caloL + caloG;
+    const pPct = macroCalo > 0 ? Math.round((caloP / macroCalo) * 100) : 0;
+    const lPct = macroCalo > 0 ? Math.round((caloL / macroCalo) * 100) : 0;
+    const gPct = macroCalo > 0 ? Math.max(0, 100 - pPct - lPct) : 0;
 
     const isToddler = menu?.targetAgeGroup === 'NHA_TRE' || (menu as any)?.ageGroup === 'NHA_TRE';
     const minKcalStandard = isToddler ? 600 : 615;
@@ -552,14 +554,11 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
       const cP = tP * 4;
       const cL = tL * 9;
       const cG = tG * 4;
-      let tCalo = Math.round(cP + cL + cG);
-      if (tCalo === 0 && sumPlannedCalo > 0) {
-        tCalo = Math.round(sumPlannedCalo);
-      }
-
-      const pP = tCalo > 0 ? Math.round((cP / tCalo) * 100) : 0;
-      const lP = tCalo > 0 ? Math.round((cL / tCalo) * 100) : 0;
-      const gP = tCalo > 0 ? Math.max(0, 100 - pP - lP) : 0;
+      const tCalo = Math.round(sumPlannedCalo);
+      const tMacroCalo = cP + cL + cG;
+      const pP = tMacroCalo > 0 ? Math.round((cP / tMacroCalo) * 100) : 0;
+      const lP = tMacroCalo > 0 ? Math.round((cL / tMacroCalo) * 100) : 0;
+      const gP = tMacroCalo > 0 ? Math.max(0, 100 - pP - lP) : 0;
 
       const diffCalo = Math.round(tCalo - totalCalo);
       const diffText = diffCalo > 0 ? `+${diffCalo} Kcal` : `${diffCalo} Kcal`;
@@ -599,9 +598,10 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   const avgP = Number(menu?.dailyAverageProteinG) || (activeNutris.length > 0 ? Math.round((activeNutris.reduce((s, n) => s + n.p, 0) / activeDaysCount) * 10) / 10 : 0);
   const avgL = Number(menu?.dailyAverageFatG) || (activeNutris.length > 0 ? Math.round((activeNutris.reduce((s, n) => s + n.l, 0) / activeDaysCount) * 10) / 10 : 0);
   const avgG = Number(menu?.dailyAverageCarbG) || (activeNutris.length > 0 ? Math.round((activeNutris.reduce((s, n) => s + n.g, 0) / activeDaysCount) * 10) / 10 : 0);
-  const avgPPct = avgCal > 0 ? Math.round((avgP * 4 / avgCal) * 100) : 16;
-  const avgLPct = avgCal > 0 ? Math.round((avgL * 9 / avgCal) * 100) : 30;
-  const avgGPct = Math.max(0, 100 - avgPPct - avgLPct);
+  const macroCalories = avgP * 4 + avgL * 9 + avgG * 4;
+  const avgPPct = macroCalories > 0 ? Math.round((avgP * 4 / macroCalories) * 100) : 0;
+  const avgLPct = macroCalories > 0 ? Math.round((avgL * 9 / macroCalories) * 100) : 0;
+  const avgGPct = macroCalories > 0 ? Math.max(0, 100 - avgPPct - avgLPct) : 0;
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden font-sans">
@@ -643,6 +643,9 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
             Từ ngày {menu?.startDate?.split('T')[0]} đến {menu?.endDate?.split('T')[0]} • Nhóm tuổi:{' '}
             <strong className="text-slate-700">{menu?.targetAgeGroup || 'ALL_AGES'}</strong>
           </p>
+          {menu?.nutritionAvailable === false && (
+            <p className="mt-1 text-xs text-amber-700">Chưa đủ công thức định lượng để tính dinh dưỡng thực đơn.</p>
+          )}
         </div>
 
         {/* Thông số dinh dưỡng tổng quan 4 chỉ số */}

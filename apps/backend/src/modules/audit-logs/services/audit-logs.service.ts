@@ -53,8 +53,8 @@ export class AuditLogsService implements OnModuleInit {
       await this.auditLogRepo.query(`
         CREATE TABLE IF NOT EXISTS audit_logs (
           id BIGSERIAL PRIMARY KEY,
-          school_id BIGINT NOT NULL DEFAULT 1,
-          user_id BIGINT,
+          school_id BIGINT NOT NULL DEFAULT 1 REFERENCES schools(id) ON DELETE RESTRICT,
+          user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
           user_email VARCHAR(255),
           user_name VARCHAR(150),
           user_role VARCHAR(50),

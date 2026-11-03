@@ -423,12 +423,12 @@ export interface NutritionIntakeStandard {
   carbohydrateRatioMax: number;
   fiberGMin?: number | null;
   fiberGMax?: number | null;
-  calciumMgMin: number;
-  ironAbsorptionRate: string;
-  ironMgMin: number;
-  zincAbsorptionLevel: string;
-  zincMgMin: number;
-  vitaminARaeMcgMin: number;
+  calciumMgMin: number | null;
+  ironAbsorptionRate: string | null;
+  ironMgMin: number | null;
+  zincAbsorptionLevel: string | null;
+  zincMgMin: number | null;
+  vitaminARaeMcgMin: number | null;
   isActive: boolean;
   note?: string | null;
   createdAt?: string;

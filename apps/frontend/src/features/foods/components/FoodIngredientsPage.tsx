@@ -30,10 +30,10 @@ interface Food {
   code: string;
   name: string;
   category: string;
-  energyKcal: number;
-  proteinG: number;
-  fatG: number;
-  carbG: number;
+  energyKcal: number | null;
+  proteinG: number | null;
+  fatG: number | null;
+  carbG: number | null;
   calciumMg?: number;
   ironMg?: number;
   zincMg?: number;
@@ -108,10 +108,10 @@ export const FoodIngredientsPage: React.FC = () => {
         code: f.code || `NL-${f.id}`,
         name: f.name || 'Nguyên liệu',
         category: typeof f.category === 'object' && f.category !== null ? (f.category.name || f.category.code || 'Khác') : (f.categoryName || f.category || 'Khác'),
-        energyKcal: Number(f.energyKcal ?? f.energyKcal100g ?? 0),
-        proteinG: Number(f.proteinG ?? 0),
-        fatG: Number(f.fatG ?? 0),
-        carbG: Number(f.carbG ?? 0),
+        energyKcal: f.energyKcal == null && f.energyKcal100g == null ? null : Number(f.energyKcal ?? f.energyKcal100g),
+        proteinG: f.proteinG == null ? null : Number(f.proteinG),
+        fatG: f.fatG == null ? null : Number(f.fatG),
+        carbG: f.carbG == null ? null : Number(f.carbG),
         refuseRatePercent: Number(f.refuseRatePercent ?? f.refuse_rate_percent ?? 0),
         defaultUnit: f.unit || f.defaultUnit || 'g',
         allergens: Array.isArray(f.allergens)
@@ -530,17 +530,17 @@ export const FoodIngredientsPage: React.FC = () => {
                           {getCategoryBadge(food.category)}
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-black text-emerald-800 text-xs">
-                          {Number(food.energyKcal).toFixed(1)}{' '}
+                          {food.energyKcal == null ? '—' : food.energyKcal.toFixed(1)}{' '}
                           <span className="text-[10px] font-normal text-slate-400">kcal</span>
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-bold text-slate-700">
-                          {Number(food.proteinG).toFixed(1)}g
+                          {food.proteinG == null ? '—' : food.proteinG.toFixed(1)}g
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-bold text-slate-700">
-                          {Number(food.fatG).toFixed(1)}g
+                          {food.fatG == null ? '—' : food.fatG.toFixed(1)}g
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-bold text-slate-700">
-                          {Number(food.carbG).toFixed(1)}g
+                          {food.carbG == null ? '—' : food.carbG.toFixed(1)}g
                         </td>
                         <td className="py-3 px-4 text-center whitespace-nowrap">
                           {hasAllergens ? (

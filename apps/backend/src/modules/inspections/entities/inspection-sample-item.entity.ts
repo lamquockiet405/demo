@@ -1,3 +1,4 @@
+import { BigIntTransformer } from '../../../database/base.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -16,6 +17,12 @@ export class InspectionSampleItem {
 
   @Column({ name: 'dish_name', length: 150 })
   dishName: string;
+
+  @Column({ name: 'dish_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  dishId: number | null;
+
+  @Column({ name: 'inspection_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  inspectionId: number | null;
 
   @Column({ name: 'sample_code', length: 50 })
   sampleCode: string;

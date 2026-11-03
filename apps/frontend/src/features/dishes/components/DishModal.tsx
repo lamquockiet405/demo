@@ -168,6 +168,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
   const [saving, setSaving] = useState(false);
   const [foods, setFoods] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [recipeStatus, setRecipeStatus] = useState('MISSING');
   const [foodSearches, setFoodSearches] = useState<Record<number, string>>({}); // search text per row
 
   const [formData, setFormData] = useState({
@@ -187,6 +188,11 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
     const n = Number(val);
     if (isNaN(n)) return '0';
     return String(Math.round(n * 100) / 100);
+  };
+
+  const nutrientValue = (food: any, key: string): number => {
+    const value = key === 'energyKcal100g' ? food?.energyKcal100g ?? food?.energyKcal : food?.[key];
+    return Number(value ?? food?.referenceValues?.[key] ?? 0);
   };
 
   const [nutritionTotals, setNutritionTotals] = useState({
@@ -214,14 +220,14 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       const food = item.food || foods.find(f => String(f.id) === String(item.foodId));
       if (food) {
         const ratio = (Number(item.netWeightPerPortionG) || 0) / 100;
-        calories += (Number(food.energyKcal || food.energyKcal100g) || 0) * ratio;
-        protein += (Number(food.proteinG) || 0) * ratio;
-        fat += (Number(food.fatG) || 0) * ratio;
-        carb += (Number(food.carbG) || 0) * ratio;
-        fiber += (Number(food.fiberG) || 0) * ratio;
-        calcium += (Number(food.calciumMg) || 0) * ratio;
-        iron += (Number(food.ironMg) || 0) * ratio;
-        zinc += (Number(food.zincMg) || 0) * ratio;
+        calories += nutrientValue(food, 'energyKcal100g') * ratio;
+        protein += nutrientValue(food, 'proteinG') * ratio;
+        fat += nutrientValue(food, 'fatG') * ratio;
+        carb += nutrientValue(food, 'carbG') * ratio;
+        fiber += nutrientValue(food, 'fiberG') * ratio;
+        calcium += nutrientValue(food, 'calciumMg') * ratio;
+        iron += nutrientValue(food, 'ironMg') * ratio;
+        zinc += nutrientValue(food, 'zincMg') * ratio;
       }
     });
 
@@ -251,6 +257,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       fetchCategories();
       fetchFoods();
       if (mode === 'create') {
+        setRecipeStatus('MISSING');
         setFormData({
           name: '',
           categoryId: '',
@@ -290,6 +297,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       setLoading(true);
       const res = await apiClient.get(`/dishes/${dishId}`);
       const data = res.data;
+      setRecipeStatus(data.nutritionStatus || 'MISSING');
 
       const items =
         data.recipeItems && data.recipeItems.length > 0
@@ -438,6 +446,9 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
             <h2 className="text-lg font-bold text-slate-800">
               {mode === 'view' ? 'Chi tiết món ăn' : mode === 'edit' ? 'Chỉnh sửa món ăn & Công thức' : 'Thêm mới món ăn'}
             </h2>
+            {recipeStatus === 'REFERENCE' && (
+              <p className="mt-1 text-xs text-amber-700">Định lượng và dinh dưỡng tham khảo từ công thức cũ; chưa xác minh thực tế.</p>
+            )}
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
             <X className="w-5 h-5" />
@@ -638,10 +649,10 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                                 </div>
                               )}
                             </td>
-                            <td className="px-2 py-2 text-center text-slate-500 font-semibold">{food ? formatExact((Number(food.energyKcal || food.energyKcal100g) || 0) * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.proteinG) || 0) * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.fatG) || 0) * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.carbG) || 0) * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500 font-semibold">{food ? formatExact(nutrientValue(food, 'energyKcal100g') * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact(nutrientValue(food, 'proteinG') * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact(nutrientValue(food, 'fatG') * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact(nutrientValue(food, 'carbG') * ratio) : '-'}</td>
                             <td className="px-2 py-2 text-center">
                                {food?.allergens?.length > 0 ? (
                                  <span className="text-[9px] bg-red-50 text-red-600 border border-red-100 px-1 py-0.5 rounded">Có</span>

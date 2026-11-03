@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -7,6 +7,14 @@ export class GetDishesQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  dishType?: string;
+
+  @IsOptional()
+  @IsBooleanString()
+  isActive?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

@@ -35,6 +35,8 @@ import { ParentSnackPaymentPage } from './features/payments/pages/ParentSnackPay
 import { VnpayReturnPage } from './features/payments/pages/VnpayReturnPage';
 import { SnackBillingPaymentPage } from './features/payments/pages/SnackBillingPaymentPage';
 import { SnackServicesPage } from './features/snack-services/pages/SnackServicesPage';
+import { FoodIngredientsPage } from './features/foods/components/FoodIngredientsPage';
+import { DishesPage } from './features/dishes/components/DishesPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -152,7 +154,7 @@ export const App: React.FC = () => {
                 <Users className="w-3.5 h-3.5" /> Nhân sự & Bếp
               </Link>
               <span className="text-slate-600">|</span>
-              <Link to="/nutritionist/menus" className="flex items-center gap-1 hover:text-emerald-300 transition">
+              <Link to="/menu-approval" className="flex items-center gap-1 hover:text-emerald-300 transition">
                 <UtensilsCrossed className="w-3.5 h-3.5" /> Duyệt thực đơn DD
               </Link>
               <span className="text-slate-600">|</span>
@@ -219,8 +221,8 @@ export const App: React.FC = () => {
           <Route path="rules" element={<NutritionRulesPage />} />
           <Route path="food-group-rules" element={<FoodGroupRulesPage />} />
           <Route path="allergens" element={<NutritionistAllergyManagementPage />} />
-          <Route path="foods" element={<NutritionRulesPage />} />
-          <Route path="dishes" element={<NutritionRulesPage />} />
+          <Route path="foods" element={<FoodIngredientsPage />} />
+          <Route path="dishes" element={<DishesPage />} />
           <Route path="children" element={<NutritionistDashboardPage />} />
           <Route path="food-safety" element={<FoodSafetyComplianceReportPage />} />
           <Route path="food-safety-report" element={<FoodSafetyComplianceReportPage />} />

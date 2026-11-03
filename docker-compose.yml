@@ -111,7 +111,10 @@ services:
   # PostgreSQL 16 — Relational Database
   # ============================================================================
   postgres:
-    image: postgres:16-alpine
+    image: kidmeal-postgres:16-source
+    build:
+      context: .
+      dockerfile: database/Dockerfile
     container_name: kidmeal_postgres
     restart: unless-stopped
     ports:
@@ -123,8 +126,6 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-KidMeal} -d ${POSTGRES_DB:-KidMeal}"]
       interval: 5s

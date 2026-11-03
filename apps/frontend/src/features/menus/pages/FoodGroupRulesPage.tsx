@@ -780,13 +780,13 @@ export const FoodGroupRulesPage: React.FC = () => {
                           <td className="py-3 px-4 text-center text-[11px] font-medium text-slate-700">
                             {std.proteinRatioMin}-{std.proteinRatioMax} : {std.lipidRatioMin}-{std.lipidRatioMax} : {std.carbohydrateRatioMin}-{std.carbohydrateRatioMax}
                           </td>
-                          <td className="py-3 px-4 text-center font-semibold text-emerald-700">{std.fiberGMin || '-'}</td>
-                          <td className="py-3 px-4 text-center font-semibold text-blue-700">{std.calciumMgMin}</td>
+                          <td className="py-3 px-4 text-center font-semibold text-emerald-700">{std.fiberGMin ?? '—'}</td>
+                          <td className="py-3 px-4 text-center font-semibold text-blue-700">{std.calciumMgMin ?? '—'}</td>
                           <td className="py-3 px-4 text-center font-semibold text-rose-700">
-                            {std.ironMgMin} <span className="text-[9px] text-slate-400">({std.ironAbsorptionRate})</span>
+                            {std.ironMgMin ?? '—'} {std.ironAbsorptionRate && <span className="text-[9px] text-slate-400">({std.ironAbsorptionRate})</span>}
                           </td>
-                          <td className="py-3 px-4 text-center font-semibold text-indigo-700">{std.zincMgMin}</td>
-                          <td className="py-3 px-4 text-center font-semibold text-teal-700">{std.vitaminARaeMcgMin}</td>
+                          <td className="py-3 px-4 text-center font-semibold text-indigo-700">{std.zincMgMin ?? '—'}</td>
+                          <td className="py-3 px-4 text-center font-semibold text-teal-700">{std.vitaminARaeMcgMin ?? '—'}</td>
                           <td className="py-3 px-4 text-center">
                             <button
                               onClick={() => handleToggleIntakeStandard(std.id)}

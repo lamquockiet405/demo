@@ -14,7 +14,18 @@
     "test:all": "npm --prefix apps/backend run test && npm --prefix apps/backend run test:e2e",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
-    "db:verify": "node database/verify_schema.js"
+    "db:verify": "node database/verify_schema.js",
+    "db:source:generate": "node scripts/import-source-catalog.cjs",
+    "db:source:apply": "node scripts/import-source-catalog.cjs --apply",
+    "db:source:test": "node --test scripts/test/source-catalog.test.cjs",
+    "db:docker:source:apply": "node scripts/apply-source-catalog-docker.cjs",
+    "db:export:view": "node scripts/export-database-snapshot.cjs",
+    "db:erd": "node scripts/generate-erd.cjs",
+    "db:relations:check": "node scripts/migrate-relations.cjs",
+    "db:relations:apply": "node scripts/migrate-relations.cjs --apply",
+    "db:relations:test": "node scripts/test-relations-docker.cjs",
+    "test:database": "node --test scripts/test/*.test.cjs",
+    "docker:test:up": "node scripts/prepare-docker-test.cjs && docker compose --env-file .docker-test/test.env -f compose.test.yml up -d --build --wait"
   },
   "devDependencies": {
     "prettier": "^3.2.5"
