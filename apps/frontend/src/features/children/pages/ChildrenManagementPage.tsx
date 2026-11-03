@@ -22,6 +22,12 @@ import {
   Download,
   GraduationCap,
   Layers,
+  Eye,
+  Pencil,
+  Phone,
+  Calendar,
+  Baby,
+  Stethoscope,
 } from 'lucide-react';
 import {
   childrenApi,
@@ -376,10 +382,31 @@ export const ChildrenManagementPage: React.FC = () => {
     lastName: '',
     dateOfBirth: '2021-05-15',
     gender: 'MALE',
+    classId: '',
     emergencyContactName: '',
     emergencyContactPhone: '',
     medicalNotes: '',
   });
+
+  // Modal View Child Details
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedChildForView, setSelectedChildForView] = useState<ChildItem | null>(null);
+
+  // Modal Edit Child Profile
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editChildId, setEditChildId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<CreateChildDto>({
+    studentCode: '',
+    firstName: '',
+    lastName: '',
+    dateOfBirth: '2021-05-15',
+    gender: 'MALE',
+    classId: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    medicalNotes: '',
+  });
+  const [updating, setUpdating] = useState(false);
 
   // Modal Declare Allergy
   const [isAllergyModalOpen, setIsAllergyModalOpen] = useState(false);
@@ -494,12 +521,31 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
 
   const handleCreateChild = async (e: React.FormEvent) => {
     e.preventDefault();
+    const fullName = `${childForm.lastName || ''} ${childForm.firstName || ''}`.trim();
+    if (!fullName) {
+      alert('Vui lòng nhập đầy đủ họ và tên học sinh.');
+      return;
+    }
+
     try {
       await childrenApi.createChild(childForm);
       setIsChildModalOpen(false);
+      setChildForm({
+        studentCode: '',
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '2021-05-15',
+        gender: 'MALE',
+        classId: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
+        medicalNotes: '',
+      });
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Lỗi khi tạo hồ sơ học sinh.');
+      const msg = err.response?.data?.message;
+      const formattedMsg = Array.isArray(msg) ? msg.join('\n') : (msg || 'Lỗi khi tạo hồ sơ học sinh.');
+      alert(formattedMsg);
     }
   };
 
@@ -513,6 +559,76 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Lỗi khi khai báo dị ứng.');
+    }
+  };
+
+  const calculateAge = (dobString?: string) => {
+    if (!dobString) return 'Chưa rõ';
+    const dob = new Date(dobString);
+    if (isNaN(dob.getTime())) return 'Chưa rõ';
+    const now = new Date();
+    let years = now.getFullYear() - dob.getFullYear();
+    let months = now.getMonth() - dob.getMonth();
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years <= 0) return `${Math.max(1, months)} tháng tuổi`;
+    return months > 0 ? `${years} tuổi ${months} tháng` : `${years} tuổi`;
+  };
+
+  const handleOpenDetail = (child: ChildItem) => {
+    setSelectedChildForView(child);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleOpenEdit = (child: ChildItem) => {
+    const parts = (child.fullName || '').trim().split(' ');
+    const firstName = child.firstName || (parts.length > 1 ? parts[parts.length - 1] : parts[0] || '');
+    const lastName = child.lastName || (parts.length > 1 ? parts.slice(0, parts.length - 1).join(' ') : '');
+
+    setEditChildId(child.id);
+    setEditForm({
+      studentCode: child.studentCode || '',
+      firstName,
+      lastName,
+      dateOfBirth: child.dateOfBirth ? child.dateOfBirth.split('T')[0] : '2021-05-15',
+      gender: (child.gender as any) || 'MALE',
+      classId: child.classId ? String(child.classId) : '',
+      emergencyContactName: child.emergencyContactName || '',
+      emergencyContactPhone: child.emergencyContactPhone || '',
+      medicalNotes: child.medicalNotes || '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateChild = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editChildId) return;
+
+    const fullName = `${editForm.lastName || ''} ${editForm.firstName || ''}`.trim() || editForm.fullName?.trim();
+    if (!fullName) {
+      alert('Vui lòng nhập đầy đủ họ và tên học sinh.');
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      await childrenApi.updateChild(editChildId, {
+        ...editForm,
+        fullName,
+        studentCode: editForm.studentCode?.trim() || undefined,
+        classId: editForm.classId && String(editForm.classId).trim() !== '' ? Number(editForm.classId) : undefined,
+      });
+      setIsEditModalOpen(false);
+      setEditChildId(null);
+      await fetchData();
+    } catch (err: any) {
+      const msg = err.response?.data?.message;
+      const formattedMsg = Array.isArray(msg) ? msg.join('\n') : (msg || 'Lỗi khi cập nhật hồ sơ học sinh.');
+      alert(formattedMsg);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -846,8 +962,23 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
                           return (
                             <tr key={c.id} className="hover:bg-slate-50/70 transition">
                               <td className="py-3.5 px-4">
-                                <div className="font-bold text-slate-900">{c.fullName}</div>
-                                <div className="text-[11px] text-slate-400 font-mono">{c.studentCode}</div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenDetail(c)}
+                                  className="text-left group flex items-center gap-2.5"
+                                  title="Nhấp để xem chi tiết hồ sơ học sinh"
+                                >
+                                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs group-hover:bg-emerald-600 group-hover:text-white transition">
+                                    {c.fullName?.charAt(0) || 'B'}
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition flex items-center gap-1">
+                                      <span>{c.fullName}</span>
+                                      <Eye className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 opacity-0 group-hover:opacity-100 transition shrink-0" />
+                                    </div>
+                                    <div className="text-[11px] text-slate-400 font-mono">{c.studentCode}</div>
+                                  </div>
+                                </button>
                               </td>
                               <td className="py-3.5 px-3 font-semibold text-slate-700">
                                 <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold text-[11px]">
@@ -894,16 +1025,38 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
                                 )}
                               </td>
                               <td className="py-3.5 px-4 text-right">
-                                <button
-                                  onClick={() => {
-                                    setTargetChild(c);
-                                    setIsAllergyModalOpen(true);
-                                  }}
-                                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition inline-flex items-center gap-1 shadow-xs"
-                                >
-                                  <Plus className="w-3.5 h-3.5" />
-                                  <span>Khai báo dị ứng</span>
-                                </button>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenDetail(c)}
+                                    title="Xem chi tiết hồ sơ học sinh"
+                                    className="px-2 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition inline-flex items-center gap-1 shadow-xs"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Chi tiết</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEdit(c)}
+                                    title="Chỉnh sửa hồ sơ học sinh"
+                                    className="px-2 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition inline-flex items-center gap-1 shadow-xs"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Sửa</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setTargetChild(c);
+                                      setIsAllergyModalOpen(true);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-xs transition inline-flex items-center gap-1 shadow-xs"
+                                    title="Khai báo thông tin dị ứng"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>Dị ứng</span>
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1291,6 +1444,347 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 7. MODAL VIEW STUDENT PROFILE DETAILS ─── */}
+      {isDetailModalOpen && selectedChildForView && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            {/* Header Banner */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 p-6 text-white relative">
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center text-white text-2xl font-black shadow-inner">
+                  {selectedChildForView.fullName?.charAt(0) || 'B'}
+                </div>
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-emerald-100 text-[11px] font-bold">
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>
+                      {selectedChildForView.class?.name ||
+                        (classes.find(cls => String(cls.id) === String(selectedChildForView.classId))?.name) ||
+                        (selectedChildForView as any).className ||
+                        'Chưa phân lớp'}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-black text-white tracking-tight">
+                    {selectedChildForView.fullName}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-emerald-100/90 font-mono">
+                    <span>Mã: {selectedChildForView.studentCode}</span>
+                    <span>•</span>
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/40 text-[10px] uppercase font-bold tracking-wide">
+                      {selectedChildForView.status || 'ACTIVE'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-700">
+              {/* Section 1: Thông tin nhân thân */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Baby className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Thông Tin Cá Nhân</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <span className="block text-[11px] text-slate-400">Ngày sinh</span>
+                    <span className="font-bold text-slate-800">
+                      {new Date(selectedChildForView.dateOfBirth).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] text-slate-400">Độ tuổi</span>
+                    <span className="font-bold text-slate-800">
+                      {calculateAge(selectedChildForView.dateOfBirth)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] text-slate-400">Giới tính</span>
+                    <span className="font-bold text-slate-800">
+                      {selectedChildForView.gender === 'MALE' ? 'Bé trai' : 'Bé gái'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Gia đình & Khẩn cấp */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-teal-600" />
+                  <span>Liên Hệ Khẩn Cấp & Y Tế</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <span className="block text-[11px] text-slate-400">Người liên hệ chính</span>
+                    <span className="font-bold text-slate-800">
+                      {selectedChildForView.emergencyContactName || 'Phụ huynh'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] text-slate-400">Số điện thoại</span>
+                    <a
+                      href={`tel:${selectedChildForView.emergencyContactPhone}`}
+                      className="font-bold text-emerald-600 hover:underline"
+                    >
+                      {selectedChildForView.emergencyContactPhone || 'Chưa cung cấp'}
+                    </a>
+                  </div>
+                </div>
+                {selectedChildForView.medicalNotes && (
+                  <div className="pt-2 border-t border-slate-200/60">
+                    <span className="block text-[11px] text-slate-400">Ghi chú y tế đặc biệt:</span>
+                    <p className="font-medium text-slate-700 italic mt-0.5">
+                      "{selectedChildForView.medicalNotes}"
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Section 3: Hồ sơ dị ứng */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Hồ Sơ Cảnh Báo Dị Ứng ({selectedChildForView.allergies?.length || 0})</span>
+                </div>
+
+                {selectedChildForView.allergies && selectedChildForView.allergies.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {selectedChildForView.allergies.map((alg) => {
+                      const isSevere =
+                        alg.severity === 'SEVERE' ||
+                        alg.severity === 'ANAPHYLACTIC' ||
+                        (alg.severity as any) === 'HIGH';
+                      return (
+                        <div
+                          key={alg.id}
+                          className="p-3 bg-white rounded-xl border border-slate-200/80 shadow-xs space-y-1.5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900 text-sm">
+                              {alg.allergen?.nameVi || alg.customAllergenName}
+                            </span>
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                isSevere
+                                  ? 'bg-rose-100 text-rose-800 border-rose-200'
+                                  : 'bg-amber-100 text-amber-800 border-amber-200'
+                              }`}
+                            >
+                              Mức độ: {alg.severity}
+                            </span>
+                          </div>
+                          {alg.symptoms && (
+                            <div className="text-[11px] text-slate-600">
+                              <span className="font-semibold text-slate-500">Triệu chứng:</span> {alg.symptoms}
+                            </div>
+                          )}
+                          {alg.reactionTreatment && (
+                            <div className="text-[11px] text-rose-700 bg-rose-50/60 p-2 rounded-lg font-medium">
+                              <strong>Phác đồ xử trí:</strong> {alg.reactionTreatment}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/60 text-emerald-800 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Học sinh chưa có tiền sử dị ứng thực phẩm ghi nhận. An toàn 100% với thực đơn chung.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsDetailModalOpen(false)}
+                className="px-4 py-2 text-xs font-bold rounded-xl text-slate-600 hover:bg-slate-200 transition"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const childToEdit = selectedChildForView;
+                  setIsDetailModalOpen(false);
+                  handleOpenEdit(childToEdit);
+                }}
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Chỉnh sửa hồ sơ</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 8. MODAL UPDATE STUDENT PROFILE ─── */}
+      {isEditModalOpen && editChildId && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-900 text-base">Cập Nhật Hồ Sơ Học Sinh</h3>
+              </div>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateChild} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Mã Học Sinh</label>
+                  <input
+                    type="text"
+                    placeholder="BM-HS01"
+                    value={editForm.studentCode}
+                    onChange={(e) => setEditForm({ ...editForm, studentCode: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Lớp Học</label>
+                  <select
+                    value={editForm.classId}
+                    onChange={(e) => setEditForm({ ...editForm, classId: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                  >
+                    <option value="">-- Chưa xếp lớp --</option>
+                    {classes.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Họ và Tên Đệm *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nguyễn Gia"
+                    value={editForm.lastName}
+                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tên *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Huy"
+                    value={editForm.firstName}
+                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Ngày Sinh *</label>
+                  <input
+                    type="date"
+                    required
+                    value={editForm.dateOfBirth}
+                    onChange={(e) => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Giới Tính *</label>
+                  <select
+                    value={editForm.gender}
+                    onChange={(e) => setEditForm({ ...editForm, gender: e.target.value as any })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-semibold"
+                  >
+                    <option value="MALE">Bé trai</option>
+                    <option value="FEMALE">Bé gái</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Người Liên Hệ Khẩn Cấp</label>
+                  <input
+                    type="text"
+                    placeholder="Mẹ: Trần Thị Mai"
+                    value={editForm.emergencyContactName}
+                    onChange={(e) => setEditForm({ ...editForm, emergencyContactName: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Số Điện Thoại</label>
+                  <input
+                    type="tel"
+                    placeholder="0912345678"
+                    value={editForm.emergencyContactPhone}
+                    onChange={(e) => setEditForm({ ...editForm, emergencyContactPhone: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Ghi Chú Y Tế Đặc Biệt</label>
+                <textarea
+                  rows={2}
+                  value={editForm.medicalNotes}
+                  onChange={(e) => setEditForm({ ...editForm, medicalNotes: e.target.value })}
+                  placeholder="Ghi chú về sức khỏe, cơ địa dễ sốt co giật hoặc tiền sử dị ứng..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold rounded-xl text-slate-600 hover:bg-slate-100 transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {updating ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Đang lưu...</span>
+                    </>
+                  ) : (
+                    <span>Lưu thay đổi hồ sơ</span>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

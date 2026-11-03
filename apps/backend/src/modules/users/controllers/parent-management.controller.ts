@@ -39,6 +39,12 @@ export class ParentManagementController {
     return this.parentService.getStats();
   }
 
+  @Get('check-email')
+  @ApiOperation({ summary: 'Kiểm tra email phụ huynh đã tồn tại hay chưa' })
+  async checkEmail(@Query('email') email: string) {
+    return this.parentService.checkEmailExists(email);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Xem chi tiết phụ huynh' })
   async findOne(@Param('id', ParseIntPipe) id: number) {

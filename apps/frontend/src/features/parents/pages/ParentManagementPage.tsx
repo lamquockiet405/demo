@@ -68,6 +68,11 @@ export const ParentManagementPage: React.FC = () => {
   const [formNote, setFormNote] = useState('');
   const [formSelectedChildIds, setFormSelectedChildIds] = useState<string[]>([]);
 
+  // Email validation & duplicate checking states
+  const [isDuplicateEmail, setIsDuplicateEmail] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState<string | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
   const showToast = (type: 'success' | 'error', text: string) => {
     setToastMessage({ type, text });
     setTimeout(() => setToastMessage(null), 4000);
@@ -126,6 +131,64 @@ export const ParentManagementPage: React.FC = () => {
     fetchChildren();
   }, []);
 
+  // Debounced check for duplicate email during account creation
+  useEffect(() => {
+    if (!isCreateModalOpen || editingParent) {
+      setIsDuplicateEmail(false);
+      setEmailErrorMessage(null);
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    const trimmed = formEmail.trim().toLowerCase();
+    if (!trimmed) {
+      setIsDuplicateEmail(false);
+      setEmailErrorMessage(null);
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    // 1. Kiểm tra nhanh tức thì trên danh sách parents hiện có trong RAM
+    const localMatch = parents.some((p) => p.email?.trim().toLowerCase() === trimmed);
+    if (localMatch) {
+      setIsDuplicateEmail(true);
+      setEmailErrorMessage('Email này đã tồn tại trong danh sách phụ huynh.');
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    // Kiểm tra cơ bản định dạng email trước khi gọi backend API
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      setIsDuplicateEmail(false);
+      setEmailErrorMessage(null);
+      setIsCheckingEmail(false);
+      return;
+    }
+
+    setIsCheckingEmail(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await parentsApi.checkEmail(trimmed);
+        if (res.exists) {
+          setIsDuplicateEmail(true);
+          setEmailErrorMessage(
+            res.message || 'Email này đã được sử dụng trong hệ thống. Vui lòng chọn email khác.',
+          );
+        } else {
+          setIsDuplicateEmail(false);
+          setEmailErrorMessage(null);
+        }
+      } catch (err) {
+        console.error('Lỗi khi kiểm tra email:', err);
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [formEmail, isCreateModalOpen, editingParent, parents]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
@@ -142,6 +205,9 @@ export const ParentManagementPage: React.FC = () => {
     setFormOccupation('');
     setFormNote('');
     setFormSelectedChildIds([]);
+    setIsDuplicateEmail(false);
+    setEmailErrorMessage(null);
+    setIsCheckingEmail(false);
     setIsCreateModalOpen(true);
   };
 
@@ -156,12 +222,23 @@ export const ParentManagementPage: React.FC = () => {
     setFormOccupation(parent.occupation || '');
     setFormNote(parent.note || '');
     setFormSelectedChildIds(Array.isArray(parent.children) ? parent.children.map((c) => c.id) : []);
+    setIsDuplicateEmail(false);
+    setEmailErrorMessage(null);
+    setIsCheckingEmail(false);
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formEmail.trim() || !formFullName.trim()) {
       showToast('error', 'Vui lòng nhập đầy đủ email và họ tên phụ huynh.');
+      return;
+    }
+
+    if (isDuplicateEmail) {
+      showToast(
+        'error',
+        emailErrorMessage || 'Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.',
+      );
       return;
     }
 
@@ -183,7 +260,12 @@ export const ParentManagementPage: React.FC = () => {
       setIsCreateModalOpen(false);
       fetchParents();
     } catch (err: any) {
-      showToast('error', err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.');
+      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.';
+      if (err.response?.status === 409 || msg.toLowerCase().includes('email')) {
+        setIsDuplicateEmail(true);
+        setEmailErrorMessage(msg);
+      }
+      showToast('error', msg);
     } finally {
       setSubmitting(false);
     }
@@ -749,6 +831,8 @@ export const ParentManagementPage: React.FC = () => {
                 onClick={() => {
                   setIsCreateModalOpen(false);
                   setEditingParent(null);
+                  setIsDuplicateEmail(false);
+                  setEmailErrorMessage(null);
                 }}
                 className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition"
               >
@@ -778,6 +862,9 @@ export const ParentManagementPage: React.FC = () => {
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
                     Email đăng nhập <span className="text-rose-500">*</span>
+                    {isCheckingEmail && (
+                      <span className="text-[10px] text-teal-600 font-normal ml-2">Đang kiểm tra...</span>
+                    )}
                   </label>
                   <input
                     type="email"
@@ -786,8 +873,18 @@ export const ParentManagementPage: React.FC = () => {
                     placeholder="phuhuynh@example.com"
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition disabled:bg-slate-100 disabled:text-slate-500"
+                    className={`w-full px-3.5 py-2.5 text-xs rounded-xl border transition disabled:bg-slate-100 disabled:text-slate-500 ${
+                      !editingParent && isDuplicateEmail
+                        ? 'border-rose-400 bg-rose-50 text-rose-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
+                        : 'border-slate-200 bg-slate-50 focus:bg-white text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20'
+                    }`}
                   />
+                  {!editingParent && isDuplicateEmail && (
+                    <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                      {emailErrorMessage || 'Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.'}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -920,6 +1017,8 @@ export const ParentManagementPage: React.FC = () => {
                   onClick={() => {
                     setIsCreateModalOpen(false);
                     setEditingParent(null);
+                    setIsDuplicateEmail(false);
+                    setEmailErrorMessage(null);
                   }}
                   className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
                 >
@@ -927,8 +1026,9 @@ export const ParentManagementPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition disabled:opacity-50"
+                  disabled={submitting || (!editingParent && isDuplicateEmail)}
+                  title={!editingParent && isDuplicateEmail ? 'Email này đã tồn tại trong hệ thống' : undefined}
+                  className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Đang lưu...' : editingParent ? 'Lưu thay đổi' : 'Tạo tài khoản'}
                 </button>

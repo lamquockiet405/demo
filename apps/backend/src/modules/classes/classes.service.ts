@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { ClassEntity } from './entities/class.entity';
@@ -102,6 +102,17 @@ export class ClassesService {
         ? Number(dto.mainTeacherId)
         : null;
 
+    // Lớp 2 bảo vệ: kiểm tra trùng tên lớp (case-insensitive) trước khi INSERT
+    const existing = await this.classRepo
+      .createQueryBuilder('c')
+      .where('LOWER(c.name) = LOWER(:name)', { name: dto.name.trim() })
+      .getOne();
+    if (existing) {
+      throw new ConflictException(
+        `Tên lớp "${dto.name.trim()}" đã tồn tại. Vui lòng chọn tên khác.`
+      );
+    }
+
     const cls = this.classRepo.create({
       schoolId: 1,
       name: dto.name,
@@ -135,7 +146,19 @@ export class ClassesService {
         ? Number(dto.mainTeacherId)
         : undefined;
 
-    if (dto.name !== undefined) cls.name = dto.name;
+    if (dto.name !== undefined) {
+      const trimmedName = dto.name.trim();
+      const existing = await this.classRepo
+        .createQueryBuilder('c')
+        .where('LOWER(c.name) = LOWER(:name) AND c.id != :id', { name: trimmedName, id })
+        .getOne();
+      if (existing) {
+        throw new ConflictException(
+          `Tên lớp "${trimmedName}" đã tồn tại. Vui lòng chọn tên khác.`
+        );
+      }
+      cls.name = trimmedName;
+    }
     if (ageGroup !== undefined) cls.ageGroup = ageGroup;
     if (schoolYear !== undefined) cls.schoolYear = schoolYear;
     if (homeroomTeacherId !== undefined) cls.homeroomTeacherId = homeroomTeacherId;
