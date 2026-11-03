@@ -14,4 +14,4 @@ import { SnackServicesController } from './snack-services.controller';
   providers: [SnackServicesService],
   exports: [SnackServicesService, TypeOrmModule],
 })
-export class SnackServicesModule {}
+export class SnackServicesModule { }

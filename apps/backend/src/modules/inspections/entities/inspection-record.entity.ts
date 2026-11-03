@@ -41,5 +41,6 @@ export class InspectionRecord {
   inspector: User;
 
   @OneToMany(() => InspectionImage, (img) => img.inspection)
-  images: InspectionImage[];
+  images?: InspectionImage[];
+
 }

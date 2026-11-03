@@ -18,6 +18,8 @@ import {
   Bell,
   UtensilsCrossed,
   Scale,
+  Activity,
+  Star,
   MessageSquareText,
   ClipboardCheck,
   Sparkles,
@@ -81,8 +83,12 @@ export const AdminDashboardLayout: React.FC = () => {
   // Danh mục menu Ban Giám Hiệu
   const navItems = [
     { label: 'Dashboard Tổng quan', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Chỉ huy Dinh dưỡng & Thể trạng', path: '/nutrition-physical-dashboard', icon: Activity },
+    { label: 'Cảnh báo an toàn trẻ (UC93)', path: '/child-alerts', icon: ShieldAlert },
+    { label: 'Báo cáo Vận hành Bữa ăn (UC94)', path: '/meal-operations-report', icon: UtensilsCrossed },
     { label: 'Quản trị Lớp học', path: '/classes', icon: GraduationCap },
     { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
+    { label: 'Điều phối cảnh báo thể trạng (UC85)', path: '/growth-notifications', icon: Bell },
     { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
     { label: 'Kế hoạch suất ăn bán trú', path: '/children', icon: ClipboardCheck },
     { label: 'Phục vụ ăn xế (Roster)', path: '/snack-roster', icon: Coffee },
@@ -90,25 +96,35 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Ý kiến & Đánh giá PH', path: '/services', icon: MessageSquareText },
     { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
+    { label: 'Tuân thủ ATTP & Kiểm thực (UC95)', path: '/food-safety', icon: ShieldCheck },
     { label: 'Sổ kiểm thực 3 bước', path: '/food-safety', icon: ShieldCheck },
     { label: 'Sổ lưu mẫu 24h', path: '/food-safety/samples', icon: Refrigerator },
     { label: 'Nhật ký kiểm toán', path: '/audit-logs', icon: ShieldAlert },
-    { label: 'Báo cáo tài chính', path: '/finances', icon: CircleDollarSign },
+    { label: 'Báo cáo tài chính & Ăn sáng (UC96)', path: '/snack-revenue-report', icon: CircleDollarSign },
+    { label: 'Đánh giá Phụ huynh & CSAT (UC97)', path: '/parent-evaluation-report', icon: Star },
     { label: 'Cài đặt trường học', path: '/settings', icon: Settings },
   ];
 
   const getBreadcrumbTitle = () => {
+    if (location.pathname.startsWith('/nutrition-physical')) return 'Chỉ huy Dinh dưỡng & Thể trạng (UC92)';
+    if (location.pathname.startsWith('/child-alerts')) return 'Tổng hợp Cảnh báo Trẻ em (UC93)';
+    if (location.pathname.startsWith('/meal-operations')) return 'Báo Cáo Vận Hành Bữa Ăn & Bán Trú (UC94)';
+    if (location.pathname.startsWith('/growth-notifications')) return 'Điều Phối Thông Báo Bất Thường Thể Trạng (UC85)';
     if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
+    if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Suất ăn sáng';
     if (location.pathname.startsWith('/children')) return 'Kế hoạch Suất ăn & Điểm danh Bán trú';
     if (location.pathname.startsWith('/snack-roster')) return 'Danh sách Phục vụ Suất ăn Xế (Snack Service Roster)';
     if (location.pathname.startsWith('/services')) return 'Ý kiến & Đánh giá của Phụ huynh';
     if (location.pathname.startsWith('/inventory')) return 'Kho nguyên liệu & Tiêu chuẩn dinh dưỡng';
-    if (location.pathname.startsWith('/food-safety')) return 'Sổ kiểm thực 3 bước & Lưu mẫu';
+    if (location.pathname.startsWith('/food-safety')) return 'Báo Cáo Tuân Thủ An Toàn Thực Phẩm (UC95)';
     if (location.pathname.startsWith('/audit-logs')) return 'Nhật ký Kiểm toán & Truy vết Dữ liệu Nhạy cảm (Audit Logs)';
-    if (location.pathname.startsWith('/finances')) return 'Báo cáo Tài chính & Thu chi';
+    if (location.pathname.startsWith('/parent-evaluation'))
+      return 'Báo Cáo Tổng Hợp Đánh Giá Phụ Huynh & CSAT (UC97)';
+    if (location.pathname.startsWith('/snack-revenue') || location.pathname.startsWith('/finances'))
+      return 'Báo Cáo Doanh Thu Dịch Vụ Suất Ăn Sáng (UC96)';
     if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/tenant/settings'))
       return 'Cài đặt thông tin Trường mầm non';
     if (location.pathname.startsWith('/dashboard')) return 'Dashboard Tổng quan';

@@ -3,36 +3,35 @@ import {
   CreditCard,
   CheckCircle2,
   Clock,
-  AlertCircle,
-  FileText,
-  DollarSign,
   Plus,
   Search,
   Sparkles,
-  QrCode,
-  ShieldCheck,
   Info,
   Calendar,
   User,
-  ArrowRight,
   RefreshCw,
   BellRing,
-  Send,
 } from 'lucide-react';
 import { apiClient } from '../../../core/api/axios';
 import { VnpayCheckoutButton } from '../components/VnpayCheckoutButton';
 
 export interface SnackInvoiceItem {
   id: string;
+  registrationId?: number;
   orderCode: string;
+  invoiceCode?: string;
   childName: string;
   className: string;
+  parentName?: string;
+  parentPhone?: string;
   packageName: string;
+  periodName?: string;
   amount: number;
   periodText: string;
   status: 'PENDING' | 'PAID' | 'SUCCESS' | 'FAILED';
-  paidAt?: string;
-  vnpTransactionNo?: string;
+  paidAt?: string | null;
+  registeredAt?: string;
+  vnpTransactionNo?: string | null;
 }
 
 export const SnackBillingPaymentPage: React.FC = () => {
@@ -67,13 +66,16 @@ export const SnackBillingPaymentPage: React.FC = () => {
 
   useEffect(() => {
     fetchInvoices();
-    apiClient.get('/classes').then((res) => {
-      const cls = res.data?.items || (Array.isArray(res.data) ? res.data : []);
-      setClassesList(cls);
-      if (cls.length > 0) {
-        setNewReg((prev) => ({ ...prev, className: cls[0].name }));
-      }
-    }).catch(() => {});
+    apiClient
+      .get('/classes')
+      .then((res) => {
+        const cls = res.data?.items || (Array.isArray(res.data) ? res.data : []);
+        setClassesList(cls);
+        if (cls.length > 0) {
+          setNewReg((prev) => ({ ...prev, className: cls[0].name }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
@@ -99,9 +101,12 @@ export const SnackBillingPaymentPage: React.FC = () => {
   };
 
   const filteredInvoices = invoices.filter((inv) => {
+    const q = search.toLowerCase();
     const matchesSearch =
-      inv.childName?.toLowerCase().includes(search.toLowerCase()) ||
-      inv.orderCode?.toLowerCase().includes(search.toLowerCase());
+      inv.childName?.toLowerCase().includes(q) ||
+      inv.parentName?.toLowerCase().includes(q) ||
+      inv.orderCode?.toLowerCase().includes(q) ||
+      inv.className?.toLowerCase().includes(q);
     const matchesStatus =
       statusFilter === 'ALL' ||
       (statusFilter === 'PAID' && (inv.status === 'PAID' || inv.status === 'SUCCESS')) ||
@@ -131,12 +136,34 @@ export const SnackBillingPaymentPage: React.FC = () => {
       alert('Hiện không có phụ huynh nào chưa thanh toán phí ăn xế.');
       return;
     }
-    if (!window.confirm(`Gửi thông báo nhắc nhở đóng phí tự động tới toàn bộ ${pendingCount} phụ huynh chưa thanh toán?`)) return;
+    if (
+      !window.confirm(
+        `Gửi thông báo nhắc nhở đóng phí tự động tới toàn bộ ${pendingCount} phụ huynh chưa thanh toán?`,
+      )
+    )
+      return;
     try {
       const res = await apiClient.post('/payments/invoices/batch-remind');
       alert(res.data?.message || 'Đã gửi nhắc nhở thành công!');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Có lỗi khi gửi nhắc nhở.');
+    }
+  };
+
+  const formatPaidDate = (paidAt?: string | null) => {
+    if (!paidAt) return '—';
+    try {
+      const d = new Date(paidAt);
+      if (isNaN(d.getTime())) return paidAt;
+      return d.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return paidAt;
     }
   };
 
@@ -148,13 +175,13 @@ export const SnackBillingPaymentPage: React.FC = () => {
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
-              Cổng Thanh Toán Trực Tuyến VNPAY
+              Doanh Thu & Lịch Sử Thu Phí VNPAY
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Dịch Vụ Ăn Xế 17:00 & Thanh Toán Bán Trú
+              Quản Lý Doanh Thu & Lịch Sử Thanh Toán Ăn Xế 17:00
             </h1>
             <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
-              Tích hợp trực tiếp cổng VNPAY Sandbox HMAC-SHA512. Dữ liệu hóa đơn và giao dịch được lưu trữ và truy vấn thời gian thực từ cơ sở dữ liệu.
+              Theo dõi trực tiếp các giao dịch thanh toán thành công qua cổng VNPAY, bao gồm tên phụ huynh thanh toán, ngày giờ thanh toán, gói dịch vụ và mã giao dịch ngân hàng.
             </p>
           </div>
 
@@ -228,7 +255,9 @@ export const SnackBillingPaymentPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
           <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Đơn Đăng Ký</div>
-          <div className="text-2xl font-black text-slate-900">{invoices.length} <span className="text-sm font-semibold text-slate-400">giao dịch</span></div>
+          <div className="text-2xl font-black text-slate-900">
+            {invoices.length} <span className="text-sm font-semibold text-slate-400">giao dịch</span>
+          </div>
           <div className="text-xs text-slate-400">Dịch vụ ăn xế chiều 17h</div>
         </div>
 
@@ -237,7 +266,7 @@ export const SnackBillingPaymentPage: React.FC = () => {
           <div className="text-2xl font-black text-emerald-700">
             {totalPaid.toLocaleString('vi-VN')} <span className="text-sm font-semibold text-slate-400">VNĐ</span>
           </div>
-          <div className="text-xs text-emerald-600 font-semibold">Tự động kích hoạt suất ăn bếp</div>
+          <div className="text-xs text-emerald-600 font-semibold">Tự động kích hoạt suất ăn bếp & mở lịch ăn xế</div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
@@ -251,11 +280,11 @@ export const SnackBillingPaymentPage: React.FC = () => {
 
       {/* ─── 4. SEARCH & FILTER ─── */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-80">
+        <div className="relative w-full sm:w-96">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Tìm theo tên học sinh, mã đơn..."
+            placeholder="Tìm theo tên học sinh, tên phụ huynh, mã đơn..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -273,27 +302,28 @@ export const SnackBillingPaymentPage: React.FC = () => {
         </select>
       </div>
 
-      {/* ─── 5. INVOICES TABLE ─── */}
+      {/* ─── 5. INVOICES & PAYMENT HISTORY TABLE ─── */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3.5 px-4">Mã Đơn / Học Sinh</th>
-                <th className="py-3.5 px-3">Gói Dịch Vụ</th>
-                <th className="py-3.5 px-3">Kỳ Phí</th>
+                <th className="py-3.5 px-3">Tên Phụ Huynh</th>
+                <th className="py-3.5 px-3">Gói Dịch Vụ & Kỳ Phí</th>
                 <th className="py-3.5 px-3">Số Tiền</th>
+                <th className="py-3.5 px-3">Ngày Thanh Toán</th>
                 <th className="py-3.5 px-3">Trạng Thái</th>
-                <th className="py-3.5 px-4 text-right">Thao Tác Thanh Toán</th>
+                <th className="py-3.5 px-4 text-right">Thao Tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                  <td colSpan={7} className="py-8 text-center text-slate-400">
                     <div className="flex items-center justify-center gap-2">
                       <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
-                      <span>Đang tải danh sách hóa đơn từ cơ sở dữ liệu...</span>
+                      <span>Đang tải lịch sử thanh toán & hóa đơn từ cơ sở dữ liệu...</span>
                     </div>
                   </td>
                 </tr>
@@ -309,20 +339,41 @@ export const SnackBillingPaymentPage: React.FC = () => {
                           {inv.orderCode} • {inv.className}
                         </div>
                       </td>
-                      <td className="py-3.5 px-3 font-semibold text-slate-800">
-                        {inv.packageName}
+                      <td className="py-3.5 px-3">
+                        <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                          <span>{inv.parentName || 'Phụ huynh học sinh'}</span>
+                        </div>
+                        {inv.parentPhone && (
+                          <div className="text-[10px] text-slate-400 font-mono pl-5">
+                            {inv.parentPhone}
+                          </div>
+                        )}
                       </td>
-                      <td className="py-3.5 px-3 font-medium text-slate-600">
-                        {inv.periodText}
+                      <td className="py-3.5 px-3">
+                        <div className="font-semibold text-slate-800">
+                          {inv.packageName || inv.periodName}
+                        </div>
+                        <div className="text-[11px] text-slate-400">{inv.periodText}</div>
                       </td>
                       <td className="py-3.5 px-3 font-black text-slate-900">
                         {Number(inv.amount).toLocaleString('vi-VN')} đ
                       </td>
                       <td className="py-3.5 px-3">
                         {isPaid ? (
+                          <div className="inline-flex items-center gap-1.5 text-emerald-700 font-bold text-[11px] bg-emerald-50/80 px-2.5 py-1 rounded-lg border border-emerald-200">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>{formatPaidDate(inv.paidAt)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 italic text-[11px]">Chưa thanh toán</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-3">
+                        {isPaid ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            Đã thanh toán {inv.vnpTransactionNo ? `(Mã: ${inv.vnpTransactionNo})` : ''}
+                            Đã thanh toán {inv.vnpTransactionNo ? `(${inv.vnpTransactionNo})` : ''}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
@@ -349,8 +400,8 @@ export const SnackBillingPaymentPage: React.FC = () => {
                             />
                           </div>
                         ) : (
-                          <span className="text-slate-400 font-semibold text-[11px]">
-                            Hoàn tất {inv.paidAt ? `(${inv.paidAt})` : ''}
+                          <span className="text-emerald-700 font-bold text-[11px]">
+                            ✓ Đã lưu sổ doanh thu
                           </span>
                         )}
                       </td>
@@ -359,7 +410,7 @@ export const SnackBillingPaymentPage: React.FC = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                  <td colSpan={7} className="py-8 text-center text-slate-400">
                     Chưa có hóa đơn ăn xế nào. Bấm "Tạo Đăng Ký Ăn Xế Mới" để tạo hóa đơn.
                   </td>
                 </tr>
@@ -429,9 +480,15 @@ export const SnackBillingPaymentPage: React.FC = () => {
                   }}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold"
                 >
-                  <option value="Gói Năng Lượng Chiều 17h">Gói Năng Lượng Chiều 17h (25.000đ/ngày • 550.000đ/tháng)</option>
-                  <option value="Gói Dinh Dưỡng Cao Cấp">Gói Dinh Dưỡng Cao Cấp (30.000đ/ngày • 660.000đ/tháng)</option>
-                  <option value="Gói Tiêu Chuẩn Truyền Thống">Gói Tiêu Chuẩn Truyền Thống (20.000đ/ngày • 440.000đ/tháng)</option>
+                  <option value="Gói Năng Lượng Chiều 17h">
+                    Gói Năng Lượng Chiều 17h (25.000đ/ngày • 550.000đ/tháng)
+                  </option>
+                  <option value="Gói Dinh Dưỡng Cao Cấp">
+                    Gói Dinh Dưỡng Cao Cấp (30.000đ/ngày • 660.000đ/tháng)
+                  </option>
+                  <option value="Gói Tiêu Chuẩn Truyền Thống">
+                    Gói Tiêu Chuẩn Truyền Thống (20.000đ/ngày • 440.000đ/tháng)
+                  </option>
                 </select>
               </div>
 

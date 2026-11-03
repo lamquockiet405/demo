@@ -24,6 +24,10 @@ import { ParentEvaluationsModule } from './modules/parent-evaluations/parent-eva
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { FinancesModule } from './modules/finances/finances.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { ChildAlertsModule } from './modules/child-alerts/child-alerts.module';
+import { MealOperationsModule } from './modules/meal-operations/meal-operations.module';
+import { FoodSafetyModule } from './modules/food-safety/food-safety.module';
+import { SnackRevenueModule } from './modules/snack-revenue/snack-revenue.module';
 import { NutritionAdviceModule } from './modules/nutrition-advice/nutrition-advice.module';
 
 @Module({
@@ -53,7 +57,12 @@ import { NutritionAdviceModule } from './modules/nutrition-advice/nutrition-advi
     DashboardModule,
     FinancesModule,
     AuditLogsModule,
+    ChildAlertsModule,
+    MealOperationsModule,
+    FoodSafetyModule,
+    SnackRevenueModule,
     NutritionAdviceModule,
+
   ],
 })
 export class AppModule implements NestModule {

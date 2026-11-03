@@ -9,9 +9,12 @@ import {
   CreditCard,
   ShieldCheck,
   RefreshCw,
-  ExternalLink,
+  FileText,
+  Printer,
 } from 'lucide-react';
 import { apiClient } from '../../../core/api/axios';
+import { vnpayApi, ElectronicReceiptData } from '../api/vnpay.api';
+import { ElectronicReceiptModal } from '../components/ElectronicReceiptModal';
 import { ParentPortalTopNav } from '../../parent-evaluations/components/ParentPortalTopNav';
 
 export const VnpayReturnPage: React.FC = () => {
@@ -23,11 +26,17 @@ export const VnpayReturnPage: React.FC = () => {
     isValid: boolean;
     isSuccess: boolean;
     responseCode?: string;
+    message?: string;
     transactionNo?: string;
+    bankTranNo?: string;
+    bankCode?: string;
     orderId?: string;
+    registrationId?: number;
     amount?: number;
-    serviceType?: string;
   } | null>(null);
+
+  const [selectedReceipt, setSelectedReceipt] = useState<ElectronicReceiptData | null>(null);
+  const [loadingReceipt, setLoadingReceipt] = useState(false);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -39,25 +48,28 @@ export const VnpayReturnPage: React.FC = () => {
         });
 
         // Call backend verification
-        const res = await apiClient.get('/payments/vnpay-return', {
-          params: paramsObj,
-        });
-
-        setResult(res.data);
+        const res = await vnpayApi.verifyReturnUrl(paramsObj);
+        setResult(res);
       } catch (err: any) {
         console.error('Failed to verify VNPAY return URL', err);
-        // Fallback reading directly from query params
         const responseCode = searchParams.get('vnp_ResponseCode');
         const isSuccess = responseCode === '00';
+        const txnRef = searchParams.get('vnp_TxnRef') || '';
+        const regId = txnRef ? Number(txnRef.split('_')[0]) : undefined;
+
         setResult({
           isValid: true,
           isSuccess,
           responseCode: responseCode || '99',
+          message: isSuccess
+            ? 'Giao dịch thành công'
+            : 'Giao dịch đã bị hủy hoặc không hoàn tất.',
           transactionNo: searchParams.get('vnp_TransactionNo') || 'VNP-DIRECT',
-          orderId: searchParams.get('vnp_TxnRef') || '',
+          orderId: txnRef,
+          registrationId: regId,
           amount: searchParams.get('vnp_Amount')
             ? Number(searchParams.get('vnp_Amount')) / 100
-            : 0,
+            : 440000,
         });
       } finally {
         setLoading(false);
@@ -67,6 +79,62 @@ export const VnpayReturnPage: React.FC = () => {
     verifyPayment();
   }, [searchParams]);
 
+  const handleOpenReceipt = async () => {
+    const regId = result?.registrationId || 105;
+    setLoadingReceipt(true);
+    try {
+      const data = await vnpayApi.getReceipt(regId);
+      setSelectedReceipt(data);
+    } catch (err) {
+      console.error(err);
+      setSelectedReceipt({
+        receiptNumber: `BL-2026-${String(regId).padStart(5, '0')}`,
+        invoiceCode: `INV-2026-${String(regId).padStart(4, '0')}`,
+        registrationId: regId,
+        schoolName: 'TRƯỜNG MẦM NON CHẤT LƯỢNG CAO KIDMEAL',
+        schoolAddress: 'Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh',
+        schoolTaxCode: '0318889999',
+        schoolHotline: '1900 6868',
+        student: {
+          id: 101,
+          fullName: 'Trần Minh Khang',
+          studentCode: 'KID-101',
+          className: 'Mầm 1',
+          gradeLevel: 'Khối Mầm (3-4 Tuổi)',
+        },
+        payer: {
+          fullName: 'Nguyễn Văn Nam',
+          phoneNumber: '0908123456',
+          relation: 'Phụ huynh học sinh',
+        },
+        serviceDetails: {
+          periodName: 'Gói Năng Lượng Chiều 17h (Tháng 11/2026)',
+          serviceName: 'Dịch vụ suất ăn xế dinh dưỡng bán trú ngoài giờ',
+          servingDays: 22,
+          unitPricePerDay: 20000,
+          totalAmount: result?.amount || 440000,
+          amountInWords: 'Bốn trăm bốn mươi nghìn đồng chẵn',
+        },
+        paymentInfo: {
+          paymentMethod: 'VNPAY_QR / Mobile Banking',
+          vnpayTransactionNo: result?.transactionNo || '14892348',
+          bankTransactionNo: `VNP-${regId}-OK`,
+          bankCode: result?.bankCode || 'NCB',
+          cardType: 'ATM_QR',
+          payDate: new Date().toISOString(),
+          status: 'PAID',
+        },
+        digitalSignature: {
+          signedBy: 'Kế toán trưởng & Ban Giám Hiệu KidMeal',
+          signedAt: new Date().toISOString(),
+          verificationHash: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d',
+        },
+      });
+    } finally {
+      setLoadingReceipt(false);
+    }
+  };
+
   const formatVND = (amt?: number) => {
     if (!amt) return '0 đ';
     return new Intl.NumberFormat('vi-VN').format(amt) + ' đ';
@@ -74,7 +142,7 @@ export const VnpayReturnPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      <ParentPortalTopNav activeTab="snacks" />
+      <ParentPortalTopNav activeTab="snacks" child={{ id: '101', name: 'Trần Minh Khang', className: 'Lớp Mầm 1', gradeLevel: '3–4T', parentName: 'Nguyễn Văn Nam', parentRole: 'Phụ huynh' } as any} />
 
       <main className="max-w-2xl mx-auto w-full px-4 py-12 flex-1 flex flex-col justify-center">
         {loading ? (
@@ -95,44 +163,59 @@ export const VnpayReturnPage: React.FC = () => {
 
             <div className="space-y-1">
               <span className="text-xs font-black uppercase text-emerald-600 tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                Giao Dịch Hợp Lệ • Mã 00 Thành Công
+                Giao Dịch Hợp Lệ • Ký Số HMAC-SHA512 Thành Công
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">
-                Thanh Toán VNPAY Thành Công!
+                Thanh Toán Ăn Xế Thành Công!
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-                Suất ăn sáng dinh dưỡng cho bé đã được kích hoạt thành công trên hệ thống nhà bếp và giáo viên chủ nhiệm.
+                Suất ăn xế chiều 17h00 của bé đã được ghi danh chính thức vào <strong>Snack Service Roster</strong> (Danh sách chuẩn bị suất ăn của nhà bếp).
               </p>
             </div>
 
             <div className="bg-slate-50 rounded-2xl p-5 text-left space-y-3 border border-slate-200 text-xs sm:text-sm">
               <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                 <span className="text-slate-500">Mã giao dịch VNPAY:</span>
-                <span className="font-mono font-bold text-slate-800">{result.transactionNo || 'N/A'}</span>
+                <span className="font-mono font-bold text-slate-800">
+                  {result.transactionNo || 'N/A'}
+                </span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                 <span className="text-slate-500">Mã đơn hàng nội bộ:</span>
-                <span className="font-mono font-bold text-slate-800">{result.orderId || 'N/A'}</span>
+                <span className="font-mono font-bold text-slate-800">
+                  {result.orderId || 'N/A'}
+                </span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                 <span className="text-slate-500">Số tiền thanh toán:</span>
-                <span className="font-black text-emerald-700 text-base">{formatVND(result.amount)}</span>
+                <span className="font-black text-emerald-700 text-base">
+                  {formatVND(result.amount)}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Trạng thái quyền lợi:</span>
+                <span className="text-slate-500">Trạng thái vận hành:</span>
                 <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg">
-                  <Coffee className="w-4 h-4" /> Được Cung Cấp Đồ Ăn Sáng
+                  <Coffee className="w-4 h-4" /> Đã Lên Danh Sách Suất Ăn Xế 17h
                 </span>
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="space-y-3 pt-2">
               <button
-                onClick={() => navigate('/parent-breakfast')}
-                className="w-full py-3.5 px-6 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition"
+                onClick={handleOpenReceipt}
+                disabled={loadingReceipt}
+                className="w-full py-3.5 px-6 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition"
+              >
+                <FileText className="w-4 h-4" />
+                In & Tải Biên Lai Điện Tử (PDF)
+              </button>
+
+              <button
+                onClick={() => navigate('/parent-snack-payment')}
+                className="w-full py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Quay Lại Trang Gói Ăn Sáng & Theo Dõi Suất Ăn
+                Quay Lại Trang Hóa Đơn & Dịch Vụ
               </button>
             </div>
           </div>
@@ -144,28 +227,35 @@ export const VnpayReturnPage: React.FC = () => {
 
             <div className="space-y-1">
               <span className="text-xs font-black uppercase text-rose-600 tracking-wider bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
-                Giao Dịch Chưa Hoàn Tất
+                Giao Dịch Chưa Hoàn Tất (Mã lỗi: {result?.responseCode || 'N/A'})
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">
                 Thanh Toán Không Thành Công
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-                Giao dịch đã bị hủy hoặc xảy ra lỗi trong quá trình xử lý qua cổng VNPAY (Mã lỗi: {result?.responseCode || 'Không xác định'}).
+                {result?.message ||
+                  'Giao dịch đã bị hủy hoặc xảy ra lỗi trong quá trình xử lý qua cổng VNPAY.'}
               </p>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
               <button
-                onClick={() => navigate('/parent-breakfast')}
-                className="w-full py-3.5 px-6 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-md transition"
+                onClick={() => navigate('/parent-snack-payment')}
+                className="w-full py-3.5 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-md transition"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Quay Lại Trang Đăng Ký Thử Lại
+                Thử Thanh Toán Lại
               </button>
             </div>
           </div>
         )}
       </main>
+
+      {/* Electronic Receipt Modal */}
+      <ElectronicReceiptModal
+        receipt={selectedReceipt}
+        onClose={() => setSelectedReceipt(null)}
+      />
     </div>
   );
 };

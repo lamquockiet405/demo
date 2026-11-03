@@ -18,8 +18,13 @@ export const VnpayCheckoutButton: React.FC<VnpayCheckoutButtonProps> = ({
   const handleCheckout = async () => {
     try {
       setLoading(true);
+      const numericRegId =
+        Number(String(invoiceId).split('-').pop()?.replace(/\D/g, '')) ||
+        Number(String(invoiceId).replace(/\D/g, '')) ||
+        1;
       const { data } = await apiClient.post('/payments/create-url', {
-        invoiceId,
+        registrationId: numericRegId,
+        invoiceId: String(invoiceId),
         amount,
         orderInfo,
       });

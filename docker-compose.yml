@@ -32,6 +32,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - PORT=3000
+      - TZ=Asia/Ho_Chi_Minh
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173,https://localhost}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -50,10 +51,10 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin123}
       - MINIO_BUCKET=${MINIO_BUCKET:-kidmeal-uploads}
-      - VNPAY_TMN_CODE=${VNPAY_TMN_CODE:-SANDBOX01TMN}
-      - VNPAY_HASH_SECRET=${VNPAY_HASH_SECRET:-SECRETSECRETSECRETSECRETSECRET123}
-      - VNPAY_URL=${VNPAY_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
-      - VNPAY_RETURN_URL=${VNPAY_RETURN_URL:-https://localhost/payments/vnpay-return}
+      - VNPAY_TMN_CODE=6JM89YDG
+      - VNPAY_HASH_SECRET=JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL
+      - VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      - VNPAY_RETURN_URL=http://localhost:5173/payments/vnpay-return
       - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
       - MAIL_PORT=${MAIL_PORT:-587}
       - MAIL_SECURE=${MAIL_SECURE:-false}

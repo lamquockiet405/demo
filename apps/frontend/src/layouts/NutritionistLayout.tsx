@@ -28,6 +28,9 @@ export const NutritionistLayout: React.FC = () => {
   // 10 Tabs ngang chuẩn xác theo ảnh thiết kế NutriKid
   const navTabs = [
     { label: 'Tổng quan', path: '/nutritionist/dashboard' },
+    { label: 'Chỉ huy Dinh dưỡng (UC92)', path: '/nutritionist/nutrition-physical' },
+    { label: 'Cảnh báo trẻ (UC93)', path: '/nutritionist/alerts' },
+    { label: 'Vận hành Bữa ăn (UC94)', path: '/meal-operations-report' },
     { label: 'Học sinh', path: '/nutritionist/children' },
     { label: 'Dị ứng', path: '/nutritionist/allergens' },
     { label: 'Kén ăn & Tư vấn', path: '/nutritionist/picky-eating' },
@@ -36,11 +39,13 @@ export const NutritionistLayout: React.FC = () => {
     { label: 'Quy tắc dinh dưỡng', path: '/nutritionist/rules' },
     { label: 'Quy tắc Tần suất & Món', path: '/nutritionist/food-group-rules' },
     { label: 'Thực đơn', path: '/nutritionist/menus' },
+    { label: 'Tuân thủ ATTP (UC95)', path: '/nutritionist/food-safety' },
     { label: 'Đi chợ (Gross)', path: '/nutritionist/purchasing' },
     { label: 'Kiểm thực', path: '/nutritionist/food-safety' },
     { label: 'Lưu mẫu 24h', path: '/nutritionist/samples' },
     { label: 'Tăng trưởng', path: '/nutritionist/growth' },
     { label: 'Báo cáo', path: '/nutritionist/reports' },
+    { label: 'Đánh giá Phụ huynh (UC97)', path: '/nutritionist/parent-evaluations' },
   ];
 
   // Xác định tiêu đề breadcrumb theo URL hiện tại

@@ -25,7 +25,7 @@ interface Props {
 }
 
 const SERVICE_TYPE_OPTIONS = [
-  { value: 'AFTER_SCHOOL_SNACK', label: 'Bữa ăn xế chiều' },
+  { value: 'AFTER_SCHOOL_SNACK', label: 'Suất ăn sáng dinh dưỡng' },
   { value: 'PREMIUM_MILK', label: 'Sữa tươi cao cấp' },
   { value: 'ORGANIC_FRUIT', label: 'Trái cây hữu cơ' },
   { value: 'CUSTOM_NUTRITION', label: 'Dinh dưỡng đặc biệt' },
@@ -46,7 +46,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -105,6 +105,11 @@ export const EditSnackServiceModal: React.FC<Props> = ({
       return;
     }
 
+    if (availableFrom && availableTo && new Date(availableTo).getTime() < new Date(availableFrom).getTime()) {
+      setSubmitMessage({ type: 'error', text: 'Ngày kết thúc phải sau ngày bắt đầu' });
+      return;
+    }
+
     setSubmitting(true);
     setSubmitMessage(null);
 
@@ -115,18 +120,36 @@ export const EditSnackServiceModal: React.FC<Props> = ({
         serviceType,
         billingCycle,
         pricePerUnit,
+        feeAmount: pricePerUnit * 22,
         isActive,
+        status: isActive ? 'OPEN' : 'CLOSED',
+        startDate: availableFrom || undefined,
+        endDate: availableTo || undefined,
         availableFrom: availableFrom || undefined,
         availableTo: availableTo || undefined,
       };
 
       const res = await updateSnackService(serviceId, dto);
       if (res.success) {
-        setSubmitMessage({ type: 'success', text: res.message || 'Cập nhật cấu hình gói dịch vụ thành công!' });
-        setTimeout(() => {
-          onSuccess();
-          onClose();
-        }, 1200);
+        if (res.warning) {
+          setSubmitMessage({
+            type: 'warning',
+            text: `${res.message} ⚠️ ${res.warning}`,
+          });
+          setTimeout(() => {
+            onSuccess();
+            onClose();
+          }, 3000);
+        } else {
+          setSubmitMessage({
+            type: 'success',
+            text: res.message || 'Cập nhật cấu hình gói dịch vụ ăn sáng thành công!',
+          });
+          setTimeout(() => {
+            onSuccess();
+            onClose();
+          }, 1500);
+        }
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Có lỗi xảy ra khi cập nhật gói dịch vụ.';
@@ -160,7 +183,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               Chỉnh Sửa Cấu Hình Gói Dịch Vụ
             </h2>
             <p className="text-[11px] text-slate-500 mt-1 ml-10">
-              UC57 • Cập nhật thông tin gói ăn xế, đơn giá và thời gian áp dụng trực tiếp trong PostgreSQL DB
+              UC57 • Cập nhật thông tin gói suất ăn sáng, đơn giá và thời gian áp dụng trực tiếp trong PostgreSQL DB
             </p>
           </div>
           <button
@@ -195,7 +218,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               {/* Tên gói */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-1.5">
-                  Tên gói dịch vụ ăn xế *
+                  Tên gói dịch vụ suất ăn sáng *
                 </label>
                 <input
                   type="text"
@@ -211,7 +234,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1.5">
-                    Loại dịch vụ ăn xế *
+                    Loại dịch vụ ăn sáng *
                   </label>
                   <select
                     value={serviceType}
@@ -371,18 +394,22 @@ export const EditSnackServiceModal: React.FC<Props> = ({
             {/* Notification message */}
             {submitMessage && (
               <div
-                className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-bold ${
+                className={`flex items-start gap-2 p-3 rounded-xl border text-xs font-bold ${
                   submitMessage.type === 'success'
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : submitMessage.type === 'warning'
+                    ? 'bg-amber-50 border-amber-300 text-amber-800'
                     : 'bg-rose-50 border-rose-200 text-rose-700'
                 }`}
               >
                 {submitMessage.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                ) : submitMessage.type === 'warning' ? (
+                  <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 )}
-                <span>{submitMessage.text}</span>
+                <span className="whitespace-pre-line leading-relaxed">{submitMessage.text}</span>
               </div>
             )}
           </form>
