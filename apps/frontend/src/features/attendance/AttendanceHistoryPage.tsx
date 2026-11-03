@@ -17,7 +17,11 @@ import {
 } from './types';
 import { Loader2, AlertCircle, X, ShieldCheck, HeartHandshake, PhoneCall } from 'lucide-react';
 
-export const AttendanceHistoryPage: React.FC = () => {
+interface AttendanceHistoryPageProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ onTabChange }) => {
   const navigate = useNavigate();
 
   // State
@@ -109,10 +113,14 @@ export const AttendanceHistoryPage: React.FC = () => {
 
   // Tab change handler
   const handleTabChange = (tab: string) => {
+    if (onTabChange) {
+      onTabChange(tab);
+      return;
+    }
     if (tab === 'notes') navigate('/coordination-notes');
-    else if (tab === 'attendance') navigate('/attendance');
-    else if (tab === 'evaluation') navigate('/evaluation');
-    else if (tab === 'history') navigate('/history');
+    else if (tab === 'attendance') navigate('/tablet');
+    else if (tab === 'evaluation') navigate('/tablet/record');
+    else if (tab === 'history') navigate('/tablet?tab=history');
   };
 
   // Date range navigator handlers

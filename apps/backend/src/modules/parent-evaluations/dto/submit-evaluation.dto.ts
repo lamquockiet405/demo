@@ -60,4 +60,32 @@ export class SubmitEvaluationDto {
   @IsOptional()
   @IsString()
   likesInfo?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  attributes?: any;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  isDrafting?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  parentNameCustom?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  childNameCustom?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  classNameCustom?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  feedbackDate?: string;
 }

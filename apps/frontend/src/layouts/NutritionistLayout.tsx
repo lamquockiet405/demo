@@ -30,6 +30,7 @@ export const NutritionistLayout: React.FC = () => {
     { label: 'Tổng quan', path: '/nutritionist/dashboard' },
     { label: 'Học sinh', path: '/nutritionist/children' },
     { label: 'Dị ứng', path: '/nutritionist/allergens' },
+    { label: 'Kén ăn & Tư vấn', path: '/nutritionist/picky-eating' },
     { label: 'Nguyên liệu', path: '/nutritionist/foods' },
     { label: 'Món ăn & Công thức', path: '/nutritionist/dishes' },
     { label: 'Quy tắc dinh dưỡng', path: '/nutritionist/rules' },

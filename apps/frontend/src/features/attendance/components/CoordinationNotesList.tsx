@@ -21,8 +21,8 @@ interface CoordinationNotesListProps {
   isLoading: boolean;
   onEditNote: (note: CoordinationNoteItem) => void;
   onDeleteNote: (noteId: string) => void;
-  onAcknowledgeNote: (note: CoordinationNoteItem) => void;
-  onResolveNote: (note: CoordinationNoteItem) => void;
+  onAcknowledgeNote?: (note: CoordinationNoteItem) => void;
+  onResolveNote?: (note: CoordinationNoteItem) => void;
 }
 
 export const CoordinationNotesList: React.FC<CoordinationNotesListProps> = ({
@@ -214,37 +214,35 @@ export const CoordinationNotesList: React.FC<CoordinationNotesListProps> = ({
               </div>
             )}
 
-            {/* Actions Bar */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {/* Fast Kitchen Acknowledge button */}
+            {/* Actions Bar for Teacher */}
+            <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2 text-xs">
                 {note.status === 'PENDING' && (
-                  <button
-                    onClick={() => onAcknowledgeNote(note)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-xs transition"
-                  >
-                    <ChefHat className="w-3.5 h-3.5" />
-                    <span>Bếp xác nhận tiếp nhận</span>
-                  </button>
+                  <span className="inline-flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/60 font-semibold">
+                    <Clock className="w-3.5 h-3.5 text-amber-500 animate-spin" />
+                    Đang gửi dặn dò &amp; Chờ Bếp Bán Trú xác nhận
+                  </span>
                 )}
-
-                {/* Fast Resolve button */}
-                {note.status !== 'RESOLVED' && (
-                  <button
-                    onClick={() => onResolveNote(note)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Đánh dấu hoàn thành</span>
-                  </button>
+                {(note.status === 'ACKNOWLEDGED' || note.status === 'PROCESSING') && (
+                  <span className="inline-flex items-center gap-1.5 text-sky-800 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200/60 font-semibold">
+                    <ChefHat className="w-3.5 h-3.5 text-sky-600" />
+                    Bếp đã tiếp nhận — Khay ăn đang được chuẩn bị đúng dặn dò
+                  </span>
+                )}
+                {note.status === 'RESOLVED' && (
+                  <span className="inline-flex items-center gap-1.5 text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60 font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Suất ăn đã được điều phối và hoàn tất tại lớp
+                  </span>
                 )}
               </div>
 
               <div className="flex items-center gap-2">
                 {/* Edit Note */}
                 <button
+                  type="button"
                   onClick={() => onEditNote(note)}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition border border-slate-200"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-teal-700 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-slate-500" />
                   <span>Sửa</span>
@@ -252,8 +250,9 @@ export const CoordinationNotesList: React.FC<CoordinationNotesListProps> = ({
 
                 {/* Delete Note */}
                 <button
+                  type="button"
                   onClick={() => onDeleteNote(note.id)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition border border-rose-200"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition border border-rose-200"
                   title="Xóa ghi chú này"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

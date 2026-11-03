@@ -47,7 +47,14 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
   const isAllSelected = children.length > 0 && children.every((c) => selectedChildIds.includes(c.id));
 
   // Render Diet badge styling
-  const renderMenuBadge = (badge: MealEvaluationItem['menuBadge']) => {
+  const renderMenuBadge = (badge?: MealEvaluationItem['menuBadge']) => {
+    if (!badge || !badge.type) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200/80 whitespace-nowrap">
+          Suất chuẩn
+        </span>
+      );
+    }
     switch (badge.type) {
       case 'allergy':
         return (
@@ -85,7 +92,30 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
   };
 
   // Render Send status badge styling
-  const renderSendStatus = (sendState: MealEvaluationItem['sendState']) => {
+  const renderSendStatus = (sendState?: MealEvaluationItem['sendState']) => {
+    if (!sendState || !sendState.status) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+          <Clock className="w-3 h-3 text-amber-600" />
+          Chờ gửi Bếp
+        </span>
+      );
+    }
+    if (sendState.status === 'SENT') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          {sendState.label || 'Đã gửi Bếp'}
+        </span>
+      );
+    }
+    if (sendState.status === 'ABSENT') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap">
+          Nghỉ học
+        </span>
+      );
+    }
     if (sendState.status === 'URGENT_PARENT') {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap">
@@ -94,18 +124,10 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
         </span>
       );
     }
-    if (sendState.status === 'PENDING') {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
-          <Clock className="w-3 h-3 text-amber-600" />
-          {sendState.label}
-        </span>
-      );
-    }
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200 whitespace-nowrap">
-        <Clock className="w-3 h-3 text-sky-600" />
-        {sendState.label}
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+        <Clock className="w-3 h-3 text-amber-600" />
+        {sendState.label || 'Chờ gửi Bếp'}
       </span>
     );
   };
@@ -147,7 +169,7 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                 <th className="py-3 px-3 w-12 text-center">STT</th>
                 <th className="py-3 px-4 min-w-[200px]">Học sinh</th>
                 <th className="py-3 px-4 min-w-[220px]">Thực đơn của bé</th>
-                <th className="py-3 px-4 min-w-[290px] text-center">Mức độ ăn của bé</th>
+                <th className="py-3 px-4 min-w-[380px] text-center">Mức độ ăn của bé (5 Mức độ)</th>
                 <th className="py-3 px-4 min-w-[170px] text-center">Nước/Sữa uống thêm</th>
                 <th className="py-3 px-3 w-20 text-center">Ghi chú của cô</th>
                 <th className="py-3 px-4 min-w-[150px] text-center">Trạng thái gửi</th>
@@ -230,44 +252,75 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
                           </span>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-1.5">
-                          {/* Option 1: Ăn hết suất */}
+                        <div className="flex items-center justify-center gap-1">
+                          {/* 1. Ăn hết 100% */}
                           <button
                             type="button"
                             onClick={() => onUpdatePortion(child.id, 'ALL')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'ALL'
-                              ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
+                            title="Ăn hết 100% suất"
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'ALL'
+                              ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/30'
+                              : 'bg-slate-100 text-slate-600 hover:bg-teal-50 hover:text-teal-700'
                               }`}
                           >
                             <Smile className="w-3.5 h-3.5" />
-                            <span>Ăn hết suất</span>
+                            <span>Ăn hết</span>
                           </button>
 
-                          {/* Option 2: Một nửa */}
+                          {/* 2. Ăn nhiều 75% */}
+                          <button
+                            type="button"
+                            onClick={() => onUpdatePortion(child.id, 'MOST')}
+                            title="Ăn nhiều (~75% suất)"
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'MOST'
+                              ? 'bg-sky-600 text-white shadow-sm ring-2 ring-sky-600/30'
+                              : 'bg-slate-100 text-slate-600 hover:bg-sky-50 hover:text-sky-700'
+                              }`}
+                          >
+                            <Smile className="w-3.5 h-3.5" />
+                            <span>Ăn nhiều</span>
+                          </button>
+
+                          {/* 3. Một nửa 50% */}
                           <button
                             type="button"
                             onClick={() => onUpdatePortion(child.id, 'HALF')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'HALF'
-                              ? 'bg-amber-700 text-white shadow-sm ring-2 ring-amber-700/20'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
+                            title="Ăn một nửa (50% suất)"
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'HALF'
+                              ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-600/30'
+                              : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700'
                               }`}
                           >
                             <Meh className="w-3.5 h-3.5" />
                             <span>Một nửa</span>
                           </button>
 
-                          {/* Option 3: Ăn ít */}
+                          {/* 4. Ăn ít 25% */}
                           <button
                             type="button"
-                            onClick={() => onUpdatePortion(child.id, 'NONE')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'NONE'
-                              ? 'bg-rose-700 text-white shadow-sm ring-2 ring-rose-700/20'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800'
+                            onClick={() => onUpdatePortion(child.id, 'LITTLE')}
+                            title="Ăn ít (~25% suất)"
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'LITTLE'
+                              ? 'bg-orange-600 text-white shadow-sm ring-2 ring-orange-600/30'
+                              : 'bg-slate-100 text-slate-600 hover:bg-orange-50 hover:text-orange-700'
                               }`}
                           >
                             <Frown className="w-3.5 h-3.5" />
                             <span>Ăn ít</span>
+                          </button>
+
+                          {/* 5. Bỏ ăn 0% */}
+                          <button
+                            type="button"
+                            onClick={() => onUpdatePortion(child.id, 'NONE')}
+                            title="Bỏ ăn / Từ chối (0%)"
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-xs ${child.portionConsumed === 'NONE'
+                              ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-600/30'
+                              : 'bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-700'
+                              }`}
+                          >
+                            <Frown className="w-3.5 h-3.5" />
+                            <span>Bỏ ăn</span>
                           </button>
                         </div>
                       )}
@@ -318,16 +371,37 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
             <button
               onClick={() => onBatchMarkPortion('ALL')}
               disabled={selectedChildIds.length === 0}
-              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-teal-200 bg-white hover:bg-teal-50 text-teal-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
+              className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-teal-200 bg-white hover:bg-teal-50 text-teal-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
             >
-              Đánh dấu ăn hết (100%)
+              Ăn hết (100%)
+            </button>
+            <button
+              onClick={() => onBatchMarkPortion('MOST')}
+              disabled={selectedChildIds.length === 0}
+              className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-sky-200 bg-white hover:bg-sky-50 text-sky-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Ăn nhiều (75%)
             </button>
             <button
               onClick={() => onBatchMarkPortion('HALF')}
               disabled={selectedChildIds.length === 0}
-              className="px-3 py-1.5 text-xs font-bold rounded-xl border border-amber-200 bg-white hover:bg-amber-50 text-amber-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
+              className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-amber-200 bg-white hover:bg-amber-50 text-amber-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
             >
-              Đánh dấu ăn nửa (50%)
+              Một nửa (50%)
+            </button>
+            <button
+              onClick={() => onBatchMarkPortion('LITTLE')}
+              disabled={selectedChildIds.length === 0}
+              className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-orange-200 bg-white hover:bg-orange-50 text-orange-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Ăn ít (25%)
+            </button>
+            <button
+              onClick={() => onBatchMarkPortion('NONE')}
+              disabled={selectedChildIds.length === 0}
+              className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-700 shadow-xs transition disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Bỏ ăn (0%)
             </button>
           </div>
 

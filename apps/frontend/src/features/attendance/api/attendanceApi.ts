@@ -64,6 +64,7 @@ export const attendanceApi = {
     classId: string;
     date: string;
     notes?: string;
+    isLocked?: boolean;
   }) => {
     const res = await apiClient.post('/attendance/lock-kitchen', data);
     return res.data;

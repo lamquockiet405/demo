@@ -393,7 +393,13 @@ export const KitchenDisplayLayout: React.FC = () => {
               to="/meal-portions"
               className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"
             >
-              ⚖️ Định Lượng (UC56)
+              ⚖️ Định Lượng Suất Ăn
+            </Link>
+            <Link
+              to="/snack-roster"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            >
+              🥛 Phục Vụ Ăn Xế
             </Link>
           </div>
 

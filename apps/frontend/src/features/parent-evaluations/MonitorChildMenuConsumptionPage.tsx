@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SubmitMealEvaluationPage } from './SubmitMealEvaluationPage';
 import { parentEvaluationApi } from './api/parentEvaluationApi';
 import { ChildMenuConsumptionData } from './types';
 import { ParentPortalTopNav } from './components/ParentPortalTopNav';
@@ -8,10 +10,15 @@ import { DaySelectorTabs } from './components/DaySelectorTabs';
 import { DailySessionsTimeline } from './components/DailySessionsTimeline';
 import { NutritionOverviewCard } from './components/NutritionOverviewCard';
 import { WeeklyConsumptionHistoryTable } from './components/WeeklyConsumptionHistoryTable';
+import { ParentNutritionAdviceCard } from './components/ParentNutritionAdviceCard';
 import { PortalFooter } from './components/PortalFooter';
 import { Loader2, Utensils, Sparkles, RefreshCw } from 'lucide-react';
 
 export const MonitorChildMenuConsumptionPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  if (searchParams.get('tab') === 'evaluation') {
+    return <SubmitMealEvaluationPage />;
+  }
   const [data, setData] = useState<ChildMenuConsumptionData | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -149,6 +156,9 @@ export const MonitorChildMenuConsumptionPage: React.FC = () => {
 
         {/* 3. KPI Metrics Overview Strip */}
         <ConsumptionKPIStrip metrics={metrics} />
+
+        {/* 3.1. Hướng dẫn bổ sung dinh dưỡng tại nhà cho bé kén ăn */}
+        <ParentNutritionAdviceCard childId={child.id} />
 
         {/* 3.1. Trạng thái đồng bộ với thực đơn trường đã công bố */}
         {isMenuPublished ? (

@@ -12,8 +12,10 @@ import {
   ParentEvaluationSummaryStats,
 } from './types';
 import { ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../../core/stores/auth.store';
 
 export const ParentEvaluationsPage: React.FC = () => {
+  const { user } = useAuthStore();
   // Filter States
   const [search, setSearch] = useState<string>('');
   const [statusTab, setStatusTab] = useState<string>('ALL');
@@ -67,7 +69,7 @@ export const ParentEvaluationsPage: React.FC = () => {
       const updated = await parentEvaluationApi.respondToEvaluation(id, {
         responseContent,
         pushNotification,
-        respondedByName: 'Hiệu trưởng Nguyễn Thu Thủy',
+        respondedByName: user?.fullName || 'Ban Giám Hiệu',
         status: 'RESPONDED',
         isDrafting: false,
       });

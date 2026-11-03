@@ -24,6 +24,7 @@ import { ParentEvaluationsModule } from './modules/parent-evaluations/parent-eva
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { FinancesModule } from './modules/finances/finances.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { NutritionAdviceModule } from './modules/nutrition-advice/nutrition-advice.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     DashboardModule,
     FinancesModule,
     AuditLogsModule,
+    NutritionAdviceModule,
   ],
 })
 export class AppModule implements NestModule {
