@@ -25,7 +25,7 @@ interface Props {
 }
 
 const SERVICE_TYPE_OPTIONS = [
-  { value: 'AFTER_SCHOOL_SNACK', label: 'Bữa ăn xế chiều' },
+  { value: 'AFTER_SCHOOL_SNACK', label: 'Suất ăn sáng dinh dưỡng' },
   { value: 'PREMIUM_MILK', label: 'Sữa tươi cao cấp' },
   { value: 'ORGANIC_FRUIT', label: 'Trái cây hữu cơ' },
   { value: 'CUSTOM_NUTRITION', label: 'Dinh dưỡng đặc biệt' },
@@ -183,7 +183,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               Chỉnh Sửa Cấu Hình Gói Dịch Vụ
             </h2>
             <p className="text-[11px] text-slate-500 mt-1 ml-10">
-              UC57 • Cập nhật thông tin gói ăn xế, đơn giá và thời gian áp dụng trực tiếp trong PostgreSQL DB
+              UC57 • Cập nhật thông tin gói suất ăn sáng, đơn giá và thời gian áp dụng trực tiếp trong PostgreSQL DB
             </p>
           </div>
           <button
@@ -218,7 +218,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               {/* Tên gói */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-1.5">
-                  Tên gói dịch vụ ăn xế *
+                  Tên gói dịch vụ suất ăn sáng *
                 </label>
                 <input
                   type="text"
@@ -234,7 +234,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1.5">
-                    Loại dịch vụ ăn xế *
+                    Loại dịch vụ ăn sáng *
                   </label>
                   <select
                     value={serviceType}

@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AttendanceService } from './services/attendance.service';
@@ -151,8 +152,38 @@ export class AttendanceController {
   }
 
   @Get('snack-roster')
-  @ApiOperation({ summary: 'Lấy danh sách suất ăn xế chiều của trẻ' })
-  async getSnackRoster(@Query() query: SnackRosterQueryDto) {
-    return this.snackRosterService.findAll(query);
+  @ApiOperation({
+    summary:
+      'Lấy danh sách trẻ đã đóng tiền ăn xế chiều 17h để Giáo viên điểm danh & gửi Bếp (Chặn CGDD)',
+  })
+  async getSnackRoster(@Query() query: SnackRosterQueryDto, @Req() req?: any) {
+    return this.snackRosterService.findAll(query, req?.user);
+  }
+
+  @Put('snack-roster/:studentId/attendance')
+  @ApiOperation({ summary: 'Giáo viên điểm danh ăn xế cho trẻ đã đóng tiền (PAID)' })
+  async markSnackAttendance(
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @Body() body: { date?: string; isAttended: boolean; note?: string },
+    @CurrentUser('sub') userId?: number,
+  ) {
+    return this.snackRosterService.markSnackAttendance(studentId, body, userId);
+  }
+
+  @Post('snack-roster/dispatch-kitchen')
+  @ApiOperation({ summary: 'Giáo viên chốt và gửi danh sách trẻ đã đóng tiền ăn xế xuống Bếp' })
+  async dispatchSnackRosterToKitchen(
+    @Body() body: { classId?: string; date?: string; notes?: string },
+    @CurrentUser('sub') userId?: number,
+  ) {
+    return this.snackRosterService.dispatchSnackRosterToKitchen(body, userId);
+  }
+
+  @Get('snack-roster/kitchen-portions')
+  @ApiOperation({
+    summary: 'Nhân viên Bếp nhận danh sách khẩu phần ăn xế từ Giáo viên gửi xuống (Chỉ trẻ đã đóng tiền)',
+  })
+  async getKitchenSnackPortions(@Query('date') date?: string) {
+    return this.snackRosterService.getKitchenSnackPortions(date);
   }
 }

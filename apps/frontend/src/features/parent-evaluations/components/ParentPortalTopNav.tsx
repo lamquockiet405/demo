@@ -86,14 +86,14 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
             </Link>
             {/* Tab 3: Mua Gói Ăn Sáng VNPAY */}
             <Link
-              to="/parent-breakfast"
+              to="/parent-snack-payment"
               className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${activeTab === 'breakfast' || activeTab === 'snacks'
                   ? 'bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-xs'
                   : 'text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 font-bold border border-amber-200'
                 }`}
             >
               <Coffee className="w-3.5 h-3.5" />
-              <span>Gói Ăn Sáng (VNPAY)</span>
+              <span>Suất Ăn Sáng (VNPAY)</span>
             </Link>
 
 
@@ -134,23 +134,23 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({ child, a
                 {(user as any)?.avatar ? (
                   <img
                     src={(user as any).avatar}
-                    alt={user?.fullName || child.parentName || 'Phụ huynh'}
+                    alt={user?.fullName || child?.parentName || 'Phụ huynh'}
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
                   <img
                     src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80"
-                    alt={child.parentName || 'Chị Hoàng Yến'}
+                    alt={child?.parentName || 'Chị Hoàng Yến'}
                     className="w-full h-full object-cover rounded-full"
                   />
                 )}
               </div>
               <div className="text-left hidden sm:block">
                 <p className="text-xs font-bold text-slate-800 leading-tight">
-                  {user?.fullName || child.parentName || 'Chị Hoàng Yến'}
+                  {user?.fullName || child?.parentName || 'Chị Hoàng Yến'}
                 </p>
                 <p className="text-[11px] text-slate-500 font-medium">
-                  {child.parentRole || 'Phụ huynh'}
+                  {child?.parentRole || 'Phụ huynh'}
 
                 </p>
               </div>

@@ -31,6 +31,10 @@ import { FoodSafetyComplianceReportPage } from './features/food-safety/pages/Foo
 import { SnackServiceRevenueReportPage } from './features/finances/pages/SnackServiceRevenueReportPage';
 import { ParentEvaluationSummaryReportPage } from './features/parent-evaluations/pages/ParentEvaluationSummaryReportPage';
 import { RoleBasedGrowthNotificationsPage } from './features/growth/pages/RoleBasedGrowthNotificationsPage';
+import { ParentSnackPaymentPage } from './features/payments/pages/ParentSnackPaymentPage';
+import { VnpayReturnPage } from './features/payments/pages/VnpayReturnPage';
+import { SnackBillingPaymentPage } from './features/payments/pages/SnackBillingPaymentPage';
+import { SnackServicesPage } from './features/snack-services/pages/SnackServicesPage';
 
 import { ProtectedRoute } from './core/components/ProtectedRoute';
 import { useAuthStore } from './core/stores/auth.store';
@@ -227,6 +231,8 @@ export const App: React.FC = () => {
           <Route path="parent-evaluations" element={<ParentEvaluationSummaryReportPage />} />
           <Route path="evaluations" element={<ParentEvaluationSummaryReportPage />} />
           <Route path="growth-notifications" element={<RoleBasedGrowthNotificationsPage />} />
+          <Route path="snack-services" element={<SnackServicesPage />} />
+          <Route path="services" element={<SnackServicesPage />} />
           <Route path="reports" element={<NutritionistDashboardPage />} />
         </Route>
 
@@ -259,7 +265,7 @@ export const App: React.FC = () => {
         {/* ─── 2. PHÂN HỆ CỔNG BAN GIÁM HIỆU / ADMIN ─── */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={['PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT', 'TEACHER']}>
+            <ProtectedRoute allowedRoles={['PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER', 'NUTRITIONIST', 'KITCHEN_STAFF']}>
               <AdminDashboardLayout />
             </ProtectedRoute>
           }
@@ -272,7 +278,8 @@ export const App: React.FC = () => {
           <Route path="/inventory" element={<NutritionRulesPage />} />
           <Route path="/menu-approval" element={<PrincipalMenuApprovalPage />} />
           <Route path="/menu-planning" element={<MenuPlanningPage />} />
-          <Route path="/services" element={<WeeklyMenuManagementPage />} />
+          <Route path="/services" element={<SnackServicesPage />} />
+          <Route path="/snack-services" element={<SnackServicesPage />} />
           <Route path="/food-safety" element={<FoodSafetyComplianceReportPage />} />
           <Route path="/food-safety-report" element={<FoodSafetyComplianceReportPage />} />
           <Route path="/food-safety-compliance" element={<FoodSafetyComplianceReportPage />} />
@@ -291,7 +298,7 @@ export const App: React.FC = () => {
           <Route path="/child-alerts" element={<RoleSpecificChildAlertsPage />} />
           <Route path="/meal-operations-report" element={<MealOperationsReportPage />} />
           <Route path="/meal-operations" element={<MealOperationsReportPage />} />
-          <Route path="/payments" element={<WeeklyMenuManagementPage />} />
+          <Route path="/payments" element={<SnackBillingPaymentPage />} />
         </Route>
 
         {/* ─── 3. PHÂN HỆ TABLET GIÁO VIÊN ─── */}
@@ -329,13 +336,30 @@ export const App: React.FC = () => {
         <Route
           path="/child-menu-consumption"
           element={
-            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL']}>
+            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER']}>
               <MonitorChildMenuConsumptionPage />
             </ProtectedRoute>
           }
         />
 
         {/* Catch-all: Điều hướng về /home */}
+                <Route
+          path="/parent-snack-payment"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER']}>
+              <ParentSnackPaymentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent-breakfast"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT', 'SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'TEACHER']}>
+              <ParentSnackPaymentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/payments/vnpay-return" element={<VnpayReturnPage />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>

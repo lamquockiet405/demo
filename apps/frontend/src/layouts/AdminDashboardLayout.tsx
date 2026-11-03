@@ -88,7 +88,7 @@ export const AdminDashboardLayout: React.FC = () => {
     { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
     { label: 'Tuân thủ ATTP & Kiểm thực (UC95)', path: '/food-safety', icon: ShieldCheck },
     { label: 'Nhật ký kiểm toán', path: '/audit-logs', icon: ShieldAlert },
-    { label: 'Báo cáo tài chính & Ăn xế (UC96)', path: '/snack-revenue-report', icon: CircleDollarSign },
+    { label: 'Báo cáo tài chính & Ăn sáng (UC96)', path: '/snack-revenue-report', icon: CircleDollarSign },
     { label: 'Đánh giá Phụ huynh & CSAT (UC97)', path: '/parent-evaluation-report', icon: Star },
     { label: 'Cài đặt trường học', path: '/settings', icon: Settings },
   ];
@@ -102,14 +102,14 @@ export const AdminDashboardLayout: React.FC = () => {
     if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
     if (location.pathname.startsWith('/classes')) return 'Quản trị Lớp học & Học sinh';
     if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
-    if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Ăn xế';
+    if (location.pathname.startsWith('/services')) return 'Dịch vụ Bán trú & Suất ăn sáng';
     if (location.pathname.startsWith('/inventory')) return 'Kho nguyên liệu & Tiêu chuẩn dinh dưỡng';
     if (location.pathname.startsWith('/food-safety')) return 'Báo Cáo Tuân Thủ An Toàn Thực Phẩm (UC95)';
     if (location.pathname.startsWith('/audit-logs')) return 'Nhật ký Kiểm toán & Truy vết Dữ liệu Nhạy cảm (Audit Logs)';
     if (location.pathname.startsWith('/parent-evaluation'))
       return 'Báo Cáo Tổng Hợp Đánh Giá Phụ Huynh & CSAT (UC97)';
     if (location.pathname.startsWith('/snack-revenue') || location.pathname.startsWith('/finances'))
-      return 'Báo Cáo Doanh Thu Dịch Vụ Ăn Xế (UC96)';
+      return 'Báo Cáo Doanh Thu Dịch Vụ Suất Ăn Sáng (UC96)';
     if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/tenant/settings'))
       return 'Cài đặt thông tin Trường mầm non';
     if (location.pathname.startsWith('/dashboard')) return 'Dashboard Tổng quan';

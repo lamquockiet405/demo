@@ -717,12 +717,12 @@ export const SnackServiceRevenueReportPage: React.FC = () => {
                     <thead className="bg-slate-50 dark:bg-slate-700/50 text-xs font-semibold text-slate-500 uppercase">
                       <tr>
                         <th className="py-2.5 px-3">Mã Giao Dịch VNPAY</th>
-                        <th className="py-2.5 px-3">Học Sinh</th>
-                        <th className="py-2.5 px-3">Lớp Học</th>
+                        <th className="py-2.5 px-3">Học Sinh & Lớp</th>
+                        <th className="py-2.5 px-3">Tên Phụ Huynh</th>
+                        <th className="py-2.5 px-3">Gói Dịch Vụ</th>
                         <th className="py-2.5 px-3 text-right">Số Tiền</th>
-                        <th className="py-2.5 px-3">Phương Thức</th>
-                        <th className="py-2.5 px-3">Thời Điểm Ghi Có</th>
-                        <th className="py-2.5 px-3">Mã Bút Toán Ngân Hàng</th>
+                        <th className="py-2.5 px-3">Ngày Thanh Toán</th>
+                        <th className="py-2.5 px-3">Mã Ngân Hàng</th>
                         <th className="py-2.5 px-3 text-center">Trạng Thái</th>
                       </tr>
                     </thead>
@@ -732,25 +732,29 @@ export const SnackServiceRevenueReportPage: React.FC = () => {
                           <td className="py-3 px-3 font-mono text-xs font-bold text-slate-900 dark:text-white">
                             {tx.transactionCode}
                           </td>
-                          <td className="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200">
-                            {tx.studentName}
+                          <td className="py-3 px-3">
+                            <div className="font-semibold text-slate-800 dark:text-slate-200">{tx.studentName}</div>
+                            <div className="text-[11px] text-slate-500">{tx.className}</div>
                           </td>
-                          <td className="py-3 px-3 text-xs text-slate-500">
-                            {tx.className}
+                          <td className="py-3 px-3">
+                            <div className="font-bold text-indigo-700 dark:text-indigo-300 text-xs">
+                              {tx.parentName || 'Phụ huynh học sinh'}
+                            </div>
+                            {tx.parentPhone && (
+                              <div className="text-[10px] font-mono text-slate-400">{tx.parentPhone}</div>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-xs text-slate-600 dark:text-slate-300 font-medium">
+                            {tx.packageName || 'Gói Ăn Xế 17h00'}
                           </td>
                           <td className="py-3 px-3 text-right font-black text-emerald-600">
                             {tx.amount.toLocaleString('vi-VN')} đ
                           </td>
-                          <td className="py-3 px-3 text-xs">
-                            <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold text-[11px]">
-                              {tx.paymentMethod}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 text-xs text-slate-500">
+                          <td className="py-3 px-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
                             {new Date(tx.paidAt).toLocaleString('vi-VN')}
                           </td>
                           <td className="py-3 px-3 font-mono text-xs text-slate-600">
-                            {tx.bankRef}
+                            {tx.bankRef} ({tx.paymentMethod})
                           </td>
                           <td className="py-3 px-3 text-center">
                             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center justify-center gap-1 mx-auto w-fit">

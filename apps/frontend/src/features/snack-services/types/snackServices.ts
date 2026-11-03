@@ -1,3 +1,17 @@
+export interface SnackMenuDayItem {
+  dayOfWeek: number;
+  dayLabel: string;
+  servingTime: string;
+  mainDish: string;
+  drinkItem: string;
+  fruitOrSide: string;
+  caloriesKcal: number;
+  proteinG: number;
+  calciumMg: number;
+  allergenTags: string[];
+  nutritionNote?: string;
+}
+
 export interface SnackServiceItem {
   id: string;
   name: string;
@@ -18,6 +32,41 @@ export interface SnackServiceItem {
   badges: string[];
   isActive: boolean;
   paidCount?: number;
+  totalRevenue?: number;
+  menuSchedule?: SnackMenuDayItem[];
+  hidePaymentInfo?: boolean;
+}
+
+export interface ParentSnackPackageItem {
+  periodId: number;
+  periodName: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline: string;
+  servingDays: number;
+  pricePerDay: number;
+  feeAmount: number;
+  periodStatus: string;
+  registrationId: number | null;
+  paymentStatus: 'PAID' | 'PENDING' | 'NOT_REGISTERED' | string;
+  isPaid: boolean;
+  canViewSchedule: boolean;
+  menuSchedule: SnackMenuDayItem[];
+}
+
+export interface ParentSnackOverviewResponse {
+  success: boolean;
+  student: {
+    id: number;
+    fullName: string;
+    studentCode: string;
+    className: string;
+  };
+  hasPaidAnyPackage: boolean;
+  activeSchedule: SnackMenuDayItem[];
+  paidPackageName: string | null;
+  publishedPackages: ParentSnackPackageItem[];
 }
 
 export interface SnackServicesSummary {
@@ -50,14 +99,19 @@ export interface SnackServicesResponse {
   summary: SnackServicesSummary;
   totalCount: number;
   data: SnackServiceItem[];
+  hidePaymentInfo?: boolean;
 }
 
 // UC56 Types
 export interface SnackServiceListItem {
   id: string;
   name: string;
+  description?: string;
   serviceType: string;
+  billingCycle?: string;
   pricePerUnit: number;
+  isActive?: boolean;
+  enrolledCount?: number;
 }
 
 export interface SnackServiceListResponse {
@@ -124,6 +178,7 @@ export interface SnackServiceDetailEntity {
   availableTo: string | null;
   createdAt: string;
   updatedAt: string;
+  menuSchedule?: SnackMenuDayItem[];
 }
 
 export interface SnackServiceDetailResponse {
@@ -137,8 +192,6 @@ export interface UpdateSnackServiceResponse {
   warning?: string;
   data: SnackServiceDetailEntity;
 }
-
-
 
 // UC61 Types - Đăng ký dịch vụ ăn xế (Kiểm tra quy tắc dị ứng)
 export interface RegisterSnackServiceDto {

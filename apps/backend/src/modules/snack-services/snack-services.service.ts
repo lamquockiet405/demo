@@ -8,8 +8,25 @@ import { CreateSnackServicePeriodDto } from './dto/create-snack-service-period.d
 import { UpdateSnackServiceDto } from './dto/update-snack-service.dto';
 import { RegisterSnackServiceDto } from './dto/register-snack-service.dto';
 
+export interface SnackMenuDayItem {
+  dayOfWeek: number;
+  dayLabel: string;
+  servingTime: string;
+  mainDish: string;
+  drinkItem: string;
+  fruitOrSide: string;
+  caloriesKcal: number;
+  proteinG: number;
+  calciumMg: number;
+  allergenTags: string[];
+  nutritionNote?: string;
+}
+
 @Injectable()
 export class SnackServicesService {
+  private readonly customMenuSchedules = new Map<number, SnackMenuDayItem[]>();
+  private readonly customDescriptions = new Map<number, string>();
+
   constructor(
     @InjectRepository(SnackServicePeriod)
     private readonly periodRepo: Repository<SnackServicePeriod>,
@@ -19,7 +36,115 @@ export class SnackServicesService {
     private readonly childRepo: Repository<Child>,
   ) {}
 
-  async findAll() {
+  isNutritionistOnly(user?: any): boolean {
+    if (!user) return false;
+    const roles: string[] = Array.isArray(user.roles)
+      ? user.roles.map((r: any) =>
+          typeof r === 'string' ? r.toUpperCase() : String(r?.code || r?.name || '').toUpperCase(),
+        )
+      : user.role
+      ? [String(user.role).toUpperCase()]
+      : [];
+    const hasManager = roles.some((r) =>
+      ['SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT'].includes(r),
+    );
+    return !hasManager && roles.includes('NUTRITIONIST');
+  }
+
+  normalizeBreakfastText(text?: string): string {
+    if (!text) return 'Dịch vụ Suất ăn sáng';
+    return text
+      .replace(/Ăn Xế Chiều 17h00/gi, 'Suất Ăn Sáng 07h00')
+      .replace(/Ăn Xế Chiều 17h/gi, 'Suất Ăn Sáng 07h00')
+      .replace(/Năng Lượng Chiều 17h00/gi, 'Năng Lượng Sáng 07h00')
+      .replace(/Năng Lượng Chiều 17h/gi, 'Năng Lượng Sáng 07h00')
+      .replace(/Năng Lượng Chiều/gi, 'Năng Lượng Sáng')
+      .replace(/Ăn Xế Chiều/gi, 'Suất Ăn Sáng')
+      .replace(/Ăn xế chiều/gi, 'Suất ăn sáng')
+      .replace(/Suất ăn xế nhẹ lúc 17h00/gi, 'Suất ăn sáng dinh dưỡng lúc 07h00')
+      .replace(/Ăn Xế/g, 'Ăn Sáng')
+      .replace(/Ăn xế/g, 'Ăn sáng')
+      .replace(/ăn xế/g, 'ăn sáng')
+      .replace(/bữa xế/gi, 'bữa sáng');
+  }
+
+  getDefaultSnackMenuSchedule(periodName?: string): SnackMenuDayItem[] {
+    const isPremium = (periodName || '').toLowerCase().includes('cao cấp');
+    return [
+      {
+        dayOfWeek: 2,
+        dayLabel: 'Thứ Hai',
+        servingTime: '07:00 - 07:45',
+        mainDish: isPremium ? 'Bánh Tart Táo Nướng Mật Ong Hữu Cơ' : 'Bánh Bông Lan Phô Mai Tươi & Cháo Yến Mạch',
+        drinkItem: 'Sữa hạt Yến mạch nguyên cám ấm (180ml)',
+        fruitOrSide: 'Chuối Laba chín cây',
+        caloriesKcal: 265,
+        proteinG: 8.8,
+        calciumMg: 190,
+        allergenTags: ['Sữa', 'Trứng', 'Lúa mì'],
+        nutritionNote: 'Bổ sung năng lượng buổi sáng và chất xơ hòa tan beta-glucan từ yến mạch.',
+      },
+      {
+        dayOfWeek: 3,
+        dayLabel: 'Thứ Ba',
+        servingTime: '07:00 - 07:45',
+        mainDish: 'Nui Sao Hầm Thịt Bằm Rau Củ & Sữa Chua Hy Lạp',
+        drinkItem: 'Nước ép Cam Vàng tươi nguyên chất (150ml)',
+        fruitOrSide: 'Bánh quy bơ yến mạch giòn',
+        caloriesKcal: 275,
+        proteinG: 9.2,
+        calciumMg: 210,
+        allergenTags: ['Sữa', 'Lúa mì'],
+        nutritionNote: 'Tăng cường lợi khuẩn Probiotics hỗ trợ tiêu hóa và Vitamin C tự nhiên.',
+      },
+      {
+        dayOfWeek: 4,
+        dayLabel: 'Thứ Tư',
+        servingTime: '07:00 - 07:45',
+        mainDish: 'Phở Gà Ta Mềm & Bánh Mì Bơ Sữa Tươi',
+        drinkItem: 'Sữa Đậu Nành Non Organic ấm (180ml)',
+        fruitOrSide: 'Dưa lưới Nhật cắt hạt lựu',
+        caloriesKcal: 280,
+        proteinG: 9.4,
+        calciumMg: 165,
+        allergenTags: ['Đậu nành'],
+        nutritionNote: 'Cung cấp năng lượng khởi đầu ngày mới cho trẻ hoạt động học tập.',
+      },
+      {
+        dayOfWeek: 5,
+        dayLabel: 'Thứ Năm',
+        servingTime: '07:00 - 07:45',
+        mainDish: 'Cháo Cá Hồi Bí Đỏ & Pudding Trứng Sữa Tươi',
+        drinkItem: 'Sữa tươi tiệt trùng nguyên kem (180ml)',
+        fruitOrSide: 'Táo Envy gọt vỏ cắt lát',
+        caloriesKcal: 270,
+        proteinG: 9.8,
+        calciumMg: 230,
+        allergenTags: ['Sữa', 'Trứng'],
+        nutritionNote: 'Giàu Canxi, DHA và Đạm sinh học cao giúp phát triển chiều cao tối ưu.',
+      },
+      {
+        dayOfWeek: 6,
+        dayLabel: 'Thứ Sáu',
+        servingTime: '07:00 - 07:45',
+        mainDish: 'Súp Gà Ngô Non Nấm Hương Ấm Bụng',
+        drinkItem: 'Sữa hạt Hạnh nhân & Óc chó (180ml)',
+        fruitOrSide: 'Đu đủ chín đỏ ngọt tự nhiên',
+        caloriesKcal: 260,
+        proteinG: 8.5,
+        calciumMg: 185,
+        allergenTags: ['Hạt cây'],
+        nutritionNote: 'Bổ sung Omega-3 thực vật từ hạt óc chó và đạm dễ hấp thu buổi sáng.',
+      },
+    ];
+  }
+
+  getMenuScheduleForPeriod(periodId: number, periodName?: string): SnackMenuDayItem[] {
+    return this.customMenuSchedules.get(Number(periodId)) || this.getDefaultSnackMenuSchedule(periodName);
+  }
+
+  async findAll(currentUser?: any, query?: { search?: string; status?: string; grade?: string }) {
+    const isNutritionist = this.isNutritionistOnly(currentUser);
     const periods = await this.periodRepo.find({
       relations: ['registrations'],
       order: { startDate: 'DESC' },
@@ -27,35 +152,61 @@ export class SnackServicesService {
 
     const totalStudents = await this.childRepo.count();
 
-    const items = periods.map((p) => {
+    const mappedItems = periods.map((p) => {
       const regCount = (p.registrations || []).length;
       const paidCount = (p.registrations || []).filter((r) => r.status === 'PAID').length;
-      const targetCount = 30;
+      const targetCount = 90;
       const percentage = Math.min(100, Math.round((regCount / (targetCount || 1)) * 100));
+      const displayName = this.normalizeBreakfastText(p.name);
+      const menuSchedule = this.getMenuScheduleForPeriod(Number(p.id), displayName);
+      const feeVal = Number(p.feeAmount) || 440000;
+      const pricePerUnit = feeVal > 50000 ? Math.round(feeVal / 22) : feeVal;
+      const monthlyPrice = feeVal > 50000 ? feeVal : feeVal * 22;
 
       return {
         id: String(p.id),
-        name: p.name,
-        description: 'Suất ăn xế nhẹ lúc 17h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
-        serviceType: 'AFTER_SCHOOL_SNACK',
+        name: displayName,
+        description: this.normalizeBreakfastText(
+          this.customDescriptions.get(Number(p.id)) ||
+            'Suất ăn sáng dinh dưỡng lúc 07h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
+        ),
+        serviceType: 'BREAKFAST_SERVICE',
         billingCycle: 'MONTHLY',
-        pricePerUnit: Number(p.feeAmount) || 25000,
-        monthlyEstimatedPrice: Number(p.feeAmount) || 550000,
+        pricePerUnit,
+        monthlyEstimatedPrice: monthlyPrice,
+        feeAmount: monthlyPrice,
+        startDate: p.startDate,
+        endDate: p.endDate,
+        registrationDeadline: p.registrationDeadline,
         appliedGrade: 'Tất cả các khối',
         registrationPeriod: `${p.startDate} ~ ${p.endDate}`,
         appliedMonth: p.startDate ? p.startDate.substring(0, 7) : '2026-10',
-        registeredCount: regCount,
+        registeredCount: isNutritionist ? 0 : regCount,
         targetCount,
-        percentage,
-        progressNote: `Đã có ${regCount}/${targetCount} bé tham gia`,
+        percentage: isNutritionist ? 0 : percentage,
+        progressNote: isNutritionist
+          ? 'Chế độ Chuyên gia Dinh dưỡng (Chỉ lên thực đơn ăn sáng)'
+          : `Đã có ${regCount}/${targetCount} bé tham gia (${paidCount} bé đã đóng tiền)`,
         status: p.status as 'OPEN' | 'UPCOMING' | 'CLOSED',
         statusLabel: p.status === 'OPEN' ? 'Đang mở đăng ký' : p.status === 'UPCOMING' ? 'Sắp mở' : 'Đã khóa đợt',
         badges: ['Sữa tươi', 'Bánh ngũ cốc', 'Trái cây'],
         isActive: p.status === 'OPEN',
-        enrolledCount: regCount,
-        paidCount,
-        totalRevenue: paidCount * (Number(p.feeAmount) || 0),
+        enrolledCount: isNutritionist ? 0 : regCount,
+        paidCount: isNutritionist ? 0 : paidCount,
+        totalRevenue: isNutritionist ? 0 : paidCount * (Number(p.feeAmount) || 0),
+        menuSchedule,
+        hidePaymentInfo: isNutritionist,
       };
+    });
+
+    const items = mappedItems.filter((item) => {
+      if (query?.search && !item.name.toLowerCase().includes(query.search.toLowerCase())) {
+        return false;
+      }
+      if (query?.status && query.status !== 'ALL' && item.status !== query.status) {
+        return false;
+      }
+      return true;
     });
 
     const totalRegistered = items.reduce((acc, i) => acc + i.registeredCount, 0);
@@ -70,15 +221,23 @@ export class SnackServicesService {
         closed: items.filter((i) => i.status === 'CLOSED').length,
       },
       studentParticipation: {
-        registered: totalRegistered,
+        registered: isNutritionist ? 0 : totalRegistered,
         total: totalStudents || 14,
-        percentage: totalStudents > 0 ? Math.min(100, Math.round((totalRegistered / totalStudents) * 100)) : 0,
+        percentage:
+          !isNutritionist && totalStudents > 0
+            ? Math.min(100, Math.round((totalRegistered / totalStudents) * 100))
+            : 0,
         remaining: Math.max(0, (totalStudents || 14) - totalRegistered),
       },
       revenue: {
-        expectedMonthly: expectedMonthly || 15000000,
-        collected: totalCollected || 8500000,
-        collectedPercentage: expectedMonthly > 0 ? Math.round((totalCollected / expectedMonthly) * 100) : 56,
+        expectedMonthly: isNutritionist ? 0 : expectedMonthly || 15000000,
+        collected: isNutritionist ? 0 : totalCollected || 8500000,
+        collectedPercentage:
+          !isNutritionist && expectedMonthly > 0
+            ? Math.round((totalCollected / expectedMonthly) * 100)
+            : isNutritionist
+            ? 0
+            : 56,
       },
       satisfaction: {
         ratePercent: 98,
@@ -94,10 +253,12 @@ export class SnackServicesService {
       summary,
       totalCount: items.length,
       activePeriod: items.find((i) => i.status === 'OPEN') || items[0] || null,
+      hidePaymentInfo: isNutritionist,
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, currentUser?: any) {
+    const isNutritionist = this.isNutritionistOnly(currentUser);
     const p = await this.periodRepo.findOne({
       where: { id },
       relations: [
@@ -111,31 +272,37 @@ export class SnackServicesService {
 
     if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn xế');
 
-    const registrations = (p.registrations || []).map((r) => {
-      const allergyList = (r.student?.allergies || [])
-        .map((a) => a.allergen?.name || a.allergen?.code)
-        .filter(Boolean);
-      return {
-        id: String(r.id),
-        studentId: String(r.studentId),
-        studentName: r.student?.fullName || 'Học sinh',
-        studentCode: r.student?.studentCode || '',
-        className: r.student?.class?.name || 'Mầm 1',
-        status: r.status,
-        registeredAt: r.registeredAt ? r.registeredAt.toISOString() : null,
-        amount: p.feeAmount,
-        hasAllergy: allergyList.length > 0,
-        allergens: allergyList,
-      };
-    });
+    const registrations = isNutritionist
+      ? []
+      : (p.registrations || []).map((r) => {
+          const allergyList = (r.student?.allergies || [])
+            .map((a) => a.allergen?.name || a.allergen?.code)
+            .filter(Boolean);
+          return {
+            id: String(r.id),
+            studentId: String(r.studentId),
+            studentName: r.student?.fullName || 'Học sinh',
+            studentCode: r.student?.studentCode || '',
+            className: r.student?.class?.name || 'Mầm 1',
+            status: r.status,
+            registeredAt: r.registeredAt ? r.registeredAt.toISOString() : null,
+            amount: p.feeAmount,
+            hasAllergy: allergyList.length > 0,
+            allergens: allergyList,
+          };
+        });
 
     const pricePerUnit = Math.round((Number(p.feeAmount) || 440000) / 22);
+    const menuSchedule = this.getMenuScheduleForPeriod(Number(p.id), p.name);
 
     const periodData = {
       id: String(p.id),
       tenantId: 'a0000000-0000-0000-0000-000000000001',
-      name: p.name,
-      description: 'Suất ăn xế nhẹ lúc 17h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
+      name: this.normalizeBreakfastText(p.name),
+      description: this.normalizeBreakfastText(
+        this.customDescriptions.get(Number(p.id)) ||
+          'Suất ăn sáng dinh dưỡng lúc 07h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
+      ),
       serviceType: 'AFTER_SCHOOL_SNACK',
       billingCycle: 'MONTHLY',
       pricePerUnit,
@@ -148,6 +315,8 @@ export class SnackServicesService {
       isActive: p.status === 'OPEN',
       status: p.status,
       registrations,
+      menuSchedule,
+      hidePaymentInfo: isNutritionist,
     };
 
     return {
@@ -199,15 +368,23 @@ export class SnackServicesService {
       endDate = dto.registrationEnd || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
     }
 
-    // 5. Điều kiện tiên quyết: Không tồn tại đợt đăng ký nào đang OPEN cùng tháng phục vụ
+    // 5. Điều kiện tiên quyết: Không tồn tại đợt đăng ký nào đang OPEN cùng tháng phục vụ (chỉ chặn khi không có periodCode riêng biệt hoặc trùng tên gói)
     const isDraft = dto.status === 'DRAFT';
     if (!isDraft) {
       const openPeriods = await this.periodRepo.find({
         where: { status: 'OPEN' },
       });
-      const hasConflict = openPeriods.some(
-        (p) => p.startDate <= endDate && p.endDate >= startDate,
-      );
+      const hasConflict = openPeriods.some((p) => {
+        const dateOverlap = p.startDate <= endDate && p.endDate >= startDate;
+        if (!dateOverlap) return false;
+        if (dto.periodCode) {
+          return (
+            dto.name &&
+            p.name?.trim().toLowerCase() === dto.name.trim().toLowerCase()
+          );
+        }
+        return true;
+      });
       if (hasConflict) {
         throw new BadRequestException(
           'Đã tồn tại đợt đăng ký đang mở cho tháng phục vụ này. Vui lòng đóng đợt cũ trước khi tạo đợt mới.',
@@ -247,6 +424,9 @@ export class SnackServicesService {
     });
 
     const saved = await this.periodRepo.save(period);
+    if (dto.nutritionNotes && saved?.id) {
+      this.customDescriptions.set(Number(saved.id), dto.nutritionNotes);
+    }
 
     return {
       success: true,
@@ -341,6 +521,10 @@ export class SnackServicesService {
       p.status = dto.isActive ? 'OPEN' : 'CLOSED';
     }
 
+    if (dto.description) {
+      this.customDescriptions.set(Number(id), dto.description);
+    }
+
     const saved = await this.periodRepo.save(p);
 
     const pricePerUnit = dto.pricePerUnit !== undefined ? dto.pricePerUnit : Math.round(Number(saved.feeAmount) / 22);
@@ -358,7 +542,10 @@ export class SnackServicesService {
       feeAmount: Number(saved.feeAmount),
       isActive: saved.status === 'OPEN',
       status: saved.status,
-      description: dto.description || 'Suất ăn xế chiều bổ sung dinh dưỡng',
+      description:
+        dto.description ||
+        this.customDescriptions.get(Number(id)) ||
+        'Suất ăn xế chiều bổ sung dinh dưỡng',
     };
 
     return {
@@ -366,6 +553,36 @@ export class SnackServicesService {
       message: 'Cập nhật cấu hình gói dịch vụ ăn sáng thành công!',
       warning,
       data: updatedData,
+    };
+  }
+
+  /**
+   * CGDD hoặc Hiệu trưởng lên thực đơn ăn xế cho gói dịch vụ
+   */
+  async updateMenuSchedule(
+    id: number,
+    payload: { menuSchedule: SnackMenuDayItem[]; description?: string },
+  ) {
+    const p = await this.periodRepo.findOne({ where: { id } });
+    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn xế');
+
+    if (!Array.isArray(payload.menuSchedule) || payload.menuSchedule.length === 0) {
+      throw new BadRequestException('Vui lòng nhập đầy đủ lịch thực đơn ăn xế');
+    }
+
+    this.customMenuSchedules.set(Number(id), payload.menuSchedule);
+    if (payload.description) {
+      this.customDescriptions.set(Number(id), payload.description);
+    }
+
+    return {
+      success: true,
+      message: `Đã lưu và cập nhật thực đơn ăn xế cho gói "${p.name}" thành công!`,
+      data: {
+        id: String(p.id),
+        name: p.name,
+        menuSchedule: payload.menuSchedule,
+      },
     };
   }
 
@@ -511,17 +728,168 @@ export class SnackServicesService {
   }
 
   async createService(dto: any) {
+    const startDate = dto.startDate || new Date().toISOString().slice(0, 10);
+    const endDate =
+      dto.endDate || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+    const feeAmount =
+      dto.feeAmount !== undefined
+        ? Number(dto.feeAmount)
+        : (Number(dto.pricePerUnit) || 20000) * 22;
+
+    const period = this.periodRepo.create({
+      name: dto.name || 'Gói Ăn Xế Chiều Mới',
+      startDate,
+      endDate,
+      registrationDeadline: dto.registrationDeadline || endDate,
+      feeAmount,
+      status: dto.status === 'CLOSED' || dto.status === 'DRAFT' ? 'CLOSED' : 'OPEN',
+    });
+
+    const saved = await this.periodRepo.save(period);
+    if (dto.description && saved?.id) {
+      this.customDescriptions.set(Number(saved.id), dto.description);
+    }
+
     return {
       success: true,
-      message: 'Đã tạo gói dịch vụ mới',
-      data: dto,
+      message: 'Đã tạo gói dịch vụ ăn xế mới thành công!',
+      data: saved,
     };
   }
 
   async deleteService(id: number) {
+    const p = await this.periodRepo.findOne({
+      where: { id },
+      relations: ['registrations'],
+    });
+    if (!p) throw new NotFoundException('Không tìm thấy gói dịch vụ ăn xế');
+
+    const paidCount = (p.registrations || []).filter((r) => r.status === 'PAID').length;
+    if (paidCount > 0) {
+      throw new BadRequestException(
+        `Gói "${p.name}" đã có ${paidCount} phụ huynh hoàn tất thanh toán (PAID), không thể xóa. Vui lòng chọn Đóng đợt để lưu trữ đối soát.`,
+      );
+    }
+
+    if (typeof (this.periodRepo as any).delete === 'function') {
+      await (this.periodRepo as any).delete(id);
+    } else if (typeof (this.periodRepo as any).remove === 'function') {
+      await (this.periodRepo as any).remove(p);
+    }
+
+    this.customMenuSchedules.delete(Number(id));
+    this.customDescriptions.delete(Number(id));
+
     return {
       success: true,
-      message: `Đã xóa dịch vụ bán trú #${id}`,
+      message: `Đã xóa gói dịch vụ ăn xế "${p.name}" thành công!`,
+    };
+  }
+
+  /**
+   * Dành cho Phụ huynh: Xem các gói ăn xế đang mở công bố và Lịch Ăn Xế (chỉ hiển thị khi đã đóng tiền PAID)
+   */
+  async getParentSnackOverview(parentId: number = 13) {
+    const allPeriods = await this.periodRepo.find({
+      order: { id: 'DESC' },
+    });
+
+    let child: Child | null = null;
+    try {
+      if (typeof (this.childRepo as any).query === 'function') {
+        const rows = await this.childRepo.query(
+          `SELECT student_id FROM student_parents WHERE parent_id = $1 LIMIT 1`,
+          [parentId],
+        );
+        if (rows?.[0]?.student_id) {
+          child = await this.childRepo.findOne({
+            where: { id: Number(rows[0].student_id) },
+            relations: ['class'],
+          });
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    if (!child) {
+      const students = await this.childRepo.find({
+        relations: ['class'],
+        take: 1,
+        order: { id: 'ASC' },
+      });
+      child = students[0] || null;
+    }
+
+    const registrations = await this.regRepo.find({
+      where: child ? [{ studentId: child.id }, { parentId }] : [{ parentId }],
+      relations: ['period', 'student', 'student.class'],
+      order: { id: 'DESC' },
+    });
+
+    // Kiểm tra xem phụ huynh đã có ít nhất 1 gói đã thanh toán (PAID) chưa
+    const paidRegistrations = registrations.filter((r) => r.status === 'PAID');
+    const hasPaidAnyPackage = paidRegistrations.length > 0;
+
+    // Danh sách các gói đã công bố (OPEN) hoặc đã đăng ký của phụ huynh
+    const publishedPackages = allPeriods
+      .filter((p) => p.status === 'OPEN' || registrations.some((r) => Number(r.periodId) === Number(p.id)))
+      .map((p) => {
+        const reg = registrations.find((r) => Number(r.periodId) === Number(p.id));
+        const isPaid = reg?.status === 'PAID';
+        const feeVal = Number(p.feeAmount) || 440000;
+        const pricePerDay = feeVal > 50000 ? Math.round(feeVal / 22) : feeVal;
+        const totalFee = feeVal > 50000 ? feeVal : feeVal * 22;
+
+        return {
+          periodId: Number(p.id),
+          periodName: this.normalizeBreakfastText(p.name),
+          description: this.normalizeBreakfastText(
+            this.customDescriptions.get(Number(p.id)) ||
+              'Suất ăn sáng dinh dưỡng lúc 07h00 - Sữa tươi, bánh ngũ cốc và trái cây tươi',
+          ),
+          startDate: p.startDate,
+          endDate: p.endDate,
+          registrationDeadline: p.registrationDeadline,
+          servingDays: 22,
+          pricePerDay,
+          feeAmount: totalFee,
+          periodStatus: p.status,
+          registrationId: reg ? Number(reg.id) : null,
+          paymentStatus: reg ? reg.status : 'NOT_REGISTERED',
+          isPaid,
+          canViewSchedule: isPaid,
+          // Ràng buộc nghiệp vụ: Phụ huynh khi đóng tiền sẽ thấy được lịch ăn sáng, không đóng là không thấy
+          menuSchedule: isPaid ? this.getMenuScheduleForPeriod(Number(p.id), p.name) : [],
+        };
+      });
+
+    return {
+      success: true,
+      student: child
+        ? {
+            id: Number(child.id),
+            fullName: child.fullName,
+            studentCode: child.studentCode,
+            className: child.class?.name || 'Mầm 1',
+          }
+        : {
+            id: 1,
+            fullName: 'Trần Minh Khang',
+            studentCode: 'KID-101',
+            className: 'Mầm 1',
+          },
+      hasPaidAnyPackage,
+      activeSchedule: hasPaidAnyPackage
+        ? this.getMenuScheduleForPeriod(
+            Number(paidRegistrations[0].periodId),
+            paidRegistrations[0].period?.name,
+          )
+        : [],
+      paidPackageName: hasPaidAnyPackage
+        ? this.normalizeBreakfastText(paidRegistrations[0].period?.name)
+        : null,
+       publishedPackages,
     };
   }
 
@@ -595,7 +963,7 @@ export class SnackServicesService {
 
     // 4. Kiểm tra chỉ tiêu (Quota capacity) nếu giới hạn
     const totalRegistrations = (period.registrations || []).filter((r) => r.status !== 'CANCELLED').length;
-    const quotaLimit = 30; // Giới hạn chỉ tiêu suất bếp của trường
+    const quotaLimit = 90; // Giới hạn chỉ tiêu suất bếp của trường (90 suất ăn sáng)
     if (totalRegistrations >= quotaLimit) {
       throw new BadRequestException('Đã đủ chỉ tiêu cho khối lớp của bé. Liên hệ nhà trường để được hỗ trợ');
     }
@@ -820,4 +1188,5 @@ export class SnackServicesService {
         isRegistered: registeredStudentIds.includes(Number(s.id)),
       })),
     };
-  }}
+  }
+}

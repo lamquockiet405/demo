@@ -4,6 +4,8 @@ import { DailyMealAttendance } from './entities/daily-meal-attendance.entity';
 import { MealCoordinationNote } from './entities/meal-coordination-note.entity';
 import { ClassEntity } from '../classes/entities/class.entity';
 import { Child } from '../children/entities/child.entity';
+import { SnackRegistration } from '../snack-services/entities/snack-registration.entity';
+import { SnackServicePeriod } from '../snack-services/entities/snack-service-period.entity';
 import { AttendanceService } from './services/attendance.service';
 import { MealCoordinationService } from './services/meal-coordination.service';
 import { SnackRosterService } from './services/snack-roster.service';
@@ -16,6 +18,8 @@ import { AttendanceController } from './attendance.controller';
       MealCoordinationNote,
       ClassEntity,
       Child,
+      SnackRegistration,
+      SnackServicePeriod,
     ]),
   ],
   controllers: [AttendanceController],

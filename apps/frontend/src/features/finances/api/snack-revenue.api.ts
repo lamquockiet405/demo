@@ -36,6 +36,9 @@ export interface VnpayTransactionItem {
   transactionCode: string;
   studentName: string;
   className: string;
+  parentName?: string;
+  parentPhone?: string;
+  packageName?: string;
   amount: number;
   paymentMethod: string;
   paidAt: string;
