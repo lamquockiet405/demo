@@ -389,7 +389,7 @@ CREATE TABLE menu_meals (
     id          BIGSERIAL PRIMARY KEY,
     menu_day_id BIGINT NOT NULL REFERENCES menu_days(id) ON DELETE CASCADE,
     meal_type   VARCHAR(30) NOT NULL
-                    CHECK (meal_type IN ('MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK'))
+                    CHECK (meal_type IN ('BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'LATE_SNACK'))
 );
 
 CREATE INDEX idx_menu_meals_day ON menu_meals(menu_day_id);
@@ -492,7 +492,7 @@ CREATE TABLE daily_meal_portions (
     date             DATE NOT NULL,
     class_id         BIGINT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     meal_type        VARCHAR(30) NOT NULL
-                         CHECK (meal_type IN ('MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK')),
+                         CHECK (meal_type IN ('BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'LATE_SNACK')),
     planned_quantity INT NOT NULL DEFAULT 0,
     actual_quantity  INT,
     note             TEXT
@@ -507,7 +507,7 @@ CREATE TABLE meal_attendances (
     student_id        BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     date              DATE NOT NULL,
     meal_type         VARCHAR(30) NOT NULL
-                          CHECK (meal_type IN ('MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK')),
+                          CHECK (meal_type IN ('BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'LATE_SNACK')),
     is_attended       BOOLEAN NOT NULL DEFAULT TRUE,
     consumption_level VARCHAR(20)
                           CHECK (consumption_level IN ('FULL', 'PARTIAL', 'NONE')),

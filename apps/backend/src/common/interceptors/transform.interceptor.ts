@@ -3,9 +3,10 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+  StreamableFile,
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 
 export interface ResponseEnvelope<T> {
   success: boolean;
@@ -16,27 +17,44 @@ export interface ResponseEnvelope<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, ResponseEnvelope<T>> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<ResponseEnvelope<T>> {
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ResponseEnvelope<T>
+> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<ResponseEnvelope<T>> {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse();
     const statusCode = response.statusCode || 200;
 
     return next.handle().pipe(
       map((resData) => {
+        if (resData instanceof StreamableFile) return resData as any;
         // If data is already structured with success flag, return as is
-        if (resData && typeof resData === 'object' && 'success' in resData && 'data' in resData) {
+        if (
+          resData &&
+          typeof resData === "object" &&
+          "success" in resData &&
+          "data" in resData
+        ) {
           return resData;
         }
 
         // If data has meta property (e.g. pagination)
-        if (resData && typeof resData === 'object' && 'items' in resData && 'meta' in resData) {
+        if (
+          resData &&
+          typeof resData === "object" &&
+          "items" in resData &&
+          "meta" in resData
+        ) {
           return {
             success: true,
             statusCode,
             data: resData.items,
             meta: resData.meta,
-            message: 'Thành công',
+            message: "Thành công",
           };
         }
 
@@ -44,7 +62,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ResponseEnvel
           success: true,
           statusCode,
           data: resData,
-          message: 'Thành công',
+          message: "Thành công",
         };
       }),
     );

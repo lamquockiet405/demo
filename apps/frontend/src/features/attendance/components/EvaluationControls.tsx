@@ -67,7 +67,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
 
   return (
     <div className="bg-white border-b border-slate-200 px-6 py-3">
-      <div className="max-w-[1440px] mx-auto flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+      <div className="w-full flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
         {/* Left Side: Date, Meals, Class */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Date Picker */}

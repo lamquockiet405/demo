@@ -1,4 +1,4 @@
-import { apiClient } from '../../../core/api/axios';
+import { apiClient } from "../../../core/api/axios";
 
 // 1. School Manager Types
 export interface UnresolvedAllergenConflictItem {
@@ -10,8 +10,8 @@ export interface UnresolvedAllergenConflictItem {
   allergen: string;
   dishToday: string;
   timeLimit: string;
-  severity: 'CRITICAL';
-  status: 'UNRESOLVED' | 'RESOLVED';
+  severity: "CRITICAL";
+  status: "UNRESOLVED" | "RESOLVED";
   message: string;
   recommendedAction: string;
 }
@@ -24,7 +24,7 @@ export interface BroadAnomalyItem {
   affectedCount: number;
   classSize: number;
   percentage: number;
-  severity: 'CRITICAL';
+  severity: "CRITICAL";
   symptoms: string[];
   message: string;
   recommendedAction: string;
@@ -39,7 +39,7 @@ export interface OverduePaymentItem {
   periodName: string;
   amountVnd: number;
   overdueDays: number;
-  severity: 'WARNING';
+  severity: "WARNING";
   message: string;
   recommendedAction: string;
 }
@@ -53,15 +53,15 @@ export interface ParentComplaintItem {
   rating: number;
   comment: string;
   createdAt: string;
-  status: 'UNRESOLVED' | 'RESOLVED';
-  severity: 'WARNING';
+  status: "UNRESOLVED" | "RESOLVED";
+  severity: "WARNING";
   message: string;
   recommendedAction: string;
 }
 
 export interface SchoolManagerAlertsResponse {
-  role: 'SCHOOL_MANAGER';
-  scope: 'ALL_SCHOOL';
+  role: "SCHOOL_MANAGER";
+  scope: "ALL_SCHOOL";
   totalAlerts: number;
   criticalCount: number;
   warningCount: number;
@@ -84,7 +84,7 @@ export interface AllergenCrossMatchingItem {
   menuDishName: string;
   proposedSubstitute: string;
   scheduledMealDate: string;
-  severity: 'CRITICAL' | 'HIGH';
+  severity: "CRITICAL" | "HIGH";
   status: string;
   message: string;
 }
@@ -100,7 +100,7 @@ export interface GrowthRiskItem {
   currentBaz: number;
   previousStatus: string;
   consecutiveDropPeriods: number;
-  severity: 'HIGH';
+  severity: "HIGH";
   diagnosis: string;
   recommendedAction: string;
 }
@@ -113,14 +113,14 @@ export interface MicronutrientDeficitItem {
   actualValue: number;
   standardValue: string;
   menuPeriod: string;
-  severity: 'WARNING';
+  severity: "WARNING";
   message: string;
   recommendedAction: string;
 }
 
 export interface NutritionistAlertsResponse {
-  role: 'NUTRITIONIST';
-  scope: 'ALL_SCHOOL_CLINICAL';
+  role: "NUTRITIONIST";
+  scope: "ALL_SCHOOL_CLINICAL";
   totalAlerts: number;
   categories: {
     allergenCrossMatchingAlerts: AllergenCrossMatchingItem[];
@@ -140,7 +140,7 @@ export interface TrayFlaggingItem {
   substituteDish: string;
   labelTag: string;
   labelColor: string;
-  severity: 'CRITICAL';
+  severity: "CRITICAL";
   isVerifiedByTeacher: boolean;
   message: string;
 }
@@ -152,7 +152,7 @@ export interface PoorConsumptionItem {
   className: string;
   consecutiveDays: number;
   averageIntake: string;
-  severity: 'WARNING';
+  severity: "WARNING";
   message: string;
   recommendedAction: string;
 }
@@ -164,13 +164,13 @@ export interface MedicalMedicationItem {
   className: string;
   parentName: string;
   medicationNote: string;
-  severity: 'INFO';
+  severity: "INFO";
   isAcknowledged: boolean;
   submittedAt: string;
 }
 
 export interface TeacherAlertsResponse {
-  role: 'TEACHER';
+  role: "TEACHER";
   scope: string;
   classId: string;
   className: string;
@@ -209,8 +209,8 @@ export interface ChildAlertDetail {
 }
 
 export interface ParentAlertsResponse {
-  role: 'PARENT';
-  scope: 'MY_CHILDREN';
+  role: "PARENT";
+  scope: "MY_CHILDREN";
   totalChildren: number;
   children: ChildAlertDetail[];
 }
@@ -224,37 +224,42 @@ export interface ResolveAlertPayload {
 
 export const childAlertsApi = {
   getSummary: async (): Promise<any> => {
-    const res = await apiClient.get('/child-alerts/summary');
+    const res = await apiClient.get("/child-alerts/summary");
     return (res as any)?.data || res;
   },
 
-  getSchoolManagerAlerts: async (): Promise<SchoolManagerAlertsResponse> => {
-    const res = await apiClient.get('/child-alerts/school-manager');
+  getSchoolManagerAlerts: async (params?: {
+    date?: string;
+  }): Promise<SchoolManagerAlertsResponse> => {
+    const res = await apiClient.get("/child-alerts/school-manager", { params });
     return (res as any)?.data || res;
   },
 
   getNutritionistAlerts: async (): Promise<NutritionistAlertsResponse> => {
-    const res = await apiClient.get('/child-alerts/nutritionist');
+    const res = await apiClient.get("/child-alerts/nutritionist");
     return (res as any)?.data || res;
   },
 
-  getTeacherAlerts: async (classId?: string): Promise<TeacherAlertsResponse> => {
-    const res = await apiClient.get('/child-alerts/teacher', {
+  getTeacherAlerts: async (
+    classId?: string,
+  ): Promise<TeacherAlertsResponse> => {
+    const res = await apiClient.get("/child-alerts/teacher", {
       params: classId ? { classId } : undefined,
     });
     return (res as any)?.data || res;
   },
 
-  getParentAlerts: async (studentId?: string): Promise<ParentAlertsResponse> => {
-    const res = await apiClient.get('/child-alerts/parent', {
+  getParentAlerts: async (
+    studentId?: string,
+  ): Promise<ParentAlertsResponse> => {
+    const res = await apiClient.get("/child-alerts/parent", {
       params: studentId ? { studentId } : undefined,
     });
     return (res as any)?.data || res;
   },
 
   resolveAlert: async (payload: ResolveAlertPayload) => {
-    const res = await apiClient.post('/child-alerts/resolve', payload);
+    const res = await apiClient.post("/child-alerts/resolve", payload);
     return (res as any)?.data || res;
   },
 };
-

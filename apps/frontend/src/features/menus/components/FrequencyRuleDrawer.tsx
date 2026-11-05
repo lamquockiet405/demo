@@ -177,7 +177,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
                 <option value="ALL">Tất cả khung giờ</option>
-                <option value="MORNING_SNACK">Phụ sáng (09:30)</option>
+                <option value="BREAKFAST">Buổi sáng (09:00)</option>
                 <option value="LUNCH">Bữa trưa chính (11:00)</option>
                 <option value="AFTERNOON_SNACK">Phụ chiều / Xế (14:30)</option>
               </select>

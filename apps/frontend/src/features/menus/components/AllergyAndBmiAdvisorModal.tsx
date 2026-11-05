@@ -185,8 +185,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
   };
 
   const mealTimeNames: Record<string, string> = {
-    BREAKFAST: 'Bữa Sáng (07:00)',
-    MORNING_SNACK: 'Bữa Phụ Sáng (09:00)',
+    BREAKFAST: 'Buổi Sáng (09:00)',
+    MORNING_SNACK: 'Buổi Sáng (09:00)',
     LUNCH: 'Bữa Trưa (11:00)',
     AFTERNOON_SNACK: 'Bữa Xế Chiều (14:30)',
     LATE_SNACK: 'Bữa Xế Muộn (17:00)',

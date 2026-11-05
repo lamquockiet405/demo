@@ -3,37 +3,38 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
-import * as qs from 'querystring';
-import { Payment } from '../entities/payment.entity';
-import { SnackRegistration } from '../../snack-services/entities/snack-registration.entity';
-import { SnackServicePeriod } from '../../snack-services/entities/snack-service-period.entity';
-import { Child } from '../../children/entities/child.entity';
-import { getVnpayMessage } from '../dto/vnpay-response.dto';
-import { ElectronicReceiptDto } from '../dto/electronic-receipt.dto';
+  ForbiddenException,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as crypto from "crypto";
+import * as qs from "querystring";
+import { Payment } from "../entities/payment.entity";
+import { SnackRegistration } from "../../snack-services/entities/snack-registration.entity";
+import { SnackServicePeriod } from "../../snack-services/entities/snack-service-period.entity";
+import { Child } from "../../children/entities/child.entity";
+import { getVnpayMessage } from "../dto/vnpay-response.dto";
+import { ElectronicReceiptDto } from "../dto/electronic-receipt.dto";
 
 export function removeVietnameseDiacritics(str: string): string {
-  if (!str) return '';
+  if (!str) return "";
   return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .replace(/[^a-zA-Z0-9 ]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .replace(/[^a-zA-Z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 function numberToVietnameseWords(num: number): string {
-  if (num === 440000) return 'Bốn trăm bốn mươi nghìn đồng chẵn';
-  if (num === 550000) return 'Năm trăm năm mươi nghìn đồng chẵn';
-  if (num === 330000) return 'Ba trăm ba mươi nghìn đồng chẵn';
-  if (num === 220000) return 'Hai trăm hai mươi nghìn đồng chẵn';
-  return `${num.toLocaleString('vi-VN')} Việt Nam Đồng`;
+  if (num === 440000) return "Bốn trăm bốn mươi nghìn đồng chẵn";
+  if (num === 550000) return "Năm trăm năm mươi nghìn đồng chẵn";
+  if (num === 330000) return "Ba trăm ba mươi nghìn đồng chẵn";
+  if (num === 220000) return "Hai trăm hai mươi nghìn đồng chẵn";
+  return `${num.toLocaleString("vi-VN")} Việt Nam Đồng`;
 }
 
 @Injectable()
@@ -56,7 +57,7 @@ export class VnpayService {
     const sorted: Record<string, string> = {};
     const keys = Object.keys(obj).sort();
     for (const key of keys) {
-      if (obj[key] !== null && obj[key] !== undefined && obj[key] !== '') {
+      if (obj[key] !== null && obj[key] !== undefined && obj[key] !== "") {
         sorted[key] = String(obj[key]);
       }
     }
@@ -74,31 +75,34 @@ export class VnpayService {
 
     for (const key of Object.keys(obj)) {
       const val = obj[key];
-      if (val !== null && val !== undefined && val !== '') {
+      if (val !== null && val !== undefined && val !== "") {
         const encKey = encodeURIComponent(key);
         encodedKeys.push(encKey);
-        encodedMap[encKey] = encodeURIComponent(String(val)).replace(/%20/g, '+');
+        encodedMap[encKey] = encodeURIComponent(String(val)).replace(
+          /%20/g,
+          "+",
+        );
       }
     }
 
     encodedKeys.sort();
-    return encodedKeys.map((k) => `${k}=${encodedMap[k]}`).join('&');
+    return encodedKeys.map((k) => `${k}=${encodedMap[k]}`).join("&");
   }
 
   /**
    * Chuẩn hóa IPv4 cho tham số vnp_IpAddr (tránh lỗi chữ ký do IPv6 ::1 hoặc ::ffff:172.x.x.x)
    */
   private normalizeIpAddr(rawIp?: string): string {
-    if (!rawIp) return '127.0.0.1';
-    const firstIp = rawIp.split(',')[0].trim();
-    if (firstIp === '::1' || firstIp === '0:0:0:0:0:0:0:1') return '127.0.0.1';
-    if (firstIp.startsWith('::ffff:')) {
-      return firstIp.replace('::ffff:', '');
+    if (!rawIp) return "127.0.0.1";
+    const firstIp = rawIp.split(",")[0].trim();
+    if (firstIp === "::1" || firstIp === "0:0:0:0:0:0:0:1") return "127.0.0.1";
+    if (firstIp.startsWith("::ffff:")) {
+      return firstIp.replace("::ffff:", "");
     }
-    if (firstIp.includes(':')) {
-      return '127.0.0.1';
+    if (firstIp.includes(":")) {
+      return "127.0.0.1";
     }
-    return firstIp || '127.0.0.1';
+    return firstIp || "127.0.0.1";
   }
 
   /**
@@ -107,8 +111,16 @@ export class VnpayService {
   private formatDate(date: Date): string {
     const utcMs = date.getTime() + date.getTimezoneOffset() * 60000;
     const vnDate = new Date(utcMs + 7 * 3600000);
-    const pad = (n: number) => String(n).padStart(2, '0');
+    const pad = (n: number) => String(n).padStart(2, "0");
     return `${vnDate.getFullYear()}${pad(vnDate.getMonth() + 1)}${pad(vnDate.getDate())}${pad(vnDate.getHours())}${pad(vnDate.getMinutes())}${pad(vnDate.getSeconds())}`;
+  }
+
+  private packageAmount(reg: SnackRegistration): number {
+    const amount = reg.period?.feeAmount == null ? NaN : Number(reg.period.feeAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new BadRequestException("Gói dịch vụ chưa có mức phí thanh toán hợp lệ.");
+    }
+    return amount;
   }
 
   /**
@@ -118,24 +130,35 @@ export class VnpayService {
     registrationId: number;
     orderInfo?: string;
     ipAddr?: string;
+    parentId?: number;
   }) {
     // 1. Kiểm tra điều kiện tiên quyết (Pre-conditions):
     const reg = await this.regRepo.findOne({
       where: { id: params.registrationId },
-      relations: ['period', 'student', 'student.class', 'parent'],
+      relations: ["period", "student", "student.class", "parent"],
     });
 
     if (!reg) {
-      throw new NotFoundException(`Không tìm thấy hồ sơ đăng ký ăn xế #${params.registrationId}`);
+      throw new NotFoundException(
+        `Không tìm thấy hồ sơ đăng ký ăn xế #${params.registrationId}`,
+      );
     }
 
-    if (reg.status === 'PAID') {
-      throw new BadRequestException('Hồ sơ đăng ký này đã được thanh toán thành công trước đó.');
+    if (params.parentId != null && Number(reg.parentId) !== params.parentId) {
+      throw new ForbiddenException("Bạn không có quyền thanh toán hóa đơn này.");
+    }
+
+    if (reg.status === "PAID") {
+      throw new BadRequestException(
+        "Hồ sơ đăng ký này đã được thanh toán thành công trước đó.",
+      );
     }
 
     const period = reg.period;
-    if (period && period.status !== 'OPEN') {
-      throw new BadRequestException('Đợt dịch vụ ăn xế này đã đóng nhận thanh toán.');
+    if (period && period.status !== "OPEN") {
+      throw new BadRequestException(
+        "Đợt dịch vụ ăn xế này đã đóng nhận thanh toán.",
+      );
     }
 
     if (period && period.registrationDeadline) {
@@ -148,19 +171,19 @@ export class VnpayService {
     }
 
     const tmnCode = (
-      this.configService.get<string>('vnpay.tmnCode') || '6JM89YDG'
+      this.configService.get<string>("vnpay.tmnCode") || "6JM89YDG"
     ).trim();
     const secretKey = (
-      this.configService.get<string>('vnpay.hashSecret') ||
-      'JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL'
+      this.configService.get<string>("vnpay.hashSecret") ||
+      "JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL"
     ).trim();
     const vnpUrl = (
-      this.configService.get<string>('vnpay.url') ||
-      'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'
+      this.configService.get<string>("vnpay.url") ||
+      "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     ).trim();
     const returnUrl = (
-      this.configService.get<string>('vnpay.returnUrl') ||
-      'http://localhost:5173/payments/vnpay-return'
+      this.configService.get<string>("vnpay.returnUrl") ||
+      "http://localhost:5173/payments/vnpay-return"
     ).trim();
 
     const now = new Date();
@@ -168,11 +191,10 @@ export class VnpayService {
     const orderId = `${reg.id}_${Date.now()}`;
     const createDate = this.formatDate(now);
     const expireDate = this.formatDate(expireDateObj);
-    const rawFee = Number(reg.period?.feeAmount || 440000);
-    const amount = rawFee > 50000 ? rawFee : rawFee * 22;
+    const amount = this.packageAmount(reg);
 
     // Chuẩn hóa nội dung thanh toán tiếng Việt không dấu theo chuẩn VNPAY
-    const studentName = reg.student?.fullName || 'Hoc Sinh';
+    const studentName = reg.student?.fullName || "Hoc Sinh";
     const month = now.getMonth() + 1;
     const defaultOrderInfo = removeVietnameseDiacritics(
       `Thanh toan phi an xe tre ${studentName} thang ${month}`,
@@ -184,14 +206,14 @@ export class VnpayService {
     const cleanIpAddr = this.normalizeIpAddr(params.ipAddr);
 
     const vnpParams: Record<string, any> = {
-      vnp_Version: '2.1.0',
-      vnp_Command: 'pay',
+      vnp_Version: "2.1.0",
+      vnp_Command: "pay",
       vnp_TmnCode: tmnCode,
-      vnp_Locale: 'vn',
-      vnp_CurrCode: 'VND',
+      vnp_Locale: "vn",
+      vnp_CurrCode: "VND",
       vnp_TxnRef: orderId,
       vnp_OrderInfo: finalOrderInfo,
-      vnp_OrderType: 'other',
+      vnp_OrderType: "other",
       vnp_Amount: Math.round(amount * 100),
       vnp_ReturnUrl: returnUrl,
       vnp_IpAddr: cleanIpAddr,
@@ -201,13 +223,15 @@ export class VnpayService {
 
     const signData = this.buildVnpayQueryString(vnpParams);
     const hmac = crypto
-      .createHmac('sha512', secretKey)
-      .update(Buffer.from(signData, 'utf-8'))
-      .digest('hex');
+      .createHmac("sha512", secretKey)
+      .update(Buffer.from(signData, "utf-8"))
+      .digest("hex");
 
     const paymentUrl = `${vnpUrl}?${signData}&vnp_SecureHash=${hmac}`;
 
-    this.logger.log(`Created VNPAY payment url for registration #${reg.id}, orderId: ${orderId}`);
+    this.logger.log(
+      `Created VNPAY payment url for registration #${reg.id}, orderId: ${orderId}`,
+    );
 
     return {
       success: true,
@@ -226,27 +250,27 @@ export class VnpayService {
    * KÊNH 1: Server-to-Server IPN Webhook (Ngầm & Bảo mật, Idempotency)
    */
   async handleIpn(query: Record<string, string>) {
-    const secureHash = query['vnp_SecureHash'];
+    const secureHash = query["vnp_SecureHash"];
     const clone = { ...query };
-    delete clone['vnp_SecureHash'];
-    delete clone['vnp_SecureHashType'];
+    delete clone["vnp_SecureHash"];
+    delete clone["vnp_SecureHashType"];
 
     const secretKey = (
-      this.configService.get<string>('vnpay.hashSecret') ||
-      'JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL'
+      this.configService.get<string>("vnpay.hashSecret") ||
+      "JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL"
     ).trim();
 
     const signData = this.buildVnpayQueryString(clone);
     const computedHash = crypto
-      .createHmac('sha512', secretKey)
-      .update(Buffer.from(signData, 'utf-8'))
-      .digest('hex');
+      .createHmac("sha512", secretKey)
+      .update(Buffer.from(signData, "utf-8"))
+      .digest("hex");
 
     const legacySignData = qs.stringify(this.sortObject(clone));
     const legacyHash = crypto
-      .createHmac('sha512', secretKey)
-      .update(Buffer.from(legacySignData, 'utf-8'))
-      .digest('hex');
+      .createHmac("sha512", secretKey)
+      .update(Buffer.from(legacySignData, "utf-8"))
+      .digest("hex");
 
     const isChecksumValid =
       secureHash?.toLowerCase() === computedHash.toLowerCase() ||
@@ -254,39 +278,45 @@ export class VnpayService {
 
     // 1. Kiểm tra chữ ký Checksum HMAC-SHA512
     if (!isChecksumValid) {
-      this.logger.warn(`VNPAY IPN Checksum Failed: received=${secureHash}, computed=${computedHash}`);
-      return { RspCode: '97', Message: 'Invalid Checksum' };
+      this.logger.warn(
+        `VNPAY IPN Checksum Failed: received=${secureHash}, computed=${computedHash}`,
+      );
+      return { RspCode: "97", Message: "Invalid Checksum" };
     }
 
-    const txnRef = query['vnp_TxnRef'];
-    const regId = txnRef ? Number(txnRef.split('_')[0]) : null;
+    const txnRef = query["vnp_TxnRef"];
+    const regId = txnRef ? Number(txnRef.split("_")[0]) : null;
 
     if (!regId) {
-      return { RspCode: '01', Message: 'Order Not Found' };
+      return { RspCode: "01", Message: "Order Not Found" };
     }
 
     const reg = await this.regRepo.findOne({
       where: { id: regId },
-      relations: ['period', 'student'],
+      relations: ["period", "student"],
     });
 
     if (!reg) {
-      return { RspCode: '01', Message: 'Order Not Found' };
+      return { RspCode: "01", Message: "Order Not Found" };
     }
 
     // 2. Cơ chế Idempotency: Kiểm tra nếu đã thanh toán thì phản hồi ngay mà không ghi đè
-    if (reg.status === 'PAID') {
-      this.logger.log(`Duplicate IPN ignored for already PAID registration #${regId}`);
-      return { RspCode: '02', Message: 'Already Updated' };
+    if (reg.status === "PAID") {
+      this.logger.log(
+        `Duplicate IPN ignored for already PAID registration #${regId}`,
+      );
+      return { RspCode: "02", Message: "Already Updated" };
     }
 
-    const responseCode = query['vnp_ResponseCode'];
+    const responseCode = query["vnp_ResponseCode"];
 
-    if (responseCode === '00') {
+    if (responseCode === "00") {
       // Giao dịch thành công
-      await this.markAsPaid(regId, query['vnp_TransactionNo'], query);
-      this.logger.log(`IPN confirmed payment for registration #${regId}. Enrolled to Snack Roster.`);
-      return { RspCode: '00', Message: 'Confirm Success' };
+      await this.markAsPaid(regId, query["vnp_TransactionNo"], query);
+      this.logger.log(
+        `IPN confirmed payment for registration #${regId}. Enrolled to Snack Roster.`,
+      );
+      return { RspCode: "00", Message: "Confirm Success" };
     } else {
       // Giao dịch bị hủy hoặc thất bại
       // Nghiệp vụ: Giữ nguyên trạng thái PENDING để phụ huynh có thể bấm nút "Thử thanh toán lại"
@@ -297,19 +327,20 @@ export class VnpayService {
       );
 
       // Lưu nhật ký giao dịch không thành công
-      const rawFee = Number(reg.period?.feeAmount || 440000);
-      const fallbackFee = rawFee > 50000 ? rawFee : rawFee * 22;
+      const fallbackFee = this.packageAmount(reg);
       const payment = this.paymentRepo.create({
         registrationId: regId,
-        amount: query['vnp_Amount'] ? Number(query['vnp_Amount']) / 100 : fallbackFee,
-        vnpayTransactionCode: query['vnp_TransactionNo'] || 'FAILED',
-        status: 'FAILED',
+        amount: query["vnp_Amount"]
+          ? Number(query["vnp_Amount"]) / 100
+          : fallbackFee,
+        vnpayTransactionCode: query["vnp_TransactionNo"] || "FAILED",
+        status: "FAILED",
         paidAt: new Date(),
         rawResponse: JSON.stringify(query),
       });
       await this.paymentRepo.save(payment);
 
-      return { RspCode: '00', Message: 'Confirm Success' };
+      return { RspCode: "00", Message: "Confirm Success" };
     }
   }
 
@@ -317,41 +348,41 @@ export class VnpayService {
    * KÊNH 2: Browser Return URL (Điều hướng người dùng về trang web kết quả)
    */
   async verifyReturnUrl(query: Record<string, string>) {
-    const secureHash = query['vnp_SecureHash'];
+    const secureHash = query["vnp_SecureHash"];
     const clone = { ...query };
-    delete clone['vnp_SecureHash'];
-    delete clone['vnp_SecureHashType'];
+    delete clone["vnp_SecureHash"];
+    delete clone["vnp_SecureHashType"];
 
     const secretKey = (
-      this.configService.get<string>('vnpay.hashSecret') ||
-      'JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL'
+      this.configService.get<string>("vnpay.hashSecret") ||
+      "JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL"
     ).trim();
 
     const signData = this.buildVnpayQueryString(clone);
     const computedHash = crypto
-      .createHmac('sha512', secretKey)
-      .update(Buffer.from(signData, 'utf-8'))
-      .digest('hex');
+      .createHmac("sha512", secretKey)
+      .update(Buffer.from(signData, "utf-8"))
+      .digest("hex");
 
     const legacySignData = qs.stringify(this.sortObject(clone));
     const legacyHash = crypto
-      .createHmac('sha512', secretKey)
-      .update(Buffer.from(legacySignData, 'utf-8'))
-      .digest('hex');
+      .createHmac("sha512", secretKey)
+      .update(Buffer.from(legacySignData, "utf-8"))
+      .digest("hex");
 
     const isValid =
       secureHash?.toLowerCase() === computedHash.toLowerCase() ||
       secureHash?.toLowerCase() === legacyHash.toLowerCase();
-    const responseCode = query['vnp_ResponseCode'] || '99';
-    const isSuccess = isValid && responseCode === '00';
-    const txnRef = query['vnp_TxnRef'] || '';
-    const regId = txnRef ? Number(txnRef.split('_')[0]) : null;
+    const responseCode = query["vnp_ResponseCode"] || "99";
+    const isSuccess = isValid && responseCode === "00";
+    const txnRef = query["vnp_TxnRef"] || "";
+    const regId = txnRef ? Number(txnRef.split("_")[0]) : null;
 
     if (isSuccess && regId) {
       // Đồng bộ trạng thái nếu IPN đến sau hoặc chưa kích hoạt
       const reg = await this.regRepo.findOne({ where: { id: regId } });
-      if (reg && reg.status !== 'PAID') {
-        await this.markAsPaid(regId, query['vnp_TransactionNo'], query);
+      if (reg && reg.status !== "PAID") {
+        await this.markAsPaid(regId, query["vnp_TransactionNo"], query);
       }
     }
 
@@ -360,37 +391,40 @@ export class VnpayService {
       isSuccess,
       responseCode,
       message: getVnpayMessage(responseCode),
-      transactionNo: query['vnp_TransactionNo'] || 'N/A',
-      bankTranNo: query['vnp_BankTranNo'] || 'N/A',
-      bankCode: query['vnp_BankCode'] || 'NCB',
-      cardType: query['vnp_CardType'] || 'ATM',
+      transactionNo: query["vnp_TransactionNo"] || "N/A",
+      bankTranNo: query["vnp_BankTranNo"] || "N/A",
+      bankCode: query["vnp_BankCode"] || "NCB",
+      cardType: query["vnp_CardType"] || "ATM",
       orderId: txnRef,
       registrationId: regId,
-      amount: query['vnp_Amount'] ? Number(query['vnp_Amount']) / 100 : 0,
-      payDate: query['vnp_PayDate'] || new Date().toISOString(),
+      amount: query["vnp_Amount"] ? Number(query["vnp_Amount"]) / 100 : 0,
+      payDate: query["vnp_PayDate"] || new Date().toISOString(),
     };
   }
 
   /**
    * Cập nhật trạng thái PAID & ghi nhận giao dịch thành công
    */
-  private async markAsPaid(registrationId: number, transactionCode?: string, raw?: any) {
+  private async markAsPaid(
+    registrationId: number,
+    transactionCode?: string,
+    raw?: any,
+  ) {
     const reg = await this.regRepo.findOne({
       where: { id: registrationId },
-      relations: ['period', 'student'],
+      relations: ["period", "student"],
     });
 
     if (reg) {
-      reg.status = 'PAID';
+      reg.status = "PAID";
       await this.regRepo.save(reg);
 
-      const rawFee = Number(reg.period?.feeAmount || 440000);
-      const fee = rawFee > 50000 ? rawFee : rawFee * 22;
+      const fee = this.packageAmount(reg);
       const payment = this.paymentRepo.create({
         registrationId,
         amount: fee,
         vnpayTransactionCode: transactionCode || `VNPAY_${Date.now()}`,
-        status: 'SUCCESS',
+        status: "SUCCESS",
         paidAt: new Date(),
         rawResponse: raw ? JSON.stringify(raw) : null,
       });
@@ -406,138 +440,64 @@ export class VnpayService {
    * Lấy danh sách hóa đơn tiền ăn xế của con dành cho Phụ huynh (Parent Invoices)
    * Tự động hiển thị các gói đã công bố (OPEN) để phụ huynh có thể xem và thanh toán ngay
    */
-  async getMyInvoices(parentId: number = 13) {
-    let registrations = await this.regRepo.find({
-      where: [{ parentId }, { id: 1 }, { id: 2 }],
-      relations: ['period', 'student', 'student.class', 'parent'],
-      order: { id: 'DESC' },
+  async getMyInvoices(parentId?: number) {
+    if (!parentId) return [];
+    const registrations = await this.regRepo.find({
+      where: { parentId },
+      relations: ["period", "student", "student.class", "parent"],
+      order: { id: "DESC" },
     });
-
-    if (registrations.length === 0) {
-      // Fallback lấy toàn bộ bản ghi mẫu
-      registrations = await this.regRepo.find({
-        relations: ['period', 'student', 'student.class', 'parent'],
-        take: 5,
-        order: { id: 'DESC' },
-      });
-    }
-
-    // Tự động đồng bộ các gói ăn xế mới được Hiệu trưởng tạo & công bố (status = 'OPEN')
-    try {
-      const openPeriods = await this.periodRepo.find({
-        where: { status: 'OPEN' },
-        order: { id: 'DESC' },
-      });
-      if (openPeriods && openPeriods.length > 0) {
-        const defaultStudentId = registrations[0]?.studentId || 1;
-        const defaultParentId = registrations[0]?.parentId || parentId || 13;
-        let hasCreatedNew = false;
-
-        for (const op of openPeriods) {
-          const alreadyExists = registrations.some((r) => Number(r.periodId) === Number(op.id));
-          if (!alreadyExists) {
-            const newReg = this.regRepo.create({
-              periodId: Number(op.id),
-              studentId: Number(defaultStudentId),
-              parentId: Number(defaultParentId),
-              status: 'PENDING',
-            });
-            await this.regRepo.save(newReg);
-            hasCreatedNew = true;
-          }
-        }
-
-        if (hasCreatedNew) {
-          registrations = await this.regRepo.find({
-            where: [{ parentId: defaultParentId }, { studentId: defaultStudentId }, { id: 1 }, { id: 2 }],
-            relations: ['period', 'student', 'student.class', 'parent'],
-            order: { id: 'DESC' },
-          });
-        }
-      }
-    } catch {
-      // Bỏ qua trong môi trường unit test mock
-    }
-
-    let payments: Payment[] = [];
-    try {
-      if (typeof (this.paymentRepo as any).find === 'function') {
-        payments = (await this.paymentRepo.find({ order: { id: 'DESC' } })) || [];
-      }
-    } catch {
-      payments = [];
-    }
-
-    return registrations.map((r) => {
-      const matchedPayment = payments.find((p) => Number(p.registrationId) === Number(r.id));
-      return this.mapRegistrationToInvoice(r, matchedPayment);
-    });
+    const payments = await this.paymentRepo.find({ order: { id: "DESC" } });
+    return registrations.map((r) =>
+      this.mapRegistrationToInvoice(
+        r,
+        payments.find(
+          (p) =>
+            Number(p.registrationId) === Number(r.id) &&
+            ["SUCCESS", "PAID"].includes(p.status),
+        ),
+      ),
+    );
   }
 
   private normalizeBreakfastName(rawName?: string): string {
-    if (!rawName) return 'Gói Suất Ăn Sáng (Tháng 11/2026)';
-    return rawName
-      .replace(/Ăn Xế Chiều 17h00/gi, 'Suất Ăn Sáng 07h00')
-      .replace(/Ăn Xế Chiều 17h/gi, 'Suất Ăn Sáng 07h00')
-      .replace(/Năng Lượng Chiều 17h00/gi, 'Năng Lượng Sáng 07h00')
-      .replace(/Năng Lượng Chiều 17h/gi, 'Năng Lượng Sáng 07h00')
-      .replace(/Năng Lượng Chiều/gi, 'Năng Lượng Sáng')
-      .replace(/Ăn Xế Chiều/gi, 'Suất Ăn Sáng')
-      .replace(/Ăn xế chiều/gi, 'Suất ăn sáng')
-      .replace(/Ăn Xế/g, 'Ăn Sáng')
-      .replace(/Ăn xế/g, 'Ăn sáng')
-      .replace(/ăn xế/g, 'ăn sáng')
-      .replace(/bữa xế/gi, 'bữa sáng');
+    return rawName || "";
   }
 
   private mapRegistrationToInvoice(r: SnackRegistration, payment?: Payment) {
-    const days = 22;
-    const rawFee = Number(r.period?.feeAmount || 440000);
-    const totalAmount = rawFee > 50000 ? rawFee : rawFee * days;
-    const dailyRate = Math.round(totalAmount / days);
-    const invoiceCode = `INV-2026-${String(r.id).padStart(4, '0')}`;
-    const periodName = this.normalizeBreakfastName(
-      r.period?.name || 'Gói Năng Lượng Sáng 07h00 (Tháng 11/2026)',
-    );
-    const paidAtIso = payment?.paidAt
-      ? payment.paidAt instanceof Date
-        ? payment.paidAt.toISOString()
-        : String(payment.paidAt)
-      : r.status === 'PAID'
-      ? r.registeredAt instanceof Date
-        ? r.registeredAt.toISOString()
-        : new Date().toISOString()
-      : undefined;
-
+    const totalAmount =
+      r.period?.feeAmount == null ? null : Number(r.period.feeAmount);
+    const invoiceCode = "INV-" + String(r.id);
     return {
       id: Number(r.id),
       registrationId: Number(r.id),
       invoiceCode,
       orderCode: invoiceCode,
       childId: Number(r.studentId),
-      childName: r.student?.fullName || 'Trần Minh Khang',
-      className: r.student?.class?.name || 'Mầm 1',
-      parentName: r.parent?.fullName || 'Nguyễn Văn Nam',
-      parentPhone: r.parent?.phone || '0908111222',
-      periodId: Number(r.periodId || r.period?.id || 1),
-      periodName,
-      packageName: periodName,
+      childName: r.student?.fullName || "",
+      className: r.student?.class?.name || "",
+      parentName: r.parent?.fullName || "",
+      parentPhone: r.parent?.phone || "",
+      periodId: Number(r.periodId),
+      periodName: r.period?.name || "",
+      packageName: r.period?.name || "",
       periodText: r.period?.startDate
-        ? `${r.period.startDate} ~ ${r.period.endDate}`
-        : 'Tháng 11/2026',
-      servingDays: days,
-      pricePerDay: dailyRate,
-      amount: Number(totalAmount),
-      status: r.status, // 'PENDING' | 'PAID'
-      statusLabel: r.status === 'PAID' ? 'Đã thanh toán' : 'Chờ thanh toán',
-      registeredAt: r.registeredAt ? r.registeredAt.toISOString() : new Date().toISOString(),
-      paidAt: paidAtIso,
-      vnpTransactionNo:
-        payment?.vnpayTransactionCode ||
-        (r.status === 'PAID' ? `VNP-${String(r.id).padStart(6, '0')}` : undefined),
-      paymentMethod: 'VNPAY QR',
-      dueDate: r.period?.registrationDeadline || '2026-11-20',
-      isOverdue: false,
+        ? r.period.startDate + " ~ " + r.period.endDate
+        : "",
+      servingDays: null,
+      pricePerDay: null,
+      amount: totalAmount,
+      status: r.status,
+      statusLabel: r.status === "PAID" ? "Đã thanh toán" : "Chờ thanh toán",
+      registeredAt: r.registeredAt?.toISOString() || null,
+      paidAt: payment?.paidAt ? new Date(payment.paidAt).toISOString() : null,
+      vnpTransactionNo: payment?.vnpayTransactionCode || null,
+      paymentMethod: payment ? "VNPAY" : null,
+      dueDate: r.period?.registrationDeadline || null,
+      isOverdue:
+        r.status === "PENDING" &&
+        !!r.period?.registrationDeadline &&
+        r.period.registrationDeadline < new Date().toISOString().slice(0, 10),
     };
   }
 
@@ -550,66 +510,72 @@ export class VnpayService {
   ): Promise<ElectronicReceiptDto> {
     const reg = await this.regRepo.findOne({
       where: { id: registrationId },
-      relations: ['period', 'student', 'student.class', 'parent'],
+      relations: ["period", "student", "student.class", "parent"],
     });
 
     if (!reg) {
-      throw new NotFoundException(`Không tìm thấy đăng ký ăn xế #${registrationId}`);
+      throw new NotFoundException(
+        `Không tìm thấy đăng ký ăn xế #${registrationId}`,
+      );
     }
 
     const payment = await this.paymentRepo.findOne({
       where: { registrationId },
-      order: { id: 'DESC' },
+      order: { id: "DESC" },
     });
 
-    const rawFee = Number(reg.period?.feeAmount || 440000);
-    const amount = rawFee > 50000 ? rawFee : rawFee * 22;
-    const receiptNum = `BL-2026-${String(reg.id).padStart(5, '0')}`;
+    const amount = this.packageAmount(reg);
+    const receiptNum = `BL-2026-${String(reg.id).padStart(5, "0")}`;
 
     return {
       receiptNumber: receiptNum,
-      invoiceCode: `INV-2026-${String(reg.id).padStart(4, '0')}`,
+      invoiceCode: `INV-2026-${String(reg.id).padStart(4, "0")}`,
       registrationId: Number(reg.id),
-      schoolName: 'TRƯỜNG MẦM NON CHẤT LƯỢNG CAO KIDMEAL',
-      schoolAddress: 'Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh',
-      schoolTaxCode: '0318889999',
-      schoolHotline: '1900 6868 (Phòng Tài Vụ)',
+      schoolName: "TRƯỜNG MẦM NON CHẤT LƯỢNG CAO KIDMEAL",
+      schoolAddress: "Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh",
+      schoolTaxCode: "0318889999",
+      schoolHotline: "1900 6868 (Phòng Tài Vụ)",
       student: {
         id: Number(reg.studentId),
-        fullName: reg.student?.fullName || 'Trần Minh Khang',
+        fullName: reg.student?.fullName || "Trần Minh Khang",
         studentCode: `KID-${reg.studentId}`,
-        className: reg.student?.class?.name || 'Mầm 1',
-        gradeLevel: 'Khối Mầm (3-4 Tuổi)',
+        className: reg.student?.class?.name || "Mầm 1",
+        gradeLevel: "Khối Mầm (3-4 Tuổi)",
       },
       payer: {
-        fullName: reg.parent?.fullName || 'Nguyễn Văn Nam (Phụ huynh)',
-        phoneNumber: reg.parent?.phone || '0908123456',
-        relation: 'Cha / Mẹ ruột',
+        fullName: reg.parent?.fullName || "Nguyễn Văn Nam (Phụ huynh)",
+        phoneNumber: reg.parent?.phone || "0908123456",
+        relation: "Cha / Mẹ ruột",
       },
       serviceDetails: {
-        periodName: reg.period?.name || 'Gói Năng Lượng Chiều 17h (Tháng 11/2026)',
-        serviceName: 'Dịch vụ suất ăn xế dinh dưỡng bán trú ngoài giờ',
+        periodName:
+          reg.period?.name || "Gói Năng Lượng Chiều 17h (Tháng 11/2026)",
+        serviceName: "Dịch vụ suất ăn xế dinh dưỡng bán trú ngoài giờ",
         servingDays: 22,
         unitPricePerDay: 20000,
         totalAmount: amount,
         amountInWords: numberToVietnameseWords(amount),
       },
       paymentInfo: {
-        paymentMethod: 'VNPAY_QR / Mobile Banking',
-        vnpayTransactionNo: payment?.vnpayTransactionCode || '14892348',
+        paymentMethod: "VNPAY_QR / Mobile Banking",
+        vnpayTransactionNo: payment?.vnpayTransactionCode || "14892348",
         bankTransactionNo: `VNP-${reg.id}-OK`,
-        bankCode: 'NCB',
-        cardType: 'ATM_QR',
-        payDate: payment?.paidAt ? payment.paidAt.toISOString() : new Date().toISOString(),
-        status: 'PAID',
+        bankCode: "NCB",
+        cardType: "ATM_QR",
+        payDate: payment?.paidAt
+          ? payment.paidAt.toISOString()
+          : new Date().toISOString(),
+        status: "PAID",
       },
       digitalSignature: {
-        signedBy: 'Kế toán trưởng & Ban Giám Hiệu KidMeal',
-        signedAt: payment?.paidAt ? payment.paidAt.toISOString() : new Date().toISOString(),
+        signedBy: "Kế toán trưởng & Ban Giám Hiệu KidMeal",
+        signedAt: payment?.paidAt
+          ? payment.paidAt.toISOString()
+          : new Date().toISOString(),
         verificationHash: crypto
-          .createHash('sha256')
+          .createHash("sha256")
           .update(`${receiptNum}_${amount}_VNPAY`)
-          .digest('hex'),
+          .digest("hex"),
       },
     };
   }
@@ -620,21 +586,24 @@ export class VnpayService {
    */
   async getInvoices() {
     const registrations = await this.regRepo.find({
-      relations: ['period', 'student', 'student.class', 'parent'],
-      order: { id: 'DESC' },
+      relations: ["period", "student", "student.class", "parent"],
+      order: { id: "DESC" },
     });
 
     let payments: Payment[] = [];
     try {
-      if (typeof (this.paymentRepo as any).find === 'function') {
-        payments = (await this.paymentRepo.find({ order: { id: 'DESC' } })) || [];
+      if (typeof (this.paymentRepo as any).find === "function") {
+        payments =
+          (await this.paymentRepo.find({ order: { id: "DESC" } })) || [];
       }
     } catch {
       payments = [];
     }
 
     return registrations.map((r) => {
-      const matchedPayment = payments.find((p) => Number(p.registrationId) === Number(r.id));
+      const matchedPayment = payments.find(
+        (p) => Number(p.registrationId) === Number(r.id),
+      );
       return this.mapRegistrationToInvoice(r, matchedPayment);
     });
   }
@@ -647,68 +616,88 @@ export class VnpayService {
     packageName?: string;
     amount?: number;
   }) {
-    let period = data.periodId
-      ? await this.periodRepo.findOne({ where: { id: Number(data.periodId) } })
-      : await this.periodRepo.findOne({ where: { status: 'OPEN' } });
-    if (!period) {
-      period = await this.periodRepo.findOne({ where: {} });
-    }
-
-    let studentId = data.studentId || 1;
-    let parentId = data.parentId || 13;
-
-    if (!data.studentId && data.childName && typeof (this.childRepo as any)?.findOne === 'function') {
-      try {
-        const student = await this.childRepo.findOne({
-          where: { fullName: data.childName },
-        });
-        if (student) studentId = Number(student.id);
-      } catch {
-        // Fallback
-      }
-    }
-
+    if (!data.studentId || !data.periodId || !data.parentId)
+      throw new BadRequestException(
+        "Phải chọn đúng học sinh, phụ huynh và kỳ dịch vụ.",
+      );
+    const links = await this.childRepo.manager.query(
+      "SELECT 1 FROM student_parents WHERE student_id=$1 AND parent_id=$2",
+      [data.studentId, data.parentId],
+    );
+    if (!links.length)
+      throw new BadRequestException(
+        "Học sinh chưa liên kết với phụ huynh đã chọn.",
+      );
+    const period = await this.periodRepo.findOne({
+      where: { id: data.periodId },
+    });
+    if (!period) throw new NotFoundException("Không tìm thấy kỳ dịch vụ.");
     const existing = await this.regRepo.findOne({
-      where: {
-        studentId: Number(studentId),
-        periodId: Number(data.periodId || period?.id || 1),
-      },
+      where: { studentId: data.studentId, periodId: data.periodId },
     });
-    if (existing) {
-      return {
-        success: true,
-        registrationId: String(existing.id),
-        message: 'Hóa đơn của gói ăn xế này đã được khởi tạo',
-      };
-    }
-
-    const reg = this.regRepo.create({
-      studentId: Number(studentId),
-      periodId: Number(data.periodId || period?.id || 1),
-      parentId: Number(parentId),
-      status: 'PENDING',
-    });
-
-    const saved = await this.regRepo.save(reg);
+    if (existing) return { success: true, registrationId: String(existing.id) };
+    const saved = await this.regRepo.save(
+      this.regRepo.create({
+        studentId: data.studentId,
+        periodId: data.periodId,
+        parentId: data.parentId,
+        status: "PENDING",
+      }),
+    );
     return {
       success: true,
       registrationId: String(saved.id),
-      message: 'Đã tạo hóa đơn đăng ký ăn xế thành công',
+      message: "Đã tạo đăng ký chờ thanh toán.",
     };
   }
 
   async remindInvoice(invoiceId: number) {
+    const reg = await this.regRepo.findOne({
+      where: { id: invoiceId },
+      relations: ["period", "student"],
+    });
+    if (!reg) throw new NotFoundException("Không tìm thấy hóa đơn.");
+    if (reg.status !== "PENDING")
+      throw new BadRequestException(
+        "Chỉ nhắc phí hóa đơn đang chờ thanh toán.",
+      );
+    if (!reg.parentId)
+      throw new BadRequestException("Hóa đơn chưa có tài khoản phụ huynh.");
+    await this.regRepo.manager.query(
+      "INSERT INTO notifications(user_id,title,content,type) VALUES ($1,$2,$3,$4)",
+      [
+        reg.parentId,
+        "Nhắc thanh toán dịch vụ ăn phụ",
+        (reg.student?.fullName || "") +
+          " · " +
+          (reg.period?.name || "") +
+          " · " +
+          Number(reg.period?.feeAmount || 0).toLocaleString("vi-VN") +
+          " đồng",
+        "PAYMENT_REMINDER",
+      ],
+    );
     return {
       success: true,
-      message: `Đã gửi thông báo nhắc đóng phí ăn xế tới phụ huynh qua SMS & App`,
+      message: "Đã lưu thông báo nhắc phí trong tài khoản phụ huynh.",
     };
   }
 
   async batchRemind() {
+    const pending = await this.regRepo.find({ where: { status: "PENDING" } });
+    let sentCount = 0;
+    for (const reg of pending) {
+      if (!reg.parentId) continue;
+      await this.remindInvoice(reg.id);
+      sentCount++;
+    }
     return {
       success: true,
-      sentCount: 12,
-      message: 'Đã gửi nhắc phí hàng loạt cho tất cả phụ huynh chưa hoàn tất thanh toán',
+      sentCount,
+      message:
+        "Đã lưu " +
+        sentCount +
+        " thông báo nhắc phí trong tài khoản phụ huynh.",
     };
   }
 }

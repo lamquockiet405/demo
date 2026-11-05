@@ -113,7 +113,7 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-6 py-4 max-w-[1440px] mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-6 py-4 w-full">
       {/* Left Card: Cảm quan món ăn hôm nay của trẻ */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
         <div>

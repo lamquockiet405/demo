@@ -1,6 +1,6 @@
-import React from 'react';
-import { Baby, AlertTriangle } from 'lucide-react';
-import { ChildProfile } from '../types';
+import React from "react";
+import { Baby, AlertTriangle } from "lucide-react";
+import { ChildProfile } from "../types";
 
 interface ChildInfoStripProps {
   child: ChildProfile;
@@ -9,27 +9,35 @@ interface ChildInfoStripProps {
 export const ChildInfoStrip: React.FC<ChildInfoStripProps> = ({ child }) => {
   return (
     <div className="bg-[#eef6fc] border-b border-sky-100 py-2.5 px-4 text-xs">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
         {/* Left Child Metrics */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-slate-700">
           <div className="flex items-center gap-1.5 font-bold text-sky-900">
             <Baby className="w-4 h-4 text-sky-600" />
-            <span>{child.name || 'Bé Nguyễn Bảo Nam'} ({child.age || 4} tuổi)</span>
+            <span>
+              {child.name || "Hồ sơ của bé"}{child.age ? ` (${child.age} tuổi)` : ""}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <span className="text-slate-500">Lớp:</span>
-            <span className="font-semibold text-slate-800">{child.className || 'Lớp Thỏ Trắng'}</span>
+            <span className="font-semibold text-slate-800">
+              {child.className || "Chưa phân lớp"}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <span className="text-slate-500">Cân nặng:</span>
-            <span className="font-semibold text-slate-800">{child.weight || 16.8} kg</span>
+            <span className="font-semibold text-slate-800">
+              {child.weight !== undefined && child.weight !== null ? `${child.weight} kg` : "—"}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <span className="text-slate-500">Chiều cao:</span>
-            <span className="font-semibold text-slate-800">{child.height || 104.5} cm</span>
+            <span className="font-semibold text-slate-800">
+              {child.height !== undefined && child.height !== null ? `${child.height} cm` : "—"}
+            </span>
           </div>
         </div>
 

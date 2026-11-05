@@ -1,13 +1,18 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
-import { User } from '../../auth/entities/user.entity';
-import { Role } from '../../auth/entities/role.entity';
-import { ParentProfile } from '../entities/parent-profile.entity';
-import { QueryParentDto } from '../dto/parent/query-parent.dto';
-import { CreateParentDto } from '../dto/parent/create-parent.dto';
-import { UpdateParentDto } from '../dto/parent/update-parent.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcryptjs";
+import { User } from "../../auth/entities/user.entity";
+import { Role } from "../../auth/entities/role.entity";
+import { ParentProfile } from "../entities/parent-profile.entity";
+import { QueryParentDto } from "../dto/parent/query-parent.dto";
+import { CreateParentDto } from "../dto/parent/create-parent.dto";
+import { UpdateParentDto } from "../dto/parent/update-parent.dto";
 
 @Injectable()
 export class ParentManagementService {
@@ -26,58 +31,65 @@ export class ParentManagementService {
     const skip = (page - 1) * limit;
 
     const qb = this.userRepo
-      .createQueryBuilder('u')
-      .leftJoin(ParentProfile, 'pp', 'pp.user_id = u.id')
-      .leftJoinAndSelect('u.roles', 'r')
+      .createQueryBuilder("u")
+      .leftJoin(ParentProfile, "pp", "pp.user_id = u.id")
+      .leftJoinAndSelect("u.roles", "r")
       .where((subQb) => {
         const roleSubQuery = subQb
           .subQuery()
-          .select('ur_parent.user_id')
-          .from('user_roles', 'ur_parent')
-          .innerJoin('roles', 'r_parent', 'ur_parent.role_id = r_parent.id')
+          .select("ur_parent.user_id")
+          .from("user_roles", "ur_parent")
+          .innerJoin("roles", "r_parent", "ur_parent.role_id = r_parent.id")
           .where("r_parent.code = 'PARENT'")
           .getQuery();
 
         const studentParentSubQuery = subQb
           .subQuery()
-          .select('sp_parent.parent_id')
-          .from('student_parents', 'sp_parent')
+          .select("sp_parent.parent_id")
+          .from("student_parents", "sp_parent")
           .getQuery();
 
         return `(u.id IN ${roleSubQuery} OR pp.user_id IS NOT NULL OR u.id IN ${studentParentSubQuery})`;
       });
 
     // Tìm kiếm thời gian thực theo họ tên phụ huynh, email, SĐT hoặc thông tin học sinh
-    if (query.search && query.search.trim() !== '') {
+    if (query.search && query.search.trim() !== "") {
       const searchPattern = `%${query.search.trim().toLowerCase()}%`;
-      qb.andWhere((subQb) => {
-        const childSearchSubQuery = subQb
-          .subQuery()
-          .select('sp_s.parent_id')
-          .from('student_parents', 'sp_s')
-          .innerJoin('students', 'st_s', 'sp_s.student_id = st_s.id')
-          .where('(LOWER(st_s.full_name) LIKE :searchPattern OR LOWER(st_s.student_code) LIKE :searchPattern)')
-          .getQuery();
+      qb.andWhere(
+        (subQb) => {
+          const childSearchSubQuery = subQb
+            .subQuery()
+            .select("sp_s.parent_id")
+            .from("student_parents", "sp_s")
+            .innerJoin("students", "st_s", "sp_s.student_id = st_s.id")
+            .where(
+              "(LOWER(st_s.full_name) LIKE :searchPattern OR LOWER(st_s.student_code) LIKE :searchPattern)",
+            )
+            .getQuery();
 
-        return `(LOWER(u.fullName) LIKE :searchPattern OR LOWER(u.email) LIKE :searchPattern OR u.phone LIKE :searchPattern OR u.id IN ${childSearchSubQuery})`;
-      }, { searchPattern });
+          return `(LOWER(u.fullName) LIKE :searchPattern OR LOWER(u.email) LIKE :searchPattern OR u.phone LIKE :searchPattern OR u.id IN ${childSearchSubQuery})`;
+        },
+        { searchPattern },
+      );
     }
 
     // Lọc theo trạng thái & xóa mềm
-    if (query.status && query.status.trim() !== '' && query.status !== 'ALL') {
-      if (query.status === 'DELETED') {
+    if (query.status && query.status.trim() !== "" && query.status !== "ALL") {
+      if (query.status === "DELETED") {
         qb.andWhere("u.status = 'INACTIVE'");
       } else {
-        qb.andWhere('u.status = :status', { status: query.status.trim() });
+        qb.andWhere("u.status = :status", { status: query.status.trim() });
       }
     } else if (!query.includeDeleted) {
       qb.andWhere("u.status != 'INACTIVE'");
     }
 
     // Sắp xếp
-    const validSortFields = ['fullName', 'email', 'createdAt', 'lastLoginAt'];
-    const sortBy = validSortFields.includes(query.sortBy || '') ? query.sortBy : 'createdAt';
-    const sortOrder = query.sortOrder === 'ASC' ? 'ASC' : 'DESC';
+    const validSortFields = ["fullName", "email", "createdAt", "lastLoginAt"];
+    const sortBy = validSortFields.includes(query.sortBy || "")
+      ? query.sortBy
+      : "createdAt";
+    const sortOrder = query.sortOrder === "ASC" ? "ASC" : "DESC";
     qb.orderBy(`u.${sortBy}`, sortOrder);
     // Phân trang
     qb.skip(skip).take(limit);
@@ -121,8 +133,10 @@ export class ParentManagementService {
         studentCode: row.student_code,
         fullName: row.full_name,
         gender: row.gender,
-        dateOfBirth: row.date_of_birth ? new Date(row.date_of_birth).toISOString().split('T')[0] : '',
-        className: row.class_name || 'Chưa xếp lớp',
+        dateOfBirth: row.date_of_birth
+          ? new Date(row.date_of_birth).toISOString().split("T")[0]
+          : "",
+        className: row.class_name || "Chưa xếp lớp",
         relationship: row.relationship,
       });
     }
@@ -137,12 +151,14 @@ export class ParentManagementService {
         phone: u.phone,
         avatarUrl: u.avatar,
         status: u.status,
-        lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : null,
+        lastLoginAt: u.lastLoginAt
+          ? new Date(u.lastLoginAt).toISOString()
+          : null,
         createdAt: u.createdAt,
-        isDeleted: u.status === 'INACTIVE',
-        address: p?.address || '',
-        occupation: p?.occupation || '',
-        note: p?.note || '',
+        isDeleted: u.status === "INACTIVE",
+        address: p?.address || "",
+        occupation: p?.occupation || "",
+        note: p?.note || "",
         children: childrenMap.get(uId) || [],
       };
     });
@@ -160,7 +176,7 @@ export class ParentManagementService {
 
   async findOne(id: number) {
     const user = await this.userRepo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('Không tìm thấy phụ huynh');
+    if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
 
     const profile = await this.parentRepo.findOne({ where: { userId: id } });
 
@@ -171,20 +187,20 @@ export class ParentManagementService {
       phone: user.phone,
       avatarUrl: user.avatar,
       status: user.status,
-      address: profile?.address || '',
-      occupation: profile?.occupation || '',
-      note: profile?.note || '',
+      address: profile?.address || "",
+      occupation: profile?.occupation || "",
+      note: profile?.note || "",
     };
   }
 
   async checkEmailExists(email: string) {
-    const trimmed = (email || '').trim().toLowerCase();
+    const trimmed = (email || "").trim().toLowerCase();
     if (!trimmed) {
       return { exists: false };
     }
     const user = await this.userRepo
-      .createQueryBuilder('u')
-      .where('LOWER(u.email) = LOWER(:email)', { email: trimmed })
+      .createQueryBuilder("u")
+      .where("LOWER(u.email) = LOWER(:email)", { email: trimmed })
       .getOne();
 
     return {
@@ -196,10 +212,10 @@ export class ParentManagementService {
   }
 
   async create(dto: CreateParentDto) {
-    const email = (dto.email || '').trim().toLowerCase();
+    const email = (dto.email || "").trim().toLowerCase();
     const existing = await this.userRepo
-      .createQueryBuilder('u')
-      .where('LOWER(u.email) = LOWER(:email)', { email })
+      .createQueryBuilder("u")
+      .where("LOWER(u.email) = LOWER(:email)", { email })
       .getOne();
 
     if (existing) {
@@ -208,18 +224,25 @@ export class ParentManagementService {
       );
     }
 
+    if (!dto.password || dto.password.length < 8)
+      throw new BadRequestException(
+        "Nhập mật khẩu ban đầu có ít nhất 8 ký tự.",
+      );
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(dto.password || '123456', salt);
+    const passwordHash = await bcrypt.hash(dto.password, salt);
 
-    const role = await this.roleRepo.findOne({ where: { code: 'PARENT' } });
-    if (!role) throw new NotFoundException('Chưa cấu hình vai trò phụ huynh trong hệ thống');
+    const role = await this.roleRepo.findOne({ where: { code: "PARENT" } });
+    if (!role)
+      throw new NotFoundException(
+        "Chưa cấu hình vai trò phụ huynh trong hệ thống",
+      );
 
     const user = this.userRepo.create({
       email,
       passwordHash,
       fullName: dto.fullName?.trim(),
       phone: dto.phone?.trim() || null,
-      status: dto.status || 'ACTIVE',
+      status: dto.status || "ACTIVE",
       roles: [role],
     });
 
@@ -228,9 +251,9 @@ export class ParentManagementService {
       savedUser = await this.userRepo.save(user);
     } catch (err: any) {
       if (
-        err?.code === '23505' ||
-        err?.message?.includes('duplicate key') ||
-        err?.message?.includes('users_email_key')
+        err?.code === "23505" ||
+        err?.message?.includes("duplicate key") ||
+        err?.message?.includes("users_email_key")
       ) {
         throw new ConflictException(
           `Email "${email}" đã được sử dụng trong hệ thống. Vui lòng chọn email khác.`,
@@ -246,17 +269,23 @@ export class ParentManagementService {
       note: dto.note || null,
     });
     await this.parentRepo.save(profile);
-
+    if (dto.childIds !== undefined)
+      await this.saveChildLinks(savedUser.id, dto.childIds);
     return this.findOne(savedUser.id);
   }
 
   async update(id: number, dto: UpdateParentDto) {
     const user = await this.userRepo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('Không tìm thấy phụ huynh');
+    if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
 
     if (dto.fullName) user.fullName = dto.fullName;
-    if (dto.phone) user.phone = dto.phone;
+    if (dto.phone !== undefined) user.phone = dto.phone;
     if (dto.status) user.status = dto.status;
+    if (dto.newPassword) {
+      if (dto.newPassword.length < 8)
+        throw new BadRequestException("Mật khẩu cần ít nhất 8 ký tự.");
+      user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    }
     await this.userRepo.save(user);
 
     let profile = await this.parentRepo.findOne({ where: { userId: id } });
@@ -267,16 +296,41 @@ export class ParentManagementService {
     if (dto.occupation !== undefined) profile.occupation = dto.occupation;
     if (dto.note !== undefined) profile.note = dto.note;
     await this.parentRepo.save(profile);
-
+    if (dto.childIds !== undefined) await this.saveChildLinks(id, dto.childIds);
     return this.findOne(id);
+  }
+
+  private async saveChildLinks(parentId: number, rawIds: string[]) {
+    const ids = [...new Set(rawIds.map(Number))];
+    if (ids.some((id) => !Number.isSafeInteger(id) || id <= 0))
+      throw new BadRequestException("Mã học sinh không hợp lệ.");
+    await this.userRepo.manager.transaction(async (manager) => {
+      const existing = ids.length
+        ? await manager.query(
+            "SELECT id FROM students WHERE id=ANY($1::bigint[])",
+            [ids],
+          )
+        : [];
+      if (existing.length !== ids.length)
+        throw new BadRequestException("Có học sinh không tồn tại.");
+      await manager.query(
+        "DELETE FROM student_parents WHERE parent_id=$1 AND NOT (student_id=ANY($2::bigint[]))",
+        [parentId, ids],
+      );
+      for (const id of ids)
+        await manager.query(
+          "INSERT INTO student_parents(student_id,parent_id,relationship,is_primary) VALUES($1,$2,'GUARDIAN',false) ON CONFLICT (student_id,parent_id) DO NOTHING",
+          [id, parentId],
+        );
+    });
   }
 
   async remove(id: number) {
     const user = await this.userRepo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('Không tìm thấy phụ huynh');
-    user.status = 'INACTIVE';
+    if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
+    user.status = "INACTIVE";
     await this.userRepo.save(user);
-    return { success: true, message: 'Đã tạm ngưng tài khoản phụ huynh' };
+    return { success: true, message: "Đã tạm ngưng tài khoản phụ huynh" };
   }
 
   async getStats() {
@@ -293,9 +347,15 @@ export class ParentManagementService {
     const parentUsers: any[] = await this.userRepo.query(parentQuery);
 
     const totalParents = parentUsers.length;
-    const activeParents = parentUsers.filter((u: any) => u.status === 'ACTIVE').length;
-    const inactiveParents = parentUsers.filter((u: any) => u.status === 'INACTIVE').length;
-    const parentsWithChildren = parentUsers.filter((u: any) => u.has_children).length;
+    const activeParents = parentUsers.filter(
+      (u: any) => u.status === "ACTIVE",
+    ).length;
+    const inactiveParents = parentUsers.filter(
+      (u: any) => u.status === "INACTIVE",
+    ).length;
+    const parentsWithChildren = parentUsers.filter(
+      (u: any) => u.has_children,
+    ).length;
 
     return {
       totalParents,
@@ -309,9 +369,9 @@ export class ParentManagementService {
 
   async restore(id: number) {
     const user = await this.userRepo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('Không tìm thấy phụ huynh');
-    user.status = 'ACTIVE';
+    if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
+    user.status = "ACTIVE";
     await this.userRepo.save(user);
-    return { success: true, message: 'Đã khôi phục tài khoản phụ huynh' };
+    return { success: true, message: "Đã khôi phục tài khoản phụ huynh" };
   }
 }

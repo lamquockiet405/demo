@@ -1,13 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users2, Coffee, FileCheck2, PackageOpen, ShieldCheck, ShieldAlert, CircleDollarSign, Headphones, MoreVertical, Bell, UtensilsCrossed, Scale, Activity, Star, MessageSquareText, ClipboardCheck } from 'lucide-react';
-import { UserProfileModal } from '../features/auth/components/UserProfileModal';
-import { LogoutButton } from '../core/components/LogoutButton';
-import { useAuthStore } from '../core/stores/auth.store';
-import { tenantApi, TenantProfile } from '../core/api/tenant.api';
+import { principalNavigation } from "../features/school/principal-navigation";
+import React, { useState, useEffect } from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users2,
+  Coffee,
+  FileCheck2,
+  PackageOpen,
+  ShieldCheck,
+  ShieldAlert,
+  CircleDollarSign,
+  Headphones,
+  MoreVertical,
+  Bell,
+  UtensilsCrossed,
+  Scale,
+  Activity,
+  Star,
+  MessageSquareText,
+  ClipboardCheck,
+} from "lucide-react";
+import { UserProfileModal } from "../features/auth/components/UserProfileModal";
+import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
+import { LogoutButton } from "../core/components/LogoutButton";
+import { useAuthStore } from "../core/stores/auth.store";
+import { tenantApi, TenantProfile } from "../core/api/tenant.api";
 
 function getInitials(name?: string): string {
-  if (!name || !name.trim()) return 'BGH';
+  if (!name || !name.trim()) return "BGH";
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
@@ -16,15 +36,20 @@ function getInitials(name?: string): string {
 export const AdminDashboardLayout: React.FC = () => {
   const location = useLocation();
   const { user } = useAuthStore();
-  const canManageParents = (user?.roles || []).some(role =>
-    ['SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN', 'SCHOOL_MANAGEMENT'].includes(role.toUpperCase()),
+  const canManageParents = (user?.roles || []).some((role) =>
+    [
+      "SCHOOL_MANAGER",
+      "PRINCIPAL",
+      "SUPER_ADMIN",
+      "SCHOOL_MANAGEMENT",
+    ].includes(role.toUpperCase()),
   );
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [schoolName, setSchoolName] = useState<string>(
-    () => localStorage.getItem('school_name') || 'Hệ thống Bán trú KidMeal',
+    () => localStorage.getItem("school_name") || "Hệ thống Bán trú KidMeal",
   );
-  const [schoolLogo, setSchoolLogo] = useState<string>('');
-  const [schoolPhone, setSchoolPhone] = useState<string>('');
+  const [schoolLogo, setSchoolLogo] = useState<string>("");
+  const [schoolPhone, setSchoolPhone] = useState<string>("");
 
   useEffect(() => {
     let mounted = true;
@@ -34,10 +59,10 @@ export const AdminDashboardLayout: React.FC = () => {
         if (!mounted || !profile) return;
         if (profile.name) {
           setSchoolName(profile.name);
-          localStorage.setItem('school_name', profile.name);
+          localStorage.setItem("school_name", profile.name);
         }
-        setSchoolLogo(profile.branding?.logoUrl || '');
-        setSchoolPhone(profile.phone || '');
+        setSchoolLogo(profile.branding?.logoUrl || "");
+        setSchoolPhone(profile.phone || "");
       })
       .catch(() => {
         // Giữ nguyên giá trị từ localStorage nếu chưa tải được
@@ -47,84 +72,53 @@ export const AdminDashboardLayout: React.FC = () => {
       const detail = (e as CustomEvent<TenantProfile>).detail;
       if (detail) {
         if (detail.name) setSchoolName(detail.name);
-        setSchoolLogo(detail.branding?.logoUrl || '');
-        setSchoolPhone(detail.phone || '');
+        setSchoolLogo(detail.branding?.logoUrl || "");
+        setSchoolPhone(detail.phone || "");
       }
     };
-    window.addEventListener('tenant-profile-updated', handleTenantUpdated);
+    window.addEventListener("tenant-profile-updated", handleTenantUpdated);
     return () => {
       mounted = false;
-      window.removeEventListener('tenant-profile-updated', handleTenantUpdated);
+      window.removeEventListener("tenant-profile-updated", handleTenantUpdated);
     };
   }, []);
 
   // Danh mục menu Ban Giám Hiệu
-  const navItems = [
-    { label: 'Thông tin trường', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Chỉ huy Dinh dưỡng & Thể trạng', path: '/nutrition-physical-dashboard', icon: Activity },
-    { label: 'Cảnh báo an toàn trẻ (UC93)', path: '/child-alerts', icon: ShieldAlert },
-    { label: 'Báo cáo Vận hành Bữa ăn (UC94)', path: '/meal-operations-report', icon: UtensilsCrossed },
-    { label: 'Theo dõi thể lực WHO', path: '/growth', icon: Scale },
-    { label: 'Điều phối cảnh báo thể trạng (UC85)', path: '/growth-notifications', icon: Bell },
-    { label: 'Nhân sự & Bếp', path: '/staff', icon: Users2 },
-    ...(canManageParents ? [{ label: 'Tài khoản phụ huynh', path: '/parents', icon: Users2 }] : []),
-    { label: 'Kế hoạch suất ăn bán trú', path: '/children', icon: ClipboardCheck },
-    { label: 'Phục vụ ăn xế (Roster)', path: '/snack-roster', icon: Coffee },
-    { label: 'Ý kiến & Đánh giá PH', path: '/services', icon: MessageSquareText },
-    { label: 'Phê duyệt thực đơn', path: '/menu-approval', icon: FileCheck2 },
-    { label: 'Kho & Dinh dưỡng', path: '/inventory', icon: PackageOpen },
-    { label: 'Tuân thủ ATTP & Kiểm thực (UC95)', path: '/food-safety', icon: ShieldCheck },
-    { label: 'Nhật ký kiểm toán', path: '/audit-logs', icon: ShieldAlert },
-    { label: 'Báo cáo tài chính & Ăn sáng (UC96)', path: '/snack-revenue-report', icon: CircleDollarSign },
-    { label: 'Đánh giá Phụ huynh & CSAT (UC97)', path: '/parent-evaluation-report', icon: Star },
-  ];
-
-  const getBreadcrumbTitle = () => {
-    if (location.pathname.startsWith('/nutrition-physical')) return 'Chỉ huy Dinh dưỡng & Thể trạng (UC92)';
-    if (location.pathname.startsWith('/child-alerts')) return 'Tổng hợp Cảnh báo Trẻ em (UC93)';
-    if (location.pathname.startsWith('/meal-operations')) return 'Báo Cáo Vận Hành Bữa Ăn & Bán Trú (UC94)';
-    if (location.pathname.startsWith('/growth-notifications')) return 'Điều Phối Thông Báo Bất Thường Thể Trạng (UC85)';
-    if (location.pathname.startsWith('/growth')) return 'Theo dõi Thể lực & Tăng trưởng Trẻ (WHO 2006)';
-    if (location.pathname.startsWith('/menu-approval')) return 'Phê duyệt & Công bố thực đơn tuần';
-    if (location.pathname.startsWith('/staff')) return 'Quản trị Nhân sự & Tài khoản Bếp';
-    if (location.pathname.startsWith('/parents')) return 'Quản lý Tài khoản Phụ huynh';
-    if (location.pathname.startsWith('/children')) return 'Kế hoạch Suất ăn & Điểm danh Bán trú';
-    if (location.pathname.startsWith('/snack-roster')) return 'Danh sách Phục vụ Suất ăn Xế (Snack Service Roster)';
-    if (location.pathname.startsWith('/services')) return 'Ý kiến & Đánh giá của Phụ huynh';
-    if (location.pathname.startsWith('/inventory')) return 'Kho nguyên liệu & Tiêu chuẩn dinh dưỡng';
-    if (location.pathname.startsWith('/food-safety')) return 'Báo Cáo Tuân Thủ An Toàn Thực Phẩm (UC95)';
-    if (location.pathname.startsWith('/audit-logs')) return 'Nhật ký Kiểm toán & Truy vết Dữ liệu Nhạy cảm (Audit Logs)';
-    if (location.pathname.startsWith('/parent-evaluation'))
-      return 'Báo Cáo Tổng Hợp Đánh Giá Phụ Huynh & CSAT (UC97)';
-    if (location.pathname.startsWith('/snack-revenue') || location.pathname.startsWith('/finances'))
-      return 'Báo Cáo Doanh Thu Dịch Vụ Suất Ăn Sáng (UC96)';
-    if (location.pathname.startsWith('/settings') || location.pathname.startsWith('/tenant/settings'))
-      return 'Cài đặt thông tin Trường mầm non';
-    if (location.pathname.startsWith('/dashboard')) return 'Thông tin trường';
-    return 'Cài đặt hệ thống & Quản trị tài khoản';
-  };
+  const navItems = principalNavigation;
+  const getBreadcrumbTitle = () =>
+    navItems.find((item) => location.pathname === item.path)?.label ||
+    "Cổng Ban Giám Hiệu";
 
   const userInitials = getInitials(user?.fullName);
 
   return (
     <div className="flex h-screen bg-[#f8fafc] font-sans antialiased text-slate-800">
       {/* 1. Sidebar Trái */}
-      <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shadow-xs z-30">
-        <div>
+      <aside className="w-64 shrink-0 bg-white border-r border-slate-200/80 flex flex-col justify-between shadow-xs z-30">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           {/* Header Sidebar: KidMeal BGH & Tên trường thực tế */}
           <div className="p-5 border-b border-slate-100 flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 shadow-inner shrink-0 overflow-hidden">
               {schoolLogo ? (
-                <img src={schoolLogo} alt={schoolName} className="w-full h-full object-contain p-1" />
+                <img
+                  src={schoolLogo}
+                  alt={schoolName}
+                  className="w-full h-full object-contain p-1"
+                />
               ) : (
                 <UtensilsCrossed className="w-5 h-5" />
               )}
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm text-slate-900 tracking-tight">KidMeal BGH</span>
+                <span className="font-extrabold text-sm text-slate-900 tracking-tight">
+                  KidMeal BGH
+                </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium truncate" title={schoolName}>
+              <p
+                className="text-[11px] text-slate-500 font-medium truncate"
+                title={schoolName}
+              >
                 {schoolName}
               </p>
             </div>
@@ -140,28 +134,38 @@ export const AdminDashboardLayout: React.FC = () => {
 
           {/* Navigation Menu Links */}
           <nav className="px-3 py-3 space-y-1">
-            {navItems.map((item) => {
+            {navItems.map((item, index) => {
               const Icon = item.icon;
               const isActive =
-                  item.path === '/dashboard'
-                  ? location.pathname === '/dashboard' || location.pathname === '/settings' ||
-                    location.pathname === '/tenant/settings' ||
-                    location.pathname === '/'
+                item.path === "/settings"
+                  ? location.pathname === "/settings" ||
+                    location.pathname === "/tenant/settings" ||
+                    location.pathname === "/"
                   : location.pathname.startsWith(item.path);
 
               return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25 font-bold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                  <span>{item.label}</span>
-                </Link>
+                <React.Fragment key={item.path}>
+                  {(index === 0 ||
+                    item.group !== navItems[index - 1].group) && (
+                    <p className="px-3 pt-4 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {item.group}
+                    </p>
+                  )}
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
+                      isActive
+                        ? "bg-teal-600 text-white shadow-md shadow-teal-600/25 font-bold"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                    }`}
+                  >
+                    <Icon
+                      className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`}
+                    />
+                    <span>{item.label}</span>
+                  </Link>
+                </React.Fragment>
               );
             })}
           </nav>
@@ -175,9 +179,11 @@ export const AdminDashboardLayout: React.FC = () => {
               <Headphones className="w-4 h-4" />
             </div>
             <div className="overflow-hidden">
-              <p className="text-[10px] text-slate-400 leading-tight">Hotline Nhà trường</p>
+              <p className="text-[10px] text-slate-400 leading-tight">
+                Hotline Nhà trường
+              </p>
               <p className="text-xs font-bold text-teal-800 tracking-tight truncate">
-                {schoolPhone || 'Chưa cập nhật'}
+                {schoolPhone || "Chưa cập nhật"}
               </p>
             </div>
           </div>
@@ -193,9 +199,11 @@ export const AdminDashboardLayout: React.FC = () => {
               </div>
               <div className="overflow-hidden">
                 <p className="text-xs font-bold text-slate-800 leading-tight truncate">
-                  {user?.fullName || user?.email || 'Ban Giám Hiệu'}
+                  {user?.fullName || user?.email || "Ban Giám Hiệu"}
                 </p>
-                <p className="text-[10px] text-slate-400">Hiệu trưởng / Quản lý</p>
+                <p className="text-[10px] text-slate-400">
+                  Hiệu trưởng / Quản lý
+                </p>
               </div>
             </div>
 
@@ -211,42 +219,29 @@ export const AdminDashboardLayout: React.FC = () => {
       </aside>
 
       {/* 2. Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between z-20">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
             <UtensilsCrossed className="w-4 h-4 text-teal-600" />
-            <span className="hover:text-slate-800 cursor-pointer">{schoolName}</span>
+            <span className="hover:text-slate-800 cursor-pointer">
+              {schoolName}
+            </span>
             <span>›</span>
-            <span className="text-slate-900 font-semibold">{getBreadcrumbTitle()}</span>
+            <span className="text-slate-900 font-semibold">
+              {getBreadcrumbTitle()}
+            </span>
           </div>
 
           {/* Right Header items */}
           <div className="flex items-center gap-4">
-            <LogoutButton />
-            {/* User Profile Pill */}
-            <button
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center gap-2.5 pl-2 pr-3 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full transition"
-            >
-              <div className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-[10px] flex items-center justify-center">
-                {userInitials}
-              </div>
-              <div className="text-left">
-                <span className="text-xs font-bold text-slate-800 block leading-tight">
-                  {user?.fullName || user?.email || 'Ban Giám Hiệu'}
-                </span>
-                <span className="text-[10px] text-teal-700 font-medium block">
-                  BGH Mầm non
-                </span>
-              </div>
-            </button>
+            <UserHeaderDropdown />
           </div>
         </header>
 
         {/* Scrollable Page Container */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-auto p-4 lg:p-8">
           <Outlet />
         </main>
       </div>

@@ -62,5 +62,25 @@ export class UpdateChildDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+    @ApiPropertyOptional({ example: 'Nguyễn Gia Bảo' })
+  @IsOptional()
+  @IsString()
+  parentName?: string;
+
+  @ApiPropertyOptional({ example: 'phuhuynh.huy@gmail.com' })
+  @IsOptional()
+  @IsString()
+  parentEmail?: string;
+
+  @ApiPropertyOptional({ example: '0908111222' })
+  @IsOptional()
+  @IsString()
+  parentPhone?: string;
+
+  @ApiPropertyOptional({ example: 'FATHER', enum: ['FATHER', 'MOTHER', 'GUARDIAN'] })
+  @IsOptional()
+  @IsString()
+  parentRelationship?: string;
+
   medicalNotes?: string;
 }

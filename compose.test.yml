@@ -58,6 +58,7 @@ services:
       REDIS_PASSWORD: ${TEST_REDIS_PASSWORD}
       JWT_SECRET: ${TEST_JWT_SECRET}
       JWT_REFRESH_SECRET: ${TEST_JWT_REFRESH_SECRET}
+      VNPAY_RETURN_URL: http://localhost:5174/payments/vnpay-return
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_ACCESS_KEY: kidmeal_test

@@ -1,6 +1,17 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber, IsArray } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsArray,
+  IsIn,
+  IsDateString,
+  Min,
+  Max,
+  IsBoolean,
+  IsObject,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class SubmitEvaluationDto {
   @ApiPropertyOptional({ example: 1 })
@@ -15,12 +26,16 @@ export class SubmitEvaluationDto {
   @IsOptional()
   menuId?: number | string;
 
-  @ApiPropertyOptional({ example: 'QUICK_EVALUATION', enum: ['QUICK_EVALUATION', 'SCHOOL_PROPOSAL'] })
+  @ApiPropertyOptional({
+    example: "QUICK_EVALUATION",
+    enum: ["QUICK_EVALUATION", "SCHOOL_PROPOSAL"],
+  })
   @IsOptional()
   @IsString()
+  @IsIn(["QUICK_EVALUATION", "SCHOOL_PROPOSAL"])
   evaluationType?: string;
 
-  @ApiPropertyOptional({ example: 'TRUA' })
+  @ApiPropertyOptional({ example: "TRUA" })
   @IsOptional()
   @IsString()
   mealType?: string;
@@ -29,19 +44,21 @@ export class SubmitEvaluationDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Min(1)
+  @Max(5)
   rating?: number = 5;
 
-  @ApiPropertyOptional({ example: 'Góp ý bữa ăn' })
+  @ApiPropertyOptional({ example: "Góp ý bữa ăn" })
   @IsOptional()
   @IsString()
   title?: string;
 
-  @ApiPropertyOptional({ example: 'Bé ăn rất ngon miệng và thích món súp.' })
+  @ApiPropertyOptional({ example: "Bé ăn rất ngon miệng và thích món súp." })
   @IsOptional()
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({ example: 'Bé ăn rất ngon miệng' })
+  @ApiPropertyOptional({ example: "Bé ăn rất ngon miệng" })
   @IsOptional()
   @IsString()
   comment?: string;
@@ -63,10 +80,12 @@ export class SubmitEvaluationDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsObject()
   attributes?: any;
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsBoolean()
   isDrafting?: boolean;
 
   @ApiPropertyOptional()
@@ -86,6 +105,6 @@ export class SubmitEvaluationDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
+  @IsDateString({ strict: true })
   feedbackDate?: string;
 }

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { schoolDate } from "../../menus/utils/published-menus";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   UtensilsCrossed,
   ChefHat,
@@ -18,9 +19,9 @@ import {
   ShieldCheck,
   X,
   Loader2,
-} from 'lucide-react';
-import { attendanceApi } from '../api/attendanceApi';
-import { AttendanceResponse, ChildAttendanceItem } from '../types';
+} from "lucide-react";
+import { attendanceApi } from "../api/attendanceApi";
+import { AttendanceResponse, ChildAttendanceItem } from "../types";
 
 interface ClassSummaryItem {
   id: string;
@@ -58,24 +59,28 @@ interface SchoolSummaryData {
 }
 
 export const BghMealPortionsOverviewPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<string>('2026-09-25');
+  const [selectedDate, setSelectedDate] = useState<string>(schoolDate);
   const [data, setData] = useState<SchoolSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Detail Modal States
-  const [selectedClass, setSelectedClass] = useState<ClassSummaryItem | null>(null);
-  const [classDetailData, setClassDetailData] = useState<AttendanceResponse | null>(null);
+  const [selectedClass, setSelectedClass] = useState<ClassSummaryItem | null>(
+    null,
+  );
+  const [classDetailData, setClassDetailData] =
+    useState<AttendanceResponse | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState<boolean>(false);
 
   // Load summary data from PostgreSQL
   const loadSummary = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res: any = await attendanceApi.getSchoolHeadcountSummary(selectedDate);
+      const res: any =
+        await attendanceApi.getSchoolHeadcountSummary(selectedDate);
       setData(res?.data || res);
     } catch (err) {
-      console.error('Lỗi khi tải tổng hợp suất ăn toàn trường:', err);
+      console.error("Lỗi khi tải tổng hợp suất ăn toàn trường:", err);
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +101,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
       });
       setClassDetailData(detail);
     } catch (err) {
-      console.error('Lỗi khi xem chi tiết lớp:', err);
+      console.error("Lỗi khi xem chi tiết lớp:", err);
     } finally {
       setIsDetailLoading(false);
     }
@@ -111,20 +116,20 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
         date: selectedDate,
         isLocked: nextLocked,
         notes: nextLocked
-          ? 'Ban Giám Hiệu xác nhận chốt số suất ăn gửi Bếp'
-          : 'Ban Giám Hiệu mở khóa cho giáo viên điều chỉnh số liệu',
+          ? "Ban Giám Hiệu xác nhận chốt số suất ăn gửi Bếp"
+          : "Ban Giám Hiệu mở khóa cho giáo viên điều chỉnh số liệu",
       });
 
       setToastMessage(
         nextLocked
           ? `Đã khóa sổ ${cls.name} gửi sang Bếp thành công!`
-          : `Đã mở khóa ${cls.name} cho giáo viên điều chỉnh!`
+          : `Đã mở khóa ${cls.name} cho giáo viên điều chỉnh!`,
       );
       setTimeout(() => setToastMessage(null), 3500);
       loadSummary();
     } catch (err) {
-      console.error('Lỗi khi đổi trạng thái khóa:', err);
-      alert('Không thể cập nhật trạng thái khóa. Vui lòng thử lại!');
+      console.error("Lỗi khi đổi trạng thái khóa:", err);
+      alert("Không thể cập nhật trạng thái khóa. Vui lòng thử lại!");
     }
   };
 
@@ -132,17 +137,17 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
   const handleExportCsv = () => {
     if (!data?.classes || data.classes.length === 0) return;
     const headers = [
-      'STT',
-      'Lớp học',
-      'Khối',
-      'Giáo viên phụ trách',
-      'Sĩ số',
-      'Đăng ký ăn trưa',
-      'Suất trưa chuẩn',
-      'Khay dị ứng',
-      'Suất ăn xế',
-      'Học sinh nghỉ',
-      'Trạng thái gửi Bếp',
+      "STT",
+      "Lớp học",
+      "Khối",
+      "Giáo viên phụ trách",
+      "Sĩ số",
+      "Đăng ký ăn trưa",
+      "Suất trưa chuẩn",
+      "Khay dị ứng",
+      "Suất ăn xế",
+      "Học sinh nghỉ",
+      "Trạng thái gửi Bếp",
     ];
 
     const rows = data.classes.map((c, idx) => [
@@ -160,19 +165,23 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
     ]);
 
     const csvContent =
-      '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      "\uFEFF" +
+      [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', `Ke_Hoach_Suat_An_Toan_Truong_${selectedDate}.csv`);
+    link.setAttribute(
+      "download",
+      `Ke_Hoach_Suat_An_Toan_Truong_${selectedDate}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans antialiased text-slate-800">
+    <div className="space-y-6 w-full pb-12 font-sans antialiased text-slate-800">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-xs border border-emerald-500">
@@ -189,13 +198,16 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />
               CỔNG BAN GIÁM HIỆU • ĐIỀU HÀNH BÁN TRÚ
             </span>
-            <span className="text-xs text-slate-500 font-medium">Hạn chốt gửi Bếp: 08:45 hàng ngày</span>
+            <span className="text-xs text-slate-500 font-medium">
+              Hạn chốt gửi Bếp: 08:45 hàng ngày
+            </span>
           </div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Kế hoạch Định lượng Suất ăn Bán trú Toàn trường
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Tổng hợp dữ liệu báo suất ăn từ Giáo viên các lớp gửi xuống Bếp trung tâm • Giám sát tiến độ chốt sổ chuẩn ATTP.
+            Tổng hợp dữ liệu báo suất ăn từ Giáo viên các lớp gửi xuống Bếp
+            trung tâm • Giám sát tiến độ chốt sổ chuẩn ATTP.
           </p>
         </div>
 
@@ -217,7 +229,9 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
             title="Làm mới dữ liệu từ cơ sở dữ liệu"
           >
-            <RotateCcw className={`w-3.5 h-3.5 text-teal-600 ${isLoading ? 'animate-spin' : ''}`} />
+            <RotateCcw
+              className={`w-3.5 h-3.5 text-teal-600 ${isLoading ? "animate-spin" : ""}`}
+            />
             <span>Làm mới</span>
           </button>
 
@@ -321,7 +335,9 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             <span className="text-3xl font-black text-slate-900">
               {data?.lockedClassesCount ?? 0}/{data?.totalClassesCount ?? 6}
             </span>
-            <span className="text-xs font-bold text-slate-400">lớp đã khóa</span>
+            <span className="text-xs font-bold text-slate-400">
+              lớp đã khóa
+            </span>
           </div>
           <div className="mt-2 pt-2 border-t border-slate-100">
             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -342,7 +358,8 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
               Bảng Tổng Hợp Kế Hoạch Suất Ăn Theo Lớp
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Theo dõi dữ liệu thực tế từ cơ sở dữ liệu PostgreSQL • Bấm nút thao tác để xem chi tiết học sinh hoặc mở khóa điều chỉnh.
+              Theo dõi dữ liệu thực tế từ cơ sở dữ liệu PostgreSQL • Bấm nút
+              thao tác để xem chi tiết học sinh hoặc mở khóa điều chỉnh.
             </p>
           </div>
           <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
@@ -353,7 +370,9 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
         {isLoading ? (
           <div className="p-16 text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto" />
-            <p className="text-xs font-bold text-slate-500">Đang tải dữ liệu suất ăn từ cơ sở dữ liệu...</p>
+            <p className="text-xs font-bold text-slate-500">
+              Đang tải dữ liệu suất ăn từ cơ sở dữ liệu...
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -364,10 +383,18 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                   <th className="py-3.5 px-4">Giáo Viên Phụ Trách</th>
                   <th className="py-3.5 px-3 text-center">Sĩ Số</th>
                   <th className="py-3.5 px-3 text-center">Đăng Ký Ăn</th>
-                  <th className="py-3.5 px-3 text-center text-teal-700">Suất Chuẩn</th>
-                  <th className="py-3.5 px-3 text-center text-red-600">Khay Dị Ứng</th>
-                  <th className="py-3.5 px-3 text-center text-amber-700">Suất Xế</th>
-                  <th className="py-3.5 px-3 text-center text-rose-600">Nghỉ Học</th>
+                  <th className="py-3.5 px-3 text-center text-teal-700">
+                    Suất Chuẩn
+                  </th>
+                  <th className="py-3.5 px-3 text-center text-red-600">
+                    Khay Dị Ứng
+                  </th>
+                  <th className="py-3.5 px-3 text-center text-amber-700">
+                    Suất Xế
+                  </th>
+                  <th className="py-3.5 px-3 text-center text-rose-600">
+                    Nghỉ Học
+                  </th>
                   <th className="py-3.5 px-4 text-center">Trạng Thái Bếp</th>
                   <th className="py-3.5 px-4 text-center">Thao Tác BGH</th>
                 </tr>
@@ -429,7 +456,9 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                             {cls.allergicCount} khay
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-xs font-medium">0</span>
+                          <span className="text-slate-400 text-xs font-medium">
+                            0
+                          </span>
                         )}
                       </td>
 
@@ -445,7 +474,9 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                             {cls.absentToday}
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-xs font-medium">0</span>
+                          <span className="text-slate-400 text-xs font-medium">
+                            0
+                          </span>
                         )}
                       </td>
 
@@ -480,13 +511,13 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                             onClick={() => handleToggleClassLock(cls)}
                             className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition border ${
                               isLocked
-                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200'
-                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
+                                ? "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200"
+                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200"
                             }`}
                             title={
                               isLocked
-                                ? 'Mở khóa cho giáo viên điều chỉnh bổ sung'
-                                : 'Đặc cách khóa sổ suất ăn gửi Bếp'
+                                ? "Mở khóa cho giáo viên điều chỉnh bổ sung"
+                                : "Đặc cách khóa sổ suất ăn gửi Bếp"
                             }
                           >
                             {isLocked ? (
@@ -527,7 +558,9 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                     Danh Sách Báo Suất Ăn: {selectedClass.name}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Giáo viên phụ trách: <strong>{selectedClass.homeroomTeacher}</strong> • Ngày: {selectedDate}
+                    Giáo viên phụ trách:{" "}
+                    <strong>{selectedClass.homeroomTeacher}</strong> • Ngày:{" "}
+                    {selectedDate}
                   </p>
                 </div>
               </div>
@@ -545,9 +578,12 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
               {isDetailLoading ? (
                 <div className="p-12 text-center space-y-2">
                   <Loader2 className="w-6 h-6 animate-spin text-teal-600 mx-auto" />
-                  <p className="text-xs font-medium text-slate-500">Đang tải danh sách học sinh của lớp...</p>
+                  <p className="text-xs font-medium text-slate-500">
+                    Đang tải danh sách học sinh của lớp...
+                  </p>
                 </div>
-              ) : classDetailData?.children && classDetailData.children.length > 0 ? (
+              ) : classDetailData?.children &&
+                classDetailData.children.length > 0 ? (
                 <div className="overflow-x-auto border border-slate-200 rounded-2xl">
                   <table className="w-full text-left text-xs">
                     <thead>
@@ -562,40 +598,46 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                     <tbody className="divide-y divide-slate-100">
                       {classDetailData.children.map((child, idx) => (
                         <tr key={child.id} className="hover:bg-slate-50/60">
-                          <td className="py-2.5 px-3 font-semibold text-slate-400">{idx + 1}</td>
-                          <td className="py-2.5 px-3 font-bold text-slate-900">{child.fullName}</td>
+                          <td className="py-2.5 px-3 font-semibold text-slate-400">
+                            {idx + 1}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-slate-900">
+                            {child.fullName}
+                          </td>
                           <td className="py-2.5 px-3 text-center">
                             <span
                               className={`inline-flex px-2 py-0.5 rounded-lg text-[11px] font-bold ${
-                                child.mealOption === 'ALL_DAY'
-                                  ? 'bg-teal-50 text-teal-800'
-                                  : child.mealOption === 'LUNCH_ONLY'
-                                  ? 'bg-sky-50 text-sky-800'
-                                  : child.mealOption === 'SNACK_ONLY'
-                                  ? 'bg-amber-50 text-amber-800'
-                                  : 'bg-rose-50 text-rose-700'
+                                child.mealOption === "ALL_DAY"
+                                  ? "bg-teal-50 text-teal-800"
+                                  : child.mealOption === "LUNCH_ONLY"
+                                    ? "bg-sky-50 text-sky-800"
+                                    : child.mealOption === "SNACK_ONLY"
+                                      ? "bg-amber-50 text-amber-800"
+                                      : "bg-rose-50 text-rose-700"
                               }`}
                             >
-                              {child.mealOption === 'ALL_DAY'
-                                ? 'Cả ngày (Trưa + Xế)'
-                                : child.mealOption === 'LUNCH_ONLY'
-                                ? 'Chỉ ăn trưa'
-                                : child.mealOption === 'SNACK_ONLY'
-                                ? 'Chỉ ăn xế'
-                                : 'Nghỉ học'}
+                              {child.mealOption === "ALL_DAY"
+                                ? "Cả ngày (Trưa + Xế)"
+                                : child.mealOption === "LUNCH_ONLY"
+                                  ? "Chỉ ăn trưa"
+                                  : child.mealOption === "SNACK_ONLY"
+                                    ? "Chỉ ăn xế"
+                                    : "Nghỉ học"}
                             </span>
                           </td>
                           <td className="py-2.5 px-3">
-                            {child.dietBadge?.type === 'ALLERGY' ? (
+                            {child.dietBadge?.type === "ALLERGY" ? (
                               <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-700 border border-red-200">
-                                ⚠ {child.dietBadge.title || 'Có dị ứng'}
+                                ⚠ {child.dietBadge.title || "Có dị ứng"}
                               </span>
                             ) : (
-                              <span className="text-slate-400 text-[11px]">Bình thường</span>
+                              <span className="text-slate-400 text-[11px]">
+                                Bình thường
+                              </span>
                             )}
                           </td>
                           <td className="py-2.5 px-3 text-slate-500 italic">
-                            {child.parentNote || 'Không có ghi chú'}
+                            {child.parentNote || "Không có ghi chú"}
                           </td>
                         </tr>
                       ))}
@@ -612,7 +654,12 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             {/* Modal Footer */}
             <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/60 text-xs">
               <span className="text-slate-500 font-medium">
-                Trạng thái: <strong>{selectedClass.isKitchenLocked ? 'Đã khóa gửi Bếp' : 'Chưa khóa'}</strong>
+                Trạng thái:{" "}
+                <strong>
+                  {selectedClass.isKitchenLocked
+                    ? "Đã khóa gửi Bếp"
+                    : "Chưa khóa"}
+                </strong>
               </span>
               <button
                 onClick={() => setSelectedClass(null)}

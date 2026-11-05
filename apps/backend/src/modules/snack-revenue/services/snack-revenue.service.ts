@@ -1,16 +1,16 @@
-import { Injectable, Optional, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { SnackServicePeriod } from '../../snack-services/entities/snack-service-period.entity';
-import { SnackRegistration } from '../../snack-services/entities/snack-registration.entity';
-import { Payment } from '../../payments/entities/payment.entity';
-import { DailyMealAttendance } from '../../attendance/entities/daily-meal-attendance.entity';
-import { Child } from '../../children/entities/child.entity';
-import { ClassEntity } from '../../classes/entities/class.entity';
-import { User } from '../../auth/entities/user.entity';
-import { AuditLogsService } from '../../audit-logs/services/audit-logs.service';
-import { QuerySnackRevenueDto } from '../dto/query-snack-revenue.dto';
-import { SendDebtReminderDto } from '../dto/send-debt-reminder.dto';
+import { Injectable, Optional, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { SnackServicePeriod } from "../../snack-services/entities/snack-service-period.entity";
+import { SnackRegistration } from "../../snack-services/entities/snack-registration.entity";
+import { Payment } from "../../payments/entities/payment.entity";
+import { DailyMealAttendance } from "../../attendance/entities/daily-meal-attendance.entity";
+import { Child } from "../../children/entities/child.entity";
+import { ClassEntity } from "../../classes/entities/class.entity";
+import { User } from "../../auth/entities/user.entity";
+import { AuditLogsService } from "../../audit-logs/services/audit-logs.service";
+import { QuerySnackRevenueDto } from "../dto/query-snack-revenue.dto";
+import { SendDebtReminderDto } from "../dto/send-debt-reminder.dto";
 
 export interface AgingDebtItem {
   registrationId: number;
@@ -32,7 +32,7 @@ export interface StudentCreditItem {
   parentName: string;
   excusedDaysCount: number;
   refundAmount: number;
-  status: 'CREDITED_NEXT_MONTH' | 'REFUNDED_CASH';
+  status: "CREDITED_NEXT_MONTH" | "REFUNDED_CASH";
 }
 
 export interface GradeRevenueBreakdown {
@@ -55,7 +55,7 @@ export interface VnpayTransactionItem {
   paymentMethod: string;
   paidAt: string;
   bankRef: string;
-  status: 'MATCHED' | 'PENDING_CLEARING';
+  status: "MATCHED" | "PENDING_CLEARING";
 }
 
 export interface SnackRevenueReportResponse {
@@ -131,200 +131,173 @@ export class SnackRevenueService {
   /**
    * UC96: Xem Báo Cáo Doanh Thu Dịch Vụ Ăn Xế (Chỉ dành riêng cho School Manager)
    */
-  async getSnackRevenueReport(query?: QuerySnackRevenueDto, schoolId?: number): Promise<SnackRevenueReportResponse> {
-    const month = query?.month || 11;
-    const year = query?.year || 2026;
-    const REFUND_PER_SNACK = 20000; // 20,000 VND / suất ăn xế khi nghỉ phép trước 08h00
-    const DEFAULT_MONTHLY_FEE = 440000; // 440,000 VND / tháng (22 ngày x 20.000đ)
-
-    // 1. Query Classes & Students
-    const classes = await this.classRepo.find({ order: { name: 'ASC' } });
-    const students = await this.childRepo.find();
-
-    // 2. Query Registrations & Payments
+  async getSnackRevenueReport(
+    query?: QuerySnackRevenueDto,
+    schoolId?: number,
+  ): Promise<SnackRevenueReportResponse> {
+    const now = new Date();
+    const month = query?.month || now.getMonth() + 1,
+      year = query?.year || now.getFullYear();
+    const start = new Date(Date.UTC(year, month - 1, 1))
+        .toISOString()
+        .slice(0, 10),
+      end = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+    const classes = await this.classRepo.find({ order: { name: "ASC" } });
     const registrations = await this.registrationRepo.find({
-      relations: ['student', 'period', 'parent'],
-      order: { registeredAt: 'DESC' },
+      relations: ["student", "period", "parent"],
+      order: { registeredAt: "DESC" },
     });
-
-    const payments = await this.paymentRepo.find({
-      relations: ['registration', 'registration.student', 'registration.parent', 'registration.period'],
-      order: { paidAt: 'DESC' },
-    });
-
-    // 3. Query Attendance records for AFTERNOON_SNACK in target month
-    const attendances = await this.attendanceRepo.find({
-      where: { mealType: 'AFTERNOON_SNACK' },
-      relations: ['student'],
-    });
-
-    // Filter registrations for active/selected period
-    const activeRegs = registrations.length > 0
-      ? registrations
-      : this.generateRealisticRegistrations(students);
-
-    const paidRegs = activeRegs.filter((r) => r.status === 'PAID');
-    const pendingRegs = activeRegs.filter((r) => r.status === 'PENDING');
-
-    const totalRegisteredCount = activeRegs.length || 132;
-    const paidCount = paidRegs.length || 126;
-    const pendingCount = pendingRegs.length || 6;
-
-    const expectedRevenue = totalRegisteredCount * DEFAULT_MONTHLY_FEE;
-    const collectedRevenue = paidCount * DEFAULT_MONTHLY_FEE;
-    const pendingDebtAmount = expectedRevenue - collectedRevenue;
-    const collectionRate = Number(((collectedRevenue / expectedRevenue) * 100).toFixed(2));
-    const isTargetReached = collectionRate >= 95.0;
-
-    // 4. Attendance Reconciliation: Count excused absences
-    const excusedAbsences = attendances.filter(
-      (a) => !a.isAttended && (a.note?.toLowerCase().includes('phép') || true),
+    const activeRegs = registrations.filter(
+      (r) =>
+        r.period &&
+        r.period.startDate <= end &&
+        r.period.endDate >= start &&
+        !["CANCELLED", "REJECTED"].includes(r.status),
     );
-    const totalExcusedAbsenceCount = Math.max(48, excusedAbsences.length);
-    const totalRefundAmount = totalExcusedAbsenceCount * REFUND_PER_SNACK;
-    const creditBalanceAppliedNextMonth = totalRefundAmount;
-
-    // Per-student credit items
-    const reconciliationStudents: StudentCreditItem[] = students.slice(0, 6).map((c, idx) => {
-      const cls = classes.find((cl) => Number(cl.id) === Number(c.classId));
-      const days = idx === 0 ? 3 : idx === 1 ? 2 : 1;
-      return {
-        studentId: c.id,
-        studentName: c.fullName,
-        className: cls?.name || 'Nhà trẻ 1',
-        parentName: `Phụ huynh bé ${c.fullName.split(' ').slice(-1)[0]}`,
-        excusedDaysCount: days,
-        refundAmount: days * REFUND_PER_SNACK,
-        status: 'CREDITED_NEXT_MONTH',
-      };
+    const payments = await this.paymentRepo.find({
+      relations: [
+        "registration",
+        "registration.student",
+        "registration.parent",
+        "registration.period",
+      ],
+      order: { paidAt: "DESC" },
     });
-
-    // 5. Cost Structure Norms (70% - 20% - 10%)
-    const ingredientCostAmount = Math.round(collectedRevenue * 0.70);
-    const serviceCostAmount = Math.round(collectedRevenue * 0.20);
-    const paymentFeeAmount = Math.round(collectedRevenue * 0.10);
-    const netSurplus = collectedRevenue - (ingredientCostAmount + serviceCostAmount + paymentFeeAmount);
-
-    const costStructure = {
-      ingredientCost70Pct: {
-        percentage: 70,
-        amount: ingredientCostAmount,
-        description: 'Chi phí mua nguyên liệu trực tiếp: sữa tươi hữu cơ, sữa chua, hoa quả, bánh tart, chè hạt sen',
-      },
-      serviceCost20Pct: {
-        percentage: 20,
-        amount: serviceCostAmount,
-        description: 'Thù lao bồi dưỡng giáo viên trực trông trẻ và nhân viên bếp chia suất, dọn rửa sau 16h30',
-      },
-      paymentFeeAndAdmin10Pct: {
-        percentage: 10,
-        amount: paymentFeeAmount,
-        description: 'Phí xử lý giao dịch điện tử cổng VNPAY/Ngân hàng và khấu hao hạ tầng quản trị hệ thống',
-      },
-      netOperatingSurplus: netSurplus,
-    };
-
-    // 6. Grade Breakdown
-    const gradeLevels = [
-      { code: 'NHA_TRE', name: 'Khối Nhà Trẻ (18 - 36 tháng)', targetPct: 0.21 },
-      { code: 'MAM', name: 'Khối Mầm (3 - 4 tuổi)', targetPct: 0.26 },
-      { code: 'CHOI', name: 'Khối Chồi (4 - 5 tuổi)', targetPct: 0.265 },
-      { code: 'LA', name: 'Khối Lá (5 - 6 tuổi)', targetPct: 0.265 },
+    const paid = payments.filter(
+      (p) =>
+        ["SUCCESS", "PAID"].includes(p.status) &&
+        p.paidAt &&
+        new Date(p.paidAt).toISOString().slice(0, 10) >= start &&
+        new Date(p.paidAt).toISOString().slice(0, 10) <= end,
+    );
+    const pendingRegs = activeRegs.filter((r) => r.status === "PENDING"),
+      paidRegs = activeRegs.filter((r) => r.status === "PAID");
+    const fee = (r: any) => Number(r.period?.feeAmount || 0);
+    const expectedRevenue = activeRegs.reduce((sum, r) => sum + fee(r), 0),
+      collectedRevenue = paid.reduce((sum, p) => sum + Number(p.amount), 0),
+      pendingDebtAmount = pendingRegs.reduce((sum, r) => sum + fee(r), 0);
+    const rate = (a: number, b: number) =>
+      b > 0 ? Math.round((a / b) * 1000) / 10 : null;
+    const gradeCodes = [
+      ...new Set(classes.map((c) => c.ageGroup).filter(Boolean)),
     ];
-
-    const gradeBreakdown: GradeRevenueBreakdown[] = gradeLevels.map((g, idx) => {
-      const regCount = Math.max(1, Math.round(totalRegisteredCount * g.targetPct));
-      const expected = regCount * DEFAULT_MONTHLY_FEE;
-      const collCount = Math.max(1, regCount > 3 ? regCount - (idx % 2 === 0 ? 1 : 2) : regCount);
-      const collected = Math.min(expected, collCount * DEFAULT_MONTHLY_FEE);
-      const rate = expected > 0 ? Number(((collected / expected) * 100).toFixed(1)) : 100;
+    const gradeBreakdown = gradeCodes.map((code) => {
+      const ids = new Set(
+        classes.filter((c) => c.ageGroup === code).map((c) => Number(c.id)),
+      );
+      const regs = activeRegs.filter((r) =>
+        ids.has(Number(r.student?.classId)),
+      );
+      const expected = regs.reduce((sum, r) => sum + fee(r), 0);
+      const collected = paid
+        .filter((p) => ids.has(Number(p.registration?.student?.classId)))
+        .reduce((sum, p) => sum + Number(p.amount), 0);
       return {
-        gradeLevel: g.code,
-        gradeName: g.name,
-        registeredCount: regCount,
+        gradeLevel: code,
+        gradeName: code,
+        registeredCount: regs.length,
         expectedRevenue: expected,
         collectedRevenue: collected,
-        collectionRate: rate,
+        collectionRate: rate(collected, expected),
       };
     });
-
-    // 7. Aging Debts List
-    const agingDebts: AgingDebtItem[] = pendingRegs.slice(0, 6).map((r, idx) => {
-      const c = r.student || students[idx % students.length];
-      const cls = classes.find((cl) => Number(cl.id) === Number(c?.classId));
-      const daysOverdue = 3 + idx * 2;
+    const agingDebts = pendingRegs.map((r) => ({
+      registrationId: r.id,
+      studentId: r.studentId,
+      studentName: r.student?.fullName || "",
+      className:
+        classes.find((c) => Number(c.id) === Number(r.student?.classId))
+          ?.name || "",
+      parentName: r.parent?.fullName || "",
+      parentPhone: r.parent?.phone || "",
+      amount: fee(r),
+      registeredAt: r.registeredAt?.toISOString() || null,
+      daysOverdue: r.period?.registrationDeadline
+        ? Math.max(
+            0,
+            Math.floor(
+              (Date.now() -
+                new Date(
+                  r.period.registrationDeadline + "T23:59:59+07:00",
+                ).getTime()) /
+                86400000,
+            ),
+          )
+        : 0,
+      status: r.status,
+    }));
+    const vnpayTransactions = paid.map((p) => {
+      let raw: any = {};
+      try {
+        raw = JSON.parse(p.rawResponse || "{}");
+      } catch {}
       return {
-        registrationId: r.id || idx + 1,
-        studentId: c?.id || 100 + idx,
-        studentName: c?.fullName || `Học sinh #${idx + 1}`,
-        className: cls?.name || 'Mầm 1',
-        parentName: r.parent?.fullName || `Nguyễn Văn Phụ Huynh ${idx + 1}`,
-        parentPhone: r.parent?.phone || `090812345${idx}`,
-        amount: DEFAULT_MONTHLY_FEE,
-        registeredAt: `${year}-${String(month).padStart(2, '0')}-01T08:00:00Z`,
-        daysOverdue,
-        status: 'PENDING_PAYMENT',
+        transactionCode: p.vnpayTransactionCode || String(p.id),
+        studentName: p.registration?.student?.fullName || "",
+        className:
+          classes.find(
+            (c) => Number(c.id) === Number(p.registration?.student?.classId),
+          )?.name || "",
+        parentName: p.registration?.parent?.fullName || "",
+        parentPhone: p.registration?.parent?.phone || "",
+        packageName: p.registration?.period?.name || "",
+        amount: Number(p.amount),
+        paymentMethod: "VNPAY",
+        paidAt: p.paidAt.toISOString(),
+        bankRef: raw.vnp_BankTranNo || "",
+        status: "MATCHED" as const,
       };
     });
-
-    // 8. VNPAY Transactions Statement (Hiển thị đầy đủ Ngày thanh toán & Tên phụ huynh)
-    const vnpayTransactions: VnpayTransactionItem[] = (
-      payments.length > 0
-        ? payments.map((p, idx) => {
-            const stu = p.registration?.student || students[idx % (students.length || 1)];
-            const cls = classes.find((c) => Number(c.id) === Number(stu?.classId)) || classes[idx % (classes.length || 1)];
-            const parentName =
-              p.registration?.parent?.fullName ||
-              `Nguyễn Văn Nam (Phụ huynh bé ${(stu?.fullName || 'Bé').split(' ').slice(-1)[0]})`;
-            const parentPhone = p.registration?.parent?.phone || `090812345${idx % 10}`;
-            const packageName =
-              p.registration?.period?.name || `Gói Ăn Xế Chiều 17h00 - Tháng ${month}/${year}`;
-
-            return {
-              transactionCode: p.vnpayTransactionCode || `VNP-${year}${month}-00${idx + 1}`,
-              studentName: stu?.fullName || 'Học sinh',
-              className: cls?.name || 'Nhà trẻ 1',
-              parentName,
-              parentPhone,
-              packageName,
-              amount: Number(p.amount) || DEFAULT_MONTHLY_FEE,
-              paymentMethod: 'VNPAY QR',
-              paidAt: p.paidAt ? p.paidAt.toISOString() : `${year}-${String(month).padStart(2, '0')}-02T09:15:00Z`,
-              bankRef: `FT${year}${month}998${idx}`,
-              status: 'MATCHED' as const,
-            };
-          })
-        : this.generateRealisticVnpayStatements(students, classes, year, month, DEFAULT_MONTHLY_FEE)
+    const schools = await this.childRepo.manager.query(
+      "SELECT name FROM schools WHERE id = $1",
+      [schoolId || 1],
     );
-
     return {
-      schoolName: 'Trường Mầm Non Thực Hành KidMeal',
+      schoolName: schools[0]?.name || "",
       period: {
         month,
         year,
-        periodName: `Đợt Dịch Vụ Ăn Xế Chiều 17h00 - Tháng ${month}/${year}`,
-        daysInMonth: 22,
-        serviceFeePerDay: 20000,
+        periodName: "Tháng " + month + "/" + year,
+        daysInMonth: null,
+        serviceFeePerDay: null,
       },
       collectionSummary: {
         expectedRevenue,
         collectedRevenue,
         pendingDebtAmount,
-        collectionRate,
-        isTargetReached,
-        targetRate: 95.0,
-        totalRegisteredStudents: totalRegisteredCount,
-        paidStudents: paidCount,
-        pendingStudents: pendingCount,
+        collectionRate: rate(collectedRevenue, expectedRevenue),
+        isTargetReached:
+          expectedRevenue > 0 && collectedRevenue >= expectedRevenue,
+        targetRate: null,
+        totalRegisteredStudents: activeRegs.length,
+        paidStudents: paidRegs.length,
+        pendingStudents: pendingRegs.length,
       },
       attendanceReconciliation: {
-        totalExcusedAbsences: totalExcusedAbsenceCount,
-        refundPerSnack: REFUND_PER_SNACK,
-        totalRefundAmount,
-        creditBalanceAppliedNextMonth,
-        reconciliationStudents,
+        totalExcusedAbsences: 0,
+        refundPerSnack: null,
+        totalRefundAmount: null,
+        creditBalanceAppliedNextMonth: null,
+        reconciliationStudents: [],
       },
-      costStructure,
+      costStructure: {
+        ingredientCost70Pct: {
+          percentage: null,
+          amount: null,
+          description: "Chưa có sổ chi phí nguyên liệu",
+        },
+        serviceCost20Pct: {
+          percentage: null,
+          amount: null,
+          description: "Chưa có sổ chi phí dịch vụ",
+        },
+        paymentFeeAndAdmin10Pct: {
+          percentage: null,
+          amount: null,
+          description: "Chưa có dữ liệu phí đối soát",
+        },
+        netOperatingSurplus: null,
+      },
       gradeBreakdown,
       agingDebts,
       vnpayTransactions,
@@ -334,82 +307,39 @@ export class SnackRevenueService {
   /**
    * Helper: Sinh danh sách đăng ký thực tế khi DB chưa có đủ bản ghi demo
    */
-  private generateRealisticRegistrations(students: Child[]): SnackRegistration[] {
-    return students.map((s, idx) => {
-      const reg = new SnackRegistration();
-      reg.id = idx + 1;
-      reg.studentId = s.id;
-      reg.student = s;
-      reg.periodId = 1;
-      reg.parentId = 1;
-      reg.status = idx < students.length - 2 ? 'PAID' : 'PENDING';
-      reg.registeredAt = new Date('2026-11-01T08:00:00Z');
-      return reg;
-    });
-  }
-
-  private generateRealisticVnpayStatements(
-    students: Child[],
-    classes: ClassEntity[],
-    year: number,
-    month: number,
-    fee: number,
-  ): VnpayTransactionItem[] {
-    const parentNames = [
-      'Nguyễn Văn Nam',
-      'Trần Thị Thu Hà',
-      'Lê Hoàng Minh',
-      'Phạm Ngọc Lan',
-      'Vũ Quốc Tuấn',
-    ];
-    return students.slice(0, 5).map((s, idx) => {
-      const cls = classes.find((c) => Number(c.id) === Number(s.classId));
-      return {
-        transactionCode: `VNP-${year}${String(month).padStart(2, '0')}0${idx + 1}-8899`,
-        studentName: s.fullName,
-        className: cls?.name || 'Nhà trẻ 1',
-        parentName: parentNames[idx % parentNames.length],
-        parentPhone: `090811223${idx}`,
-        packageName: `Gói Năng Lượng Chiều 17h00 - Tháng ${month}/${year}`,
-        amount: fee,
-        paymentMethod: 'VNPAY QR',
-        paidAt: `${year}-${String(month).padStart(2, '0')}-02T0${8 + idx}:15:00Z`,
-        bankRef: `BIDV-${year}9923${idx}`,
-        status: 'MATCHED',
-      };
-    });
-  }
 
   /**
    * Gửi tin nhắn đôn đốc phụ huynh đóng phí dịch vụ ăn xế (SMS / App Push)
    */
   async sendDebtReminder(dto: SendDebtReminderDto, userId: number) {
-    const channel = dto.channel || 'ALL';
-    const message =
-      dto.customMessage ||
-      'Trường Mầm Non KidMeal trân trọng nhắc Quý Phụ Huynh hoàn tất phí dịch vụ ăn xế chiều 17h00. Xin cảm ơn!';
-
-    this.auditLogsService?.logAction({
-      tenantId: 1,
-      userId,
-      userName: 'Ban Giám Hiệu',
-      userRole: 'SCHOOL_MANAGER',
-      action: 'SEND_SNACK_FEE_DEBT_REMINDER',
-      targetEntity: 'SNACK_REGISTRATION',
-      targetId: dto.registrationIds.join(','),
-      ipAddress: '127.0.0.1',
-      details: {
-        registrationCount: dto.registrationIds.length,
-        channel,
-        message,
-      },
-    }).catch(() => {});
-
+    const ids = [...new Set(dto.registrationIds)];
+    let remindedCount = 0;
+    for (const id of ids) {
+      const reg = await this.registrationRepo.findOne({
+        where: { id },
+        relations: ["period", "student"],
+      });
+      if (!reg || reg.status !== "PENDING" || !reg.parentId) continue;
+      await this.registrationRepo.manager.query(
+        "INSERT INTO notifications(user_id,title,content,type) VALUES ($1,$2,$3,$4)",
+        [
+          reg.parentId,
+          "Nhắc thanh toán dịch vụ ăn phụ",
+          dto.customMessage ||
+            (reg.student?.fullName || "") + " · " + (reg.period?.name || ""),
+          "PAYMENT_REMINDER",
+        ],
+      );
+      remindedCount++;
+    }
     return {
       success: true,
-      remindedCount: dto.registrationIds.length,
-      channel,
-      message: `Đã gửi thành công tin nhắn nhắc đóng phí tới ${dto.registrationIds.length} phụ huynh qua kênh ${channel}.`,
+      remindedCount,
+      channel: "APP_PUSH",
+      message:
+        "Đã lưu " +
+        remindedCount +
+        " thông báo nhắc phí trong tài khoản phụ huynh.",
       sentAt: new Date().toISOString(),
     };
   }
@@ -421,7 +351,7 @@ export class SnackRevenueService {
     const report = await this.getSnackRevenueReport(query);
 
     return {
-      reportTitle: 'BÁO CÁO DOANH THU & QUYẾT TOÁN TÀI CHÍNH DỊCH VỤ ĂN XẾ',
+      reportTitle: "BÁO CÁO DOANH THU & QUYẾT TOÁN TÀI CHÍNH DỊCH VỤ ĂN XẾ",
       financialPeriod: `Tháng ${report.period.month}/${report.period.year}`,
       issuedBy: report.schoolName,
       issuedAt: new Date().toISOString(),

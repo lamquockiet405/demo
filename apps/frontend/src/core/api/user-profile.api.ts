@@ -1,4 +1,4 @@
-import { apiClient } from './axios';
+import { apiClient } from "./axios";
 
 export interface UserRoleInfo {
   id: string;
@@ -60,7 +60,7 @@ export const userProfileApi = {
    * UC05: Lấy hồ sơ cá nhân của người dùng hiện tại (View Profile - áp dụng cho mọi role)
    */
   getMyProfile: async (): Promise<UserProfile> => {
-    const res = await apiClient.get<UserProfile>('/users/profile');
+    const res = await apiClient.get<UserProfile>("/users/profile");
     return res.data;
   },
 
@@ -68,15 +68,24 @@ export const userProfileApi = {
    * UC06: Cập nhật thông tin cá nhân (Edit Profile: họ tên, số điện thoại, avatar)
    */
   updateMyProfile: async (data: UpdateProfileInput): Promise<UserProfile> => {
-    const res = await apiClient.patch<UserProfile>('/users/profile', data);
+    const { avatarUrl, ...fields } = data;
+    const res = await apiClient.patch<UserProfile>("/users/profile", {
+      ...fields,
+      ...(avatarUrl !== undefined ? { avatar: avatarUrl } : {}),
+    });
     return res.data;
   },
 
   /**
    * Đổi mật khẩu tài khoản
    */
-  changePassword: async (data: ChangePasswordInput): Promise<{ message: string }> => {
-    const res = await apiClient.post<{ message: string }>('/users/change-password', data);
+  changePassword: async (
+    data: ChangePasswordInput,
+  ): Promise<{ message: string }> => {
+    const res = await apiClient.post<{ message: string }>(
+      "/auth/change-password",
+      { currentPassword: data.currentPassword, newPassword: data.newPassword },
+    );
     return res.data;
   },
 
@@ -84,7 +93,8 @@ export const userProfileApi = {
    * Khởi tạo thiết lập 2FA (nhận mã QR & secret)
    */
   setup2FA: async (): Promise<TwoFactorSetupResponse> => {
-    const res = await apiClient.post<TwoFactorSetupResponse>('/users/2fa/setup');
+    const res =
+      await apiClient.post<TwoFactorSetupResponse>("/users/2fa/setup");
     return res.data;
   },
 
@@ -92,15 +102,20 @@ export const userProfileApi = {
    * Kích hoạt 2FA bằng mã OTP 6 số
    */
   enable2FA: async (code: string): Promise<TwoFactorEnableResponse> => {
-    const res = await apiClient.post<TwoFactorEnableResponse>('/users/2fa/enable', { code });
+    const res = await apiClient.post<TwoFactorEnableResponse>(
+      "/users/2fa/enable",
+      { code },
+    );
     return res.data;
   },
 
   /**
    * Hủy kích hoạt 2FA
    */
-  disable2FA: async (code: string): Promise<{ message: string; twoFactorEnabled: boolean }> => {
-    const res = await apiClient.post('/users/2fa/disable', { code });
+  disable2FA: async (
+    code: string,
+  ): Promise<{ message: string; twoFactorEnabled: boolean }> => {
+    const res = await apiClient.post("/users/2fa/disable", { code });
     return res.data;
   },
 };

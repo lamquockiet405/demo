@@ -1,17 +1,28 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
-import { NutritionalStandard } from '../entities/nutrition-rule.entity';
-import { NutritionCalculatorService } from './nutrition-calculator.service';
-import { Dish } from '../../dishes/entities/dish.entity';
-import { EvaluateMenuDto } from '../dto/evaluate-menu.dto';
-import { MenuVersion } from '../../menus/entities/menu-version.entity';
-import { getPortionNutrition, hasVerifiedNutrition } from '../../dishes/nutrition.util';
+import { configuredMenuCriteria, MenuSlot } from "./menu-criteria";
+import { DishFrequencyRule } from "../entities/dish-frequency-rule.entity";
+import { DishSpacingRule } from "../entities/dish-spacing-rule.entity";
+import { matchesDeclaredAllergy } from "../../menus/services/allergy-matching";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, In } from "typeorm";
+import { NutritionalStandard } from "../entities/nutrition-rule.entity";
+import { NutritionCalculatorService } from "./nutrition-calculator.service";
+import { Dish } from "../../dishes/entities/dish.entity";
+import { EvaluateMenuDto } from "../dto/evaluate-menu.dto";
+import { MenuVersion } from "../../menus/entities/menu-version.entity";
+import {
+  getPortionNutrition,
+  hasVerifiedNutrition,
+} from "../../dishes/nutrition.util";
 
 export interface ViolationItem {
   ruleCode: string;
   ruleName: string;
-  severity: 'INFO' | 'WARNING' | 'ERROR';
+  severity: "INFO" | "WARNING" | "ERROR";
   message: string;
   actualValue?: number;
   expectedRange?: string;
@@ -30,161 +41,254 @@ export class MenuScannerService {
   ) {}
 
   async evaluateMenu(dto: EvaluateMenuDto) {
-    let ageGroup = dto.ageGroup || dto.targetAgeGroup || 'MAU_GIAO';
+    let ageGroup = dto.ageGroup || dto.targetAgeGroup || "MAU_GIAO";
     let dayCount = 1;
-    let menuTitle = '';
+    let menuTitle = "";
+    const slots: MenuSlot[] = [];
     const selections: Array<{ dish: Dish; portionSizeG?: number }> = [];
 
     if (dto.dishes !== undefined) {
-      const loaded = dto.dishes.length ? await this.dishRepo.find({
-        where: { id: In(dto.dishes.map((item) => item.dishId)) }, relations: ['nutrition'],
-      }) : [];
+      const loaded = dto.dishes.length
+        ? await this.dishRepo.find({
+            where: { id: In(dto.dishes.map((item) => item.dishId)) },
+            relations: [
+              "nutrition",
+              "category",
+              "recipes",
+              "recipes.ingredient",
+              "dishAllergens",
+            ],
+          })
+        : [];
       for (const item of dto.dishes) {
-        const dish = loaded.find((candidate) => Number(candidate.id) === Number(item.dishId));
-        if (!dish) throw new NotFoundException(`Không tìm thấy món ăn ${item.dishId}`);
+        const dish = loaded.find(
+          (candidate) => Number(candidate.id) === Number(item.dishId),
+        );
+        if (!dish)
+          throw new NotFoundException(`Không tìm thấy món ăn ${item.dishId}`);
         selections.push({ dish, portionSizeG: item.portionSizeG });
       }
     } else if (dto.menuId) {
       const version = await this.versionRepo.findOne({
-        where: { menuId: dto.menuId }, order: { versionNumber: 'DESC' },
-        relations: ['menu', 'days', 'days.meals', 'days.meals.dishes', 'days.meals.dishes.dish', 'days.meals.dishes.dish.nutrition'],
+        where: { menuId: dto.menuId },
+        order: { versionNumber: "DESC" },
+        relations: [
+          "menu",
+          "days",
+          "days.meals",
+          "days.meals.dishes",
+          "days.meals.dishes.dish",
+          "days.meals.dishes.dish.nutrition",
+          "days.meals.dishes.dish.category",
+          "days.meals.dishes.dish.recipes",
+          "days.meals.dishes.dish.recipes.ingredient",
+          "days.meals.dishes.dish.dishAllergens",
+        ],
       });
-      if (!version) throw new NotFoundException('Không tìm thấy phiên bản thực đơn');
+      if (!version)
+        throw new NotFoundException("Không tìm thấy phiên bản thực đơn");
       ageGroup = version.menu.ageGroup;
       menuTitle = version.menu.title;
-      const days = (version.days || []).filter((day) => !dto.targetDate || day.date === dto.targetDate);
-      if (dto.targetDate && !days.length) throw new NotFoundException('Ngày đánh giá không thuộc thực đơn');
+      const days = (version.days || []).filter(
+        (day) => !dto.targetDate || day.date === dto.targetDate,
+      );
+      if (dto.targetDate && !days.length)
+        throw new NotFoundException("Ngày đánh giá không thuộc thực đơn");
       dayCount = Math.max(days.length, 1);
-      for (const day of days) for (const meal of day.meals || []) for (const item of meal.dishes || []) {
-        selections.push({ dish: item.dish, portionSizeG: item.portionSizeG });
-      }
+      for (const day of days)
+        for (const meal of day.meals || [])
+          for (const item of meal.dishes || []) {
+            selections.push({
+              dish: item.dish,
+              portionSizeG: item.portionSizeG,
+            });
+            slots.push({
+              date: day.date,
+              meal: meal.mealType,
+              dishId: Number(item.dishId),
+              categoryId: Number(item.dish?.categoryId),
+              categoryCode: item.dish?.category?.code,
+              foodGroupIds: (item.dish?.recipes || [])
+                .map((r) => Number(r.ingredient?.categoryId))
+                .filter(Boolean),
+            });
+          }
     }
-    const missing = selections.filter(({ dish }) => !hasVerifiedNutrition(dish));
+    const missing = selections.filter(
+      ({ dish }) => !hasVerifiedNutrition(dish),
+    );
     if (missing.length) {
-      throw new BadRequestException(`Chưa có công thức định lượng được xác nhận: ${[...new Set(missing.map(({ dish }) => dish?.name || 'Món ăn'))].join(', ')}`);
+      throw new BadRequestException(
+        `Chưa có công thức định lượng được xác nhận: ${[...new Set(missing.map(({ dish }) => dish?.name || "Món ăn"))].join(", ")}`,
+      );
     }
 
     const standard = await this.standardRepo.findOne({
       where: [
-        { ageGroup, mealScope: 'FULL_DAY', status: 'ACTIVE' },
-        { ageGroup, mealScope: 'ALL_DAY', status: 'ACTIVE' },
-        { ageGroup, mealScope: 'DAYBOARDING', status: 'ACTIVE' },
+        { ageGroup, mealScope: "FULL_DAY", status: "ACTIVE" },
+        { ageGroup, mealScope: "ALL_DAY", status: "ACTIVE" },
+        { ageGroup, mealScope: "DAYBOARDING", status: "ACTIVE" },
       ],
     });
 
     const dishesNutrition = selections.map(({ dish, portionSizeG }) => {
       const nutrients = getPortionNutrition(dish, portionSizeG);
       // Weekly evaluation compares the daily average with daily standards.
-      return Object.fromEntries(Object.entries(nutrients).map(([key, value]) => [key, value / dayCount])) as typeof nutrients;
+      return Object.fromEntries(
+        Object.entries(nutrients).map(([key, value]) => [
+          key,
+          value / dayCount,
+        ]),
+      ) as typeof nutrients;
     });
 
     const summary = this.calculator.calculateMacros(dishesNutrition);
     const violations: ViolationItem[] = [];
-    if (!selections.length) violations.push({
-      ruleCode: 'NO_DISHES', ruleName: 'Chưa có món ăn', severity: 'ERROR',
-      message: 'Chọn thực đơn hoặc món ăn cần đánh giá.',
-    });
-
-    const minEnergy = standard ? standard.minEnergyKcal : (ageGroup === 'MAU_GIAO' ? 615 : 600);
-    const maxEnergy = standard ? standard.maxEnergyKcal : (ageGroup === 'MAU_GIAO' ? 738 : 651);
-    const minProteinPct = standard ? standard.minProteinPct : 13;
-    const maxProteinPct = standard ? standard.maxProteinPct : 20;
-    const minFatPct = standard ? standard.minFatPct : (ageGroup === 'MAU_GIAO' ? 25 : 30);
-    const maxFatPct = standard ? standard.maxFatPct : (ageGroup === 'MAU_GIAO' ? 35 : 40);
-    const minCarbPct = standard ? standard.minCarbPct : 52;
-    const maxCarbPct = standard ? standard.maxCarbPct : 60;
-
-    // 1. Check Energy
-    if (summary.energyKcal < minEnergy) {
+    if (!selections.length)
       violations.push({
-        ruleCode: 'CALORIE_DEFICIT',
-        ruleName: 'Thiếu năng lượng Kcal',
-        severity: 'ERROR',
-        message: `Tổng năng lượng ${summary.energyKcal} kcal chưa đạt chuẩn tối thiểu ${minEnergy} kcal (Thông tư 28/2016/TT-BGDĐT)`,
-        actualValue: summary.energyKcal,
-        expectedRange: `${minEnergy} - ${maxEnergy} kcal`,
+        ruleCode: "NO_DISHES",
+        ruleName: "Chưa có món ăn",
+        severity: "ERROR",
+        message: "Chọn thực đơn hoặc món ăn cần đánh giá.",
       });
-    } else if (summary.energyKcal > maxEnergy) {
-      violations.push({
-        ruleCode: 'CALORIE_EXCESS',
-        ruleName: 'Vượt năng lượng Kcal',
-        severity: 'WARNING',
-        message: `Tổng năng lượng ${summary.energyKcal} kcal vượt ngưỡng tối đa ${maxEnergy} kcal`,
-        actualValue: summary.energyKcal,
-        expectedRange: `${minEnergy} - ${maxEnergy} kcal`,
-      });
+
+    const minEnergy =
+        standard?.minEnergyKcal == null ? null : Number(standard.minEnergyKcal),
+      maxEnergy =
+        standard?.maxEnergyKcal == null ? null : Number(standard.maxEnergyKcal),
+      minProteinPct =
+        standard?.minProteinPct == null ? null : Number(standard.minProteinPct),
+      maxProteinPct =
+        standard?.maxProteinPct == null ? null : Number(standard.maxProteinPct),
+      minFatPct =
+        standard?.minFatPct == null ? null : Number(standard.minFatPct),
+      maxFatPct =
+        standard?.maxFatPct == null ? null : Number(standard.maxFatPct),
+      minCarbPct =
+        standard?.minCarbPct == null ? null : Number(standard.minCarbPct),
+      maxCarbPct =
+        standard?.maxCarbPct == null ? null : Number(standard.maxCarbPct);
+    let frequency: any[] = [],
+      spacing: any[] = [],
+      conflicts: string[] | null = null;
+    if (dto.menuId && this.versionRepo.manager) {
+      frequency = (
+        await this.versionRepo.manager
+          .getRepository(DishFrequencyRule)
+          .find({ where: { isActive: true } })
+      ).filter((r) => r.ageGroup === "ALL" || r.ageGroup === ageGroup);
+      spacing = (
+        await this.versionRepo.manager
+          .getRepository(DishSpacingRule)
+          .find({ where: { isActive: true } })
+      ).filter((r) => r.ageGroup === "ALL" || r.ageGroup === ageGroup);
+      const declarations = await this.versionRepo.manager.query(
+        "SELECT sa.student_id,s.full_name,a.name,a.code,sa.allergen_id,sa.custom_allergen_name FROM student_allergies sa JOIN students s ON s.id=sa.student_id LEFT JOIN allergens a ON a.id=sa.allergen_id WHERE sa.is_active=true",
+      );
+      conflicts = [];
+      for (const declaration of declarations)
+        for (const { dish } of selections) {
+          if (
+            matchesDeclaredAllergy(
+              {
+                name:
+                  declaration.name || declaration.custom_allergen_name || "",
+                code: declaration.code,
+                catalogId: declaration.allergen_id,
+              },
+              {
+                name: dish.name,
+                ingredients: (dish.recipes || []).map(
+                  (r) => r.ingredient?.name || "",
+                ),
+                allergenIds: (dish.dishAllergens || []).map((a) =>
+                  Number(a.allergenId),
+                ),
+              },
+            )
+          ) {
+            const text =
+              declaration.full_name +
+              " · " +
+              dish.name +
+              " · " +
+              (declaration.name || declaration.custom_allergen_name);
+            if (!conflicts.includes(text)) conflicts.push(text);
+          }
+        }
     }
-
-    // 2. Check Protein%
-    if (summary.proteinPct < minProteinPct || summary.proteinPct > maxProteinPct) {
+    const criteria = configuredMenuCriteria(
+      summary,
+      standard,
+      slots,
+      frequency,
+      spacing,
+      conflicts,
+    );
+    for (const criterion of criteria.filter((c) => c.status === "FAIL"))
+      for (const finding of criterion.findings)
+        violations.push({
+          ruleCode: criterion.key,
+          ruleName: criterion.name,
+          severity: "ERROR",
+          message: finding,
+        });
+    for (const criterion of criteria.filter((c) => c.status === "UNKNOWN"))
       violations.push({
-        ruleCode: 'PROTEIN_OUT_OF_RANGE',
-        ruleName: 'Tỷ lệ Đạm (P%) ngoài khoảng',
-        severity: 'WARNING',
-        message: `Tỷ lệ đạm ${summary.proteinPct}% nằm ngoài khoảng chuẩn ${minProteinPct}% - ${maxProteinPct}%`,
-        actualValue: summary.proteinPct,
-        expectedRange: `${minProteinPct}% - ${maxProteinPct}%`,
+        ruleCode: criterion.key + "_UNKNOWN",
+        ruleName: criterion.name,
+        severity: "WARNING",
+        message: criterion.findings.join(" "),
       });
-    }
 
-    // 3. Check Fat%
-    if (summary.fatPct < minFatPct || summary.fatPct > maxFatPct) {
-      violations.push({
-        ruleCode: 'FAT_OUT_OF_RANGE',
-        ruleName: 'Tỷ lệ Béo (L%) ngoài khoảng',
-        severity: 'WARNING',
-        message: `Tỷ lệ chất béo ${summary.fatPct}% nằm ngoài khoảng chuẩn ${minFatPct}% - ${maxFatPct}%`,
-        actualValue: summary.fatPct,
-        expectedRange: `${minFatPct}% - ${maxFatPct}%`,
-      });
-    }
-
-    // 4. Check Carb%
-    if (summary.carbPct < minCarbPct || summary.carbPct > maxCarbPct) {
-      violations.push({
-        ruleCode: 'CARB_OUT_OF_RANGE',
-        ruleName: 'Tỷ lệ Bột đường (G%) ngoài khoảng',
-        severity: 'WARNING',
-        message: `Tỷ lệ bột đường ${summary.carbPct}% nằm ngoài khoảng chuẩn ${minCarbPct}% - ${maxCarbPct}%`,
-        actualValue: summary.carbPct,
-        expectedRange: `${minCarbPct}% - ${maxCarbPct}%`,
-      });
-    }
-
-    const hasError = violations.some((v) => v.severity === 'ERROR');
-    const hasWarning = violations.some((v) => v.severity === 'WARNING');
-    const overallStatus: 'PASS' | 'WARNING' | 'VIOLATION' = hasError
-      ? 'VIOLATION'
-      : hasWarning
-      ? 'WARNING'
-      : 'PASS';
-
-    const complianceScore = violations.length === 0 ? 100 : hasError ? 68 : 88;
-
+    const overallStatus = violations.some((v) => v.severity === "ERROR")
+      ? "VIOLATION"
+      : violations.length
+        ? "WARNING"
+        : "PASS";
+    const evaluated = criteria.filter((c) => c.status !== "UNKNOWN");
+    const complianceScore = evaluated.length
+      ? Math.round(
+          (evaluated.filter((c) => c.status === "PASS").length /
+            evaluated.length) *
+            100,
+        )
+      : null;
     const mappedViolations = violations.map((v) => ({
       code: v.ruleCode,
-      severity: v.severity === 'ERROR' ? ('CRITICAL' as const) : ('WARNING' as const),
-      category: 'MACRO_NUTRIENT' as const,
+      severity: v.severity === "ERROR" ? "CRITICAL" : "WARNING",
+      category: v.ruleCode,
       title: v.ruleName,
       message: v.message,
-      recommendation: 'Cân chỉnh thực phẩm giàu đạm, rau củ để đạt cân đối theo Thông tư 28.',
+      recommendation:
+        "Đối chiếu tiêu chuẩn và điều chỉnh dữ liệu cấu hình hoặc thực đơn.",
     }));
-
+    const standardReference = {
+      minEnergyKcal: minEnergy,
+      maxEnergyKcal: maxEnergy,
+      minProteinPercent: minProteinPct,
+      maxProteinPercent: maxProteinPct,
+      minFatPercent: minFatPct,
+      maxFatPercent: maxFatPct,
+      minCarbPercent: minCarbPct,
+      maxCarbPercent: maxCarbPct,
+    };
     return {
       menuId: dto.menuId ? String(dto.menuId) : null,
-      menuTitle: menuTitle || `Thực đơn ${ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo'} bán trú`,
+      menuTitle,
       targetAgeGroup: ageGroup,
-      appliedRuleName: `Thông tư 28/2016/TT-BGDĐT (${ageGroup === 'NHA_TRE' ? 'Nhà trẻ' : 'Mẫu giáo'})`,
+      appliedRuleName: `Tiêu chuẩn ${standard?.ageGroup} · ${standard?.mealScope}`,
+      criteria,
       complianceScore,
       overallStatus,
       summaryNutrition: {
-        totalEnergyKcal: Math.round(summary.energyKcal),
+        totalEnergyKcal: summary.energyKcal,
         totalProteinG: summary.proteinG,
         totalLipidG: summary.fatG,
         totalGlucidG: summary.carbG,
-        proteinCalories: Math.round(summary.proteinG * 4),
-        lipidCalories: Math.round(summary.fatG * 9),
-        glucidCalories: Math.round(summary.carbG * 4),
+        proteinCalories: summary.proteinG * 4,
+        lipidCalories: summary.fatG * 9,
+        glucidCalories: summary.carbG * 4,
         proteinRatioPercent: summary.proteinPct,
         lipidRatioPercent: summary.fatPct,
         glucidRatioPercent: summary.carbPct,
@@ -193,36 +297,13 @@ export class MenuScannerService {
         zincMg: summary.zincMg,
         caPRatio: null,
       },
-      standardReference: {
-        minEnergyKcal: minEnergy,
-        maxEnergyKcal: maxEnergy,
-        minProteinPercent: minProteinPct,
-        maxProteinPercent: maxProteinPct,
-        minFatPercent: minFatPct,
-        maxFatPercent: maxFatPct,
-        minCarbPercent: minCarbPct,
-        maxCarbPercent: maxCarbPct,
-      },
+      standardReference,
       violations: mappedViolations,
-      actionableRecommendations: violations.length > 0
-        ? [
-            'Tăng cường món đạm nạc và cá để đạt tỷ lệ Protein 13-20%',
-            'Kiểm tra định lượng dầu/mỡ khi chế biến món xào để đảm bảo Lipid không vượt ngưỡng 35%',
-            'Đối chiếu cảnh báo chất dị ứng trong thực đơn đối với các bé có tiền sử dị ứng',
-          ]
-        : ['Thực đơn đạt chuẩn cân đối năng lượng và vi chất theo Thông tư 28/2016/TT-BGDĐT.'],
-      // Backwards compatibility:
-      isCompliant: !hasError,
+      actionableRecommendations: mappedViolations.map((v) => v.message),
+      isCompliant: overallStatus === "PASS",
       hasWarnings: violations.length > 0,
       evaluatedAt: new Date().toISOString(),
-      standardCode: 'Circular 28/2016/TT-BGDĐT',
       summary,
-      targetStandards: {
-        energyRange: `${minEnergy} - ${maxEnergy} kcal`,
-        proteinPctRange: `${minProteinPct}% - ${maxProteinPct}%`,
-        fatPctRange: `${minFatPct}% - ${maxFatPct}%`,
-        carbPctRange: `${minCarbPct}% - ${maxCarbPct}%`,
-      },
     };
   }
 }

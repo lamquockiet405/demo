@@ -17,7 +17,7 @@ interface EvaluationSummaryCardsProps {
 
 export const EvaluationSummaryCards: React.FC<EvaluationSummaryCardsProps> = ({ summary }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-6 py-4 max-w-[1440px] mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-6 py-4 w-full">
       {/* Card 1: Tổng trẻ ăn bán trú */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
         <div className="flex items-start justify-between">

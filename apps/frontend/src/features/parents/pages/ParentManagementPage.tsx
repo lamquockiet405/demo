@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Users,
   UserCheck,
@@ -20,15 +20,15 @@ import {
   ChevronRight,
   Eye,
   Lock,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   parentsApi,
   ParentUser,
   ParentStats,
   CreateParentPayload,
   UpdateParentPayload,
-} from '../api/parents.api';
-import { apiClient } from '../../../core/api/axios';
+} from "../api/parents.api";
+import { apiClient } from "../../../core/api/axios";
 
 export const ParentManagementPage: React.FC = () => {
   const [parents, setParents] = useState<ParentUser[]>([]);
@@ -38,15 +38,20 @@ export const ParentManagementPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   // Filters
-  const [search, setSearch] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('ALL');
+  const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [includeDeleted, setIncludeDeleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
   // Children list for linking
   const [availableChildren, setAvailableChildren] = useState<
-    Array<{ id: string; fullName: string; studentCode: string; className?: string }>
+    Array<{
+      id: string;
+      fullName: string;
+      studentCode: string;
+      className?: string;
+    }>
   >([]);
 
   // Modals
@@ -55,25 +60,32 @@ export const ParentManagementPage: React.FC = () => {
   const [editingParent, setEditingParent] = useState<ParentUser | null>(null);
   const [deletingParent, setDeletingParent] = useState<ParentUser | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [toastMessage, setToastMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Form states
-  const [formEmail, setFormEmail] = useState('');
-  const [formFullName, setFormFullName] = useState('');
-  const [formPhone, setFormPhone] = useState('');
-  const [formPassword, setFormPassword] = useState('');
-  const [formStatus, setFormStatus] = useState('ACTIVE');
-  const [formAddress, setFormAddress] = useState('');
-  const [formOccupation, setFormOccupation] = useState('');
-  const [formNote, setFormNote] = useState('');
-  const [formSelectedChildIds, setFormSelectedChildIds] = useState<string[]>([]);
+  const [formEmail, setFormEmail] = useState("");
+  const [formFullName, setFormFullName] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formPassword, setFormPassword] = useState("");
+  const [formStatus, setFormStatus] = useState("ACTIVE");
+  const [formAddress, setFormAddress] = useState("");
+  const [formOccupation, setFormOccupation] = useState("");
+  const [formNote, setFormNote] = useState("");
+  const [formSelectedChildIds, setFormSelectedChildIds] = useState<string[]>(
+    [],
+  );
 
   // Email validation & duplicate checking states
   const [isDuplicateEmail, setIsDuplicateEmail] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState<string | null>(null);
+  const [emailErrorMessage, setEmailErrorMessage] = useState<string | null>(
+    null,
+  );
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
-  const showToast = (type: 'success' | 'error', text: string) => {
+  const showToast = (type: "success" | "error", text: string) => {
     setToastMessage({ type, text });
     setTimeout(() => setToastMessage(null), 4000);
   };
@@ -84,7 +96,7 @@ export const ParentManagementPage: React.FC = () => {
       const [parentData, statData] = await Promise.all([
         parentsApi.getParents({
           search: search.trim() || undefined,
-          status: selectedStatus !== 'ALL' ? selectedStatus : undefined,
+          status: selectedStatus !== "ALL" ? selectedStatus : undefined,
           includeDeleted,
           page: currentPage,
           limit: pageSize,
@@ -100,7 +112,7 @@ export const ParentManagementPage: React.FC = () => {
       setTotalPages((parentData as any)?.meta?.totalPages ?? 1);
       setStats(statData);
     } catch (err) {
-      console.error('Lỗi khi tải danh sách phụ huynh:', err);
+      console.error("Lỗi khi tải danh sách phụ huynh:", err);
     } finally {
       setLoading(false);
     }
@@ -108,18 +120,18 @@ export const ParentManagementPage: React.FC = () => {
 
   const fetchChildren = async () => {
     try {
-      const res = await apiClient.get('/children?limit=200');
+      const res = await apiClient.get("/children?limit=200");
       const items = res.data?.items || [];
       setAvailableChildren(
         items.map((c: any) => ({
           id: c.id,
           fullName: c.fullName,
           studentCode: c.studentCode,
-          className: c.className || c.class?.name || 'Chưa xếp lớp',
-        }))
+          className: c.className || c.class?.name || "Chưa xếp lớp",
+        })),
       );
     } catch (err) {
-      console.error('Lỗi khi tải danh sách học sinh:', err);
+      console.error("Lỗi khi tải danh sách học sinh:", err);
     }
   };
 
@@ -149,10 +161,12 @@ export const ParentManagementPage: React.FC = () => {
     }
 
     // 1. Kiểm tra nhanh tức thì trên danh sách parents hiện có trong RAM
-    const localMatch = parents.some((p) => p.email?.trim().toLowerCase() === trimmed);
+    const localMatch = parents.some(
+      (p) => p.email?.trim().toLowerCase() === trimmed,
+    );
     if (localMatch) {
       setIsDuplicateEmail(true);
-      setEmailErrorMessage('Email này đã tồn tại trong danh sách phụ huynh.');
+      setEmailErrorMessage("Email này đã tồn tại trong danh sách phụ huynh.");
       setIsCheckingEmail(false);
       return;
     }
@@ -173,14 +187,15 @@ export const ParentManagementPage: React.FC = () => {
         if (res.exists) {
           setIsDuplicateEmail(true);
           setEmailErrorMessage(
-            res.message || 'Email này đã được sử dụng trong hệ thống. Vui lòng chọn email khác.',
+            res.message ||
+              "Email này đã được sử dụng trong hệ thống. Vui lòng chọn email khác.",
           );
         } else {
           setIsDuplicateEmail(false);
           setEmailErrorMessage(null);
         }
       } catch (err) {
-        console.error('Lỗi khi kiểm tra email:', err);
+        console.error("Lỗi khi kiểm tra email:", err);
       } finally {
         setIsCheckingEmail(false);
       }
@@ -196,14 +211,14 @@ export const ParentManagementPage: React.FC = () => {
   };
 
   const openCreateModal = () => {
-    setFormEmail('');
-    setFormFullName('');
-    setFormPhone('');
-    setFormPassword('');
-    setFormStatus('ACTIVE');
-    setFormAddress('');
-    setFormOccupation('');
-    setFormNote('');
+    setFormEmail("");
+    setFormFullName("");
+    setFormPhone("");
+    setFormPassword("");
+    setFormStatus("ACTIVE");
+    setFormAddress("");
+    setFormOccupation("");
+    setFormNote("");
     setFormSelectedChildIds([]);
     setIsDuplicateEmail(false);
     setEmailErrorMessage(null);
@@ -215,13 +230,15 @@ export const ParentManagementPage: React.FC = () => {
     setEditingParent(parent);
     setFormEmail(parent.email);
     setFormFullName(parent.fullName);
-    setFormPhone(parent.phone || '');
-    setFormPassword('');
+    setFormPhone(parent.phone || "");
+    setFormPassword("");
     setFormStatus(parent.status);
-    setFormAddress(parent.address || '');
-    setFormOccupation(parent.occupation || '');
-    setFormNote(parent.note || '');
-    setFormSelectedChildIds(Array.isArray(parent.children) ? parent.children.map((c) => c.id) : []);
+    setFormAddress(parent.address || "");
+    setFormOccupation(parent.occupation || "");
+    setFormNote(parent.note || "");
+    setFormSelectedChildIds(
+      Array.isArray(parent.children) ? parent.children.map((c) => c.id) : [],
+    );
     setIsDuplicateEmail(false);
     setEmailErrorMessage(null);
     setIsCheckingEmail(false);
@@ -229,15 +246,20 @@ export const ParentManagementPage: React.FC = () => {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formPassword.trim().length < 8) {
+      showToast("error", "Nhập mật khẩu ban đầu có ít nhất 8 ký tự.");
+      return;
+    }
     if (!formEmail.trim() || !formFullName.trim()) {
-      showToast('error', 'Vui lòng nhập đầy đủ email và họ tên phụ huynh.');
+      showToast("error", "Vui lòng nhập đầy đủ email và họ tên phụ huynh.");
       return;
     }
 
     if (isDuplicateEmail) {
       showToast(
-        'error',
-        emailErrorMessage || 'Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.',
+        "error",
+        emailErrorMessage ||
+          "Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.",
       );
       return;
     }
@@ -256,16 +278,17 @@ export const ParentManagementPage: React.FC = () => {
         childIds: formSelectedChildIds,
       };
       await parentsApi.createParent(payload);
-      showToast('success', 'Tạo tài khoản phụ huynh thành công!');
+      showToast("success", "Tạo tài khoản phụ huynh thành công!");
       setIsCreateModalOpen(false);
       fetchParents();
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.';
-      if (err.response?.status === 409 || msg.toLowerCase().includes('email')) {
+      const msg =
+        err.response?.data?.message || "Có lỗi xảy ra khi tạo tài khoản.";
+      if (err.response?.status === 409 || msg.toLowerCase().includes("email")) {
         setIsDuplicateEmail(true);
         setEmailErrorMessage(msg);
       }
-      showToast('error', msg);
+      showToast("error", msg);
     } finally {
       setSubmitting(false);
     }
@@ -288,11 +311,14 @@ export const ParentManagementPage: React.FC = () => {
         childIds: formSelectedChildIds,
       };
       await parentsApi.updateParent(editingParent.id, payload);
-      showToast('success', 'Cập nhật tài khoản phụ huynh thành công!');
+      showToast("success", "Cập nhật tài khoản phụ huynh thành công!");
       setEditingParent(null);
       fetchParents();
     } catch (err: any) {
-      showToast('error', err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật.');
+      showToast(
+        "error",
+        err.response?.data?.message || "Có lỗi xảy ra khi cập nhật.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -303,11 +329,14 @@ export const ParentManagementPage: React.FC = () => {
     setSubmitting(true);
     try {
       await parentsApi.deleteParent(deletingParent.id);
-      showToast('success', 'Đã xóa tài khoản phụ huynh và hủy liên kết.');
+      showToast("success", "Đã xóa tài khoản phụ huynh và hủy liên kết.");
       setDeletingParent(null);
       fetchParents();
     } catch (err: any) {
-      showToast('error', err.response?.data?.message || 'Có lỗi xảy ra khi xóa.');
+      showToast(
+        "error",
+        err.response?.data?.message || "Có lỗi xảy ra khi xóa.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -316,16 +345,21 @@ export const ParentManagementPage: React.FC = () => {
   const handleRestore = async (id: string) => {
     try {
       await parentsApi.restoreParent(id);
-      showToast('success', 'Khôi phục tài khoản phụ huynh thành công!');
+      showToast("success", "Khôi phục tài khoản phụ huynh thành công!");
       fetchParents();
     } catch (err: any) {
-      showToast('error', err.response?.data?.message || 'Không thể khôi phục tài khoản.');
+      showToast(
+        "error",
+        err.response?.data?.message || "Không thể khôi phục tài khoản.",
+      );
     }
   };
 
   const toggleChildSelection = (childId: string) => {
     setFormSelectedChildIds((prev) =>
-      prev.includes(childId) ? prev.filter((id) => id !== childId) : [...prev, childId]
+      prev.includes(childId)
+        ? prev.filter((id) => id !== childId)
+        : [...prev, childId],
     );
   };
 
@@ -334,12 +368,13 @@ export const ParentManagementPage: React.FC = () => {
       {/* Toast */}
       {toastMessage && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2 text-xs font-bold ${toastMessage.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-            }`}
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2 text-xs font-bold ${
+            toastMessage.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
         >
-          {toastMessage.type === 'success' ? (
+          {toastMessage.type === "success" ? (
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           ) : (
             <AlertCircle className="w-4 h-4 text-rose-600" />
@@ -352,9 +387,13 @@ export const ParentManagementPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mb-1">
-            <span className="text-teal-600 font-semibold">Quản trị người dùng</span>
+            <span className="text-teal-600 font-semibold">
+              Quản trị người dùng
+            </span>
             <span>›</span>
-            <span className="text-slate-700 font-bold">Tài khoản Phụ huynh</span>
+            <span className="text-slate-700 font-bold">
+              Tài khoản Phụ huynh
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-600/20">
@@ -365,7 +404,8 @@ export const ParentManagementPage: React.FC = () => {
                 Quản Lý Tài Khoản Phụ Huynh
               </h1>
               <p className="text-xs text-slate-500 mt-0.5">
-                Quản lý danh sách, cấp tài khoản, thiết lập trạng thái và liên kết phụ huynh với hồ sơ học sinh mầm non.
+                Quản lý danh sách, cấp tài khoản, thiết lập trạng thái và liên
+                kết phụ huynh với hồ sơ học sinh mầm non.
               </p>
             </div>
           </div>
@@ -376,7 +416,9 @@ export const ParentManagementPage: React.FC = () => {
             onClick={fetchParents}
             className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-teal-600' : 'text-slate-500'}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin text-teal-600" : "text-slate-500"}`}
+            />
             Làm mới
           </button>
           <button
@@ -396,8 +438,12 @@ export const ParentManagementPage: React.FC = () => {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng phụ huynh</p>
-            <p className="text-2xl font-black text-slate-900 mt-0.5">{stats?.totalParents || totalCount}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Tổng phụ huynh
+            </p>
+            <p className="text-2xl font-black text-slate-900 mt-0.5">
+              {stats?.totalParents || totalCount}
+            </p>
           </div>
         </div>
 
@@ -406,8 +452,12 @@ export const ParentManagementPage: React.FC = () => {
             <UserCheck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đang hoạt động</p>
-            <p className="text-2xl font-black text-emerald-700 mt-0.5">{stats?.activeParents || 0}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Đang hoạt động
+            </p>
+            <p className="text-2xl font-black text-emerald-700 mt-0.5">
+              {stats?.activeParents || 0}
+            </p>
           </div>
         </div>
 
@@ -416,8 +466,12 @@ export const ParentManagementPage: React.FC = () => {
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đã liên kết học sinh</p>
-            <p className="text-2xl font-black text-blue-700 mt-0.5">{stats?.parentsWithChildren || 0}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Đã liên kết học sinh
+            </p>
+            <p className="text-2xl font-black text-blue-700 mt-0.5">
+              {stats?.parentsWithChildren || 0}
+            </p>
           </div>
         </div>
 
@@ -426,15 +480,22 @@ export const ParentManagementPage: React.FC = () => {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tạm dừng / Đã xóa</p>
-            <p className="text-2xl font-black text-slate-700 mt-0.5">{stats?.inactiveOrDeleted ?? (stats as any)?.inactiveParents ?? 0}</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Tạm dừng / Đã xóa
+            </p>
+            <p className="text-2xl font-black text-slate-700 mt-0.5">
+              {stats?.inactiveOrDeleted ?? (stats as any)?.inactiveParents ?? 0}
+            </p>
           </div>
         </div>
       </div>
 
       {/* 3. Search & Filter Bar */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
-        <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex flex-col md:flex-row gap-3"
+        >
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -502,17 +563,27 @@ export const ParentManagementPage: React.FC = () => {
             <tbody className="divide-y divide-slate-100 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-slate-400">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-12 text-center text-slate-400"
+                  >
                     <div className="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin mb-2"></div>
                     <p>Đang tải danh sách phụ huynh...</p>
                   </td>
                 </tr>
               ) : parents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-slate-400">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-12 text-center text-slate-400"
+                  >
                     <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                    <p className="font-semibold text-slate-600">Không tìm thấy tài khoản phụ huynh nào</p>
-                    <p className="text-[11px] mt-0.5">Nhấn "Tạo tài khoản phụ huynh" để bắt đầu thiết lập.</p>
+                    <p className="font-semibold text-slate-600">
+                      Không tìm thấy tài khoản phụ huynh nào
+                    </p>
+                    <p className="text-[11px] mt-0.5">
+                      Nhấn "Tạo tài khoản phụ huynh" để bắt đầu thiết lập.
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -521,10 +592,12 @@ export const ParentManagementPage: React.FC = () => {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-teal-100 text-teal-700 font-black flex items-center justify-center text-sm shadow-inner shrink-0">
-                          {(p.fullName || 'P').charAt(0).toUpperCase()}
+                          {(p.fullName || "P").charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900">{p.fullName}</div>
+                          <div className="font-bold text-slate-900">
+                            {p.fullName}
+                          </div>
                           {p.twoFactorEnabled && (
                             <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
                               <ShieldCheck className="w-3 h-3" /> Đã bật 2FA
@@ -540,7 +613,7 @@ export const ParentManagementPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1.5 text-slate-500 text-[11px] mt-0.5">
                         <Phone className="w-3.5 h-3.5 text-slate-400" />
-                        {p.phone || 'Chưa cập nhật'}
+                        {p.phone || "Chưa cập nhật"}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
@@ -557,7 +630,9 @@ export const ParentManagementPage: React.FC = () => {
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic text-[11px]">Chưa liên kết học sinh</span>
+                        <span className="text-slate-400 italic text-[11px]">
+                          Chưa liên kết học sinh
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
@@ -565,11 +640,11 @@ export const ParentManagementPage: React.FC = () => {
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
                           ĐÃ XÓA
                         </span>
-                      ) : p.status === 'ACTIVE' ? (
+                      ) : p.status === "ACTIVE" ? (
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
                           HOẠT ĐỘNG
                         </span>
-                      ) : p.status === 'INACTIVE' ? (
+                      ) : p.status === "INACTIVE" ? (
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                           TẠM DỪNG
                         </span>
@@ -580,7 +655,7 @@ export const ParentManagementPage: React.FC = () => {
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-slate-500 font-mono text-[11px]">
-                      {new Date(p.createdAt).toLocaleDateString('vi-VN')}
+                      {new Date(p.createdAt).toLocaleDateString("vi-VN")}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
@@ -591,7 +666,7 @@ export const ParentManagementPage: React.FC = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {p.status === 'INACTIVE' || p.isDeleted ? (
+                        {p.status === "INACTIVE" || p.isDeleted ? (
                           <>
                             <button
                               onClick={() => handleRestore(p.id)}
@@ -638,7 +713,8 @@ export const ParentManagementPage: React.FC = () => {
         {/* Pagination Footer */}
         <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-600">
           <div>
-            Hiển thị <span className="font-bold">{parents.length}</span> / {totalCount} phụ huynh (Trang {currentPage}/{totalPages})
+            Hiển thị <span className="font-bold">{parents.length}</span> /{" "}
+            {totalCount} phụ huynh (Trang {currentPage}/{totalPages})
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -670,8 +746,12 @@ export const ParentManagementPage: React.FC = () => {
                   <Eye className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Hồ sơ chi tiết Phụ huynh</h3>
-                  <p className="text-[11px] text-slate-500">Mã định danh: #{viewingParent.id}</p>
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    Hồ sơ chi tiết Phụ huynh
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Mã định danh: #{viewingParent.id}
+                  </p>
                 </div>
               </div>
               <button
@@ -686,16 +766,18 @@ export const ParentManagementPage: React.FC = () => {
               {/* Header Profile Card */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-teal-50/60 to-blue-50/60 border border-teal-100">
                 <div className="w-14 h-14 rounded-2xl bg-teal-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-teal-600/20 shrink-0">
-                  {(viewingParent.fullName || 'P').charAt(0).toUpperCase()}
+                  {(viewingParent.fullName || "P").charAt(0).toUpperCase()}
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-base font-extrabold text-slate-900">{viewingParent.fullName}</h4>
-                    {viewingParent.status === 'ACTIVE' ? (
+                    <h4 className="text-base font-extrabold text-slate-900">
+                      {viewingParent.fullName}
+                    </h4>
+                    {viewingParent.status === "ACTIVE" ? (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
                         HOẠT ĐỘNG
                       </span>
-                    ) : viewingParent.status === 'INACTIVE' ? (
+                    ) : viewingParent.status === "INACTIVE" ? (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                         TẠM DỪNG
                       </span>
@@ -707,10 +789,12 @@ export const ParentManagementPage: React.FC = () => {
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-slate-600">
                     <span className="flex items-center gap-1 font-semibold text-slate-700">
-                      <Mail className="w-3.5 h-3.5 text-teal-600" /> {viewingParent.email}
+                      <Mail className="w-3.5 h-3.5 text-teal-600" />{" "}
+                      {viewingParent.email}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Phone className="w-3.5 h-3.5 text-teal-600" /> {viewingParent.phone || 'Chưa cập nhật SĐT'}
+                      <Phone className="w-3.5 h-3.5 text-teal-600" />{" "}
+                      {viewingParent.phone || "Chưa cập nhật SĐT"}
                     </span>
                     {viewingParent.twoFactorEnabled && (
                       <span className="flex items-center gap-1 text-emerald-700 font-bold">
@@ -724,31 +808,49 @@ export const ParentManagementPage: React.FC = () => {
               {/* Detailed Specs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
                 <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">Nghề nghiệp:</span>
-                  <span className="text-slate-800 font-semibold">{viewingParent.occupation || 'Chưa thiết lập'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">Địa chỉ liên hệ:</span>
-                  <span className="text-slate-800 font-semibold">{viewingParent.address || 'Chưa thiết lập'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">Ngày khởi tạo tài khoản:</span>
-                  <span className="text-slate-800 font-mono font-medium">
-                    {new Date(viewingParent.createdAt).toLocaleString('vi-VN')}
+                  <span className="text-slate-400 font-medium block text-[11px]">
+                    Nghề nghiệp:
+                  </span>
+                  <span className="text-slate-800 font-semibold">
+                    {viewingParent.occupation || "Chưa thiết lập"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">Đăng nhập lần cuối:</span>
+                  <span className="text-slate-400 font-medium block text-[11px]">
+                    Địa chỉ liên hệ:
+                  </span>
+                  <span className="text-slate-800 font-semibold">
+                    {viewingParent.address || "Chưa thiết lập"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block text-[11px]">
+                    Ngày khởi tạo tài khoản:
+                  </span>
+                  <span className="text-slate-800 font-mono font-medium">
+                    {new Date(viewingParent.createdAt).toLocaleString("vi-VN")}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block text-[11px]">
+                    Đăng nhập lần cuối:
+                  </span>
                   <span className="text-slate-800 font-mono font-medium">
                     {viewingParent.lastLoginAt
-                      ? new Date(viewingParent.lastLoginAt).toLocaleString('vi-VN')
-                      : 'Chưa từng đăng nhập'}
+                      ? new Date(viewingParent.lastLoginAt).toLocaleString(
+                          "vi-VN",
+                        )
+                      : "Chưa từng đăng nhập"}
                   </span>
                 </div>
                 {viewingParent.note && (
                   <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
-                    <span className="text-slate-400 font-medium block text-[11px]">Ghi chú nội bộ:</span>
-                    <p className="text-slate-700 italic mt-0.5">{viewingParent.note}</p>
+                    <span className="text-slate-400 font-medium block text-[11px]">
+                      Ghi chú nội bộ:
+                    </span>
+                    <p className="text-slate-700 italic mt-0.5">
+                      {viewingParent.note}
+                    </p>
                   </div>
                 )}
               </div>
@@ -758,7 +860,8 @@ export const ParentManagementPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
                     <GraduationCap className="w-4 h-4 text-teal-600" />
-                    Học sinh thuộc quyền giám hộ ({viewingParent.children?.length || 0})
+                    Học sinh thuộc quyền giám hộ (
+                    {viewingParent.children?.length || 0})
                   </h5>
                 </div>
                 {viewingParent.children && viewingParent.children.length > 0 ? (
@@ -769,14 +872,20 @@ export const ParentManagementPage: React.FC = () => {
                         className="p-3 bg-white border border-teal-200/80 rounded-2xl shadow-xs flex items-center gap-3"
                       >
                         <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 font-black text-xs flex items-center justify-center shrink-0">
-                          {child.gender === 'FEMALE' ? '👧' : '👦'}
+                          {child.gender === "FEMALE" ? "👧" : "👦"}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-slate-900 truncate">{child.fullName}</p>
+                          <p className="font-bold text-slate-900 truncate">
+                            {child.fullName}
+                          </p>
                           <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
-                            <span className="font-mono text-teal-700 font-semibold">{child.studentCode}</span>
+                            <span className="font-mono text-teal-700 font-semibold">
+                              {child.studentCode}
+                            </span>
                             <span>•</span>
-                            <span className="font-medium text-slate-700">{child.className}</span>
+                            <span className="font-medium text-slate-700">
+                              {child.className}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -784,7 +893,8 @@ export const ParentManagementPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400">
-                    Phụ huynh này chưa được liên kết với học sinh nào trong hệ thống.
+                    Phụ huynh này chưa được liên kết với học sinh nào trong hệ
+                    thống.
                   </div>
                 )}
               </div>
@@ -821,10 +931,16 @@ export const ParentManagementPage: React.FC = () => {
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
-                  {editingParent ? <Edit3 className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+                  {editingParent ? (
+                    <Edit3 className="w-4 h-4" />
+                  ) : (
+                    <UserPlus className="w-4 h-4" />
+                  )}
                 </div>
                 <h3 className="font-bold text-slate-900 text-sm">
-                  {editingParent ? 'Cập nhật tài khoản Phụ huynh' : 'Tạo mới tài khoản Phụ huynh'}
+                  {editingParent
+                    ? "Cập nhật tài khoản Phụ huynh"
+                    : "Tạo mới tài khoản Phụ huynh"}
                 </h3>
               </div>
               <button
@@ -863,7 +979,9 @@ export const ParentManagementPage: React.FC = () => {
                   <label className="block text-slate-700 font-bold mb-1">
                     Email đăng nhập <span className="text-rose-500">*</span>
                     {isCheckingEmail && (
-                      <span className="text-[10px] text-teal-600 font-normal ml-2">Đang kiểm tra...</span>
+                      <span className="text-[10px] text-teal-600 font-normal ml-2">
+                        Đang kiểm tra...
+                      </span>
                     )}
                   </label>
                   <input
@@ -875,20 +993,23 @@ export const ParentManagementPage: React.FC = () => {
                     onChange={(e) => setFormEmail(e.target.value)}
                     className={`w-full px-3.5 py-2.5 text-xs rounded-xl border transition disabled:bg-slate-100 disabled:text-slate-500 ${
                       !editingParent && isDuplicateEmail
-                        ? 'border-rose-400 bg-rose-50 text-rose-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
-                        : 'border-slate-200 bg-slate-50 focus:bg-white text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20'
+                        ? "border-rose-400 bg-rose-50 text-rose-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                        : "border-slate-200 bg-slate-50 focus:bg-white text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     }`}
                   />
                   {!editingParent && isDuplicateEmail && (
                     <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
                       <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                      {emailErrorMessage || 'Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.'}
+                      {emailErrorMessage ||
+                        "Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác."}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Số điện thoại</label>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    Số điện thoại
+                  </label>
                   <input
                     type="tel"
                     placeholder="0912345678"
@@ -902,11 +1023,17 @@ export const ParentManagementPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
-                    {editingParent ? 'Mật khẩu mới (bỏ trống nếu không đổi)' : 'Mật khẩu (mặc định: 123456)'}
+                    {editingParent
+                      ? "Mật khẩu mới (bỏ trống nếu không đổi)"
+                      : "Mật khẩu ban đầu (ít nhất 8 ký tự)"}
                   </label>
                   <input
                     type="password"
-                    placeholder={editingParent ? '••••••••' : 'Nhập mật khẩu hoặc để trống'}
+                    placeholder={
+                      editingParent
+                        ? "Để trống để giữ mật khẩu hiện tại"
+                        : "Mật khẩu ban đầu (ít nhất 8 ký tự)"
+                    }
                     value={formPassword}
                     onChange={(e) => setFormPassword(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
@@ -916,7 +1043,9 @@ export const ParentManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Trạng thái tài khoản</label>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    Trạng thái tài khoản
+                  </label>
                   <select
                     value={formStatus}
                     onChange={(e) => setFormStatus(e.target.value)}
@@ -929,7 +1058,9 @@ export const ParentManagementPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Nghề nghiệp</label>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    Nghề nghiệp
+                  </label>
                   <input
                     type="text"
                     placeholder="Ví dụ: Kỹ sư, Bác sĩ, Kinh doanh..."
@@ -941,7 +1072,9 @@ export const ParentManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Địa chỉ liên hệ</label>
+                <label className="block text-slate-700 font-bold mb-1">
+                  Địa chỉ liên hệ
+                </label>
                 <input
                   type="text"
                   placeholder="Ví dụ: 45 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM"
@@ -952,7 +1085,9 @@ export const ParentManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Ghi chú nội bộ</label>
+                <label className="block text-slate-700 font-bold mb-1">
+                  Ghi chú nội bộ
+                </label>
                 <textarea
                   rows={2}
                   placeholder="Ghi chú về phụ huynh (người liên hệ chính, giờ đón bé...)"
@@ -968,28 +1103,35 @@ export const ParentManagementPage: React.FC = () => {
                   Liên kết học sinh (Con em)
                 </label>
                 <p className="text-[11px] text-slate-500 mb-2">
-                  Chọn các bé thuộc quyền giám hộ của phụ huynh này để đồng bộ thực đơn và thông báo:
+                  Chọn các bé thuộc quyền giám hộ của phụ huynh này để đồng bộ
+                  thực đơn và thông báo:
                 </p>
                 <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-2xl p-2.5 bg-slate-50 space-y-1.5">
                   {availableChildren.length === 0 ? (
-                    <p className="text-slate-400 text-center py-4">Chưa có danh sách học sinh</p>
+                    <p className="text-slate-400 text-center py-4">
+                      Chưa có danh sách học sinh
+                    </p>
                   ) : (
-                    (Array.isArray(availableChildren) ? availableChildren : []).map((c) => {
+                    (Array.isArray(availableChildren)
+                      ? availableChildren
+                      : []
+                    ).map((c) => {
                       const isSelected = formSelectedChildIds.includes(c.id);
                       return (
                         <div
                           key={c.id}
                           onClick={() => toggleChildSelection(c.id)}
-                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer text-xs transition select-none ${isSelected
-                              ? 'bg-teal-100/70 border border-teal-300 font-bold text-teal-900'
-                              : 'bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-medium'
-                            }`}
+                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer text-xs transition select-none ${
+                            isSelected
+                              ? "bg-teal-100/70 border border-teal-300 font-bold text-teal-900"
+                              : "bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-medium"
+                          }`}
                         >
                           <div className="flex items-center gap-2">
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => { }}
+                              onChange={() => {}}
                               className="rounded text-teal-600 pointer-events-none"
                             />
                             <span>
@@ -1027,10 +1169,18 @@ export const ParentManagementPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submitting || (!editingParent && isDuplicateEmail)}
-                  title={!editingParent && isDuplicateEmail ? 'Email này đã tồn tại trong hệ thống' : undefined}
+                  title={
+                    !editingParent && isDuplicateEmail
+                      ? "Email này đã tồn tại trong hệ thống"
+                      : undefined
+                  }
                   className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Đang lưu...' : editingParent ? 'Lưu thay đổi' : 'Tạo tài khoản'}
+                  {submitting
+                    ? "Đang lưu..."
+                    : editingParent
+                      ? "Lưu thay đổi"
+                      : "Tạo tài khoản"}
                 </button>
               </div>
             </form>
@@ -1046,13 +1196,19 @@ export const ParentManagementPage: React.FC = () => {
               <Trash2 className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="font-bold text-slate-900 text-base">Xác nhận xóa tài khoản phụ huynh</h3>
+              <h3 className="font-bold text-slate-900 text-base">
+                Xác nhận xóa tài khoản phụ huynh
+              </h3>
               <p className="text-slate-500 text-xs">
-                Bạn có chắc chắn muốn xóa tài khoản của phụ huynh{' '}
-                <span className="font-bold text-slate-900">{deletingParent.fullName}</span> ({deletingParent.email})?
+                Bạn có chắc chắn muốn xóa tài khoản của phụ huynh{" "}
+                <span className="font-bold text-slate-900">
+                  {deletingParent.fullName}
+                </span>{" "}
+                ({deletingParent.email})?
               </p>
               <p className="text-[11px] text-amber-600 bg-amber-50 p-2 rounded-xl mt-2">
-                Hành động này sẽ xóa mềm tài khoản và tự động hủy liên kết các học sinh đang gắn với phụ huynh này.
+                Hành động này sẽ xóa mềm tài khoản và tự động hủy liên kết các
+                học sinh đang gắn với phụ huynh này.
               </p>
             </div>
             <div className="flex gap-3 pt-2">
@@ -1067,7 +1223,7 @@ export const ParentManagementPage: React.FC = () => {
                 disabled={submitting}
                 className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-md shadow-rose-600/20 transition disabled:opacity-50"
               >
-                {submitting ? 'Đang xóa...' : 'Đồng ý xóa'}
+                {submitting ? "Đang xóa..." : "Đồng ý xóa"}
               </button>
             </div>
           </div>

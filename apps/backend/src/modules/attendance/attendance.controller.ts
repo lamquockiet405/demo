@@ -135,8 +135,8 @@ export class AttendanceController {
 
   @Get('attendance/kitchen-kds')
   @ApiOperation({ summary: 'Lấy dữ liệu khẩu phần thời gian thực cho màn hình bếp (KDS)' })
-  async getKitchenKds(@Query('date') date?: string) {
-    return this.attendanceService.getKitchenKdsData(date);
+  async getKitchenKds(@Query('date') date: string | undefined, @CurrentUser() actor: any) {
+    return this.attendanceService.getKitchenKdsData(date, Number(actor.tenantId) || 1);
   }
 
   @Get('attendance/coordination-notes')

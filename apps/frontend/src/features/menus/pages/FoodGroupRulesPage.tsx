@@ -216,7 +216,7 @@ export const FoodGroupRulesPage: React.FC = () => {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 w-full space-y-6">
       {/* ── HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
         <div>
@@ -229,7 +229,7 @@ export const FoodGroupRulesPage: React.FC = () => {
                 Cấu hình Quy tắc Nhóm Thực phẩm, Tần suất & Khoảng cách Món
               </h1>
               <p className="text-xs text-slate-500">
-                Thiết lập cơ cấu khay ăn (09:30, 11:00, 14:30), 10 nhóm thực phẩm Phụ lục 7 và định mức vi chất Phụ lục 1-6
+                Thiết lập cơ cấu khay ăn (09:00, 11:00, 14:30), 10 nhóm thực phẩm Phụ lục 7 và định mức vi chất Phụ lục 1-6
               </p>
             </div>
           </div>
@@ -358,7 +358,7 @@ export const FoodGroupRulesPage: React.FC = () => {
               }`}
             >
               <Utensils className="w-4 h-4" />
-              <span>Cơ cấu Loại Món (09:30, 11:00, 14:30)</span>
+              <span>Cơ cấu Loại Món (09:00, 11:00, 14:30)</span>
               <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800">
                 {frequencyRules.filter((r) => r.targetType === 'DISH_CATEGORY').length}
               </span>
@@ -443,8 +443,8 @@ export const FoodGroupRulesPage: React.FC = () => {
               {/* Bảng chỉ dẫn chuẩn 3 khung giờ */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-emerald-50/50 border border-emerald-200/70 rounded-xl text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">09:30</span>
-                  <span className="text-slate-700"><strong>Phụ sáng</strong>: Sữa tươi / Thức uống hoa quả (~100 Kcal)</span>
+                  <span className="font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">09:00</span>
+                  <span className="text-slate-700"><strong>Buổi sáng</strong>: Món sáng / Sữa tươi / Thức uống (~100-150 Kcal)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">11:00</span>
@@ -492,7 +492,7 @@ export const FoodGroupRulesPage: React.FC = () => {
                               {rule.mealSlot === 'LUNCH'
                                 ? '11:00 (Bữa trưa)'
                                 : rule.mealSlot === 'MORNING_SNACK'
-                                ? '09:30 (Phụ sáng)'
+                                ? '09:00 (Buổi sáng)'
                                 : rule.mealSlot === 'AFTERNOON_SNACK'
                                 ? '14:30 (Xế chiều)'
                                 : 'Tất cả bữa'}

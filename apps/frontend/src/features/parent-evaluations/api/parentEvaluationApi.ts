@@ -33,15 +33,20 @@ export const parentEvaluationApi = {
     return res.data;
   },
 
-  getPortalData: async (childId?: string) => {
+  getPortalData: async (childId?: string, date?: string, mealType?: string) => {
     const res = await apiClient.get('/parent-evaluations/portal-data', {
-      params: childId ? { childId } : undefined,
+      params: { childId, date, mealType },
     });
     return res.data;
   },
 
   submitEvaluation: async (payload: any) => {
     const res = await apiClient.post('/parent-evaluations/submit', payload);
+    return res.data;
+  },
+
+  updateEvaluation: async (id: string, payload: any) => {
+    const res = await apiClient.put(`/parent-evaluations/${encodeURIComponent(id)}`, payload);
     return res.data;
   },
 

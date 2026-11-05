@@ -1,318 +1,142 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  NotFoundException,
-  ConflictException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
-import { StaffManagementService } from '../../../src/modules/users/services/staff-management.service';
-import { User } from '../../../src/modules/auth/entities/user.entity';
-import { Role } from '../../../src/modules/auth/entities/role.entity';
+import { StaffManagementService } from "../../../src/modules/users/services/staff-management.service";
+import { StaffManagementController } from "../../../src/modules/users/controllers/staff-management.controller";
+import * as bcrypt from "bcryptjs";
+jest.mock("bcryptjs", () => ({
+  hash: jest.fn().mockResolvedValue("hashed-password"),
+}));
 
-describe('StaffManagementService (UC08 - UC11)', () => {
-  let service: StaffManagementService;
-  let userRepoMock: any;
-  let roleRepoMock: any;
-
-  const mockTenantId = 'tenant-uuid-1';
-  const mockUserId = 'user-uuid-1';
-  const mockTargetId = 'user-uuid-2';
-
-  const mockStaffRole: Role = {
-    id: 'role-teacher-id',
-    code: 'TEACHER',
-    name: 'Giáo Viên',
-    description: 'Giáo viên',
-    isSystem: true,
-    tenantId: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const mockUser: Partial<User> = {
-    id: mockTargetId,
-    tenantId: mockTenantId,
-    email: 'giaovien@hoamai.edu.vn',
-    fullName: 'Cô Nguyễn Thị Hoa',
-    phone: '0903111222',
-    status: 'ACTIVE',
-    twoFactorEnabled: false,
-    roles: [mockStaffRole],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
-  };
-
-  beforeEach(async () => {
-    userRepoMock = {
-      createQueryBuilder: jest.fn(),
-      findOne: jest.fn(),
-      create: jest.fn().mockImplementation((dto) => dto),
-      save: jest.fn().mockImplementation((u) => Promise.resolve({ id: 'new-id', ...u })),
-      update: jest.fn().mockResolvedValue({ affected: 1 }),
-      softDelete: jest.fn().mockResolvedValue({ affected: 1 }),
-      restore: jest.fn().mockResolvedValue({ affected: 1 }),
+describe("Staff account frontend/backend contract", () => {
+  function setup() {
+    let user: any = {
+      id: 9,
+      email: "staff@example.invalid",
+      fullName: "Actual staff",
+      status: "ACTIVE",
+      roles: [{ id: 2, code: "TEACHER", name: "Teacher" }],
+      createdAt: new Date("2026-11-01"),
     };
-
-    roleRepoMock = {
-      find: jest.fn().mockResolvedValue([mockStaffRole]),
-      findOne: jest.fn().mockResolvedValue(mockStaffRole),
+    const qb: any = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getMany: jest.fn(async () => [user]),
     };
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        StaffManagementService,
-        { provide: getRepositoryToken(User), useValue: userRepoMock },
-        { provide: getRepositoryToken(Role), useValue: roleRepoMock },
+    const users: any = {
+      createQueryBuilder: () => qb,
+      findOne: jest.fn(async ({ where }) => (where.email ? null : user)),
+      create: jest.fn((x) => x),
+      save: jest.fn(async (x) => {
+        user = { ...user, ...x };
+        return user;
+      }),
+      find: async () => [user],
+    };
+    let profile: any = { userId: 9, staffType: "TEACHER" };
+    const profiles: any = {
+      findOne: async () => profile,
+      find: async () => [profile],
+      create: (x) => x,
+      save: jest.fn(async (x) => {
+        profile = x;
+        return x;
+      }),
+    };
+    const roles: any = {
+      findOne: async ({ where }) => ({
+        id: 2,
+        code: where.code,
+        name: where.code,
+      }),
+      find: async () => [
+        { id: 2, code: "TEACHER", name: "Teacher" },
+        { id: 3, code: "PARENT", name: "Parent" },
       ],
-    }).compile();
-
-    service = module.get<StaffManagementService>(StaffManagementService);
+    };
+    const service = new StaffManagementService(users, roles, profiles);
+    return {
+      service,
+      users,
+      profiles,
+      qb,
+      controller: new StaffManagementController(service),
+    };
+  }
+  it("supports roleCodes from the staff drawer and stores all selected roles", async () => {
+    const { service, users, profiles } = setup();
+    const result = await service.create({
+      email: " New@Example.invalid ",
+      fullName: "New staff",
+      roleCodes: ["TEACHER", "NUTRITIONIST"],
+      password: "explicit-password",
+    });
+    expect(users.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "new@example.invalid",
+        roles: [
+          expect.objectContaining({ code: "TEACHER" }),
+          expect.objectContaining({ code: "NUTRITIONIST" }),
+        ],
+      }),
+    );
+    expect(result.roles.map((r) => r.code)).toEqual([
+      "TEACHER",
+      "NUTRITIONIST",
+    ]);
+    expect(profiles.save).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 9, startDate: null }),
+    );
   });
-
-  describe('getStaffList (UC08 & UC11)', () => {
-    it('phải trả về danh sách nhân sự phân trang thành công', async () => {
-      const qbMock: any = {
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        withDeleted: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([[mockUser], 1]),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const result = await service.getStaffList(mockTenantId, {
-        page: 1,
-        limit: 10,
-        search: 'Hoa',
-        roleCode: 'TEACHER',
-        status: 'ACTIVE',
-      });
-
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0].email).toBe('giaovien@hoamai.edu.vn');
-      expect(result.meta.total).toBe(1);
-      expect(result.meta.totalPages).toBe(1);
-      expect(qbMock.leftJoinAndSelect).toHaveBeenCalledWith('u.roles', 'r');
-    });
+  it("rejects non-staff and missing roles before creating a user", async () => {
+    const { service, users } = setup();
+    await expect(
+      service.create({
+        email: "x@example.invalid",
+        fullName: "X",
+        roleCodes: ["PARENT"],
+      }),
+    ).rejects.toThrow();
+    await expect(
+      service.create({ email: "x@example.invalid", fullName: "X" }),
+    ).rejects.toThrow();
+    expect(users.save).not.toHaveBeenCalled();
   });
-
-  describe('getStaffStats', () => {
-    it('phải trả về thống kê nhân sự đồng thời bằng Promise.all', async () => {
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        innerJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(4),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const stats = await service.getStaffStats(mockTenantId);
-      expect(stats.totalStaff).toBe(4);
-      expect(stats.activeStaff).toBe(4);
-      expect(stats.teachers).toBe(4);
+  it("returns paginated objects with role names and applies search and role filters", async () => {
+    const { service, qb } = setup();
+    const result = await service.findAll({
+      search: "actual",
+      roleCode: "TEACHER",
+      page: 1,
+      limit: 10,
     });
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining("LOWER"), {
+      s: "%actual%",
+    });
+    expect(result.meta.total).toBe(1);
+    expect(result.data[0].roles[0].code).toBe("TEACHER");
+    expect(
+      (await service.findAll({ roleCode: "NUTRITIONIST" })).meta.total,
+    ).toBe(0);
   });
-
-  describe('getStaffById (UC08)', () => {
-    it('phải trả về chi tiết nhân sự khi tìm thấy', async () => {
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(mockUser),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const result = await service.getStaffById(mockTenantId, mockTargetId);
-
-      expect(result.id).toBe(mockTargetId);
-      expect(result.fullName).toBe('Cô Nguyễn Thị Hoa');
+  it("updates roles, clears optional contact fields and hashes the supplied replacement password", async () => {
+    const { service } = setup();
+    const result = await service.update(9, {
+      phone: "",
+      roleCodes: ["NUTRITIONIST"],
+      newPassword: "new-explicit-password",
     });
-
-    it('phải ném NotFoundException khi không tìm thấy nhân sự', async () => {
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(null),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      await expect(service.getStaffById(mockTenantId, 'unknown-id')).rejects.toThrow(
-        NotFoundException,
-      );
-    });
+    expect(result.phone).toBe("");
+    expect(result.roles[0].code).toBe("NUTRITIONIST");
+    expect(bcrypt.hash).toHaveBeenCalledWith("new-explicit-password", 10);
   });
-
-  describe('createStaff (UC09)', () => {
-    it('phải tạo nhân sự mới thành công và hash mật khẩu', async () => {
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(null),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const result = await service.createStaff(mockTenantId, {
-        email: 'newteacher@hoamai.edu.vn',
-        fullName: 'Thầy Trần Văn Minh',
-        phone: '0909888777',
-        roleCodes: ['TEACHER'],
-        password: 'Password123@',
-      });
-
-      expect(result.email).toBe('newteacher@hoamai.edu.vn');
-      expect(userRepoMock.create).toHaveBeenCalled();
-      expect(userRepoMock.save).toHaveBeenCalled();
-    });
-
-    it('phải ném ConflictException khi email đã tồn tại', async () => {
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(mockUser),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      await expect(
-        service.createStaff(mockTenantId, {
-          email: 'giaovien@hoamai.edu.vn',
-          fullName: 'Trùng Email',
-          roleCodes: ['TEACHER'],
-        }),
-      ).rejects.toThrow(ConflictException);
-    });
+  it("reports only stored staff counts and excludes parent roles from assignment", async () => {
+    const { service } = setup();
+    expect((await service.getStats()).teachers).toBe(1);
+    expect((await service.getRoles()).map((r) => r.code)).toEqual(["TEACHER"]);
   });
-
-  describe('updateStaff (UC10)', () => {
-    it('phải cập nhật thông tin nhân sự thành công', async () => {
-      const qbMock: any = {
-        addSelect: jest.fn().mockReturnThis(),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue({ ...mockUser }),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const result = await service.updateStaff(mockTenantId, mockTargetId, {
-        fullName: 'Cô Nguyễn Thị Hoa (Tổ trưởng)',
-        phone: '0909123456',
-        roleCodes: ['TEACHER'],
-      });
-
-      expect(result.fullName).toBe('Cô Nguyễn Thị Hoa (Tổ trưởng)');
-      expect(result.phone).toBe('0909123456');
-      expect(userRepoMock.save).toHaveBeenCalled();
-    });
-  });
-
-  describe('softDeleteStaff', () => {
-    it('phải từ chối xóa chính tài khoản đang đăng nhập', async () => {
-      await expect(
-        service.softDeleteStaff(mockTenantId, mockUserId, mockUserId),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('phải thực hiện xóa mềm TypeORM và đổi status thành INACTIVE', async () => {
-      const qbMock: any = {
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(mockUser),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const result = await service.softDeleteStaff(mockTenantId, mockUserId, mockTargetId);
-
-      expect(result.success).toBe(true);
-      expect(userRepoMock.softDelete).toHaveBeenCalledWith({
-        id: mockTargetId,
-        tenantId: mockTenantId,
-      });
-      expect(userRepoMock.update).toHaveBeenCalledWith(
-        { id: mockTargetId, tenantId: mockTenantId },
-        { status: 'INACTIVE' },
-      );
-    });
-
-    it('phải từ chối xóa tài khoản SUPER_ADMIN', async () => {
-      const superAdminUser = {
-        ...mockUser,
-        roles: [{ code: 'SUPER_ADMIN', name: 'Quản trị viên' }],
-      };
-      const qbMock: any = {
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(superAdminUser),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      await expect(
-        service.softDeleteStaff(mockTenantId, mockUserId, mockTargetId),
-      ).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  describe('restoreStaff', () => {
-    it('phải khôi phục tài khoản đã xóa mềm và đặt lại status ACTIVE', async () => {
-      const deletedUser = {
-        ...mockUser,
-        deletedAt: new Date(),
-      };
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(deletedUser),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      const result = await service.restoreStaff(mockTenantId, mockTargetId);
-
-      expect(result.success).toBe(true);
-      expect(userRepoMock.restore).toHaveBeenCalledWith({
-        id: mockTargetId,
-        tenantId: mockTenantId,
-      });
-      expect(userRepoMock.update).toHaveBeenCalledWith(
-        { id: mockTargetId, tenantId: mockTenantId },
-        { status: 'ACTIVE' },
-      );
-    });
-
-    it('phải ném BadRequestException nếu tài khoản không ở trạng thái xóa mềm', async () => {
-      const activeUser = {
-        ...mockUser,
-        deletedAt: null,
-      };
-      const qbMock: any = {
-        withDeleted: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(activeUser),
-      };
-      userRepoMock.createQueryBuilder.mockReturnValue(qbMock);
-
-      await expect(service.restoreStaff(mockTenantId, mockTargetId)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-  });
-
-  describe('toggleStaffStatus', () => {
-    it('phải đảo ngược trạng thái tài khoản giữa ACTIVE và INACTIVE', async () => {
-      userRepoMock.findOne.mockResolvedValue({ ...mockUser, status: 'ACTIVE' });
-
-      const result = await service.toggleStaffStatus(mockTenantId, mockUserId, mockTargetId);
-
-      expect(result.status).toBe('INACTIVE');
-      expect(userRepoMock.update).toHaveBeenCalledWith(
-        { id: mockTargetId, tenantId: mockTenantId },
-        { status: 'INACTIVE' },
-      );
-    });
+  it("passes numeric account ids and the real payload through the update controller", async () => {
+    const { service, controller } = setup();
+    const update = jest.spyOn(service, "update");
+    await controller.update(9, { fullName: "Changed name" });
+    expect(update).toHaveBeenCalledWith(9, { fullName: "Changed name" });
   });
 });

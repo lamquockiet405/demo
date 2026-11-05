@@ -18,7 +18,7 @@ export const AttendanceTopNav: React.FC<AttendanceTopNavProps> = ({ onSearch }) 
 
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-6 py-2.5">
-      <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
+      <div className="w-full flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 p-0.5 flex items-center justify-center text-white shadow-sm ring-2 ring-emerald-100 overflow-hidden shrink-0">

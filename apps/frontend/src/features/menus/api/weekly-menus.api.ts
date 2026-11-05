@@ -1,4 +1,5 @@
-import { apiClient } from '../../../core/api/axios';
+import { apiClient } from "../../../core/api/axios";
+import { notifyMenuPublished } from "./published-menus.api";
 
 export interface DishItem {
   nutritionAvailable?: boolean;
@@ -66,7 +67,15 @@ export interface WeeklyMenu {
   startDate: string;
   endDate: string;
   cycleWeekNumber: number;
-  status: 'DRAFT' | 'SUBMITTED_FOR_REVIEW' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'PUBLISHED' | 'ARCHIVED';
+  status:
+    | "DRAFT"
+    | "SUBMITTED_FOR_REVIEW"
+    | "PENDING"
+    | "APPROVED"
+    | "REJECTED"
+    | "ACTIVE"
+    | "PUBLISHED"
+    | "ARCHIVED";
   createdBy: string;
   approvedBy?: string | null;
   approvedAt?: string | null;
@@ -83,7 +92,7 @@ export interface WeeklyMenu {
   commitmentItems?: string[];
   overrideJustification?: string | null;
   violationsSnapshot?: any[];
-  editRequestStatus?: 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
+  editRequestStatus?: "NONE" | "PENDING" | "APPROVED" | "REJECTED";
   editRequestReason?: string | null;
   editRequestAt?: string | null;
   editRequestBy?: string | null;
@@ -267,12 +276,15 @@ export const weeklyMenusApi = {
     includeDeleted?: boolean;
   }): Promise<WeeklyMenu[]> {
     const cleanParams: any = { ...params };
-    if (cleanParams.status === 'ALL') delete cleanParams.status;
-    if (cleanParams.targetAgeGroup === 'ALL') delete cleanParams.targetAgeGroup;
+    if (cleanParams.status === "ALL") delete cleanParams.status;
+    if (cleanParams.targetAgeGroup === "ALL") delete cleanParams.targetAgeGroup;
     if (cleanParams.targetAgeGroup) {
-      cleanParams.ageGroup = cleanParams.targetAgeGroup === 'TODDLER_18_36M' ? 'NHA_TRE' : 'MAU_GIAO';
+      cleanParams.ageGroup =
+        cleanParams.targetAgeGroup === "TODDLER_18_36M"
+          ? "NHA_TRE"
+          : "MAU_GIAO";
     }
-    const res = await apiClient.get('/menus', { params: cleanParams });
+    const res = await apiClient.get("/menus", { params: cleanParams });
     const raw = res.data?.data || res.data;
     if (Array.isArray(raw)) return raw;
     if (Array.isArray(raw?.items)) return raw.items;
@@ -282,13 +294,13 @@ export const weeklyMenusApi = {
 
   // 2. Thống kê KPI
   async getStatistics(): Promise<MenuStatistics> {
-    const res = await apiClient.get('/menus/statistics');
+    const res = await apiClient.get("/menus/statistics");
     return res.data;
   },
 
   // 3. Món ăn trong kho
   async getAvailableDishes(): Promise<DishItem[]> {
-    const res = await apiClient.get('/menus/available-dishes');
+    const res = await apiClient.get("/menus/available-dishes");
     const raw = res.data;
     if (Array.isArray(raw)) return raw;
     if (Array.isArray(raw?.items)) return raw.items;
@@ -296,8 +308,13 @@ export const weeklyMenusApi = {
     return [];
   },
 
-  async getSubstituteCandidates(menuId: string, menuDishId: string): Promise<DishItem[]> {
-    const res = await apiClient.get(`/menus/${menuId}/dishes/${menuDishId}/substitute-candidates`);
+  async getSubstituteCandidates(
+    menuId: string,
+    menuDishId: string,
+  ): Promise<DishItem[]> {
+    const res = await apiClient.get(
+      `/menus/${menuId}/dishes/${menuDishId}/substitute-candidates`,
+    );
     return Array.isArray(res.data) ? res.data : [];
   },
 
@@ -338,13 +355,13 @@ export const weeklyMenusApi = {
    */
   async createMenu(payload: CreateMenuPayload): Promise<WeeklyMenu> {
     // GỬI HTTP POST SANG BACKEND: apps/backend/src/modules/menus/controllers/menus.controller.ts
-    const res = await apiClient.post('/menus', payload);
+    const res = await apiClient.post("/menus", payload);
     return res.data;
   },
 
   // 7. Import thực đơn từ Excel
   async importExcel(payload: ImportExcelPayload): Promise<WeeklyMenu> {
-    const res = await apiClient.post('/menus/import-excel', payload);
+    const res = await apiClient.post("/menus/import-excel", payload);
     return res.data;
   },
 
@@ -355,7 +372,10 @@ export const weeklyMenusApi = {
   },
 
   // 9. Cập nhật thông tin thực đơn
-  async updateMenu(id: string, payload: Partial<CreateMenuPayload>): Promise<WeeklyMenu> {
+  async updateMenu(
+    id: string,
+    payload: Partial<CreateMenuPayload>,
+  ): Promise<WeeklyMenu> {
     const res = await apiClient.put(`/menus/${id}`, payload);
     return res.data;
   },
@@ -365,13 +385,19 @@ export const weeklyMenusApi = {
    * - GỌI TỪ: handleAdjustDish() trong WeeklyMenuManagementPage.tsx
    * - GỌI SANG: POST /menus/:menuId/adjust-dish trong apps/backend/src/modules/menus/controllers/menus.controller.ts (BƯỚC 3)
    */
-  async adjustDish(menuId: string, payload: AdjustDishPayload): Promise<MenuDishItem> {
+  async adjustDish(
+    menuId: string,
+    payload: AdjustDishPayload,
+  ): Promise<MenuDishItem> {
     const res = await apiClient.post(`/menus/${menuId}/adjust-dish`, payload);
     return res.data;
   },
 
   // 11. Xóa món ăn khỏi bữa ăn (Xóa mềm)
-  async removeDish(menuId: string, menuDishId: string): Promise<{ success: boolean }> {
+  async removeDish(
+    menuId: string,
+    menuDishId: string,
+  ): Promise<{ success: boolean }> {
     const res = await apiClient.delete(`/menus/${menuId}/dishes/${menuDishId}`);
     return res.data;
   },
@@ -381,17 +407,24 @@ export const weeklyMenusApi = {
    * - GỌI TỪ: handleSubmitForReview() trong WeeklyMenuManagementPage.tsx
    * - GỌI SANG: POST /menus/:id/submit trong apps/backend/src/modules/menus/controllers/menus.controller.ts (BƯỚC 3)
    */
-  async submitForReview(id: string, payload?: SubmitMenuPayload): Promise<WeeklyMenu> {
-    const res = await apiClient.post(`/menus/${id}/submit`, payload || {
-      commitmentSigned: true,
-      commitmentItems: [
-        'COMMIT_TT28_NUTRITION',
-        'COMMIT_QD1246_SAFETY',
-        'COMMIT_ALLERGEN_SAFETY',
-        'COMMIT_PROFESSIONAL_RESP',
-      ],
-      commitmentText: 'Cam kết thực đơn tuân thủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn thực phẩm Quyết định 1246/QĐ-BYT',
-    });
+  async submitForReview(
+    id: string,
+    payload?: SubmitMenuPayload,
+  ): Promise<WeeklyMenu> {
+    const res = await apiClient.post(
+      `/menus/${id}/submit`,
+      payload || {
+        commitmentSigned: true,
+        commitmentItems: [
+          "COMMIT_TT28_NUTRITION",
+          "COMMIT_QD1246_SAFETY",
+          "COMMIT_ALLERGEN_SAFETY",
+          "COMMIT_PROFESSIONAL_RESP",
+        ],
+        commitmentText:
+          "Cam kết thực đơn tuân thủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn thực phẩm Quyết định 1246/QĐ-BYT",
+      },
+    );
     return res.data;
   },
 
@@ -411,7 +444,9 @@ export const weeklyMenusApi = {
    * - GỌI SANG: POST /menus/:id/reject trong apps/backend/src/modules/menus/controllers/menus.controller.ts (BƯỚC 3)
    */
   async rejectMenu(id: string, rejectionReason: string): Promise<WeeklyMenu> {
-    const res = await apiClient.post(`/menus/${id}/reject`, { rejectionReason });
+    const res = await apiClient.post(`/menus/${id}/reject`, {
+      rejectionReason,
+    });
     return res.data;
   },
 
@@ -422,6 +457,7 @@ export const weeklyMenusApi = {
    */
   async publishMenu(id: string): Promise<WeeklyMenu> {
     const res = await apiClient.post(`/menus/${id}/publish`);
+    notifyMenuPublished();
     return res.data;
   },
 
@@ -446,12 +482,12 @@ export const weeklyMenusApi = {
   // 19. Tải file Excel/CSV
   async downloadExcel(id: string, fileName?: string): Promise<void> {
     const res = await apiClient.get(`/menus/${id}/export/excel`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
     const url = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', fileName || `Thuc_don_tuan_${id}.csv`);
+    link.setAttribute("download", fileName || `Thuc_don_tuan_${id}.csv`);
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -459,9 +495,14 @@ export const weeklyMenusApi = {
 
   // 20. Tự động sinh thực đơn (Lưu vào DB)
   async autoGenerateMenu(payload: AutoGeneratePayload): Promise<WeeklyMenu> {
-    const rawAge = payload.targetAgeGroup || 'MAU_GIAO';
-    const ageGroup = rawAge === 'TODDLER_18_36M' ? 'NHA_TRE' : (rawAge === 'KINDERGARTEN_3_5Y' ? 'MAU_GIAO' : rawAge);
-    const res = await apiClient.post<any>('/menus/auto-generate', {
+    const rawAge = payload.targetAgeGroup || "MAU_GIAO";
+    const ageGroup =
+      rawAge === "TODDLER_18_36M"
+        ? "NHA_TRE"
+        : rawAge === "KINDERGARTEN_3_5Y"
+          ? "MAU_GIAO"
+          : rawAge;
+    const res = await apiClient.post<any>("/menus/auto-generate", {
       ...payload,
       ageGroup,
       weekStartDate: payload.startDate,
@@ -471,10 +512,17 @@ export const weeklyMenusApi = {
   },
 
   // 21. Xem trước ma trận thực đơn tự động sinh
-  async previewAutoGenerateMenu(payload: AutoGeneratePayload): Promise<AutoGeneratePreviewResponse> {
-    const rawAge = payload.targetAgeGroup || 'MAU_GIAO';
-    const ageGroup = rawAge === 'TODDLER_18_36M' ? 'NHA_TRE' : (rawAge === 'KINDERGARTEN_3_5Y' ? 'MAU_GIAO' : rawAge);
-    const res = await apiClient.post<any>('/menus/auto-generate', {
+  async previewAutoGenerateMenu(
+    payload: AutoGeneratePayload,
+  ): Promise<AutoGeneratePreviewResponse> {
+    const rawAge = payload.targetAgeGroup || "MAU_GIAO";
+    const ageGroup =
+      rawAge === "TODDLER_18_36M"
+        ? "NHA_TRE"
+        : rawAge === "KINDERGARTEN_3_5Y"
+          ? "MAU_GIAO"
+          : rawAge;
+    const res = await apiClient.post<any>("/menus/auto-generate", {
       ...payload,
       ageGroup,
       weekStartDate: payload.startDate,
@@ -486,7 +534,9 @@ export const weeklyMenusApi = {
   // 22. Lấy tư vấn cảnh báo Dị ứng học sinh & Cá nhân hóa Dinh dưỡng theo BMI
   async getAdvisory(menuId: string): Promise<MenuAdvisoryResponse | null> {
     try {
-      const res = await apiClient.get<MenuAdvisoryResponse>(`/menus/${menuId}/advisory`);
+      const res = await apiClient.get<MenuAdvisoryResponse>(
+        `/menus/${menuId}/advisory`,
+      );
       return res.data;
     } catch {
       return null;
@@ -509,25 +559,35 @@ export const weeklyMenusApi = {
 
   // 24. Chuyên viên Dinh dưỡng xin phép Hiệu trưởng chỉnh sửa thực đơn đã duyệt
   async requestEditMenu(id: string, reason: string): Promise<WeeklyMenu> {
-    const res = await apiClient.post<WeeklyMenu>(`/menus/${id}/request-edit`, { reason });
+    const res = await apiClient.post<WeeklyMenu>(`/menus/${id}/request-edit`, {
+      reason,
+    });
     return res.data;
   },
 
   // 25. Hiệu trưởng chấp thuận yêu cầu chỉnh sửa (mở khóa về DRAFT)
   async approveEditRequest(id: string, notes?: string): Promise<WeeklyMenu> {
-    const res = await apiClient.post<WeeklyMenu>(`/menus/${id}/approve-edit-request`, { notes });
+    const res = await apiClient.post<WeeklyMenu>(
+      `/menus/${id}/approve-edit-request`,
+      { notes },
+    );
     return res.data;
   },
 
   // 26. Hiệu trưởng từ chối yêu cầu chỉnh sửa
   async rejectEditRequest(id: string, reason: string): Promise<WeeklyMenu> {
-    const res = await apiClient.post<WeeklyMenu>(`/menus/${id}/reject-edit-request`, { reason });
+    const res = await apiClient.post<WeeklyMenu>(
+      `/menus/${id}/reject-edit-request`,
+      { reason },
+    );
     return res.data;
   },
 
   // 27. Hủy yêu cầu xin phép chỉnh sửa
   async cancelEditRequest(id: string): Promise<WeeklyMenu> {
-    const res = await apiClient.post<WeeklyMenu>(`/menus/${id}/cancel-edit-request`);
+    const res = await apiClient.post<WeeklyMenu>(
+      `/menus/${id}/cancel-edit-request`,
+    );
     return res.data;
   },
 };
@@ -569,7 +629,7 @@ export interface AllergyConflictItem {
   className: string;
   allergenDetected: string;
   allergenCode?: string;
-  severity: 'MILD' | 'MODERATE' | 'SEVERE' | 'ANAPHYLACTIC';
+  severity: "MILD" | "MODERATE" | "SEVERE" | "ANAPHYLACTIC";
   reactionTreatment?: string | null;
   menuDishId: string;
   dishId: string;
@@ -611,7 +671,7 @@ export interface BmiSubstituteDishRecommendation {
 export interface BmiRecommendationGroup {
   label: string;
   count: number;
-  severity: 'WARNING' | 'CRITICAL';
+  severity: "WARNING" | "CRITICAL";
   clinicalStrategy: string;
   portionAdvice: string;
   children: BmiChildItem[];

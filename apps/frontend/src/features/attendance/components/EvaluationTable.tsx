@@ -133,7 +133,7 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
   };
 
   return (
-    <div className="px-6 py-2 max-w-[1440px] mx-auto">
+    <div className="px-6 py-2 w-full">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Section Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50">

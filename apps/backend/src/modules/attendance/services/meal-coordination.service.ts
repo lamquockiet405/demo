@@ -1,6 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+export const COORDINATION_MEAL_LABELS: Record<string, string> = {
+  BREAKFAST: 'Bữa sáng',
+  MORNING_SNACK: 'Phụ sáng',
+  LUNCH: 'Bữa trưa chính',
+  AFTERNOON_SNACK: 'Bữa xế chiều',
+};
+const NOTE_TYPE_LABELS: Record<string, string> = {
+  ALLERGY_WARNING: 'Cảnh báo dị ứng khẩn cấp',
+  SPECIAL_DIET: 'Chế độ ăn riêng',
+  PORTION_ADJUSTMENT: 'Điều chỉnh suất ăn',
+};
+
 @Injectable()
 export class MealCoordinationService {
   constructor(private readonly dataSource: DataSource) {}
@@ -72,9 +84,9 @@ export class MealCoordinationService {
     }));
 
     // 3. Xây dựng bộ lọc ghi chú
-    const whereClauses: string[] = [];
-    const queryParams: any[] = [];
-    let pIdx = 1;
+    const whereClauses: string[] = ['m.meal_date = $1'];
+    const queryParams: any[] = [filterDate];
+    let pIdx = 2;
 
     if (params?.classId && params.classId !== 'ALL') {
       whereClauses.push(`m.class_id = $${pIdx}`);
@@ -115,12 +127,14 @@ export class MealCoordinationService {
     const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
     const notesRows = await this.dataSource.query(`
-      SELECT m.*, s.full_name as student_name, s.student_code as student_code, alg.name as allergen_name, c.name as class_name
+      SELECT m.*, to_char(m.meal_date, 'YYYY-MM-DD') AS meal_date,
+        s.full_name as student_name, s.student_code as student_code,
+        (SELECT string_agg(DISTINCT alg.name, ', ')
+         FROM student_allergies sa JOIN allergens alg ON alg.id = sa.allergen_id
+         WHERE sa.student_id = s.id) as allergen_name, c.name as class_name
       FROM meal_coordination_notes m
-      LEFT JOIN classes c ON c.id::text = m.class_id
-      LEFT JOIN students s ON s.id::text = m.child_id
-      LEFT JOIN student_allergies sa ON sa.student_id = s.id
-      LEFT JOIN allergens alg ON sa.allergen_id = alg.id
+      LEFT JOIN classes c ON c.id::text = m.class_id::text
+      LEFT JOIN students s ON s.id::text = m.child_id::text
       ${whereSql}
       ORDER BY 
         CASE m.priority WHEN 'URGENT' THEN 1 WHEN 'HIGH' THEN 2 ELSE 3 END,
@@ -142,9 +156,9 @@ export class MealCoordinationService {
           avatarLetter: initials,
           allergyWarning: n.allergen_name ? `Dị ứng: ${n.allergen_name}` : undefined,
         } : null,
-        mealDate: n.meal_date ? new Date(n.meal_date).toISOString().split('T')[0] : filterDate,
+        mealDate: n.meal_date || filterDate,
         mealSession: n.meal_session || 'LUNCH',
-        mealSessionLabel: n.meal_session_label || (n.meal_session === 'AFTERNOON_SNACK' ? 'Bữa xế chiều' : 'Bữa trưa chính'),
+        mealSessionLabel: n.meal_session_label || COORDINATION_MEAL_LABELS[n.meal_session] || COORDINATION_MEAL_LABELS.LUNCH,
         noteType: n.note_type || 'OTHER',
         noteTypeLabel: n.note_type_label || 'Ghi chú điều phối',
         priority: (n.priority || 'NORMAL') as 'URGENT' | 'HIGH' | 'NORMAL',
@@ -202,11 +216,8 @@ export class MealCoordinationService {
     teacherName?: string;
     photos?: string[];
   }, userId?: number) {
-    const mealSessionLabel = data.mealSession === 'AFTERNOON_SNACK' ? 'Bữa xế chiều' : 'Bữa trưa chính';
-    let noteTypeLabel = 'Ghi chú điều phối';
-    if (data.noteType === 'ALLERGY_WARNING') noteTypeLabel = 'Cảnh báo dị ứng khẩn cấp';
-    else if (data.noteType === 'SPECIAL_DIET') noteTypeLabel = 'Chế độ ăn riêng';
-    else if (data.noteType === 'PORTION_ADJUSTMENT') noteTypeLabel = 'Điều chỉnh suất ăn';
+    const mealSessionLabel = COORDINATION_MEAL_LABELS[data.mealSession] || COORDINATION_MEAL_LABELS.LUNCH;
+    const noteTypeLabel = NOTE_TYPE_LABELS[data.noteType] || 'Ghi chú điều phối';
 
     const targetRoleLabel = data.targetRole === 'NUTRITIONIST' ? 'Chuyên viên Dinh Dưỡng' : 'Bếp Bán Trú & Dinh Dưỡng';
 
@@ -248,7 +259,7 @@ export class MealCoordinationService {
       teacherName,
       data.targetRole || 'KITCHEN',
       targetRoleLabel,
-      data.photos || [],
+      JSON.stringify(data.photos || []),
     ]);
 
     return {
@@ -294,6 +305,18 @@ export class MealCoordinationService {
       setClauses.push(`priority = $${idx}`);
       params.push(data.priority);
       idx++;
+    }
+    if (data.mealSession !== undefined) {
+      setClauses.push(`meal_session = $${idx++}`, `meal_session_label = $${idx++}`);
+      params.push(data.mealSession, COORDINATION_MEAL_LABELS[data.mealSession] || COORDINATION_MEAL_LABELS.LUNCH);
+    }
+    if (data.noteType !== undefined) {
+      setClauses.push(`note_type = $${idx++}`, `note_type_label = $${idx++}`);
+      params.push(data.noteType, NOTE_TYPE_LABELS[data.noteType] || 'Ghi chú điều phối');
+    }
+    if (data.photos !== undefined) {
+      setClauses.push(`photos = $${idx++}::jsonb`);
+      params.push(JSON.stringify(data.photos));
     }
     if (data.status !== undefined) {
       setClauses.push(`status = $${idx}`);

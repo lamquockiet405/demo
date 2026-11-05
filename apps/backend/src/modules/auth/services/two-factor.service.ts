@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { authenticator } from 'otplib';
-import * as QRCode from 'qrcode';
+import { Injectable } from "@nestjs/common";
+import { authenticator } from "otplib";
+import * as QRCode from "qrcode";
 
 @Injectable()
 export class TwoFactorService {
   generateSecret(email: string) {
     const secret = authenticator.generateSecret();
-    const otpAuthUrl = authenticator.keyuri(email, 'KidMeal', secret);
+    const otpAuthUrl = authenticator.keyuri(email, "KidMeal", secret);
     return { secret, otpAuthUrl };
   }
 
@@ -15,7 +15,6 @@ export class TwoFactorService {
   }
 
   verifyCode(code: string, secret: string): boolean {
-    if (code === '123456') return true; // Development bypass
     try {
       return authenticator.verify({ token: code, secret });
     } catch {

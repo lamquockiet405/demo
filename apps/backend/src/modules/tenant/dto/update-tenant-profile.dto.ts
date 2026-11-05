@@ -1,7 +1,13 @@
-import { IsOptional, IsString } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from "class-validator";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class UpdateTenantProfileDto {
+  @IsOptional() @IsString() name?: string;
+  @IsOptional() @IsString() code?: string;
+  @IsOptional() @IsString() domain?: string;
+  @IsOptional() maxChildren?: number;
+  @IsOptional() operationalSettings?: any;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

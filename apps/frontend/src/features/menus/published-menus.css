@@ -1,0 +1,346 @@
+.pm-browser {
+  color: #294136;
+  font-family: Inter, 'Segoe UI', sans-serif;
+  font-size: 14px;
+}
+.pm-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.pm-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #7d9286;
+}
+.pm-heading :is(h1, h2) {
+  font-size: 25px;
+  font-weight: 750;
+  margin: 5px 0 7px;
+  letter-spacing: -0.03em;
+}
+.pm-heading p {
+  color: #74867b;
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.7;
+}
+.pm-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  background: #fff;
+  border: 1px solid #dce6e0;
+  border-radius: 9px;
+  color: #396b50;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pm-button:hover:not(:disabled) {
+  background: #f0f7f3;
+}
+.pm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pm-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #e0e8e3;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+.pm-filters input,
+.pm-filters select {
+  font: inherit;
+  font-size: 12px;
+  background: #f9fcfa;
+  border: 1px solid #dce6df;
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: #3f5e4b;
+  min-width: 0;
+  max-width: 100%;
+}
+.pm-filters input {
+  flex: 1;
+  min-width: 180px;
+}
+.pm-filters > span {
+  color: #839386;
+  font-size: 11px;
+  margin-left: auto;
+}
+.pm-layout {
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+.pm-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 740px;
+  overflow-y: auto;
+  padding: 2px 4px 2px 2px;
+  scrollbar-width: thin;
+}
+.pm-menu-card {
+  text-align: left;
+  padding: 16px;
+  border: 1px solid #dfe7e2;
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+}
+.pm-menu-card:hover {
+  border-color: #93bea4;
+}
+.pm-menu-card.selected {
+  background: #eff8f2;
+  border-color: #72ad88;
+  box-shadow: 0 0 0 1px #72ad8825;
+}
+.pm-menu-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  color: #3b845b;
+  margin-bottom: 9px;
+  font-size: 10px;
+}
+.pm-menu-card strong {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.pm-menu-card > small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #7b8d80;
+  font-size: 10px;
+  margin-top: 10px;
+}
+.pm-menu-card em {
+  display: block;
+  font-size: 10px;
+  color: #668171;
+  font-style: normal;
+  margin-top: 9px;
+}
+.pm-detail {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #dfe8e2;
+  border-radius: 14px;
+  padding: 22px;
+}
+.pm-detail-heading {
+  padding-bottom: 17px;
+  border-bottom: 1px solid #e5ede7;
+}
+.pm-detail-heading h2 {
+  margin: 12px 0 7px;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.pm-detail-heading p {
+  font-size: 11px;
+  color: #768b7c;
+  margin: 5px 0 0;
+}
+.pm-published-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e7f6ec;
+  color: #29724a;
+  font-size: 10px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-weight: 600;
+}
+.pm-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+.pm-days button {
+  padding: 8px 11px;
+  background: #f7faf8;
+  border: 1px solid #e1eae4;
+  border-radius: 8px;
+  color: #728478;
+  text-align: left;
+}
+.pm-days button.selected {
+  background: #167451;
+  color: #fff;
+  border-color: #167451;
+}
+.pm-days span,
+.pm-days b {
+  display: block;
+  font-size: 10px;
+}
+.pm-days b {
+  font-size: 11px;
+  margin-top: 3px;
+  font-weight: 600;
+}
+.pm-day-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #58715f;
+  margin-bottom: 13px;
+}
+.pm-meals {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.pm-meal {
+  background: #fbfdfb;
+  border: 1px solid #e2ece5;
+  border-radius: 10px;
+  padding: 14px;
+}
+.pm-meal h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #337351;
+  margin: 0 0 9px;
+}
+.pm-dish {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid #eaf0ec;
+}
+.pm-dish strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.pm-dish small {
+  display: block;
+  font-size: 10px;
+  color: #8a998d;
+  margin-top: 4px;
+}
+.pm-dish > span {
+  text-align: right;
+  font-size: 11px;
+  color: #65816e;
+  flex-shrink: 0;
+}
+.pm-message {
+  font-size: 12px;
+  color: #75887c;
+  padding: 20px 12px;
+  line-height: 1.8;
+}
+.pm-message.error {
+  background: #fff3f4;
+  color: #a83243;
+  border: 1px solid #f1cbd1;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+.pm-message.error .pm-button {
+  margin-left: 12px;
+}
+.pm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 55px 20px;
+  background: #fff;
+  border: 1px dashed #d4e4d9;
+  border-radius: 14px;
+  color: #6d8a75;
+}
+.pm-empty h2 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 13px 0 7px;
+}
+.pm-empty p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.pm-browser :is(a, button, input, select):focus-visible {
+  outline: 2px solid #25865c;
+  outline-offset: 3px;
+}
+@media (max-width: 1100px) {
+  .pm-layout {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+}
+@media (max-width: 800px) {
+  .pm-layout {
+    grid-template-columns: 1fr;
+  }
+  .pm-menu-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 280px;
+  }
+  .pm-detail {
+    padding: 17px;
+  }
+}
+@media (max-width: 480px) {
+  .pm-menu-list {
+    grid-template-columns: 1fr;
+    max-height: 250px;
+  }
+  .pm-filters input {
+    flex-basis: 100%;
+  }
+  .pm-filters select {
+    width: calc(50% - 5px);
+  }
+  .pm-heading :is(h1, h2) {
+    font-size: 22px;
+  }
+  .pm-dish {
+    align-items: flex-start;
+  }
+  .pm-dish > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .pm-dish > span {
+    max-width: 95px;
+  }
+  .pm-days {
+    gap: 6px;
+  }
+  .pm-days button {
+    padding: 7px;
+  }
+}

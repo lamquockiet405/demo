@@ -343,7 +343,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
       />
 
       {/* 3. Main Content Container */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-6">
+      <main className="flex-1 w-full px-6 py-6 space-y-6">
         {/* Header & Title */}
         <AttendanceHeader
           classNameTitle={attendanceData?.classInfo.name || 'Lớp Mầm 1 (3-4 tuổi)'}
@@ -430,7 +430,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
 
       {/* Footer */}
       <footer className="mt-12 border-t border-slate-200 bg-white py-6 px-6 text-xs text-slate-500">
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-medium">
             <strong className="text-teal-700">KidMeal</strong> © 2025 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.
           </p>

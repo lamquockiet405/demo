@@ -12,7 +12,7 @@ function loadStore(fetchCurrentUser) {
   const localStorage = { getItem: key => values.get(key) ?? null,
     setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
   const exports = {};
-  const context = { exports, localStorage, window: { location: {} }, console,
+  const context = { exports, localStorage, window: { location: {}, addEventListener() {} }, document: { addEventListener() {} }, console,
     setTimeout: () => 1, clearTimeout: () => {},
     require: name => {
       if (name === 'zustand') return { create: initialize => {
@@ -24,6 +24,7 @@ function loadStore(fetchCurrentUser) {
       } };
       if (name === '../utils/jwt') return { isJwtExpired: () => false, getJwtRemainingTimeMs: () => 60000 };
       if (name === '../api/auth.api') return { fetchCurrentUser };
+      if (name === '../api/axios') return { refreshAccessToken: async () => 'new-access', authTokensChangedEvent: 'tokens-changed', authSessionExpiredEvent: 'session-expired' };
       throw new Error(`Unexpected import: ${name}`);
     } };
   const source = fs.readFileSync(path.join(root, 'apps/frontend/src/core/stores/auth.store.ts'), 'utf8');

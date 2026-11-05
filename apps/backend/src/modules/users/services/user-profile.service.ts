@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../../auth/entities/user.entity';
-import { UpdateProfileDto } from '../dto/update-profile.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { User } from "../../auth/entities/user.entity";
+import { UpdateProfileDto } from "../dto/update-profile.dto";
 
 @Injectable()
 export class UserProfileService {
@@ -14,10 +14,10 @@ export class UserProfileService {
   async getProfile(userId: number) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
-      relations: ['roles'],
+      relations: ["roles"],
     });
     if (!user) {
-      throw new NotFoundException('Không tìm thấy thông tin tài khoản');
+      throw new NotFoundException("Không tìm thấy thông tin tài khoản");
     }
 
     return {
@@ -36,12 +36,12 @@ export class UserProfileService {
   async updateProfile(userId: number, dto: UpdateProfileDto) {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('Không tìm thấy thông tin tài khoản');
+      throw new NotFoundException("Không tìm thấy thông tin tài khoản");
     }
 
-    if (dto.fullName) user.fullName = dto.fullName;
-    if (dto.phone) user.phone = dto.phone;
-    if (dto.avatar) user.avatar = dto.avatar;
+    if (dto.fullName !== undefined) user.fullName = dto.fullName.trim();
+    if (dto.phone !== undefined) user.phone = dto.phone;
+    if (dto.avatar !== undefined) user.avatar = dto.avatar;
 
     await this.userRepo.save(user);
     return this.getProfile(userId);

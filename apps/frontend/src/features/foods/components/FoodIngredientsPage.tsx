@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { apiClient } from '@/core/api/axios';
-import { useAuthStore } from '@/core/stores/auth.store';
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { apiClient } from "@/core/api/axios";
+import { useAuthStore } from "@/core/stores/auth.store";
 import {
   Search,
   Plus,
@@ -22,8 +22,8 @@ import {
   Lock,
   CheckCircle2,
   ShieldCheck,
-} from 'lucide-react';
-import { FoodModal } from './FoodModal';
+} from "lucide-react";
+import { FoodModal } from "./FoodModal";
 
 interface Food {
   id: string;
@@ -61,10 +61,15 @@ export const FoodIngredientsPage: React.FC = () => {
   const location = useLocation();
   const { user } = useAuthStore();
   const roles = user?.roles || [];
-  const isPrincipalOrManagement = roles.includes('SCHOOL_MANAGEMENT') || roles.includes('SCHOOL_MANAGER') || roles.includes('PRINCIPAL');
-  const isNutritionist = roles.includes('NUTRITIONIST');
+  const isPrincipalOrManagement =
+    roles.includes("SCHOOL_MANAGEMENT") ||
+    roles.includes("SCHOOL_MANAGER") ||
+    roles.includes("PRINCIPAL");
+  const isNutritionist = roles.includes("NUTRITIONIST");
   // Khi ở phân hệ Ban Giám Hiệu (/inventory) hoặc tài khoản BGH, chỉ được xem không được thêm/sửa/xóa
-  const isReadOnly = location.pathname.startsWith('/inventory') || (isPrincipalOrManagement && !isNutritionist);
+  const isReadOnly =
+    location.pathname.startsWith("/inventory") ||
+    (isPrincipalOrManagement && !isNutritionist);
 
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<FoodCategory[]>([]);
@@ -72,10 +77,10 @@ export const FoodIngredientsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // Filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [allergenFilter, setAllergenFilter] = useState('');
-  const [nutritionFilter, setNutritionFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [allergenFilter, setAllergenFilter] = useState("");
+  const [nutritionFilter, setNutritionFilter] = useState("");
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -84,13 +89,15 @@ export const FoodIngredientsPage: React.FC = () => {
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'view' | 'edit'>('create');
+  const [modalMode, setModalMode] = useState<"create" | "view" | "edit">(
+    "create",
+  );
   const [selectedFoodId, setSelectedFoodId] = useState<string | null>(null);
 
   const fetchFoods = async () => {
     try {
       setLoading(true);
-      const res = await apiClient.get('/foods', {
+      const res = await apiClient.get("/foods", {
         params: {
           search: searchTerm || undefined,
           categoryId: categoryFilter || undefined,
@@ -101,27 +108,42 @@ export const FoodIngredientsPage: React.FC = () => {
           limit,
         },
       });
-      const rawItems = res.data?.items || res.data?.data || (Array.isArray(res.data) ? res.data : []);
+      const rawItems =
+        res.data?.items ||
+        res.data?.data ||
+        (Array.isArray(res.data) ? res.data : []);
       const normalizedFoods = rawItems.map((f: any) => ({
         ...f,
         id: String(f.id),
         code: f.code || `NL-${f.id}`,
-        name: f.name || 'Nguyên liệu',
-        category: typeof f.category === 'object' && f.category !== null ? (f.category.name || f.category.code || 'Khác') : (f.categoryName || f.category || 'Khác'),
-        energyKcal: f.energyKcal == null && f.energyKcal100g == null ? null : Number(f.energyKcal ?? f.energyKcal100g),
+        name: f.name || "Nguyên liệu",
+        category:
+          typeof f.category === "object" && f.category !== null
+            ? f.category.name || f.category.code || "Khác"
+            : f.categoryName || f.category || "Khác",
+        energyKcal:
+          f.energyKcal == null && f.energyKcal100g == null
+            ? null
+            : Number(f.energyKcal ?? f.energyKcal100g),
         proteinG: f.proteinG == null ? null : Number(f.proteinG),
         fatG: f.fatG == null ? null : Number(f.fatG),
         carbG: f.carbG == null ? null : Number(f.carbG),
-        refuseRatePercent: Number(f.refuseRatePercent ?? f.refuse_rate_percent ?? 0),
-        defaultUnit: f.unit || f.defaultUnit || 'g',
+        refuseRatePercent: Number(
+          f.refuseRatePercent ?? f.refuse_rate_percent ?? 0,
+        ),
+        defaultUnit: f.unit || f.defaultUnit || "g",
         allergens: Array.isArray(f.allergens)
-          ? f.allergens.map((a: any) => typeof a === 'object' && a !== null ? (a.name || a.allergenName || String(a.id)) : String(a))
+          ? f.allergens.map((a: any) =>
+              typeof a === "object" && a !== null
+                ? a.name || a.allergenName || String(a.id)
+                : String(a),
+            )
           : [],
       }));
       setFoods(normalizedFoods);
       setTotal(res.data?.total || normalizedFoods.length);
     } catch (error) {
-      console.error('Error fetching foods:', error);
+      console.error("Error fetching foods:", error);
     } finally {
       setLoading(false);
     }
@@ -129,20 +151,22 @@ export const FoodIngredientsPage: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await apiClient.get('/foods/stats');
+      const res = await apiClient.get("/foods/stats");
       setStats(res.data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error("Error fetching stats:", error);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const res = await apiClient.get('/foods/categories');
-      const raw = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.items || []);
+      const res = await apiClient.get("/foods/categories");
+      const raw = Array.isArray(res.data)
+        ? res.data
+        : res.data?.data || res.data?.items || [];
       setCategories(raw);
     } catch (error) {
-      console.error('Error fetching food categories:', error);
+      console.error("Error fetching food categories:", error);
     }
   };
 
@@ -153,7 +177,14 @@ export const FoodIngredientsPage: React.FC = () => {
 
   useEffect(() => {
     fetchFoods();
-  }, [page, limit, searchTerm, categoryFilter, allergenFilter, nutritionFilter]);
+  }, [
+    page,
+    limit,
+    searchTerm,
+    categoryFilter,
+    allergenFilter,
+    nutritionFilter,
+  ]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -161,61 +192,112 @@ export const FoodIngredientsPage: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setSearchTerm('');
-    setCategoryFilter('');
-    setAllergenFilter('');
-    setNutritionFilter('');
+    setSearchTerm("");
+    setCategoryFilter("");
+    setAllergenFilter("");
+    setNutritionFilter("");
     setPage(1);
   };
 
   const getCategoryBadge = (category: any) => {
-    const name = (typeof category === 'object' && category !== null ? (category.name || category.code) : category) || 'Chưa phân nhóm';
+    const name =
+      (typeof category === "object" && category !== null
+        ? category.name || category.code
+        : category) || "Chưa phân nhóm";
     const str = name.toUpperCase();
 
-    let colorClass = 'bg-slate-100 text-slate-700 border-slate-200';
-    if (str.includes('THỊT')) colorClass = 'bg-rose-50 text-rose-800 border-rose-200';
-    else if (str.includes('THỦY SẢN') || str.includes('CÁ') || str.includes('TÔM')) colorClass = 'bg-sky-50 text-sky-800 border-sky-200';
-    else if (str.includes('TRỨNG')) colorClass = 'bg-amber-50 text-amber-800 border-amber-200';
-    else if (str.includes('SỮA')) colorClass = 'bg-blue-50 text-blue-800 border-blue-200';
-    else if (str.includes('NGŨ CỐC') || str.includes('KHOAI')) colorClass = 'bg-amber-100/70 text-amber-900 border-amber-300';
-    else if (str.includes('DẦU') || str.includes('MỠ') || str.includes('BƠ')) colorClass = 'bg-orange-50 text-orange-800 border-orange-200';
-    else if (str.includes('ĐẬU') || str.includes('HẠT')) colorClass = 'bg-teal-50 text-teal-800 border-teal-200';
-    else if (str.includes('RAU')) colorClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
-    else if (str.includes('QUẢ') || str.includes('TRÁI CÂY')) colorClass = 'bg-purple-50 text-purple-800 border-purple-200';
-    else if (str.includes('GIA VỊ')) colorClass = 'bg-slate-100 text-slate-800 border-slate-200';
-    else if (str.includes('ĐỒ UỐNG') || str.includes('NƯỚC')) colorClass = 'bg-indigo-50 text-indigo-800 border-indigo-200';
-    else if (str.includes('NGỌT') || str.includes('ĐƯỜNG')) colorClass = 'bg-pink-50 text-pink-800 border-pink-200';
+    let colorClass = "bg-slate-100 text-slate-700 border-slate-200";
+    if (str.includes("THỊT"))
+      colorClass = "bg-rose-50 text-rose-800 border-rose-200";
+    else if (
+      str.includes("THỦY SẢN") ||
+      str.includes("CÁ") ||
+      str.includes("TÔM")
+    )
+      colorClass = "bg-sky-50 text-sky-800 border-sky-200";
+    else if (str.includes("TRỨNG"))
+      colorClass = "bg-amber-50 text-amber-800 border-amber-200";
+    else if (str.includes("SỮA"))
+      colorClass = "bg-blue-50 text-blue-800 border-blue-200";
+    else if (str.includes("NGŨ CỐC") || str.includes("KHOAI"))
+      colorClass = "bg-amber-100/70 text-amber-900 border-amber-300";
+    else if (str.includes("DẦU") || str.includes("MỠ") || str.includes("BƠ"))
+      colorClass = "bg-orange-50 text-orange-800 border-orange-200";
+    else if (str.includes("ĐẬU") || str.includes("HẠT"))
+      colorClass = "bg-teal-50 text-teal-800 border-teal-200";
+    else if (str.includes("RAU"))
+      colorClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+    else if (str.includes("QUẢ") || str.includes("TRÁI CÂY"))
+      colorClass = "bg-purple-50 text-purple-800 border-purple-200";
+    else if (str.includes("GIA VỊ"))
+      colorClass = "bg-slate-100 text-slate-800 border-slate-200";
+    else if (str.includes("ĐỒ UỐNG") || str.includes("NƯỚC"))
+      colorClass = "bg-indigo-50 text-indigo-800 border-indigo-200";
+    else if (str.includes("NGỌT") || str.includes("ĐƯỜNG"))
+      colorClass = "bg-pink-50 text-pink-800 border-pink-200";
 
     return (
-      <span className={`inline-block border px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${colorClass}`} title={name}>
+      <span
+        className={`inline-block border px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${colorClass}`}
+        title={name}
+      >
         {name}
       </span>
     );
   };
 
   const getFoodEmoji = (category: any) => {
-    const code = (typeof category === 'object' && category !== null ? (category.code || category.name) : category) || '';
-    const name = (typeof category === 'object' && category !== null ? (category.name || category.code) : category) || '';
+    const code =
+      (typeof category === "object" && category !== null
+        ? category.code || category.name
+        : category) || "";
+    const name =
+      (typeof category === "object" && category !== null
+        ? category.name || category.code
+        : category) || "";
     const str = `${code} ${name}`.toUpperCase();
 
-    if (str.includes('MEAT') || str.includes('THỊT')) return '🥩';
-    if (str.includes('DAIRY') || str.includes('SỮA')) return '🥛';
-    if (str.includes('SEAFOOD') || str.includes('HẢI SẢN') || str.includes('CÁ') || str.includes('TÔM')) return '🦐';
-    if (str.includes('CEREAL') || str.includes('NGŨ CỐC') || str.includes('GẠO')) return '🍚';
-    if (str.includes('EGG') || str.includes('TRỨNG')) return '🥚';
-    if (str.includes('NUT') || str.includes('HẠT') || str.includes('ĐẬU')) return '🥜';
-    if (str.includes('VEGETABLE') || str.includes('RAU')) return '🥬';
-    if (str.includes('FRUIT') || str.includes('TRÁI CÂY') || str.includes('QUẢ')) return '🍎';
-    if (str.includes('FAT') || str.includes('OIL') || str.includes('DẦU') || str.includes('MỠ')) return '🧈';
-    if (str.includes('BEVERAGE') || str.includes('ĐỒ UỐNG')) return '🧃';
-    return '🍲';
+    if (str.includes("MEAT") || str.includes("THỊT")) return "🥩";
+    if (str.includes("DAIRY") || str.includes("SỮA")) return "🥛";
+    if (
+      str.includes("SEAFOOD") ||
+      str.includes("HẢI SẢN") ||
+      str.includes("CÁ") ||
+      str.includes("TÔM")
+    )
+      return "🦐";
+    if (
+      str.includes("CEREAL") ||
+      str.includes("NGŨ CỐC") ||
+      str.includes("GẠO")
+    )
+      return "🍚";
+    if (str.includes("EGG") || str.includes("TRỨNG")) return "🥚";
+    if (str.includes("NUT") || str.includes("HẠT") || str.includes("ĐẬU"))
+      return "🥜";
+    if (str.includes("VEGETABLE") || str.includes("RAU")) return "🥬";
+    if (
+      str.includes("FRUIT") ||
+      str.includes("TRÁI CÂY") ||
+      str.includes("QUẢ")
+    )
+      return "🍎";
+    if (
+      str.includes("FAT") ||
+      str.includes("OIL") ||
+      str.includes("DẦU") ||
+      str.includes("MỠ")
+    )
+      return "🧈";
+    if (str.includes("BEVERAGE") || str.includes("ĐỒ UỐNG")) return "🧃";
+    return "🍲";
   };
 
   // Optional local nutrition filter
   const displayedFoods = foods.filter((f) => {
-    if (nutritionFilter === 'HIGH_PROTEIN') return Number(f.proteinG) >= 15;
-    if (nutritionFilter === 'HIGH_CARB') return Number(f.carbG) >= 40;
-    if (nutritionFilter === 'HIGH_CALORIES') return Number(f.energyKcal) >= 250;
+    if (nutritionFilter === "HIGH_PROTEIN") return Number(f.proteinG) >= 15;
+    if (nutritionFilter === "HIGH_CARB") return Number(f.carbG) >= 40;
+    if (nutritionFilter === "HIGH_CALORIES") return Number(f.energyKcal) >= 250;
     return true;
   });
 
@@ -240,7 +322,9 @@ export const FoodIngredientsPage: React.FC = () => {
               </span>
             </div>
             <p className="text-slate-500 text-xs sm:text-sm mt-1 leading-relaxed max-w-3xl">
-              Tra cứu giá trị năng lượng Kcal, Đạm, Béo, Đường và vi chất trên 100g ăn được; giám sát dị nguyên và quản lý định mức công thức chế biến.
+              Tra cứu giá trị năng lượng Kcal, Đạm, Béo, Đường và vi chất trên
+              100g ăn được; giám sát dị nguyên và quản lý định mức công thức chế
+              biến.
             </p>
           </div>
 
@@ -248,14 +332,16 @@ export const FoodIngredientsPage: React.FC = () => {
             {isReadOnly ? (
               <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Quyền Ban Giám Hiệu: Giám sát kho & dinh dưỡng (Chỉ xem)</span>
+                <span>
+                  Quyền Ban Giám Hiệu: Giám sát kho & dinh dưỡng (Chỉ xem)
+                </span>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={() => {
                   setSelectedFoodId(null);
-                  setModalMode('create');
+                  setModalMode("create");
                   setIsModalOpen(true);
                 }}
                 className="flex items-center gap-2 bg-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-emerald-600/25 transition active:scale-95 cursor-pointer"
@@ -268,7 +354,7 @@ export const FoodIngredientsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="px-6 sm:px-8 mt-6 max-w-7xl mx-auto space-y-6">
+      <div className="px-4 sm:px-6 lg:px-8 mt-6 w-full space-y-6">
         {/* Stats KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Tổng nguyên liệu */}
@@ -282,8 +368,12 @@ export const FoodIngredientsPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.totalIngredients || total}</span>
-              <span className="text-xs font-bold text-slate-500 ml-1.5">thực phẩm</span>
+              <span className="text-3xl font-black text-slate-900">
+                {stats?.totalIngredients || total}
+              </span>
+              <span className="text-xs font-bold text-slate-500 ml-1.5">
+                thực phẩm
+              </span>
             </div>
             <p className="text-[11px] text-emerald-700 font-bold flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -302,8 +392,12 @@ export const FoodIngredientsPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.allergenCount || 0}</span>
-              <span className="text-xs font-bold text-slate-500 ml-1.5">loại dị nguyên</span>
+              <span className="text-3xl font-black text-slate-900">
+                {stats?.allergenCount || 0}
+              </span>
+              <span className="text-xs font-bold text-slate-500 ml-1.5">
+                loại dị nguyên
+              </span>
             </div>
             <p className="text-[11px] text-rose-700 font-bold flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-rose-500"></span>
@@ -322,8 +416,12 @@ export const FoodIngredientsPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{categories.length || stats?.categoryCount || 14}</span>
-              <span className="text-xs font-bold text-slate-500 ml-1.5">nhóm dinh dưỡng</span>
+              <span className="text-3xl font-black text-slate-900">
+                {stats?.categoryCount ?? categories.length}
+              </span>
+              <span className="text-xs font-bold text-slate-500 ml-1.5">
+                nhóm dinh dưỡng
+              </span>
             </div>
             <p className="text-[11px] text-blue-700 font-bold flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -342,8 +440,12 @@ export const FoodIngredientsPage: React.FC = () => {
               </div>
             </div>
             <div className="my-2">
-              <span className="text-3xl font-black text-slate-900">{stats?.updatedThisWeekCount || total}</span>
-              <span className="text-xs font-bold text-slate-500 ml-1.5">đã chuẩn hóa</span>
+              <span className="text-3xl font-black text-slate-900">
+                {stats?.updatedThisWeekCount || total}
+              </span>
+              <span className="text-xs font-bold text-slate-500 ml-1.5">
+                đã chuẩn hóa
+              </span>
             </div>
             <p className="text-[11px] text-purple-700 font-bold flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
@@ -368,7 +470,7 @@ export const FoodIngredientsPage: React.FC = () => {
               {searchTerm && (
                 <button
                   type="button"
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -389,7 +491,9 @@ export const FoodIngredientsPage: React.FC = () => {
                   }}
                 >
                   <option value="">
-                    {categories.length > 0 ? `Tất cả các nhóm (${categories.length} nhóm)` : 'Tất cả các nhóm'}
+                    {categories.length > 0
+                      ? `Tất cả các nhóm (${categories.length} nhóm)`
+                      : "Tất cả các nhóm"}
                   </option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
@@ -428,13 +532,18 @@ export const FoodIngredientsPage: React.FC = () => {
                   <option value="">Tất cả chỉ số dinh dưỡng</option>
                   <option value="HIGH_PROTEIN">Giàu Đạm (P ≥ 15g)</option>
                   <option value="HIGH_CARB">Giàu Tinh bột (G ≥ 40g)</option>
-                  <option value="HIGH_CALORIES">Năng lượng cao (≥ 250 kcal)</option>
+                  <option value="HIGH_CALORIES">
+                    Năng lượng cao (≥ 250 kcal)
+                  </option>
                 </select>
               </div>
             </div>
 
             {/* Clear button */}
-            {(searchTerm || categoryFilter || allergenFilter || nutritionFilter) && (
+            {(searchTerm ||
+              categoryFilter ||
+              allergenFilter ||
+              nutritionFilter) && (
               <button
                 type="button"
                 onClick={handleClearFilters}
@@ -451,10 +560,13 @@ export const FoodIngredientsPage: React.FC = () => {
           <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap justify-between items-center gap-2">
             <div className="flex items-center gap-2 font-black text-slate-800 text-xs sm:text-sm">
               <ListOrdered className="w-4 h-4 text-emerald-600" />
-              <span>Bảng Thành Phần Dinh Dưỡng Thực Phẩm (Tính trên 100g ăn được)</span>
+              <span>
+                Bảng Thành Phần Dinh Dưỡng Thực Phẩm (Tính trên 100g ăn được)
+              </span>
             </div>
             <div className="text-[11px] text-slate-500 font-medium">
-              Hệ quy chiếu: Bảng thành phần thực phẩm Việt Nam (Bộ Y Tế / Viện Dinh Dưỡng)
+              Hệ quy chiếu: Bảng thành phần thực phẩm Việt Nam (Bộ Y Tế / Viện
+              Dinh Dưỡng)
             </div>
           </div>
 
@@ -477,16 +589,24 @@ export const FoodIngredientsPage: React.FC = () => {
               <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
                 {loading ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-12 text-slate-500">
+                    <td
+                      colSpan={10}
+                      className="text-center py-12 text-slate-500"
+                    >
                       <RefreshCw className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
                       <span>Đang tải danh mục nguyên liệu...</span>
                     </td>
                   </tr>
                 ) : displayedFoods.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-12 text-slate-500">
+                    <td
+                      colSpan={10}
+                      className="text-center py-12 text-slate-500"
+                    >
                       <Apple className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                      <p className="font-bold text-slate-700">Không tìm thấy nguyên liệu nào phù hợp.</p>
+                      <p className="font-bold text-slate-700">
+                        Không tìm thấy nguyên liệu nào phù hợp.
+                      </p>
                       <button
                         type="button"
                         onClick={handleClearFilters}
@@ -499,18 +619,27 @@ export const FoodIngredientsPage: React.FC = () => {
                 ) : (
                   displayedFoods.map((food, idx) => {
                     const stt = (page - 1) * limit + idx + 1;
-                    const hasAllergens = food.allergens && food.allergens.length > 0;
+                    const hasAllergens =
+                      food.allergens && food.allergens.length > 0;
 
                     return (
-                      <tr key={food.id} className={`hover:bg-slate-50/80 transition ${food.status === 'INACTIVE' ? 'bg-slate-100/50 text-slate-500' : ''}`}>
-                        <td className="py-3 px-3 text-center text-slate-400 font-bold">{stt}</td>
+                      <tr
+                        key={food.id}
+                        className={`hover:bg-slate-50/80 transition ${food.status === "INACTIVE" ? "bg-slate-100/50 text-slate-500" : ""}`}
+                      >
+                        <td className="py-3 px-3 text-center text-slate-400 font-bold">
+                          {stt}
+                        </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-lg shrink-0 shadow-2xs">
                               {getFoodEmoji(food.category)}
                             </div>
                             <div className="truncate max-w-[240px]">
-                              <p className="font-black text-xs truncate text-slate-900" title={food.name}>
+                              <p
+                                className="font-black text-xs truncate text-slate-900"
+                                title={food.name}
+                              >
                                 {food.name}
                               </p>
                               <div className="flex items-center gap-1.5 mt-0.5">
@@ -518,7 +647,10 @@ export const FoodIngredientsPage: React.FC = () => {
                                   Mã: {food.code}
                                 </span>
                                 {Number(food.refuseRatePercent) > 0 && (
-                                  <span className="bg-amber-50 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-200" title="Tỷ lệ thải bỏ sơ chế chuẩn FCT">
+                                  <span
+                                    className="bg-amber-50 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-200"
+                                    title="Tỷ lệ thải bỏ sơ chế chuẩn FCT"
+                                  >
                                     Bỏ {food.refuseRatePercent}%
                                   </span>
                                 )}
@@ -530,27 +662,45 @@ export const FoodIngredientsPage: React.FC = () => {
                           {getCategoryBadge(food.category)}
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-black text-emerald-800 text-xs">
-                          {food.energyKcal == null ? '—' : food.energyKcal.toFixed(1)}{' '}
-                          <span className="text-[10px] font-normal text-slate-400">kcal</span>
+                          {food.energyKcal == null
+                            ? "—"
+                            : food.energyKcal.toFixed(1)}{" "}
+                          <span className="text-[10px] font-normal text-slate-400">
+                            kcal
+                          </span>
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-bold text-slate-700">
-                          {food.proteinG == null ? '—' : food.proteinG.toFixed(1)}g
+                          {food.proteinG == null
+                            ? "—"
+                            : food.proteinG.toFixed(1)}
+                          g
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-bold text-slate-700">
-                          {food.fatG == null ? '—' : food.fatG.toFixed(1)}g
+                          {food.fatG == null ? "—" : food.fatG.toFixed(1)}g
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap font-bold text-slate-700">
-                          {food.carbG == null ? '—' : food.carbG.toFixed(1)}g
+                          {food.carbG == null ? "—" : food.carbG.toFixed(1)}g
                         </td>
                         <td className="py-3 px-4 text-center whitespace-nowrap">
                           {hasAllergens ? (
                             <span
                               className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200/80 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
-                              title={food.allergens?.map((a: any) => typeof a === 'object' && a !== null ? a.name : String(a)).join(', ')}
+                              title={food.allergens
+                                ?.map((a: any) =>
+                                  typeof a === "object" && a !== null
+                                    ? a.name
+                                    : String(a),
+                                )
+                                .join(", ")}
                             >
                               <AlertTriangle className="w-3 h-3 text-rose-500 shrink-0" />
-                              {typeof food.allergens?.[0] === 'object' && food.allergens[0] !== null ? (food.allergens[0] as any)?.name : String(food.allergens?.[0] || 'Dị ứng')}
-                              {food.allergens && food.allergens.length > 1 ? ` (+${food.allergens.length - 1})` : ''}
+                              {typeof food.allergens?.[0] === "object" &&
+                              food.allergens[0] !== null
+                                ? (food.allergens[0] as any)?.name
+                                : String(food.allergens?.[0] || "Dị ứng")}
+                              {food.allergens && food.allergens.length > 1
+                                ? ` (+${food.allergens.length - 1})`
+                                : ""}
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
@@ -560,7 +710,7 @@ export const FoodIngredientsPage: React.FC = () => {
                           )}
                         </td>
                         <td className="py-3 px-3 text-center whitespace-nowrap text-slate-500 font-semibold text-[11px]">
-                          {food.defaultUnit || 'gram'}
+                          {food.defaultUnit || "gram"}
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
@@ -568,7 +718,7 @@ export const FoodIngredientsPage: React.FC = () => {
                               type="button"
                               onClick={() => {
                                 setSelectedFoodId(food.id);
-                                setModalMode('view');
+                                setModalMode("view");
                                 setIsModalOpen(true);
                               }}
                               className="px-2.5 py-1.5 rounded-lg text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 transition cursor-pointer flex items-center gap-1 text-xs font-bold"
@@ -583,7 +733,7 @@ export const FoodIngredientsPage: React.FC = () => {
                                   type="button"
                                   onClick={() => {
                                     setSelectedFoodId(food.id);
-                                    setModalMode('edit');
+                                    setModalMode("edit");
                                     setIsModalOpen(true);
                                   }}
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition cursor-pointer"
@@ -606,9 +756,16 @@ export const FoodIngredientsPage: React.FC = () => {
           {/* Pagination Bar */}
           <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white text-xs">
             <div className="text-slate-500 font-medium">
-              Hiển thị <strong className="text-slate-800">{Math.min((page - 1) * limit + 1, total)}</strong> -{' '}
-              <strong className="text-slate-800">{Math.min(page * limit, total)}</strong> trong tổng số{' '}
-              <strong className="text-slate-900">{total}</strong> nguyên liệu
+              Hiển thị{" "}
+              <strong className="text-slate-800">
+                {Math.min((page - 1) * limit + 1, total)}
+              </strong>{" "}
+              -{" "}
+              <strong className="text-slate-800">
+                {Math.min(page * limit, total)}
+              </strong>{" "}
+              trong tổng số <strong className="text-slate-900">{total}</strong>{" "}
+              nguyên liệu
             </div>
 
             <div className="flex items-center gap-3">
@@ -661,7 +818,7 @@ export const FoodIngredientsPage: React.FC = () => {
 
       <FoodModal
         isOpen={isModalOpen}
-        mode={isReadOnly ? 'view' : modalMode}
+        mode={isReadOnly ? "view" : modalMode}
         foodId={selectedFoodId}
         onClose={() => setIsModalOpen(false)}
         onSuccess={() => {

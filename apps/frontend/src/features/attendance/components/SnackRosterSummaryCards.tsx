@@ -1,22 +1,21 @@
-import React from 'react';
-import { Users, ShieldCheck, School, Utensils, Check } from 'lucide-react';
-import { SnackRosterStats } from '../types';
+import React from "react";
+import { Users, ShieldCheck, School, Utensils, Check } from "lucide-react";
+import { SnackRosterStats } from "../types";
 
 interface SnackRosterSummaryCardsProps {
   stats?: SnackRosterStats;
   isLoading?: boolean;
 }
 
-export const SnackRosterSummaryCards: React.FC<SnackRosterSummaryCardsProps> = ({
-  stats,
-  isLoading = false,
-}) => {
-  const totalRegistered = stats?.totalRegistered ?? 318;
-  const paidCount = stats?.paidCount ?? 318;
-  const paidPercent = stats?.paidPercent ?? 100;
-  const totalClasses = stats?.totalClasses ?? 12;
-  const todayTotal = stats?.todayTotalPortions ?? 318;
-  const standardCount = stats?.standardPortions ?? 310;
+export const SnackRosterSummaryCards: React.FC<
+  SnackRosterSummaryCardsProps
+> = ({ stats, isLoading = false }) => {
+  const totalRegistered = stats?.totalRegistered ?? "—";
+  const paidCount = stats?.paidCount ?? "—";
+  const paidPercent = stats?.paidPercent ?? "—";
+  const totalClasses = stats?.totalClasses ?? "—";
+  const todayTotal = stats?.todayTotalPortions ?? "—";
+  const standardCount = stats?.standardPortions ?? "—";
   const specialCount = stats?.specialDietPortions ?? 8;
 
   return (
@@ -37,7 +36,7 @@ export const SnackRosterSummaryCards: React.FC<SnackRosterSummaryCardsProps> = (
             TỔNG HỌC SINH ĂN XẾ
           </p>
           <p className="text-3xl font-black text-[#134e32] mt-0.5">
-            {isLoading ? '...' : `${totalRegistered} trẻ`}
+            {isLoading ? "..." : `${totalRegistered} trẻ`}
           </p>
         </div>
 
@@ -65,7 +64,7 @@ export const SnackRosterSummaryCards: React.FC<SnackRosterSummaryCardsProps> = (
             ĐÃ HOÀN THÀNH PHÍ
           </p>
           <p className="text-3xl font-black text-[#0c4a6e] mt-0.5">
-            {isLoading ? '...' : `${paidCount} / ${totalRegistered}`}
+            {isLoading ? "..." : `${paidCount} / ${totalRegistered}`}
           </p>
         </div>
 
@@ -93,7 +92,7 @@ export const SnackRosterSummaryCards: React.FC<SnackRosterSummaryCardsProps> = (
             SỐ LỚP CÓ ĂN XẾ
           </p>
           <p className="text-3xl font-black text-[#9a3412] mt-0.5">
-            {isLoading ? '...' : `${totalClasses} lớp`}
+            {isLoading ? "..." : `${totalClasses} lớp`}
           </p>
         </div>
 
@@ -118,13 +117,15 @@ export const SnackRosterSummaryCards: React.FC<SnackRosterSummaryCardsProps> = (
             TỔNG SUẤT XẾ HÔM NAY
           </p>
           <p className="text-3xl font-black text-[#881337] mt-0.5">
-            {isLoading ? '...' : `${todayTotal} suất`}
+            {isLoading ? "..." : `${todayTotal} suất`}
           </p>
         </div>
 
         <div className="mt-3 text-xs text-rose-700 font-medium">
-          <strong className="font-bold text-rose-800">{standardCount}</strong> Tiêu chuẩn •{' '}
-          <strong className="font-bold text-rose-800">{specialCount}</strong> Chế độ riêng
+          <strong className="font-bold text-rose-800">{standardCount}</strong>{" "}
+          Tiêu chuẩn •{" "}
+          <strong className="font-bold text-rose-800">{specialCount}</strong>{" "}
+          Chế độ riêng
         </div>
       </div>
     </div>

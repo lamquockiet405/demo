@@ -9,3 +9,8 @@ COPY database/reset_sequences.sql /docker-entrypoint-initdb.d/05-reset-sequences
 COPY database/docker-test-runtime.sql /docker-entrypoint-initdb.d/06-test-runtime.sql
 COPY database/migrations/20261103-lunch-rice-recipes.sql /docker-entrypoint-initdb.d/07-lunch-rice-recipes.sql
 COPY database/migrations/20261103-allergy-declaration.sql /docker-entrypoint-initdb.d/08-allergy-declaration.sql
+COPY database/migrations/20261105-parent-evaluation-editing.sql /docker-entrypoint-initdb.d/09-parent-evaluation-editing.sql
+COPY database/migrations/20261105-meal-coordination-notes.sql /docker-entrypoint-initdb.d/10-meal-coordination-notes.sql
+COPY database/migrations/20261105-attendance-kitchen-handoff.sql /docker-entrypoint-initdb.d/11-attendance-kitchen-handoff.sql
+COPY database/migrations/20261105-menu-meals-check.sql /docker-entrypoint-initdb.d/12-menu-meals-check.sql
+COPY database/realistic-preschool-seed.sql /docker-entrypoint-initdb.d/13-realistic-preschool-seed.sql

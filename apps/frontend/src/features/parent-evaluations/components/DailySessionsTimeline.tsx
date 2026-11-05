@@ -14,17 +14,23 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MealSessionRecord } from '../types';
+import { DishDetailModal } from '../../dishes/components/DishDetailModal';
 
 interface DailySessionsTimelineProps {
   sessions: MealSessionRecord[];
   onHeartReaction: (attendanceId: string) => Promise<void>;
+  childId?: string;
+  date?: string;
 }
 
 export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
   sessions,
   onHeartReaction,
+  childId,
+  date,
 }) => {
   const [heartAttendanceIds, setHeartAttendanceIds] = useState<Set<string>>(new Set());
+  const [selectedDishName, setSelectedDishName] = useState<string | null>(null);
 
   const handleHeartClick = async (attendanceId: string) => {
     setHeartAttendanceIds((prev) => new Set(prev).add(attendanceId));
@@ -132,9 +138,23 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
                 {/* Meal Dishes */}
                 <div className={`${session.photoEvidenceUrl ? 'lg:col-span-4' : 'lg:col-span-6'} space-y-1.5`}>
                   <p className="text-xs font-bold text-slate-800">Món ăn được phục vụ:</p>
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium bg-slate-50/70 p-3 rounded-xl border border-slate-200/80">
-                    {session.dishesServed}
-                  </p>
+                  <div className="flex flex-wrap gap-1.5 p-2.5 bg-slate-50/70 rounded-xl border border-slate-200/80">
+                    {session.dishesServed.split(/[,;•]/).map((item, idx) => {
+                      const trimmed = item.trim();
+                      if (!trimmed) return null;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setSelectedDishName(trimmed)}
+                          className="px-2.5 py-1 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-lg text-xs font-semibold text-slate-800 hover:text-teal-900 transition cursor-pointer text-left"
+                          title={`Bấm để xem chi tiết món ăn "${trimmed}" (UC41)`}
+                        >
+                          {trimmed}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Photo Evidence if present */}
@@ -218,11 +238,11 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
                   {/* Quick Evaluate Button */}
                   {isLunch && (
                     <Link
-                      to="/submit-evaluation"
+                      to={`/submit-evaluation?${new URLSearchParams({ ...(childId ? { childId } : {}), ...(date ? { date } : {}), mealType: "LUNCH" })}`}
                       className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold transition flex items-center gap-1.5 text-xs shadow-2xs"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Đánh giá bữa này</span>
+                      <span>{session.hasEvaluated ? "Chỉnh sửa đánh giá" : session.evaluationId ? "Tiếp tục bản nháp" : "Đánh giá bữa này"}</span>
                     </Link>
                   )}
                 </div>
@@ -231,6 +251,12 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
           );
         })}
       </div>
+
+      <DishDetailModal
+        isOpen={!!selectedDishName}
+        onClose={() => setSelectedDishName(null)}
+        dishName={selectedDishName || undefined}
+      />
     </div>
   );
 };

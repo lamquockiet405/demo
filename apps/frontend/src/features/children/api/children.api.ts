@@ -36,6 +36,10 @@ export interface ChildItem {
     name: string;
   };
   parentId?: string;
+  parentName?: string;
+  parentEmail?: string;
+  parentPhone?: string;
+  parentRelationship?: string;
   studentCode: string;
   firstName: string;
   lastName: string;
@@ -46,7 +50,9 @@ export interface ChildItem {
   emergencyContactName: string;
   emergencyContactPhone: string;
   medicalNotes?: string;
+  avatarUrl?: string;
   allergies?: ChildAllergyItem[];
+  hasNutritionProfile?: boolean;
 }
 
 export interface ChildrenStats {
@@ -69,6 +75,15 @@ export interface CreateChildDto {
   medicalNotes?: string;
 }
 
+export interface NutritionProfileDto {
+  dietaryRegime?: string;
+  dietaryNotes?: string;
+  eatingHabits?: string;
+  nutritionGoals?: string;
+  targetEnergyKcal?: number | null;
+  updatedAt?: string;
+}
+
 export interface DeclareAllergyDto {
   allergenId?: string | null;
   customAllergenName?: string;
@@ -87,11 +102,14 @@ export const childrenApi = {
     hasAllergy?: string;
     page?: number;
     limit?: number;
-  }) => {
+  }): Promise<{ items: ChildItem[]; total: number }> => {
     const res = await apiClient.get<{ items: ChildItem[]; total: number }>('/children', {
       params,
     });
-    return res.data;
+    const raw: any = res.data;
+    const items = Array.isArray(raw) ? raw : raw?.items;
+    if (!Array.isArray(items)) throw new Error('Không đọc được danh sách học sinh. Vui lòng tải lại.');
+    return { items, total: Number(raw?.total ?? raw?.meta?.total ?? items.length) };
   },
 
   getStats: async (): Promise<ChildrenStats> => {
@@ -175,6 +193,16 @@ export const childrenApi = {
     errors: string[];
   }> => {
     const res = await apiClient.post('/children/import', { items });
+    return res.data;
+  },
+
+  getNutritionProfile: async (childId: string | number): Promise<{ childId: string; profile: NutritionProfileDto | null }> => {
+    const res = await apiClient.get<{ childId: string; profile: NutritionProfileDto | null }>(`/children/${childId}/nutrition-profile`);
+    return res.data;
+  },
+
+  updateNutritionProfile: async (childId: string | number, dto: NutritionProfileDto): Promise<{ childId: string; profile: NutritionProfileDto }> => {
+    const res = await apiClient.patch<{ childId: string; profile: NutritionProfileDto }>(`/children/${childId}/nutrition-profile`, dto);
     return res.data;
   },
 };

@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DailyMealPortion } from '../entities/daily-meal-portion.entity';
 import { ClassEntity } from '../../classes/entities/class.entity';
 import { MealPortionsQueryDto } from '../dto/meal-portions-query.dto';
+import { schoolDate } from '../../../common/utils/persisted-state';
 
 @Injectable()
 export class MealPortionsService {
@@ -14,9 +15,9 @@ export class MealPortionsService {
     private readonly classRepo: Repository<ClassEntity>,
   ) {}
 
-  async findAll(query: MealPortionsQueryDto) {
-    const date = query.date || new Date().toISOString().split('T')[0];
-    const classes = await this.classRepo.find({ order: { name: 'ASC' } });
+  async findAll(query: MealPortionsQueryDto, tenantId = 1) {
+    const date = query.date || schoolDate();
+    const classes = await this.classRepo.find({ where: { schoolId: tenantId }, order: { name: 'ASC' } });
 
     const portions = await this.portionRepo.find({
       where: { date },
@@ -24,50 +25,48 @@ export class MealPortionsService {
     });
     const portionMap = new Map(portions.map((p) => [`${p.classId}_${p.mealType}`, p]));
 
-    const items = classes.map((cls) => {
+    const value = (portion?: DailyMealPortion) => ({
+      planned: portion?.plannedQuantity ?? null,
+      actual: portion?.actualQuantity ?? null,
+      submittedAt: portion?.attendanceSubmittedAt ?? null,
+      present: portion?.attendanceSnapshot?.filter(item => item.isAttended).length ?? null,
+      absent: portion?.attendanceSnapshot?.filter(item => !item.isAttended).length ?? null,
+      notes: portion?.attendanceSnapshot?.filter(item => item.note).map(item => ({ fullName: item.fullName, note: item.note })) ?? [],
+    });
+    const items = classes.filter(cls => !query.classId || String(cls.id) === query.classId).map((cls) => {
+      const breakfastPortion = portionMap.get(`${cls.id}_BREAKFAST`);
       const lunchPortion = portionMap.get(`${cls.id}_LUNCH`);
+      const morningPortion = portionMap.get(`${cls.id}_MORNING_SNACK`);
       const snackPortion = portionMap.get(`${cls.id}_AFTERNOON_SNACK`);
 
       return {
         classId: String(cls.id),
         className: cls.name,
         ageGroup: cls.ageGroup,
-        lunch: {
-          planned: lunchPortion?.plannedQuantity || 25,
-          actual: lunchPortion?.actualQuantity || 24,
-        },
-        afternoonSnack: {
-          planned: snackPortion?.plannedQuantity || 20,
-          actual: snackPortion?.actualQuantity || 19,
-        },
+        breakfast: value(breakfastPortion),
+        morningSnack: value(morningPortion),
+        lunch: value(lunchPortion),
+        afternoonSnack: value(snackPortion),
       };
     });
 
     return {
       date,
       items,
-      totalLunch: 150,
-      totalSnack: 120,
+      totalBreakfast: items.reduce((total, item) => total + (item.breakfast.planned ?? 0), 0),
+      totalLunch: items.reduce((total, item) => total + (item.lunch.planned ?? 0), 0),
+      totalSnack: items.reduce((total, item) => total + (item.afternoonSnack.planned ?? 0), 0),
     };
   }
 
-  async updateActual(classId: number, date: string, mealType: string, actualQuantity: number) {
-    let p = await this.portionRepo.findOne({
-      where: { classId, date, mealType },
-    });
-
-    if (!p) {
-      p = this.portionRepo.create({
-        classId,
-        date,
-        mealType,
-        plannedQuantity: actualQuantity,
-        actualQuantity,
-      });
-    } else {
-      p.actualQuantity = actualQuantity;
-    }
-
-    return this.portionRepo.save(p);
+  async updateActual(classId: number, date: string, mealType: string, actualQuantity: number, tenantId = 1) {
+    if (!Number.isSafeInteger(classId) || !Number.isSafeInteger(actualQuantity) || actualQuantity < 0 || !/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !['BREAKFAST','MORNING_SNACK','LUNCH','AFTERNOON_SNACK'].includes(mealType)) throw new BadRequestException('Ngày, bữa ăn hoặc số suất không hợp lệ.');
+    if (!await this.classRepo.findOne({ where: { id: classId, schoolId: tenantId } })) throw new ForbiddenException('Lớp không thuộc trường.');
+    // A kitchen acknowledgement never overwrites the teacher's requested quantity.
+    const result = await this.portionRepo.query(`UPDATE daily_meal_portions SET actual_quantity=$4
+      WHERE class_id=$1 AND date=$2 AND meal_type=$3 RETURNING id`, [classId, date, mealType, actualQuantity]);
+    const rows = Array.isArray(result?.[0]) ? result[0] : result;
+    if (!rows?.length) throw new BadRequestException('Chưa có kế hoạch suất ăn cho lớp, ngày và bữa này.');
+    return { success: true, actualQuantity };
   }
 }

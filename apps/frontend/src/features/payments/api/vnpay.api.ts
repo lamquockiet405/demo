@@ -10,9 +10,10 @@ export interface SnackInvoiceItem {
   parentName: string;
   parentPhone: string;
   periodName: string;
-  servingDays: number;
-  pricePerDay: number;
-  amount: number;
+  periodId?: number;
+  servingDays: number | null;
+  pricePerDay: number | null;
+  amount: number | null;
   status: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
   statusLabel: string;
   registeredAt: string;

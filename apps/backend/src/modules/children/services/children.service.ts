@@ -1,19 +1,69 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Child } from '../entities/child.entity';
-import { ChildAllergy } from '../entities/child-allergy.entity';
-import { AllergenCatalog } from '../entities/allergen-catalog.entity';
-import { CreateChildDto } from '../dto/create-child.dto';
-import { UpdateChildDto } from '../dto/update-child.dto';
-import { GetChildrenQueryDto } from '../dto/get-children-query.dto';
-import { DeclareAllergyDto } from '../dto/declare-allergy.dto';
-import { UpdateAllergyDto } from '../dto/update-allergy.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Child } from "../entities/child.entity";
+import { ChildAllergy } from "../entities/child-allergy.entity";
+import { AllergenCatalog } from "../entities/allergen-catalog.entity";
+import { CreateChildDto } from "../dto/create-child.dto";
+import { UpdateChildDto } from "../dto/update-child.dto";
+import { GetChildrenQueryDto } from "../dto/get-children-query.dto";
+import { DeclareAllergyDto } from "../dto/declare-allergy.dto";
+import { UpdateAllergyDto } from "../dto/update-allergy.dto";
+import { UpdateNutritionProfileDto } from "../dto/update-nutrition-profile.dto";
+import { readState, writeState } from "../../../common/utils/persisted-state";
 
-export interface ChildAccessActor { sub: number; roles?: (string | { code?: string })[]; }
+export interface ChildAccessActor {
+  sub: number;
+  roles?: (string | { code?: string })[];
+}
 
 @Injectable()
 export class ChildrenService {
+  async getNutritionProfile(childId: number, actor: ChildAccessActor) {
+    await this.assertChildAccess(childId, actor);
+    const child = await this.findOne(childId, actor);
+    const profile = await readState(
+      this.childRepo.manager,
+      `child-nutrition:${childId}`,
+      null,
+    );
+    return { childId: String(child.id), profile };
+  }
+
+  async updateNutritionProfile(
+    childId: number,
+    dto: UpdateNutritionProfileDto,
+    actor: ChildAccessActor,
+  ) {
+    await this.assertChildAccess(childId, actor);
+    await this.findOne(childId, actor);
+    if (!actor?.sub)
+      throw new ForbiddenException("Thiếu thông tin tài khoản cập nhật.");
+    const previous: Record<string, unknown> = await readState(
+      this.childRepo.manager,
+      `child-nutrition:${childId}`,
+      {},
+    );
+    const profile = {
+      ...previous,
+      ...dto,
+      updatedAt: new Date().toISOString(),
+      updatedBy: String(actor.sub),
+    };
+    await writeState(
+      this.childRepo.manager,
+      `child-nutrition:${childId}`,
+      profile,
+    );
+    return { childId: String(childId), profile };
+  }
+
   constructor(
     @InjectRepository(Child)
     private readonly childRepo: Repository<Child>,
@@ -21,35 +71,36 @@ export class ChildrenService {
     private readonly allergyRepo: Repository<ChildAllergy>,
     @InjectRepository(AllergenCatalog)
     private readonly catalogRepo: Repository<AllergenCatalog>,
-  ) { }
+  ) {}
 
   private mapChildAllergy(a: ChildAllergy) {
-    const allergenNameVi = a.allergen?.name || a.customAllergenName || 'Dị ứng thực phẩm';
+    const allergenNameVi =
+      a.allergen?.name || a.customAllergenName || "Dị ứng thực phẩm";
     return {
       id: String(a.id),
       childId: String(a.studentId),
       allergenId: a.allergenId ? String(a.allergenId) : undefined,
       customAllergenName: a.customAllergenName || undefined,
       allergenName: allergenNameVi,
-      allergenCode: a.allergen?.code || 'CUSTOM',
+      allergenCode: a.allergen?.code || "CUSTOM",
       allergen: a.allergen
         ? {
-          id: String(a.allergen.id),
-          code: a.allergen.code,
-          nameVi: a.allergen.name,
-          nameEn: a.allergen.code,
-          description: a.allergen.description,
-        }
+            id: String(a.allergen.id),
+            code: a.allergen.code,
+            nameVi: a.allergen.name,
+            nameEn: a.allergen.code,
+            description: a.allergen.description,
+          }
         : a.customAllergenName
           ? {
-            id: '0',
-            code: 'CUSTOM',
-            nameVi: a.customAllergenName,
-            nameEn: 'Custom',
-            description: a.customAllergenName,
-          }
+              id: "0",
+              code: "CUSTOM",
+              nameVi: a.customAllergenName,
+              nameEn: "Custom",
+              description: a.customAllergenName,
+            }
           : undefined,
-      allergyType: a.allergyType || 'ALLERGY',
+      allergyType: a.allergyType || "ALLERGY",
       severity: a.severity,
       symptoms: a.symptoms || undefined,
       reactionTreatment: a.reactionTreatment || undefined,
@@ -61,93 +112,192 @@ export class ChildrenService {
   }
 
   private parentOnly(actor?: ChildAccessActor) {
-    const roles = (actor?.roles || []).map(role => (typeof role === 'string' ? role : role.code || '').toUpperCase());
-    return roles.includes('PARENT') && !roles.some(role =>
-      ['SUPER_ADMIN', 'PRINCIPAL', 'SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'TEACHER', 'NUTRITIONIST', 'KITCHEN_STAFF'].includes(role));
+    const roles = (actor?.roles || []).map((role) =>
+      (typeof role === "string" ? role : role.code || "").toUpperCase(),
+    );
+    return (
+      roles.includes("PARENT") &&
+      !roles.some((role) =>
+        [
+          "SUPER_ADMIN",
+          "PRINCIPAL",
+          "SCHOOL_MANAGER",
+          "SCHOOL_MANAGEMENT",
+          "TEACHER",
+          "NUTRITIONIST",
+          "KITCHEN_STAFF",
+        ].includes(role),
+      )
+    );
   }
 
   private async assertChildAccess(childId: number, actor?: ChildAccessActor) {
     if (!this.parentOnly(actor)) return;
-    const links = await this.childRepo.query('SELECT 1 FROM student_parents WHERE student_id=$1 AND parent_id=$2', [childId, actor.sub]);
-    if (!links.length) throw new ForbiddenException('Tài khoản chưa được liên kết với hồ sơ học sinh này');
+    const links = await this.childRepo.query(
+      "SELECT 1 FROM student_parents WHERE student_id=$1 AND parent_id=$2",
+      [childId, actor.sub],
+    );
+    if (!links.length)
+      throw new ForbiddenException(
+        "Tài khoản chưa được liên kết với hồ sơ học sinh này",
+      );
   }
 
-  private async allergyTarget(dto: DeclareAllergyDto | UpdateAllergyDto, current?: ChildAllergy) {
+  private async allergyTarget(
+    dto: DeclareAllergyDto | UpdateAllergyDto,
+    current?: ChildAllergy,
+  ) {
     let allergenId = current?.allergenId ?? null;
     if (dto.allergenId !== undefined) {
-      if (dto.allergenId === null || dto.allergenId === '') allergenId = null;
+      if (dto.allergenId === null || dto.allergenId === "") allergenId = null;
       else {
         const parsed = Number(dto.allergenId);
-        if (!Number.isSafeInteger(parsed) || parsed <= 0) throw new BadRequestException('Dị nguyên được chọn không hợp lệ');
-        if (!await this.catalogRepo.findOne({ where: { id: parsed } })) throw new NotFoundException('Không tìm thấy dị nguyên trong danh mục');
+        if (!Number.isSafeInteger(parsed) || parsed <= 0)
+          throw new BadRequestException("Dị nguyên được chọn không hợp lệ");
+        if (!(await this.catalogRepo.findOne({ where: { id: parsed } })))
+          throw new NotFoundException(
+            "Không tìm thấy dị nguyên trong danh mục",
+          );
         allergenId = parsed;
       }
     }
-    const customAllergenName = dto.customAllergenName === undefined ? current?.customAllergenName ?? null : dto.customAllergenName?.trim() || null;
-    if (!allergenId && !customAllergenName) throw new BadRequestException('Vui lòng chọn dị nguyên hoặc nhập thực phẩm cần tránh');
-    return { allergenId, customAllergenName: allergenId ? null : customAllergenName };
+    const customAllergenName =
+      dto.customAllergenName === undefined
+        ? (current?.customAllergenName ?? null)
+        : dto.customAllergenName?.trim() || null;
+    if (!allergenId && !customAllergenName)
+      throw new BadRequestException(
+        "Vui lòng chọn dị nguyên hoặc nhập thực phẩm cần tránh",
+      );
+    return {
+      allergenId,
+      customAllergenName: allergenId ? null : customAllergenName,
+    };
   }
 
-  private async assertNoDuplicate(childId: number, target: { allergenId: number | null; customAllergenName: string | null }, exceptId?: number) {
-    const active = await this.allergyRepo.find({ where: { studentId: childId, isActive: true } });
-    const duplicate = active.some(item => Number(item.id) !== Number(exceptId) &&
-      (target.allergenId ? Number(item.allergenId) === target.allergenId :
-        !item.allergenId && (item.customAllergenName || '').trim().toLocaleLowerCase('vi') === target.customAllergenName.toLocaleLowerCase('vi')));
-    if (duplicate) throw new ConflictException('Thực phẩm này đã có trong hồ sơ đang áp dụng của bé');
+  private async assertNoDuplicate(
+    childId: number,
+    target: { allergenId: number | null; customAllergenName: string | null },
+    exceptId?: number,
+  ) {
+    const active = await this.allergyRepo.find({
+      where: { studentId: childId, isActive: true },
+    });
+    const duplicate = active.some(
+      (item) =>
+        Number(item.id) !== Number(exceptId) &&
+        (target.allergenId
+          ? Number(item.allergenId) === target.allergenId
+          : !item.allergenId &&
+            (item.customAllergenName || "").trim().toLocaleLowerCase("vi") ===
+              target.customAllergenName.toLocaleLowerCase("vi")),
+    );
+    if (duplicate)
+      throw new ConflictException(
+        "Thực phẩm này đã có trong hồ sơ đang áp dụng của bé",
+      );
   }
 
   async findAll(query: GetChildrenQueryDto, actor?: ChildAccessActor) {
     const qb = this.childRepo
-      .createQueryBuilder('c')
-      .leftJoinAndSelect('c.class', 'cls')
-      .leftJoinAndSelect('c.allergies', 'alg', 'alg.isActive = :allergyActive', { allergyActive: true })
-      .leftJoinAndSelect('alg.allergen', 'ac');
+      .createQueryBuilder("c")
+      .leftJoinAndSelect("c.class", "cls")
+      .leftJoinAndSelect(
+        "c.allergies",
+        "alg",
+        "alg.isActive = :allergyActive",
+        { allergyActive: true },
+      )
+      .leftJoinAndSelect("alg.allergen", "ac");
 
     if (this.parentOnly(actor)) {
-      qb.andWhere('EXISTS (SELECT 1 FROM student_parents sp WHERE sp.student_id=c.id AND sp.parent_id=:parentId)', { parentId: actor.sub });
+      qb.andWhere(
+        "EXISTS (SELECT 1 FROM student_parents sp WHERE sp.student_id=c.id AND sp.parent_id=:parentId)",
+        { parentId: actor.sub },
+      );
     }
 
     if (query.search) {
       qb.andWhere(
-        '(LOWER(c.fullName) LIKE :search OR LOWER(c.studentCode) LIKE :search)',
+        "(LOWER(c.fullName) LIKE :search OR LOWER(c.studentCode) LIKE :search)",
         { search: `%${query.search.toLowerCase()}%` },
       );
     }
 
     if (query.classId) {
-      qb.andWhere('c.classId = :classId', { classId: query.classId });
+      qb.andWhere("c.classId = :classId", { classId: query.classId });
     }
 
     if (query.ageGroup) {
-      qb.andWhere('cls.ageGroup = :ageGroup', { ageGroup: query.ageGroup });
+      qb.andWhere("cls.ageGroup = :ageGroup", { ageGroup: query.ageGroup });
     }
 
-    if (query.allergyRisk === 'YES') {
-      qb.andWhere('alg.id IS NOT NULL');
+    if (query.allergyRisk === "YES") {
+      qb.andWhere("alg.id IS NOT NULL");
     }
 
     const page = query.page || 1;
     const limit = query.limit || 50;
     qb.skip((page - 1) * limit).take(limit);
-    qb.orderBy('c.fullName', 'ASC');
+    qb.orderBy("c.fullName", "ASC");
 
     const [items, total] = await qb.getManyAndCount();
 
+    const studentIds = items.map((c) => Number(c.id));
+    const parentMap = new Map<number, any>();
+    if (studentIds.length > 0) {
+      const parentRows = await this.childRepo.query(
+        `SELECT sp.student_id, u.id as parent_id, u.full_name as parent_name, u.email as parent_email, u.phone as parent_phone, sp.relationship, sp.is_primary
+         FROM student_parents sp
+         JOIN users u ON u.id = sp.parent_id
+         WHERE sp.student_id = ANY($1::bigint[])
+         ORDER BY sp.is_primary DESC, sp.student_id`,
+        [studentIds],
+      );
+      for (const p of parentRows) {
+        const sid = Number(p.student_id);
+        if (!parentMap.has(sid)) {
+          parentMap.set(sid, {
+            parentId: String(p.parent_id),
+            parentName: p.parent_name,
+            parentEmail: p.parent_email,
+            parentPhone: p.parent_phone,
+            parentRelationship:
+              p.relationship === "FATHER"
+                ? "Bố"
+                : p.relationship === "MOTHER"
+                  ? "Mẹ"
+                  : "Người giám hộ",
+          });
+        }
+      }
+    }
+
     // Map items to frontend ChildItem structure
-    const mapped = items.map((c) => ({
-      id: String(c.id),
-      studentCode: c.studentCode,
-      fullName: c.fullName,
-      dateOfBirth: c.dateOfBirth,
-      gender: c.gender,
-      avatarUrl: c.avatar || null,
-      classId: c.classId ? String(c.classId) : null,
-      className: c.class?.name || 'Chưa phân lớp',
-      ageGroup: c.class?.ageGroup || 'MAU_GIAO',
-      status: c.status,
-      allergies: (c.allergies || []).map((a) => this.mapChildAllergy(a)),
-      hasAllergy: (c.allergies || []).length > 0,
-    }));
+    const mapped = items.map((c) => {
+      const p = parentMap.get(Number(c.id));
+      return {
+        id: String(c.id),
+        studentCode: c.studentCode,
+        fullName: c.fullName,
+        dateOfBirth: c.dateOfBirth,
+        gender: c.gender,
+        avatarUrl: c.avatar || null,
+        classId: c.classId ? String(c.classId) : null,
+        className: c.class?.name || "Chưa phân lớp",
+        ageGroup: c.class?.ageGroup || "MAU_GIAO",
+        status: c.status,
+        allergies: (c.allergies || []).map((a) => this.mapChildAllergy(a)),
+        hasAllergy: (c.allergies || []).length > 0,
+        parentId: p?.parentId || null,
+        parentName: p?.parentName || null,
+        parentEmail: p?.parentEmail || null,
+        parentPhone: p?.parentPhone || null,
+        parentRelationship: p?.parentRelationship || null,
+        emergencyContactName: p?.parentName || null,
+        emergencyContactPhone: p?.parentPhone || null,
+      };
+    });
 
     return { items: mapped, total, page, limit };
   }
@@ -155,21 +305,22 @@ export class ChildrenService {
   async getStats() {
     const total = await this.childRepo.count();
     const allergicCount = await this.childRepo
-      .createQueryBuilder('c')
-      .innerJoin('c.allergies', 'a', 'a.isActive = true')
-      .select('COUNT(DISTINCT c.id)', 'cnt')
+      .createQueryBuilder("c")
+      .innerJoin("c.allergies", "a", "a.isActive = true")
+      .select("COUNT(DISTINCT c.id)", "cnt")
       .getRawOne();
 
     const severeCount = await this.childRepo
-      .createQueryBuilder('c')
-      .innerJoin('c.allergies', 'a', 'a.isActive = true')
+      .createQueryBuilder("c")
+      .innerJoin("c.allergies", "a", "a.isActive = true")
       .where("a.severity IN ('HIGH', 'SEVERE', 'ANAPHYLACTIC')")
-      .select('COUNT(DISTINCT c.id)', 'cnt')
+      .select("COUNT(DISTINCT c.id)", "cnt")
       .getRawOne();
 
-    const allergic = parseInt(allergicCount?.cnt || '0', 10);
-    const severe = parseInt(severeCount?.cnt || '0', 10);
-    const rate = total > 0 ? parseFloat(((allergic / total) * 100).toFixed(1)) : 0;
+    const allergic = parseInt(allergicCount?.cnt || "0", 10);
+    const severe = parseInt(severeCount?.cnt || "0", 10);
+    const rate =
+      total > 0 ? parseFloat(((allergic / total) * 100).toFixed(1)) : 0;
 
     return {
       totalChildren: total,
@@ -180,7 +331,7 @@ export class ChildrenService {
   }
 
   async getAllergenCatalogs() {
-    const list = await this.catalogRepo.find({ order: { name: 'ASC' } });
+    const list = await this.catalogRepo.find({ order: { name: "ASC" } });
     return list.map((item) => ({
       id: String(item.id),
       code: item.code,
@@ -197,12 +348,22 @@ export class ChildrenService {
     await this.assertChildAccess(id, actor);
     const child = await this.childRepo.findOne({
       where: { id },
-      relations: ['class', 'allergies', 'allergies.allergen'],
+      relations: ["class", "allergies", "allergies.allergen"],
     });
 
     if (!child) {
       throw new NotFoundException(`Không tìm thấy thông tin trẻ với ID: ${id}`);
     }
+
+    const parentRows = await this.childRepo.query(
+      `SELECT sp.student_id, u.id as parent_id, u.full_name as parent_name, u.email as parent_email, u.phone as parent_phone, sp.relationship, sp.is_primary
+       FROM student_parents sp
+       JOIN users u ON u.id = sp.parent_id
+       WHERE sp.student_id = $1
+       ORDER BY sp.is_primary DESC`,
+      [child.id],
+    );
+    const p = parentRows[0];
 
     return {
       id: String(child.id),
@@ -215,15 +376,95 @@ export class ChildrenService {
       className: child.class?.name || null,
       status: child.status,
       allergies: (child.allergies || []).map((a) => this.mapChildAllergy(a)),
+      parentId: p ? String(p.parent_id) : null,
+      parentName: p?.parent_name || null,
+      parentEmail: p?.parent_email || null,
+      parentPhone: p?.parent_phone || null,
+      parentRelationship: p
+        ? p.relationship === "FATHER"
+          ? "Bố"
+          : p.relationship === "MOTHER"
+            ? "Mẹ"
+            : "Người giám hộ"
+        : null,
+      emergencyContactName: p?.parent_name || null,
+      emergencyContactPhone: p?.parent_phone || null,
+      parents: parentRows.map((row: any) => ({
+        id: String(row.parent_id),
+        name: row.parent_name,
+        email: row.parent_email,
+        phone: row.parent_phone,
+        relationship: row.relationship,
+        isPrimary: row.is_primary,
+      })),
     };
   }
 
+
+  async syncStudentParent(studentId: number, dto: any) {
+    const parentName = (dto.parentName || dto.emergencyContactName || '').trim();
+    const parentEmail = (dto.parentEmail || '').trim().toLowerCase();
+    const parentPhone = (dto.parentPhone || dto.emergencyContactPhone || '').trim();
+    const rel = dto.parentRelationship === 'MOTHER' ? 'MOTHER' : dto.parentRelationship === 'GUARDIAN' ? 'GUARDIAN' : 'FATHER';
+
+    if (!parentName && !parentEmail && !parentPhone) return;
+
+    let parentUser: any = null;
+    if (parentEmail) {
+      const users = await this.childRepo.query(`SELECT id FROM users WHERE LOWER(email) = $1`, [parentEmail]);
+      if (users[0]) parentUser = users[0];
+    }
+    if (!parentUser && parentPhone) {
+      const users = await this.childRepo.query(`SELECT id FROM users WHERE phone = $1`, [parentPhone]);
+      if (users[0]) parentUser = users[0];
+    }
+    if (!parentUser) {
+      const email = parentEmail || `phuhuynh.${studentId}@huongduong.edu.vn`;
+      const name = parentName || 'Phụ huynh học sinh';
+      const insertUser = await this.childRepo.query(
+        `INSERT INTO users (email, password_hash, full_name, phone, status) 
+         VALUES ($1, '$2b$12$LDEYAL/OVrU/HQWo386Bqu/0kT2j7ZPrSon1Za.TZxivk0hl9a5x6', $2, $3, 'ACTIVE')
+         ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone
+         RETURNING id`,
+        [email, name, parentPhone || null]
+      );
+      parentUser = insertUser[0];
+      await this.childRepo.query(
+        `INSERT INTO user_roles (user_id, role_id) 
+         SELECT $1, id FROM roles WHERE code = 'PARENT'
+         ON CONFLICT DO NOTHING`,
+        [parentUser.id]
+      );
+      await this.childRepo.query(
+        `INSERT INTO parent_profiles (user_id, address, occupation) VALUES ($1, 'TP. Hồ Chí Minh', 'Phụ huynh') ON CONFLICT DO NOTHING`,
+        [parentUser.id]
+      );
+    } else {
+      if (parentName || parentPhone) {
+        await this.childRepo.query(
+          `UPDATE users SET full_name = COALESCE($1, full_name), phone = COALESCE($2, phone) WHERE id = $3`,
+          [parentName || null, parentPhone || null, parentUser.id]
+        );
+      }
+    }
+
+    if (parentUser?.id) {
+      await this.childRepo.query(
+        `INSERT INTO student_parents (student_id, parent_id, relationship, is_primary) 
+         VALUES ($1, $2, $3, TRUE) 
+         ON CONFLICT (student_id, parent_id) DO UPDATE SET relationship = EXCLUDED.relationship, is_primary = TRUE`,
+        [studentId, parentUser.id, rel]
+      );
+    }
+  }
+
   async create(dto: CreateChildDto) {
-    const studentCode = dto.studentCode?.trim() || `HS-${Date.now().toString().slice(-6)}`;
+    const studentCode =
+      dto.studentCode?.trim() || `HS-${Date.now().toString().slice(-6)}`;
     const fullName =
       dto.fullName?.trim() ||
-      `${dto.lastName || ''} ${dto.firstName || ''}`.trim() ||
-      'Học sinh mới';
+      `${dto.lastName || ""} ${dto.firstName || ""}`.trim() ||
+      "Học sinh mới";
 
     const child = this.childRepo.create({
       studentCode,
@@ -232,9 +473,10 @@ export class ChildrenService {
       gender: dto.gender,
       classId: dto.classId || null,
       avatar: dto.avatar || null,
-      status: dto.status || 'ACTIVE',
+      status: dto.status || "ACTIVE",
     });
     const saved = await this.childRepo.save(child);
+    await this.syncStudentParent(saved.id, dto);
     return this.findOne(saved.id);
   }
 
@@ -247,7 +489,7 @@ export class ChildrenService {
     const calculatedFullName =
       dto.fullName?.trim() ||
       (dto.lastName !== undefined || dto.firstName !== undefined
-        ? `${dto.lastName || ''} ${dto.firstName || ''}`.trim()
+        ? `${dto.lastName || ""} ${dto.firstName || ""}`.trim()
         : undefined);
 
     if (calculatedFullName !== undefined && calculatedFullName.length > 0) {
@@ -261,10 +503,16 @@ export class ChildrenService {
     if (dto.status !== undefined) child.status = dto.status;
 
     await this.childRepo.save(child);
+    await this.syncStudentParent(id, dto);
     return this.findOne(id);
   }
 
-  async declareAllergy(childId: number, dto: DeclareAllergyDto, declaredBy?: number, actor?: ChildAccessActor) {
+  async declareAllergy(
+    childId: number,
+    dto: DeclareAllergyDto,
+    declaredBy?: number,
+    actor?: ChildAccessActor,
+  ) {
     await this.assertChildAccess(childId, actor);
     const child = await this.childRepo.findOne({ where: { id: childId } });
     if (!child) {
@@ -277,8 +525,8 @@ export class ChildrenService {
     const allergy = this.allergyRepo.create({
       studentId: childId,
       ...target,
-      allergyType: dto.allergyType || 'ALLERGY',
-      severity: dto.severity || 'MEDIUM',
+      allergyType: dto.allergyType || "ALLERGY",
+      severity: dto.severity || "MEDIUM",
       symptoms: dto.symptoms || null,
       reactionTreatment: dto.reactionTreatment || null,
       diagnosedDate: dto.diagnosedDate || null,
@@ -290,57 +538,76 @@ export class ChildrenService {
     const saved = await this.allergyRepo.save(allergy);
     const reloaded = await this.allergyRepo.findOne({
       where: { id: saved.id },
-      relations: ['allergen'],
+      relations: ["allergen"],
     });
 
     return this.mapChildAllergy(reloaded || saved);
   }
 
-  async updateAllergy(allergyId: number, dto: UpdateAllergyDto, actor?: ChildAccessActor) {
+  async updateAllergy(
+    allergyId: number,
+    dto: UpdateAllergyDto,
+    actor?: ChildAccessActor,
+  ) {
     const allergy = await this.allergyRepo.findOne({
       where: { id: allergyId },
-      relations: ['allergen'],
+      relations: ["allergen"],
     });
     if (!allergy) {
-      throw new NotFoundException(`Không tìm thấy thông tin dị ứng với ID: ${allergyId}`);
+      throw new NotFoundException(
+        `Không tìm thấy thông tin dị ứng với ID: ${allergyId}`,
+      );
     }
 
     await this.assertChildAccess(allergy.studentId, actor);
     const target = await this.allergyTarget(dto, allergy);
-    if (dto.isActive !== false && (dto.isActive === true || allergy.isActive)) await this.assertNoDuplicate(allergy.studentId, target, allergy.id);
+    if (dto.isActive !== false && (dto.isActive === true || allergy.isActive))
+      await this.assertNoDuplicate(allergy.studentId, target, allergy.id);
     Object.assign(allergy, target);
-    allergy.allergen = target.allergenId ? { id: target.allergenId } as AllergenCatalog : null;
+    allergy.allergen = target.allergenId
+      ? ({ id: target.allergenId } as AllergenCatalog)
+      : null;
     if (dto.allergyType !== undefined) allergy.allergyType = dto.allergyType;
     if (dto.severity !== undefined) allergy.severity = dto.severity;
     if (dto.symptoms !== undefined) allergy.symptoms = dto.symptoms || null;
-    if (dto.reactionTreatment !== undefined) allergy.reactionTreatment = dto.reactionTreatment || null;
-    if (dto.diagnosedDate !== undefined) allergy.diagnosedDate = dto.diagnosedDate || null;
+    if (dto.reactionTreatment !== undefined)
+      allergy.reactionTreatment = dto.reactionTreatment || null;
+    if (dto.diagnosedDate !== undefined)
+      allergy.diagnosedDate = dto.diagnosedDate || null;
     if (dto.note !== undefined) allergy.note = dto.note || null;
     if (dto.isActive !== undefined) allergy.isActive = dto.isActive;
 
     await this.allergyRepo.save(allergy);
     const reloaded = await this.allergyRepo.findOne({
       where: { id: allergy.id },
-      relations: ['allergen'],
+      relations: ["allergen"],
     });
     return this.mapChildAllergy(reloaded || allergy);
   }
 
   async deleteAllergy(allergyId: number, actor?: ChildAccessActor) {
-    const allergy = await this.allergyRepo.findOne({ where: { id: allergyId } });
+    const allergy = await this.allergyRepo.findOne({
+      where: { id: allergyId },
+    });
     if (!allergy) {
-      throw new NotFoundException(`Không tìm thấy thông tin dị ứng với ID: ${allergyId}`);
+      throw new NotFoundException(
+        `Không tìm thấy thông tin dị ứng với ID: ${allergyId}`,
+      );
     }
     await this.assertChildAccess(allergy.studentId, actor);
     allergy.isActive = false;
     await this.allergyRepo.save(allergy);
-    return { success: true, message: 'Đã ngưng áp dụng thông tin dị ứng, hồ sơ được giữ lại' };
+    return {
+      success: true,
+      message: "Đã ngưng áp dụng thông tin dị ứng, hồ sơ được giữ lại",
+    };
   }
 
   async rescanAllergies() {
     return {
       success: true,
-      message: 'Đã quét và đồng bộ dữ liệu cảnh báo dị ứng học sinh toàn trường',
+      message:
+        "Đã quét và đồng bộ dữ liệu cảnh báo dị ứng học sinh toàn trường",
     };
   }
 
@@ -348,18 +615,20 @@ export class ChildrenService {
     await this.assertChildAccess(childId, actor);
     const allergies = await this.allergyRepo.find({
       where: { studentId: childId },
-      relations: ['allergen'],
-      order: { declaredAt: 'DESC' },
+      relations: ["allergen"],
+      order: { declaredAt: "DESC" },
     });
     return allergies.map((a) => ({
       id: String(a.id),
       allergenId: a.allergenId ? String(a.allergenId) : null,
-      allergenName: a.allergen?.name || a.customAllergenName || 'Dị ứng',
+      allergenName: a.allergen?.name || a.customAllergenName || "Dị ứng",
       severity: a.severity,
       note: a.note || a.symptoms,
-      action: 'DECLARED',
-      date: a.declaredAt ? a.declaredAt.toISOString() : new Date().toISOString(),
-      updatedBy: 'Phụ huynh / Y tế trường',
+      action: "DECLARED",
+      date: a.declaredAt
+        ? a.declaredAt.toISOString()
+        : new Date().toISOString(),
+      updatedBy: "Phụ huynh / Y tế trường",
     }));
   }
 
@@ -367,7 +636,7 @@ export class ChildrenService {
     if (!Array.isArray(items) || items.length === 0) {
       return {
         success: true,
-        message: 'Không có dữ liệu học sinh để nhập.',
+        message: "Không có dữ liệu học sinh để nhập.",
         importedCount: 0,
         errors: [],
       };
@@ -381,7 +650,7 @@ export class ChildrenService {
       try {
         const fullName =
           item.fullName?.trim() ||
-          `${item.lastName || ''} ${item.firstName || ''}`.trim();
+          `${item.lastName || ""} ${item.firstName || ""}`.trim();
 
         if (!fullName) {
           errors.push(`Dòng ${i + 1}: Họ và tên học sinh không được để trống.`);
@@ -389,35 +658,37 @@ export class ChildrenService {
         }
 
         // Chuẩn hóa giới tính ('MALE' | 'FEMALE')
-        let gender = 'MALE';
-        const rawGender = String(item.gender || '').trim().toUpperCase();
+        let gender = "MALE";
+        const rawGender = String(item.gender || "")
+          .trim()
+          .toUpperCase();
         if (
-          rawGender === 'FEMALE' ||
-          rawGender === 'NỮ' ||
-          rawGender === 'NU' ||
-          rawGender === 'GIRL' ||
-          rawGender.includes('GÁI') ||
-          rawGender.includes('NỮ')
+          rawGender === "FEMALE" ||
+          rawGender === "NỮ" ||
+          rawGender === "NU" ||
+          rawGender === "GIRL" ||
+          rawGender.includes("GÁI") ||
+          rawGender.includes("NỮ")
         ) {
-          gender = 'FEMALE';
+          gender = "FEMALE";
         }
 
         // Chuẩn hóa ngày sinh (YYYY-MM-DD)
-        let dob = '2021-01-01';
+        let dob = "2021-01-01";
         if (item.dateOfBirth) {
           const rawDob = String(item.dateOfBirth).trim();
           if (/^\d{4}-\d{2}-\d{2}$/.test(rawDob)) {
             dob = rawDob;
           } else if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(rawDob)) {
             const parts = rawDob.split(/[\/\-]/);
-            const day = parts[0].padStart(2, '0');
-            const month = parts[1].padStart(2, '0');
+            const day = parts[0].padStart(2, "0");
+            const month = parts[1].padStart(2, "0");
             const year = parts[2];
             dob = `${year}-${month}-${day}`;
           } else {
             const parsed = new Date(rawDob);
             if (!isNaN(parsed.getTime())) {
-              dob = parsed.toISOString().split('T')[0];
+              dob = parsed.toISOString().split("T")[0];
             }
           }
         }
@@ -427,8 +698,8 @@ export class ChildrenService {
         if (
           item.classId !== undefined &&
           item.classId !== null &&
-          String(item.classId).trim() !== '' &&
-          String(item.classId) !== 'ALL'
+          String(item.classId).trim() !== "" &&
+          String(item.classId) !== "ALL"
         ) {
           const parsedClassId = Number(item.classId);
           if (!isNaN(parsedClassId) && parsedClassId > 0) {
@@ -437,11 +708,13 @@ export class ChildrenService {
         }
 
         // Xử lý studentCode & Cơ chế Upsert
-        let studentCode = (item.studentCode || '').trim();
+        let studentCode = (item.studentCode || "").trim();
         let existingChild: Child | null = null;
 
         if (studentCode) {
-          existingChild = await this.childRepo.findOne({ where: { studentCode } });
+          existingChild = await this.childRepo.findOne({
+            where: { studentCode },
+          });
         }
 
         if (existingChild) {
@@ -457,7 +730,7 @@ export class ChildrenService {
         } else {
           // Tạo mới hồ sơ học sinh
           if (!studentCode) {
-            studentCode = `HS-${Date.now().toString().slice(-6)}-${(i + 1).toString().padStart(2, '0')}`;
+            studentCode = `HS-${Date.now().toString().slice(-6)}-${(i + 1).toString().padStart(2, "0")}`;
           }
 
           const newChild = this.childRepo.create({
@@ -466,18 +739,18 @@ export class ChildrenService {
             dateOfBirth: dob,
             gender,
             classId,
-            status: 'ACTIVE',
+            status: "ACTIVE",
           });
 
           const savedChild = await this.childRepo.save(newChild);
 
           // Tự động ghi nhận dị ứng nếu có ghi chú y tế đặc biệt
-          const notes = (item.medicalNotes || '').trim();
+          const notes = (item.medicalNotes || "").trim();
           if (
             notes &&
-            notes.toLowerCase() !== 'bình thường' &&
-            notes.toLowerCase() !== 'khong' &&
-            notes.toLowerCase() !== 'không'
+            notes.toLowerCase() !== "bình thường" &&
+            notes.toLowerCase() !== "khong" &&
+            notes.toLowerCase() !== "không"
           ) {
             try {
               const catalogs = await this.catalogRepo.find();
@@ -491,22 +764,25 @@ export class ChildrenService {
                 studentId: savedChild.id,
                 allergenId: matchedCat ? matchedCat.id : null,
                 customAllergenName: matchedCat ? null : notes,
-                allergyType: 'ALLERGY',
-                severity: 'MEDIUM',
+                allergyType: "ALLERGY",
+                severity: "MEDIUM",
                 symptoms: notes,
-                reactionTreatment: 'Báo y tế trường học khi có dấu hiệu dị ứng',
+                reactionTreatment: "Báo y tế trường học khi có dấu hiệu dị ứng",
                 isActive: true,
               });
               await this.allergyRepo.save(allergy);
             } catch (algErr) {
-              console.warn('Could not auto-declare allergy for imported child:', algErr);
+              console.warn(
+                "Could not auto-declare allergy for imported child:",
+                algErr,
+              );
             }
           }
 
           importedCount++;
         }
       } catch (rowErr: any) {
-        errors.push(`Dòng ${i + 1}: ${rowErr.message || 'Lỗi xử lý dữ liệu.'}`);
+        errors.push(`Dòng ${i + 1}: ${rowErr.message || "Lỗi xử lý dữ liệu."}`);
       }
     }
 

@@ -44,9 +44,9 @@ export interface ParentSnackPackageItem {
   startDate: string;
   endDate: string;
   registrationDeadline: string;
-  servingDays: number;
-  pricePerDay: number;
-  feeAmount: number;
+  servingDays: number | null;
+  pricePerDay: number | null;
+  feeAmount: number | null;
   periodStatus: string;
   registrationId: number | null;
   paymentStatus: 'PAID' | 'PENDING' | 'NOT_REGISTERED' | string;

@@ -236,7 +236,7 @@ export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ on
       <AttendanceSubTabs activeTab="history" onTabChange={handleTabChange} />
 
       {/* Main Content Container */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-6">
+      <main className="flex-1 w-full px-6 py-6 space-y-6">
         {/* Header & Title */}
         <HistoryHeader
           classNameTitle={selectedClass?.name || historyData?.classInfo.name || 'Lớp Mầm 1 (3-4 tuổi)'}
@@ -329,7 +329,7 @@ export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ on
 
       {/* Global Footer */}
       <footer className="bg-white border-t border-slate-200 mt-auto py-5 px-6">
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex flex-wrap items-center gap-4">
             <span className="font-extrabold text-slate-700">
               KidMeal © 2025 Bản quyền thuộc KidMeal Education Tech.

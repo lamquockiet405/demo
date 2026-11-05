@@ -29,6 +29,7 @@ import { MealOperationsModule } from './modules/meal-operations/meal-operations.
 import { FoodSafetyModule } from './modules/food-safety/food-safety.module';
 import { SnackRevenueModule } from './modules/snack-revenue/snack-revenue.module';
 import { NutritionAdviceModule } from './modules/nutrition-advice/nutrition-advice.module';
+import { TeacherModule } from './modules/teacher/teacher.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { NutritionAdviceModule } from './modules/nutrition-advice/nutrition-advi
     FoodSafetyModule,
     SnackRevenueModule,
     NutritionAdviceModule,
+    TeacherModule,
 
   ],
 })

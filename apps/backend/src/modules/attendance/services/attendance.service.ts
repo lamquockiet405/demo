@@ -764,18 +764,20 @@ export class AttendanceService {
 
   
 
-  async getKitchenKdsData(date?: string) {
-    const classes = await this.classRepo.find({ order: { id: 'ASC' } });
+  async getKitchenKdsData(date?: string, tenantId = 1) {
+    const classes = await this.classRepo.find({ where: { schoolId: tenantId }, order: { id: 'ASC' } });
     const today = date || new Date().toISOString().split('T')[0];
 
     const todayMenu = await this.getMenuForDate(today, 'LUNCH');
+    const submissions = await this.attendanceRepo.query(`SELECT class_id,meal_type,planned_quantity,attendance_snapshot
+      FROM daily_meal_portions WHERE date=$1 AND attendance_submitted_at IS NOT NULL`, [today]);
 
     const classKdsList = await Promise.all(
       classes.map(async (c) => {
         const planned = await this.childRepo.count({ where: { classId: c.id } });
-        const actual = await this.attendanceRepo.count({
-          where: { date: today, mealType: 'LUNCH', isAttended: true },
-        });
+        const lunch = submissions.find((p: any) => Number(p.class_id) === Number(c.id) && p.meal_type === 'LUNCH');
+        const snack = submissions.find((p: any) => Number(p.class_id) === Number(c.id) && p.meal_type === 'AFTERNOON_SNACK');
+        const actual = Number(lunch?.planned_quantity ?? 0);
 
         const allergyKids = await this.childRepo.manager.query(
           `SELECT s.full_name, a.name as allergen_name
@@ -794,8 +796,11 @@ export class AttendanceService {
           className: c.name,
           ageGroup: c.ageGroup,
           plannedPortions: planned,
-          actualPortions: actual > 0 ? actual : planned,
-          status: 'READY_DELIVERY',
+          actualPortions: actual,
+          lunchCount: actual,
+          snackCount: Number(snack?.planned_quantity ?? 0),
+          absentCount: lunch?.attendance_snapshot?.filter((s: any) => !s.isAttended).length ?? 0,
+          status: lunch || snack ? 'SYNCED' : 'WAITING',
           allergies,
         };
       }),
@@ -811,6 +816,11 @@ export class AttendanceService {
       classes: classKdsList,
       totalPlanned,
       totalActual,
+      summary: {
+        totalLunchPortions: totalActual,
+        totalSnackPortions: classKdsList.reduce((total, c) => total + c.snackCount, 0),
+        absentCount: classKdsList.reduce((total, c) => total + c.absentCount, 0),
+      },
     };
   }
 }
