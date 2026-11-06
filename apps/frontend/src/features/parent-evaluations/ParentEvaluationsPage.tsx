@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from "react";
 import { EvaluationHeader } from "./components/EvaluationHeader";
 import { EvaluationSummaryCards } from "./components/EvaluationSummaryCards";
@@ -15,6 +17,7 @@ import { ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuthStore } from "../../core/stores/auth.store";
 
 export const ParentEvaluationsPage: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   // Filter States
   const [search, setSearch] = useState<string>("");
@@ -110,7 +113,7 @@ export const ParentEvaluationsPage: React.FC = () => {
       fetchData();
     } catch (err) {
       console.error("Lỗi khi gửi phản hồi:", err);
-      alert("Không thể lưu phản hồi. Vui lòng kiểm tra kết nối cơ sở dữ liệu!");
+      alert(translateText("Không thể lưu phản hồi. Vui lòng kiểm tra kết nối cơ sở dữ liệu!"));
     }
   };
 
@@ -275,18 +278,12 @@ export const ParentEvaluationsPage: React.FC = () => {
       {isLoading ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
           <Loader2 className="w-8 h-8 text-teal-600 animate-spin mx-auto" />
-          <p className="text-xs font-semibold text-slate-500">
-            Đang tải danh sách ý kiến phụ huynh từ cơ sở dữ liệu...
-          </p>
+          <p className="text-xs font-semibold text-slate-500">{translateText("Đang tải danh sách ý kiến phụ huynh từ cơ sở dữ liệu...")}</p>
         </div>
       ) : !data?.items || data.items.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-2">
-          <p className="font-bold text-sm text-slate-700">
-            Không tìm thấy đánh giá nào phù hợp với bộ lọc
-          </p>
-          <p className="text-xs text-slate-400">
-            Vui lòng điều chỉnh tiêu chí tìm kiếm hoặc thiết lập lại bộ lọc.
-          </p>
+          <p className="font-bold text-sm text-slate-700">{translateText("Không tìm thấy đánh giá nào phù hợp với bộ lọc")}</p>
+          <p className="text-xs text-slate-400">{translateText("Vui lòng điều chỉnh tiêu chí tìm kiếm hoặc thiết lập lại bộ lọc.")}</p>
           <button
             onClick={() => {
               setSearch("");
@@ -298,9 +295,7 @@ export const ParentEvaluationsPage: React.FC = () => {
               setCurrentPage(1);
             }}
             className="mt-3 px-4 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 font-bold rounded-xl text-xs transition"
-          >
-            Đặt lại bộ lọc
-          </button>
+          >{translateText("Đặt lại bộ lọc")}</button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -318,15 +313,11 @@ export const ParentEvaluationsPage: React.FC = () => {
       {/* Pagination Section */}
       {data && data.items.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
-          <div>
-            Đang hiển thị{" "}
+          <div>{translateText("Đang hiển thị")}{" "}
             <span className="font-bold text-slate-800">
               {startItem} - {endItem}
-            </span>{" "}
-            trong tổng số{" "}
-            <span className="font-bold text-slate-800">{totalItems}</span> đánh
-            giá của Phụ huynh
-          </div>
+            </span>{" "}{translateText("trong tổng số")}{" "}
+            <span className="font-bold text-slate-800">{totalItems}</span>{translateText(" đánh giá của Phụ huynh")}</div>
 
           {renderPaginationButtons()}
         </div>
@@ -349,7 +340,7 @@ export const ParentEvaluationsPage: React.FC = () => {
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-slideUp text-xs font-semibold">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
+          <span>{translateText(toastMessage)}</span>
           <button
             onClick={() => setToastMessage(null)}
             className="ml-2 text-slate-400 hover:text-white"

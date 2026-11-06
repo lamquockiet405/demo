@@ -1,3 +1,5 @@
+import { t as translateText } from '../core/i18n/language';
+import { useLanguage } from '../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
@@ -50,7 +52,7 @@ const teacherGroups = [
     items: [
       {
         to: "/teacher/snack-roster",
-        label: "Danh sách ăn phụ",
+        label: "Danh sách ăn sáng",
         icon: Coffee,
       },
       {
@@ -93,6 +95,7 @@ const teacherGroups = [
 ];
 
 export function TeacherPortalLayout() {
+  useLanguage();
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
@@ -118,7 +121,7 @@ export function TeacherPortalLayout() {
       {open && (
         <button
           className="kp-sidebar-backdrop"
-          aria-label="Đóng menu giáo viên"
+          aria-label={translateText("Đóng menu giáo viên")}
           onClick={() => setOpen(false)}
         />
       )}
@@ -126,7 +129,7 @@ export function TeacherPortalLayout() {
       {/* Sidebar matching Kitchen Portal layout */}
       <aside
         className={`kp-sidebar ${open ? "open" : ""}`}
-        aria-label="Thanh điều hướng giáo viên"
+        aria-label={translateText("Thanh điều hướng giáo viên")}
         id="teacher-sidebar"
       >
         <NavLink to="/teacher/classes" className="kp-logo">
@@ -134,14 +137,14 @@ export function TeacherPortalLayout() {
             <GraduationCap size={28} />
           </span>
           <div>
-            <strong>KidMeal</strong>
-            <small>GIÁO VIÊN MẦM NON (3-6 TUỔI)</small>
+            <strong>{translateText("KidMeal")}</strong>
+            <small>{translateText("GIÁO VIÊN MẦM NON (3-6 TUỔI)")}</small>
           </div>
         </NavLink>
 
         <button
           className="kp-sidebar-close kp-button icon"
-          aria-label="Đóng menu"
+          aria-label={translateText("Đóng menu")}
           onClick={() => setOpen(false)}
         >
           <X size={20} />
@@ -150,7 +153,7 @@ export function TeacherPortalLayout() {
         <nav>
           {teacherGroups.map((group) => (
             <div className="kp-nav-group" key={group.title}>
-              <p>{group.title}</p>
+              <p>{translateText(group.title)}</p>
               {group.items.map((item) => (
                 <NavLink
                   key={item.to}
@@ -160,7 +163,7 @@ export function TeacherPortalLayout() {
                   }
                 >
                   <item.icon size={18} />
-                  <span>{item.label}</span>
+                  <span>{translateText(item.label)}</span>
                 </NavLink>
               ))}
             </div>
@@ -169,10 +172,8 @@ export function TeacherPortalLayout() {
 
         <div className="kp-sidebar-footer">
           <ShieldCheck size={18} />
-          <span>
-            Đồng hành cùng trẻ
-            <br />
-            <b>Bữa ăn học đường an toàn</b>
+          <span>{translateText("Đồng hành cùng trẻ")}<br />
+            <b>{translateText("Bữa ăn học đường an toàn")}</b>
           </span>
         </div>
       </aside>
@@ -183,15 +184,14 @@ export function TeacherPortalLayout() {
           <div className="kp-breadcrumb">
             <button
               className="kp-menu-toggle kp-button icon"
-              aria-label="Mở menu giáo viên"
+              aria-label={translateText("Mở menu giáo viên")}
               aria-expanded={open}
               aria-controls="teacher-sidebar"
               onClick={() => setOpen(true)}
             >
               <Menu size={21} />
             </button>
-            <span>
-              Giáo viên phụ trách <i>/</i> <strong>{current}</strong>
+            <span>{translateText("Giáo viên phụ trách ")}<i>/</i> <strong>{translateText(current)}</strong>
             </span>
           </div>
 

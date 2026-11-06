@@ -20,6 +20,12 @@ import { GrowthService } from '../services/growth.service';
 import { CreateGrowthRecordDto } from '../dto/create-growth-record.dto';
 import { QueryGrowthRecordsDto } from '../dto/query-growth-records.dto';
 
+/**
+ * Quản lý các lần đo thể chất và dữ liệu theo dõi tăng trưởng của trẻ.
+ * Các đường dẫn bên dưới được ghép với tiền tố toàn cục /api/v1.
+ * JwtAuthGuard xác thực tài khoản; RolesGuard kiểm tra quyền tại controller hoặc từng endpoint.
+ * Constructor nhận service qua Dependency Injection; các hàm chuyển dữ liệu request sang service.
+ */
 @ApiTags('Growth & Health Monitoring')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -27,6 +33,12 @@ import { QueryGrowthRecordsDto } from '../dto/query-growth-records.dto';
 export class GrowthController {
   constructor(private readonly growthService: GrowthService) {}
 
+  /**
+   * GET /growth: Danh sách hồ sơ tăng trưởng & Z-score.
+   * @param query Bộ lọc trong query string.
+   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
+   * Chuyển xử lý sang GrowthService.findAll() và trả kết quả cho client.
+   */
   @Get()
   @ApiOperation({ summary: 'Danh sách hồ sơ tăng trưởng & Z-score' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER', 'PARENT')
@@ -37,6 +49,11 @@ export class GrowthController {
     return this.growthService.findAll(query, schoolId);
   }
 
+  /**
+   * GET /growth/child/:childId: Lịch sử phát triển thể chất của học sinh.
+   * @param childId Giá trị childId trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * Chuyển xử lý sang GrowthService.getChildHistory() và trả kết quả cho client.
+   */
   @Get('child/:childId')
   @ApiOperation({ summary: 'Lịch sử phát triển thể chất của học sinh' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER', 'PARENT')
@@ -44,6 +61,11 @@ export class GrowthController {
     return this.growthService.getChildHistory(childId);
   }
 
+  /**
+   * GET /growth/class/:classId/overview: Tổng quan tình trạng dinh dưỡng của lớp học.
+   * @param classId Giá trị classId trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * Chuyển xử lý sang GrowthService.getClassOverview() và trả kết quả cho client.
+   */
   @Get('class/:classId/overview')
   @ApiOperation({ summary: 'Tổng quan tình trạng dinh dưỡng của lớp học' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
@@ -51,6 +73,12 @@ export class GrowthController {
     return this.growthService.getClassOverview(classId);
   }
 
+  /**
+   * POST /growth: Ghi nhận chỉ số thể chất mới (chiều cao, cân nặng).
+   * @param dto Dữ liệu body JSON, kiểu CreateGrowthRecordDto.
+   * @param userId Trường id của tài khoản đã xác thực (tùy chọn).
+   * Chuyển xử lý sang GrowthService.createRecord() và trả kết quả cho client.
+   */
   @Post()
   @ApiOperation({ summary: 'Ghi nhận chỉ số thể chất mới (chiều cao, cân nặng)' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
@@ -61,6 +89,12 @@ export class GrowthController {
     return this.growthService.createRecord(dto, userId);
   }
 
+  /**
+   * PUT /growth/:id: Cập nhật chỉ số thể chất.
+   * @param id Giá trị id trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * @param dto Dữ liệu body JSON, kiểu Partial<CreateGrowthRecordDto>.
+   * Chuyển xử lý sang GrowthService.updateRecord() và trả kết quả cho client.
+   */
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật chỉ số thể chất' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')
@@ -71,6 +105,11 @@ export class GrowthController {
     return this.growthService.updateRecord(id, dto);
   }
 
+  /**
+   * DELETE /growth/:id: Xóa chỉ số thể chất.
+   * @param id Giá trị id trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * Chuyển xử lý sang GrowthService.deleteRecord() và trả kết quả cho client.
+   */
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa chỉ số thể chất' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST')
@@ -78,6 +117,12 @@ export class GrowthController {
     return this.growthService.deleteRecord(id);
   }
 
+  /**
+   * POST /growth/import: Nhập dữ liệu đo thể chất hàng loạt từ Excel/CSV.
+   * @param items Trường items trong body JSON.
+   * @param userId Trường id của tài khoản đã xác thực (tùy chọn).
+   * Chuyển xử lý sang GrowthService.importRecords() và trả kết quả cho client.
+   */
   @Post('import')
   @ApiOperation({ summary: 'Nhập dữ liệu đo thể chất hàng loạt từ Excel/CSV' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST')
@@ -88,6 +133,11 @@ export class GrowthController {
     return this.growthService.importRecords(items || [], userId);
   }
 
+  /**
+   * GET /growth/export: Xuất báo cáo tăng trưởng.
+   * @param classId Tham số classId trong query string (tùy chọn).
+   * Chuyển xử lý sang GrowthService.exportReport() và trả kết quả cho client.
+   */
   @Get('export')
   @ApiOperation({ summary: 'Xuất báo cáo tăng trưởng' })
   @Roles('SCHOOL_MANAGEMENT', 'NUTRITIONIST', 'TEACHER')

@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { growthApi } from "../../growth/api/growth.api";
 import { growthDispatchApi } from "../../growth/api/growth-dispatch.api";
@@ -42,6 +44,7 @@ const statusLabelMap: Record<string, { label: string; color: string }> = {
 };
 
 export function PrincipalGrowthPage() {
+  useLanguage();
   const [search, setSearch] = useState("");
   const [classId, setClassId] = useState("");
   const [status, setStatus] = useState("");
@@ -144,18 +147,12 @@ export function PrincipalGrowthPage() {
       <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              Ban Giám Hiệu • Y Tế & Thể Chất
-            </span>
-            <span className="text-xs text-teal-200">Chuẩn WHO LMS Growth Curves</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Ban Giám Hiệu • Y Tế & Thể Chất")}</span>
+            <span className="text-xs text-teal-200">{translateText("Chuẩn WHO LMS Growth Curves")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <HeartPulse className="w-8 h-8 text-amber-300" />
-            Dữ Liệu Thể Chất Học Sinh & Biểu Đồ Tăng Trưởng WHO
-          </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-            Theo dõi kết quả cân đo định kỳ, phân loại thể trạng theo chuẩn WHO và bấm <strong>"Xem biểu đồ"</strong> để kiểm tra đường cong tăng trưởng chi tiết từng học sinh.
-          </p>
+            <HeartPulse className="w-8 h-8 text-amber-300" />{translateText("Dữ Liệu Thể Chất Học Sinh & Biểu Đồ Tăng Trưởng WHO")}</h1>
+          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Theo dõi kết quả cân đo định kỳ, phân loại thể trạng theo chuẩn WHO và bấm ")}<strong>{translateText("\"Xem biểu đồ\"")}</strong>{translateText(" để kiểm tra đường cong tăng trưởng chi tiết từng học sinh.")}</p>
         </div>
 
         <div className="flex items-center gap-3 self-start md:self-auto">
@@ -164,17 +161,13 @@ export function PrincipalGrowthPage() {
             disabled={resource.loading}
             className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />
-            Làm mới
-          </button>
+            <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
           <button
             onClick={() => void exportReport()}
             disabled={action.busy}
             className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2"
           >
-            <Download className="w-4 h-4" />
-            Xuất Báo Cáo
-          </button>
+            <Download className="w-4 h-4" />{translateText("Xuất Báo Cáo")}</button>
         </div>
       </div>
 
@@ -184,55 +177,51 @@ export function PrincipalGrowthPage() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
         <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold">Tổng hồ sơ đo</span>
+            <span className="text-xs font-semibold">{translateText("Tổng hồ sơ đo")}</span>
             <Users className="w-4 h-4 text-teal-600" />
           </div>
           <div className="text-2xl font-black text-slate-900">{totalRecords}</div>
-          <p className="text-[11px] text-slate-400">Đã cập nhật số đo</p>
+          <p className="text-[11px] text-slate-400">{translateText("Đã cập nhật số đo")}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-emerald-200 bg-emerald-50/20 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-emerald-800">
-            <span className="text-xs font-bold">Bình thường (Chuẩn)</span>
+            <span className="text-xs font-bold">{translateText("Bình thường (Chuẩn)")}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700">{normalCount}</div>
           <p className="text-[11px] text-emerald-600 font-bold">
-            {totalRecords > 0 ? Math.round((normalCount / totalRecords) * 100) : 0}% học sinh
-          </p>
+            {totalRecords > 0 ? Math.round((normalCount / totalRecords) * 100) : 0}{translateText("% học sinh")}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-amber-200 bg-amber-50/20 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-amber-800">
-            <span className="text-xs font-bold">Nhẹ cân / Gầy còm</span>
+            <span className="text-xs font-bold">{translateText("Nhẹ cân / Gầy còm")}</span>
             <AlertTriangle className="w-4 h-4 text-amber-600" />
           </div>
           <div className="text-2xl font-black text-amber-700">{underweightCount}</div>
           <p className="text-[11px] text-amber-600 font-bold">
-            {totalRecords > 0 ? Math.round((underweightCount / totalRecords) * 100) : 0}% cần bồi dưỡng
-          </p>
+            {totalRecords > 0 ? Math.round((underweightCount / totalRecords) * 100) : 0}{translateText("% cần bồi dưỡng")}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-rose-200 bg-rose-50/20 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-rose-800">
-            <span className="text-xs font-bold">Thấp còi</span>
+            <span className="text-xs font-bold">{translateText("Thấp còi")}</span>
             <TrendingDown className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-black text-rose-700">{stuntedCount}</div>
           <p className="text-[11px] text-rose-600 font-bold">
-            {totalRecords > 0 ? Math.round((stuntedCount / totalRecords) * 100) : 0}% cần can thiệp
-          </p>
+            {totalRecords > 0 ? Math.round((stuntedCount / totalRecords) * 100) : 0}{translateText("% cần can thiệp")}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-purple-200 bg-purple-50/20 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-purple-800">
-            <span className="text-xs font-bold">Thừa cân / Béo phì</span>
+            <span className="text-xs font-bold">{translateText("Thừa cân / Béo phì")}</span>
             <Scale className="w-4 h-4 text-purple-600" />
           </div>
           <div className="text-2xl font-black text-purple-700">{overweightCount}</div>
           <p className="text-[11px] text-purple-600 font-bold">
-            {totalRecords > 0 ? Math.round((overweightCount / totalRecords) * 100) : 0}% kiểm soát calo
-          </p>
+            {totalRecords > 0 ? Math.round((overweightCount / totalRecords) * 100) : 0}{translateText("% kiểm soát calo")}</p>
         </div>
       </div>
 
@@ -241,9 +230,9 @@ export function PrincipalGrowthPage() {
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
-            aria-label="Tìm dữ liệu thể chất"
+            aria-label={translateText("Tìm dữ liệu thể chất")}
             type="text"
-            placeholder="Tìm theo tên học sinh, mã học sinh…"
+            placeholder={translateText("Tìm theo tên học sinh, mã học sinh…")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -253,12 +242,12 @@ export function PrincipalGrowthPage() {
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
           <select
-            aria-label="Lớp"
+            aria-label={translateText("Lớp")}
             value={classId}
             onChange={(e) => setClassId(e.target.value)}
             className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="">Tất cả các lớp</option>
+            <option value="">{translateText("Tất cả các lớp")}</option>
             {(classes.data || []).map((c: any) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -267,20 +256,20 @@ export function PrincipalGrowthPage() {
           </select>
 
           <select
-            aria-label="Phân loại thể chất"
+            aria-label={translateText("Phân loại thể chất")}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="">Tất cả phân loại thể chất</option>
-            <option value="NORMAL">Bình thường (NORMAL)</option>
-            <option value="UNDERWEIGHT">Nhẹ cân (UNDERWEIGHT)</option>
-            <option value="STUNTED">Thấp còi (STUNTED)</option>
-            <option value="OVERWEIGHT">Thừa cân (OVERWEIGHT)</option>
-            <option value="OBESE">Béo phì (OBESE)</option>
-            <option value="WASTED">Gầy còm (WASTED)</option>
-            <option value="SEVERELY_UNDERWEIGHT">Nhẹ cân nặng (SEVERELY_UNDERWEIGHT)</option>
-            <option value="SEVERELY_STUNTED">Thấp còi nặng (SEVERELY_STUNTED)</option>
+            <option value="">{translateText("Tất cả phân loại thể chất")}</option>
+            <option value="NORMAL">{translateText("Bình thường (NORMAL)")}</option>
+            <option value="UNDERWEIGHT">{translateText("Nhẹ cân (UNDERWEIGHT)")}</option>
+            <option value="STUNTED">{translateText("Thấp còi (STUNTED)")}</option>
+            <option value="OVERWEIGHT">{translateText("Thừa cân (OVERWEIGHT)")}</option>
+            <option value="OBESE">{translateText("Béo phì (OBESE)")}</option>
+            <option value="WASTED">{translateText("Gầy còm (WASTED)")}</option>
+            <option value="SEVERELY_UNDERWEIGHT">{translateText("Nhẹ cân nặng (SEVERELY_UNDERWEIGHT)")}</option>
+            <option value="SEVERELY_STUNTED">{translateText("Thấp còi nặng (SEVERELY_STUNTED)")}</option>
           </select>
         </div>
       </div>
@@ -292,36 +281,32 @@ export function PrincipalGrowthPage() {
         <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-teal-600" />
-              Danh Sách Kết Quả Cân Đo Định Kỳ
-            </h3>
-            <span className="text-xs text-slate-500">
-              Bấm nút <strong className="text-teal-700">"Xem biểu đồ"</strong> để mở đồ thị WHO chi tiết
-            </span>
+              <Activity className="w-5 h-5 text-teal-600" />{translateText("Danh Sách Kết Quả Cân Đo Định Kỳ")}</h3>
+            <span className="text-xs text-slate-500">{translateText("Bấm nút ")}<strong className="text-teal-700">{translateText("\"Xem biểu đồ\"")}</strong>{translateText(" để mở đồ thị WHO chi tiết")}</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/70">
                 <tr>
-                  <th className="p-4">Học Sinh</th>
-                  <th className="p-4">Lớp</th>
-                  <th className="p-4">Ngày Đo</th>
-                  <th className="p-4 text-center">Cân Nặng (kg)</th>
-                  <th className="p-4 text-center">Chiều Cao (cm)</th>
-                  <th className="p-4 text-center">BMI</th>
-                  <th className="p-4 text-center">Phân Loại Thể Trạng</th>
-                  <th className="p-4 text-right">Biểu Đồ Tăng Trưởng</th>
+                  <th className="p-4">{translateText("Học Sinh")}</th>
+                  <th className="p-4">{translateText("Lớp")}</th>
+                  <th className="p-4">{translateText("Ngày Đo")}</th>
+                  <th className="p-4 text-center">{translateText("Cân Nặng (kg)")}</th>
+                  <th className="p-4 text-center">{translateText("Chiều Cao (cm)")}</th>
+                  <th className="p-4 text-center">{translateText("BMI")}</th>
+                  <th className="p-4 text-center">{translateText("Phân Loại Thể Trạng")}</th>
+                  <th className="p-4 text-right">{translateText("Biểu Đồ Tăng Trưởng")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {rows.map((r) => {
                   const statusInfo = statusLabelMap[r.overallNutritionalStatus] || {
-                    label: r.overallNutritionalStatus || "Chưa đánh giá",
+                    label: r.overallNutritionalStatus || translateText("Chưa đánh giá"),
                     color: "bg-slate-100 text-slate-700 border-slate-200",
                   };
                   const childIdStr = String(r.childId || r.child?.id || "");
-                  const childFullName = r.child?.fullName || "Học sinh";
+                  const childFullName = r.child?.fullName || translateText("Học sinh");
 
                   return (
                     <tr key={r.id} className="hover:bg-teal-50/20 transition">
@@ -335,23 +320,23 @@ export function PrincipalGrowthPage() {
                       <td className="p-4 text-slate-600">
                         <span className="flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          {r.measurementDate?.slice(0, 10) || "—"}
+                          {translateText(r.measurementDate?.slice(0, 10) || "—")}
                         </span>
                       </td>
                       <td className="p-4 text-center font-bold text-slate-900 text-sm">
-                        {r.weightKg != null ? `${r.weightKg} kg` : "—"}
+                        {translateText(r.weightKg != null ? `${r.weightKg} kg` : "—")}
                       </td>
                       <td className="p-4 text-center font-bold text-slate-900 text-sm">
-                        {r.heightCm != null ? `${r.heightCm} cm` : "—"}
+                        {translateText(r.heightCm != null ? `${r.heightCm} cm` : "—")}
                       </td>
                       <td className="p-4 text-center font-bold text-slate-900 text-sm">
-                        {r.bmi != null ? r.bmi : "—"}
+                        {translateText(r.bmi != null ? r.bmi : "—")}
                       </td>
                       <td className="p-4 text-center">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-[11px] font-black border ${statusInfo.color}`}
                         >
-                          {statusInfo.label}
+                          {translateText(statusInfo.label)}
                         </span>
                       </td>
                       <td className="p-4 text-right">
@@ -359,9 +344,7 @@ export function PrincipalGrowthPage() {
                           onClick={() => openChartModal(childIdStr, childFullName)}
                           className="px-3.5 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition inline-flex items-center gap-1.5 cursor-pointer active:scale-95"
                         >
-                          <TrendingUp className="w-3.5 h-3.5 text-amber-300" />
-                          Xem biểu đồ
-                        </button>
+                          <TrendingUp className="w-3.5 h-3.5 text-amber-300" />{translateText("Xem biểu đồ")}</button>
                       </td>
                     </tr>
                   );
@@ -390,11 +373,8 @@ export function PrincipalGrowthPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800 uppercase tracking-wider">
-                      Biểu Đồ Chuẩn WHO
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      Mã: <strong>{history.data?.child?.studentCode || "—"}</strong>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800 uppercase tracking-wider">{translateText("Biểu Đồ Chuẩn WHO")}</span>
+                    <span className="text-xs text-slate-500">{translateText("Mã: ")}<strong>{history.data?.child?.studentCode || "—"}</strong>
                     </span>
                   </div>
                   <h3 className="font-black text-slate-900 text-xl">
@@ -418,28 +398,25 @@ export function PrincipalGrowthPage() {
               {history.data?.latest && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs">
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Cân nặng gần nhất</span>
+                    <span className="text-slate-400 block text-[11px]">{translateText("Cân nặng gần nhất")}</span>
                     <strong className="text-slate-900 text-base font-black">
-                      {history.data.latest.weightKg} kg
-                    </strong>
-                    <span className="text-[10px] text-slate-500 block">WAZ: {history.data.latest.waz ?? "—"}</span>
+                      {translateText(history.data.latest.weightKg)}{translateText(" kg")}</strong>
+                    <span className="text-[10px] text-slate-500 block">{translateText("WAZ: ")}{translateText(history.data.latest.waz ?? "—")}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Chiều cao gần nhất</span>
+                    <span className="text-slate-400 block text-[11px]">{translateText("Chiều cao gần nhất")}</span>
                     <strong className="text-slate-900 text-base font-black">
-                      {history.data.latest.heightCm} cm
-                    </strong>
-                    <span className="text-[10px] text-slate-500 block">HAZ: {history.data.latest.haz ?? "—"}</span>
+                      {translateText(history.data.latest.heightCm)}{translateText(" cm")}</strong>
+                    <span className="text-[10px] text-slate-500 block">{translateText("HAZ: ")}{translateText(history.data.latest.haz ?? "—")}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Chỉ số BMI</span>
+                    <span className="text-slate-400 block text-[11px]">{translateText("Chỉ số BMI")}</span>
                     <strong className="text-slate-900 text-base font-black">
-                      {history.data.latest.bmi} kg/m²
-                    </strong>
-                    <span className="text-[10px] text-slate-500 block">BAZ: {history.data.latest.baz ?? "—"}</span>
+                      {translateText(history.data.latest.bmi)}{translateText(" kg/m²")}</strong>
+                    <span className="text-[10px] text-slate-500 block">{translateText("BAZ: ")}{translateText(history.data.latest.baz ?? "—")}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Đánh giá thể trạng</span>
+                    <span className="text-slate-400 block text-[11px]">{translateText("Đánh giá thể trạng")}</span>
                     <span
                       className={`inline-block px-2.5 py-1 rounded-full text-xs font-black mt-1 ${
                         history.data.latest.overallNutritionalStatus === "NORMAL"
@@ -447,8 +424,8 @@ export function PrincipalGrowthPage() {
                           : "bg-rose-100 text-rose-800"
                       }`}
                     >
-                      {statusLabelMap[history.data.latest.overallNutritionalStatus]?.label ||
-                        history.data.latest.overallNutritionalStatus}
+                      {translateText(statusLabelMap[history.data.latest.overallNutritionalStatus]?.label ||
+                        history.data.latest.overallNutritionalStatus)}
                     </span>
                   </div>
                 </div>
@@ -469,16 +446,12 @@ export function PrincipalGrowthPage() {
 
             {/* Modal Footer */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
-              <span className="text-xs text-slate-500">
-                Đường cong tham chiếu LMS chuẩn Tổ chức Y tế Thế giới (WHO Child Growth Standards)
-              </span>
+              <span className="text-xs text-slate-500">{translateText("Đường cong tham chiếu LMS chuẩn Tổ chức Y tế Thế giới (WHO Child Growth Standards)")}</span>
               <button
                 type="button"
                 onClick={closeChartModal}
                 className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition shadow-xs"
-              >
-                Đóng biểu đồ
-              </button>
+              >{translateText("Đóng biểu đồ")}</button>
             </div>
           </div>
         </div>

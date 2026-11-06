@@ -580,7 +580,8 @@ CREATE TABLE food_samples (
     sample_weight_g NUMERIC(6,1) DEFAULT 150.0,
     storage_temp    NUMERIC(4,1) DEFAULT 3.8,
     collector_name  VARCHAR(100) DEFAULT 'Nguyễn Văn Cường (Bếp trưởng)',
-    note            TEXT
+    note            TEXT,
+    image_url       TEXT
 );
 
 CREATE INDEX idx_food_samples_date ON food_samples(date);

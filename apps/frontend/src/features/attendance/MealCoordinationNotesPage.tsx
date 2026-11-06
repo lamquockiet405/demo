@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -30,6 +32,7 @@ interface MealCoordinationNotesPageProps {
 }
 
 export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps> = ({ onTabChange }) => {
+  useLanguage();
   const navigate = useNavigate();
 
   const [data, setData] = useState<MealCoordinationData | null>(null);
@@ -119,7 +122,7 @@ export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps>
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa ghi chú điều phối này? Dữ liệu sẽ được gỡ khỏi cơ sở dữ liệu.')) {
+    if (!window.confirm(translateText('Bạn có chắc chắn muốn xóa ghi chú điều phối này? Dữ liệu sẽ được gỡ khỏi cơ sở dữ liệu.'))) {
       return;
     }
     try {
@@ -148,7 +151,7 @@ export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps>
             ) : (
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
             )}
-            <span>{toastMessage.text}</span>
+            <span>{translateText(toastMessage.text)}</span>
           </div>
         </div>
       )}
@@ -165,19 +168,12 @@ export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white rounded-3xl p-6 border border-slate-200 shadow-xs">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200 px-3 py-0.5 rounded-full">
-                Bàn Điều Phối Suất Ăn Giáo Viên (Teacher Console)
-              </span>
+              <span className="text-[11px] font-black uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-200 px-3 py-0.5 rounded-full">{translateText("Bàn Điều Phối Suất Ăn Giáo Viên (Teacher Console)")}</span>
               <span className="text-xs font-semibold text-slate-500">
-                • {data?.selectedClass.name || 'Lớp Chồi 1'} ({data?.selectedClass.totalStudents || 26} học sinh)
-              </span>
+                • {data?.selectedClass.name || translateText('Lớp Chồi 1')} ({data?.selectedClass.totalStudents || 26}{translateText(" học sinh)")}</span>
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              Quản lý Ghi chú Điều phối Bữa ăn Bán trú
-            </h1>
-            <p className="text-xs text-slate-500 font-medium max-w-2xl">
-              Cầu nối dặn dò trực tiếp giữa Giáo viên chủ nhiệm trên lớp, Bếp bán trú, Cán bộ Dinh dưỡng &amp; Y tế học đường theo tiêu chuẩn Thông tư 28/2016/TT-BGDĐT.
-            </p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">{translateText("Quản lý Ghi chú Điều phối Bữa ăn Bán trú")}</h1>
+            <p className="text-xs text-slate-500 font-medium max-w-2xl">{translateText("Cầu nối dặn dò trực tiếp giữa Giáo viên chủ nhiệm trên lớp, Bếp bán trú, Cán bộ Dinh dưỡng & Y tế học đường theo tiêu chuẩn Thông tư 28/2016/TT-BGDĐT.")}</p>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
@@ -186,10 +182,10 @@ export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps>
               onClick={() => loadData(true)}
               disabled={isRefreshing}
               className="p-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-2xl border border-slate-200 font-bold text-xs transition flex items-center gap-1.5"
-              title="Làm mới dữ liệu từ PostgreSQL"
+              title={translateText("Làm mới dữ liệu từ PostgreSQL")}
             >
               <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-teal-600' : ''}`} />
-              <span className="hidden sm:inline">Làm mới</span>
+              <span className="hidden sm:inline">{translateText("Làm mới")}</span>
             </button>
 
             {/* Create New Note Button */}
@@ -201,7 +197,7 @@ export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps>
               className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-teal-700/20 active:scale-95 transition"
             >
               <Plus className="w-4 h-4" />
-              <span>Tạo Ghi Chú Điều Phối Mới</span>
+              <span>{translateText("Tạo Ghi Chú Điều Phối Mới")}</span>
             </button>
           </div>
         </div>
@@ -214,18 +210,12 @@ export const MealCoordinationNotesPage: React.FC<MealCoordinationNotesPageProps>
             </div>
             <div>
               <p className="text-xs font-bold text-teal-200 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                Hệ thống Đồng bộ Realtime Đến Màn hình Bếp (KDS) &amp; Phiếu Tiếp Phẩm
-              </p>
-              <p className="text-[11px] text-slate-300 mt-0.5">
-                Mọi ghi chú điều chỉnh suất ăn (cháo bệnh, đổi món dị ứng, cắt suất đón sớm) lập trước <strong>08h45</strong> sáng được tự động hạch toán vào định lượng kho và khay ăn chia lớp.
-              </p>
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />{translateText("Hệ thống Đồng bộ Realtime Đến Màn hình Bếp (KDS) & Phiếu Tiếp Phẩm")}</p>
+              <p className="text-[11px] text-slate-300 mt-0.5">{translateText("Mọi ghi chú điều chỉnh suất ăn (cháo bệnh, đổi món dị ứng, cắt suất đón sớm) lập trước ")}<strong>{translateText("08h45")}</strong>{translateText(" sáng được tự động hạch toán vào định lượng kho và khay ăn chia lớp.")}</p>
             </div>
           </div>
           <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-teal-300 bg-teal-950/60 px-3 py-1.5 rounded-xl border border-teal-700/40">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Kết nối Bếp: Bếp trưởng Trần Văn Bếp
-          </div>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />{translateText("Kết nối Bếp: Bếp trưởng Trần Văn Bếp")}</div>
         </div>
 
         {/* 4. KPI Strip */}

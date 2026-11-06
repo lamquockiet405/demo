@@ -413,6 +413,21 @@ export class InspectionsService {
     );
   }
 
+  private getSampleFallbackImage(dishName: string): string {
+    if (!dishName) return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80";
+    const name = dishName.toLowerCase();
+    if (name.includes("cơm")) return "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("heo") || name.includes("lợn") || name.includes("thịt")) return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("gà")) return "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("bò")) return "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("cá") || name.includes("tôm") || name.includes("hải sản")) return "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("canh") || name.includes("súp")) return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("bún") || name.includes("phở") || name.includes("miến") || name.includes("mì")) return "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("dưa hấu") || name.includes("chuối") || name.includes("trái cây") || name.includes("tráng miệng")) return "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80";
+    if (name.includes("cháo")) return "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=600&q=80";
+    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80";
+  }
+
   /**
    * Lấy danh sách mẫu thức ăn lưu 24h (QĐ 1246/QĐ-BYT)
    */
@@ -452,6 +467,7 @@ export class InspectionsService {
         collectorName: s.collectorName || "Chưa cập nhật",
         countdownHours: parseFloat(hoursRemaining.toFixed(1)),
         note: s.note,
+        imageUrl: s.imageUrl || this.getSampleFallbackImage(s.dishName),
       };
     });
   }
@@ -491,7 +507,16 @@ export class InspectionsService {
       note: s.note,
       sealIntegrity: "NGUYÊN VẸN",
       storageLocation: s.fridgeUnit || null,
+      imageUrl: s.imageUrl || this.getSampleFallbackImage(s.dishName),
     };
+  }
+
+  async updateSamplePhoto(id: number, imageUrl: string) {
+    const s = await this.sampleRepo.findOne({ where: { id } });
+    if (!s) throw new NotFoundException("Không tìm thấy mẫu thức ăn");
+    s.imageUrl = imageUrl;
+    await this.sampleRepo.save(s);
+    return this.getSampleDetail(id);
   }
 
   /**
@@ -541,6 +566,7 @@ export class InspectionsService {
       fridgeUnit: dto.fridgeUnit || null,
       collectorName: dto.collectorName || "Nhân viên nhà bếp",
       note: dto.note || "Lưu mẫu 24h theo Quyết định 1246/QĐ-BYT",
+      imageUrl: dto.imageUrl || this.getSampleFallbackImage(dto.dishName),
     });
     const saved = await this.sampleRepo.save(sample);
 

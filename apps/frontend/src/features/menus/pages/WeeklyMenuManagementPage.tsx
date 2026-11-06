@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from "react";
 import {
   Plus,
@@ -43,6 +45,7 @@ import { SubmitMenuModal } from "../components/SubmitMenuModal";
 import { SubmitMenuPayload } from "../api/weekly-menus.api";
 
 export const WeeklyMenuManagementPage: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   const isPrincipal =
     user?.roles?.includes("PRINCIPAL") || user?.roles?.includes("SUPER_ADMIN");
@@ -283,7 +286,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
   // 6. Xóa món ăn khỏi bữa ăn (Xóa mềm)
   const handleRemoveDish = async (menuDishId: string) => {
     if (!selectedMenu) return;
-    if (!window.confirm("Bạn có chắc chắn muốn xóa món này khỏi bữa ăn?"))
+    if (!window.confirm(translateText("Bạn có chắc chắn muốn xóa món này khỏi bữa ăn?")))
       return;
     try {
       await weeklyMenusApi.removeDish(selectedMenu.id, menuDishId);
@@ -406,7 +409,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
   const handleCancelEditRequest = async (id: string) => {
     if (
       !window.confirm(
-        "Bạn có chắc chắn muốn hủy yêu cầu xin phép chỉnh sửa này?",
+        translateText("Bạn có chắc chắn muốn hủy yêu cầu xin phép chỉnh sửa này?"),
       )
     )
       return;
@@ -490,7 +493,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
     if (!selectedMenu) return;
     if (
       !window.confirm(
-        "Công bố thực đơn sẽ khóa bản này và hiển thị lên toàn hệ thống. Xác nhận?",
+        translateText("Công bố thực đơn sẽ khóa bản này và hiển thị lên toàn hệ thống. Xác nhận?"),
       )
     )
       return;
@@ -519,7 +522,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
     if (!selectedMenu) return;
     if (
       !window.confirm(
-        `Xác nhận chuyển thực đơn "${selectedMenu.title}" vào thùng rác?`,
+        translateText(`Xác nhận chuyển thực đơn "${selectedMenu.title}" vào thùng rác?`),
       )
     )
       return;
@@ -607,7 +610,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
             ) : (
               <AlertCircle className="w-4 h-4" />
             )}
-            <span>{notification.message}</span>
+            <span>{translateText(notification.message)}</span>
           </div>
         </div>
       )}
@@ -625,9 +628,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
             <div className="flex flex-wrap items-center gap-3">
               {/* Chọn Thực đơn đang xem */}
               <div className="min-w-[260px] sm:min-w-[320px]">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Chọn Thực đơn tuần
-                </label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">{translateText("Chọn Thực đơn tuần")}</label>
                 <select
                   value={selectedMenu?.id || ""}
                   onChange={(e) => handleSelectMenu(e.target.value)}
@@ -635,7 +636,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 >
                   {(Array.isArray(menus) ? menus : []).map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.title} (v{m.version}.0) - {m.status}
+                      {m.title}{translateText(" (v")}{m.version}.0) - {translateText(m.status)}
                     </option>
                   ))}
                 </select>
@@ -643,28 +644,24 @@ export const WeeklyMenuManagementPage: React.FC = () => {
 
               {/* Lọc Trạng thái */}
               <div className="w-[160px]">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Trạng thái
-                </label>
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">{translateText("Trạng thái")}</label>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white hover:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition cursor-pointer"
                 >
-                  <option value="ALL">Tất cả trạng thái</option>
-                  <option value="DRAFT">Bản dự thảo</option>
-                  <option value="SUBMITTED_FOR_REVIEW">Chờ BGH duyệt</option>
-                  <option value="APPROVED">Đã duyệt</option>
-                  <option value="ACTIVE">Đang áp dụng (Khóa)</option>
-                  <option value="REJECTED">Bị từ chối</option>
+                  <option value="ALL">{translateText("Tất cả trạng thái")}</option>
+                  <option value="DRAFT">{translateText("Bản dự thảo")}</option>
+                  <option value="SUBMITTED_FOR_REVIEW">{translateText("Chờ BGH duyệt")}</option>
+                  <option value="APPROVED">{translateText("Đã duyệt")}</option>
+                  <option value="ACTIVE">{translateText("Đang áp dụng (Khóa)")}</option>
+                  <option value="REJECTED">{translateText("Bị từ chối")}</option>
                 </select>
               </div>
 
               {/* Thùng rác */}
               <div>
-                <label className="text-[11px] font-bold text-transparent block mb-1 select-none">
-                  Thao tác
-                </label>
+                <label className="text-[11px] font-bold text-transparent block mb-1 select-none">{translateText("Thao tác")}</label>
                 <button
                   onClick={() => setShowDeleted(!showDeleted)}
                   className={`px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
@@ -672,11 +669,11 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                       ? "bg-rose-50 border-rose-300 text-rose-700"
                       : "border-slate-300 text-slate-600 hover:bg-slate-50"
                   }`}
-                  title="Xem các thực đơn đã xóa mềm trong thùng rác"
+                  title={translateText("Xem các thực đơn đã xóa mềm trong thùng rác")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>
-                    {showDeleted ? "Thùng rác (Đang xem)" : "Thùng rác"}
+                    {translateText(showDeleted ? "Thùng rác (Đang xem)" : "Thùng rác")}
                   </span>
                 </button>
               </div>
@@ -684,9 +681,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
               {/* Lọc Phiên bản nếu có nhiều version */}
               {Array.isArray(menuVersions) && menuVersions.length > 1 && (
                 <div>
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                    Phiên bản
-                  </label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">{translateText("Phiên bản")}</label>
                   <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
                     {menuVersions.map((v) => (
                       <button
@@ -697,8 +692,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                             ? "bg-white text-emerald-800 shadow-xs"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
-                      >
-                        v{v.version}.0
+                      >{translateText("v")}{v.version}.0
                       </button>
                     ))}
                   </div>
@@ -714,10 +708,8 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 className="px-4 py-2.5 rounded-2xl bg-emerald-600 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition hover:scale-102 active:scale-98 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-emerald-200 animate-pulse" />
-                <span>Tự động tạo thực đơn</span>
-                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-white/20 text-white">
-                  Tạo gợi ý
-                </span>
+                <span>{translateText("Tự động tạo thực đơn")}</span>
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-white/20 text-white">{translateText("Tạo gợi ý")}</span>
               </button>
 
 
@@ -728,7 +720,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 className="px-3.5 py-2.5 rounded-2xl border border-slate-200 hover:border-emerald-300 bg-white text-slate-700 hover:text-emerald-700 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs hover:bg-emerald-50/50 cursor-pointer"
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                <span>Import Excel</span>
+                <span>{translateText("Import Excel")}</span>
               </button>
             </div>
           </div>
@@ -753,7 +745,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                       ? "bg-rose-50/90 border-rose-300 text-rose-900 hover:bg-rose-100 hover:border-rose-400"
                       : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                   }`}
-                  title="Phân loại dinh dưỡng 3 nhóm học sinh: Dị ứng, Thấp còi (thêm lượng ăn), Béo phì (giảm calo)"
+                  title={translateText("Phân loại dinh dưỡng 3 nhóm học sinh: Dị ứng, Thấp còi (thêm lượng ăn), Béo phì (giảm calo)")}
                 >
                   <div className="relative">
                     <AlertCircle
@@ -767,31 +759,27 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-600 rounded-full animate-ping" />
                     )}
                   </div>
-                  <span>Phân loại Dinh dưỡng (3 nhóm học sinh)</span>
+                  <span>{translateText("Phân loại Dinh dưỡng (3 nhóm học sinh)")}</span>
                   {advisory && (
                     <div className="flex items-center gap-1.5 font-black">
                       {advisory.allergySummary.totalConflicts > 0 && (
                         <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-600 text-white shadow-2xs">
-                          {advisory.allergySummary.totalConflicts} Dị ứng
-                        </span>
+                          {advisory.allergySummary.totalConflicts}{translateText(" Dị ứng")}</span>
                       )}
                       {advisory.bmiSummary.overweightObeseCount +
                         advisory.bmiSummary.wastedUnderweightCount >
                         0 && (
                         <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500 text-white shadow-2xs">
                           {advisory.bmiSummary.overweightObeseCount +
-                            advisory.bmiSummary.wastedUnderweightCount}{" "}
-                          BMI
-                        </span>
+                            advisory.bmiSummary.wastedUnderweightCount}{" "}{translateText("BMI")}</span>
                       )}
                     </div>
                   )}
                 </button>
 
-                <span className="text-xs text-slate-400 font-medium hidden md:inline">
-                  • Tuần {selectedMenu.cycleWeekNumber || 1} (
-                  {selectedMenu.startDate?.split("T")[0]} -{" "}
-                  {selectedMenu.endDate?.split("T")[0]})
+                <span className="text-xs text-slate-400 font-medium hidden md:inline">{translateText("• Tuần ")}{selectedMenu.cycleWeekNumber || 1} (
+                  {translateText(selectedMenu.startDate?.split("T")[0])} -{" "}
+                  {translateText(selectedMenu.endDate?.split("T")[0])})
                 </span>
               </div>
             )}
@@ -803,11 +791,11 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 <button
                   onClick={handleCreateVersion}
                   disabled={actionLoading}
-                  title="Nhân bản thực đơn hiện tại thành phiên bản mới để điều chỉnh mà không mất bản cũ"
+                  title={translateText("Nhân bản thực đơn hiện tại thành phiên bản mới để điều chỉnh mà không mất bản cũ")}
                   className="px-3.5 py-2.5 rounded-2xl border border-slate-200 hover:border-blue-300 bg-white text-slate-700 hover:text-blue-700 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs disabled:opacity-50"
                 >
                   <Copy className="w-4 h-4 text-blue-600" />
-                  <span>Tạo bản v{selectedMenu.version + 1}.0</span>
+                  <span>{translateText("Tạo bản v")}{selectedMenu.version + 1}.0</span>
                 </button>
               )}
 
@@ -822,7 +810,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                     className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/25 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Gửi Hiệu trưởng duyệt</span>
+                    <span>{translateText("Gửi Hiệu trưởng duyệt")}</span>
                   </button>
                 )}
 
@@ -836,14 +824,14 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                       onClick={handleSubmitForReview}
                       disabled={actionLoading}
                       className="px-4 py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
-                      title="Thực đơn đang chờ duyệt, bạn có thể chỉnh sửa các món ăn và bấm nút này để gửi lại bản mới nhất cho Hiệu trưởng"
+                      title={translateText("Thực đơn đang chờ duyệt, bạn có thể chỉnh sửa các món ăn và bấm nút này để gửi lại bản mới nhất cho Hiệu trưởng")}
                     >
                       <Send className="w-4 h-4" />
-                      <span>Cập nhật & Gửi lại Hiệu trưởng duyệt</span>
+                      <span>{translateText("Cập nhật & Gửi lại Hiệu trưởng duyệt")}</span>
                     </button>
                     <div className="px-3 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                       <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
-                      <span>Đang chờ duyệt (Có thể sửa)</span>
+                      <span>{translateText("Đang chờ duyệt (Có thể sửa)")}</span>
                     </div>
                   </div>
                 )}
@@ -859,7 +847,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <div className="px-3.5 py-2 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                           <Clock className="w-4 h-4 text-purple-600 animate-spin" />
-                          <span>Đang chờ Hiệu trưởng cấp quyền sửa</span>
+                          <span>{translateText("Đang chờ Hiệu trưởng cấp quyền sửa")}</span>
                         </div>
                         <button
                           onClick={() =>
@@ -867,20 +855,18 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                           }
                           disabled={actionLoading}
                           className="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold transition cursor-pointer"
-                          title="Hủy yêu cầu xin phép chỉnh sửa"
-                        >
-                          Hủy xin sửa
-                        </button>
+                          title={translateText("Hủy yêu cầu xin phép chỉnh sửa")}
+                        >{translateText("Hủy xin sửa")}</button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setIsRequestEditModalOpen(true)}
                         disabled={actionLoading}
                         className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-purple-600/25 flex items-center gap-1.5 transition cursor-pointer hover:scale-102 active:scale-98"
-                        title="Thực đơn đã duyệt/công bố. Gửi yêu cầu kèm lý do lên Hiệu trưởng để được mở khóa chỉnh sửa."
+                        title={translateText("Thực đơn đã duyệt/công bố. Gửi yêu cầu kèm lý do lên Hiệu trưởng để được mở khóa chỉnh sửa.")}
                       >
                         <ShieldAlert className="w-4 h-4 text-purple-200" />
-                        <span>Xin phép Hiệu trưởng chỉnh sửa</span>
+                        <span>{translateText("Xin phép Hiệu trưởng chỉnh sửa")}</span>
                       </button>
                     )}
                   </>
@@ -896,10 +882,10 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                   <button
                     onClick={() => setIsRespondEditModalOpen(true)}
                     className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-purple-600 hover:from-amber-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition animate-pulse cursor-pointer"
-                    title="Chuyên viên Dinh dưỡng vừa gửi yêu cầu xin phép chỉnh sửa thực đơn đã duyệt này"
+                    title={translateText("Chuyên viên Dinh dưỡng vừa gửi yêu cầu xin phép chỉnh sửa thực đơn đã duyệt này")}
                   >
                     <AlertCircle className="w-4 h-4 text-amber-200" />
-                    <span>Hiệu trưởng: Duyệt yêu cầu xin sửa</span>
+                    <span>{translateText("Hiệu trưởng: Duyệt yêu cầu xin sửa")}</span>
                   </button>
                 )}
 
@@ -909,7 +895,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 isPrincipal && (
                   <div className="px-3.5 py-2 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                     <Clock className="w-4 h-4 text-slate-500" />
-                    <span>Bản dự thảo (Chờ CV Dinh dưỡng gửi duyệt)</span>
+                    <span>{translateText("Bản dự thảo (Chờ CV Dinh dưỡng gửi duyệt)")}</span>
                   </div>
                 )}
 
@@ -919,7 +905,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 isPrincipal && (
                   <div className="px-3.5 py-2 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                     <AlertCircle className="w-4 h-4 text-rose-600" />
-                    <span>Đã từ chối (Chờ CV Dinh dưỡng sửa lại)</span>
+                    <span>{translateText("Đã từ chối (Chờ CV Dinh dưỡng sửa lại)")}</span>
                   </div>
                 )}
 
@@ -933,7 +919,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                     className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Hiệu trưởng: Phê duyệt / Từ chối</span>
+                    <span>{translateText("Hiệu trưởng: Phê duyệt / Từ chối")}</span>
                   </button>
                 )}
 
@@ -944,7 +930,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 selectedMenu.editRequestStatus !== "PENDING" && (
                   <div className="px-3.5 py-2 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                     <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                    <span>Đã được Hiệu trưởng duyệt</span>
+                    <span>{translateText("Đã được Hiệu trưởng duyệt")}</span>
                   </div>
                 )}
 
@@ -958,7 +944,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                     className="px-4 py-2.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md shadow-emerald-700/25 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
                   >
                     <Lock className="w-4 h-4" />
-                    <span>Hiệu trưởng: Khóa & Công bố</span>
+                    <span>{translateText("Hiệu trưởng: Khóa & Công bố")}</span>
                   </button>
                 )}
 
@@ -968,7 +954,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                   selectedMenu.status === "PUBLISHED") && (
                   <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
                     <Lock className="w-4 h-4 text-emerald-700" />
-                    <span>Đã khóa & Công bố toàn trường</span>
+                    <span>{translateText("Đã khóa & Công bố toàn trường")}</span>
                   </div>
                 )}
 
@@ -979,7 +965,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 <button
                   onClick={handleOpenPrintPreview}
                   className="p-2.5 rounded-2xl border border-slate-200 hover:bg-slate-100 text-slate-700 transition cursor-pointer"
-                  title="Xem trước và In thực đơn (PDF A4)"
+                  title={translateText("Xem trước và In thực đơn (PDF A4)")}
                 >
                   <Printer className="w-4 h-4" />
                 </button>
@@ -992,7 +978,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                   <button
                     onClick={handleSoftDelete}
                     className="p-2.5 rounded-2xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                    title="Xóa mềm thực đơn vào thùng rác"
+                    title={translateText("Xóa mềm thực đơn vào thùng rác")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -1005,7 +991,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                   className="px-3 py-2 rounded-2xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
-                  <span>Khôi phục bản này</span>
+                  <span>{translateText("Khôi phục bản này")}</span>
                 </button>
               )}
             </div>

@@ -14,7 +14,10 @@ const compiled = ts.transpileModule(source, {
   },
 }).outputText;
 const moduleValue = { exports: {} };
-new Function('module', 'exports', compiled)(moduleValue, moduleValue.exports);
+new Function('module', 'exports', 'require', compiled)(moduleValue, moduleValue.exports, name => {
+  if (name.endsWith('/i18n/language')) return require('./helpers/i18n.cjs').createI18n().api;
+  throw new Error('Unexpected import: ' + name);
+});
 const {
   calculateGrossWeight,
   getSampleState,

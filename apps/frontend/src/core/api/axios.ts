@@ -93,6 +93,10 @@ apiClient.interceptors.request.use(
       delete config.headers.Authorization;
     }
 
+    // 3. Ngôn ngữ hiện tại (i18n)
+    const currentLang = localStorage.getItem('kidmeal.language') || 'vi';
+    config.headers['Accept-Language'] = currentLang === 'en' ? 'en-US,en;q=0.9' : 'vi-VN,vi;q=0.9';
+
     return config;
   },
   (error) => Promise.reject(error),

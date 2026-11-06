@@ -1,3 +1,4 @@
+import { useLanguage } from './core/i18n/useLanguage';
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AdminDashboardLayout } from "./layouts/AdminDashboardLayout";
@@ -114,6 +115,7 @@ export const getPortalPathForRoles = (roles?: any[]): string => {
  * Component điều hướng thông minh theo Role người dùng khi muốn vào đúng Cổng
  */
 const RoleBasedRedirect: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   const targetPath = getPortalPathForRoles(user?.roles);
   return <Navigate to={targetPath} replace />;
@@ -125,6 +127,7 @@ const RoleBasedRedirect: React.FC = () => {
  * - Nếu CHƯA ĐĂNG NHẬP / ĐÃ ĐĂNG XUẤT / HẾT HẠN TOKEN -> Vào trang HomePage.
  */
 const HomeOrPortalRedirect: React.FC = () => {
+  useLanguage();
   const { isAuthenticated, accessToken, user } = useAuthStore();
 
   if (isAuthenticated && accessToken && !isJwtExpired(accessToken)) {
@@ -136,6 +139,7 @@ const HomeOrPortalRedirect: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  useLanguage();
   const { hydrate, refreshProfile } = useAuthStore();
 
   // Hydrate auth state từ localStorage 1 lần khi app mount & kiểm tra token hết hạn

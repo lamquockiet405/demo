@@ -118,10 +118,20 @@ export function publishedMenuDay(
         if (typeof name !== "string" || !name.trim()) continue;
         const nutrient = (field: string) =>
           dish.nutritionAvailable === false ? null : numberOrNull(dish[field]);
+        const rawCategory = String(dish.categoryName || dish.categoryCode || "Món ăn");
+        const lowerCat = rawCategory.toLowerCase();
+        const category =
+          (type === "BREAKFAST" || type === "MORNING_SNACK") &&
+          (lowerCat.includes("xế") ||
+            lowerCat.includes("chiều") ||
+            lowerCat.includes("phụ") ||
+            rawCategory === "SNACK_AFTERNOON")
+            ? "Món sáng"
+            : rawCategory;
         group.dishes.push({
           id: String(dish.dishId ?? dish.dish?.id ?? dish.id ?? name),
           name: name.trim(),
-          category: String(dish.categoryName || dish.categoryCode || "Món ăn"),
+          category,
           portionSizeG: numberOrNull(dish.portionSizeG),
           calories:
             dish.nutritionAvailable === false

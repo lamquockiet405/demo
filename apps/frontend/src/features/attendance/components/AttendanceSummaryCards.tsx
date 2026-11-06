@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Users, Utensils, UtensilsCrossed, AlertTriangle, ShieldAlert, HeartPulse } from 'lucide-react';
 
@@ -16,20 +18,20 @@ interface AttendanceSummaryCardsProps {
 }
 
 export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({ summary }) => {
+  useLanguage();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Card 1: Tổng sĩ số lớp */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
         <div>
-          <p className="text-xs font-semibold text-slate-500">Tổng sĩ số lớp</p>
+          <p className="text-xs font-semibold text-slate-500">{translateText("Tổng sĩ số lớp")}</p>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-3xl font-black text-slate-900">{summary.totalClassStudents}</span>
-            <span className="text-xs font-semibold text-slate-500">trẻ</span>
+            <span className="text-xs font-semibold text-slate-500">{translateText("trẻ")}</span>
           </div>
           <p className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            {summary.officialRatioPercent}% học sinh chính thức
-          </p>
+            {summary.officialRatioPercent}{translateText("% học sinh chính thức")}</p>
         </div>
         <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
           <Users className="w-6 h-6" />
@@ -39,10 +41,10 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({ 
       {/* Card 2: Đăng ký ăn hôm nay */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
         <div>
-          <p className="text-xs font-semibold text-slate-500">Đăng ký ăn hôm nay</p>
+          <p className="text-xs font-semibold text-slate-500">{translateText("Đăng ký ăn hôm nay")}</p>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-3xl font-black text-teal-700">{summary.registeredToday}</span>
-            <span className="text-xs font-semibold text-slate-500">/ {summary.totalClassStudents} bé ({summary.registeredRatioPercent}%)</span>
+            <span className="text-xs font-semibold text-slate-500">/ {summary.totalClassStudents}{translateText(" bé (")}{summary.registeredRatioPercent}%)</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden max-w-[120px]">
             <div
@@ -59,15 +61,14 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({ 
       {/* Card 3: Nghỉ ăn / Vắng mặt */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
         <div>
-          <p className="text-xs font-semibold text-slate-500">Nghỉ ăn / Vắng mặt</p>
+          <p className="text-xs font-semibold text-slate-500">{translateText("Nghỉ ăn / Vắng mặt")}</p>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-3xl font-black text-amber-600">{summary.absentCount}</span>
-            <span className="text-xs font-semibold text-slate-500">trẻ</span>
+            <span className="text-xs font-semibold text-slate-500">{translateText("trẻ")}</span>
           </div>
           <p className="text-[11px] font-medium text-amber-700 mt-1 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            {summary.absentPermitted} có phép • {summary.absentUnpermitted} không phép
-          </p>
+            {summary.absentPermitted}{translateText(" có phép • ")}{summary.absentUnpermitted}{translateText(" không phép")}</p>
         </div>
         <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
           <UtensilsCrossed className="w-6 h-6" />
@@ -77,14 +78,14 @@ export const AttendanceSummaryCards: React.FC<AttendanceSummaryCardsProps> = ({ 
       {/* Card 4: Chế độ kiêng / Dị ứng */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
         <div>
-          <p className="text-xs font-semibold text-slate-500">Chế độ kiêng / Dị ứng</p>
+          <p className="text-xs font-semibold text-slate-500">{translateText("Chế độ kiêng / Dị ứng")}</p>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-3xl font-black text-red-600">{summary.dietSpecialCount}</span>
-            <span className="text-xs font-semibold text-slate-500">cần món riêng</span>
+            <span className="text-xs font-semibold text-slate-500">{translateText("cần món riêng")}</span>
           </div>
-          <p className="text-[11px] font-medium text-red-700 mt-1 flex items-center gap-1 truncate max-w-[150px]" title={summary.dietSpecialSummary}>
+          <p className="text-[11px] font-medium text-red-700 mt-1 flex items-center gap-1 truncate max-w-[150px]" title={translateText(summary.dietSpecialSummary)}>
             <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-            {summary.dietSpecialSummary}
+            {translateText(summary.dietSpecialSummary)}
           </p>
         </div>
         <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center">

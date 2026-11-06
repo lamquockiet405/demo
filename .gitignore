@@ -48,6 +48,7 @@ Thumbs.db
 
 
 .docker-test/
+.vercel/
 database/backups/
 docs/database-snapshot/
 *-test-results*.json
@@ -55,3 +56,9 @@ docs/database-snapshot/
 api-test-results*.json
 unit-test-results*.json
 TEST-REPORT.md
+
+# Local secrets and database backup archive
+.env.*
+!.env.example
+nginx/ssl/*.pem
+/database.zip

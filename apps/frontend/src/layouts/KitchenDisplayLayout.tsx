@@ -1,3 +1,5 @@
+import { getLocale, t as translateText } from '../core/i18n/language';
+import { useLanguage } from '../core/i18n/useLanguage';
 import React, {
   useCallback,
   useEffect,
@@ -37,12 +39,12 @@ import {
 import "../features/kitchen/kitchen-display.css";
 
 const schoolTime = () =>
-  new Date().toLocaleTimeString("vi-VN", {
+  new Date().toLocaleTimeString(getLocale(), {
     timeZone: "Asia/Ho_Chi_Minh",
     hour12: false,
   });
 const displayCount = (value: number | null | undefined) =>
-  value == null ? "—" : value.toLocaleString("vi-VN");
+  value == null ? "—" : value.toLocaleString(getLocale());
 const finished = (status: KitchenStatus) =>
   status === "COMPLETED" || status === "DELIVERED";
 const preparing = (status: KitchenStatus) =>
@@ -63,15 +65,16 @@ function Metric({
   tone: string;
   children: React.ReactNode;
 }) {
+  useLanguage();
   return (
     <article className={`kds-metric kds-tone-${tone}`}>
       <div className="kds-metric-label">
-        <span>{label}</span>
-        <span className="kds-metric-icon">{icon}</span>
+        <span>{translateText(label)}</span>
+        <span className="kds-metric-icon">{translateText(icon)}</span>
       </div>
       <div className="kds-metric-value">
-        <strong>{value}</strong>
-        <span>{unit}</span>
+        <strong>{translateText(value)}</strong>
+        <span>{translateText(unit)}</span>
       </div>
       <div className="kds-metric-foot">{children}</div>
     </article>
@@ -79,6 +82,7 @@ function Metric({
 }
 
 export const KitchenDisplayLayout: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   const [currentDate, setCurrentDate] = useState(getSchoolDate);
   const published = usePublishedDay(currentDate);
@@ -123,7 +127,7 @@ export const KitchenDisplayLayout: React.FC = () => {
       setUpdatedAt(
         Number.isNaN(receivedAt.getTime())
           ? schoolTime()
-          : receivedAt.toLocaleTimeString("vi-VN", {
+          : receivedAt.toLocaleTimeString(getLocale(), {
               timeZone: "Asia/Ho_Chi_Minh",
             }),
       );
@@ -232,17 +236,17 @@ export const KitchenDisplayLayout: React.FC = () => {
         <main className="kds-main">
           <div className="kds-page-heading">
             <div>
-              <span className="kds-eyebrow">BẾP BÁN TRÚ</span>
-              <h2>Tổng quan điều phối</h2>
+              <span className="kds-eyebrow">{translateText("BẾP BÁN TRÚ")}</span>
+              <h2>{translateText("Tổng quan điều phối")}</h2>
             </div>
             <p className="kds-update">
-              {isLoading
+              {translateText(isLoading
                 ? "Đang tải dữ liệu…"
                 : updatedAt
                   ? `Cập nhật lúc ${updatedAt}`
-                  : "Chưa có dữ liệu"}
+                  : "Chưa có dữ liệu")}
               {historical && (
-                <span className="kds-tag">Đang xem ngày đã chọn</span>
+                <span className="kds-tag">{translateText("Đang xem ngày đã chọn")}</span>
               )}
             </p>
           </div>
@@ -250,8 +254,8 @@ export const KitchenDisplayLayout: React.FC = () => {
             <div className="kds-error" role="alert">
               <AlertOctagon size={19} />
               <span>
-                {loadError}
-                {data && " Đang hiển thị dữ liệu tải gần nhất."}
+                {translateText(loadError)}
+                {translateText(data && " Đang hiển thị dữ liệu tải gần nhất.")}
               </span>
               <button
                 onClick={() => {
@@ -259,18 +263,17 @@ export const KitchenDisplayLayout: React.FC = () => {
                   void published.reload();
                 }}
                 disabled={isLoading}
-              >
-                Thử lại <RotateCcw size={14} />
+              >{translateText("Thử lại ")}<RotateCcw size={14} />
               </button>
             </div>
           )}
           {actionError && (
             <div className="kds-error" role="alert">
               <AlertOctagon size={19} />
-              <span>{actionError}</span>
+              <span>{translateText(actionError)}</span>
               <button
                 onClick={() => setActionError("")}
-                aria-label="Đóng thông báo"
+                aria-label={translateText("Đóng thông báo")}
               >
                 <X size={17} />
               </button>
@@ -278,52 +281,50 @@ export const KitchenDisplayLayout: React.FC = () => {
           )}
           <section
             className="kds-metrics"
-            aria-label="Thống kê suất ăn"
+            aria-label={translateText("Thống kê suất ăn")}
             aria-busy={isLoading}
           >
             <Metric
-              label="Tổng suất trưa chính"
+              label={translateText("Tổng suất trưa chính")}
               value={displayCount(summary?.lunch)}
               unit="suất ăn"
               tone="green"
               icon={<UtensilsCrossed size={17} />}
             >
-              <span>
-                Cơm mềm <b>{displayCount(summary?.kindergarten)}</b>
+              <span>{translateText("Cơm mềm ")}<b>{translateText(displayCount(summary?.kindergarten))}</b>
               </span>
-              <span>
-                Cháo / xay <b>{displayCount(summary?.toddler)}</b>
+              <span>{translateText("Cháo / xay ")}<b>{translateText(displayCount(summary?.toddler))}</b>
               </span>
             </Metric>
             <Metric
-              label="Bữa phụ xế"
+              label={translateText("Bữa phụ xế")}
               value={displayCount(summary?.snack)}
               unit="phần ăn xế"
               tone="blue"
               icon={<Clock size={17} />}
             >
-              <span>Khung giờ phục vụ</span>
+              <span>{translateText("Khung giờ phục vụ")}</span>
               <b>14:30</b>
             </Metric>
             <Metric
-              label="Học sinh vắng"
+              label={translateText("Học sinh vắng")}
               value={displayCount(summary?.absent)}
               unit="trẻ vắng"
               tone="rose"
               icon={<Users size={17} />}
             >
               <span>
-                {summary?.absent == null
+                {translateText(summary?.absent == null
                   ? "Chưa có số liệu điểm danh"
-                  : "Theo điểm danh ngày đã chọn"}
+                  : "Theo điểm danh ngày đã chọn")}
               </span>
             </Metric>
             <Metric
-              label="Tiến độ báo bếp"
+              label={translateText("Tiến độ báo bếp")}
               value={
                 <>
-                  {displayCount(summary?.locked)}
-                  <small> / {displayCount(summary?.total)}</small>
+                  {translateText(displayCount(summary?.locked))}
+                  <small> / {translateText(displayCount(summary?.total))}</small>
                 </>
               }
               unit="lớp đã chốt"
@@ -333,7 +334,7 @@ export const KitchenDisplayLayout: React.FC = () => {
               <div
                 className="kds-progress"
                 role="progressbar"
-                aria-label="Tỷ lệ lớp chốt báo bếp"
+                aria-label={translateText("Tỷ lệ lớp chốt báo bếp")}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={summary?.locked == null ? undefined : completion}
@@ -341,26 +342,26 @@ export const KitchenDisplayLayout: React.FC = () => {
                 <span style={{ width: `${completion}%` }} />
               </div>
               <b>
-                {summary?.locked == null ? "Chưa có dữ liệu" : `${completion}%`}
+                {translateText(summary?.locked == null ? "Chưa có dữ liệu" : `${completion}%`)}
               </b>
             </Metric>
             <Metric
-              label="Suất ăn riêng"
+              label={translateText("Suất ăn riêng")}
               value={displayCount(summary?.special)}
               unit="khay riêng"
               tone="red"
               icon={<ShieldCheck size={17} />}
             >
               <span>
-                {data
+                {translateText(data
                   ? `${data.alerts.length} yêu cầu cần kiểm tra`
-                  : "Đang kiểm tra yêu cầu"}
+                  : "Đang kiểm tra yêu cầu")}
               </span>
               <AlertOctagon size={14} />
             </Metric>
           </section>
 
-          <section className="kds-overview" aria-label="Dị ứng và thực đơn">
+          <section className="kds-overview" aria-label={translateText("Dị ứng và thực đơn")}>
             <article
               className={`kds-panel kds-allergies ${data?.alerts.length ? "has-alerts" : ""}`}
             >
@@ -369,35 +370,32 @@ export const KitchenDisplayLayout: React.FC = () => {
                   <span className="kds-section-icon red">
                     <ShieldCheck size={20} />
                   </span>
-                  <h2>
-                    Dị ứng & suất ăn riêng{" "}
+                  <h2>{translateText("Dị ứng & suất ăn riêng")}{" "}
                     <span className="kds-count">
-                      {data ? data.alerts.length : "—"}
+                      {translateText(data ? data.alerts.length : "—")}
                     </span>
                   </h2>
                 </div>
-                <span className="kds-tag">Ưu tiên kiểm tra</span>
+                <span className="kds-tag">{translateText("Ưu tiên kiểm tra")}</span>
               </div>
               <div className="kds-allergy-list">
                 {!data ? (
                   <div className="kds-empty">
                     <ShieldCheck size={30} />
                     <strong>
-                      {isLoading
+                      {translateText(isLoading
                         ? "Đang tải yêu cầu ăn riêng…"
-                        : "Chưa tải được yêu cầu ăn riêng"}
+                        : "Chưa tải được yêu cầu ăn riêng")}
                     </strong>
-                    <p>Kiểm tra dữ liệu trước khi chuẩn bị suất ăn.</p>
+                    <p>{translateText("Kiểm tra dữ liệu trước khi chuẩn bị suất ăn.")}</p>
                   </div>
                 ) : data.alerts.length === 0 ? (
                   <div className="kds-empty kds-safe">
                     <span className="kds-empty-icon">
                       <ShieldCheck size={26} />
                     </span>
-                    <strong>Không có yêu cầu ăn riêng trong dữ liệu</strong>
-                    <p>
-                      Tiếp tục kiểm tra nhãn suất ăn trước khi giao lên lớp.
-                    </p>
+                    <strong>{translateText("Không có yêu cầu ăn riêng trong dữ liệu")}</strong>
+                    <p>{translateText("Tiếp tục kiểm tra nhãn suất ăn trước khi giao lên lớp.")}</p>
                   </div>
                 ) : (
                   data.alerts.map((alert) => (
@@ -408,24 +406,24 @@ export const KitchenDisplayLayout: React.FC = () => {
                       <div className="kds-allergy-title">
                         <strong>{alert.childName}</strong>
                         <span className="kds-tag">
-                          {alert.className || "Chưa có lớp"}
+                          {alert.className || translateText("Chưa có lớp")}
                         </span>
-                        <span className="kds-severity">{alert.severity}</span>
+                        <span className="kds-severity">{translateText(alert.severity)}</span>
                       </div>
                       <p>
-                        <b>Yêu cầu:</b>{" "}
-                        {alert.allergen || "Cần đối chiếu với giáo viên"}
+                        <b>{translateText("Yêu cầu:")}</b>{" "}
+                        {translateText(alert.allergen || "Cần đối chiếu với giáo viên")}
                       </p>
                       {alert.replacementMeal && (
                         <div className="kds-replacement">
                           <ChefHat size={15} />
                           <span>
-                            <b>Suất thay thế:</b> {alert.replacementMeal}
+                            <b>{translateText("Suất thay thế:")}</b> {translateText(alert.replacementMeal)}
                           </span>
                         </div>
                       )}
                       {alert.notes && (
-                        <p className="kds-note">Ghi chú: {alert.notes}</p>
+                        <p className="kds-note">{translateText("Ghi chú: ")}{alert.notes}</p>
                       )}
                     </div>
                   ))
@@ -433,10 +431,7 @@ export const KitchenDisplayLayout: React.FC = () => {
               </div>
               <footer className="kds-allergy-footer">
                 <AlertOctagon size={14} />
-                <span>
-                  Kiểm tra tem nhãn và tách riêng khay dị ứng trước khi chuyển
-                  lên lớp.
-                </span>
+                <span>{translateText("Kiểm tra tem nhãn và tách riêng khay dị ứng trước khi chuyển lên lớp.")}</span>
               </footer>
             </article>
             <div className="kds-side-panels">
@@ -446,47 +441,41 @@ export const KitchenDisplayLayout: React.FC = () => {
                     <span className="kds-section-icon amber">
                       <UtensilsCrossed size={20} />
                     </span>
-                    <h2>Thực đơn trưa chính</h2>
+                    <h2>{translateText("Thực đơn trưa chính")}</h2>
                   </div>
-                  <Link className="kds-tag" to="/kitchen/menus">
-                    Xem thực đơn đã công bố
-                  </Link>
+                  <Link className="kds-tag" to="/kitchen/menus">{translateText("Xem thực đơn đã công bố")}</Link>
                 </div>
                 <div className="kds-menu-grid">
                   {published.loading ? (
-                    <div className="kds-menu-empty" role="status">
-                      Đang tải thực đơn đã công bố…
-                    </div>
+                    <div className="kds-menu-empty" role="status">{translateText("Đang tải thực đơn đã công bố…")}</div>
                   ) : published.error ? (
                     <div className="kds-menu-empty" role="alert">
-                      {published.error}
+                      {translateText(published.error)}
                     </div>
                   ) : lunchDishes.length ? (
                     lunchDishes.map((dish, index) => (
                       <div className="kds-dish" key={dish.id + "-" + index}>
-                        <span>{dish.category}</span>
+                        <span>{translateText(dish.category)}</span>
                         <h3>{dish.name}</h3>
                         <div>
                           <span>
-                            {dish.portionSizeG === null
+                            {translateText(dish.portionSizeG === null
                               ? "Chưa có định lượng"
-                              : dish.portionSizeG + " g"}
+                              : dish.portionSizeG + " g")}
                           </span>
                           <b>
-                            {dish.calories === null
+                            {translateText(dish.calories === null
                               ? "—"
-                              : dish.calories + " kcal"}
+                              : dish.calories + " kcal")}
                           </b>
                         </div>
                         <small className="block text-[9px] text-slate-500 mt-2">
-                          {dish.source}
+                          {translateText(dish.source)}
                         </small>
                       </div>
                     ))
                   ) : (
-                    <div className="kds-menu-empty">
-                      Chưa có thực đơn trưa đã công bố cho ngày đã chọn.
-                    </div>
+                    <div className="kds-menu-empty">{translateText("Chưa có thực đơn trưa đã công bố cho ngày đã chọn.")}</div>
                   )}
                 </div>
               </article>
@@ -499,44 +488,34 @@ export const KitchenDisplayLayout: React.FC = () => {
           >
             <div className="kds-coordination-heading">
               <div>
-                <span className="kds-eyebrow">ĐIỀU PHỐI THEO LỚP</span>
-                <h2 id="kds-coordination-title">
-                  Bảng khẩu phần{" "}
+                <span className="kds-eyebrow">{translateText("ĐIỀU PHỐI THEO LỚP")}</span>
+                <h2 id="kds-coordination-title">{translateText("Bảng khẩu phần")}{" "}
                   <span className="kds-count">
-                    {data ? data.classes.length : "—"} lớp
-                  </span>
+                    {translateText(data ? data.classes.length : "—")}{translateText(" lớp")}</span>
                 </h2>
-                <p>
-                  Theo dõi số lượng và tiến độ chuẩn bị suất ăn cho từng lớp.
-                </p>
+                <p>{translateText("Theo dõi số lượng và tiến độ chuẩn bị suất ăn cho từng lớp.")}</p>
               </div>
               <div className="kds-legend">
                 <span>
-                  <i />
-                  Chờ tiếp nhận
-                </span>
+                  <i />{translateText("Chờ tiếp nhận")}</span>
                 <span>
-                  <i className="amber" />
-                  Đang chuẩn bị
-                </span>
+                  <i className="amber" />{translateText("Đang chuẩn bị")}</span>
                 <span>
-                  <i className="green" />
-                  Đã xuất khay
-                </span>
+                  <i className="green" />{translateText("Đã xuất khay")}</span>
               </div>
             </div>
             <div className="kds-filter-bar">
               <label className="kds-search">
                 <Search size={17} />
                 <input
-                  aria-label="Tìm lớp, phòng hoặc giáo viên"
-                  placeholder="Tìm tên lớp, phòng, giáo viên…"
+                  aria-label={translateText("Tìm lớp, phòng hoặc giáo viên")}
+                  placeholder={translateText("Tìm tên lớp, phòng, giáo viên…")}
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
                 {searchQuery && (
                   <button
-                    aria-label="Xóa tìm kiếm"
+                    aria-label={translateText("Xóa tìm kiếm")}
                     onClick={() => setSearchQuery("")}
                   >
                     <X size={15} />
@@ -544,43 +523,35 @@ export const KitchenDisplayLayout: React.FC = () => {
                 )}
               </label>
               <select
-                aria-label="Lọc khối lớp"
+                aria-label={translateText("Lọc khối lớp")}
                 value={selectedGrade}
                 onChange={(event) => setSelectedGrade(event.target.value)}
               >
-                <option value="ALL">Tất cả khối lớp</option>
-                <option value="TODDLER">Nhà trẻ · Cháo / xay</option>
-                <option value="KINDERGARTEN">Mẫu giáo · Cơm mềm</option>
+                <option value="ALL">{translateText("Tất cả khối lớp")}</option>
+                <option value="TODDLER">{translateText("Nhà trẻ · Cháo / xay")}</option>
+                <option value="KINDERGARTEN">{translateText("Mẫu giáo · Cơm mềm")}</option>
               </select>
               <select
-                aria-label="Lọc trạng thái"
+                aria-label={translateText("Lọc trạng thái")}
                 value={selectedStatus}
                 onChange={(event) => setSelectedStatus(event.target.value)}
               >
-                <option value="ALL">Tất cả trạng thái</option>
-                <option value="LOCKED">Đã chốt báo bếp</option>
-                <option value="UNLOCKED">Chưa chốt báo bếp</option>
-                <option value="PREPARING">Đang chuẩn bị / chia suất</option>
-                <option value="READY_DELIVERY">Sẵn sàng giao</option>
-                <option value="COMPLETED">Đã xuất khay / giao lớp</option>
+                <option value="ALL">{translateText("Tất cả trạng thái")}</option>
+                <option value="LOCKED">{translateText("Đã chốt báo bếp")}</option>
+                <option value="UNLOCKED">{translateText("Chưa chốt báo bếp")}</option>
+                <option value="PREPARING">{translateText("Đang chuẩn bị / chia suất")}</option>
+                <option value="READY_DELIVERY">{translateText("Sẵn sàng giao")}</option>
+                <option value="COMPLETED">{translateText("Đã xuất khay / giao lớp")}</option>
               </select>
-              <span className="kds-filter-result">
-                Hiển thị <b>{filteredClasses.length}</b> /{" "}
-                {data?.classes.length || 0} lớp
-              </span>
+              <span className="kds-filter-result">{translateText("Hiển thị ")}<b>{filteredClasses.length}</b> /{" "}
+                {data?.classes.length || 0}{translateText(" lớp")}</span>
               {hasFilters && (
-                <button className="kds-reset" onClick={resetFilters}>
-                  Xóa bộ lọc
-                </button>
+                <button className="kds-reset" onClick={resetFilters}>{translateText("Xóa bộ lọc")}</button>
               )}
             </div>
             {historical && (
               <div className="kds-date-notice">
-                <Calendar size={15} />
-                Đang xem ngày {currentDate.split("-").reverse().join("/")}. Chỉ
-                cập nhật tiến độ cho ngày hôm nay.
-                <button onClick={() => setCurrentDate(getSchoolDate())}>
-                  Về hôm nay <ArrowRight size={14} />
+                <Calendar size={15} />{translateText("Đang xem ngày ")}{translateText(currentDate.split("-").reverse().join("/"))}{translateText(". Chỉ cập nhật tiến độ cho ngày hôm nay.")}<button onClick={() => setCurrentDate(getSchoolDate())}>{translateText("Về hôm nay ")}<ArrowRight size={14} />
                 </button>
               </div>
             )}
@@ -604,13 +575,10 @@ export const KitchenDisplayLayout: React.FC = () => {
                     const cannotUpdate =
                       busy ||
                       historical ||
-                      item.isLocked === false ||
                       !item.classId;
                     const reason = historical
-                      ? "Chỉ cập nhật tiến độ ngày hôm nay"
-                      : item.isLocked === false
-                        ? "Chờ giáo viên chốt báo bếp"
-                        : undefined;
+                      ? translateText("Chỉ cập nhật tiến độ ngày hôm nay")
+                      : undefined;
                     return (
                       <article
                         className={`kds-class-card ${done ? "completed" : preparing(item.kitchenStatus) ? "preparing" : ""}`}
@@ -626,45 +594,43 @@ export const KitchenDisplayLayout: React.FC = () => {
                             ) : (
                               <Clock size={11} />
                             )}
-                            {item.isLocked === true
+                            {translateText(item.isLocked === true
                               ? "Đã chốt"
                               : item.isLocked === false
                                 ? "Chờ chốt"
-                                : "Chưa rõ chốt"}
+                                : "Chưa rõ chốt")}
                           </span>
                         </div>
                         <p className="kds-teacher">
                           {item.roomNumber && (
-                            <span>Phòng {item.roomNumber} · </span>
-                          )}
-                          GV: {item.teacherName || "Chưa có thông tin"}
+                            <span>{translateText("Phòng ")}{translateText(item.roomNumber)} · </span>
+                          )}{translateText("GV: ")}{item.teacherName || translateText("Chưa có thông tin")}
                         </p>
-                        <span className="kds-grade">{item.gradeLabel}</span>
+                        <span className="kds-grade">{translateText(item.gradeLabel)}</span>
                         <div className="kds-portions">
                           <div>
-                            <span>Bữa trưa</span>
-                            <strong>{displayCount(item.lunchCount)}</strong>
-                            <small>suất</small>
+                            <span>{translateText("Bữa trưa")}</span>
+                            <strong>{translateText(displayCount(item.lunchCount))}</strong>
+                            <small>{translateText("suất")}</small>
                           </div>
                           <div>
-                            <span>Bữa xế</span>
-                            <strong>{displayCount(item.snackCount)}</strong>
-                            <small>phần</small>
+                            <span>{translateText("Bữa xế")}</span>
+                            <strong>{translateText(displayCount(item.snackCount))}</strong>
+                            <small>{translateText("phần")}</small>
                           </div>
                           <div>
-                            <span>Vắng mặt</span>
-                            <strong>{displayCount(item.absentCount)}</strong>
-                            <small>trẻ</small>
+                            <span>{translateText("Vắng mặt")}</span>
+                            <strong>{translateText(displayCount(item.absentCount))}</strong>
+                            <small>{translateText("trẻ")}</small>
                           </div>
                         </div>
                         {item.specialCount != null && item.specialCount > 0 && (
                           <p className="kds-class-special">
                             <ShieldCheck size={13} />
-                            {item.specialCount} suất ăn riêng cần kiểm tra
-                          </p>
+                            {item.specialCount}{translateText(" suất ăn riêng cần kiểm tra")}</p>
                         )}
                         <div className="kds-class-status">
-                          <span>Trạng thái bếp</span>
+                          <span>{translateText("Trạng thái bếp")}</span>
                           <b
                             className={
                               done
@@ -676,14 +642,14 @@ export const KitchenDisplayLayout: React.FC = () => {
                             }
                           >
                             <i />
-                            {busy
+                            {translateText(busy
                               ? "Đang lưu…"
-                              : statusLabels[item.kitchenStatus]}
+                              : statusLabels[item.kitchenStatus])}
                           </b>
                         </div>
                         <div className="kds-class-actions">
                           <button
-                            title={reason}
+                            title={translateText(reason)}
                             disabled={
                               cannotUpdate ||
                               preparing(item.kitchenStatus) ||
@@ -694,11 +660,9 @@ export const KitchenDisplayLayout: React.FC = () => {
                               void handleUpdateStatus(item.classId, "PREPARING")
                             }
                           >
-                            <Flame size={15} />
-                            Chia khay
-                          </button>
+                            <Flame size={15} />{translateText("Chia khay")}</button>
                           <button
-                            title={reason}
+                            title={translateText(reason)}
                             className="kds-dispatch"
                             disabled={cannotUpdate || done}
                             onClick={() =>
@@ -710,7 +674,7 @@ export const KitchenDisplayLayout: React.FC = () => {
                             ) : (
                               <Truck size={15} />
                             )}
-                            {done ? "Đã xuất khay" : "Xuất khay"}
+                            {translateText(done ? "Đã xuất khay" : "Xuất khay")}
                           </button>
                         </div>
                       </article>
@@ -721,30 +685,26 @@ export const KitchenDisplayLayout: React.FC = () => {
               <div className="kds-empty kds-class-empty">
                 <Search size={28} />
                 <strong>
-                  {!data
+                  {translateText(!data
                     ? "Chưa tải được danh sách lớp"
                     : hasFilters
                       ? "Không có lớp phù hợp"
-                      : "Chưa có lớp trong ngày đã chọn"}
+                      : "Chưa có lớp trong ngày đã chọn")}
                 </strong>
                 <p>
-                  {hasFilters
+                  {translateText(hasFilters
                     ? "Thử thay đổi từ khóa hoặc xóa bộ lọc để xem tất cả lớp."
-                    : "Dữ liệu sẽ hiển thị khi có thông tin báo bếp."}
+                    : "Dữ liệu sẽ hiển thị khi có thông tin báo bếp.")}
                 </p>
                 {hasFilters && (
-                  <button className="kds-control" onClick={resetFilters}>
-                    Xóa bộ lọc
-                  </button>
+                  <button className="kds-control" onClick={resetFilters}>{translateText("Xóa bộ lọc")}</button>
                 )}
               </div>
             )}
             <footer className="kds-coordination-footer">
               <span>
-                <ShieldCheck size={14} />
-                Đối chiếu suất ăn và nhãn dị ứng trước khi bàn giao.
-              </span>
-              <span>“—” : chưa có dữ liệu</span>
+                <ShieldCheck size={14} />{translateText("Đối chiếu suất ăn và nhãn dị ứng trước khi bàn giao.")}</span>
+              <span>{translateText("“—” : chưa có dữ liệu")}</span>
             </footer>
           </section>
         </main>

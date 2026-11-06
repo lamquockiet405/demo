@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import { X, Printer, Download, FileSpreadsheet, FileText, CheckCircle2 } from 'lucide-react';
 import { AttendanceHistoryResponse } from '../types';
@@ -13,6 +15,7 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
   onClose,
   data,
 }) => {
+  useLanguage();
   const [format, setFormat] = useState<'excel' | 'pdf'>('excel');
   const [includeNotes, setIncludeNotes] = useState(true);
   const [includeWater, setIncludeWater] = useState(true);
@@ -40,11 +43,9 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
           <div>
-            <h3 className="text-lg font-black text-slate-900">
-              Xuất Báo Cáo Lịch Sử Điểm Danh & Sức Ăn
-            </h3>
+            <h3 className="text-lg font-black text-slate-900">{translateText("Xuất Báo Cáo Lịch Sử Điểm Danh & Sức Ăn")}</h3>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              {data.classInfo.name} • {data.period.displayRange} ({data.period.weekLabel})
+              {data.classInfo.name} • {translateText(data.period.displayRange)} ({translateText(data.period.weekLabel)})
             </p>
           </div>
           <button
@@ -58,9 +59,7 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
         {/* Options */}
         <div className="space-y-4 print:hidden">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">
-              1. Chọn định dạng xuất file:
-            </label>
+            <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">{translateText("1. Chọn định dạng xuất file:")}</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -74,8 +73,8 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
                   <FileSpreadsheet className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold">Bảng tính Excel (.xlsx)</p>
-                  <p className="text-[11px] text-slate-500">Chuẩn hóa cho kế toán & tổng hợp số liệu</p>
+                  <p className="text-xs font-bold">{translateText("Bảng tính Excel (.xlsx)")}</p>
+                  <p className="text-[11px] text-slate-500">{translateText("Chuẩn hóa cho kế toán & tổng hợp số liệu")}</p>
                 </div>
               </button>
 
@@ -91,17 +90,15 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold">Văn bản PDF (.pdf)</p>
-                  <p className="text-[11px] text-slate-500">Kèm chữ ký BGH & Bếp để lưu trữ</p>
+                  <p className="text-xs font-bold">{translateText("Văn bản PDF (.pdf)")}</p>
+                  <p className="text-[11px] text-slate-500">{translateText("Kèm chữ ký BGH & Bếp để lưu trữ")}</p>
                 </div>
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">
-              2. Tùy chọn nội dung kèm theo:
-            </label>
+            <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">{translateText("2. Tùy chọn nội dung kèm theo:")}</label>
             <div className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-xs">
               <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
                 <input
@@ -110,7 +107,7 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
                   onChange={(e) => setIncludeNotes(e.target.checked)}
                   className="rounded text-teal-600 focus:ring-teal-500"
                 />
-                <span>Kèm nhận xét chi tiết và ghi chú đặc biệt của giáo viên chủ nhiệm</span>
+                <span>{translateText("Kèm nhận xét chi tiết và ghi chú đặc biệt của giáo viên chủ nhiệm")}</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
@@ -120,7 +117,7 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
                   onChange={(e) => setIncludeWater(e.target.checked)}
                   className="rounded text-teal-600 focus:ring-teal-500"
                 />
-                <span>Kèm thống kê lượng nước uống & sữa cữ phụ của từng học sinh</span>
+                <span>{translateText("Kèm thống kê lượng nước uống & sữa cữ phụ của từng học sinh")}</span>
               </label>
             </div>
           </div>
@@ -129,28 +126,27 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
         {/* Report Preview Summary Card */}
         <div className="border border-slate-200 p-5 rounded-2xl bg-white space-y-3 text-xs">
           <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-            <span className="font-bold text-slate-800 uppercase">Tóm tắt dữ liệu xuất:</span>
+            <span className="font-bold text-slate-800 uppercase">{translateText("Tóm tắt dữ liệu xuất:")}</span>
             <span className="text-[11px] text-teal-700 font-bold">
-              {data.pagination?.totalWeekMeals || data.pagination?.totalItems || data.items.length} lượt ăn / {data.classInfo?.totalStudents || 32} học sinh
-            </span>
+              {data.pagination?.totalWeekMeals || data.pagination?.totalItems || data.items.length}{translateText(" lượt ăn / ")}{data.classInfo?.totalStudents || 32}{translateText(" học sinh")}</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
             <div className="p-2 bg-slate-50 rounded-lg">
-              <p className="text-slate-500">Chuyên cần</p>
+              <p className="text-slate-500">{translateText("Chuyên cần")}</p>
               <p className="font-black text-slate-800 text-sm mt-0.5">{data.summary.attendanceRate}%</p>
             </div>
             <div className="p-2 bg-teal-50 rounded-lg">
-              <p className="text-teal-700">Ăn hết suất</p>
+              <p className="text-teal-700">{translateText("Ăn hết suất")}</p>
               <p className="font-black text-teal-800 text-sm mt-0.5">{data.summary.allEatenRate}%</p>
             </div>
             <div className="p-2 bg-amber-50 rounded-lg">
-              <p className="text-amber-700">Lưu ý dinh dưỡng</p>
-              <p className="font-black text-amber-800 text-sm mt-0.5">{data.summary.specialCareCount} bé</p>
+              <p className="text-amber-700">{translateText("Lưu ý dinh dưỡng")}</p>
+              <p className="font-black text-amber-800 text-sm mt-0.5">{data.summary.specialCareCount}{translateText(" bé")}</p>
             </div>
             <div className="p-2 bg-sky-50 rounded-lg">
-              <p className="text-sky-700">Suất ăn riêng</p>
-              <p className="font-black text-sky-800 text-sm mt-0.5">{data.summary.specialDietCount} suất</p>
+              <p className="text-sky-700">{translateText("Suất ăn riêng")}</p>
+              <p className="font-black text-sky-800 text-sm mt-0.5">{data.summary.specialDietCount}{translateText(" suất")}</p>
             </div>
           </div>
         </div>
@@ -159,7 +155,7 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
         {exportedSuccess && (
           <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Đã tạo file báo cáo thành công! Quá trình tải xuống tự động bắt đầu.</span>
+            <span>{translateText("Đã tạo file báo cáo thành công! Quá trình tải xuống tự động bắt đầu.")}</span>
           </div>
         )}
 
@@ -170,16 +166,14 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition"
           >
             <Printer className="w-4 h-4 text-slate-600" />
-            <span>Xem trước bản in</span>
+            <span>{translateText("Xem trước bản in")}</span>
           </button>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition"
-            >
-              Hủy bỏ
-            </button>
+            >{translateText("Hủy bỏ")}</button>
 
             <button
               onClick={handleExport}
@@ -187,7 +181,7 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow transition disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              <span>{isExporting ? 'Đang xuất file...' : 'Tải xuống báo cáo'}</span>
+              <span>{translateText(isExporting ? 'Đang xuất file...' : 'Tải xuống báo cáo')}</span>
             </button>
           </div>
         </div>

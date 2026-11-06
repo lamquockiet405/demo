@@ -52,4 +52,7 @@ export class InspectionSampleItem {
 
   @Column({ type: 'text', nullable: true })
   note: string;
+
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl?: string | null;
 }

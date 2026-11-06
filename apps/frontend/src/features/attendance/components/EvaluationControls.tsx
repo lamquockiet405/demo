@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import {
   Calendar,
@@ -42,6 +44,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
   onCopyMenu,
   totalStudents = 30,
 }) => {
+  useLanguage();
   const handlePrevDay = () => {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() - 1);
@@ -75,18 +78,18 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
             <button
               onClick={handlePrevDay}
               className="p-1.5 hover:bg-slate-200/70 rounded-lg text-slate-500 transition"
-              title="Ngày trước"
+              title={translateText("Ngày trước")}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-2 px-3 text-xs font-bold text-slate-700">
               <Calendar className="w-3.5 h-3.5 text-teal-600" />
-              <span>{formatDateDisplay(selectedDate)}</span>
+              <span>{translateText(formatDateDisplay(selectedDate))}</span>
             </div>
             <button
               onClick={handleNextDay}
               className="p-1.5 hover:bg-slate-200/70 rounded-lg text-slate-500 transition"
-              title="Ngày tiếp theo"
+              title={translateText("Ngày tiếp theo")}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -102,7 +105,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
                 }`}
             >
               <Utensils className="w-3.5 h-3.5" />
-              <span>Bữa Trưa (10:30 - 11:30)</span>
+              <span>{translateText("Bữa Trưa (10:30 - 11:30)")}</span>
             </button>
 
             <button
@@ -113,7 +116,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
                 }`}
             >
               <Coffee className="w-3.5 h-3.5" />
-              <span>Bữa Xế (14:15 - 15:00)</span>
+              <span>{translateText("Bữa Xế (14:15 - 15:00)")}</span>
             </button>
           </div>
 
@@ -126,8 +129,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
             >
               {classes.map((cls) => (
                 <option key={cls.id} value={cls.id}>
-                  {cls.name} - {cls.totalStudents || 30} suất
-                </option>
+                  {cls.name} - {cls.totalStudents || 30}{translateText(" suất")}</option>
               ))}
             </select>
             <GraduationCap className="w-4 h-4 text-teal-700 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -143,7 +145,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
             className="flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-sm transition"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Cả lớp ăn hết suất (100%)</span>
+            <span>{translateText("Cả lớp ăn hết suất (100%)")}</span>
           </button>
 
           {/* Quick Button: Sao chép thực đơn */}
@@ -152,7 +154,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 active:bg-slate-100 text-teal-700 font-bold text-xs rounded-xl border border-teal-200 shadow-sm transition"
           >
             <Copy className="w-3.5 h-3.5 text-teal-600" />
-            <span>Sao chép thực đơn</span>
+            <span>{translateText("Sao chép thực đơn")}</span>
           </button>
 
           {/* Search Input */}
@@ -162,7 +164,7 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Tìm tên bé..."
+              placeholder={translateText("Tìm tên bé...")}
               className="w-full bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 text-xs pl-8 pr-3 py-2 rounded-xl text-slate-800 placeholder:text-slate-400 transition focus:outline-none"
             />
           </div>

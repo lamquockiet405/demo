@@ -1,3 +1,5 @@
+import { t as translateText } from '../core/i18n/language';
+import { useLanguage } from '../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
@@ -44,7 +46,7 @@ const groups = [
         label: "Thực đơn đã công bố",
         icon: CalendarDays,
       },
-      { to: "/kitchen/snack-roster", label: "Danh sách ăn phụ", icon: Users },
+      { to: "/kitchen/snack-roster", label: "Danh sách ăn sáng", icon: Users },
       { to: "/kitchen/notes", label: "Ghi chú phối hợp", icon: MessageSquare },
     ],
   },
@@ -89,6 +91,7 @@ const groups = [
 ];
 
 export const KitchenPortalLayout: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -112,13 +115,13 @@ export const KitchenPortalLayout: React.FC = () => {
       {open && (
         <button
           className="kp-sidebar-backdrop"
-          aria-label="Đóng menu bếp"
+          aria-label={translateText("Đóng menu bếp")}
           onClick={() => setOpen(false)}
         />
       )}
       <aside
         className={`kp-sidebar ${open ? "open" : ""}`}
-        aria-label="Thanh điều hướng bếp"
+        aria-label={translateText("Thanh điều hướng bếp")}
         id="kitchen-sidebar"
       >
         <NavLink to="/kitchen" className="kp-logo">
@@ -126,13 +129,13 @@ export const KitchenPortalLayout: React.FC = () => {
             <ChefHat size={28} />
           </span>
           <div>
-            <strong>KidMeal</strong>
-            <small>BẾP BÁN TRÚ</small>
+            <strong>{translateText("KidMeal")}</strong>
+            <small>{translateText("BẾP BÁN TRÚ")}</small>
           </div>
         </NavLink>
         <button
           className="kp-sidebar-close kp-button icon"
-          aria-label="Đóng menu"
+          aria-label={translateText("Đóng menu")}
           onClick={() => setOpen(false)}
         >
           <X size={20} />
@@ -140,7 +143,7 @@ export const KitchenPortalLayout: React.FC = () => {
         <nav>
           {groups.map((group) => (
             <div className="kp-nav-group" key={group.title}>
-              <p>{group.title}</p>
+              <p>{translateText(group.title)}</p>
               {group.items.map((item) => (
                 <NavLink
                   key={item.to}
@@ -151,7 +154,7 @@ export const KitchenPortalLayout: React.FC = () => {
                   }
                 >
                   <item.icon size={18} />
-                  <span>{item.label}</span>
+                  <span>{translateText(item.label)}</span>
                 </NavLink>
               ))}
             </div>
@@ -159,10 +162,8 @@ export const KitchenPortalLayout: React.FC = () => {
         </nav>
         <div className="kp-sidebar-footer">
           <ShieldCheck size={18} />
-          <span>
-            Chuẩn bị chu đáo
-            <br />
-            <b>An toàn mỗi bữa ăn</b>
+          <span>{translateText("Chuẩn bị chu đáo")}<br />
+            <b>{translateText("An toàn mỗi bữa ăn")}</b>
           </span>
         </div>
       </aside>
@@ -171,15 +172,14 @@ export const KitchenPortalLayout: React.FC = () => {
           <div className="kp-breadcrumb">
             <button
               className="kp-menu-toggle kp-button icon"
-              aria-label="Mở menu bếp"
+              aria-label={translateText("Mở menu bếp")}
               aria-expanded={open}
               aria-controls="kitchen-sidebar"
               onClick={() => setOpen(true)}
             >
               <Menu size={21} />
             </button>
-            <span>
-              Bếp bán trú <i>/</i> <strong>{current}</strong>
+            <span>{translateText("Bếp bán trú ")}<i>/</i> <strong>{translateText(current)}</strong>
             </span>
           </div>
           <div className="kp-topbar-actions">

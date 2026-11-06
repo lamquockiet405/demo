@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from "react";
 import {
   ShieldCheck,
@@ -33,6 +35,7 @@ import {
 import { InspectionDetail } from "../../kitchen/pages/KitchenInspectionsPage";
 
 export function PrincipalInspectionSafetyPage() {
+  useLanguage();
   const [activeTab, setActiveTab] = useState<"inspections" | "safety">("inspections");
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
@@ -123,28 +126,22 @@ export function PrincipalInspectionSafetyPage() {
       case "DA_DUYET":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            Đã duyệt
-          </span>
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />{translateText("Đã duyệt")}</span>
         );
       case "CHO_DUYET":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-            Chờ duyệt
-          </span>
+            <Clock className="w-3.5 h-3.5 text-amber-600" />{translateText("Chờ duyệt")}</span>
         );
       case "YEU_CAU_CHUP_LAI":
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-200">
-            <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-            Yêu cầu bổ sung
-          </span>
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />{translateText("Yêu cầu bổ sung")}</span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
-            {approvalStatus || "Chưa xác định"}
+            {translateText(approvalStatus || "Chưa xác định")}
           </span>
         );
     }
@@ -154,22 +151,18 @@ export function PrincipalInspectionSafetyPage() {
     if (statusText === "Đạt chuẩn") {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          <Check className="w-3 h-3 text-emerald-600" />
-          Đạt
-        </span>
+          <Check className="w-3 h-3 text-emerald-600" />{translateText("Đạt")}</span>
       );
     }
     if (statusText === "Không đạt") {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-          <X className="w-3 h-3 text-rose-600" />
-          Không đạt
-        </span>
+          <X className="w-3 h-3 text-rose-600" />{translateText("Không đạt")}</span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-slate-50 text-slate-500 border border-slate-200">
-        {statusText || "Chưa thực hiện"}
+        {translateText(statusText || "Chưa thực hiện")}
       </span>
     );
   };
@@ -180,18 +173,12 @@ export function PrincipalInspectionSafetyPage() {
       <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              Ban Giám Hiệu • Quản Lý Bếp & ATTP
-            </span>
-            <span className="text-xs text-teal-200">Chuẩn Bộ Y Tế & Codex</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Ban Giám Hiệu • Quản Lý Bếp & ATTP")}</span>
+            <span className="text-xs text-teal-200">{translateText("Chuẩn Bộ Y Tế & Codex")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <ShieldCheck className="w-8 h-8 text-amber-300" />
-            Kiểm Thực 3 Bước & An Toàn Thực Phẩm
-          </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-            Hợp nhất quy trình phê duyệt minh chứng kiểm thực bếp (trước, trong chế biến, trước ăn) và tra cứu hồ sơ tuân thủ an toàn thực phẩm, mẫu lưu 24h.
-          </p>
+            <ShieldCheck className="w-8 h-8 text-amber-300" />{translateText("Kiểm Thực 3 Bước & An Toàn Thực Phẩm")}</h1>
+          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Hợp nhất quy trình phê duyệt minh chứng kiểm thực bếp (trước, trong chế biến, trước ăn) và tra cứu hồ sơ tuân thủ an toàn thực phẩm, mẫu lưu 24h.")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
@@ -207,27 +194,21 @@ export function PrincipalInspectionSafetyPage() {
               className={`w-4 h-4 ${
                 inspectionsResource.loading || safetyResource.loading ? "animate-spin" : ""
               }`}
-            />
-            Làm mới
-          </button>
+            />{translateText("Làm mới")}</button>
           {activeTab === "inspections" ? (
             <button
               onClick={exportInspectionsCsv}
               disabled={!filteredInspections.length}
               className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2"
             >
-              <Download className="w-4 h-4" />
-              Xuất Nhật Ký Kiểm Thực
-            </button>
+              <Download className="w-4 h-4" />{translateText("Xuất Nhật Ký Kiểm Thực")}</button>
           ) : (
             <button
               onClick={() => void exportSafetyDossier()}
               disabled={action.busy || !safetyReport}
               className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2"
             >
-              <Download className="w-4 h-4" />
-              Xuất Báo Cáo ATTP
-            </button>
+              <Download className="w-4 h-4" />{translateText("Xuất Báo Cáo ATTP")}</button>
           )}
         </div>
       </div>
@@ -238,42 +219,40 @@ export function PrincipalInspectionSafetyPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold">Tổng biên bản</span>
+            <span className="text-xs font-semibold">{translateText("Tổng biên bản")}</span>
             <Layers className="w-4 h-4 text-teal-600" />
           </div>
           <div className="text-2xl font-black text-slate-900">{totalInspections}</div>
-          <p className="text-[11px] text-slate-400">Đã ghi nhận trong hệ thống</p>
+          <p className="text-[11px] text-slate-400">{translateText("Đã ghi nhận trong hệ thống")}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-amber-200 bg-amber-50/20 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-amber-800">
-            <span className="text-xs font-bold">Chờ BGH duyệt</span>
+            <span className="text-xs font-bold">{translateText("Chờ BGH duyệt")}</span>
             <Clock className="w-4 h-4 text-amber-600" />
           </div>
           <div className="text-2xl font-black text-amber-700">{pendingCount}</div>
           <p className="text-[11px] text-amber-600 font-bold">
-            {pendingCount > 0 ? "Cần kiểm tra minh chứng ngay" : "Tất cả đã được xử lý"}
+            {translateText(pendingCount > 0 ? "Cần kiểm tra minh chứng ngay" : "Tất cả đã được xử lý")}
           </p>
         </div>
 
         <div className="bg-white rounded-2xl border border-emerald-200 bg-emerald-50/20 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-emerald-800">
-            <span className="text-xs font-bold">Biên bản đã duyệt</span>
+            <span className="text-xs font-bold">{translateText("Biên bản đã duyệt")}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700">{approvedCount}</div>
-          <p className="text-[11px] text-emerald-600 font-bold">
-            Đạt chuẩn 3 bước & lưu trữ
-          </p>
+          <p className="text-[11px] text-emerald-600 font-bold">{translateText("Đạt chuẩn 3 bước & lưu trữ")}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold">Mẫu lưu thực phẩm 24h</span>
+            <span className="text-xs font-semibold">{translateText("Mẫu lưu thực phẩm 24h")}</span>
             <Thermometer className="w-4 h-4 text-teal-600" />
           </div>
           <div className="text-2xl font-black text-slate-900">{sampleCount}</div>
-          <p className="text-[11px] text-slate-400">Ghi nhận theo ngày kiểm</p>
+          <p className="text-[11px] text-slate-400">{translateText("Ghi nhận theo ngày kiểm")}</p>
         </div>
       </div>
 
@@ -287,9 +266,7 @@ export function PrincipalInspectionSafetyPage() {
               : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           }`}
         >
-          <FileCheck2 className="w-4 h-4" />
-          Phê Duyệt Kiểm Thực 3 Bước
-          {pendingCount > 0 && (
+          <FileCheck2 className="w-4 h-4" />{translateText("Phê Duyệt Kiểm Thực 3 Bước")}{pendingCount > 0 && (
             <span className="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950">
               {pendingCount}
             </span>
@@ -304,9 +281,7 @@ export function PrincipalInspectionSafetyPage() {
               : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           }`}
         >
-          <ShieldCheck className="w-4 h-4" />
-          Báo Cáo An Toàn & Minh Chứng Thực Tế
-        </button>
+          <ShieldCheck className="w-4 h-4" />{translateText("Báo Cáo An Toàn & Minh Chứng Thực Tế")}</button>
       </div>
 
       {/* ─── 4. Nội Dung Tab 1: Phê Duyệt Kiểm Thực 3 Bước ─── */}
@@ -317,9 +292,9 @@ export function PrincipalInspectionSafetyPage() {
             <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                aria-label="Tìm biên bản"
+                aria-label={translateText("Tìm biên bản")}
                 type="text"
-                placeholder="Tìm mã biên bản, người kiểm, tên món…"
+                placeholder={translateText("Tìm mã biên bản, người kiểm, tên món…")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -329,7 +304,7 @@ export function PrincipalInspectionSafetyPage() {
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <Filter className="w-4 h-4 text-slate-400 shrink-0" />
               <input
-                aria-label="Ngày kiểm thực"
+                aria-label={translateText("Ngày kiểm thực")}
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -337,15 +312,15 @@ export function PrincipalInspectionSafetyPage() {
               />
 
               <select
-                aria-label="Trạng thái phê duyệt"
+                aria-label={translateText("Trạng thái phê duyệt")}
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
-                <option value="">Tất cả trạng thái</option>
-                <option value="CHO_DUYET">Chờ duyệt (Pending)</option>
-                <option value="DA_DUYET">Đã duyệt (Approved)</option>
-                <option value="YEU_CAU_CHUP_LAI">Yêu cầu bổ sung</option>
+                <option value="">{translateText("Tất cả trạng thái")}</option>
+                <option value="CHO_DUYET">{translateText("Chờ duyệt (Pending)")}</option>
+                <option value="DA_DUYET">{translateText("Đã duyệt (Approved)")}</option>
+                <option value="YEU_CAU_CHUP_LAI">{translateText("Yêu cầu bổ sung")}</option>
               </select>
 
               {(search || date || status) && (
@@ -356,9 +331,7 @@ export function PrincipalInspectionSafetyPage() {
                     setStatus("");
                   }}
                   className="px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-xl font-bold transition"
-                >
-                  Xóa bộ lọc
-                </button>
+                >{translateText("Xóa bộ lọc")}</button>
               )}
             </div>
           </div>
@@ -372,14 +345,14 @@ export function PrincipalInspectionSafetyPage() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/70">
                     <tr>
-                      <th className="p-4">Mã Biên Bản</th>
-                      <th className="p-4">Ngày / Bữa Ăn</th>
-                      <th className="p-4">Người Kiểm</th>
-                      <th className="p-4 text-center">Bước 1: Nhập Kho</th>
-                      <th className="p-4 text-center">Bước 2: Chế Biến</th>
-                      <th className="p-4 text-center">Bước 3: Trước Ăn</th>
-                      <th className="p-4 text-center">Trạng Thái</th>
-                      <th className="p-4 text-right">Thao Tác</th>
+                      <th className="p-4">{translateText("Mã Biên Bản")}</th>
+                      <th className="p-4">{translateText("Ngày / Bữa Ăn")}</th>
+                      <th className="p-4">{translateText("Người Kiểm")}</th>
+                      <th className="p-4 text-center">{translateText("Bước 1: Nhập Kho")}</th>
+                      <th className="p-4 text-center">{translateText("Bước 2: Chế Biến")}</th>
+                      <th className="p-4 text-center">{translateText("Bước 3: Trước Ăn")}</th>
+                      <th className="p-4 text-center">{translateText("Trạng Thái")}</th>
+                      <th className="p-4 text-right">{translateText("Thao Tác")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -388,16 +361,16 @@ export function PrincipalInspectionSafetyPage() {
                       return (
                         <tr key={r.id} className="hover:bg-teal-50/20 transition">
                           <td className="p-4 font-mono font-bold text-slate-900">
-                            {r.code}
+                            {translateText(r.code)}
                           </td>
                           <td className="p-4">
                             <div className="font-bold text-slate-800">
-                              {r.mealDate || r.date}
+                              {translateText(r.mealDate || r.date)}
                             </div>
-                            <div className="text-[11px] text-slate-500">{r.mealTime}</div>
+                            <div className="text-[11px] text-slate-500">{translateText(r.mealTime)}</div>
                           </td>
                           <td className="p-4 text-slate-700 font-medium">
-                            {r.performerName || "Bếp trưởng"}
+                            {r.performerName || translateText("Bếp trưởng")}
                           </td>
                           <td className="p-4 text-center">
                             {getStepStatusPill(r.step1Status)}
@@ -416,9 +389,7 @@ export function PrincipalInspectionSafetyPage() {
                               onClick={() => setSelectedInspectionId(idStr)}
                               className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 cursor-pointer"
                             >
-                              <Eye className="w-3.5 h-3.5" />
-                              Xem & Duyệt
-                            </button>
+                              <Eye className="w-3.5 h-3.5" />{translateText("Xem & Duyệt")}</button>
                           </td>
                         </tr>
                       );
@@ -438,11 +409,9 @@ export function PrincipalInspectionSafetyPage() {
           <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-teal-600" />
-              <label className="text-xs font-bold text-slate-700">
-                Chọn ngày kiểm thực để đối chiếu hồ sơ:
-              </label>
+              <label className="text-xs font-bold text-slate-700">{translateText("Chọn ngày kiểm thực để đối chiếu hồ sơ:")}</label>
               <input
-                aria-label="Ngày kiểm thực"
+                aria-label={translateText("Ngày kiểm thực")}
                 type="date"
                 value={reportDate}
                 onChange={(e) => setReportDate(e.target.value)}
@@ -450,8 +419,7 @@ export function PrincipalInspectionSafetyPage() {
               />
             </div>
 
-            <span className="text-xs text-slate-500">
-              Chỉ số tuân thủ chung:{" "}
+            <span className="text-xs text-slate-500">{translateText("Chỉ số tuân thủ chung:")}{" "}
               <strong className="text-emerald-700 text-sm">
                 {safetyReport?.overallComplianceRate ?? 100}%
               </strong>
@@ -463,8 +431,7 @@ export function PrincipalInspectionSafetyPage() {
           {/* Minh chứng ảnh thực tế */}
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <Camera className="w-5 h-5 text-teal-600" />
-              Ảnh Minh Chứng Kiểm Thực Ngày {reportDate}
+              <Camera className="w-5 h-5 text-teal-600" />{translateText("Ảnh Minh Chứng Kiểm Thực Ngày ")}{translateText(reportDate)}
             </h3>
 
             {safetyReport?.inspection3Step?.photoAuditTrail?.samplePhotos?.length ? (
@@ -478,21 +445,20 @@ export function PrincipalInspectionSafetyPage() {
                       <div className="h-44 bg-slate-200 rounded-xl overflow-hidden flex items-center justify-center">
                         <img
                           src={photo.imageUrl}
-                          alt={photo.title || "Minh chứng"}
+                          alt={translateText(photo.title || "Minh chứng")}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-slate-800">{photo.step}</span>
-                        <span className="text-slate-500 text-[11px]">{photo.title}</span>
+                        <span className="font-bold text-slate-800">{translateText(photo.step)}</span>
+                        <span className="text-slate-500 text-[11px]">{translateText(photo.title)}</span>
                       </div>
                     </div>
                   ),
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                Chưa có ảnh minh chứng kiểm thực cho ngày {reportDate}.
+              <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">{translateText("Chưa có ảnh minh chứng kiểm thực cho ngày ")}{translateText(reportDate)}.
               </div>
             )}
           </div>
@@ -500,8 +466,7 @@ export function PrincipalInspectionSafetyPage() {
           {/* Danh mục mẫu lưu thực phẩm 24h */}
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <Thermometer className="w-5 h-5 text-teal-600" />
-              Danh Sách Mẫu Lưu Thực Phẩm 24 Giờ Ngày {reportDate}
+              <Thermometer className="w-5 h-5 text-teal-600" />{translateText("Danh Sách Mẫu Lưu Thực Phẩm 24 Giờ Ngày ")}{translateText(reportDate)}
             </h3>
 
             {safetyReport?.sampleRetention24h?.samples?.length ? (
@@ -509,12 +474,12 @@ export function PrincipalInspectionSafetyPage() {
                 <table className="w-full text-xs text-left">
                   <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/70">
                     <tr>
-                      <th className="p-3">Mã Mẫu</th>
-                      <th className="p-3">Tên Món Ăn</th>
-                      <th className="p-3 text-center">Khối Lượng / Thể Tích</th>
-                      <th className="p-3 text-center">Thời Gian Lưu</th>
-                      <th className="p-3 text-center">Thời Gian Hủy</th>
-                      <th className="p-3 text-center">Trạng Thái</th>
+                      <th className="p-3">{translateText("Mã Mẫu")}</th>
+                      <th className="p-3">{translateText("Tên Món Ăn")}</th>
+                      <th className="p-3 text-center">{translateText("Khối Lượng / Thể Tích")}</th>
+                      <th className="p-3 text-center">{translateText("Thời Gian Lưu")}</th>
+                      <th className="p-3 text-center">{translateText("Thời Gian Hủy")}</th>
+                      <th className="p-3 text-center">{translateText("Trạng Thái")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -525,17 +490,17 @@ export function PrincipalInspectionSafetyPage() {
                         </td>
                         <td className="p-3 font-bold text-slate-800">{s.dishName}</td>
                         <td className="p-3 text-center font-medium">
-                          {s.weightOrVolume}
+                          {translateText(s.weightOrVolume)}
                         </td>
                         <td className="p-3 text-center text-slate-600">
-                          {s.storedAt?.slice(0, 16) || "—"}
+                          {translateText(s.storedAt?.slice(0, 16) || "—")}
                         </td>
                         <td className="p-3 text-center text-slate-600">
-                          {s.disposeAt?.slice(0, 16) || "—"}
+                          {translateText(s.disposeAt?.slice(0, 16) || "—")}
                         </td>
                         <td className="p-3 text-center">
                           <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
-                            {s.status || "Đang lưu"}
+                            {translateText(s.status || "Đang lưu")}
                           </span>
                         </td>
                       </tr>
@@ -544,8 +509,7 @@ export function PrincipalInspectionSafetyPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                Chưa có mẫu lưu thực phẩm được ghi nhận cho ngày {reportDate}.
+              <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">{translateText("Chưa có mẫu lưu thực phẩm được ghi nhận cho ngày ")}{translateText(reportDate)}.
               </div>
             )}
           </div>

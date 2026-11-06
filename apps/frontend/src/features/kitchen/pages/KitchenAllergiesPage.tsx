@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useMemo, useState } from "react";
 import { Download, ShieldCheck } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
@@ -49,6 +51,7 @@ const severityLabel = (value: string) =>
   "Chưa phân loại";
 
 export function KitchenAllergiesPage() {
+  useLanguage();
   const resource = useKitchenResource(loadChildren, []);
   const [search, setSearch] = useState("");
   const [classId, setClassId] = useState("");
@@ -88,8 +91,8 @@ export function KitchenAllergiesPage() {
   return (
     <>
       <PageTitle
-        title="Dị ứng & chế độ ăn"
-        description="Đối chiếu thực phẩm cần tránh, mức độ phản ứng và hướng dẫn ăn riêng đã khai báo cho từng trẻ."
+        title={translateText("Dị ứng & chế độ ăn")}
+        description={translateText("Đối chiếu thực phẩm cần tránh, mức độ phản ứng và hướng dẫn ăn riêng đã khai báo cho từng trẻ.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button
@@ -118,15 +121,13 @@ export function KitchenAllergiesPage() {
             ])
           }
         >
-          <Download size={15} />
-          Xuất danh sách
-        </button>
+          <Download size={15} />{translateText("Xuất danh sách")}</button>
       </PageTitle>
       <div className="kp-filters">
         <input
           type="search"
-          aria-label="Tìm học sinh hoặc dị nguyên"
-          placeholder="Tên trẻ, mã, thực phẩm cần tránh…"
+          aria-label={translateText("Tìm học sinh hoặc dị nguyên")}
+          placeholder={translateText("Tên trẻ, mã, thực phẩm cần tránh…")}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -134,32 +135,32 @@ export function KitchenAllergiesPage() {
           }}
         />
         <select
-          aria-label="Lọc lớp dị ứng"
+          aria-label={translateText("Lọc lớp dị ứng")}
           value={classId}
           onChange={(e) => {
             setClassId(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">Tất cả lớp</option>
+          <option value="">{translateText("Tất cả lớp")}</option>
           {classes.map(([id, name]) => (
             <option key={id} value={id}>
-              {name}
+              {translateText(name)}
             </option>
           ))}
         </select>
         <select
-          aria-label="Mức độ dị ứng"
+          aria-label={translateText("Mức độ dị ứng")}
           value={severity}
           onChange={(e) => {
             setSeverity(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">Tất cả mức độ</option>
+          <option value="">{translateText("Tất cả mức độ")}</option>
           {["LOW", "MEDIUM", "HIGH", "SEVERE", "ANAPHYLACTIC"].map((s) => (
             <option key={s} value={s}>
-              {severityLabel(s)}
+              {translateText(severityLabel(s))}
             </option>
           ))}
         </select>
@@ -171,9 +172,7 @@ export function KitchenAllergiesPage() {
             setSeverity("");
             setPage(1);
           }}
-        >
-          Xóa bộ lọc
-        </button>
+        >{translateText("Xóa bộ lọc")}</button>
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       {resource.data && (
@@ -182,11 +181,11 @@ export function KitchenAllergiesPage() {
             <table className="kp-table">
               <thead>
                 <tr>
-                  <th>Học sinh</th>
-                  <th>Lớp</th>
-                  <th>Thực phẩm cần tránh</th>
-                  <th>Mức độ / chế độ</th>
-                  <th>Hướng dẫn đã khai báo</th>
+                  <th>{translateText("Học sinh")}</th>
+                  <th>{translateText("Lớp")}</th>
+                  <th>{translateText("Thực phẩm cần tránh")}</th>
+                  <th>{translateText("Mức độ / chế độ")}</th>
+                  <th>{translateText("Hướng dẫn đã khai báo")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -194,7 +193,7 @@ export function KitchenAllergiesPage() {
                   <tr key={`${row.id}-${index}`}>
                     <td>
                       <strong>{row.childName}</strong>
-                      <small>{row.code}</small>
+                      <small>{translateText(row.code)}</small>
                     </td>
                     <td>{row.className}</td>
                     <td>
@@ -206,25 +205,24 @@ export function KitchenAllergiesPage() {
                       <span
                         className={`kp-tag ${["HIGH", "SEVERE", "ANAPHYLACTIC"].includes(row.severity) ? "red" : "amber"}`}
                       >
-                        {severityLabel(row.severity)}
+                        {translateText(severityLabel(row.severity))}
                       </span>
                       <small>
-                        {row.allergyType === "INTOLERANCE"
+                        {translateText(row.allergyType === "INTOLERANCE"
                           ? "Không dung nạp"
                           : row.allergyType === "ALLERGY"
                             ? "Dị ứng thực phẩm"
-                            : row.allergyType || "Chế độ ăn riêng"}
+                            : row.allergyType || "Chế độ ăn riêng")}
                       </small>
                     </td>
                     <td>
                       <p className="kp-note-text">
-                        {row.note ||
+                        {translateText(row.note ||
                           row.symptoms ||
-                          "Chưa có hướng dẫn bổ sung"}
+                          "Chưa có hướng dẫn bổ sung")}
                       </p>
                       {row.reactionTreatment && (
-                        <small>
-                          Hướng dẫn xử trí đã khai báo: {row.reactionTreatment}
+                        <small>{translateText("Hướng dẫn xử trí đã khai báo: ")}{row.reactionTreatment}
                         </small>
                       )}
                     </td>
@@ -241,6 +239,7 @@ export function KitchenAllergiesPage() {
 }
 
 export function KitchenAllergyAlertsPage() {
+  useLanguage();
   const [date, setDate] = useState(getSchoolDate);
   const [search, setSearch] = useState("");
   const resource = useKitchenResource(
@@ -256,17 +255,15 @@ export function KitchenAllergyAlertsPage() {
   return (
     <>
       <PageTitle
-        title="Cảnh báo dị ứng"
-        description="Danh sách yêu cầu ăn riêng trong ngày. Kiểm tra nhãn và tách riêng suất trước khi bàn giao."
+        title={translateText("Cảnh báo dị ứng")}
+        description={translateText("Danh sách yêu cầu ăn riêng trong ngày. Kiểm tra nhãn và tách riêng suất trước khi bàn giao.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
       </PageTitle>
       <div className="kp-filters">
-        <label>
-          Ngày phục vụ
-          <input
+        <label>{translateText("Ngày phục vụ")}<input
             type="date"
-            aria-label="Ngày cảnh báo"
+            aria-label={translateText("Ngày cảnh báo")}
             value={date}
             onChange={(e) => {
               if (e.target.value) setDate(e.target.value);
@@ -275,8 +272,8 @@ export function KitchenAllergyAlertsPage() {
         </label>
         <input
           type="search"
-          aria-label="Tìm cảnh báo dị ứng"
-          placeholder="Tìm trẻ, lớp, yêu cầu ăn riêng…"
+          aria-label={translateText("Tìm cảnh báo dị ứng")}
+          placeholder={translateText("Tìm trẻ, lớp, yêu cầu ăn riêng…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -290,16 +287,16 @@ export function KitchenAllergyAlertsPage() {
                 <ShieldCheck size={18} className="inline mr-2 text-red-600" />
                 {alert.childName}
               </h2>
-              <span className="kp-tag red">{alert.severity}</span>
+              <span className="kp-tag red">{translateText(alert.severity)}</span>
             </div>
             <span className="kp-tag">{alert.className}</span>
             <p>
-              <b>Yêu cầu:</b>{" "}
-              {alert.allergen || "Đối chiếu hồ sơ trước khi chế biến."}
+              <b>{translateText("Yêu cầu:")}</b>{" "}
+              {translateText(alert.allergen || "Đối chiếu hồ sơ trước khi chế biến.")}
             </p>
             {alert.replacementMeal && (
               <p>
-                <b>Suất thay thế đã chỉ định:</b> {alert.replacementMeal}
+                <b>{translateText("Suất thay thế đã chỉ định:")}</b> {translateText(alert.replacementMeal)}
               </p>
             )}
             {alert.notes && <p>{alert.notes}</p>}

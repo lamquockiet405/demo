@@ -764,6 +764,27 @@ export class AttendanceService {
 
   
 
+  async updateKitchenStatus(data: { classId: string; status: string; date?: string; actorName?: string }) {
+    const classId = this.parseClassId(data.classId, 1);
+    const date = data.date || new Date().toISOString().split('T')[0];
+    const status = data.status || 'PREPARING';
+
+    await this.attendanceRepo.query(
+      `INSERT INTO meal_evaluation_locks (class_id, date, meal_type, is_locked, chef_feedback)
+       VALUES ($1, $2, 'KITCHEN_STATUS', true, $3)
+       ON CONFLICT (class_id, date, meal_type)
+       DO UPDATE SET chef_feedback = $3;`,
+      [classId, date, status],
+    );
+
+    return {
+      success: true,
+      classId: String(classId),
+      status,
+      message: `Đã cập nhật trạng thái lớp sang ${status}`,
+    };
+  }
+
   async getKitchenKdsData(date?: string, tenantId = 1) {
     const classes = await this.classRepo.find({ where: { schoolId: tenantId }, order: { id: 'ASC' } });
     const today = date || new Date().toISOString().split('T')[0];
@@ -772,12 +793,19 @@ export class AttendanceService {
     const submissions = await this.attendanceRepo.query(`SELECT class_id,meal_type,planned_quantity,attendance_snapshot
       FROM daily_meal_portions WHERE date=$1 AND attendance_submitted_at IS NOT NULL`, [today]);
 
+    const statusLocks = await this.attendanceRepo.query(
+      `SELECT class_id, chef_feedback FROM meal_evaluation_locks WHERE date = $1 AND meal_type = 'KITCHEN_STATUS'`,
+      [today],
+    );
+    const statusMap = new Map(statusLocks.map((l: any) => [Number(l.class_id), l.chef_feedback]));
+
     const classKdsList = await Promise.all(
       classes.map(async (c) => {
         const planned = await this.childRepo.count({ where: { classId: c.id } });
         const lunch = submissions.find((p: any) => Number(p.class_id) === Number(c.id) && p.meal_type === 'LUNCH');
         const snack = submissions.find((p: any) => Number(p.class_id) === Number(c.id) && p.meal_type === 'AFTERNOON_SNACK');
         const actual = Number(lunch?.planned_quantity ?? 0);
+        const savedStatus = statusMap.get(Number(c.id));
 
         const allergyKids = await this.childRepo.manager.query(
           `SELECT s.full_name, a.name as allergen_name
@@ -791,6 +819,8 @@ export class AttendanceService {
           (k: any) => `1 suất không ${k.allergen_name} (Bé ${k.full_name})`,
         );
 
+        const finalStatus = savedStatus || (lunch || snack ? 'SYNCED' : 'WAITING');
+
         return {
           classId: String(c.id),
           className: c.name,
@@ -800,7 +830,9 @@ export class AttendanceService {
           lunchCount: actual,
           snackCount: Number(snack?.planned_quantity ?? 0),
           absentCount: lunch?.attendance_snapshot?.filter((s: any) => !s.isAttended).length ?? 0,
-          status: lunch || snack ? 'SYNCED' : 'WAITING',
+          status: finalStatus,
+          kitchenStatus: finalStatus,
+          isLocked: Boolean(lunch?.attendance_submitted_at || snack?.attendance_submitted_at),
           allergies,
         };
       }),

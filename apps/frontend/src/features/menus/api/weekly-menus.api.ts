@@ -41,6 +41,7 @@ export interface DishItem {
 
 export interface MenuDishItem {
   nutritionAvailable?: boolean;
+  nutritionReference?: boolean;
   id: string;
   tenantId: string;
   menuId: string;
@@ -59,6 +60,7 @@ export interface MenuDishItem {
 
 export interface WeeklyMenu {
   nutritionAvailable?: boolean;
+  nutritionReference?: boolean;
   id: string;
   tenantId: string;
   title: string;

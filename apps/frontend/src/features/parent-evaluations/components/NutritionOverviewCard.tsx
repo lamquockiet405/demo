@@ -1,3 +1,5 @@
+import { getLocale, t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from "react";
 import { Activity } from "lucide-react";
 
@@ -10,10 +12,11 @@ type Nutrition = Partial<
 export const NutritionOverviewCard: React.FC<{ nutrition?: Nutrition }> = ({
   nutrition,
 }) => {
+  useLanguage();
   const value = (amount: number | null | undefined) =>
     amount == null
       ? "—"
-      : amount.toLocaleString("vi-VN", { maximumFractionDigits: 1 });
+      : amount.toLocaleString(getLocale(), { maximumFractionDigits: 1 });
   const fields: [keyof Nutrition, string, string, string][] = [
     ["calories", "Năng lượng", "kcal", "bg-amber-50 border-amber-200"],
     ["proteinG", "Chất đạm", "g", "bg-red-50 border-red-200"],
@@ -29,13 +32,8 @@ export const NutritionOverviewCard: React.FC<{ nutrition?: Nutrition }> = ({
           <Activity size={21} />
         </span>
         <div>
-          <h3 className="text-sm font-bold text-slate-900">
-            Dinh dưỡng theo thực đơn đã công bố
-          </h3>
-          <p className="text-xs text-slate-500 mt-1">
-            Tổng theo định lượng món trong ngày đang xem. “—” là chưa có đủ số
-            liệu.
-          </p>
+          <h3 className="text-sm font-bold text-slate-900">{translateText("Dinh dưỡng theo thực đơn đã công bố")}</h3>
+          <p className="text-xs text-slate-500 mt-1">{translateText("Tổng theo định lượng món trong ngày đang xem. “—” là chưa có đủ số liệu.")}</p>
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -45,12 +43,12 @@ export const NutritionOverviewCard: React.FC<{ nutrition?: Nutrition }> = ({
             key={key}
           >
             <span className="text-[11px] font-semibold text-slate-700 block">
-              {label}
+              {translateText(label)}
             </span>
             <strong className="text-lg text-slate-900 block mt-1">
-              {value(nutrition?.[key])}
+              {translateText(value(nutrition?.[key]))}
             </strong>
-            <small className="text-slate-500">{unit}</small>
+            <small className="text-slate-500">{translateText(unit)}</small>
           </div>
         ))}
       </div>

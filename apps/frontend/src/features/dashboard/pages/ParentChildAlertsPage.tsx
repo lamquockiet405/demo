@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from "react";
 import {
   ShieldAlert,
@@ -27,6 +29,7 @@ import { nutritionAdviceApi, PickyEatingAdvice } from "../../nutrition/api/nutri
 import { childrenApi, ChildItem } from "../../children/api/children.api";
 
 export const ParentChildAlertsPage: React.FC = () => {
+  useLanguage();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [children, setChildren] = useState<ChildItem[]>([]);
@@ -88,13 +91,13 @@ export const ParentChildAlertsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
       <ParentPortalTopNav
-        activeTab="menu-consumption"
+        activeTab="alerts"
         child={
           selectedChild
             ? {
-                name: selectedChild.fullName,
-                className: selectedChild.className || selectedChild.class?.name,
-              }
+              name: selectedChild.fullName,
+              className: selectedChild.className || selectedChild.class?.name,
+            }
             : undefined
         }
       />
@@ -102,47 +105,37 @@ export const ParentChildAlertsPage: React.FC = () => {
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 space-y-6 flex-1">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link to="/child-menu-consumption" className="hover:text-teal-700">
-            Cổng phụ huynh
-          </Link>
+          <Link to="/child-menu-consumption" className="hover:text-teal-700">{translateText("Cổng phụ huynh")}</Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="font-semibold text-slate-700">Tổng hợp Cảnh báo của con (UC93)</span>
+          <span className="font-semibold text-slate-700">{translateText("Tổng hợp Cảnh báo của con")}</span>
         </div>
 
         {/* Hero banner */}
         <div className="rounded-3xl bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-                UC93 • Giám sát an toàn trẻ em
-              </span>
-              <span className="text-xs text-teal-200">Bảo mật thông tin & cá nhân hóa</span>
+              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Giám sát an toàn trẻ em")}</span>
+              <span className="text-xs text-teal-200">{translateText("Bảo mật thông tin & cá nhân hóa")}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-              <Bell className="w-8 h-8 text-amber-300" />
-              Tổng Hợp Cảnh Báo An Toàn & Sức Khỏe Của Bé
-            </h1>
-            <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-              Kiểm tra mức độ an toàn của thực đơn hôm nay theo hồ sơ dị ứng, báo cáo tiêu thụ lượng ăn của cô giáo, tình trạng phát triển thể chất và hướng dẫn dinh dưỡng.
-            </p>
+              <Bell className="w-8 h-8 text-amber-300" />{translateText("Tổng Hợp Cảnh Báo An Toàn & Sức Khỏe Của Bé")}</h1>
+            <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Kiểm tra mức độ an toàn của thực đơn hôm nay theo hồ sơ dị ứng, báo cáo tiêu thụ lượng ăn của cô giáo, tình trạng phát triển thể chất và hướng dẫn dinh dưỡng.")}</p>
           </div>
 
           {/* Child Selector */}
           {children.length > 0 && (
             <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-white min-w-[260px]">
-              <label htmlFor="alert-child-select" className="text-xs font-bold text-teal-100 block mb-1">
-                Chọn bé theo dõi:
-              </label>
+              <label htmlFor="alert-child-select" className="text-xs font-bold text-teal-100 block mb-1">{translateText("Chọn bé theo dõi:")}</label>
               <select
                 id="alert-child-select"
-                aria-label="Chọn học sinh theo dõi"
+                aria-label={translateText("Chọn học sinh theo dõi")}
                 value={selectedChildId}
                 onChange={(e) => setSelectedChildId(e.target.value)}
                 className="w-full bg-white text-slate-900 font-bold rounded-xl px-3 py-2 text-sm outline-none cursor-pointer"
               >
                 {children.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.fullName} ({c.className || c.class?.name || "Lớp mầm non"})
+                    {c.fullName} ({c.className || c.class?.name || translateText("Lớp mầm non")})
                   </option>
                 ))}
               </select>
@@ -154,14 +147,14 @@ export const ParentChildAlertsPage: React.FC = () => {
         {loading && (
           <div className="flex min-h-[250px] flex-col items-center justify-center gap-3 text-slate-500">
             <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-            <p className="text-sm font-semibold">Đang tổng hợp cảnh báo an toàn cho bé...</p>
+            <p className="text-sm font-semibold">{translateText("Đang tổng hợp cảnh báo an toàn cho bé...")}</p>
           </div>
         )}
 
         {/* Error alert */}
         {error && !loading && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm font-semibold text-rose-800">
-            {error}
+            {translateText(error)}
           </div>
         )}
 
@@ -175,23 +168,20 @@ export const ParentChildAlertsPage: React.FC = () => {
                     <Utensils className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-black uppercase text-teal-700 block">
-                      An toàn thực đơn hôm nay
-                    </span>
+                    <span className="text-[11px] font-black uppercase text-teal-700 block">{translateText("An toàn thực đơn hôm nay")}</span>
                     <h3 className="text-base font-black text-slate-900">
-                      {activeAlertDetail.menuSafetyAlert?.title || "Thực đơn an toàn"}
+                      {translateText(activeAlertDetail.menuSafetyAlert?.title || "Thực đơn an toàn")}
                     </h3>
                   </div>
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-black ${
-                    activeAlertDetail.menuSafetyAlert?.isSafe
+                  className={`rounded-full px-3 py-1 text-xs font-black ${activeAlertDetail.menuSafetyAlert?.isSafe
                       ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                       : "bg-rose-100 text-rose-800 border border-rose-300"
-                  }`}
+                    }`}
                 >
-                  {activeAlertDetail.menuSafetyAlert?.isSafe ? "Đạt an toàn" : "Cần lưu ý"}
+                  {translateText(activeAlertDetail.menuSafetyAlert?.isSafe ? "Đạt an toàn" : "Cần lưu ý")}
                 </span>
               </div>
 
@@ -200,14 +190,12 @@ export const ParentChildAlertsPage: React.FC = () => {
               </p>
 
               <div className="pt-2 flex items-center justify-between text-xs">
-                <span className="text-slate-500">
-                  Lớp: <strong>{activeAlertDetail.className}</strong>
+                <span className="text-slate-500">{translateText("Lớp: ")}<strong>{activeAlertDetail.className}</strong>
                 </span>
                 <Link
                   to="/declare-allergy"
                   className="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-900"
-                >
-                  Kiểm tra hồ sơ dị ứng <ExternalLink className="h-3 w-3" />
+                >{translateText("Kiểm tra hồ sơ dị ứng ")}<ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             </div>
@@ -220,37 +208,33 @@ export const ParentChildAlertsPage: React.FC = () => {
                     <Activity className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-black uppercase text-sky-700 block">
-                      Tình hình ăn uống tại lớp
-                    </span>
+                    <span className="text-[11px] font-black uppercase text-sky-700 block">{translateText("Tình hình ăn uống tại lớp")}</span>
                     <h3 className="text-base font-black text-slate-900">
-                      {activeAlertDetail.dailyIntakeReport?.title || "Báo cáo lượng ăn"}
+                      {translateText(activeAlertDetail.dailyIntakeReport?.title || "Báo cáo lượng ăn")}
                     </h3>
                   </div>
                 </div>
 
-                <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">
-                  Giáo viên ghi nhận
-                </span>
+                <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">{translateText("Giáo viên ghi nhận")}</span>
               </div>
 
               <div className="space-y-2 text-xs">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
-                  <span className="text-slate-500">Bữa trưa chính:</span>
+                  <span className="text-slate-500">{translateText("Bữa trưa chính:")}</span>
                   <strong className="text-slate-900 font-bold">
-                    {activeAlertDetail.dailyIntakeReport?.lunchStatus}
+                    {translateText(activeAlertDetail.dailyIntakeReport?.lunchStatus)}
                   </strong>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
-                  <span className="text-slate-500">Bữa phụ xế chiều:</span>
+                  <span className="text-slate-500">{translateText("Bữa phụ xế chiều:")}</span>
                   <strong className="text-slate-900 font-bold">
-                    {activeAlertDetail.dailyIntakeReport?.snackStatus}
+                    {translateText(activeAlertDetail.dailyIntakeReport?.snackStatus)}
                   </strong>
                 </div>
                 {activeAlertDetail.dailyIntakeReport?.teacherNote && (
                   <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 text-emerald-950">
-                    <span className="font-bold block mb-0.5">Lời nhắn của cô giáo:</span>
-                    <span>{activeAlertDetail.dailyIntakeReport.teacherNote}</span>
+                    <span className="font-bold block mb-0.5">{translateText("Lời nhắn của cô giáo:")}</span>
+                    <span>{translateText(activeAlertDetail.dailyIntakeReport.teacherNote)}</span>
                   </div>
                 )}
               </div>
@@ -259,8 +243,7 @@ export const ParentChildAlertsPage: React.FC = () => {
                 <Link
                   to="/child-menu-consumption"
                   className="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-900"
-                >
-                  Xem chi tiết suất ăn & thả tim <ExternalLink className="h-3 w-3" />
+                >{translateText("Xem chi tiết suất ăn & thả tim ")}<ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             </div>
@@ -273,35 +256,31 @@ export const ParentChildAlertsPage: React.FC = () => {
                     <HeartPulse className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-black uppercase text-amber-700 block">
-                      Sức khỏe & Thể trạng
-                    </span>
+                    <span className="text-[11px] font-black uppercase text-amber-700 block">{translateText("Sức khỏe & Thể trạng")}</span>
                     <h3 className="text-base font-black text-slate-900">
-                      {activeAlertDetail.healthReminder?.title || "Theo dõi thể lực"}
+                      {translateText(activeAlertDetail.healthReminder?.title || "Theo dõi thể lực")}
                     </h3>
                   </div>
                 </div>
 
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">
-                  WAZ: {activeAlertDetail.healthReminder?.latestWaz} SD
-                </span>
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">{translateText("WAZ: ")}{activeAlertDetail.healthReminder?.latestWaz}{translateText(" SD")}</span>
               </div>
 
               <div className="space-y-2 text-xs">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
-                  <span className="text-slate-500">Tình trạng thể chất:</span>
+                  <span className="text-slate-500">{translateText("Tình trạng thể chất:")}</span>
                   <span className="font-bold text-emerald-700">
-                    {activeAlertDetail.healthReminder?.statusLabel}
+                    {translateText(activeAlertDetail.healthReminder?.statusLabel)}
                   </span>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
-                  <span className="text-slate-500">Lịch cân đo định kỳ kế tiếp:</span>
+                  <span className="text-slate-500">{translateText("Lịch cân đo định kỳ kế tiếp:")}</span>
                   <strong className="text-slate-900 font-bold">
-                    {activeAlertDetail.healthReminder?.nextMeasurementDate}
+                    {translateText(activeAlertDetail.healthReminder?.nextMeasurementDate)}
                   </strong>
                 </div>
                 <div className="bg-teal-50/70 p-3 rounded-xl border border-teal-200 text-teal-950">
-                  <span className="font-bold block mb-0.5">Lời khuyên của chuyên gia dinh dưỡng:</span>
+                  <span className="font-bold block mb-0.5">{translateText("Lời khuyên của chuyên gia dinh dưỡng:")}</span>
                   <span>{activeAlertDetail.healthReminder?.nutritionistAdvice}</span>
                 </div>
               </div>
@@ -310,8 +289,7 @@ export const ParentChildAlertsPage: React.FC = () => {
                 <Link
                   to="/parent/growth"
                   className="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-900"
-                >
-                  Xem biểu đồ Z-score WHO <ExternalLink className="h-3 w-3" />
+                >{translateText("Xem biểu đồ Z-score WHO ")}<ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             </div>
@@ -324,44 +302,37 @@ export const ParentChildAlertsPage: React.FC = () => {
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-black uppercase text-orange-700 block">
-                      Tư vấn trẻ kén ăn • UC71
-                    </span>
-                    <h3 className="text-base font-black text-slate-900">
-                      Bổ sung dinh dưỡng tại gia đình
-                    </h3>
+                    <span className="text-[11px] font-black uppercase text-orange-700 block">{translateText("Tư vấn dinh dưỡng trẻ kén ăn")}</span>
+                    <h3 className="text-base font-black text-slate-900">{translateText("Bổ sung dinh dưỡng tại gia đình")}</h3>
                   </div>
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${
-                    pickyAdvice
+                  className={`rounded-full px-3 py-1 text-xs font-bold ${pickyAdvice
                       ? "bg-amber-100 text-amber-900 border border-amber-300"
                       : "bg-emerald-100 text-emerald-800"
-                  }`}
+                    }`}
                 >
-                  {pickyAdvice ? "Có tư vấn mới" : "Bé ăn ngoan"}
+                  {translateText(pickyAdvice ? "Có tư vấn mới" : "Bé ăn ngoan")}
                 </span>
               </div>
 
               {pickyAdvice ? (
                 <div className="space-y-2 text-xs">
                   <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-amber-950">
-                    <strong className="block mb-1 font-bold">{pickyAdvice.adviceTitle}</strong>
+                    <strong className="block mb-1 font-bold">{translateText(pickyAdvice.adviceTitle)}</strong>
                     <p className="leading-relaxed">{pickyAdvice.homeSupplementAdvice}</p>
                   </div>
                   {pickyAdvice.recommendedDishes?.length > 0 && (
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                      <span className="text-slate-500 font-semibold block mb-1">
-                        Món ăn gợi ý tăng cường:
-                      </span>
+                      <span className="text-slate-500 font-semibold block mb-1">{translateText("Món ăn gợi ý tăng cường:")}</span>
                       <div className="flex flex-wrap gap-1.5">
                         {pickyAdvice.recommendedDishes.map((dish, i) => (
                           <span
                             key={i}
                             className="bg-white border border-slate-200 px-2 py-0.5 rounded-lg text-slate-800 font-semibold"
                           >
-                            {dish}
+                            {translateText(dish)}
                           </span>
                         ))}
                       </div>
@@ -369,17 +340,14 @@ export const ParentChildAlertsPage: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center text-xs text-slate-500">
-                  Bé có sức ăn tốt, hiện không có cảnh báo kén ăn hay biếng ăn cần tư vấn can thiệp.
-                </div>
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center text-xs text-slate-500">{translateText("Bé có sức ăn tốt, hiện không có cảnh báo kén ăn hay biếng ăn cần tư vấn can thiệp.")}</div>
               )}
 
               <div className="pt-2 flex justify-end text-xs">
                 <Link
                   to="/child-menu-consumption"
                   className="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-900"
-                >
-                  Xem thực đơn & xác nhận tư vấn <ExternalLink className="h-3 w-3" />
+                >{translateText("Xem thực đơn & xác nhận tư vấn ")}<ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             </div>

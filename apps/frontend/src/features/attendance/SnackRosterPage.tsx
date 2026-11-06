@@ -1,3 +1,4 @@
+import { useLanguage } from '../../core/i18n/useLanguage';
 import { schoolDate } from "../menus/utils/published-menus";
 import React, { useState, useEffect, useCallback } from "react";
 
@@ -12,6 +13,7 @@ import { attendanceApi } from "./api/attendanceApi";
 import { SnackRosterResponse, SnackRosterItem } from "./types";
 
 export const SnackRosterPage: React.FC = () => {
+  useLanguage();
   // Filter States
   const [search, setSearch] = useState<string>("");
   const [gradeLevel, setGradeLevel] = useState<string>("ALL");

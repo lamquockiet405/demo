@@ -278,15 +278,18 @@ export class ParentManagementService {
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
 
-    if (dto.fullName) user.fullName = dto.fullName;
-    if (dto.phone !== undefined) user.phone = dto.phone;
-    if (dto.status) user.status = dto.status;
+    const updateFields: Record<string, any> = {};
+    if (dto.fullName) updateFields.fullName = dto.fullName;
+    if (dto.phone !== undefined) updateFields.phone = dto.phone;
+    if (dto.status) updateFields.status = dto.status;
     if (dto.newPassword) {
       if (dto.newPassword.length < 8)
         throw new BadRequestException("Mật khẩu cần ít nhất 8 ký tự.");
-      user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+      updateFields.passwordHash = await bcrypt.hash(dto.newPassword, 10);
     }
-    await this.userRepo.save(user);
+    if (Object.keys(updateFields).length > 0) {
+      await this.userRepo.update(id, updateFields);
+    }
 
     let profile = await this.parentRepo.findOne({ where: { userId: id } });
     if (!profile) {
@@ -328,8 +331,7 @@ export class ParentManagementService {
   async remove(id: number) {
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
-    user.status = "INACTIVE";
-    await this.userRepo.save(user);
+    await this.userRepo.update(id, { status: "INACTIVE" });
     return { success: true, message: "Đã tạm ngưng tài khoản phụ huynh" };
   }
 
@@ -370,8 +372,7 @@ export class ParentManagementService {
   async restore(id: number) {
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException("Không tìm thấy phụ huynh");
-    user.status = "ACTIVE";
-    await this.userRepo.save(user);
+    await this.userRepo.update(id, { status: "ACTIVE" });
     return { success: true, message: "Đã khôi phục tài khoản phụ huynh" };
   }
 }

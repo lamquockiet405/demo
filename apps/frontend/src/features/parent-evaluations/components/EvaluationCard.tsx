@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import {
   Star,
@@ -28,6 +30,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
   onRespond,
   onPhotoClick,
 }) => {
+  useLanguage();
   // State for response editing / drafting
   const [isResponding, setIsResponding] = useState<boolean>(
     item.isDrafting || item.status === 'PENDING' && item.displayOrder === 1,
@@ -107,7 +110,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
           />
         ))}
         <span className="ml-1 text-xs font-bold text-slate-700">
-          {rating.toFixed(1)}
+          {translateText(rating.toFixed(1))}
         </span>
       </div>
     );
@@ -121,13 +124,13 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
           <div
             className={`w-10 h-10 rounded-full ${avatar.bg} text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs`}
           >
-            {avatar.initials}
+            {translateText(avatar.initials)}
           </div>
 
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-sm text-slate-900">
-                {item.parentNameCustom || 'Phụ huynh'}
+                {translateText(item.parentNameCustom || 'Phụ huynh')}
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
@@ -136,7 +139,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             </div>
 
             <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-              <span>{item.feedbackTimeLabel || item.feedbackDate}</span>
+              <span>{translateText(item.feedbackTimeLabel || item.feedbackDate)}</span>
             </p>
           </div>
         </div>
@@ -144,17 +147,11 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
         {/* Status Badge & Stars */}
         <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1.5">
           {item.status === 'PENDING' ? (
-            <span className="px-2.5 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 font-bold text-[11px] rounded-md tracking-tight">
-              Chưa phản hồi
-            </span>
+            <span className="px-2.5 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 font-bold text-[11px] rounded-md tracking-tight">{translateText("Chưa phản hồi")}</span>
           ) : item.status === 'RESOLVED' ? (
-            <span className="px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-[11px] rounded-md tracking-tight">
-              Đã cảm ơn
-            </span>
+            <span className="px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-[11px] rounded-md tracking-tight">{translateText("Đã cảm ơn")}</span>
           ) : (
-            <span className="px-2.5 py-0.5 bg-teal-50 border border-teal-200 text-teal-700 font-bold text-[11px] rounded-md tracking-tight">
-              Đã phản hồi
-            </span>
+            <span className="px-2.5 py-0.5 bg-teal-50 border border-teal-200 text-teal-700 font-bold text-[11px] rounded-md tracking-tight">{translateText("Đã phản hồi")}</span>
           )}
 
           <div className="pt-0.5">{renderStars(item.rating)}</div>
@@ -164,7 +161,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
       {/* Meal Badge Tag */}
       {item.mealTitle && (
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 font-medium max-w-full truncate">
-          <span>{item.mealTitle}</span>
+          <span>{translateText(item.mealTitle)}</span>
         </div>
       )}
 
@@ -184,11 +181,11 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             >
               <img
                 src={ph.url}
-                alt={ph.caption}
+                alt={translateText(ph.caption)}
                 className="w-20 h-20 object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <span className="absolute bottom-0 inset-x-0 bg-slate-900/70 backdrop-blur-xs text-[10px] text-white text-center py-0.5 truncate px-1 font-medium">
-                {ph.caption}
+                {translateText(ph.caption)}
               </span>
             </div>
           ))}
@@ -200,11 +197,9 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
         <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
           <div className="flex items-center gap-1.5 text-slate-600">
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-            <span className="text-[11px] font-medium">{item.likesInfo}</span>
+            <span className="text-[11px] font-medium">{translateText(item.likesInfo)}</span>
           </div>
-          <button className="text-[11px] text-teal-700 hover:underline font-semibold">
-            Xem chi tiết sổ ăn
-          </button>
+          <button className="text-[11px] text-teal-700 hover:underline font-semibold">{translateText("Xem chi tiết sổ ăn")}</button>
         </div>
       )}
 
@@ -216,20 +211,16 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             <div className="flex items-center gap-1.5 font-bold text-teal-900">
               <CheckCircle className="w-4 h-4 text-teal-600" />
               <span>
-                {item.responseHeader ||
-                  `Phản hồi chính thức từ Ban Giám Hiệu ${localStorage.getItem('school_name') || 'Trường Mẫu Giáo Hướng Dương'}`}
+                {translateText(item.responseHeader ||
+                  `Phản hồi chính thức từ Ban Giám Hiệu ${localStorage.getItem('school_name') || 'Trường Mẫu Giáo Hướng Dương'}`)}
               </span>
             </div>
-            <span className="text-teal-700 font-semibold text-[11px]">
-              Hiệu trưởng Nguyễn Thu Thủy
-            </span>
+            <span className="text-teal-700 font-semibold text-[11px]">{translateText("Hiệu trưởng Nguyễn Thu Thủy")}</span>
           </div>
 
           {/* Quick Suggestions */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              GỢI Ý PHẢN HỒI NHANH:
-            </span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("GỢI Ý PHẢN HỒI NHANH:")}</span>
             <div className="flex items-center gap-2 flex-wrap text-xs">
               {quickSuggestions.map((sug, idx) => (
                 <button
@@ -237,7 +228,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
                   onClick={() => handleAppendSuggestion(sug.text)}
                   className="px-2.5 py-1 bg-white hover:bg-teal-100/70 border border-teal-200/90 text-teal-800 rounded-lg text-[11px] font-medium transition active:scale-98"
                 >
-                  {sug.label}
+                  {translateText(sug.label)}
                 </button>
               ))}
             </div>
@@ -249,7 +240,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               rows={4}
               value={responseText}
               onChange={(e) => setResponseText(e.target.value)}
-              placeholder="Nhập nội dung phản hồi chính thức từ BGH gửi tới phụ huynh..."
+              placeholder={translateText("Nhập nội dung phản hồi chính thức từ BGH gửi tới phụ huynh...")}
               className="w-full p-3 bg-white border border-teal-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition leading-relaxed"
             />
           </div>
@@ -266,9 +257,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             <label
               htmlFor={`push-${item.id}`}
               className="text-[11px] cursor-pointer font-medium text-slate-700"
-            >
-              Gửi thông báo đẩy (Push notification) tức thì qua App KidMeal Connect của Phụ huynh
-            </label>
+            >{translateText("Gửi thông báo đẩy (Push notification) tức thì qua App KidMeal Connect của Phụ huynh")}</label>
           </div>
 
           {/* Action buttons */}
@@ -278,7 +267,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               className="flex items-center gap-1 text-slate-500 hover:text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-white/60 transition"
             >
               <ChevronUp className="w-3.5 h-3.5" />
-              <span>Thu gọn</span>
+              <span>{translateText("Thu gọn")}</span>
             </button>
 
             <button
@@ -288,7 +277,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             >
               <Send className="w-3.5 h-3.5" />
               <span>
-                {isSubmitting ? 'Đang gửi...' : 'Gửi phản hồi cho Phụ huynh'}
+                {translateText(isSubmitting ? 'Đang gửi...' : 'Gửi phản hồi cho Phụ huynh')}
               </span>
             </button>
           </div>
@@ -300,14 +289,14 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             <div className="flex items-center gap-1.5 font-bold text-slate-800">
               <CornerDownRight className="w-3.5 h-3.5 text-teal-600" />
               <span>
-                {item.responseHeader ||
-                  `BGH ${localStorage.getItem('school_name') || 'Trường Mẫu Giáo Hướng Dương'}`}
+                {translateText(item.responseHeader ||
+                  `BGH ${localStorage.getItem('school_name') || 'Trường Mẫu Giáo Hướng Dương'}`)}
               </span>
             </div>
             <span className="text-[11px] text-slate-400">
-              {item.respondedAt
-                ? `Đã gửi: ${new Date(item.respondedAt).toLocaleDateString('vi-VN')}`
-                : 'Đã gửi: Hôm qua, 17:10'}
+              {translateText(item.respondedAt
+                ? `Đã gửi: ${new Date(item.respondedAt).toLocaleDateString(getLocale())}`
+                : 'Đã gửi: Hôm qua, 17:10')}
             </span>
           </div>
 
@@ -321,7 +310,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               className="flex items-center gap-1 text-teal-700 hover:text-teal-800 hover:underline"
             >
               <Edit3 className="w-3.5 h-3.5" />
-              <span>Chỉnh sửa phản hồi</span>
+              <span>{translateText("Chỉnh sửa phản hồi")}</span>
             </button>
             <span>•</span>
             <button
@@ -329,7 +318,7 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               className="flex items-center gap-1 text-slate-500 hover:text-slate-800"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>Phản hồi thêm</span>
+              <span>{translateText("Phản hồi thêm")}</span>
             </button>
           </div>
         </div>
@@ -342,21 +331,21 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition active:scale-98"
             >
               <CornerDownRight className="w-3.5 h-3.5" />
-              <span>Phản hồi phụ huynh</span>
+              <span>{translateText("Phản hồi phụ huynh")}</span>
             </button>
 
             <button
-              onClick={() => alert('Đã chuyển tiếp thông tin ghi nhận cho Tổ Bếp!')}
+              onClick={() => alert(translateText('Đã chuyển tiếp thông tin ghi nhận cho Tổ Bếp!'))}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold shadow-2xs transition active:scale-98"
             >
               <Share2 className="w-3.5 h-3.5 text-slate-500" />
-              <span>Chuyển tổ bếp ghi nhận</span>
+              <span>{translateText("Chuyển tổ bếp ghi nhận")}</span>
             </button>
           </div>
 
           {item.priorityNote && (
             <span className="text-[11px] font-bold text-amber-700 flex items-center gap-1">
-              <span>{item.priorityNote}</span>
+              <span>{translateText(item.priorityNote)}</span>
             </span>
           )}
         </div>

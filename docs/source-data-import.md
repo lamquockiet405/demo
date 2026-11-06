@@ -1,5 +1,13 @@
 # Dữ liệu món ăn và dinh dưỡng có nguồn
 
+Cập nhật thức uống ngày 05/11/2026: `20261105-drink-recipes.sql` khôi phục 10 lựa chọn cho bản dự thảo từ định lượng mẫu lưu trữ: yaourt, nước cam, nước ép cam, sữa đậu nành, sâm bí đao, nước sâm bí đao, sâm bí đao hạt chia, nước đậu rang, nước đậu rang đường phèn và nước mía. Các biến thể bỏ hạt chia/đường giữ nguyên khối lượng của những nguyên liệu còn lại; phần bỏ được ghi trong metadata. Nguyên liệu được tra bằng tên; nước đậu dùng đúng nguyên liệu đậu đen, không dùng ID cũ hiện đang thuộc đậu đỏ.
+
+Các công thức này giữ `nutrition_verified=false`, có `recipeStatus=APPROVED_REFERENCE` và `menuPlanningEnabled=true`. Chỉ bản dự thảo được sử dụng số tính từ nguyên liệu; giao diện thực đơn và kết quả sinh tự động ghi rõ đây là số tham khảo. Bộ quét dinh dưỡng vẫn yêu cầu xác nhận công thức. Không bổ sung số dinh dưỡng hay định lượng mới cho các món chưa có dữ liệu như sữa đậu xanh, chanh dây, trà đào. Công thức nước nấu chỉ có tổng nguyên liệu tham khảo; hao hụt do lọc/chiết chưa được đo.
+
+Bộ sinh thực đơn luân phiên theo nhóm thức uống (các tên cam/bí đao/đậu rang cùng nhóm), ưu tiên nhóm ít dùng nhất trong tuần và cảnh báo khi chưa đủ nhóm. Nguồn và cách tính được giữ trong `dish_recipes.source_metadata` và `dish_nutrition.source_metadata`. Món đã có công thức được giữ nguyên khi áp dụng lại migration.
+
+Sinh migration: `node scripts/prepare-drink-recipes.cjs`. Áp dụng vào Docker thử nghiệm, có sao lưu trước: `node scripts/apply-drink-recipes-docker.cjs`. Kiểm tra tính lặp an toàn, số dinh dưỡng tính từ công thức, 10 lần sinh xem trước và nhãn tham khảo khi lưu: `node scripts/verify-drinks-docker.cjs`.
+
 Cập nhật quan hệ database ngày 03/11/2026: migration `20261103-relational-integrity.sql` bổ sung các tham chiếu thực, đưa schema hiện tại lên **56 bảng, 77 FK trong một nhóm liên thông**. Xem [chi tiết migration và dữ liệu lịch sử](database-relations.md). Những số lượng 55 bảng bên dưới mô tả bản chụp trước migration này.
 
 Đã bổ sung trực tiếp bốn bảng còn trống ngày 03/11/2026 và xuất lại trang xem toàn bộ database lúc **13:21 (UTC+7)**: **55 bảng, 2.350 dòng, không còn bảng trống** trong database hiện tại. Kết quả được đọc lại bằng PostgreSQL và các entity TypeORM của backend:

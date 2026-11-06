@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -31,6 +33,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
   profile,
   onSaved,
 }) => {
+  useLanguage();
   const [form, setForm] = useState({
     name: "",
     code: "",
@@ -144,13 +147,8 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               <Building className="w-5 h-5 text-teal-200" />
             </div>
             <div>
-              <h3 className="font-bold text-base">
-                Cập nhật thông tin Trường mầm non
-              </h3>
-              <p className="text-xs text-teal-200">
-                Chỉnh sửa hồ sơ cơ sở, mã định danh Bộ GD&ĐT và giấy chứng nhận
-                ATTP
-              </p>
+              <h3 className="font-bold text-base">{translateText("Cập nhật thông tin Trường mầm non")}</h3>
+              <p className="text-xs text-teal-200">{translateText("Chỉnh sửa hồ sơ cơ sở, mã định danh Bộ GD&ĐT và giấy chứng nhận ATTP")}</p>
             </div>
           </div>
           <button
@@ -168,60 +166,53 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
         >
           {error && (
             <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-medium">
-              {error}
+              {translateText(error)}
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Building className="w-3.5 h-3.5 text-teal-600" /> Tên trường
-                mầm non *
-              </label>
+                <Building className="w-3.5 h-3.5 text-teal-600" />{translateText(" Tên trường mầm non *")}</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setField("name", e.target.value)}
                 required
                 className={inputCls}
-                placeholder="Nhập tên trường mầm non"
+                placeholder={translateText("Nhập tên trường mầm non")}
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Hash className="w-3.5 h-3.5 text-teal-600" /> Mã trường
-              </label>
+                <Hash className="w-3.5 h-3.5 text-teal-600" />{translateText(" Mã trường")}</label>
               <input
                 type="text"
                 value={form.code}
                 onChange={(e) => setField("code", e.target.value)}
                 className={`${inputCls} font-mono`}
-                placeholder="VD: MN_SAOMAI"
+                placeholder={translateText("VD: MN_SAOMAI")}
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <Building className="w-3.5 h-3.5 text-teal-600" /> Địa chỉ cơ sở
-              trường *
-            </label>
+              <Building className="w-3.5 h-3.5 text-teal-600" />{translateText(" Địa chỉ cơ sở trường *")}</label>
             <input
               type="text"
               value={form.address}
               onChange={(e) => setField("address", e.target.value)}
               required
               className={inputCls}
-              placeholder="Nhập địa chỉ trường học"
+              placeholder={translateText("Nhập địa chỉ trường học")}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-teal-600" /> Số điện thoại /
-                Hotline *
-              </label>
+                <Phone className="w-3.5 h-3.5 text-teal-600" />{translateText(" Số điện thoại / Hotline *")}</label>
               <input
                 type="text"
                 value={form.phone}
@@ -232,9 +223,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-teal-600" /> Email liên hệ nhà
-                trường *
-              </label>
+                <Mail className="w-3.5 h-3.5 text-teal-600" />{translateText(" Email liên hệ nhà trường *")}</label>
               <input
                 type="email"
                 value={form.contactEmail}
@@ -245,22 +234,18 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-teal-600" /> Website / Tên
-                miền
-              </label>
+                <Globe className="w-3.5 h-3.5 text-teal-600" />{translateText(" Website / Tên miền")}</label>
               <input
                 type="text"
                 value={form.domain}
                 onChange={(e) => setField("domain", e.target.value)}
                 className={inputCls}
-                placeholder="VD: saomai.kidsnutri.vn"
+                placeholder={translateText("VD: saomai.kidsnutri.vn")}
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-teal-600" /> Quy mô học sinh
-                tối đa (chỗ)
-              </label>
+                <Users className="w-3.5 h-3.5 text-teal-600" />{translateText(" Quy mô học sinh tối đa (chỗ)")}</label>
               <input
                 type="number"
                 min={1}
@@ -273,9 +258,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Mã Phòng / Sở GD&ĐT
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Mã Phòng / Sở GD&ĐT")}</label>
               <input
                 type="text"
                 value={form.educationDepartmentCode}
@@ -283,13 +266,11 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                   setField("educationDepartmentCode", e.target.value)
                 }
                 className={`${inputCls} font-mono`}
-                placeholder="VD: GD-MN-79-03-0042"
+                placeholder={translateText("VD: GD-MN-79-03-0042")}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Mã định danh CSDL Ngành (Bộ GD&ĐT)
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Mã định danh CSDL Ngành (Bộ GD&ĐT)")}</label>
               <input
                 type="text"
                 value={form.schoolIdentifierSgd}
@@ -297,7 +278,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                   setField("schoolIdentifierSgd", e.target.value)
                 }
                 className={`${inputCls} font-mono`}
-                placeholder="VD: MN-HCM-Q3-0042"
+                placeholder={translateText("VD: MN-HCM-Q3-0042")}
               />
             </div>
           </div>
@@ -305,9 +286,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                <UserCheck className="w-3.5 h-3.5 text-teal-600" /> Người đại
-                diện pháp lý *
-              </label>
+                <UserCheck className="w-3.5 h-3.5 text-teal-600" />{translateText(" Người đại diện pháp lý *")}</label>
               <input
                 type="text"
                 value={form.repName}
@@ -317,9 +296,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Chức vụ pháp lý
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Chức vụ pháp lý")}</label>
               <input
                 type="text"
                 value={form.repTitle}
@@ -332,14 +309,10 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
 
           <div className="p-4 bg-teal-50/50 rounded-2xl border border-teal-100 space-y-3">
             <h4 className="text-xs font-bold text-teal-900 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-teal-600" /> Giấy chứng nhận
-              Cơ sở đủ điều kiện ATTP
-            </h4>
+              <ShieldCheck className="w-4 h-4 text-teal-600" />{translateText(" Giấy chứng nhận Cơ sở đủ điều kiện ATTP")}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-teal-950 mb-1">
-                  Số giấy chứng nhận ATTP
-                </label>
+                <label className="block text-[11px] font-semibold text-teal-950 mb-1">{translateText("Số giấy chứng nhận ATTP")}</label>
                 <input
                   type="text"
                   value={form.licenseNumber}
@@ -348,9 +321,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-semibold text-teal-950 mb-1">
-                  Cơ quan cấp phép
-                </label>
+                <label className="block text-[11px] font-semibold text-teal-950 mb-1">{translateText("Cơ quan cấp phép")}</label>
                 <input
                   type="text"
                   value={form.issuingAuthority}
@@ -360,8 +331,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-teal-950 mb-1 flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-teal-600" /> Ngày cấp
-                </label>
+                  <Calendar className="w-3 h-3 text-teal-600" />{translateText(" Ngày cấp")}</label>
                 <input
                   type="date"
                   value={form.issueDate}
@@ -371,8 +341,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-teal-950 mb-1 flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-teal-600" /> Ngày hết hạn
-                </label>
+                  <Calendar className="w-3 h-3 text-teal-600" />{translateText(" Ngày hết hạn")}</label>
                 <input
                   type="date"
                   value={form.expiryDate}
@@ -388,17 +357,13 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-            >
-              Hủy bỏ
-            </button>
+            >{translateText("Hủy bỏ")}</button>
             <button
               type="submit"
               disabled={saving}
               className="px-5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
             >
-              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              Lưu thay đổi vào CSDL
-            </button>
+              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}{translateText("Lưu thay đổi vào CSDL")}</button>
           </div>
         </form>
       </div>

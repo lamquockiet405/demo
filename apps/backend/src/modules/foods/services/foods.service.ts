@@ -214,8 +214,13 @@ export class FoodsService {
       calciumMg: dto.calciumMg || 0,
       ironMg: dto.ironMg || 0,
       zincMg: dto.zincMg || 0,
+      phosphorusMg: dto.phosphorusMg ?? 0,
+      sodiumMg: dto.sodiumMg ?? 0,
+      vitaminAMcg: dto.vitaminAMcg ?? 0,
+      vitaminCMg: dto.vitaminCMg ?? 0,
       refuseRatePercent: dto.refuseRatePercent || 0,
       status: dto.status || 'ACTIVE',
+      sourceMetadata: dto.sourceMetadata ?? null,
     });
 
     const saved = await this.foodRepo.save(food);
@@ -239,8 +244,13 @@ export class FoodsService {
     if (dto.calciumMg !== undefined) food.calciumMg = dto.calciumMg;
     if (dto.ironMg !== undefined) food.ironMg = dto.ironMg;
     if (dto.zincMg !== undefined) food.zincMg = dto.zincMg;
+    if (dto.phosphorusMg !== undefined) food.phosphorusMg = dto.phosphorusMg;
+    if (dto.sodiumMg !== undefined) food.sodiumMg = dto.sodiumMg;
+    if (dto.vitaminAMcg !== undefined) food.vitaminAMcg = dto.vitaminAMcg;
+    if (dto.vitaminCMg !== undefined) food.vitaminCMg = dto.vitaminCMg;
     if (dto.refuseRatePercent !== undefined) food.refuseRatePercent = dto.refuseRatePercent;
     if (dto.status !== undefined) food.status = dto.status;
+    if (dto.sourceMetadata !== undefined) food.sourceMetadata = dto.sourceMetadata;
 
     if (food.sourceMetadata?.missingNutrients) {
       food.sourceMetadata = {

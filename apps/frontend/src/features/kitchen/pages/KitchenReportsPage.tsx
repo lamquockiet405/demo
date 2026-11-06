@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { Download, Printer } from "lucide-react";
 import { mealOperationsApi } from "../api/meal-operations.api";
@@ -14,7 +16,10 @@ import {
   useKitchenResource,
 } from "../components/KitchenUI";
 
+import { sanitizeInspectionNote } from "../utils/inspection-note";
+
 export function KitchenReportsPage() {
+  useLanguage();
   const [date, setDate] = useState(getSchoolDate);
   const [tab, setTab] = useState("portions");
   const resource = useKitchenResource(
@@ -53,7 +58,7 @@ export function KitchenReportsPage() {
         c.specialDiet,
       ]),
       [],
-      ["Kiểm thực", "Kết quả", "Người kiểm", "Thời gian", "Ghi chú"],
+      ["Kiểm thực", "Kết quả", "Người kiểm", "Thời gian", "Ghi chú"].map(translateText),
     ];
     if (safety)
       for (const [name, step] of [
@@ -62,15 +67,15 @@ export function KitchenReportsPage() {
         ["Bước 3", safety.step3PreServingCheck],
       ] as const)
         rows.push([
-          name,
-          step?.result,
+          translateText(name),
+          translateText(step?.result),
           step?.inspectorName,
           step?.checkedAt,
-          step?.notes,
+          sanitizeInspectionNote(step?.notes),
         ]);
     rows.push(
       [],
-      ["Món", "Nhóm", "Tỷ lệ thức ăn thừa (%)", "Cảnh báo"],
+      ["Món", "Nhóm", "Tỷ lệ thức ăn thừa (%)", "Cảnh báo"].map(translateText),
       ...(consumption?.dishWasteIndex || []).map((d) => [
         d.dishName,
         d.dishCategory,
@@ -83,29 +88,23 @@ export function KitchenReportsPage() {
   return (
     <>
       <PageTitle
-        title="Báo cáo vận hành bữa ăn"
-        description="Đối chiếu suất ăn, kiểm thực và phản hồi sau bữa của ngày được chọn."
+        title={translateText("Báo cáo vận hành bữa ăn")}
+        description={translateText("Đối chiếu suất ăn, kiểm thực và phản hồi sau bữa của ngày được chọn.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button className="kp-button" disabled={!report} onClick={exportRows}>
-          <Download size={15} />
-          Xuất báo cáo
-        </button>
+          <Download size={15} />{translateText("Xuất báo cáo")}</button>
         <button
           className="kp-button"
           disabled={!report}
           onClick={() => window.print()}
         >
-          <Printer size={15} />
-          In báo cáo
-        </button>
+          <Printer size={15} />{translateText("In báo cáo")}</button>
       </PageTitle>
       <div className="kp-filters">
-        <label>
-          Ngày báo cáo
-          <input
+        <label>{translateText("Ngày báo cáo")}<input
             type="date"
-            aria-label="Ngày báo cáo bếp"
+            aria-label={translateText("Ngày báo cáo bếp")}
             value={date}
             onChange={(e) => {
               if (e.target.value) setDate(e.target.value);
@@ -119,22 +118,22 @@ export function KitchenReportsPage() {
         <>
           <div className="kp-stats">
             {[
-              ["Tổng học sinh", reconciliation?.totalEnrolledStudents],
-              ["Suất trưa thực tế", reconciliation?.actualLunchCount],
-              ["Suất ăn phụ", reconciliation?.actualSnackCount],
-              ["Suất chế độ riêng", reconciliation?.specialDietCount],
+              [translateText("Tổng học sinh"), reconciliation?.totalEnrolledStudents],
+              [translateText("Suất trưa thực tế"), reconciliation?.actualLunchCount],
+              [translateText("Suất ăn sáng"), reconciliation?.actualSnackCount],
+              [translateText("Suất chế độ riêng"), reconciliation?.specialDietCount],
             ].map(([label, value]) => (
               <div className="kp-stat" key={String(label)}>
-                <span>{label}</span>
-                <strong>{formatNumber(value, 0)}</strong>
+                <span>{translateText(label)}</span>
+                <strong>{translateText(formatNumber(value, 0))}</strong>
               </div>
             ))}
           </div>
-          <div className="kp-tabs" role="tablist" aria-label="Nội dung báo cáo">
+          <div className="kp-tabs" role="tablist" aria-label={translateText("Nội dung báo cáo")}>
             {[
-              ["portions", "Cân đối suất ăn"],
-              ["safety", "Kiểm thực & lưu mẫu"],
-              ["consumption", "Tiêu thụ & phản hồi"],
+              ["portions", translateText("Cân đối suất ăn")],
+              ["safety", translateText("Kiểm thực & lưu mẫu")],
+              ["consumption", translateText("Tiêu thụ & phản hồi")],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -143,7 +142,7 @@ export function KitchenReportsPage() {
                 className={tab === id ? "active" : ""}
                 onClick={() => setTab(id)}
               >
-                {label}
+                {translateText(label)}
               </button>
             ))}
           </div>
@@ -152,13 +151,13 @@ export function KitchenReportsPage() {
               <table className="kp-table">
                 <thead>
                   <tr>
-                    <th>Lớp</th>
-                    <th>Sĩ số</th>
-                    <th>Trưa</th>
-                    <th>Ăn phụ</th>
-                    <th>Vắng có phép</th>
-                    <th>Vắng không phép</th>
-                    <th>Ăn riêng</th>
+                    <th>{translateText("Lớp")}</th>
+                    <th>{translateText("Sĩ số")}</th>
+                    <th>{translateText("Trưa")}</th>
+                    <th>{translateText("Ăn phụ")}</th>
+                    <th>{translateText("Vắng có phép")}</th>
+                    <th>{translateText("Vắng không phép")}</th>
+                    <th>{translateText("Ăn riêng")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -166,7 +165,7 @@ export function KitchenReportsPage() {
                     <tr key={c.classId}>
                       <td>
                         <strong>{c.className}</strong>
-                        <small>{c.ageGroup}</small>
+                        <small>{translateText(c.ageGroup)}</small>
                       </td>
                       {[
                         c.enrolled,
@@ -176,7 +175,7 @@ export function KitchenReportsPage() {
                         c.unexcusedAbsence,
                         c.specialDiet,
                       ].map((v, i) => (
-                        <td key={i}>{formatNumber(v, 0)}</td>
+                        <td key={i}>{translateText(formatNumber(v, 0))}</td>
                       ))}
                     </tr>
                   ))}
@@ -189,61 +188,53 @@ export function KitchenReportsPage() {
               <div className="kp-card-grid">
                 {safety &&
                   [
-                    ["Bước 1 · Nguyên liệu", safety.step1RawCheck],
-                    ["Bước 2 · Chế biến", safety.step2ProcessingCheck],
-                    ["Bước 3 · Trước khi ăn", safety.step3PreServingCheck],
+                    [translateText("Bước 1 · Nguyên liệu"), safety.step1RawCheck],
+                    [translateText("Bước 2 · Chế biến"), safety.step2ProcessingCheck],
+                    [translateText("Bước 3 · Trước khi ăn"), safety.step3PreServingCheck],
                   ].map(([label, step]: [string, any]) => (
                     <section className="kp-panel" key={label}>
-                      <h2>{label}</h2>
+                      <h2>{translateText(label)}</h2>
                       <span className="kp-tag">
-                        {step?.result || "Chưa có kết quả"}
+                        {translateText(step?.result || "Chưa có kết quả")}
                       </span>
-                      <p>
-                        Người kiểm: {step?.inspectorName || "—"}
+                      <p>{translateText("Người kiểm: ")}{step?.inspectorName || "—"}
+                        <br />{translateText("Thời gian: ")}{translateText(formatDateTime(step?.checkedAt))}
                         <br />
-                        Thời gian: {formatDateTime(step?.checkedAt)}
-                        <br />
-                        {step?.notes || "Không có ghi chú thêm."}
+                        {sanitizeInspectionNote(step?.notes) || translateText("Không có ghi chú thêm.")}
                       </p>
                       {step?.supplierName && (
-                        <p>Nhà cung cấp: {step.supplierName}</p>
+                        <p>{translateText("Nhà cung cấp: ")}{step.supplierName}</p>
                       )}
                       {step?.equipmentHygiene && (
-                        <p>Vệ sinh thiết bị: {step.equipmentHygiene}</p>
+                        <p>{translateText("Vệ sinh thiết bị: ")}{translateText(step.equipmentHygiene)}</p>
                       )}
                       {step?.sensoryColorSmell && (
-                        <p>Cảm quan: {step.sensoryColorSmell}</p>
+                        <p>{translateText("Cảm quan: ")}{translateText(step.sensoryColorSmell)}</p>
                       )}
                       {(step?.transportTempC != null ||
                         step?.coreBoilingTempC != null) && (
-                        <p>
-                          Nhiệt độ ghi nhận:{" "}
-                          {formatNumber(
+                        <p>{translateText("Nhiệt độ ghi nhận:")}{" "}
+                          {translateText(formatNumber(
                             step.transportTempC ?? step.coreBoilingTempC,
-                          )}{" "}
-                          °C
-                        </p>
+                          ))}{" "}{translateText("°C")}</p>
                       )}
                     </section>
                   ))}
               </div>
               <section className="kp-panel mt-4">
-                <h2>Lưu mẫu 24 giờ</h2>
+                <h2>{translateText("Lưu mẫu 24 giờ")}</h2>
                 <p>
-                  {safety?.sampleRetention24h?.fridgeUnit ||
-                    "Chưa có dữ liệu tủ lưu"}{" "}
-                  · {formatNumber(safety?.sampleRetention24h?.storageTempC)} °C
-                  · {formatNumber(safety?.sampleRetention24h?.sampleCount, 0)}{" "}
-                  mẫu
-                </p>
+                  {translateText(safety?.sampleRetention24h?.fridgeUnit ||
+                    "Chưa có dữ liệu tủ lưu")}{" "}
+                  · {translateText(formatNumber(safety?.sampleRetention24h?.storageTempC))}{translateText(" °C · ")}{translateText(formatNumber(safety?.sampleRetention24h?.sampleCount, 0))}{" "}{translateText("mẫu")}</p>
                 <div className="kp-table-wrap">
                   <table className="kp-table">
                     <thead>
                       <tr>
-                        <th>Mẫu</th>
-                        <th>Món</th>
-                        <th>Khối lượng / thể tích</th>
-                        <th>Lưu lúc</th>
+                        <th>{translateText("Mẫu")}</th>
+                        <th>{translateText("Món")}</th>
+                        <th>{translateText("Khối lượng / thể tích")}</th>
+                        <th>{translateText("Lưu lúc")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -251,8 +242,8 @@ export function KitchenReportsPage() {
                         <tr key={i}>
                           <td>{s.sampleCode}</td>
                           <td>{s.dishName}</td>
-                          <td>{s.weightOrVolume}</td>
-                          <td>{formatDateTime(s.storedAt)}</td>
+                          <td>{translateText(s.weightOrVolume)}</td>
+                          <td>{translateText(formatDateTime(s.storedAt))}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -264,30 +255,29 @@ export function KitchenReportsPage() {
           {tab === "consumption" && (
             <>
               <section className="kp-panel">
-                <h2>Mức tiêu thụ toàn trường</h2>
-                <p>
-                  Tỷ lệ tiêu thụ bình quân:{" "}
+                <h2>{translateText("Mức tiêu thụ toàn trường")}</h2>
+                <p>{translateText("Tỷ lệ tiêu thụ bình quân:")}{" "}
                   <b>
-                    {formatNumber(consumption?.schoolAverageConsumptionRate)}%
+                    {translateText(formatNumber(consumption?.schoolAverageConsumptionRate))}%
                   </b>
                 </p>
                 <div className="kp-table-wrap">
                   <table className="kp-table">
                     <thead>
                       <tr>
-                        <th>Món</th>
-                        <th>Nhóm</th>
-                        <th>Thức ăn thừa</th>
-                        <th>Ghi nhận</th>
+                        <th>{translateText("Món")}</th>
+                        <th>{translateText("Nhóm")}</th>
+                        <th>{translateText("Thức ăn thừa")}</th>
+                        <th>{translateText("Ghi nhận")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {consumption?.dishWasteIndex?.map((d, i) => (
                         <tr key={i}>
                           <td>{d.dishName}</td>
-                          <td>{d.dishCategory}</td>
-                          <td>{formatNumber(d.wastePercent)}%</td>
-                          <td>{d.warning || "—"}</td>
+                          <td>{translateText(d.dishCategory)}</td>
+                          <td>{translateText(formatNumber(d.wastePercent))}%</td>
+                          <td>{translateText(d.warning || "—")}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -295,28 +285,28 @@ export function KitchenReportsPage() {
                 </div>
               </section>
               <section className="kp-panel">
-                <h2>Phản hồi giáo viên</h2>
+                <h2>{translateText("Phản hồi giáo viên")}</h2>
                 <div className="kp-table-wrap">
                   <table className="kp-table">
                     <thead>
                       <tr>
-                        <th>Lớp</th>
-                        <th>Nhiệt độ</th>
-                        <th>Hương vị</th>
-                        <th>Vệ sinh</th>
-                        <th>Khay nhận</th>
-                        <th>Nhận xét</th>
+                        <th>{translateText("Lớp")}</th>
+                        <th>{translateText("Nhiệt độ")}</th>
+                        <th>{translateText("Hương vị")}</th>
+                        <th>{translateText("Vệ sinh")}</th>
+                        <th>{translateText("Khay nhận")}</th>
+                        <th>{translateText("Nhận xét")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {consumption?.teacherSensoryFeedback?.map((f, i) => (
                         <tr key={i}>
                           <td>{f.className}</td>
-                          <td>{f.temperature}</td>
-                          <td>{f.taste}</td>
-                          <td>{f.cleanliness}</td>
-                          <td>{formatNumber(f.trayCountReceived, 0)}</td>
-                          <td>{f.comment || "—"}</td>
+                          <td>{translateText(f.temperature)}</td>
+                          <td>{translateText(f.taste)}</td>
+                          <td>{translateText(f.cleanliness)}</td>
+                          <td>{translateText(formatNumber(f.trayCountReceived, 0))}</td>
+                          <td>{translateText(f.comment || "—")}</td>
                         </tr>
                       ))}
                     </tbody>

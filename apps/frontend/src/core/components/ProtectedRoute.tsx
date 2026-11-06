@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth.store';
@@ -13,6 +14,7 @@ interface ProtectedRouteProps {
  * - Sai role → redirect về đúng portal theo role của user.
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+  useLanguage();
   const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {

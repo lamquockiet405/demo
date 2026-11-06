@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useMemo } from "react";
 import {
   ShieldAlert,
@@ -96,6 +98,7 @@ export interface NutritionistAllergyManagementPageProps {
 export const NutritionistAllergyManagementPage: React.FC<
   NutritionistAllergyManagementPageProps
 > = ({ embedded = false, onCatalogChange }) => {
+  useLanguage();
   const [activeTab, setActiveTab] = useState<"DIRECTORY" | "CATALOG">(
     "DIRECTORY",
   );
@@ -266,7 +269,7 @@ export const NutritionistAllergyManagementPage: React.FC<
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-red-100 text-red-700 border border-red-300">
           <AlertOctagon className="w-3.5 h-3.5 text-red-600 shrink-0" />
-          <span>Nguy cơ cao (Phản vệ)</span>
+          <span>{translateText("Nguy cơ cao (Phản vệ)")}</span>
         </span>
       );
     }
@@ -274,14 +277,14 @@ export const NutritionistAllergyManagementPage: React.FC<
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-          <span>Trung bình</span>
+          <span>{translateText("Trung bình")}</span>
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
         <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-        <span>Nhẹ / Bất dung nạp</span>
+        <span>{translateText("Nhẹ / Bất dung nạp")}</span>
       </span>
     );
   };
@@ -347,7 +350,7 @@ export const NutritionistAllergyManagementPage: React.FC<
   ) => {
     if (
       !window.confirm(
-        `Xác nhận xóa cảnh báo dị ứng "${allergenName}" của học sinh "${childName}"?`,
+        translateText(`Xác nhận xóa cảnh báo dị ứng "${allergenName}" của học sinh "${childName}"?`),
       )
     )
       return;
@@ -395,7 +398,7 @@ export const NutritionistAllergyManagementPage: React.FC<
       );
     if (
       !window.confirm(
-        `Xác nhận chuyển nhóm dị ứng "${item.nameVi || item.name}" vào lưu trữ?`,
+        translateText(`Xác nhận chuyển nhóm dị ứng "${item.nameVi || item.name}" vào lưu trữ?`),
       )
     )
       return;
@@ -446,7 +449,7 @@ export const NutritionistAllergyManagementPage: React.FC<
         `"${a.allergenName}"`,
         `"${a.severity === "HIGH" ? "Nguy cơ cao" : a.severity === "MEDIUM" ? "Trung bình" : "Nhẹ"}"`,
         `"${(a.note || "").replace(/"/g, '""')}"`,
-        `"${a.declaredAt ? new Date(a.declaredAt).toLocaleDateString("vi-VN") : ""}"`,
+        `"${a.declaredAt ? new Date(a.declaredAt).toLocaleDateString(getLocale()) : ""}"`,
       ]),
     );
     const csvContent =
@@ -482,7 +485,7 @@ export const NutritionistAllergyManagementPage: React.FC<
           ) : (
             <X className="w-4 h-4 text-red-600" />
           )}
-          <span>{toastMessage.text}</span>
+          <span>{translateText(toastMessage.text)}</span>
         </div>
       )}
 
@@ -490,17 +493,9 @@ export const NutritionistAllergyManagementPage: React.FC<
       <div className="bg-gradient-to-r from-[#0d3429] via-[#114b3b] to-[#1c382f] rounded-3xl p-6 text-white shadow-xl border border-emerald-800/40 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-1.5 max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
-            Quy Tắc An Toàn Thực Phẩm Codex CXC 80-2020 & Bộ Y Tế
-          </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            Cấu Hình Quy Tắc Dị Ứng & Hồ Sơ Cách Ly Khẩu Phần Mầm Non
-          </h2>
-          <p className="text-emerald-100 text-xs leading-relaxed">
-            Quản trị danh mục dị nguyên chuẩn Codex, phân tầng 3 mức độ phản vệ
-            (Nhẹ • Trung bình • Phản vệ cấp tính), chống nhiễm chéo dụng cụ nấu
-            và in thẻ cảnh báo bàn ăn.
-          </p>
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />{translateText("Quy Tắc An Toàn Thực Phẩm Codex CXC 80-2020 & Bộ Y Tế")}</div>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">{translateText("Cấu Hình Quy Tắc Dị Ứng & Hồ Sơ Cách Ly Khẩu Phần Mầm Non")}</h2>
+          <p className="text-emerald-100 text-xs leading-relaxed">{translateText("Quản trị danh mục dị nguyên chuẩn Codex, phân tầng 3 mức độ phản vệ (Nhẹ • Trung bình • Phản vệ cấp tính), chống nhiễm chéo dụng cụ nấu và in thẻ cảnh báo bàn ăn.")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
@@ -509,7 +504,7 @@ export const NutritionistAllergyManagementPage: React.FC<
             className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
-            <span>Xuất Excel/CSV</span>
+            <span>{translateText("Xuất Excel/CSV")}</span>
           </button>
           <button
             onClick={() => {
@@ -519,14 +514,14 @@ export const NutritionistAllergyManagementPage: React.FC<
             className="px-4 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs shadow-lg transition flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>Thêm Nhóm Dị Ứng</span>
+            <span>{translateText("Thêm Nhóm Dị Ứng")}</span>
           </button>
           <button
             onClick={() => setIsDeclareModalOpen(true)}
             className="px-4 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-black text-xs shadow-lg transition flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>Khai Báo Hồ Sơ Trẻ</span>
+            <span>{translateText("Khai Báo Hồ Sơ Trẻ")}</span>
           </button>
         </div>
       </div>
@@ -536,7 +531,7 @@ export const NutritionistAllergyManagementPage: React.FC<
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
             {
-              title: "Trẻ Có Hồ Sơ Dị Ứng",
+              title: translateText("Trẻ Có Hồ Sơ Dị Ứng"),
               val: stats.totalAllergic,
               unit: `/ ${stats.totalStudents} bé`,
               sub: `Chiếm tỷ lệ ${stats.allergyRate}% sĩ số`,
@@ -545,37 +540,37 @@ export const NutritionistAllergyManagementPage: React.FC<
               text: "text-slate-900",
             },
             {
-              title: "Nguy Cơ Cao (Phản Vệ)",
+              title: translateText("Nguy Cơ Cao (Phản Vệ)"),
               val: stats.highRiskCount,
-              unit: "bé",
-              sub: "Thẻ đỏ & khay ăn cách ly tuyệt đối",
+              unit: translateText("bé"),
+              sub: translateText("Thẻ đỏ & khay ăn cách ly tuyệt đối"),
               icon: AlertOctagon,
               color: "bg-red-50 text-red-600",
               text: "text-red-600",
             },
             {
-              title: "Chất Phổ Biến Nhất",
+              title: translateText("Chất Phổ Biến Nhất"),
               val: stats.topAllergenText,
               unit: "",
-              sub: "Kiểm soát chặt nguyên liệu đầu vào",
+              sub: translateText("Kiểm soát chặt nguyên liệu đầu vào"),
               icon: AlertTriangle,
               color: "bg-amber-50 text-amber-600",
               text: "text-amber-800 text-base truncate block",
             },
             {
-              title: "Lớp Tỷ Lệ Cao Nhất",
+              title: translateText("Lớp Tỷ Lệ Cao Nhất"),
               val: stats.topClassText,
               unit: "",
-              sub: "GVCN & Bếp giám sát kỹ giờ ăn",
+              sub: translateText("GVCN & Bếp giám sát kỹ giờ ăn"),
               icon: GraduationCap,
               color: "bg-teal-50 text-teal-600",
               text: "text-teal-800 text-base truncate block",
             },
             {
-              title: "Món Ăn Thay Thế",
+              title: translateText("Món Ăn Thay Thế"),
               val: "100%",
               unit: "",
-              sub: "Đảm bảo tương đương dinh dưỡng",
+              sub: translateText("Đảm bảo tương đương dinh dưỡng"),
               icon: Salad,
               color: "bg-emerald-50 text-emerald-600",
               text: "text-emerald-600",
@@ -587,7 +582,7 @@ export const NutritionistAllergyManagementPage: React.FC<
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  {k.title}
+                  {translateText(k.title)}
                 </span>
                 <div
                   className={`w-9 h-9 rounded-2xl flex items-center justify-center ${k.color}`}
@@ -599,16 +594,16 @@ export const NutritionistAllergyManagementPage: React.FC<
                 <span
                   className={`text-2xl font-black tracking-tight ${k.text}`}
                 >
-                  {k.val}
+                  {translateText(k.val)}
                 </span>
                 {k.unit && (
                   <span className="text-xs font-bold text-slate-400">
-                    {k.unit}
+                    {translateText(k.unit)}
                   </span>
                 )}
               </div>
               <div className="mt-2 text-[11px] text-slate-600 font-semibold">
-                {k.sub}
+                {translateText(k.sub)}
               </div>
             </div>
           ))}
@@ -626,7 +621,7 @@ export const NutritionistAllergyManagementPage: React.FC<
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
-          <span>Danh Sách Học Sinh Dị Ứng</span>
+          <span>{translateText("Danh Sách Học Sinh Dị Ứng")}</span>
           <span
             className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === "DIRECTORY" ? "bg-rose-700 text-rose-100" : "bg-slate-200 text-slate-700"}`}
           >
@@ -643,7 +638,7 @@ export const NutritionistAllergyManagementPage: React.FC<
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>Danh Mục Dị Ứng Codex & Quy Tắc Xử Trí (UC43)</span>
+          <span>{translateText("Danh Mục Dị Ứng Codex & Quy Tắc Xử Trí (UC43)")}</span>
           <span
             className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === "CATALOG" ? "bg-indigo-700 text-indigo-100" : "bg-slate-200 text-slate-700"}`}
           >
@@ -660,7 +655,7 @@ export const NutritionistAllergyManagementPage: React.FC<
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Tìm theo tên học sinh, mã số hoặc chất dị ứng..."
+                placeholder={translateText("Tìm theo tên học sinh, mã số hoặc chất dị ứng...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none"
@@ -673,7 +668,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                 onChange={(e) => setSelectedClassId(e.target.value)}
                 className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
               >
-                <option value="ALL">Tất cả các lớp</option>
+                <option value="ALL">{translateText("Tất cả các lớp")}</option>
                 {classesList.map((c) => (
                   <option key={c.id} value={c.name}>
                     {c.name}
@@ -686,7 +681,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                 onChange={(e) => setSelectedAllergenCode(e.target.value)}
                 className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
               >
-                <option value="ALL">Tất cả nhóm dị ứng</option>
+                <option value="ALL">{translateText("Tất cả nhóm dị ứng")}</option>
                 {allergensList.map((a) => (
                   <option key={a.id} value={a.code}>
                     {a.nameVi || a.name}
@@ -699,16 +694,16 @@ export const NutritionistAllergyManagementPage: React.FC<
                 onChange={(e) => setSelectedSeverity(e.target.value)}
                 className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
               >
-                <option value="ALL">Mọi mức độ nguy cơ</option>
-                <option value="HIGH">Nguy cơ cao (Phản vệ)</option>
-                <option value="MEDIUM">Trung bình</option>
-                <option value="LOW">Nhẹ</option>
+                <option value="ALL">{translateText("Mọi mức độ nguy cơ")}</option>
+                <option value="HIGH">{translateText("Nguy cơ cao (Phản vệ)")}</option>
+                <option value="MEDIUM">{translateText("Trung bình")}</option>
+                <option value="LOW">{translateText("Nhẹ")}</option>
               </select>
 
               <button
                 onClick={fetchData}
                 className="p-2 rounded-2xl border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition"
-                title="Làm mới dữ liệu"
+                title={translateText("Làm mới dữ liệu")}
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -720,14 +715,12 @@ export const NutritionistAllergyManagementPage: React.FC<
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3.5 px-5">Học Sinh</th>
-                    <th className="py-3.5 px-4">Lớp Học</th>
-                    <th className="py-3.5 px-4">Nhóm Dị Ứng</th>
-                    <th className="py-3.5 px-4">Mức Độ Cảnh Báo</th>
-                    <th className="py-3.5 px-4">
-                      Triệu Chứng & Quy Tắc Cách Ly Bếp
-                    </th>
-                    <th className="py-3.5 px-5 text-right">Thao Tác</th>
+                    <th className="py-3.5 px-5">{translateText("Học Sinh")}</th>
+                    <th className="py-3.5 px-4">{translateText("Lớp Học")}</th>
+                    <th className="py-3.5 px-4">{translateText("Nhóm Dị Ứng")}</th>
+                    <th className="py-3.5 px-4">{translateText("Mức Độ Cảnh Báo")}</th>
+                    <th className="py-3.5 px-4">{translateText("Triệu Chứng & Quy Tắc Cách Ly Bếp")}</th>
+                    <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -738,7 +731,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                         className="py-12 text-center text-slate-400"
                       >
                         <RefreshCw className="w-6 h-6 animate-spin mx-auto text-slate-300 mb-2" />
-                        <p className="font-bold">Đang tải hồ sơ dị ứng...</p>
+                        <p className="font-bold">{translateText("Đang tải hồ sơ dị ứng...")}</p>
                       </td>
                     </tr>
                   ) : filteredAllergicChildren.length === 0 ? (
@@ -748,9 +741,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                         className="py-12 text-center text-slate-400"
                       >
                         <ShieldAlert className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                        <p className="font-bold text-slate-700">
-                          Không tìm thấy học sinh dị ứng phù hợp với bộ lọc
-                        </p>
+                        <p className="font-bold text-slate-700">{translateText("Không tìm thấy học sinh dị ứng phù hợp với bộ lọc")}</p>
                       </td>
                     </tr>
                   ) : (
@@ -770,14 +761,14 @@ export const NutritionistAllergyManagementPage: React.FC<
                               </span>
                               <span className="text-[11px] text-slate-400 font-mono">
                                 {child.studentCode} •{" "}
-                                {child.gender === "MALE" ? "Nam" : "Nữ"}
+                                {translateText(child.gender === "MALE" ? "Nam" : "Nữ")}
                               </span>
                             </div>
                           </div>
                         </td>
                         <td className="py-3.5 px-4 font-bold text-slate-700">
                           <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 inline-block">
-                            {child.className || "Chưa phân lớp"}
+                            {child.className || translateText("Chưa phân lớp")}
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
@@ -808,7 +799,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                               <span className="font-semibold text-slate-800">
                                 {a.allergenName}:{" "}
                               </span>
-                              <span>{a.note || "Theo dõi sát sau giờ ăn"}</span>
+                              <span>{a.note || translateText("Theo dõi sát sau giờ ăn")}</span>
                             </div>
                           ))}
                         </td>
@@ -820,7 +811,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                                 setIsCardModalOpen(true);
                               }}
                               className="p-1.5 rounded-xl text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition"
-                              title="In thẻ nhận diện bàn ăn riêng"
+                              title={translateText("In thẻ nhận diện bàn ăn riêng")}
                             >
                               <Printer className="w-4 h-4" />
                             </button>
@@ -840,7 +831,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                                     setIsEditModalOpen(true);
                                   }}
                                   className="p-1.5 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition"
-                                  title="Chỉnh sửa ghi chú dị ứng"
+                                  title={translateText("Chỉnh sửa ghi chú dị ứng")}
                                 >
                                   <Edit3 className="w-4 h-4" />
                                 </button>
@@ -853,7 +844,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                                     )
                                   }
                                   className="p-1.5 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
-                                  title="Xóa cảnh báo dị ứng"
+                                  title={translateText("Xóa cảnh báo dị ứng")}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -882,7 +873,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                 type="text"
                 value={catalogSearch}
                 onChange={(e) => setCatalogSearch(e.target.value)}
-                placeholder="Tìm mã dị nguyên (MILK, PEANUT...) hoặc thực phẩm cảnh báo..."
+                placeholder={translateText("Tìm mã dị nguyên (MILK, PEANUT...) hoặc thực phẩm cảnh báo...")}
                 className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -894,7 +885,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                   onChange={(e) => setIncludeDeletedCatalog(e.target.checked)}
                   className="w-3.5 h-3.5 text-indigo-600 rounded-sm"
                 />
-                <span>Hiện nhóm đã lưu trữ</span>
+                <span>{translateText("Hiện nhóm đã lưu trữ")}</span>
               </label>
               <button
                 onClick={() => {
@@ -904,7 +895,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                 className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
               >
                 <Plus className="w-4 h-4" />
-                <span>Thêm Dị Nguyên Mới</span>
+                <span>{translateText("Thêm Dị Nguyên Mới")}</span>
               </button>
             </div>
           </div>
@@ -913,19 +904,19 @@ export const NutritionistAllergyManagementPage: React.FC<
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
-                level: "MỨC 1: NHẸ / BẤT DUNG NẠP (LOW)",
+                level: translateText("MỨC 1: NHẸ / BẤT DUNG NẠP (LOW)"),
                 color: "border-blue-200 bg-blue-50/60 text-blue-900",
-                rule: "Ghi chú chia phần hạn chế dị nguyên; thay thế tinh bột/sữa không chứa lactose hoặc gluten tương đương.",
+                rule: translateText("Ghi chú chia phần hạn chế dị nguyên; thay thế tinh bột/sữa không chứa lactose hoặc gluten tương đương."),
               },
               {
-                level: "MỨC 2: TRUNG BÌNH (MEDIUM)",
+                level: translateText("MỨC 2: TRUNG BÌNH (MEDIUM)"),
                 color: "border-amber-200 bg-amber-50/60 text-amber-900",
-                rule: "Rule Engine cảnh báo vàng; bắt buộc tách khẩu phần hoặc đổi sang nguyên liệu đạm an toàn tương đương Calo.",
+                rule: translateText("Rule Engine cảnh báo vàng; bắt buộc tách khẩu phần hoặc đổi sang nguyên liệu đạm an toàn tương đương Calo."),
               },
               {
-                level: "MỨC 3: NGUY CƠ PHẢN VỆ (HIGH / CRITICAL)",
+                level: translateText("MỨC 3: NGUY CƠ PHẢN VỆ (HIGH / CRITICAL)"),
                 color: "border-red-200 bg-red-50/60 text-red-900",
-                rule: "Rule Engine chặn cảnh báo đỏ; nấu nồi/dụng cụ riêng chống nhiễm chéo (CXC 80-2020), dán thẻ đỏ khay ăn & sẵn sàng phác đồ cấp cứu.",
+                rule: translateText("Rule Engine chặn cảnh báo đỏ; nấu nồi/dụng cụ riêng chống nhiễm chéo (CXC 80-2020), dán thẻ đỏ khay ăn & sẵn sàng phác đồ cấp cứu."),
               },
             ].map((p) => (
               <div
@@ -933,9 +924,9 @@ export const NutritionistAllergyManagementPage: React.FC<
                 className={`p-4 rounded-2xl border space-y-1.5 ${p.color}`}
               >
                 <span className="text-[11px] font-black uppercase tracking-wider block">
-                  {p.level}
+                  {translateText(p.level)}
                 </span>
-                <p className="text-xs leading-relaxed opacity-90">{p.rule}</p>
+                <p className="text-xs leading-relaxed opacity-90">{translateText(p.rule)}</p>
               </div>
             ))}
           </div>
@@ -955,13 +946,13 @@ export const NutritionistAllergyManagementPage: React.FC<
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
-                        {item.code}
+                        {translateText(item.code)}
                       </span>
                       {item.isDeleted ? (
                         <button
                           onClick={() => handleRestoreCatalog(item)}
                           className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg"
-                          title="Khôi phục"
+                          title={translateText("Khôi phục")}
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                         </button>
@@ -973,7 +964,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                               setIsAllergenDrawerOpen(true);
                             }}
                             className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                            title="Chỉnh sửa quy tắc dị nguyên"
+                            title={translateText("Chỉnh sửa quy tắc dị nguyên")}
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
@@ -981,7 +972,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                             <button
                               onClick={() => handleSoftDeleteCatalog(item)}
                               className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                              title="Lưu trữ (Xóa mềm)"
+                              title={translateText("Lưu trữ (Xóa mềm)")}
                             >
                               <Archive className="w-3.5 h-3.5" />
                             </button>
@@ -996,16 +987,14 @@ export const NutritionistAllergyManagementPage: React.FC<
                   </h3>
                   {item.nameEn && (
                     <p className="text-[11px] text-slate-400 italic">
-                      {item.nameEn}
+                      {translateText(item.nameEn)}
                     </p>
                   )}
 
                   <div className="mt-3 p-2.5 bg-slate-50 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Thực phẩm & Quy tắc cảnh báo:
-                    </span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("Thực phẩm & Quy tắc cảnh báo:")}</span>
                     <p className="text-xs text-slate-700 leading-relaxed">
-                      {item.commonFoods || item.description || "Chưa cập nhật"}
+                      {translateText(item.commonFoods || item.description || "Chưa cập nhật")}
                     </p>
                   </div>
                 </div>
@@ -1014,9 +1003,9 @@ export const NutritionistAllergyManagementPage: React.FC<
                   <span
                     className={`font-semibold px-2 py-0.5 rounded-full ${item.isSystemStandard ? "text-amber-700 bg-amber-50" : "text-indigo-700 bg-indigo-50"}`}
                   >
-                    {item.isSystemStandard
+                    {translateText(item.isSystemStandard
                       ? "Chuẩn Codex / BYT"
-                      : "Quy tắc Trường"}
+                      : "Quy tắc Trường")}
                   </span>
                   <span
                     className={
@@ -1025,7 +1014,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                         : "text-emerald-700 font-bold"
                     }
                   >
-                    {item.isDeleted ? "Đã lưu trữ" : "✓ Đang kích hoạt"}
+                    {translateText(item.isDeleted ? "Đã lưu trữ" : "✓ Đang kích hoạt")}
                   </span>
                 </div>
               </div>
@@ -1053,12 +1042,8 @@ export const NutritionistAllergyManagementPage: React.FC<
                   <ShieldAlert className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">
-                    Khai Báo Dị Ứng Học Sinh Mới
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Tạo hồ sơ theo dõi dị ứng thực phẩm cho học sinh
-                  </p>
+                  <h3 className="font-bold text-slate-900 text-base">{translateText("Khai Báo Dị Ứng Học Sinh Mới")}</h3>
+                  <p className="text-xs text-slate-400">{translateText("Tạo hồ sơ theo dõi dị ứng thực phẩm cho học sinh")}</p>
                 </div>
               </div>
               <button
@@ -1071,9 +1056,7 @@ export const NutritionistAllergyManagementPage: React.FC<
 
             <form onSubmit={handleDeclareSubmit} className="space-y-4 text-xs">
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">
-                  Chọn Học Sinh *
-                </label>
+                <label className="font-bold text-slate-700">{translateText("Chọn Học Sinh *")}</label>
                 <select
                   value={declareForm.childId}
                   onChange={(e) =>
@@ -1082,20 +1065,18 @@ export const NutritionistAllergyManagementPage: React.FC<
                   required
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 font-semibold bg-white"
                 >
-                  <option value="">-- Chọn học sinh toàn trường --</option>
+                  <option value="">{translateText("-- Chọn học sinh toàn trường --")}</option>
                   {allChildren.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.fullName} ({c.studentCode}) • Lớp:{" "}
-                      {c.className || "Chưa phân lớp"}
+                      {c.fullName} ({c.studentCode}{translateText(") • Lớp:")}{" "}
+                      {c.className || translateText("Chưa phân lớp")}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">
-                  Nhóm Chất Dị Ứng *
-                </label>
+                <label className="font-bold text-slate-700">{translateText("Nhóm Chất Dị Ứng *")}</label>
                 <select
                   value={declareForm.allergenId}
                   onChange={(e) =>
@@ -1107,36 +1088,32 @@ export const NutritionistAllergyManagementPage: React.FC<
                   required
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 font-semibold bg-white"
                 >
-                  <option value="">
-                    -- Chọn nhóm chất dị ứng (Codex/BYT) --
-                  </option>
+                  <option value="">{translateText("-- Chọn nhóm chất dị ứng (Codex/BYT) --")}</option>
                   {allergensList.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.nameVi || a.name} ({a.code})
+                      {a.nameVi || a.name} ({translateText(a.code)})
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">
-                  Mức Độ Cảnh Báo *
-                </label>
+                <label className="font-bold text-slate-700">{translateText("Mức Độ Cảnh Báo *")}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     {
                       val: "HIGH",
-                      label: "Nguy cơ cao (Phản vệ)",
+                      label: translateText("Nguy cơ cao (Phản vệ)"),
                       active: "bg-red-500 text-white border-red-500",
                     },
                     {
                       val: "MEDIUM",
-                      label: "Trung bình",
+                      label: translateText("Trung bình"),
                       active: "bg-amber-500 text-white border-amber-500",
                     },
                     {
                       val: "LOW",
-                      label: "Nhẹ",
+                      label: translateText("Nhẹ"),
                       active: "bg-blue-500 text-white border-blue-500",
                     },
                   ].map((s) => (
@@ -1148,23 +1125,21 @@ export const NutritionistAllergyManagementPage: React.FC<
                       }
                       className={`py-2 px-3 rounded-2xl font-bold border transition ${declareForm.severity === s.val ? s.active : "bg-slate-50 text-slate-700 border-slate-200"}`}
                     >
-                      {s.label}
+                      {translateText(s.label)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">
-                  Triệu Chứng & Hướng Dẫn Cách Ly / Thay Thế Cho Bếp
-                </label>
+                <label className="font-bold text-slate-700">{translateText("Triệu Chứng & Hướng Dẫn Cách Ly / Thay Thế Cho Bếp")}</label>
                 <textarea
                   rows={3}
                   value={declareForm.note}
                   onChange={(e) =>
                     setDeclareForm({ ...declareForm, note: e.target.value })
                   }
-                  placeholder="Ví dụ: Dị ứng tôm cua — sưng môi, khó thở. Yêu cầu Bếp nấu nồi riêng và thay bằng thịt lợn nạc..."
+                  placeholder={translateText("Ví dụ: Dị ứng tôm cua — sưng môi, khó thở. Yêu cầu Bếp nấu nồi riêng và thay bằng thịt lợn nạc...")}
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200"
                 />
               </div>
@@ -1174,15 +1149,13 @@ export const NutritionistAllergyManagementPage: React.FC<
                   type="button"
                   onClick={() => setIsDeclareModalOpen(false)}
                   className="px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-600 font-bold"
-                >
-                  Hủy Bỏ
-                </button>
+                >{translateText("Hủy Bỏ")}</button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-md disabled:opacity-50"
                 >
-                  {isSubmitting ? "Đang Lưu..." : "Lưu Hồ Sơ Dị Ứng"}
+                  {translateText(isSubmitting ? "Đang Lưu..." : "Lưu Hồ Sơ Dị Ứng")}
                 </button>
               </div>
             </form>
@@ -1196,11 +1169,8 @@ export const NutritionistAllergyManagementPage: React.FC<
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <h3 className="font-bold text-slate-900 text-base">
-                  Cập Nhật Hồ Sơ Dị Ứng
-                </h3>
-                <p className="text-xs text-slate-500 font-semibold">
-                  Học sinh: {editingAllergy.childName} •{" "}
+                <h3 className="font-bold text-slate-900 text-base">{translateText("Cập Nhật Hồ Sơ Dị Ứng")}</h3>
+                <p className="text-xs text-slate-500 font-semibold">{translateText("Học sinh: ")}{editingAllergy.childName} •{" "}
                   {editingAllergy.allergenName}
                 </p>
               </div>
@@ -1214,24 +1184,22 @@ export const NutritionistAllergyManagementPage: React.FC<
 
             <form onSubmit={handleEditSubmit} className="space-y-4 text-xs">
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">
-                  Mức Độ Cảnh Báo *
-                </label>
+                <label className="font-bold text-slate-700">{translateText("Mức Độ Cảnh Báo *")}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     {
                       val: "HIGH",
-                      label: "Nguy cơ cao",
+                      label: translateText("Nguy cơ cao"),
                       active: "bg-red-500 text-white border-red-500",
                     },
                     {
                       val: "MEDIUM",
-                      label: "Trung bình",
+                      label: translateText("Trung bình"),
                       active: "bg-amber-500 text-white border-amber-500",
                     },
                     {
                       val: "LOW",
-                      label: "Nhẹ",
+                      label: translateText("Nhẹ"),
                       active: "bg-blue-500 text-white border-blue-500",
                     },
                   ].map((s) => (
@@ -1246,16 +1214,14 @@ export const NutritionistAllergyManagementPage: React.FC<
                       }
                       className={`py-2 px-3 rounded-2xl font-bold border transition ${editingAllergy.severity === s.val ? s.active : "bg-slate-50 text-slate-700"}`}
                     >
-                      {s.label}
+                      {translateText(s.label)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700">
-                  Triệu Chứng & Hướng Dẫn Bếp
-                </label>
+                <label className="font-bold text-slate-700">{translateText("Triệu Chứng & Hướng Dẫn Bếp")}</label>
                 <textarea
                   rows={3}
                   value={editingAllergy.note}
@@ -1274,15 +1240,13 @@ export const NutritionistAllergyManagementPage: React.FC<
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
                   className="px-4 py-2 rounded-2xl border border-slate-200 text-slate-600 font-bold"
-                >
-                  Hủy
-                </button>
+                >{translateText("Hủy")}</button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="px-5 py-2 rounded-2xl bg-teal-600 hover:bg-teal-500 text-white font-bold shadow-md"
                 >
-                  {isSubmitting ? "Đang Lưu..." : "Cập Nhật"}
+                  {translateText(isSubmitting ? "Đang Lưu..." : "Cập Nhật")}
                 </button>
               </div>
             </form>
@@ -1296,9 +1260,7 @@ export const NutritionistAllergyManagementPage: React.FC<
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <Printer className="w-5 h-5 text-emerald-600" /> Thẻ Nhận Diện
-                Khay Ăn Dị Ứng
-              </h3>
+                <Printer className="w-5 h-5 text-emerald-600" />{translateText(" Thẻ Nhận Diện Khay Ăn Dị Ứng")}</h3>
               <button
                 onClick={() => setIsCardModalOpen(false)}
                 className="p-2 text-slate-400 hover:text-slate-600 rounded-xl"
@@ -1313,24 +1275,19 @@ export const NutritionistAllergyManagementPage: React.FC<
             >
               <div className="flex items-center justify-between pb-2 border-b border-red-200">
                 <span className="font-black text-red-600 text-[11px] uppercase tracking-wider flex items-center gap-1">
-                  <AlertOctagon className="w-4 h-4" /> KIDMEAL CẢNH BÁO BÀN ĂN
-                </span>
-                <span className="text-[10px] font-bold text-slate-500">
-                  LỚP: {selectedChildForCard.className}
+                  <AlertOctagon className="w-4 h-4" />{translateText(" KIDMEAL CẢNH BÁO BÀN ĂN")}</span>
+                <span className="text-[10px] font-bold text-slate-500">{translateText("LỚP: ")}{selectedChildForCard.className}
                 </span>
               </div>
               <div className="space-y-1">
                 <h2 className="text-xl font-black text-slate-900">
                   {selectedChildForCard.fullName}
                 </h2>
-                <p className="text-xs text-slate-500 font-mono">
-                  Mã số: {selectedChildForCard.studentCode}
+                <p className="text-xs text-slate-500 font-mono">{translateText("Mã số: ")}{selectedChildForCard.studentCode}
                 </p>
               </div>
               <div className="p-3 bg-red-100 border border-red-300 rounded-2xl space-y-1">
-                <span className="text-[10px] font-black text-red-700 uppercase tracking-wider block">
-                  CHẤT DỊ ỨNG CẤM KỴ TUYỆT ĐỐI:
-                </span>
+                <span className="text-[10px] font-black text-red-700 uppercase tracking-wider block">{translateText("CHẤT DỊ ỨNG CẤM KỴ TUYỆT ĐỐI:")}</span>
                 <div className="flex flex-wrap justify-center gap-1.5 pt-1">
                   {selectedChildForCard.allergies.map((a) => (
                     <span
@@ -1344,30 +1301,24 @@ export const NutritionistAllergyManagementPage: React.FC<
               </div>
               {selectedChildForCard.allergies[0]?.note && (
                 <div className="text-[11px] text-slate-700 bg-white p-2.5 rounded-xl border border-slate-200">
-                  <span className="font-bold text-slate-900">
-                    Ghi chú cho Bếp & Cô giáo:{" "}
+                  <span className="font-bold text-slate-900">{translateText("Ghi chú cho Bếp & Cô giáo:")}{" "}
                   </span>
                   {selectedChildForCard.allergies[0].note}
                 </div>
               )}
-              <p className="text-[10px] text-slate-400 italic">
-                * Thẻ này dán cố định tại khay ăn và vị trí ngồi của học sinh
-                trong giờ ăn bán trú.
-              </p>
+              <p className="text-[10px] text-slate-400 italic">{translateText("* Thẻ này dán cố định tại khay ăn và vị trí ngồi của học sinh trong giờ ăn bán trú.")}</p>
             </div>
 
             <div className="flex items-center justify-end gap-2.5 pt-2">
               <button
                 onClick={() => setIsCardModalOpen(false)}
                 className="px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs"
-              >
-                Đóng
-              </button>
+              >{translateText("Đóng")}</button>
               <button
                 onClick={() => window.print()}
                 className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5"
               >
-                <Printer className="w-4 h-4" /> <span>In Thẻ Ngay</span>
+                <Printer className="w-4 h-4" /> <span>{translateText("In Thẻ Ngay")}</span>
               </button>
             </div>
           </div>

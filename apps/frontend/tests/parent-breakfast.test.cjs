@@ -5,6 +5,7 @@ const path = require('node:path');
 const ts = require('typescript');
 const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
+const { api: i18n } = require('./helpers/i18n.cjs').createI18n();
 
 const source = ts.transpileModule(fs.readFileSync(path.join(__dirname,
   '../src/features/payments/pages/ParentSnackPaymentPage.tsx'), 'utf8'), {
@@ -24,6 +25,8 @@ function renderPage(invoices, overview = null) {
   new Function('require', 'module', 'exports', source)(name => {
     if (name === 'react') return mockedReact;
     if (name === 'lucide-react') return require(name);
+    if (name.endsWith('/i18n/language')) return i18n;
+    if (name.endsWith('/i18n/useLanguage')) return { useLanguage: () => ({ language: i18n.getLanguage() }) };
     return new Proxy({}, { get: () => () => null });
   }, moduleValue, moduleValue.exports);
   return renderToStaticMarkup(React.createElement(moduleValue.exports.ParentSnackPaymentPage));

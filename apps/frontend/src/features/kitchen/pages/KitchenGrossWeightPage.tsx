@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { Calculator, Download, Plus, Trash2 } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
@@ -36,6 +38,7 @@ export function KitchenGrossWeightPage({
 }: {
   audience?: "kitchen" | "nutritionist";
 }) {
+  useLanguage();
   const resource = useKitchenResource(async () => {
     const results = await Promise.allSettled([
       fetchKitchenCollection("/foods"),
@@ -132,10 +135,10 @@ export function KitchenGrossWeightPage({
     <>
       <PageTitle
         eyebrow={
-          audience === "nutritionist" ? "CHUYÊN GIA DINH DƯỠNG" : undefined
+          translateText(audience === "nutritionist" ? "CHUYÊN GIA DINH DƯỠNG" : undefined)
         }
-        title="Dự trù nguyên liệu cần mua"
-        description="Tính khối lượng mua từ định lượng tinh mỗi suất, số suất và hao hụt sơ chế. Có thể lấy định lượng từ công thức món ăn."
+        title={translateText("Dự trù nguyên liệu cần mua")}
+        description={translateText("Tính khối lượng mua từ định lượng tinh mỗi suất, số suất và hao hụt sơ chế. Có thể lấy định lượng từ công thức món ăn.")}
       >
         <button
           className="kp-button primary"
@@ -165,21 +168,15 @@ export function KitchenGrossWeightPage({
             ])
           }
         >
-          <Download size={15} />
-          Xuất dự trù
-        </button>
+          <Download size={15} />{translateText("Xuất dự trù")}</button>
       </PageTitle>
       <ResourceState resource={resource} />
       <Notice error={action.error} message={action.message} />
       <section className="kp-panel">
         <h2>
-          <Calculator size={18} className="inline mr-2" />
-          Thông số tính
-        </h2>
+          <Calculator size={18} className="inline mr-2" />{translateText("Thông số tính")}</h2>
         <div className="kp-form-grid">
-          <label className="kp-field">
-            Ngày phục vụ
-            <input
+          <label className="kp-field">{translateText("Ngày phục vụ")}<input
               className="kp-input"
               required
               type="date"
@@ -187,11 +184,9 @@ export function KitchenGrossWeightPage({
               onChange={(e) => setDate(e.target.value)}
             />
           </label>
-          <label className="kp-field">
-            Số suất
-            <input
+          <label className="kp-field">{translateText("Số suất")}<input
               className="kp-input"
-              aria-label="Số suất dự trù"
+              aria-label={translateText("Số suất dự trù")}
               type="number"
               min={0}
               step={1}
@@ -199,26 +194,22 @@ export function KitchenGrossWeightPage({
               onChange={(e) => setPortions(e.target.value)}
             />
           </label>
-          <label className="kp-field">
-            Tìm món có công thức
-            <input
+          <label className="kp-field">{translateText("Tìm món có công thức")}<input
               className="kp-input"
               type="search"
-              aria-label="Tìm món lấy công thức"
+              aria-label={translateText("Tìm món lấy công thức")}
               value={search}
-              placeholder="Tìm tên món…"
+              placeholder={translateText("Tìm tên món…")}
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
-          <label className="kp-field">
-            Món ăn
-            <select
+          <label className="kp-field">{translateText("Món ăn")}<select
               className="kp-input"
-              aria-label="Món lấy công thức"
+              aria-label={translateText("Món lấy công thức")}
               value={dishId}
               onChange={(e) => setDishId(e.target.value)}
             >
-              <option value="">Chọn món</option>
+              <option value="">{translateText("Chọn món")}</option>
               {dishes.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
@@ -232,25 +223,20 @@ export function KitchenGrossWeightPage({
             className="kp-button"
             disabled={!dishId || action.busy}
             onClick={() => void importRecipe()}
-          >
-            Lấy định lượng công thức
-          </button>
+          >{translateText("Lấy định lượng công thức")}</button>
         </div>
-        <p>
-          Khối lượng mua thô = (định lượng tinh mỗi suất × số suất) ÷ (1 − tỷ lệ
-          hao hụt / 100). Hao hụt cần từ 0 đến dưới 100%.
-        </p>
+        <p>{translateText("Khối lượng mua thô = (định lượng tinh mỗi suất × số suất) ÷ (1 − tỷ lệ hao hụt / 100). Hao hụt cần từ 0 đến dưới 100%.")}</p>
       </section>
       <div className="kp-table-wrap">
         <table className="kp-table">
           <thead>
             <tr>
-              <th>Nguyên liệu</th>
-              <th>Tinh / suất (g)</th>
-              <th>Hao hụt (%)</th>
-              <th>Tổng tinh (g)</th>
-              <th>Đề xuất mua (kg)</th>
-              <th>Xóa</th>
+              <th>{translateText("Nguyên liệu")}</th>
+              <th>{translateText("Tinh / suất (g)")}</th>
+              <th>{translateText("Hao hụt (%)")}</th>
+              <th>{translateText("Tổng tinh (g)")}</th>
+              <th>{translateText("Đề xuất mua (kg)")}</th>
+              <th>{translateText("Xóa")}</th>
             </tr>
           </thead>
           <tbody>
@@ -260,11 +246,11 @@ export function KitchenGrossWeightPage({
                   <select
                     className="kp-input"
                     style={{ maxWidth: 280 }}
-                    aria-label={`Nguyên liệu dòng ${index + 1}`}
+                    aria-label={translateText(`Nguyên liệu dòng ${index + 1}`)}
                     value={row.foodId}
                     onChange={(e) => chooseFood(row, e.target.value)}
                   >
-                    <option value="">Chọn nguyên liệu</option>
+                    <option value="">{translateText("Chọn nguyên liệu")}</option>
                     {resource.data?.foods.map((f) => (
                       <option key={f.id} value={f.id}>
                         {f.name}
@@ -279,7 +265,7 @@ export function KitchenGrossWeightPage({
                     type="number"
                     min={0}
                     step="any"
-                    aria-label={`Định lượng dòng ${index + 1}`}
+                    aria-label={translateText(`Định lượng dòng ${index + 1}`)}
                     value={row.net}
                     onChange={(e) => update(row.key, { net: e.target.value })}
                   />
@@ -291,21 +277,21 @@ export function KitchenGrossWeightPage({
                     min={0}
                     max={99.99}
                     step="any"
-                    aria-label={`Hao hụt dòng ${index + 1}`}
+                    aria-label={translateText(`Hao hụt dòng ${index + 1}`)}
                     value={row.refuse}
                     onChange={(e) =>
                       update(row.key, { refuse: e.target.value })
                     }
                   />
                 </td>
-                <td>{formatNumber(result[index]?.netGrams, 2)}</td>
+                <td>{translateText(formatNumber(result[index]?.netGrams, 2))}</td>
                 <td>
-                  <strong>{formatNumber(result[index]?.grossKg, 3)}</strong>
+                  <strong>{translateText(formatNumber(result[index]?.grossKg, 3))}</strong>
                 </td>
                 <td>
                   <button
                     className="kp-button icon danger"
-                    aria-label={`Xóa nguyên liệu dòng ${index + 1}`}
+                    aria-label={translateText(`Xóa nguyên liệu dòng ${index + 1}`)}
                     onClick={() =>
                       setLines(lines.filter((r) => r.key !== row.key))
                     }
@@ -323,21 +309,14 @@ export function KitchenGrossWeightPage({
           className="kp-button"
           onClick={() => setLines([...lines, line()])}
         >
-          <Plus size={15} />
-          Thêm nguyên liệu
-        </button>
-        <span style={{ marginLeft: "auto", marginRight: 0 }}>
-          Tổng khối lượng đề xuất:{" "}
+          <Plus size={15} />{translateText("Thêm nguyên liệu")}</button>
+        <span style={{ marginLeft: "auto", marginRight: 0 }}>{translateText("Tổng khối lượng đề xuất:")}{" "}
           <b className="text-emerald-700 text-lg">
-            {formatNumber(total, 3)} kg
-          </b>
+            {translateText(formatNumber(total, 3))}{translateText(" kg")}</b>
         </span>
       </div>
       {!valid && (
-        <p className="text-xs text-amber-800">
-          Điền đủ nguyên liệu, định lượng và tỷ lệ hao hụt hợp lệ để xuất dự
-          trù.
-        </p>
+        <p className="text-xs text-amber-800">{translateText("Điền đủ nguyên liệu, định lượng và tỷ lệ hao hụt hợp lệ để xuất dự trù.")}</p>
       )}
     </>
   );

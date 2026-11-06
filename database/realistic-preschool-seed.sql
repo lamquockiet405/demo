@@ -297,12 +297,12 @@ INSERT INTO food_inspections (date, inspection_step, inspector_id, result, meal_
  'Cảm quan món ăn đạt chuẩn vị trẻ em, ít gia vị mặn ngọt gắt. Thức ăn chia vào khay inox 304 giữ ấm > 65°C trước khi chuyển lên các lớp Mầm, Chồi, Lá.')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO food_samples (date, dish_name, sample_code, stored_at, dispose_at, status, fridge_unit, sample_weight_g, storage_temp, collector_name, note) VALUES
-('2026-11-05', 'Cơm trắng dẻo', 'LM-20261105-01', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 150.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu cơm trưa 150g'),
-('2026-11-05', 'Thịt heo rim nước dừa cà rốt', 'LM-20261105-02', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 100.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu món mặn 100g'),
-('2026-11-05', 'Canh rau ngót nấu thịt bằm', 'LM-20261105-03', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 150.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu canh 150ml cái + nước'),
-('2026-11-05', 'Dưa hấu tráng miệng', 'LM-20261105-04', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 100.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu tráng miệng 100g'),
-('2026-11-05', 'Bún mọc thịt sườn cà rốt', 'LM-20261105-05', '2026-11-05 14:15:00+07', '2026-11-06 14:15:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 150.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu bữa xế chiều 14h30')
+INSERT INTO food_samples (date, dish_name, sample_code, stored_at, dispose_at, status, fridge_unit, sample_weight_g, storage_temp, collector_name, note, image_url) VALUES
+('2026-11-05', 'Cơm trắng dẻo', 'LM-20261105-01', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 150.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu cơm trưa 150g', 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80'),
+('2026-11-05', 'Thịt heo rim nước dừa cà rốt', 'LM-20261105-02', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 100.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu món mặn 100g', 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80'),
+('2026-11-05', 'Canh rau ngót nấu thịt bằm', 'LM-20261105-03', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 150.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu canh 150ml cái + nước', 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80'),
+('2026-11-05', 'Dưa hấu tráng miệng', 'LM-20261105-04', '2026-11-05 10:30:00+07', '2026-11-06 10:30:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 100.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu tráng miệng 100g', 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80'),
+('2026-11-05', 'Bún mọc thịt sườn cà rốt', 'LM-20261105-05', '2026-11-05 14:15:00+07', '2026-11-06 14:15:00+07', 'STORED', 'Tủ lưu mẫu số 1 (Ngăn mát 0-5°C)', 150.0, 3.8, 'Nguyễn Văn Cường (Bếp trưởng)', 'Lưu mẫu bữa xế chiều 14h30', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=600&q=80')
 ON CONFLICT DO NOTHING;
 
 COMMIT;

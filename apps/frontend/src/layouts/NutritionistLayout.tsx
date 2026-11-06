@@ -1,3 +1,5 @@
+import { t as translateText } from '../core/i18n/language';
+import { useLanguage } from '../core/i18n/useLanguage';
 import { nutritionistNavigation } from "../features/nutrition/nutritionist-navigation";
 import "../features/kitchen/kitchen-portal.css";
 import React, { useState } from "react";
@@ -15,6 +17,7 @@ import { UserProfileModal } from "../features/auth/components/UserProfileModal";
 import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
 
 export const NutritionistLayout: React.FC = () => {
+  useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -63,15 +66,10 @@ export const NutritionistLayout: React.FC = () => {
                   </svg>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-base text-slate-900 tracking-tight">
-                    NutriKid{" "}
-                    <span className="hidden sm:inline text-slate-500 font-medium text-xs sm:text-sm">
-                      - Dinh dưỡng Mầm non
-                    </span>
+                  <span className="font-extrabold text-base text-slate-900 tracking-tight">{translateText("NutriKid")}{" "}
+                    <span className="hidden sm:inline text-slate-500 font-medium text-xs sm:text-sm">{translateText("- Dinh dưỡng Mầm non")}</span>
                   </span>
-                  <span className="hidden md:inline bg-[#4eed9c]/25 border border-emerald-500/30 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                    BẢN CHUẨN
-                  </span>
+                  <span className="hidden md:inline bg-[#4eed9c]/25 border border-emerald-500/30 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">{translateText("BẢN CHUẨN")}</span>
                 </div>
               </Link>
             </div>
@@ -106,7 +104,7 @@ export const NutritionistLayout: React.FC = () => {
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium"
                   }`}
                 >
-                  {tab.label}
+                  {translateText(tab.label)}
                 </Link>
               );
             })}
@@ -123,20 +121,20 @@ export const NutritionistLayout: React.FC = () => {
                 className="hover:text-emerald-700 flex items-center gap-1"
               >
                 <Home className="w-3.5 h-3.5 text-slate-400" />
-                <span>Trang chủ</span>
+                <span>{translateText("Trang chủ")}</span>
               </Link>
               <span>›</span>
-              <span className="text-slate-500">Dinh dưỡng Mầm non</span>
+              <span className="text-slate-500">{translateText("Dinh dưỡng Mầm non")}</span>
               <span>›</span>
               <span className="text-slate-900 font-bold">
-                {getBreadcrumbTitle()}
+                {translateText(getBreadcrumbTitle())}
               </span>
             </div>
 
             {/* Badge bên phải: Chuẩn VN-RDA 2024 (Viện Dinh Dưỡng Quốc Gia) */}
             <div className="flex items-center gap-1.5 bg-[#4eed9c]/20 border border-emerald-500/40 text-emerald-900 font-bold text-xs px-3.5 py-1 rounded-full shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Không gian chuyên gia dinh dưỡng</span>
+              <span>{translateText("Không gian chuyên gia dinh dưỡng")}</span>
             </div>
           </div>
         </div>

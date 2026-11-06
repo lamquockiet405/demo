@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useMemo } from 'react';
 import { apiClient } from '../../../core/api/axios';
 import { useSchoolResource } from '../../school/components/SchoolUI';
@@ -7,6 +9,7 @@ export interface TeacherStatsOverviewProps {
 }
 
 export function TeacherStatsOverview({ classes: propClasses }: TeacherStatsOverviewProps) {
+  useLanguage();
   const resource = useSchoolResource<any[]>(
     async () => {
       if (propClasses && propClasses.length > 0) return propClasses;
@@ -44,37 +47,36 @@ export function TeacherStatsOverview({ classes: propClasses }: TeacherStatsOverv
     <div className="kp-stats">
       {/* ─── Ô 1: Lớp phụ trách ─── */}
       <div className="kp-stat">
-        <span>Lớp phụ trách</span>
+        <span>{translateText("Lớp phụ trách")}</span>
         <strong>{stats.totalClasses}</strong>
-        <span className="mt-1 block text-[11px] text-[#75887a]">Năm học 2025 - 2026</span>
+        <span className="mt-1 block text-[11px] text-[#75887a]">{translateText("Năm học 2025 - 2026")}</span>
       </div>
 
       {/* ─── Ô 2: Tổng sĩ số học sinh ─── */}
       <div className="kp-stat">
-        <span>Tổng sĩ số học sinh</span>
-        <strong>{stats.totalStudents}</strong>
-        <span className="mt-1 block text-[11px] text-[#75887a]">Học sinh theo học</span>
+        <span>{translateText("Tổng sĩ số học sinh")}</span>
+        <strong>{translateText(stats.totalStudents)}</strong>
+        <span className="mt-1 block text-[11px] text-[#75887a]">{translateText("Học sinh theo học")}</span>
       </div>
 
       {/* ─── Ô 3: Cảnh báo dị ứng ─── */}
       <div className={`kp-stat ${stats.allergicStudents > 0 ? 'red' : ''}`}>
-        <span>Cảnh báo dị ứng</span>
-        <strong>{stats.allergicStudents}</strong>
+        <span>{translateText("Cảnh báo dị ứng")}</span>
+        <strong>{translateText(stats.allergicStudents)}</strong>
         <span
           className={`mt-1 block text-[11px] ${
             stats.allergicStudents > 0 ? 'text-[#c33248]' : 'text-[#75887a]'
           }`}
         >
-          {stats.allergicStudents > 0 ? 'Cần theo dõi chế độ ăn' : 'An toàn toàn bộ'}
+          {translateText(stats.allergicStudents > 0 ? 'Cần theo dõi chế độ ăn' : 'An toàn toàn bộ')}
         </span>
       </div>
 
       {/* ─── Ô 4: Chế độ ăn tiêu chuẩn ─── */}
       <div className="kp-stat">
-        <span>Chế độ ăn tiêu chuẩn</span>
+        <span>{translateText("Chế độ ăn tiêu chuẩn")}</span>
         <strong>{stats.standardDietStudents}</strong>
-        <span className="mt-1 block text-[11px] text-[#75887a]">
-          Tỷ lệ an toàn: {stats.safeRate}%
+        <span className="mt-1 block text-[11px] text-[#75887a]">{translateText("Tỷ lệ an toàn: ")}{stats.safeRate}%
         </span>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { apiClient } from "../../../core/api/axios";
@@ -41,6 +43,7 @@ function ChildNutritionDetail({
   id: string;
   onClose: () => void;
 }) {
+  useLanguage();
   const resource = useSchoolResource(async () => {
     const [child, response] = await Promise.all([
       childrenApi.getChild(id),
@@ -95,11 +98,9 @@ function ChildNutritionDetail({
               <Baby className="w-6 h-6 text-amber-300" />
             </div>
             <div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800 uppercase tracking-wider">
-                Hồ Sơ Dinh Dưỡng Học Sinh
-              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800 uppercase tracking-wider">{translateText("Hồ Sơ Dinh Dưỡng Học Sinh")}</span>
               <h3 className="font-black text-slate-900 text-lg mt-0.5">
-                {child?.fullName || "Đang tải thông tin…"}
+                {child?.fullName || translateText("Đang tải thông tin…")}
               </h3>
             </div>
           </div>
@@ -122,25 +123,23 @@ function ChildNutritionDetail({
               {/* Quick Info Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Mã học sinh</span>
+                  <span className="text-slate-400 block text-[11px]">{translateText("Mã học sinh")}</span>
                   <strong className="text-slate-900 font-mono text-sm">{child.studentCode}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Lớp học</span>
-                  <strong className="text-teal-800 text-sm">{child.className || child.class?.name || "Chưa phân lớp"}</strong>
+                  <span className="text-slate-400 block text-[11px]">{translateText("Lớp học")}</span>
+                  <strong className="text-teal-800 text-sm">{child.className || child.class?.name || translateText("Chưa phân lớp")}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Ngày sinh</span>
-                  <strong className="text-slate-800 text-sm">{child.dateOfBirth?.slice(0, 10) || "—"}</strong>
+                  <span className="text-slate-400 block text-[11px]">{translateText("Ngày sinh")}</span>
+                  <strong className="text-slate-800 text-sm">{translateText(child.dateOfBirth?.slice(0, 10) || "—")}</strong>
                 </div>
               </div>
 
               {/* Dị ứng */}
               <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-2">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <ShieldAlert className="w-4 h-4 text-rose-600" />
-                  Dị Ứng Đã Khai Báo
-                </h4>
+                  <ShieldAlert className="w-4 h-4 text-rose-600" />{translateText("Dị Ứng Đã Khai Báo")}</h4>
                 {child.allergies?.filter((a) => a.isActive !== false).length ? (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {child.allergies
@@ -151,7 +150,7 @@ function ChildNutritionDetail({
                           className="px-3 py-1.5 bg-rose-50 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5"
                         >
                           <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
-                          {a.customAllergenName || a.allergen?.nameVi || (a as any).allergenName} ({a.severity})
+                          {a.customAllergenName || a.allergen?.nameVi || (a as any).allergenName} ({translateText(a.severity)})
                           {a.note && <span className="font-normal text-slate-500">• {a.note}</span>}
                         </span>
                       ))}
@@ -159,7 +158,7 @@ function ChildNutritionDetail({
                 ) : (
                   <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Học sinh chưa ghi nhận dị ứng thực phẩm nào.</span>
+                    <span>{translateText("Học sinh chưa ghi nhận dị ứng thực phẩm nào.")}</span>
                   </div>
                 )}
               </div>
@@ -168,22 +167,18 @@ function ChildNutritionDetail({
               <form onSubmit={save} className="space-y-4 pt-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Chế độ ăn chỉ định
-                    </label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Chế độ ăn chỉ định")}</label>
                     <input
                       className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                       maxLength={100}
                       value={form.dietaryRegime}
                       onChange={(e) => setDraft({ ...form, dietaryRegime: e.target.value })}
-                      placeholder="VD: Cơm nát, ăn ít muối, kiêng hải sản…"
+                      placeholder={translateText("VD: Cơm nát, ăn ít muối, kiêng hải sản…")}
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Năng lượng mục tiêu (kcal/ngày)
-                    </label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Năng lượng mục tiêu (kcal/ngày)")}</label>
                     <input
                       className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                       type="number"
@@ -191,63 +186,57 @@ function ChildNutritionDetail({
                       step="any"
                       value={form.targetEnergyKcal}
                       onChange={(e) => setDraft({ ...form, targetEnergyKcal: e.target.value })}
-                      placeholder="VD: 1250"
+                      placeholder={translateText("VD: 1250")}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Thói quen ăn uống & Sức ăn
-                  </label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Thói quen ăn uống & Sức ăn")}</label>
                   <textarea
                     rows={2}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                     maxLength={3000}
                     value={form.eatingHabits}
                     onChange={(e) => setDraft({ ...form, eatingHabits: e.target.value })}
-                    placeholder="Ghi nhận thói quen ăn chậm, kén rau, ăn nhanh, uống nhiều sữa…"
+                    placeholder={translateText("Ghi nhận thói quen ăn chậm, kén rau, ăn nhanh, uống nhiều sữa…")}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Mục tiêu chăm sóc dinh dưỡng
-                  </label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Mục tiêu chăm sóc dinh dưỡng")}</label>
                   <textarea
                     rows={2}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                     maxLength={3000}
                     value={form.nutritionGoals}
                     onChange={(e) => setDraft({ ...form, nutritionGoals: e.target.value })}
-                    placeholder="VD: Tăng cường canxi cải thiện chiều cao, bổ sung đạm bồi dưỡng thể lực…"
+                    placeholder={translateText("VD: Tăng cường canxi cải thiện chiều cao, bổ sung đạm bồi dưỡng thể lực…")}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Lưu ý đặc biệt cho bếp & giáo viên
-                  </label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Lưu ý đặc biệt cho bếp & giáo viên")}</label>
                   <textarea
                     rows={2}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                     maxLength={3000}
                     value={form.dietaryNotes}
                     onChange={(e) => setDraft({ ...form, dietaryNotes: e.target.value })}
-                    placeholder="Lưu ý khi chia phần ăn tại lớp…"
+                    placeholder={translateText("Lưu ý khi chia phần ăn tại lớp…")}
                   />
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                   <span className="text-[11px] text-slate-400">
-                    {profile?.updatedAt ? `Cập nhật lần cuối: ${new Date(profile.updatedAt).toLocaleDateString("vi-VN")}` : "Hồ sơ mới"}
+                    {translateText(profile?.updatedAt ? `Cập nhật lần cuối: ${new Date(profile.updatedAt).toLocaleDateString(getLocale())}` : "Hồ sơ mới")}
                   </span>
                   <button
                     type="submit"
                     disabled={action.busy}
                     className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                   >
-                    {action.busy ? "Đang lưu…" : "Lưu Hồ Sơ Dinh Dưỡng"}
+                    {translateText(action.busy ? "Đang lưu…" : "Lưu Hồ Sơ Dinh Dưỡng")}
                   </button>
                 </div>
               </form>
@@ -260,6 +249,7 @@ function ChildNutritionDetail({
 }
 
 export function NutritionStudentsPage() {
+  useLanguage();
   const isTeacherPortal = useLocation().pathname.startsWith("/teacher/");
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState("");
@@ -335,17 +325,15 @@ export function NutritionStudentsPage() {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              {isTeacherPortal ? "Giáo viên • Lớp phụ trách" : "Chuyên Gia Dinh Dưỡng • NutriKid"}
+              {translateText(isTeacherPortal ? "Giáo viên • Lớp phụ trách" : "Chuyên Gia Dinh Dưỡng • NutriKid")}
             </span>
-            <span className="text-xs text-teal-200">Quản lý hồ sơ dinh dưỡng cá nhân</span>
+            <span className="text-xs text-teal-200">{translateText("Quản lý hồ sơ dinh dưỡng cá nhân")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
             <Baby className="w-8 h-8 text-amber-300" />
-            {isTeacherPortal ? "Học sinh & Hồ sơ dinh dưỡng của lớp" : "Học Sinh & Hồ Sơ Dinh Dưỡng Cá Nhân"}
+            {translateText(isTeacherPortal ? "Học sinh & Hồ sơ dinh dưỡng của lớp" : "Học Sinh & Hồ Sơ Dinh Dưỡng Cá Nhân")}
           </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-            Tra cứu thông tin học sinh, kiểm soát tình trạng dị ứng thực phẩm và cập nhật chế độ ăn, mục tiêu dinh dưỡng cá nhân hoá cho từng bé.
-          </p>
+          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Tra cứu thông tin học sinh, kiểm soát tình trạng dị ứng thực phẩm và cập nhật chế độ ăn, mục tiêu dinh dưỡng cá nhân hoá cho từng bé.")}</p>
         </div>
 
         <button
@@ -353,9 +341,7 @@ export function NutritionStudentsPage() {
           disabled={resource.loading}
           className="self-start md:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2 shadow-xs cursor-pointer"
         >
-          <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />
-          Làm mới
-        </button>
+          <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
       </div>
 
       <Feedback error={classes.error} />
@@ -368,16 +354,12 @@ export function NutritionStudentsPage() {
           {/* Card 1: Tổng học sinh */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Tổng số học sinh
-              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{translateText("Tổng số học sinh")}</span>
               <div className="text-2xl font-black text-slate-900 mt-1">
-                {stats.total} <span className="text-xs font-bold text-slate-400">trẻ</span>
+                {stats.total} <span className="text-xs font-bold text-slate-400">{translateText("trẻ")}</span>
               </div>
               <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Đang học tập tại trường
-              </p>
+                <CheckCircle2 className="w-3.5 h-3.5" />{translateText("Đang học tập tại trường")}</p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
               <Users className="w-6 h-6" />
@@ -387,16 +369,12 @@ export function NutritionStudentsPage() {
           {/* Card 2: Có cảnh báo dị ứng */}
           <div className="bg-white rounded-2xl p-5 border border-rose-200/90 shadow-xs flex items-center justify-between bg-rose-50/20">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700">
-                Có cảnh báo dị ứng
-              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700">{translateText("Có cảnh báo dị ứng")}</span>
               <div className="text-2xl font-black text-rose-700 mt-1">
-                {stats.allergic} <span className="text-xs font-bold text-rose-500">học sinh</span>
+                {stats.allergic} <span className="text-xs font-bold text-rose-500">{translateText("học sinh")}</span>
               </div>
               <p className="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5" />
-                Cần rà soát khi lên thực đơn
-              </p>
+                <ShieldAlert className="w-3.5 h-3.5" />{translateText("Cần rà soát khi lên thực đơn")}</p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
               <ShieldAlert className="w-6 h-6" />
@@ -406,16 +384,12 @@ export function NutritionStudentsPage() {
           {/* Card 3: An toàn / Tiêu chuẩn */}
           <div className="bg-white rounded-2xl p-5 border border-emerald-200/90 shadow-xs flex items-center justify-between bg-emerald-50/20">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-                Chế độ ăn tiêu chuẩn
-              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">{translateText("Chế độ ăn tiêu chuẩn")}</span>
               <div className="text-2xl font-black text-emerald-800 mt-1">
-                {stats.safe} <span className="text-xs font-bold text-emerald-600">học sinh</span>
+                {stats.safe} <span className="text-xs font-bold text-emerald-600">{translateText("học sinh")}</span>
               </div>
               <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Không ghi nhận dị ứng
-              </p>
+                <ShieldCheck className="w-3.5 h-3.5" />{translateText("Không ghi nhận dị ứng")}</p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
               <ShieldCheck className="w-6 h-6" />
@@ -425,16 +399,12 @@ export function NutritionStudentsPage() {
           {/* Card 4: Số lớp học */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Lớp học quản lý
-              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{translateText("Lớp học quản lý")}</span>
               <div className="text-2xl font-black text-slate-900 mt-1">
-                {stats.classCount} <span className="text-xs font-bold text-slate-400">lớp</span>
+                {stats.classCount} <span className="text-xs font-bold text-slate-400">{translateText("lớp")}</span>
               </div>
               <p className="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1">
-                <GraduationCap className="w-3.5 h-3.5" />
-                Nhà trẻ, Mầm, Chồi, Lá
-              </p>
+                <GraduationCap className="w-3.5 h-3.5" />{translateText("Nhà trẻ, Mầm, Chồi, Lá")}</p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
               <GraduationCap className="w-6 h-6" />
@@ -448,9 +418,9 @@ export function NutritionStudentsPage() {
         <div className="relative w-full lg:w-96">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
-            aria-label="Tìm học sinh"
+            aria-label={translateText("Tìm học sinh")}
             type="text"
-            placeholder="Tìm theo tên học sinh hoặc mã học sinh…"
+            placeholder={translateText("Tìm theo tên học sinh hoặc mã học sinh…")}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -464,7 +434,7 @@ export function NutritionStudentsPage() {
           <Filter className="w-4 h-4 text-slate-400 shrink-0" />
           {/* Lọc theo lớp */}
           <select
-            aria-label="Lọc theo lớp"
+            aria-label={translateText("Lọc theo lớp")}
             value={classId}
             onChange={(e) => {
               setClassId(e.target.value);
@@ -472,7 +442,7 @@ export function NutritionStudentsPage() {
             }}
             className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
-            <option value="">Tất cả các lớp ({stats.classCount} lớp)</option>
+            <option value="">{translateText("Tất cả các lớp (")}{stats.classCount}{translateText(" lớp)")}</option>
             {(classes.data || []).map((c: any) => (
               <option value={c.id} key={c.id}>
                 {c.name}
@@ -482,7 +452,7 @@ export function NutritionStudentsPage() {
 
           {/* Lọc theo tình trạng dị ứng */}
           <select
-            aria-label="Lọc theo tình trạng dị ứng"
+            aria-label={translateText("Lọc theo tình trạng dị ứng")}
             value={allergyFilter}
             onChange={(e) => {
               setAllergyFilter(e.target.value as any);
@@ -490,18 +460,16 @@ export function NutritionStudentsPage() {
             }}
             className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
-            <option value="ALL">Tất cả trạng thái dị ứng</option>
-            <option value="ALLERGIC">Có khai báo dị ứng ({stats.allergic})</option>
-            <option value="SAFE">Chế độ ăn an toàn ({stats.safe})</option>
+            <option value="ALL">{translateText("Tất cả trạng thái dị ứng")}</option>
+            <option value="ALLERGIC">{translateText("Có khai báo dị ứng (")}{stats.allergic})</option>
+            <option value="SAFE">{translateText("Chế độ ăn an toàn (")}{stats.safe})</option>
           </select>
 
           {(search || classId || allergyFilter !== "ALL") && (
             <button
               onClick={handleClearFilters}
               className="px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-xl font-bold transition cursor-pointer"
-            >
-              Xóa bộ lọc
-            </button>
+            >{translateText("Xóa bộ lọc")}</button>
           )}
         </div>
       </div>
@@ -515,11 +483,9 @@ export function NutritionStudentsPage() {
           <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap justify-between items-center gap-2">
             <div className="flex items-center gap-2 font-black text-slate-800 text-xs sm:text-sm">
               <ListOrdered className="w-4 h-4 text-teal-600" />
-              <span>{isTeacherPortal ? "Hồ sơ dinh dưỡng học sinh lớp phụ trách" : "Bảng Hồ Sơ Dinh Dưỡng Học Sinh Toàn Trường"}</span>
+              <span>{translateText(isTeacherPortal ? "Hồ sơ dinh dưỡng học sinh lớp phụ trách" : "Bảng Hồ Sơ Dinh Dưỡng Học Sinh Toàn Trường")}</span>
             </div>
-            <div className="text-[11px] text-slate-500 font-medium">
-              Tìm thấy <strong className="text-slate-800 font-bold">{totalFiltered}</strong> học sinh phù hợp
-            </div>
+            <div className="text-[11px] text-slate-500 font-medium">{translateText("Tìm thấy ")}<strong className="text-slate-800 font-bold">{totalFiltered}</strong>{translateText(" học sinh phù hợp")}</div>
           </div>
 
           {/* Table Element */}
@@ -527,12 +493,12 @@ export function NutritionStudentsPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
-                  <th className="py-3 px-3 w-12 text-center">STT</th>
-                  <th className="py-3 px-3 w-28 text-center font-mono">Mã HS</th>
-                  <th className="py-3 px-4 min-w-[200px]">Học sinh & Ngày sinh</th>
-                  <th className="py-3 px-3 min-w-[140px] text-center">Lớp học</th>
-                  <th className="py-3 px-4 min-w-[220px]">Tình trạng dị ứng thực phẩm</th>
-                  <th className="py-3 px-4 text-right min-w-[140px]">Thao tác</th>
+                  <th className="py-3 px-3 w-12 text-center">{translateText("STT")}</th>
+                  <th className="py-3 px-3 w-28 text-center font-mono">{translateText("Mã HS")}</th>
+                  <th className="py-3 px-4 min-w-[200px]">{translateText("Học sinh & Ngày sinh")}</th>
+                  <th className="py-3 px-3 min-w-[140px] text-center">{translateText("Lớp học")}</th>
+                  <th className="py-3 px-4 min-w-[220px]">{translateText("Tình trạng dị ứng thực phẩm")}</th>
+                  <th className="py-3 px-4 text-right min-w-[140px]">{translateText("Thao tác")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
@@ -540,16 +506,12 @@ export function NutritionStudentsPage() {
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-slate-500">
                       <Baby className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                      <p className="font-bold text-slate-700">
-                        Không tìm thấy học sinh nào phù hợp với bộ lọc hiện tại.
-                      </p>
+                      <p className="font-bold text-slate-700">{translateText("Không tìm thấy học sinh nào phù hợp với bộ lọc hiện tại.")}</p>
                       <button
                         type="button"
                         onClick={handleClearFilters}
                         className="mt-2 text-xs text-teal-600 hover:underline font-bold cursor-pointer"
-                      >
-                        Bấm vào đây để xóa bộ lọc
-                      </button>
+                      >{translateText("Bấm vào đây để xóa bộ lọc")}</button>
                     </td>
                   </tr>
                 ) : (
@@ -569,7 +531,7 @@ export function NutritionStudentsPage() {
                       .filter(Boolean);
 
                     const dob = c.dateOfBirth
-                      ? new Date(c.dateOfBirth).toLocaleDateString("vi-VN")
+                      ? new Date(c.dateOfBirth).toLocaleDateString(getLocale())
                       : "—";
 
                     return (
@@ -599,8 +561,7 @@ export function NutritionStudentsPage() {
                               <p className="font-black text-xs text-slate-900 group-hover:text-teal-800 transition">
                                 {c.fullName}
                               </p>
-                              <p className="text-[11px] text-slate-400 font-normal">
-                                Ngày sinh: {dob}
+                              <p className="text-[11px] text-slate-400 font-normal">{translateText("Ngày sinh: ")}{translateText(dob)}
                               </p>
                             </div>
                           </div>
@@ -609,7 +570,7 @@ export function NutritionStudentsPage() {
                         {/* Lớp học */}
                         <td className="py-3.5 px-3 text-center">
                           <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200/60 inline-block">
-                            {c.className || c.class?.name || "Chưa phân lớp"}
+                            {c.className || c.class?.name || translateText("Chưa phân lớp")}
                           </span>
                         </td>
 
@@ -619,7 +580,7 @@ export function NutritionStudentsPage() {
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold">
                               <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                               <span>
-                                {allergenNames.length} dị nguyên:{" "}
+                                {allergenNames.length}{translateText(" dị nguyên:")}{" "}
                                 {allergenNames.slice(0, 2).join(", ")}
                                 {allergenNames.length > 2
                                   ? ` (+${allergenNames.length - 2})`
@@ -629,7 +590,7 @@ export function NutritionStudentsPage() {
                           ) : (
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-medium">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span>An toàn • Chưa có dị ứng</span>
+                              <span>{translateText("An toàn • Chưa có dị ứng")}</span>
                             </div>
                           )}
                         </td>
@@ -642,7 +603,7 @@ export function NutritionStudentsPage() {
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer active:scale-95"
                           >
                             <FileText className="w-3.5 h-3.5" />
-                            <span>Chi tiết & Hồ sơ</span>
+                            <span>{translateText("Chi tiết & Hồ sơ")}</span>
                           </button>
                         </td>
                       </tr>
@@ -655,23 +616,19 @@ export function NutritionStudentsPage() {
 
           {/* ─── 5. Thanh Điều Hướng Phân Trang (Pagination Controls) ─── */}
           <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white text-xs">
-            <div className="text-slate-500 font-medium">
-              Hiển thị{" "}
+            <div className="text-slate-500 font-medium">{translateText("Hiển thị")}{" "}
               <strong className="text-slate-800">
                 {totalFiltered === 0 ? 0 : (currentPage - 1) * pageSize + 1}
               </strong>{" "}
               -{" "}
               <strong className="text-slate-800">
                 {Math.min(currentPage * pageSize, totalFiltered)}
-              </strong>{" "}
-              trong tổng số <strong className="text-slate-900">{totalFiltered}</strong>{" "}
-              học sinh
-            </div>
+              </strong>{" "}{translateText("trong tổng số ")}<strong className="text-slate-900">{totalFiltered}</strong>{" "}{translateText("học sinh")}</div>
 
             <div className="flex items-center gap-3">
               {/* Selector số dòng mỗi trang */}
               <div className="flex items-center gap-1.5 text-slate-600 font-bold">
-                <span>Số dòng/trang:</span>
+                <span>{translateText("Số dòng/trang:")}</span>
                 <select
                   value={pageSize}
                   onChange={(e) => {
@@ -680,10 +637,10 @@ export function NutritionStudentsPage() {
                   }}
                   className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none text-xs font-bold text-slate-800 cursor-pointer"
                 >
-                  <option value={10}>10 dòng</option>
-                  <option value={15}>15 dòng</option>
-                  <option value={20}>20 dòng</option>
-                  <option value={30}>30 dòng</option>
+                  <option value={10}>{translateText("10 dòng")}</option>
+                  <option value={15}>{translateText("15 dòng")}</option>
+                  <option value={20}>{translateText("20 dòng")}</option>
+                  <option value={30}>{translateText("30 dòng")}</option>
                 </select>
               </div>
 
@@ -694,7 +651,7 @@ export function NutritionStudentsPage() {
                   disabled={currentPage <= 1}
                   onClick={() => setPage(currentPage - 1)}
                   className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 transition cursor-pointer"
-                  title="Trang trước"
+                  title={translateText("Trang trước")}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -738,7 +695,7 @@ export function NutritionStudentsPage() {
                   disabled={currentPage >= totalPages}
                   onClick={() => setPage(currentPage + 1)}
                   className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 transition cursor-pointer"
-                  title="Trang sau"
+                  title={translateText("Trang sau")}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

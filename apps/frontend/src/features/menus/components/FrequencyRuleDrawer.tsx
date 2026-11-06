@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Scale, AlertCircle, Check } from 'lucide-react';
 import { DishFrequencyRule } from '../api/nutrition-rule-engine.api';
@@ -38,6 +40,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
   onClose,
   onSubmit,
 }) => {
+  useLanguage();
   const isEditMode = Boolean(rule);
   const [form, setForm] = useState<Partial<DishFrequencyRule>>(DEFAULT_FORM);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -104,11 +107,9 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 text-base">
-                {isEditMode ? 'Chỉnh sửa Quy tắc Tần suất' : 'Thêm mới Quy tắc Tần suất'}
+                {translateText(isEditMode ? 'Chỉnh sửa Quy tắc Tần suất' : 'Thêm mới Quy tắc Tần suất')}
               </h3>
-              <p className="text-xs text-slate-500">
-                Cấu hình số lần xuất hiện cho loại món (Món mặn, cơm, canh...) hoặc 10 nhóm thực phẩm
-              </p>
+              <p className="text-xs text-slate-500">{translateText("Cấu hình số lần xuất hiện cho loại món (Món mặn, cơm, canh...) hoặc 10 nhóm thực phẩm")}</p>
             </div>
           </div>
           <button
@@ -124,20 +125,19 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
           {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-700 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
+              <span>{translateText(errorMessage)}</span>
             </div>
           )}
 
           {/* Tên quy tắc */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Tên quy tắc <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Tên quy tắc ")}<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.ruleName || ''}
               onChange={(e) => setForm((prev) => ({ ...prev, ruleName: e.target.value }))}
-              placeholder="VD: Món mặn bữa trưa tối đa 2 lần/chu kỳ 4 tuần"
+              placeholder={translateText("VD: Món mặn bữa trưa tối đa 2 lần/chu kỳ 4 tuần")}
               className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
               required
             />
@@ -146,9 +146,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
           {/* Loại mục tiêu & Khung giờ */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Loại mục tiêu
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Loại mục tiêu")}</label>
               <select
                 value={form.targetType}
                 onChange={(e) => {
@@ -162,32 +160,29 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
                 }}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
-                <option value="DISH_CATEGORY">Loại món ăn (Cơm, Món mặn, Canh...)</option>
-                <option value="FOOD_GROUP">10 Nhóm thực phẩm (Phụ lục 7)</option>
+                <option value="DISH_CATEGORY">{translateText("Loại món ăn (Cơm, Món mặn, Canh...)")}</option>
+                <option value="FOOD_GROUP">{translateText("10 Nhóm thực phẩm (Phụ lục 7)")}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Khung giờ bữa ăn
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Khung giờ bữa ăn")}</label>
               <select
                 value={form.mealSlot}
                 onChange={(e) => setForm((prev) => ({ ...prev, mealSlot: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
-                <option value="ALL">Tất cả khung giờ</option>
-                <option value="BREAKFAST">Buổi sáng (09:00)</option>
-                <option value="LUNCH">Bữa trưa chính (11:00)</option>
-                <option value="AFTERNOON_SNACK">Phụ chiều / Xế (14:30)</option>
+                <option value="ALL">{translateText("Tất cả khung giờ")}</option>
+                <option value="BREAKFAST">{translateText("Buổi sáng (09:00)")}</option>
+                <option value="LUNCH">{translateText("Bữa trưa chính (11:00)")}</option>
+                <option value="AFTERNOON_SNACK">{translateText("Phụ chiều / Xế (14:30)")}</option>
               </select>
             </div>
           </div>
 
           {/* Chọn đối tượng cụ thể */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Đối tượng áp dụng ({form.targetType === 'DISH_CATEGORY' ? 'Loại món' : 'Nhóm nguyên liệu'})
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Đối tượng áp dụng (")}{translateText(form.targetType === 'DISH_CATEGORY' ? 'Loại món' : 'Nhóm nguyên liệu')})
             </label>
             <select
               value={form.targetCode}
@@ -196,21 +191,21 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
             >
               {form.targetType === 'DISH_CATEGORY' ? (
                 <>
-                  <option value="MAIN">🥩 Món mặn (Món chính - Thịt, cá, tôm...)</option>
-                  <option value="RICE">🍚 Cơm / Cháo (Tinh bột nền tảng)</option>
-                  <option value="SOUP">🍲 Canh / Súp</option>
-                  <option value="SIDE">🥗 Món phụ / Rau xào</option>
-                  <option value="DESSERT">🍉 Tráng miệng (Trái cây, sữa chua)</option>
-                  <option value="SNACK_AFTERNOON">🥣 Món xế chiều (Chè, súp, bún...)</option>
-                  <option value="SNACK_MORNING">🥛 Xế sáng / Sữa tươi</option>
-                  <option value="DRINK">🥤 Thức uống</option>
+                  <option value="MAIN">{translateText("🥩 Món mặn (Món chính - Thịt, cá, tôm...)")}</option>
+                  <option value="RICE">{translateText("🍚 Cơm / Cháo (Tinh bột nền tảng)")}</option>
+                  <option value="SOUP">{translateText("🍲 Canh / Súp")}</option>
+                  <option value="SIDE">{translateText("🥗 Món phụ / Rau xào")}</option>
+                  <option value="DESSERT">{translateText("🍉 Tráng miệng (Trái cây, sữa chua)")}</option>
+                  <option value="SNACK_AFTERNOON">{translateText("🥣 Món xế chiều (Chè, súp, bún...)")}</option>
+                  <option value="SNACK_MORNING">{translateText("🥛 Xế sáng / Sữa tươi")}</option>
+                  <option value="DRINK">{translateText("🥤 Thức uống")}</option>
                 </>
               ) : (
                 catalog?.standardFoodGroups.map((g) => (
                   <option key={g.code} value={g.code}>
                     {g.name}
                   </option>
-                )) || <option value="MEAT">VII. Thịt và sản phẩm chế biến</option>
+                )) || <option value="MEAT">{translateText("VII. Thịt và sản phẩm chế biến")}</option>
               )}
             </select>
           </div>
@@ -218,34 +213,30 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
           {/* Lứa tuổi & Chu kỳ */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Lứa tuổi áp dụng
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Lứa tuổi áp dụng")}</label>
               <select
                 value={form.ageGroup}
                 onChange={(e) => setForm((prev) => ({ ...prev, ageGroup: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
-                <option value="ALL">Tất cả khối lớp</option>
-                <option value="MAU_GIAO">Mẫu giáo (3 - 6 tuổi)</option>
-                <option value="NHA_TRE">Nhà trẻ (1 - 3 tuổi)</option>
-                <option value="PRIMARY_6_7">Tiểu học (6 - 7 tuổi)</option>
-                <option value="PRIMARY_8_9">Tiểu học (8 - 9 tuổi)</option>
+                <option value="ALL">{translateText("Tất cả khối lớp")}</option>
+                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
+                <option value="NHA_TRE">{translateText("Nhà trẻ (1 - 3 tuổi)")}</option>
+                <option value="PRIMARY_6_7">{translateText("Tiểu học (6 - 7 tuổi)")}</option>
+                <option value="PRIMARY_8_9">{translateText("Tiểu học (8 - 9 tuổi)")}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Phạm vi chu kỳ
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Phạm vi chu kỳ")}</label>
               <select
                 value={form.periodType}
                 onChange={(e) => setForm((prev) => ({ ...prev, periodType: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
-                <option value="PER_CYCLE_4_WEEKS">Theo chu kỳ 4 tuần</option>
-                <option value="PER_WEEK">Theo từng tuần (T2 - T6)</option>
-                <option value="PER_DAY">Theo ngày</option>
+                <option value="PER_CYCLE_4_WEEKS">{translateText("Theo chu kỳ 4 tuần")}</option>
+                <option value="PER_WEEK">{translateText("Theo từng tuần (T2 - T6)")}</option>
+                <option value="PER_DAY">{translateText("Theo ngày")}</option>
               </select>
             </div>
           </div>
@@ -253,9 +244,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
           {/* Số lần Tối thiểu - Tối đa */}
           <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số lần tối thiểu (Min)
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Số lần tối thiểu (Min)")}</label>
               <input
                 type="number"
                 min="0"
@@ -263,13 +252,11 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
                 onChange={(e) => setForm((prev) => ({ ...prev, minOccurrences: parseInt(e.target.value, 10) || 0 }))}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               />
-              <span className="text-[10px] text-slate-500">0 = Không bắt buộc</span>
+              <span className="text-[10px] text-slate-500">{translateText("0 = Không bắt buộc")}</span>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số lần tối đa (Max)
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Số lần tối đa (Max)")}</label>
               <input
                 type="number"
                 min="1"
@@ -278,7 +265,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 required
               />
-              <span className="text-[10px] text-slate-500">Giới hạn không vượt quá</span>
+              <span className="text-[10px] text-slate-500">{translateText("Giới hạn không vượt quá")}</span>
             </div>
           </div>
 
@@ -292,37 +279,31 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
                 onChange={(e) => setForm((prev) => ({ ...prev, isRequiredInMeal: e.target.checked }))}
                 className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
               />
-              <label htmlFor="isRequiredInMeal" className="text-xs font-medium text-slate-700 cursor-pointer">
-                Bắt buộc có trong bữa
-              </label>
+              <label htmlFor="isRequiredInMeal" className="text-xs font-medium text-slate-700 cursor-pointer">{translateText("Bắt buộc có trong bữa")}</label>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Mức độ nghiêm ngặt
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Mức độ nghiêm ngặt")}</label>
               <select
                 value={form.severity}
                 onChange={(e) => setForm((prev) => ({ ...prev, severity: e.target.value }))}
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
-                <option value="WARNING">Cảnh báo (WARNING)</option>
-                <option value="ERROR">Chặn lưu (ERROR)</option>
-                <option value="INFO">Thông tin (INFO)</option>
+                <option value="WARNING">{translateText("Cảnh báo (WARNING)")}</option>
+                <option value="ERROR">{translateText("Chặn lưu (ERROR)")}</option>
+                <option value="INFO">{translateText("Thông tin (INFO)")}</option>
               </select>
             </div>
           </div>
 
           {/* Ghi chú */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Ghi chú nghiệp vụ
-            </label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Ghi chú nghiệp vụ")}</label>
             <textarea
               rows={2}
               value={form.note || ''}
               onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
-              placeholder="VD: Tuân thủ Thông tư 28 về cân đối đạm động vật và thực vật"
+              placeholder={translateText("VD: Tuân thủ Thông tư 28 về cân đối đạm động vật và thực vật")}
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -334,9 +315,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
             type="button"
             onClick={onClose}
             className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors"
-          >
-            Hủy bỏ
-          </button>
+          >{translateText("Hủy bỏ")}</button>
           <button
             type="submit"
             form="freq-rule-form"
@@ -344,7 +323,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
             className="px-5 py-2 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
           >
             {isLoading ? <Sparkles className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            <span>{isEditMode ? 'Lưu thay đổi' : 'Tạo quy tắc'}</span>
+            <span>{translateText(isEditMode ? 'Lưu thay đổi' : 'Tạo quy tắc')}</span>
           </button>
         </div>
       </div>

@@ -16,6 +16,7 @@ import { ClassEntity } from "../../classes/entities/class.entity";
 import { ChildAllergy } from "../../children/entities/child-allergy.entity";
 import { User } from "../../auth/entities/user.entity";
 import { AuditLogsService } from "../../audit-logs/services/audit-logs.service";
+import { stripWorkflowMeta } from "../../inspections/utils/workflow-note.util";
 import { SignInspectionDto } from "../dto/sign-inspection.dto";
 import { TeacherSensoryEvaluationDto } from "../dto/teacher-sensory-evaluation.dto";
 
@@ -293,11 +294,13 @@ export class MealOperationsService {
       (r) => r.inspectionStep === "STEP_3_PRE_SERVING_CHECK",
     );
 
+    const cleanInspectionNote = stripWorkflowMeta;
+
     const recordInfo = (r: any) => ({
       result: r?.result || "NOT_RECORDED",
       inspectorName: r?.inspector?.fullName || "",
       checkedAt: null,
-      notes: r?.note || "",
+      notes: cleanInspectionNote(r?.note),
     });
     const foodSafetyInspection = {
       decisionStandard: "Kiểm thực 3 bước",

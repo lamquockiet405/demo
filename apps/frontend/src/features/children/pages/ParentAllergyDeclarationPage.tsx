@@ -1,3 +1,5 @@
+import { getLocale, t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -50,7 +52,7 @@ const types = [
 ];
 const normalizeSeverity = (value: string): Severity =>
   ({ LOW: 'MILD', MEDIUM: 'MODERATE', HIGH: 'SEVERE' }[value] as Severity) || (value as Severity);
-const dateLabel = (value?: string | null) => (value ? new Date(value).toLocaleDateString('vi-VN') : 'Chưa ghi nhận');
+const dateLabel = (value?: string | null) => (value ? new Date(value).toLocaleDateString(getLocale()) : 'Chưa ghi nhận');
 const inputClass =
   'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:bg-slate-50';
 
@@ -78,6 +80,7 @@ const emptyForm = (): AllergyForm => ({
 });
 
 export const ParentAllergyDeclarationPage: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   const [children, setChildren] = useState<ChildItem[]>([]);
   const [catalogs, setCatalogs] = useState<AllergenCatalogItem[]>([]);
@@ -297,7 +300,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
     if (
       item.isActive !== false &&
       !window.confirm(
-        `Ngưng áp dụng "${item.allergen?.nameVi || item.customAllergenName}"? Thông tin vẫn được giữ trong hồ sơ.`,
+        translateText(`Ngưng áp dụng "${item.allergen?.nameVi || item.customAllergenName}"? Thông tin vẫn được giữ trong hồ sơ.`),
       )
     )
       return;
@@ -341,10 +344,9 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
       <main className="w-full px-4 pb-28 pt-7 sm:px-6 lg:px-8">
         <div className="mb-5 flex items-center gap-2 text-xs text-slate-500">
           <Link to="/child-menu-consumption" className="inline-flex items-center gap-1 hover:text-teal-700">
-            <ArrowLeft className="h-3.5 w-3.5" /> Cổng phụ huynh
-          </Link>
+            <ArrowLeft className="h-3.5 w-3.5" />{translateText(" Cổng phụ huynh")}</Link>
           <ChevronRight className="h-3 w-3" />
-          <span>Dị ứng & Dinh dưỡng của bé</span>
+          <span>{translateText("Dị ứng & Dinh dưỡng của bé")}</span>
         </div>
 
         {/* Child Selector Strip */}
@@ -353,19 +355,17 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
             <Baby className="h-6 w-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <label htmlFor="allergy-child" className="mb-1 block text-xs font-medium text-slate-500">
-              Chọn hồ sơ học sinh
-            </label>
+            <label htmlFor="allergy-child" className="mb-1 block text-xs font-medium text-slate-500">{translateText("Chọn hồ sơ học sinh")}</label>
             <select
               id="allergy-child"
-              aria-label="Chọn học sinh"
+              aria-label={translateText("Chọn học sinh")}
               value={selectedId}
               onChange={(event) => setSelectedId(event.target.value)}
               disabled={initialLoading || !children.length}
               className="max-w-full bg-transparent pr-7 text-base font-bold text-slate-900 outline-none focus:ring-2 focus:ring-teal-200"
             >
               {!children.length && (
-                <option value="">{initialLoading ? 'Đang tải hồ sơ…' : 'Chưa có học sinh được liên kết'}</option>
+                <option value="">{translateText(initialLoading ? 'Đang tải hồ sơ…' : 'Chưa có học sinh được liên kết')}</option>
               )}
               {children.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -377,12 +377,10 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
           </div>
           {child && (
             <div className="flex flex-wrap gap-2 text-xs">
-              <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-600">
-                Mã: <strong>{child.studentCode}</strong>
+              <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-600">{translateText("Mã: ")}<strong>{child.studentCode}</strong>
               </span>
               {child.dateOfBirth && (
-                <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-600">
-                  Ngày sinh: {dateLabel(child.dateOfBirth)}
+                <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-600">{translateText("Ngày sinh: ")}{translateText(dateLabel(child.dateOfBirth))}
                 </span>
               )}
             </div>
@@ -400,9 +398,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
-            <ShieldAlert className="h-4 w-4" />
-            1. Dị ứng & Thực phẩm cần tránh
-            {active.length > 0 && (
+            <ShieldAlert className="h-4 w-4" />{translateText("1. Dị ứng & Thực phẩm cần tránh")}{active.length > 0 && (
               <span className="ml-1 rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700">
                 {active.length}
               </span>
@@ -417,9 +413,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
-            <Utensils className="h-4 w-4" />
-            2. Hồ sơ Dinh dưỡng & Thói quen ăn uống (STT 29)
-          </button>
+            <Utensils className="h-4 w-4" />{translateText("2. Hồ sơ Dinh dưỡng & Thói quen ăn uống (STT 29)")}</button>
         </div>
 
         {error && (
@@ -428,14 +422,12 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
             className="mb-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"
           >
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span className="flex-1">{error}</span>
+            <span className="flex-1">{translateText(error)}</span>
             <button
               type="button"
               className="shrink-0 font-semibold underline"
               onClick={() => (selectedId ? loadChild(selectedId) : loadChildren())}
-            >
-              Thử lại
-            </button>
+            >{translateText("Thử lại")}</button>
           </div>
         )}
 
@@ -444,11 +436,8 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
           <>
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dị ứng & Kiêng cữ thực phẩm</h1>
-                <p className="mt-1 text-sm text-slate-500">
-                  Cập nhật danh sách thực phẩm dị ứng hoặc kiêng theo tôn giáo/y tế để nhà trường tự động thay thế món
-                  an toàn cho bé.
-                </p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900">{translateText("Dị ứng & Kiêng cữ thực phẩm")}</h1>
+                <p className="mt-1 text-sm text-slate-500">{translateText("Cập nhật danh sách thực phẩm dị ứng hoặc kiêng theo tôn giáo/y tế để nhà trường tự động thay thế món an toàn cho bé.")}</p>
               </div>
               <button
                 type="button"
@@ -456,29 +445,28 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 disabled={!child || initialLoading || childLoading}
                 className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Plus className="h-4 w-4" /> Thêm dị ứng
-              </button>
+                <Plus className="h-4 w-4" />{translateText(" Thêm dị ứng")}</button>
             </div>
 
             <div className="mb-6 grid gap-3 sm:grid-cols-3">
               {[
-                { label: 'Đang áp dụng', value: `${active.length} thực phẩm`, icon: ShieldAlert, color: 'bg-teal-50 text-teal-700' },
+                { label: translateText('Đang áp dụng'), value: `${active.length} thực phẩm`, icon: ShieldAlert, color: 'bg-teal-50 text-teal-700' },
                 {
-                  label: 'Mức độ nặng / tiền sử sốc phản vệ',
+                  label: translateText('Mức độ nặng / tiền sử sốc phản vệ'),
                   value: `${severeCount} ghi nhận`,
                   icon: AlertCircle,
                   color: 'bg-rose-50 text-rose-700',
                 },
-                { label: 'Khai báo gần nhất', value: dateLabel(lastDeclared), icon: CalendarDays, color: 'bg-slate-100 text-slate-600' },
+                { label: translateText('Khai báo gần nhất'), value: dateLabel(lastDeclared), icon: CalendarDays, color: 'bg-slate-100 text-slate-600' },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-4">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${item.color}`}>
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500">{item.label}</p>
+                    <p className="text-xs text-slate-500">{translateText(item.label)}</p>
                     <p className="mt-1 text-base font-bold text-slate-900">
-                      {initialLoading || childLoading ? '—' : item.value}
+                      {translateText(initialLoading || childLoading ? '—' : item.value)}
                     </p>
                   </div>
                 </div>
@@ -488,10 +476,10 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_290px]">
               <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-4 sm:px-5">
-                  <div className="flex gap-1 rounded-lg bg-slate-100 p-1" role="tablist" aria-label="Trạng thái hồ sơ">
+                  <div className="flex gap-1 rounded-lg bg-slate-100 p-1" role="tablist" aria-label={translateText("Trạng thái hồ sơ")}>
                     {[
-                      { value: 'active', label: 'Đang áp dụng', count: active.length },
-                      { value: 'inactive', label: 'Đã ngưng', count: inactive.length },
+                      { value: 'active', label: translateText('Đang áp dụng'), count: active.length },
+                      { value: 'inactive', label: translateText('Đã ngưng'), count: inactive.length },
                     ].map((tab) => (
                       <button
                         key={tab.value}
@@ -505,32 +493,29 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                             : 'text-slate-500 hover:text-slate-800'
                         }`}
                       >
-                        {tab.label} <span className="ml-1 opacity-60">{tab.count}</span>
+                        {translateText(tab.label)} <span className="ml-1 opacity-60">{tab.count}</span>
                       </button>
                     ))}
                   </div>
                   <div className="relative min-w-0 flex-1 sm:max-w-60">
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                     <input
-                      aria-label="Tìm thực phẩm dị ứng"
+                      aria-label={translateText("Tìm thực phẩm dị ứng")}
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
-                      placeholder="Tìm thực phẩm…"
+                      placeholder={translateText("Tìm thực phẩm…")}
                       className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                     />
                   </div>
                 </div>
                 {initialLoading || childLoading ? (
                   <div className="flex min-h-64 flex-col items-center justify-center gap-3 text-sm text-slate-500">
-                    <Loader2 className="h-6 w-6 animate-spin text-teal-600" /> Đang tải hồ sơ của bé…
-                  </div>
+                    <Loader2 className="h-6 w-6 animate-spin text-teal-600" />{translateText(" Đang tải hồ sơ của bé…")}</div>
                 ) : !child ? (
                   <div className="px-6 py-14 text-center">
                     <Baby className="mx-auto mb-4 h-9 w-9 text-slate-300" />
-                    <h2 className="font-semibold text-slate-800">Chưa có hồ sơ học sinh</h2>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                      Nhà trường cần liên kết tài khoản với hồ sơ học sinh trước khi khai báo dị ứng.
-                    </p>
+                    <h2 className="font-semibold text-slate-800">{translateText("Chưa có hồ sơ học sinh")}</h2>
+                    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{translateText("Nhà trường cần liên kết tài khoản với hồ sơ học sinh trước khi khai báo dị ứng.")}</p>
                   </div>
                 ) : !shown.length ? (
                   <div className="px-6 py-14 text-center">
@@ -538,18 +523,18 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                       <ClipboardList className="h-7 w-7 text-teal-600" />
                     </div>
                     <h2 className="text-base font-semibold text-slate-900">
-                      {search
+                      {translateText(search
                         ? 'Không tìm thấy thực phẩm phù hợp'
                         : filter === 'inactive'
                         ? 'Chưa có khai báo ngưng áp dụng'
-                        : 'Chưa có khai báo dị ứng'}
+                        : 'Chưa có khai báo dị ứng')}
                     </h2>
                     <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                      {search
+                      {translateText(search
                         ? 'Thử tìm bằng tên thực phẩm hoặc triệu chứng khác.'
                         : filter === 'inactive'
                         ? 'Các khai báo ngưng áp dụng sẽ được giữ lại tại đây.'
-                        : 'Thêm thông tin thực phẩm bé cần tránh để nhà trường theo dõi trong hồ sơ.'}
+                        : 'Thêm thông tin thực phẩm bé cần tránh để nhà trường theo dõi trong hồ sơ.')}
                     </p>
                     {filter === 'active' && !search && (
                       <button
@@ -557,8 +542,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                         onClick={() => openForm()}
                         className="mt-5 inline-flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-800 hover:bg-teal-100"
                       >
-                        <Plus className="h-4 w-4" /> Khai báo đầu tiên
-                      </button>
+                        <Plus className="h-4 w-4" />{translateText(" Khai báo đầu tiên")}</button>
                     )}
                   </div>
                 ) : (
@@ -572,10 +556,10 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div className="min-w-0">
                               <p className="mb-1 text-xs text-slate-500">
-                                {types.find((type) => type.value === item.allergyType)?.label || 'Dị ứng / kiêng cữ'}
+                                {translateText(types.find((type) => type.value === item.allergyType)?.label || 'Dị ứng / kiêng cữ')}
                               </p>
                               <h3 className="break-words text-lg font-bold text-slate-900">
-                                {item.allergen?.nameVi || item.customAllergenName || 'Thực phẩm cần tránh'}
+                                {translateText(item.allergen?.nameVi || item.customAllergenName || 'Thực phẩm cần tránh')}
                               </h3>
                             </div>
                             <span
@@ -583,19 +567,19 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                                 severity?.className || 'border-slate-200 bg-slate-50 text-slate-700'
                               }`}
                             >
-                              {severity?.label || item.severity}
+                              {translateText(severity?.label || item.severity)}
                             </span>
                           </div>
                           <dl className="mt-4 space-y-2 text-sm">
                             {item.symptoms && (
                               <div>
-                                <dt className="mb-1 text-xs font-medium text-slate-500">Triệu chứng ghi nhận</dt>
-                                <dd className="whitespace-pre-wrap break-words leading-6">{item.symptoms}</dd>
+                                <dt className="mb-1 text-xs font-medium text-slate-500">{translateText("Triệu chứng ghi nhận")}</dt>
+                                <dd className="whitespace-pre-wrap break-words leading-6">{translateText(item.symptoms)}</dd>
                               </div>
                             )}
                             {item.reactionTreatment && (
                               <div>
-                                <dt className="mb-1 text-xs font-medium text-slate-500">Hướng dẫn đã được cung cấp</dt>
+                                <dt className="mb-1 text-xs font-medium text-slate-500">{translateText("Hướng dẫn đã được cung cấp")}</dt>
                                 <dd className="whitespace-pre-wrap break-words rounded-lg bg-slate-50 px-3 py-2 leading-6">
                                   {item.reactionTreatment}
                                 </dd>
@@ -603,15 +587,14 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                             )}
                             {item.note && item.note !== item.symptoms && (
                               <div>
-                                <dt className="mb-1 text-xs font-medium text-slate-500">Ghi chú</dt>
+                                <dt className="mb-1 text-xs font-medium text-slate-500">{translateText("Ghi chú")}</dt>
                                 <dd className="whitespace-pre-wrap break-words leading-6">{item.note}</dd>
                               </div>
                             )}
                           </dl>
                           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                            <p className="text-xs text-slate-400">
-                              Khai báo: {dateLabel(item.declaredAt)}
-                              {item.diagnosedDate ? ` · Phát hiện: ${dateLabel(item.diagnosedDate)}` : ''}
+                            <p className="text-xs text-slate-400">{translateText("Khai báo: ")}{translateText(dateLabel(item.declaredAt))}
+                              {translateText(item.diagnosedDate ? ` · Phát hiện: ${dateLabel(item.diagnosedDate)}` : '')}
                             </p>
                             <div className="flex gap-3">
                               <button
@@ -620,8 +603,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                                 onClick={() => openForm(item)}
                                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-900"
                               >
-                                <Edit2 className="h-3.5 w-3.5" /> Chỉnh sửa
-                              </button>
+                                <Edit2 className="h-3.5 w-3.5" />{translateText(" Chỉnh sửa")}</button>
                               <button
                                 type="button"
                                 disabled={!!busyId}
@@ -635,7 +617,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                                 ) : (
                                   <Pause className="h-3.5 w-3.5" />
                                 )}
-                                {item.isActive === false ? 'Áp dụng lại' : 'Ngưng áp dụng'}
+                                {translateText(item.isActive === false ? 'Áp dụng lại' : 'Ngưng áp dụng')}
                               </button>
                             </div>
                           </div>
@@ -649,24 +631,23 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
               <aside className="space-y-4">
                 <section className="rounded-2xl border border-slate-200 bg-white p-5">
                   <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <ClipboardList className="h-4 w-4 text-teal-600" /> Thông tin hồ sơ
-                  </h2>
+                    <ClipboardList className="h-4 w-4 text-teal-600" />{translateText(" Thông tin hồ sơ")}</h2>
                   <dl className="space-y-3 text-sm">
                     <div>
-                      <dt className="text-xs text-slate-500">Học sinh</dt>
-                      <dd className="mt-1 font-medium">{child?.fullName || 'Chưa chọn học sinh'}</dd>
+                      <dt className="text-xs text-slate-500">{translateText("Học sinh")}</dt>
+                      <dd className="mt-1 font-medium">{child?.fullName || translateText('Chưa chọn học sinh')}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Lớp</dt>
-                      <dd className="mt-1">{child?.className || child?.class?.name || 'Chưa ghi nhận'}</dd>
+                      <dt className="text-xs text-slate-500">{translateText("Lớp")}</dt>
+                      <dd className="mt-1">{child?.className || child?.class?.name || translateText('Chưa ghi nhận')}</dd>
                     </div>
                     <div className="border-t border-slate-100 pt-3">
-                      <dt className="text-xs text-slate-500">Tài khoản cập nhật</dt>
-                      <dd className="mt-1 font-medium">{user?.fullName || 'Chưa có thông tin'}</dd>
+                      <dt className="text-xs text-slate-500">{translateText("Tài khoản cập nhật")}</dt>
+                      <dd className="mt-1 font-medium">{user?.fullName || translateText('Chưa có thông tin')}</dd>
                     </div>
                     {user?.phone && (
                       <div>
-                        <dt className="text-xs text-slate-500">Số điện thoại tài khoản</dt>
+                        <dt className="text-xs text-slate-500">{translateText("Số điện thoại tài khoản")}</dt>
                         <dd className="mt-1">{user.phone}</dd>
                       </div>
                     )}
@@ -674,14 +655,11 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 </section>
                 <section className="rounded-2xl border border-teal-100 bg-teal-50/70 p-5">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-teal-900">
-                    <Info className="h-4 w-4" /> Khi cập nhật hồ sơ
-                  </h2>
+                    <Info className="h-4 w-4" />{translateText(" Khi cập nhật hồ sơ")}</h2>
                   <ul className="mt-3 space-y-3 text-sm leading-6 text-teal-900/80">
-                    <li>Chọn đúng bé và thực phẩm cần tránh.</li>
-                    <li>
-                      Ghi lại triệu chứng thực tế và hướng dẫn của bác sĩ hoặc y tế trường nếu đã được cung cấp.
-                    </li>
-                    <li>Cập nhật khi thông tin thay đổi. Các khai báo ngưng áp dụng vẫn được giữ trong hồ sơ.</li>
+                    <li>{translateText("Chọn đúng bé và thực phẩm cần tránh.")}</li>
+                    <li>{translateText("Ghi lại triệu chứng thực tế và hướng dẫn của bác sĩ hoặc y tế trường nếu đã được cung cấp.")}</li>
+                    <li>{translateText("Cập nhật khi thông tin thay đổi. Các khai báo ngưng áp dụng vẫn được giữ trong hồ sơ.")}</li>
                   </ul>
                 </section>
               </aside>
@@ -695,33 +673,27 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                  <Utensils className="h-6 w-6 text-teal-600" />
-                  Quản lý Hồ sơ Dinh dưỡng của bé (STT 29)
-                </h1>
-                <p className="mt-1 text-sm text-slate-500">
-                  Cung cấp thông tin thói quen ăn uống, chế độ dinh dưỡng và mục tiêu phát triển để nhà trường và bếp
-                  chuẩn bị suất ăn phù hợp nhất cho bé.
-                </p>
+                  <Utensils className="h-6 w-6 text-teal-600" />{translateText("Quản lý Hồ sơ Dinh dưỡng của bé (STT 29)")}</h1>
+                <p className="mt-1 text-sm text-slate-500">{translateText("Cung cấp thông tin thói quen ăn uống, chế độ dinh dưỡng và mục tiêu phát triển để nhà trường và bếp chuẩn bị suất ăn phù hợp nhất cho bé.")}</p>
               </div>
             </div>
 
             {nutritionLoading ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-3">
                 <Loader2 className="w-8 h-8 text-teal-600 animate-spin mx-auto" />
-                <p className="text-sm font-medium text-slate-600">Đang tải hồ sơ dinh dưỡng của bé...</p>
+                <p className="text-sm font-medium text-slate-600">{translateText("Đang tải hồ sơ dinh dưỡng của bé...")}</p>
               </div>
             ) : !child ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-2">
                 <Baby className="w-10 h-10 text-slate-300 mx-auto" />
-                <p className="text-sm font-medium text-slate-600">Vui lòng chọn học sinh để cập nhật hồ sơ dinh dưỡng.</p>
+                <p className="text-sm font-medium text-slate-600">{translateText("Vui lòng chọn học sinh để cập nhật hồ sơ dinh dưỡng.")}</p>
               </div>
             ) : (
               <form onSubmit={handleSaveNutrition} className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
                   {/* Chế độ ăn */}
                   <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-2">
-                      Chế độ dinh dưỡng chính của bé <span className="text-rose-500">*</span>
+                    <label className="block text-sm font-bold text-slate-900 mb-2">{translateText("Chế độ dinh dưỡng chính của bé ")}<span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={nutritionProfile.dietaryRegime || 'TIÊU CHUẨN'}
@@ -730,20 +702,18 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                       }
                       className={inputClass}
                     >
-                      <option value="TIÊU CHUẨN">Chế độ tiêu chuẩn theo lứa tuổi mầm non</option>
-                      <option value="ĂN CHAY">Chế độ ăn thuần chay / Bán chay</option>
-                      <option value="THANH ĐẠM / ÍT GIA VỊ">Thanh đạm, hạn chế gia vị cay & mặn</option>
-                      <option value="HỖ TRỢ TĂNG CÂN">Nhu cầu năng lượng cao (hỗ trợ bé nhẹ cân)</option>
-                      <option value="KIỂM SOÁT CÂN NẶNG">Kiểm soát calo & chất béo (cho trẻ thừa cân/béo phì)</option>
-                      <option value="KHÁC">Chế độ dinh dưỡng đặc biệt khác</option>
+                      <option value="TIÊU CHUẨN">{translateText("Chế độ tiêu chuẩn theo lứa tuổi mầm non")}</option>
+                      <option value="ĂN CHAY">{translateText("Chế độ ăn thuần chay / Bán chay")}</option>
+                      <option value="THANH ĐẠM / ÍT GIA VỊ">{translateText("Thanh đạm, hạn chế gia vị cay & mặn")}</option>
+                      <option value="HỖ TRỢ TĂNG CÂN">{translateText("Nhu cầu năng lượng cao (hỗ trợ bé nhẹ cân)")}</option>
+                      <option value="KIỂM SOÁT CÂN NẶNG">{translateText("Kiểm soát calo & chất béo (cho trẻ thừa cân/béo phì)")}</option>
+                      <option value="KHÁC">{translateText("Chế độ dinh dưỡng đặc biệt khác")}</option>
                     </select>
                   </div>
 
                   {/* Năng lượng mục tiêu Kcal/ngày */}
                   <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-2">
-                      Nhu cầu năng lượng ước tính (Kcal / ngày)
-                    </label>
+                    <label className="block text-sm font-bold text-slate-900 mb-2">{translateText("Nhu cầu năng lượng ước tính (Kcal / ngày)")}</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="number"
@@ -759,60 +729,50 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                         }
                         className="w-40 rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-bold text-slate-900 focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
                       />
-                      <span className="text-sm text-slate-500 font-medium">Kcal / ngày (Khuyến nghị mầm non: 1,100 ~ 1,400 Kcal)</span>
+                      <span className="text-sm text-slate-500 font-medium">{translateText("Kcal / ngày (Khuyến nghị mầm non: 1,100 ~ 1,400 Kcal)")}</span>
                     </div>
                   </div>
 
                   {/* Thói quen ăn uống */}
                   <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-1.5">
-                      Thói quen & Hành vi ăn uống tại nhà (Eating Habits)
-                    </label>
-                    <p className="text-xs text-slate-500 mb-2">
-                      Ví dụ: Bé nhai chậm, thích ăn cơm mềm chan canh, kén ăn rau màu xanh đậm, cần cô động viên khi ăn cá...
-                    </p>
+                    <label className="block text-sm font-bold text-slate-900 mb-1.5">{translateText("Thói quen & Hành vi ăn uống tại nhà (Eating Habits)")}</label>
+                    <p className="text-xs text-slate-500 mb-2">{translateText("Ví dụ: Bé nhai chậm, thích ăn cơm mềm chan canh, kén ăn rau màu xanh đậm, cần cô động viên khi ăn cá...")}</p>
                     <textarea
                       rows={3}
                       value={nutritionProfile.eatingHabits || ''}
                       onChange={(e) =>
                         setNutritionProfile((prev) => ({ ...prev, eatingHabits: e.target.value }))
                       }
-                      placeholder="Ghi nhận cụ thể thói quen của bé để cô giáo mầm non hỗ trợ chăm sóc..."
+                      placeholder={translateText("Ghi nhận cụ thể thói quen của bé để cô giáo mầm non hỗ trợ chăm sóc...")}
                       className={inputClass}
                     />
                   </div>
 
                   {/* Mục tiêu dinh dưỡng */}
                   <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-1.5">
-                      Mục tiêu dinh dưỡng của gia đình (Nutrition Goals)
-                    </label>
-                    <p className="text-xs text-slate-500 mb-2">
-                      Ví dụ: Bổ sung thực phẩm giàu canxi & vitamin D tăng chiều cao; tập cho bé làm quen thêm đạm từ cá và đậu hũ...
-                    </p>
+                    <label className="block text-sm font-bold text-slate-900 mb-1.5">{translateText("Mục tiêu dinh dưỡng của gia đình (Nutrition Goals)")}</label>
+                    <p className="text-xs text-slate-500 mb-2">{translateText("Ví dụ: Bổ sung thực phẩm giàu canxi & vitamin D tăng chiều cao; tập cho bé làm quen thêm đạm từ cá và đậu hũ...")}</p>
                     <textarea
                       rows={2}
                       value={nutritionProfile.nutritionGoals || ''}
                       onChange={(e) =>
                         setNutritionProfile((prev) => ({ ...prev, nutritionGoals: e.target.value }))
                       }
-                      placeholder="Mục tiêu gia đình mong muốn đồng hành cùng nhà trường..."
+                      placeholder={translateText("Mục tiêu gia đình mong muốn đồng hành cùng nhà trường...")}
                       className={inputClass}
                     />
                   </div>
 
                   {/* Ghi chú đặc biệt cho trường & bếp */}
                   <div>
-                    <label className="block text-sm font-bold text-slate-900 mb-1.5">
-                      Ghi chú dặn dò cấp dưỡng & giáo viên phụ trách (Dietary Notes)
-                    </label>
+                    <label className="block text-sm font-bold text-slate-900 mb-1.5">{translateText("Ghi chú dặn dò cấp dưỡng & giáo viên phụ trách (Dietary Notes)")}</label>
                     <textarea
                       rows={2}
                       value={nutritionProfile.dietaryNotes || ''}
                       onChange={(e) =>
                         setNutritionProfile((prev) => ({ ...prev, dietaryNotes: e.target.value }))
                       }
-                      placeholder="Lưu ý khi chia phần ăn cho bé (cắt nhỏ thịt, không để thức ăn quá nóng...)"
+                      placeholder={translateText("Lưu ý khi chia phần ăn cho bé (cắt nhỏ thịt, không để thức ăn quá nóng...)")}
                       className={inputClass}
                     />
                   </div>
@@ -820,9 +780,9 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                   {/* Submit Action */}
                   <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
                     <div className="text-xs text-slate-400">
-                      {nutritionProfile.updatedAt
+                      {translateText(nutritionProfile.updatedAt
                         ? `Cập nhật lần cuối: ${dateLabel(nutritionProfile.updatedAt)}`
-                        : 'Hồ sơ dinh dưỡng sẵn sàng lưu'}
+                        : 'Hồ sơ dinh dưỡng sẵn sàng lưu')}
                     </div>
                     <button
                       type="submit"
@@ -834,7 +794,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                       ) : (
                         <Save className="h-4 w-4" />
                       )}
-                      {nutritionSaving ? 'Đang lưu…' : 'Lưu hồ sơ dinh dưỡng của bé'}
+                      {translateText(nutritionSaving ? 'Đang lưu…' : 'Lưu hồ sơ dinh dưỡng của bé')}
                     </button>
                   </div>
                 </div>
@@ -844,24 +804,19 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                   <div className="bg-gradient-to-br from-emerald-500 to-teal-700 text-white rounded-3xl p-6 space-y-3 shadow-md">
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-5 w-5 text-amber-300" />
-                      <h3 className="font-bold text-base">Lợi ích của Hồ sơ Dinh dưỡng</h3>
+                      <h3 className="font-bold text-base">{translateText("Lợi ích của Hồ sơ Dinh dưỡng")}</h3>
                     </div>
-                    <p className="text-xs text-emerald-100 leading-relaxed">
-                      Thông tin này được đồng bộ tức thời với <strong>Chuyên gia Dinh dưỡng</strong> và{' '}
-                      <strong>Giáo viên chủ nhiệm</strong> để lập kế hoạch khẩu phần cá nhân hóa và theo dõi phát hiện
-                      trẻ kén ăn (STT 71).
-                    </p>
+                    <p className="text-xs text-emerald-100 leading-relaxed">{translateText("Thông tin này được đồng bộ tức thời với ")}<strong>{translateText("Chuyên gia Dinh dưỡng")}</strong>{translateText(" và")}{' '}
+                      <strong>{translateText("Giáo viên chủ nhiệm")}</strong>{translateText(" để lập kế hoạch khẩu phần cá nhân hóa và theo dõi phát hiện trẻ kén ăn (STT 71).")}</p>
                   </div>
 
                   <div className="bg-white rounded-3xl border border-slate-200 p-5 space-y-3">
                     <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <Heart className="h-4 w-4 text-rose-500" />
-                      Khuyến nghị từ Bộ Y tế
-                    </h4>
+                      <Heart className="h-4 w-4 text-rose-500" />{translateText("Khuyến nghị từ Bộ Y tế")}</h4>
                     <ul className="text-xs text-slate-600 space-y-2 leading-relaxed">
-                      <li>• Trẻ mầm non 3-5 tuổi cần cân bằng 4 nhóm chất: Đạm, Tinh bột, Béo, Vitamin & Khoáng.</li>
-                      <li>• Uống tối thiểu 1.2 - 1.5 lít nước/ngày (bao gồm sữa và súp canh).</li>
-                      <li>• Hạn chế đường tinh luyện và đồ chiên rán nhiều dầu mỡ.</li>
+                      <li>{translateText("• Trẻ mầm non 3-5 tuổi cần cân bằng 4 nhóm chất: Đạm, Tinh bột, Béo, Vitamin & Khoáng.")}</li>
+                      <li>{translateText("• Uống tối thiểu 1.2 - 1.5 lít nước/ngày (bao gồm sữa và súp canh).")}</li>
+                      <li>{translateText("• Hạn chế đường tinh luyện và đồ chiên rán nhiều dầu mỡ.")}</li>
                     </ul>
                   </div>
                 </aside>
@@ -878,8 +833,8 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
           className="fixed bottom-20 left-1/2 z-40 flex w-[92vw] max-w-md -translate-x-1/2 items-center gap-3 rounded-xl border border-teal-200 bg-white px-4 py-3 text-sm text-teal-900 shadow-lg"
         >
           <CheckCircle2 className="h-5 w-5 shrink-0 text-teal-600" />
-          <span className="flex-1 font-medium">{toast}</span>
-          <button type="button" aria-label="Đóng thông báo" onClick={() => setToast('')}>
+          <span className="flex-1 font-medium">{translateText(toast)}</span>
+          <button type="button" aria-label={translateText("Đóng thông báo")} onClick={() => setToast('')}>
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -902,9 +857,9 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
         <form onSubmit={save} className="flex max-h-[90dvh] flex-col">
           <header className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-6 py-5">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-700">Hồ sơ dị ứng</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal-700">{translateText("Hồ sơ dị ứng")}</p>
               <h2 id="allergy-dialog-title" className="text-xl font-bold text-slate-900">
-                {editing ? 'Chỉnh sửa khai báo' : 'Thêm dị ứng / kiêng cữ'}
+                {translateText(editing ? 'Chỉnh sửa khai báo' : 'Thêm dị ứng / kiêng cữ')}
               </h2>
               <p className="mt-1 text-sm text-slate-500">
                 {child?.fullName}
@@ -913,7 +868,7 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
             </div>
             <button
               type="button"
-              aria-label="Đóng biểu mẫu"
+              aria-label={translateText("Đóng biểu mẫu")}
               disabled={submitting}
               onClick={closeForm}
               className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
@@ -928,12 +883,11 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 className="flex gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                {formError}
+                {translateText(formError)}
               </div>
             )}
             <div>
-              <label htmlFor="allergy-type" className="mb-2 block text-sm font-semibold">
-                Loại ghi nhận <span className="text-rose-500">*</span>
+              <label htmlFor="allergy-type" className="mb-2 block text-sm font-semibold">{translateText("Loại ghi nhận ")}<span className="text-rose-500">*</span>
               </label>
               <select
                 id="allergy-type"
@@ -944,19 +898,18 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
               >
                 {types.map((type) => (
                   <option key={type.value} value={type.value}>
-                    {type.label}
+                    {translateText(type.label)}
                   </option>
                 ))}
               </select>
             </div>
             <fieldset>
-              <legend className="mb-2 text-sm font-semibold">
-                Thực phẩm cần tránh <span className="text-rose-500">*</span>
+              <legend className="mb-2 text-sm font-semibold">{translateText("Thực phẩm cần tránh ")}<span className="text-rose-500">*</span>
               </legend>
               <div className="mb-3 inline-flex rounded-lg bg-slate-100 p-1">
                 {[
-                  { value: 'catalog', label: 'Chọn từ danh mục' },
-                  { value: 'custom', label: 'Nhập thực phẩm khác' },
+                  { value: 'catalog', label: translateText('Chọn từ danh mục') },
+                  { value: 'custom', label: translateText('Nhập thực phẩm khác') },
                 ].map((mode) => (
                   <button
                     key={mode.value}
@@ -967,42 +920,41 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                       form.mode === mode.value ? 'bg-white text-teal-800 shadow-sm' : 'text-slate-500'
                     }`}
                   >
-                    {mode.label}
+                    {translateText(mode.label)}
                   </button>
                 ))}
               </div>
               {form.mode === 'catalog' ? (
                 <select
-                  aria-label="Dị nguyên trong danh mục"
+                  aria-label={translateText("Dị nguyên trong danh mục")}
                   value={form.allergenId}
                   onChange={(event) => updateForm('allergenId', event.target.value)}
                   required
                   disabled={submitting}
                   className={inputClass}
                 >
-                  <option value="">Chọn thực phẩm / nhóm dị nguyên</option>
+                  <option value="">{translateText("Chọn thực phẩm / nhóm dị nguyên")}</option>
                   {catalogs.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {item.nameVi}
+                      {translateText(item.nameVi)}
                     </option>
                   ))}
                 </select>
               ) : (
                 <input
-                  aria-label="Tên thực phẩm khác"
+                  aria-label={translateText("Tên thực phẩm khác")}
                   value={form.customName}
                   onChange={(event) => updateForm('customName', event.target.value)}
                   required
                   maxLength={150}
                   disabled={submitting}
                   className={inputClass}
-                  placeholder="Nhập tên thực phẩm bé cần tránh"
+                  placeholder={translateText("Nhập tên thực phẩm bé cần tránh")}
                 />
               )}
             </fieldset>
             <fieldset>
-              <legend className="mb-2 text-sm font-semibold">
-                Mức độ ghi nhận <span className="text-rose-500">*</span>
+              <legend className="mb-2 text-sm font-semibold">{translateText("Mức độ ghi nhận ")}<span className="text-rose-500">*</span>
               </legend>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {severityOptions.map((option) => (
@@ -1024,14 +976,13 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                       disabled={submitting}
                       className="accent-teal-700"
                     />
-                    {option.label}
+                    {translateText(option.label)}
                   </label>
                 ))}
               </div>
             </fieldset>
             <div>
-              <label htmlFor="allergy-symptoms" className="mb-2 block text-sm font-semibold">
-                Triệu chứng đã ghi nhận <span className="font-normal text-slate-400">(không bắt buộc)</span>
+              <label htmlFor="allergy-symptoms" className="mb-2 block text-sm font-semibold">{translateText("Triệu chứng đã ghi nhận ")}<span className="font-normal text-slate-400">{translateText("(không bắt buộc)")}</span>
               </label>
               <textarea
                 id="allergy-symptoms"
@@ -1040,12 +991,11 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 onChange={(event) => updateForm('symptoms', event.target.value)}
                 disabled={submitting}
                 className={inputClass}
-                placeholder="Mô tả triệu chứng thực tế của bé"
+                placeholder={translateText("Mô tả triệu chứng thực tế của bé")}
               />
             </div>
             <div>
-              <label htmlFor="allergy-treatment" className="mb-2 block text-sm font-semibold">
-                Hướng dẫn từ bác sĩ / y tế trường <span className="font-normal text-slate-400">(nếu có)</span>
+              <label htmlFor="allergy-treatment" className="mb-2 block text-sm font-semibold">{translateText("Hướng dẫn từ bác sĩ / y tế trường ")}<span className="font-normal text-slate-400">{translateText("(nếu có)")}</span>
               </label>
               <textarea
                 id="allergy-treatment"
@@ -1054,14 +1004,12 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 onChange={(event) => updateForm('reactionTreatment', event.target.value)}
                 disabled={submitting}
                 className={inputClass}
-                placeholder="Nhập hướng dẫn đã được cung cấp cho bé"
+                placeholder={translateText("Nhập hướng dẫn đã được cung cấp cho bé")}
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="allergy-date" className="mb-2 block text-sm font-semibold">
-                  Ngày phát hiện / chẩn đoán
-                </label>
+                <label htmlFor="allergy-date" className="mb-2 block text-sm font-semibold">{translateText("Ngày phát hiện / chẩn đoán")}</label>
                 <input
                   id="allergy-date"
                   type="date"
@@ -1072,40 +1020,35 @@ export const ParentAllergyDeclarationPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label htmlFor="allergy-note" className="mb-2 block text-sm font-semibold">
-                  Ghi chú thêm
-                </label>
+                <label htmlFor="allergy-note" className="mb-2 block text-sm font-semibold">{translateText("Ghi chú thêm")}</label>
                 <input
                   id="allergy-note"
                   value={form.note}
                   onChange={(event) => updateForm('note', event.target.value)}
                   disabled={submitting}
                   className={inputClass}
-                  placeholder="Thông tin khác cần lưu ý"
+                  placeholder={translateText("Thông tin khác cần lưu ý")}
                 />
               </div>
             </div>
           </div>
           <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
             <p className="hidden text-xs text-slate-400 sm:block">
-              <span className="text-rose-500">*</span> Thông tin bắt buộc
-            </p>
+              <span className="text-rose-500">*</span>{translateText(" Thông tin bắt buộc")}</p>
             <div className="ml-auto flex gap-2">
               <button
                 type="button"
                 disabled={submitting}
                 onClick={closeForm}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-              >
-                Hủy
-              </button>
+              >{translateText("Hủy")}</button>
               <button
                 type="submit"
                 disabled={submitting}
                 className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                {submitting ? 'Đang lưu…' : editing ? 'Lưu thay đổi' : 'Lưu khai báo'}
+                {translateText(submitting ? 'Đang lưu…' : editing ? 'Lưu thay đổi' : 'Lưu khai báo')}
               </button>
             </div>
           </footer>

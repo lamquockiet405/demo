@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import { apiClient } from '../../../core/api/axios';
 import { schoolDate } from '../../menus/utils/published-menus';
@@ -23,6 +25,7 @@ const stateLabels: Record<string, string> = {
 const get = async (path: string, params?: any) => (await apiClient.get('/teacher/' + path, { params })).data;
 
 export function TeacherNotesPage() {
+  useLanguage();
   const classes = useSchoolResource<any[]>(() => get('classes'), []);
   const [classId, setClassId] = useState('');
   const [date, setDate] = useState(schoolDate);
@@ -126,8 +129,8 @@ export function TeacherNotesPage() {
 
   return (
     <SchoolPage
-      title="Ghi chú sau bữa ăn của bé"
-      description="Ghi nhận tình trạng ăn uống, biểu hiện và nhận xét chi tiết của từng bé sau mỗi bữa ăn (Phụ sáng, Bữa trưa, Ăn xế chiều) cho lớp phụ trách."
+      title={translateText("Ghi chú sau bữa ăn của bé")}
+      description={translateText("Ghi nhận tình trạng ăn uống, biểu hiện và nhận xét chi tiết của từng bé sau mỗi bữa ăn (Phụ sáng, Bữa trưa, Ăn xế chiều) cho lớp phụ trách.")}
       actions={
         <div className="flex gap-2">
           <button
@@ -136,18 +139,14 @@ export function TeacherNotesPage() {
               void mealAttendanceRes.reload();
               void kitchenNotesRes.reload();
             }}
-          >
-            Làm mới
-          </button>
+          >{translateText("Làm mới")}</button>
           {activeTab === 'CHILDREN_NOTES' && (
             <button
               className="kp-button primary"
               disabled={action.busy || studentRows.length === 0}
               onClick={saveAllStudentNotes}
             >
-              <Save size={16} className="inline mr-1" />
-              Lưu tất cả ghi chú
-            </button>
+              <Save size={16} className="inline mr-1" />{translateText("Lưu tất cả ghi chú")}</button>
           )}
           {activeTab === 'KITCHEN_NOTES' && (
             <button
@@ -162,9 +161,7 @@ export function TeacherNotesPage() {
                 })
               }
             >
-              <ChefHat size={16} className="inline mr-1" />
-              Tạo ghi chú gửi bếp
-            </button>
+              <ChefHat size={16} className="inline mr-1" />{translateText("Tạo ghi chú gửi bếp")}</button>
           )}
         </div>
       }
@@ -176,20 +173,20 @@ export function TeacherNotesPage() {
 
       {/* Bộ lọc Ngày, Lớp, Bữa ăn, Tìm kiếm */}
       <div className="kp-filters">
-        <Field label="Ngày bữa ăn">
+        <Field label={translateText("Ngày bữa ăn")}>
           <input
-            aria-label="Ngày ghi chú sau bữa"
+            aria-label={translateText("Ngày ghi chú sau bữa")}
             type="date"
             value={date}
             onChange={(e) => e.target.value && setDate(e.target.value)}
           />
         </Field>
         <select
-          aria-label="Lớp phụ trách"
+          aria-label={translateText("Lớp phụ trách")}
           value={classId}
           onChange={(e) => setClassId(e.target.value)}
         >
-          <option value="">Tất cả lớp được phân công</option>
+          <option value="">{translateText("Tất cả lớp được phân công")}</option>
           {(classes.data || []).map((c: any) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -197,19 +194,19 @@ export function TeacherNotesPage() {
           ))}
         </select>
         <select
-          aria-label="Bữa ăn"
+          aria-label={translateText("Bữa ăn")}
           value={meal}
           onChange={(e) => setMeal(e.target.value)}
         >
           {Object.entries(mealLabels).map(([code, label]) => (
             <option key={code} value={code}>
-              {label}
+              {translateText(label)}
             </option>
           ))}
         </select>
         <input
-          aria-label="Tìm kiếm học sinh"
-          placeholder="Tìm tên hoặc mã học sinh..."
+          aria-label={translateText("Tìm kiếm học sinh")}
+          placeholder={translateText("Tìm tên hoặc mã học sinh...")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -225,9 +222,7 @@ export function TeacherNotesPage() {
           }`}
           onClick={() => setActiveTab('CHILDREN_NOTES')}
         >
-          <Utensils size={16} />
-          Ghi chú sau bữa ăn từng bé ({studentRows.length} học sinh)
-        </button>
+          <Utensils size={16} />{translateText("Ghi chú sau bữa ăn từng bé (")}{studentRows.length}{translateText(" học sinh)")}</button>
         <button
           className={`pb-3 font-bold text-sm border-b-2 flex items-center gap-2 transition-colors ${
             activeTab === 'KITCHEN_NOTES'
@@ -236,8 +231,7 @@ export function TeacherNotesPage() {
           }`}
           onClick={() => setActiveTab('KITCHEN_NOTES')}
         >
-          <MessageSquare size={16} />
-          Ghi chú phối hợp với nhà bếp ({kitchenNotes.length})
+          <MessageSquare size={16} />{translateText("Ghi chú phối hợp với nhà bếp (")}{kitchenNotes.length})
         </button>
       </div>
 
@@ -250,12 +244,12 @@ export function TeacherNotesPage() {
               <table className="kp-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '22%' }}>Học sinh</th>
-                    <th style={{ width: '13%' }}>Lớp</th>
-                    <th style={{ width: '10%' }}>Điểm danh</th>
-                    <th style={{ width: '20%' }}>Mức ăn sau bữa</th>
-                    <th style={{ width: '25%' }}>Ghi chú sau bữa ăn của bé</th>
-                    <th style={{ width: '10%' }}>Thao tác</th>
+                    <th style={{ width: '22%' }}>{translateText("Học sinh")}</th>
+                    <th style={{ width: '13%' }}>{translateText("Lớp")}</th>
+                    <th style={{ width: '10%' }}>{translateText("Điểm danh")}</th>
+                    <th style={{ width: '20%' }}>{translateText("Mức ăn sau bữa")}</th>
+                    <th style={{ width: '25%' }}>{translateText("Ghi chú sau bữa ăn của bé")}</th>
+                    <th style={{ width: '10%' }}>{translateText("Thao tác")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -284,13 +278,13 @@ export function TeacherNotesPage() {
                               })
                             }
                           >
-                            {currentVal.isAttended ? 'Có mặt' : 'Vắng mặt'}
+                            {translateText(currentVal.isAttended ? 'Có mặt' : 'Vắng mặt')}
                           </button>
                         </td>
                         <td>
                           {currentVal.isAttended ? (
                             <select
-                              aria-label={`Mức ăn của ${row.fullName}`}
+                              aria-label={translateText(`Mức ăn của ${row.fullName}`)}
                               className="kp-input text-xs w-full py-1.5"
                               value={currentVal.consumptionLevel}
                               onChange={(e) =>
@@ -301,20 +295,20 @@ export function TeacherNotesPage() {
                             >
                               {Object.entries(stateLabels).map(([code, label]) => (
                                 <option key={code} value={code}>
-                                  {label}
+                                  {translateText(label)}
                                 </option>
                               ))}
                             </select>
                           ) : (
-                            <span className="text-xs text-slate-400 italic">Không ăn (Trẻ vắng)</span>
+                            <span className="text-xs text-slate-400 italic">{translateText("Không ăn (Trẻ vắng)")}</span>
                           )}
                         </td>
                         <td>
                           {currentVal.isAttended ? (
                             <input
-                              aria-label={`Ghi chú sau bữa cho ${row.fullName}`}
+                              aria-label={translateText(`Ghi chú sau bữa cho ${row.fullName}`)}
                               className="kp-input text-xs w-full py-1.5"
-                              placeholder="VD: Bé tự xúc hết suất; Bé bỏ rau; Bé trớ canh..."
+                              placeholder={translateText("VD: Bé tự xúc hết suất; Bé bỏ rau; Bé trớ canh...")}
                               value={currentVal.note}
                               onChange={(e) =>
                                 updateStudentDraft(row.studentId, {
@@ -324,9 +318,9 @@ export function TeacherNotesPage() {
                             />
                           ) : (
                             <input
-                              aria-label={`Lý do vắng cho ${row.fullName}`}
+                              aria-label={translateText(`Lý do vắng cho ${row.fullName}`)}
                               className="kp-input text-xs w-full py-1.5"
-                              placeholder="Lý do vắng mặt..."
+                              placeholder={translateText("Lý do vắng mặt...")}
                               value={currentVal.note}
                               onChange={(e) =>
                                 updateStudentDraft(row.studentId, {
@@ -344,9 +338,7 @@ export function TeacherNotesPage() {
                             }`}
                             disabled={action.busy}
                             onClick={() => saveSingleStudentNote(row)}
-                          >
-                            Lưu
-                          </button>
+                          >{translateText("Lưu")}</button>
                         </td>
                       </tr>
                     );
@@ -367,10 +359,10 @@ export function TeacherNotesPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-xs text-slate-500 font-medium">
-                    {n.className} · Ngày: {n.meal_date} · Bữa: {mealLabels[n.meal_session] || n.meal_session} · Trạng thái:{' '}
-                    <span className="font-bold text-emerald-700">{n.status}</span>
+                    {n.className}{translateText(" · Ngày: ")}{translateText(n.meal_date)}{translateText(" · Bữa: ")}{translateText(mealLabels[n.meal_session] || n.meal_session)}{translateText(" · Trạng thái:")}{' '}
+                    <span className="font-bold text-emerald-700">{translateText(n.status)}</span>
                   </p>
-                  <h3 className="font-bold text-base mt-1 text-slate-900">{n.title}</h3>
+                  <h3 className="font-bold text-base mt-1 text-slate-900">{translateText(n.title)}</h3>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -388,23 +380,19 @@ export function TeacherNotesPage() {
                         content: n.content,
                       })
                     }
-                  >
-                    Sửa
-                  </button>
+                  >{translateText("Sửa")}</button>
                   <button
                     className="kp-button text-xs"
                     disabled={action.busy}
                     onClick={() => {
-                      if (window.confirm('Xóa ghi chú phối hợp này?')) {
+                      if (window.confirm(translateText('Xóa ghi chú phối hợp này?'))) {
                         void action.run(async () => {
                           await apiClient.delete('/teacher/notes/' + n.id);
                           await kitchenNotesRes.reload();
                         }, 'Đã xóa ghi chú phối hợp.');
                       }
                     }}
-                  >
-                    Xóa
-                  </button>
+                  >{translateText("Xóa")}</button>
                 </div>
               </div>
               <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
@@ -412,10 +400,10 @@ export function TeacherNotesPage() {
               </p>
               {n.kitchen_response ? (
                 <div className="text-sm bg-emerald-50 border border-emerald-200 text-emerald-900 p-3 rounded-lg">
-                  <strong>Phản hồi từ nhà bếp:</strong> {n.kitchen_response}
+                  <strong>{translateText("Phản hồi từ nhà bếp:")}</strong> {translateText(n.kitchen_response)}
                 </div>
               ) : (
-                <p className="text-xs text-amber-700 italic">Nhà bếp chưa phản hồi.</p>
+                <p className="text-xs text-amber-700 italic">{translateText("Nhà bếp chưa phản hồi.")}</p>
               )}
             </article>
           ))}
@@ -425,19 +413,19 @@ export function TeacherNotesPage() {
       {/* Modal tạo / sửa ghi chú gửi bếp */}
       {kitchenForm && (
         <Modal
-          title={kitchenForm.id ? 'Sửa ghi chú gửi nhà bếp' : 'Tạo ghi chú phối hợp gửi nhà bếp'}
+          title={translateText(kitchenForm.id ? 'Sửa ghi chú gửi nhà bếp' : 'Tạo ghi chú phối hợp gửi nhà bếp')}
           onClose={() => !action.busy && setKitchenForm(null)}
         >
           <form onSubmit={saveKitchenNote} className="space-y-4">
-            <Field label="Lớp phụ trách">
+            <Field label={translateText("Lớp phụ trách")}>
               <select
-                aria-label="Lớp ghi chú"
+                aria-label={translateText("Lớp ghi chú")}
                 required
                 disabled={!!kitchenForm.id}
                 value={kitchenForm.classId}
                 onChange={(e) => setKitchenForm({ ...kitchenForm, classId: e.target.value })}
               >
-                <option value="">Chọn lớp</option>
+                <option value="">{translateText("Chọn lớp")}</option>
                 {(classes.data || []).map((c: any) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -445,9 +433,9 @@ export function TeacherNotesPage() {
                 ))}
               </select>
             </Field>
-            <Field label="Ngày bữa ăn">
+            <Field label={translateText("Ngày bữa ăn")}>
               <input
-                aria-label="Ngày ghi chú"
+                aria-label={translateText("Ngày ghi chú")}
                 required
                 disabled={!!kitchenForm.id}
                 type="date"
@@ -455,41 +443,41 @@ export function TeacherNotesPage() {
                 onChange={(e) => setKitchenForm({ ...kitchenForm, mealDate: e.target.value })}
               />
             </Field>
-            <Field label="Bữa ăn">
+            <Field label={translateText("Bữa ăn")}>
               <select
-                aria-label="Bữa ghi chú"
+                aria-label={translateText("Bữa ghi chú")}
                 value={kitchenForm.mealSession}
                 onChange={(e) => setKitchenForm({ ...kitchenForm, mealSession: e.target.value })}
               >
                 {Object.entries(mealLabels).map(([code, label]) => (
                   <option key={code} value={code}>
-                    {label}
+                    {translateText(label)}
                   </option>
                 ))}
               </select>
             </Field>
-            <Field label="Tiêu đề trao đổi">
+            <Field label={translateText("Tiêu đề trao đổi")}>
               <input
-                aria-label="Tiêu đề ghi chú"
+                aria-label={translateText("Tiêu đề ghi chú")}
                 required
-                placeholder="VD: Cơm hôm nay hơi khô; Bổ sung thêm rau cho bé;..."
+                placeholder={translateText("VD: Cơm hôm nay hơi khô; Bổ sung thêm rau cho bé;...")}
                 value={kitchenForm.title}
                 onChange={(e) => setKitchenForm({ ...kitchenForm, title: e.target.value })}
               />
             </Field>
-            <Field label="Nội dung chi tiết">
+            <Field label={translateText("Nội dung chi tiết")}>
               <textarea
-                aria-label="Nội dung ghi chú"
+                aria-label={translateText("Nội dung ghi chú")}
                 required
                 rows={4}
-                placeholder="Nhập nội dung cô muốn trao đổi hoặc phản hồi trực tiếp với bếp..."
+                placeholder={translateText("Nhập nội dung cô muốn trao đổi hoặc phản hồi trực tiếp với bếp...")}
                 value={kitchenForm.content}
                 onChange={(e) => setKitchenForm({ ...kitchenForm, content: e.target.value })}
               />
             </Field>
             <Feedback error={action.error} />
             <button className="kp-button primary w-full" disabled={action.busy}>
-              {kitchenForm.id ? 'Cập nhật ghi chú' : 'Gửi ghi chú đến nhà bếp'}
+              {translateText(kitchenForm.id ? 'Cập nhật ghi chú' : 'Gửi ghi chú đến nhà bếp')}
             </button>
           </form>
         </Modal>

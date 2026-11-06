@@ -1,5 +1,7 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
-import { Download, Eye, Plus } from "lucide-react";
+import { Download, Eye, Plus, Camera, Image as ImageIcon, X } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
 import { useAuthStore } from "../../../core/stores/auth.store";
 import { getSchoolDate, normalizeSearch } from "../utils/kds-data";
@@ -10,6 +12,7 @@ import {
   getSampleState,
   sampleDueAt,
   rowsOf,
+  prepareProofImage,
 } from "../utils/kitchen-operations";
 import {
   Modal,
@@ -32,6 +35,7 @@ export function KitchenSamplesPage({
 }: {
   audience?: "kitchen" | "principal" | "nutritionist";
 }) {
+  useLanguage();
   const { user } = useAuthStore();
   const canDispose = (user?.roles || []).some((role) =>
     [
@@ -56,6 +60,8 @@ export function KitchenSamplesPage({
   const [create, setCreate] = useState(false);
   const [detail, setDetail] = useState<any>(null);
   const [dispose, setDispose] = useState<any>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState("");
   const [form, setForm] = useState({
     dishName: "",
     date: getSchoolDate(),
@@ -64,6 +70,7 @@ export function KitchenSamplesPage({
     storageTemp: "",
     fridgeUnit: "",
     note: "",
+    imageUrl: "",
   });
   const action = useKitchenAction();
   const now = resource.data?.loadedAt ?? Date.now();
@@ -95,6 +102,7 @@ export function KitchenSamplesPage({
         sampleWeightG: Number(form.sampleWeightG),
         storageTemp: Number(form.storageTemp),
         collectorName: user?.fullName || "Nhân viên bếp",
+        imageUrl: form.imageUrl || undefined,
       });
       setCreate(false);
       await resource.reload();
@@ -120,14 +128,14 @@ export function KitchenSamplesPage({
     <>
       <PageTitle
         eyebrow={
-          audience === "principal"
+          translateText(audience === "principal"
             ? "BAN GIÁM HIỆU"
             : audience === "nutritionist"
               ? "CHUYÊN GIA DINH DƯỠNG"
-              : undefined
+              : undefined)
         }
-        title="Lưu mẫu thực phẩm 24 giờ"
-        description="Quản lý mẫu niêm phong, tra cứu thời gian lưu và xác nhận hủy khi đủ 24 giờ. Thời hạn được kiểm tra khi tải dữ liệu."
+        title={translateText("Lưu mẫu thực phẩm 24 giờ")}
+        description={translateText("Quản lý mẫu niêm phong, tra cứu thời gian lưu và xác nhận hủy khi đủ 24 giờ. Thời hạn được kiểm tra khi tải dữ liệu.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button
@@ -162,19 +170,15 @@ export function KitchenSamplesPage({
             ])
           }
         >
-          <Download size={15} />
-          Xuất báo cáo an toàn
-        </button>
+          <Download size={15} />{translateText("Xuất báo cáo an toàn")}</button>
         <button className="kp-button primary" onClick={() => setCreate(true)}>
-          <Plus size={16} />
-          Niêm phong mẫu
-        </button>
+          <Plus size={16} />{translateText("Niêm phong mẫu")}</button>
       </PageTitle>
       <Notice error={action.error} message={action.message} />
       {due.length > 0 && (
         <div className="kp-notice error" role="status">
           <span>
-            <b>{due.length} mẫu đã đủ 24 giờ, cần kiểm tra trước khi hủy.</b>{" "}
+            <b>{due.length}{translateText(" mẫu đã đủ 24 giờ, cần kiểm tra trước khi hủy.")}</b>{" "}
             <button
               className="underline"
               onClick={() => {
@@ -182,38 +186,34 @@ export function KitchenSamplesPage({
                 setDate("");
                 setSearch("");
               }}
-            >
-              Xem mẫu chờ hủy
-            </button>
+            >{translateText("Xem mẫu chờ hủy")}</button>
           </span>
         </div>
       )}
       <div className="kp-filters">
         <input
           type="search"
-          aria-label="Tìm mẫu lưu"
-          placeholder="Tìm mã mẫu, món, người lấy…"
+          aria-label={translateText("Tìm mẫu lưu")}
+          placeholder={translateText("Tìm mã mẫu, món, người lấy…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <label>
-          Ngày lấy mẫu
-          <input
+        <label>{translateText("Ngày lấy mẫu")}<input
             type="date"
-            aria-label="Ngày mẫu lưu"
+            aria-label={translateText("Ngày mẫu lưu")}
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </label>
         <select
-          aria-label="Trạng thái mẫu lưu"
+          aria-label={translateText("Trạng thái mẫu lưu")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
           {Object.entries(labels).map(([id, label]) => (
             <option key={id} value={id}>
-              {label}
+              {translateText(label)}
             </option>
           ))}
         </select>
@@ -224,21 +224,19 @@ export function KitchenSamplesPage({
             setDate("");
             setStatus("");
           }}
-        >
-          Xóa bộ lọc
-        </button>
+        >{translateText("Xóa bộ lọc")}</button>
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       <div className="kp-table-wrap">
         <table className="kp-table">
           <thead>
             <tr>
-              <th>Mẫu / món</th>
-              <th>Khối lượng / nhiệt độ</th>
-              <th>Thời điểm lưu</th>
-              <th>Đủ 24 giờ</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
+              <th>{translateText("Mẫu / món")}</th>
+              <th>{translateText("Khối lượng / nhiệt độ")}</th>
+              <th>{translateText("Thời điểm lưu")}</th>
+              <th>{translateText("Đủ 24 giờ")}</th>
+              <th>{translateText("Trạng thái")}</th>
+              <th>{translateText("Thao tác")}</th>
             </tr>
           </thead>
           <tbody>
@@ -247,29 +245,46 @@ export function KitchenSamplesPage({
               return (
                 <tr key={r.id}>
                   <td>
-                    <strong>{r.sampleCode || r.code}</strong>
-                    <small>{r.dishName}</small>
+                    <div className="flex items-center gap-3">
+                      {r.imageUrl ? (
+                        <img
+                          src={r.imageUrl}
+                          alt={r.dishName}
+                          className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0 cursor-pointer shadow-sm hover:scale-105 transition"
+                          onClick={() => setDetail(r)}
+                        />
+                      ) : (
+                        <div
+                          className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 cursor-pointer"
+                          onClick={() => setDetail(r)}
+                        >
+                          <ImageIcon size={18} />
+                        </div>
+                      )}
+                      <div>
+                        <strong>{r.sampleCode || r.code}</strong>
+                        <small>{r.dishName}</small>
+                      </div>
+                    </div>
                   </td>
                   <td>
-                    {formatNumber(r.sampleWeight)} g
-                    <small>
-                      {formatNumber(r.storageTemp ?? r.temperatureC)} °C
-                    </small>
+                    {translateText(formatNumber(r.sampleWeight))}{translateText(" g")}<small>
+                      {translateText(formatNumber(r.storageTemp ?? r.temperatureC))}{translateText(" °C")}</small>
                   </td>
                   <td>
-                    {formatDateTime(r.storedAt)}
+                    {translateText(formatDateTime(r.storedAt))}
                     <small>{r.collectorName}</small>
                   </td>
                   <td>
-                    {r.storedAt && Number.isFinite(Date.parse(r.storedAt))
+                    {translateText(r.storedAt && Number.isFinite(Date.parse(r.storedAt))
                       ? formatDateTime(sampleDueAt(r.storedAt))
-                      : "—"}
+                      : "—")}
                   </td>
                   <td>
                     <span
                       className={`kp-tag ${state === "DUE" ? "red" : state === "DISPOSED" ? "gray" : ""}`}
                     >
-                      {labels[state]}
+                      {translateText(labels[state])}
                     </span>
                   </td>
                   <td>
@@ -277,7 +292,7 @@ export function KitchenSamplesPage({
                       <button
                         className="kp-button"
                         disabled={action.busy}
-                        aria-label={`Chi tiết mẫu ${r.sampleCode || r.code}`}
+                        aria-label={translateText(`Chi tiết mẫu ${r.sampleCode || r.code}`)}
                         onClick={() =>
                           void action.run(
                             async () =>
@@ -292,17 +307,13 @@ export function KitchenSamplesPage({
                           )
                         }
                       >
-                        <Eye size={14} />
-                        Chi tiết
-                      </button>
+                        <Eye size={14} />{translateText("Chi tiết")}</button>
                       {canDispose && (
                         <button
                           className="kp-button danger"
                           disabled={state !== "DUE" || action.busy}
                           onClick={() => setDispose(r)}
-                        >
-                          Hủy mẫu
-                        </button>
+                        >{translateText("Hủy mẫu")}</button>
                       )}
                     </div>
                   </td>
@@ -314,16 +325,14 @@ export function KitchenSamplesPage({
       </div>
       {create && (
         <Modal
-          title="Niêm phong mẫu lưu"
+          title={translateText("Niêm phong mẫu lưu")}
           busy={action.busy}
           onClose={() => setCreate(false)}
         >
           <Notice error={action.error} />
           <form onSubmit={save}>
             <div className="kp-form-grid">
-              <label className="kp-field full">
-                Tên món
-                <input
+              <label className="kp-field full">{translateText("Tên món")}<input
                   className="kp-input"
                   required
                   maxLength={200}
@@ -333,9 +342,7 @@ export function KitchenSamplesPage({
                   }
                 />
               </label>
-              <label className="kp-field">
-                Ngày lấy mẫu
-                <input
+              <label className="kp-field">{translateText("Ngày lấy mẫu")}<input
                   className="kp-input"
                   required
                   type="date"
@@ -343,9 +350,7 @@ export function KitchenSamplesPage({
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
                 />
               </label>
-              <label className="kp-field">
-                Mã mẫu (để trống để tạo tự động)
-                <input
+              <label className="kp-field">{translateText("Mã mẫu (để trống để tạo tự động)")}<input
                   className="kp-input"
                   maxLength={80}
                   value={form.sampleCode}
@@ -354,9 +359,7 @@ export function KitchenSamplesPage({
                   }
                 />
               </label>
-              <label className="kp-field">
-                Khối lượng mẫu (g)
-                <input
+              <label className="kp-field">{translateText("Khối lượng mẫu (g)")}<input
                   className="kp-input"
                   type="number"
                   required
@@ -368,9 +371,7 @@ export function KitchenSamplesPage({
                   }
                 />
               </label>
-              <label className="kp-field">
-                Nhiệt độ tủ lưu (°C)
-                <input
+              <label className="kp-field">{translateText("Nhiệt độ tủ lưu (°C)")}<input
                   className="kp-input"
                   type="number"
                   required
@@ -381,9 +382,7 @@ export function KitchenSamplesPage({
                   }
                 />
               </label>
-              <label className="kp-field full">
-                Vị trí / tủ lưu
-                <input
+              <label className="kp-field full">{translateText("Vị trí / tủ lưu")}<input
                   className="kp-input"
                   required
                   value={form.fridgeUnit}
@@ -392,44 +391,141 @@ export function KitchenSamplesPage({
                   }
                 />
               </label>
-              <label className="kp-field full">
-                Ghi chú
-                <textarea
+              <label className="kp-field full">{translateText("Ghi chú")}<textarea
                   className="kp-input"
                   maxLength={1000}
                   value={form.note}
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
                 />
               </label>
+              <label className="kp-field full">
+                <span><Camera size={13} className="inline mr-1" />{translateText("Ảnh chụp mẫu lưu & tem niêm phong")}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const photo = await prepareProofImage(file);
+                      setForm({ ...form, imageUrl: photo });
+                    } catch (err: any) {
+                      action.run(async () => {
+                        throw err;
+                      });
+                    }
+                  }}
+                />
+                {form.imageUrl && (
+                  <div className="mt-2 relative w-32 h-20 rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                    <img
+                      src={form.imageUrl}
+                      alt="Sample Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-0.5 hover:bg-rose-700"
+                      onClick={() => setForm({ ...form, imageUrl: "" })}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+              </label>
             </div>
             <div className="kp-form-actions">
-              <button className="kp-button primary" disabled={action.busy}>
-                Lưu mẫu niêm phong
-              </button>
+              <button className="kp-button primary" disabled={action.busy}>{translateText("Lưu mẫu niêm phong")}</button>
             </div>
           </form>
         </Modal>
       )}
       {detail && (
-        <Modal title="Chi tiết mẫu lưu" onClose={() => setDetail(null)}>
+        <Modal title={translateText("Chi tiết mẫu lưu")} onClose={() => setDetail(null)}>
+          {photoError && <Notice error={photoError} />}
+          <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
+            <div className="relative group aspect-video sm:aspect-[21/9] max-h-60 w-full bg-slate-900 flex items-center justify-center overflow-hidden">
+              {detail.imageUrl ? (
+                <img
+                  src={detail.imageUrl}
+                  alt={detail.dishName}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-slate-400 gap-2 p-6">
+                  <ImageIcon size={40} />
+                  <span className="text-xs">{translateText("Chưa có ảnh mẫu lưu")}</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent flex flex-col justify-end p-3 text-white pointer-events-none">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-600/90 text-white backdrop-blur">
+                    {translateText("Tem niêm phong đạt chuẩn BYT")}
+                  </span>
+                  <span className="text-[11px] text-white/90">
+                    {formatDateTime(detail.storedAt)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 bg-white flex flex-wrap items-center justify-between gap-2 border-t border-slate-100">
+              <span className="text-xs font-medium text-slate-600">
+                {translateText("Ảnh minh chứng lưu mẫu thực phẩm 24h")}
+              </span>
+              <label className="kp-button text-xs py-1 px-3 cursor-pointer flex items-center gap-1.5 hover:bg-slate-100 font-medium">
+                <Camera size={14} className="text-emerald-600" />
+                <span>
+                  {translateText(
+                    uploadingPhoto ? "Đang xử lý ảnh…" : "Cập nhật ảnh mẫu"
+                  )}
+                </span>
+                <input
+                  type="file"
+                  className="hidden"
+                  disabled={uploadingPhoto}
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    e.target.value = "";
+                    setPhotoError("");
+                    setUploadingPhoto(true);
+                    try {
+                      const photo = await prepareProofImage(file);
+                      await apiClient.patch(
+                        `/inspections/samples/${detail.id}/photo`,
+                        { imageUrl: photo }
+                      );
+                      setDetail({ ...detail, imageUrl: photo });
+                      await resource.reload();
+                    } catch (err: any) {
+                      setPhotoError(err?.message || "Lỗi khi xử lý ảnh mẫu.");
+                    } finally {
+                      setUploadingPhoto(false);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
           <dl className="kp-detail-list">
             {[
-              ["Mã mẫu", detail.sampleCode || detail.code],
-              ["Món", detail.dishName],
-              ["Người lấy", detail.collectorName],
-              ["Vị trí", detail.storageLocation || detail.fridgeUnit],
-              ["Lưu lúc", formatDateTime(detail.storedAt)],
-              ["Trạng thái", labels[getSampleState(detail)]],
-              ["Khối lượng", `${formatNumber(detail.sampleWeight)} g`],
+              [translateText("Mã mẫu"), detail.sampleCode || detail.code],
+              [translateText("Món"), detail.dishName],
+              [translateText("Người lấy"), detail.collectorName],
+              [translateText("Vị trí"), detail.storageLocation || detail.fridgeUnit],
+              [translateText("Lưu lúc"), formatDateTime(detail.storedAt)],
+              [translateText("Trạng thái"), labels[getSampleState(detail)]],
+              [translateText("Khối lượng"), `${formatNumber(detail.sampleWeight)} g`],
               [
-                "Nhiệt độ",
+                translateText("Nhiệt độ"),
                 `${formatNumber(detail.storageTemp ?? detail.temperatureC)} °C`,
               ],
-              ["Ghi chú", detail.note],
+              [translateText("Ghi chú"), detail.note],
             ].map(([label, value]) => (
               <div key={label}>
-                <dt>{label}</dt>
-                <dd>{value || "—"}</dd>
+                <dt>{translateText(label)}</dt>
+                <dd>{translateText(value || "—")}</dd>
               </div>
             ))}
           </dl>
@@ -437,33 +533,26 @@ export function KitchenSamplesPage({
       )}
       {dispose && (
         <Modal
-          title="Xác nhận hủy mẫu lưu"
+          title={translateText("Xác nhận hủy mẫu lưu")}
           busy={action.busy}
           onClose={() => setDispose(null)}
         >
           <Notice error={action.error} />
-          <p className="text-sm leading-7">
-            Xác nhận đã kiểm tra và thực hiện hủy mẫu{" "}
+          <p className="text-sm leading-7">{translateText("Xác nhận đã kiểm tra và thực hiện hủy mẫu")}{" "}
             <b>
               {dispose.sampleCode || dispose.code} · {dispose.dishName}
-            </b>
-            ? Thao tác ghi nhận mẫu đã hủy.
-          </p>
+            </b>{translateText("? Thao tác ghi nhận mẫu đã hủy.")}</p>
           <div className="kp-form-actions">
             <button
               className="kp-button"
               disabled={action.busy}
               onClick={() => setDispose(null)}
-            >
-              Quay lại
-            </button>
+            >{translateText("Quay lại")}</button>
             <button
               className="kp-button danger"
               disabled={action.busy}
               onClick={() => void destroy()}
-            >
-              Xác nhận đã hủy
-            </button>
+            >{translateText("Xác nhận đã hủy")}</button>
           </div>
         </Modal>
       )}

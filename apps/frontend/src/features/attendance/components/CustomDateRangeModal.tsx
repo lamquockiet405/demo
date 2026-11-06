@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import { X, Calendar, CalendarRange, Check, RotateCcw } from 'lucide-react';
 
@@ -16,6 +18,7 @@ export const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
   currentEndDate,
   onApply,
 }) => {
+  useLanguage();
   const [startDate, setStartDate] = useState(currentStartDate);
   const [endDate, setEndDate] = useState(currentEndDate);
 
@@ -79,12 +82,8 @@ export const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
               <CalendarRange className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-black text-slate-900">
-                Tùy Chọn Khoảng Thời Gian Lịch Sử
-              </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Chọn khoảng ngày bắt đầu và kết thúc để lọc hồ sơ
-              </p>
+              <h3 className="text-base font-black text-slate-900">{translateText("Tùy Chọn Khoảng Thời Gian Lịch Sử")}</h3>
+              <p className="text-xs text-slate-500 font-medium">{translateText("Chọn khoảng ngày bắt đầu và kết thúc để lọc hồ sơ")}</p>
             </div>
           </div>
           <button
@@ -97,52 +96,38 @@ export const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
 
         {/* Quick Presets */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">
-            Phím tắt chọn nhanh:
-          </label>
+          <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">{translateText("Phím tắt chọn nhanh:")}</label>
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => handlePreset('this_week')}
               className="px-3 py-2 text-xs font-bold bg-slate-50 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 rounded-xl transition text-slate-700 text-center"
-            >
-              Tuần này (21-25/09)
-            </button>
+            >{translateText("Tuần này (21-25/09)")}</button>
             <button
               type="button"
               onClick={() => handlePreset('this_month')}
               className="px-3 py-2 text-xs font-bold bg-slate-50 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 rounded-xl transition text-slate-700 text-center"
-            >
-              Tháng 09/2026
-            </button>
+            >{translateText("Tháng 09/2026")}</button>
             <button
               type="button"
               onClick={() => handlePreset('last_7_days')}
               className="px-3 py-2 text-xs font-bold bg-slate-50 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 rounded-xl transition text-slate-700 text-center"
-            >
-              7 ngày qua
-            </button>
+            >{translateText("7 ngày qua")}</button>
             <button
               type="button"
               onClick={() => handlePreset('today')}
               className="px-3 py-2 text-xs font-bold bg-slate-50 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 rounded-xl transition text-slate-700 text-center"
-            >
-              Hôm nay (25/09)
-            </button>
+            >{translateText("Hôm nay (25/09)")}</button>
             <button
               type="button"
               onClick={() => handlePreset('last_week')}
               className="px-3 py-2 text-xs font-bold bg-slate-50 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 rounded-xl transition text-slate-700 text-center"
-            >
-              Tuần trước (14-18/09)
-            </button>
+            >{translateText("Tuần trước (14-18/09)")}</button>
             <button
               type="button"
               onClick={() => handlePreset('last_30_days')}
               className="px-3 py-2 text-xs font-bold bg-slate-50 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 rounded-xl transition text-slate-700 text-center"
-            >
-              30 ngày qua
-            </button>
+            >{translateText("30 ngày qua")}</button>
           </div>
         </div>
 
@@ -151,7 +136,7 @@ export const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-teal-600" />
-              <span>Từ ngày:</span>
+              <span>{translateText("Từ ngày:")}</span>
             </label>
             <input
               type="date"
@@ -164,7 +149,7 @@ export const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-teal-600" />
-              <span>Đến ngày:</span>
+              <span>{translateText("Đến ngày:")}</span>
             </label>
             <input
               type="date"
@@ -182,16 +167,14 @@ export const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
             type="button"
             onClick={onClose}
             className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
-          >
-            Hủy bỏ
-          </button>
+          >{translateText("Hủy bỏ")}</button>
           <button
             type="button"
             onClick={handleApply}
             className="flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-teal-600/20 transition"
           >
             <Check className="w-4 h-4" />
-            <span>Áp dụng bộ lọc</span>
+            <span>{translateText("Áp dụng bộ lọc")}</span>
           </button>
         </div>
       </div>

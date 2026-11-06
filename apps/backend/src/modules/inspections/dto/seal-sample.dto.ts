@@ -49,4 +49,9 @@ export class SealSampleDto {
   @IsOptional()
   @IsString()
   fridgeUnit?: string;
+
+  @ApiPropertyOptional({ example: 'https://images.unsplash.com/...' })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from "react";
 import {
   Users,
@@ -31,6 +33,7 @@ import {
 import { apiClient } from "../../../core/api/axios";
 
 export const ParentManagementPage: React.FC = () => {
+  useLanguage();
   const [parents, setParents] = useState<ParentUser[]>([]);
   const [stats, setStats] = useState<ParentStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -379,7 +382,7 @@ export const ParentManagementPage: React.FC = () => {
           ) : (
             <AlertCircle className="w-4 h-4 text-rose-600" />
           )}
-          <span>{toastMessage.text}</span>
+          <span>{translateText(toastMessage.text)}</span>
         </div>
       )}
 
@@ -387,26 +390,17 @@ export const ParentManagementPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mb-1">
-            <span className="text-teal-600 font-semibold">
-              Quản trị người dùng
-            </span>
+            <span className="text-teal-600 font-semibold">{translateText("Quản trị người dùng")}</span>
             <span>›</span>
-            <span className="text-slate-700 font-bold">
-              Tài khoản Phụ huynh
-            </span>
+            <span className="text-slate-700 font-bold">{translateText("Tài khoản Phụ huynh")}</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-600/20">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Quản Lý Tài Khoản Phụ Huynh
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Quản lý danh sách, cấp tài khoản, thiết lập trạng thái và liên
-                kết phụ huynh với hồ sơ học sinh mầm non.
-              </p>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">{translateText("Quản Lý Tài Khoản Phụ Huynh")}</h1>
+              <p className="text-xs text-slate-500 mt-0.5">{translateText("Quản lý danh sách, cấp tài khoản, thiết lập trạng thái và liên kết phụ huynh với hồ sơ học sinh mầm non.")}</p>
             </div>
           </div>
         </div>
@@ -418,16 +412,12 @@ export const ParentManagementPage: React.FC = () => {
           >
             <RefreshCw
               className={`w-3.5 h-3.5 ${loading ? "animate-spin text-teal-600" : "text-slate-500"}`}
-            />
-            Làm mới
-          </button>
+            />{translateText("Làm mới")}</button>
           <button
             onClick={openCreateModal}
             className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
           >
-            <UserPlus className="w-4 h-4" />
-            Tạo tài khoản phụ huynh
-          </button>
+            <UserPlus className="w-4 h-4" />{translateText("Tạo tài khoản phụ huynh")}</button>
         </div>
       </div>
 
@@ -438,9 +428,7 @@ export const ParentManagementPage: React.FC = () => {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Tổng phụ huynh
-            </p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Tổng phụ huynh")}</p>
             <p className="text-2xl font-black text-slate-900 mt-0.5">
               {stats?.totalParents || totalCount}
             </p>
@@ -452,9 +440,7 @@ export const ParentManagementPage: React.FC = () => {
             <UserCheck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Đang hoạt động
-            </p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Đang hoạt động")}</p>
             <p className="text-2xl font-black text-emerald-700 mt-0.5">
               {stats?.activeParents || 0}
             </p>
@@ -466,9 +452,7 @@ export const ParentManagementPage: React.FC = () => {
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Đã liên kết học sinh
-            </p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Đã liên kết học sinh")}</p>
             <p className="text-2xl font-black text-blue-700 mt-0.5">
               {stats?.parentsWithChildren || 0}
             </p>
@@ -480,11 +464,9 @@ export const ParentManagementPage: React.FC = () => {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Tạm dừng / Đã xóa
-            </p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Tạm dừng / Đã xóa")}</p>
             <p className="text-2xl font-black text-slate-700 mt-0.5">
-              {stats?.inactiveOrDeleted ?? (stats as any)?.inactiveParents ?? 0}
+              {translateText(stats?.inactiveOrDeleted ?? (stats as any)?.inactiveParents ?? 0)}
             </p>
           </div>
         </div>
@@ -500,7 +482,7 @@ export const ParentManagementPage: React.FC = () => {
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm theo họ tên phụ huynh, email, số điện thoại hoặc tên học sinh..."
+              placeholder={translateText("Tìm theo họ tên phụ huynh, email, số điện thoại hoặc tên học sinh...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
@@ -516,11 +498,11 @@ export const ParentManagementPage: React.FC = () => {
               }}
               className="px-3.5 py-2.5 bg-slate-50 text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none"
             >
-              <option value="ALL">Tất cả trạng thái</option>
-              <option value="ACTIVE">Đang hoạt động</option>
-              <option value="INACTIVE">Tạm dừng</option>
-              <option value="BLOCKED">Bị khóa</option>
-              <option value="DELETED">Đã xóa mềm</option>
+              <option value="ALL">{translateText("Tất cả trạng thái")}</option>
+              <option value="ACTIVE">{translateText("Đang hoạt động")}</option>
+              <option value="INACTIVE">{translateText("Tạm dừng")}</option>
+              <option value="BLOCKED">{translateText("Bị khóa")}</option>
+              <option value="DELETED">{translateText("Đã xóa mềm")}</option>
             </select>
 
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer select-none">
@@ -532,16 +514,12 @@ export const ParentManagementPage: React.FC = () => {
                   setCurrentPage(1);
                 }}
                 className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 border-slate-300"
-              />
-              Bao gồm đã xóa
-            </label>
+              />{translateText("Bao gồm đã xóa")}</label>
 
             <button
               type="submit"
               className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
-            >
-              Tìm kiếm
-            </button>
+            >{translateText("Tìm kiếm")}</button>
           </div>
         </form>
       </div>
@@ -552,12 +530,12 @@ export const ParentManagementPage: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
               <tr>
-                <th className="px-4 py-3.5">Phụ huynh</th>
-                <th className="px-4 py-3.5">Email & Điện thoại</th>
-                <th className="px-4 py-3.5">Học sinh liên kết</th>
-                <th className="px-4 py-3.5">Trạng thái</th>
-                <th className="px-4 py-3.5">Ngày đăng ký</th>
-                <th className="px-4 py-3.5 text-center w-28">Thao tác</th>
+                <th className="px-4 py-3.5">{translateText("Phụ huynh")}</th>
+                <th className="px-4 py-3.5">{translateText("Email & Điện thoại")}</th>
+                <th className="px-4 py-3.5">{translateText("Học sinh liên kết")}</th>
+                <th className="px-4 py-3.5">{translateText("Trạng thái")}</th>
+                <th className="px-4 py-3.5">{translateText("Ngày đăng ký")}</th>
+                <th className="px-4 py-3.5 text-center w-28">{translateText("Thao tác")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -568,7 +546,7 @@ export const ParentManagementPage: React.FC = () => {
                     className="px-4 py-12 text-center text-slate-400"
                   >
                     <div className="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                    <p>Đang tải danh sách phụ huynh...</p>
+                    <p>{translateText("Đang tải danh sách phụ huynh...")}</p>
                   </td>
                 </tr>
               ) : parents.length === 0 ? (
@@ -578,12 +556,8 @@ export const ParentManagementPage: React.FC = () => {
                     className="px-4 py-12 text-center text-slate-400"
                   >
                     <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                    <p className="font-semibold text-slate-600">
-                      Không tìm thấy tài khoản phụ huynh nào
-                    </p>
-                    <p className="text-[11px] mt-0.5">
-                      Nhấn "Tạo tài khoản phụ huynh" để bắt đầu thiết lập.
-                    </p>
+                    <p className="font-semibold text-slate-600">{translateText("Không tìm thấy tài khoản phụ huynh nào")}</p>
+                    <p className="text-[11px] mt-0.5">{translateText("Nhấn \"Tạo tài khoản phụ huynh\" để bắt đầu thiết lập.")}</p>
                   </td>
                 </tr>
               ) : (
@@ -600,8 +574,7 @@ export const ParentManagementPage: React.FC = () => {
                           </div>
                           {p.twoFactorEnabled && (
                             <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
-                              <ShieldCheck className="w-3 h-3" /> Đã bật 2FA
-                            </span>
+                              <ShieldCheck className="w-3 h-3" />{translateText(" Đã bật 2FA")}</span>
                           )}
                         </div>
                       </div>
@@ -613,7 +586,7 @@ export const ParentManagementPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1.5 text-slate-500 text-[11px] mt-0.5">
                         <Phone className="w-3.5 h-3.5 text-slate-400" />
-                        {p.phone || "Chưa cập nhật"}
+                        {p.phone || translateText("Chưa cập nhật")}
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
@@ -630,38 +603,30 @@ export const ParentManagementPage: React.FC = () => {
                           ))}
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic text-[11px]">
-                          Chưa liên kết học sinh
-                        </span>
+                        <span className="text-slate-400 italic text-[11px]">{translateText("Chưa liên kết học sinh")}</span>
                       )}
                     </td>
                     <td className="px-4 py-3.5">
                       {p.isDeleted ? (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
-                          ĐÃ XÓA
-                        </span>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">{translateText("ĐÃ XÓA")}</span>
                       ) : p.status === "ACTIVE" ? (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                          HOẠT ĐỘNG
-                        </span>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">{translateText("HOẠT ĐỘNG")}</span>
                       ) : p.status === "INACTIVE" ? (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                          TẠM DỪNG
-                        </span>
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">{translateText("TẠM DỪNG")}</span>
                       ) : (
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
-                          {p.status}
+                          {translateText(p.status)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-slate-500 font-mono text-[11px]">
-                      {new Date(p.createdAt).toLocaleDateString("vi-VN")}
+                      {translateText(new Date(p.createdAt).toLocaleDateString(getLocale()))}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => setViewingParent(p)}
-                          title="Xem chi tiết tài khoản"
+                          title={translateText("Xem chi tiết tài khoản")}
                           className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                         >
                           <Eye className="w-4 h-4" />
@@ -670,14 +635,14 @@ export const ParentManagementPage: React.FC = () => {
                           <>
                             <button
                               onClick={() => handleRestore(p.id)}
-                              title="Khôi phục / Kích hoạt lại tài khoản"
+                              title={translateText("Khôi phục / Kích hoạt lại tài khoản")}
                               className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
                             >
                               <RotateCcw className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => openEditModal(p)}
-                              title="Chỉnh sửa tài khoản"
+                              title={translateText("Chỉnh sửa tài khoản")}
                               className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition"
                             >
                               <Edit3 className="w-4 h-4" />
@@ -687,14 +652,14 @@ export const ParentManagementPage: React.FC = () => {
                           <>
                             <button
                               onClick={() => openEditModal(p)}
-                              title="Chỉnh sửa tài khoản"
+                              title={translateText("Chỉnh sửa tài khoản")}
                               className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setDeletingParent(p)}
-                              title="Tạm ngưng / Vô hiệu hóa tài khoản"
+                              title={translateText("Tạm ngưng / Vô hiệu hóa tài khoản")}
                               className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -712,9 +677,8 @@ export const ParentManagementPage: React.FC = () => {
 
         {/* Pagination Footer */}
         <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-600">
-          <div>
-            Hiển thị <span className="font-bold">{parents.length}</span> /{" "}
-            {totalCount} phụ huynh (Trang {currentPage}/{totalPages})
+          <div>{translateText("Hiển thị ")}<span className="font-bold">{parents.length}</span> /{" "}
+            {totalCount}{translateText(" phụ huynh (Trang ")}{currentPage}/{totalPages})
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -746,11 +710,8 @@ export const ParentManagementPage: React.FC = () => {
                   <Eye className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">
-                    Hồ sơ chi tiết Phụ huynh
-                  </h3>
-                  <p className="text-[11px] text-slate-500">
-                    Mã định danh: #{viewingParent.id}
+                  <h3 className="font-bold text-slate-900 text-sm">{translateText("Hồ sơ chi tiết Phụ huynh")}</h3>
+                  <p className="text-[11px] text-slate-500">{translateText("Mã định danh: #")}{translateText(viewingParent.id)}
                   </p>
                 </div>
               </div>
@@ -774,16 +735,12 @@ export const ParentManagementPage: React.FC = () => {
                       {viewingParent.fullName}
                     </h4>
                     {viewingParent.status === "ACTIVE" ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                        HOẠT ĐỘNG
-                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">{translateText("HOẠT ĐỘNG")}</span>
                     ) : viewingParent.status === "INACTIVE" ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                        TẠM DỪNG
-                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">{translateText("TẠM DỪNG")}</span>
                     ) : (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
-                        {viewingParent.status}
+                        {translateText(viewingParent.status)}
                       </span>
                     )}
                   </div>
@@ -794,12 +751,11 @@ export const ParentManagementPage: React.FC = () => {
                     </span>
                     <span className="flex items-center gap-1">
                       <Phone className="w-3.5 h-3.5 text-teal-600" />{" "}
-                      {viewingParent.phone || "Chưa cập nhật SĐT"}
+                      {viewingParent.phone || translateText("Chưa cập nhật SĐT")}
                     </span>
                     {viewingParent.twoFactorEnabled && (
                       <span className="flex items-center gap-1 text-emerald-700 font-bold">
-                        <ShieldCheck className="w-3.5 h-3.5" /> 2FA Bảo mật
-                      </span>
+                        <ShieldCheck className="w-3.5 h-3.5" />{translateText(" 2FA Bảo mật")}</span>
                     )}
                   </div>
                 </div>
@@ -808,46 +764,36 @@ export const ParentManagementPage: React.FC = () => {
               {/* Detailed Specs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
                 <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">
-                    Nghề nghiệp:
-                  </span>
+                  <span className="text-slate-400 font-medium block text-[11px]">{translateText("Nghề nghiệp:")}</span>
                   <span className="text-slate-800 font-semibold">
-                    {viewingParent.occupation || "Chưa thiết lập"}
+                    {translateText(viewingParent.occupation || "Chưa thiết lập")}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">
-                    Địa chỉ liên hệ:
-                  </span>
+                  <span className="text-slate-400 font-medium block text-[11px]">{translateText("Địa chỉ liên hệ:")}</span>
                   <span className="text-slate-800 font-semibold">
-                    {viewingParent.address || "Chưa thiết lập"}
+                    {viewingParent.address || translateText("Chưa thiết lập")}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">
-                    Ngày khởi tạo tài khoản:
-                  </span>
+                  <span className="text-slate-400 font-medium block text-[11px]">{translateText("Ngày khởi tạo tài khoản:")}</span>
                   <span className="text-slate-800 font-mono font-medium">
-                    {new Date(viewingParent.createdAt).toLocaleString("vi-VN")}
+                    {translateText(new Date(viewingParent.createdAt).toLocaleString(getLocale()))}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-medium block text-[11px]">
-                    Đăng nhập lần cuối:
-                  </span>
+                  <span className="text-slate-400 font-medium block text-[11px]">{translateText("Đăng nhập lần cuối:")}</span>
                   <span className="text-slate-800 font-mono font-medium">
-                    {viewingParent.lastLoginAt
+                    {translateText(viewingParent.lastLoginAt
                       ? new Date(viewingParent.lastLoginAt).toLocaleString(
-                          "vi-VN",
+                          getLocale(),
                         )
-                      : "Chưa từng đăng nhập"}
+                      : "Chưa từng đăng nhập")}
                   </span>
                 </div>
                 {viewingParent.note && (
                   <div className="sm:col-span-2 pt-2 border-t border-slate-200/60">
-                    <span className="text-slate-400 font-medium block text-[11px]">
-                      Ghi chú nội bộ:
-                    </span>
+                    <span className="text-slate-400 font-medium block text-[11px]">{translateText("Ghi chú nội bộ:")}</span>
                     <p className="text-slate-700 italic mt-0.5">
                       {viewingParent.note}
                     </p>
@@ -859,9 +805,7 @@ export const ParentManagementPage: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
-                    <GraduationCap className="w-4 h-4 text-teal-600" />
-                    Học sinh thuộc quyền giám hộ (
-                    {viewingParent.children?.length || 0})
+                    <GraduationCap className="w-4 h-4 text-teal-600" />{translateText("Học sinh thuộc quyền giám hộ (")}{viewingParent.children?.length || 0})
                   </h5>
                 </div>
                 {viewingParent.children && viewingParent.children.length > 0 ? (
@@ -872,7 +816,7 @@ export const ParentManagementPage: React.FC = () => {
                         className="p-3 bg-white border border-teal-200/80 rounded-2xl shadow-xs flex items-center gap-3"
                       >
                         <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 font-black text-xs flex items-center justify-center shrink-0">
-                          {child.gender === "FEMALE" ? "👧" : "👦"}
+                          {translateText(child.gender === "FEMALE" ? "👧" : "👦")}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-bold text-slate-900 truncate">
@@ -892,10 +836,7 @@ export const ParentManagementPage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400">
-                    Phụ huynh này chưa được liên kết với học sinh nào trong hệ
-                    thống.
-                  </div>
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400">{translateText("Phụ huynh này chưa được liên kết với học sinh nào trong hệ thống.")}</div>
                 )}
               </div>
             </div>
@@ -905,9 +846,7 @@ export const ParentManagementPage: React.FC = () => {
                 type="button"
                 onClick={() => setViewingParent(null)}
                 className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
-              >
-                Đóng
-              </button>
+              >{translateText("Đóng")}</button>
               <button
                 type="button"
                 onClick={() => {
@@ -917,8 +856,7 @@ export const ParentManagementPage: React.FC = () => {
                 }}
                 className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
               >
-                <Edit3 className="w-3.5 h-3.5" /> Chỉnh sửa tài khoản này
-              </button>
+                <Edit3 className="w-3.5 h-3.5" />{translateText(" Chỉnh sửa tài khoản này")}</button>
             </div>
           </div>
         </div>
@@ -938,9 +876,9 @@ export const ParentManagementPage: React.FC = () => {
                   )}
                 </div>
                 <h3 className="font-bold text-slate-900 text-sm">
-                  {editingParent
+                  {translateText(editingParent
                     ? "Cập nhật tài khoản Phụ huynh"
-                    : "Tạo mới tài khoản Phụ huynh"}
+                    : "Tạo mới tài khoản Phụ huynh")}
                 </h3>
               </div>
               <button
@@ -961,13 +899,12 @@ export const ParentManagementPage: React.FC = () => {
               className="p-6 overflow-y-auto space-y-4 text-xs"
             >
               <div>
-                <label className="block text-slate-700 font-bold mb-1">
-                  Họ và tên phụ huynh <span className="text-rose-500">*</span>
+                <label className="block text-slate-700 font-bold mb-1">{translateText("Họ và tên phụ huynh ")}<span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: Nguyễn Văn An"
+                  placeholder={translateText("Ví dụ: Nguyễn Văn An")}
                   value={formFullName}
                   onChange={(e) => setFormFullName(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
@@ -976,19 +913,16 @@ export const ParentManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">
-                    Email đăng nhập <span className="text-rose-500">*</span>
+                  <label className="block text-slate-700 font-bold mb-1">{translateText("Email đăng nhập ")}<span className="text-rose-500">*</span>
                     {isCheckingEmail && (
-                      <span className="text-[10px] text-teal-600 font-normal ml-2">
-                        Đang kiểm tra...
-                      </span>
+                      <span className="text-[10px] text-teal-600 font-normal ml-2">{translateText("Đang kiểm tra...")}</span>
                     )}
                   </label>
                   <input
                     type="email"
                     required
                     disabled={!!editingParent}
-                    placeholder="phuhuynh@example.com"
+                    placeholder={translateText("phuhuynh@example.com")}
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
                     className={`w-full px-3.5 py-2.5 text-xs rounded-xl border transition disabled:bg-slate-100 disabled:text-slate-500 ${
@@ -1000,19 +934,17 @@ export const ParentManagementPage: React.FC = () => {
                   {!editingParent && isDuplicateEmail && (
                     <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
                       <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                      {emailErrorMessage ||
-                        "Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác."}
+                      {translateText(emailErrorMessage ||
+                        "Email này đã tồn tại trong hệ thống. Vui lòng chọn email khác.")}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">
-                    Số điện thoại
-                  </label>
+                  <label className="block text-slate-700 font-bold mb-1">{translateText("Số điện thoại")}</label>
                   <input
                     type="tel"
-                    placeholder="0912345678"
+                    placeholder={"0912345678"}
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
@@ -1023,16 +955,16 @@ export const ParentManagementPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-700 font-bold mb-1">
-                    {editingParent
+                    {translateText(editingParent
                       ? "Mật khẩu mới (bỏ trống nếu không đổi)"
-                      : "Mật khẩu ban đầu (ít nhất 8 ký tự)"}
+                      : "Mật khẩu ban đầu (ít nhất 8 ký tự)")}
                   </label>
                   <input
                     type="password"
                     placeholder={
-                      editingParent
+                      translateText(editingParent
                         ? "Để trống để giữ mật khẩu hiện tại"
-                        : "Mật khẩu ban đầu (ít nhất 8 ký tự)"
+                        : "Mật khẩu ban đầu (ít nhất 8 ký tự)")
                     }
                     value={formPassword}
                     onChange={(e) => setFormPassword(e.target.value)}
@@ -1043,27 +975,23 @@ export const ParentManagementPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">
-                    Trạng thái tài khoản
-                  </label>
+                  <label className="block text-slate-700 font-bold mb-1">{translateText("Trạng thái tài khoản")}</label>
                   <select
                     value={formStatus}
                     onChange={(e) => setFormStatus(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none"
                   >
-                    <option value="ACTIVE">Hoạt động (ACTIVE)</option>
-                    <option value="INACTIVE">Tạm dừng (INACTIVE)</option>
-                    <option value="BLOCKED">Khóa (BLOCKED)</option>
+                    <option value="ACTIVE">{translateText("Hoạt động (ACTIVE)")}</option>
+                    <option value="INACTIVE">{translateText("Tạm dừng (INACTIVE)")}</option>
+                    <option value="BLOCKED">{translateText("Khóa (BLOCKED)")}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">
-                    Nghề nghiệp
-                  </label>
+                  <label className="block text-slate-700 font-bold mb-1">{translateText("Nghề nghiệp")}</label>
                   <input
                     type="text"
-                    placeholder="Ví dụ: Kỹ sư, Bác sĩ, Kinh doanh..."
+                    placeholder={translateText("Ví dụ: Kỹ sư, Bác sĩ, Kinh doanh...")}
                     value={formOccupation}
                     onChange={(e) => setFormOccupation(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
@@ -1072,12 +1000,10 @@ export const ParentManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">
-                  Địa chỉ liên hệ
-                </label>
+                <label className="block text-slate-700 font-bold mb-1">{translateText("Địa chỉ liên hệ")}</label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: 45 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM"
+                  placeholder={translateText("Ví dụ: 45 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM")}
                   value={formAddress}
                   onChange={(e) => setFormAddress(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
@@ -1085,12 +1011,10 @@ export const ParentManagementPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">
-                  Ghi chú nội bộ
-                </label>
+                <label className="block text-slate-700 font-bold mb-1">{translateText("Ghi chú nội bộ")}</label>
                 <textarea
                   rows={2}
-                  placeholder="Ghi chú về phụ huynh (người liên hệ chính, giờ đón bé...)"
+                  placeholder={translateText("Ghi chú về phụ huynh (người liên hệ chính, giờ đón bé...)")}
                   value={formNote}
                   onChange={(e) => setFormNote(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition resize-none"
@@ -1099,18 +1023,11 @@ export const ParentManagementPage: React.FC = () => {
 
               {/* Children Selection */}
               <div>
-                <label className="block text-slate-700 font-bold mb-1">
-                  Liên kết học sinh (Con em)
-                </label>
-                <p className="text-[11px] text-slate-500 mb-2">
-                  Chọn các bé thuộc quyền giám hộ của phụ huynh này để đồng bộ
-                  thực đơn và thông báo:
-                </p>
+                <label className="block text-slate-700 font-bold mb-1">{translateText("Liên kết học sinh (Con em)")}</label>
+                <p className="text-[11px] text-slate-500 mb-2">{translateText("Chọn các bé thuộc quyền giám hộ của phụ huynh này để đồng bộ thực đơn và thông báo:")}</p>
                 <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-2xl p-2.5 bg-slate-50 space-y-1.5">
                   {availableChildren.length === 0 ? (
-                    <p className="text-slate-400 text-center py-4">
-                      Chưa có danh sách học sinh
-                    </p>
+                    <p className="text-slate-400 text-center py-4">{translateText("Chưa có danh sách học sinh")}</p>
                   ) : (
                     (Array.isArray(availableChildren)
                       ? availableChildren
@@ -1147,9 +1064,7 @@ export const ParentManagementPage: React.FC = () => {
                   )}
                 </div>
                 {formSelectedChildIds.length > 0 && (
-                  <p className="text-[11px] text-teal-700 font-semibold mt-1">
-                    Đã chọn {formSelectedChildIds.length} học sinh liên kết.
-                  </p>
+                  <p className="text-[11px] text-teal-700 font-semibold mt-1">{translateText("Đã chọn ")}{formSelectedChildIds.length}{translateText(" học sinh liên kết.")}</p>
                 )}
               </div>
 
@@ -1163,24 +1078,22 @@ export const ParentManagementPage: React.FC = () => {
                     setEmailErrorMessage(null);
                   }}
                   className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition"
-                >
-                  Hủy bỏ
-                </button>
+                >{translateText("Hủy bỏ")}</button>
                 <button
                   type="submit"
                   disabled={submitting || (!editingParent && isDuplicateEmail)}
                   title={
-                    !editingParent && isDuplicateEmail
+                    translateText(!editingParent && isDuplicateEmail
                       ? "Email này đã tồn tại trong hệ thống"
-                      : undefined
+                      : undefined)
                   }
                   className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting
+                  {translateText(submitting
                     ? "Đang lưu..."
                     : editingParent
                       ? "Lưu thay đổi"
-                      : "Tạo tài khoản"}
+                      : "Tạo tài khoản")}
                 </button>
               </div>
             </form>
@@ -1196,34 +1109,26 @@ export const ParentManagementPage: React.FC = () => {
               <Trash2 className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="font-bold text-slate-900 text-base">
-                Xác nhận xóa tài khoản phụ huynh
-              </h3>
-              <p className="text-slate-500 text-xs">
-                Bạn có chắc chắn muốn xóa tài khoản của phụ huynh{" "}
+              <h3 className="font-bold text-slate-900 text-base">{translateText("Xác nhận xóa tài khoản phụ huynh")}</h3>
+              <p className="text-slate-500 text-xs">{translateText("Bạn có chắc chắn muốn xóa tài khoản của phụ huynh")}{" "}
                 <span className="font-bold text-slate-900">
                   {deletingParent.fullName}
                 </span>{" "}
                 ({deletingParent.email})?
               </p>
-              <p className="text-[11px] text-amber-600 bg-amber-50 p-2 rounded-xl mt-2">
-                Hành động này sẽ xóa mềm tài khoản và tự động hủy liên kết các
-                học sinh đang gắn với phụ huynh này.
-              </p>
+              <p className="text-[11px] text-amber-600 bg-amber-50 p-2 rounded-xl mt-2">{translateText("Hành động này sẽ xóa mềm tài khoản và tự động hủy liên kết các học sinh đang gắn với phụ huynh này.")}</p>
             </div>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setDeletingParent(null)}
                 className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition"
-              >
-                Hủy bỏ
-              </button>
+              >{translateText("Hủy bỏ")}</button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={submitting}
                 className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-md shadow-rose-600/20 transition disabled:opacity-50"
               >
-                {submitting ? "Đang xóa..." : "Đồng ý xóa"}
+                {translateText(submitting ? "Đang xóa..." : "Đồng ý xóa")}
               </button>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Activity,
@@ -18,6 +20,7 @@ import { growthApi, GrowthRecordItem } from "../api/growth.api";
 import { childrenApi, ChildItem } from "../../children/api/children.api";
 
 export const ParentGrowthMonitoringPage: React.FC = () => {
+  useLanguage();
   const [children, setChildren] = useState<ChildItem[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string>("");
   const [selectedChild, setSelectedChild] = useState<ChildItem | null>(null);
@@ -136,7 +139,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
       <ParentPortalTopNav
-        activeTab="menu-consumption"
+        activeTab="growth"
         child={
           selectedChild
             ? {
@@ -150,46 +153,36 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 space-y-6 flex-1">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link to="/child-menu-consumption" className="hover:text-teal-700">
-            Cổng phụ huynh
-          </Link>
+          <Link to="/child-menu-consumption" className="hover:text-teal-700">{translateText("Cổng phụ huynh")}</Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="font-semibold text-slate-700">Thể chất & Tăng trưởng WHO (UC81, 83, 84)</span>
+          <span className="font-semibold text-slate-700">{translateText("Thể chất & Tăng trưởng WHO")}</span>
         </div>
 
         {/* Page Hero */}
         <div className="rounded-3xl bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-                Chuẩn tăng trưởng WHO • Bộ Y Tế
-              </span>
+              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Chuẩn tăng trưởng WHO • Bộ Y Tế")}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-              <Activity className="w-8 h-8 text-emerald-300" />
-              Theo Dõi Thể Chất & Biểu Đồ Z-Score Của Bé
-            </h1>
-            <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-              Xem lịch sử cân đo, chỉ số độ lệch chuẩn WHO (WAZ, HAZ, BAZ) và nhận cảnh báo nguy cơ tăng trưởng sớm của bé.
-            </p>
+              <Activity className="w-8 h-8 text-emerald-300" />{translateText("Theo Dõi Thể Chất & Biểu Đồ Z-Score Của Bé")}</h1>
+            <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Xem lịch sử cân đo, chỉ số độ lệch chuẩn WHO (WAZ, HAZ, BAZ) và nhận cảnh báo nguy cơ tăng trưởng sớm của bé.")}</p>
           </div>
 
           {/* Child Selector */}
           {children.length > 0 && (
             <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-white min-w-[260px]">
-              <label htmlFor="child-select" className="text-xs font-bold text-teal-100 block mb-1">
-                Chọn bé theo dõi:
-              </label>
+              <label htmlFor="child-select" className="text-xs font-bold text-teal-100 block mb-1">{translateText("Chọn bé theo dõi:")}</label>
               <select
                 id="child-select"
-                aria-label="Chọn học sinh theo dõi"
+                aria-label={translateText("Chọn học sinh theo dõi")}
                 value={selectedChildId}
                 onChange={(e) => setSelectedChildId(e.target.value)}
                 className="w-full bg-white text-slate-900 font-bold rounded-xl px-3 py-2 text-sm outline-none cursor-pointer"
               >
                 {children.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.fullName} ({c.className || c.class?.name || "Lớp mầm non"})
+                    {c.fullName} ({c.className || c.class?.name || translateText("Lớp mầm non")})
                   </option>
                 ))}
               </select>
@@ -200,7 +193,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
         {/* Error message */}
         {error && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
-            {error}
+            {translateText(error)}
           </div>
         )}
 
@@ -213,21 +206,18 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-rose-100 px-3 py-0.5 text-xs font-black uppercase tracking-wider text-rose-800">
-                    UC84 • Cảnh báo tăng trưởng
-                  </span>
-                  <span className="text-xs font-bold text-slate-500">
-                    Kỳ đo ngày: {growthRiskAlert.latestRecord.measurementDate}
+                  <span className="rounded-full bg-rose-100 px-3 py-0.5 text-xs font-black uppercase tracking-wider text-rose-800">{translateText("Cảnh báo nguy cơ tăng trưởng")}</span>
+                  <span className="text-xs font-bold text-slate-500">{translateText("Kỳ đo ngày: ")}{translateText(growthRiskAlert.latestRecord.measurementDate)}
                   </span>
                 </div>
                 <h3 className="text-lg font-black text-slate-900">
-                  {growthRiskAlert.title} — Bé {selectedChild?.fullName}
+                  {translateText(growthRiskAlert.title)}{translateText(" — Bé ")}{selectedChild?.fullName}
                 </h3>
                 <ul className="space-y-1.5 text-xs text-slate-700">
                   {growthRiskAlert.reasons.map((r, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-rose-600"></span>
-                      <strong>{r}</strong>
+                      <strong>{translateText(r)}</strong>
                     </li>
                   ))}
                 </ul>
@@ -238,8 +228,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                     onClick={() => setActiveTab("chart")}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 transition cursor-pointer"
                   >
-                    <TrendingUp className="h-3.5 w-3.5" /> Xem đường cong tăng trưởng WHO
-                  </button>
+                    <TrendingUp className="h-3.5 w-3.5" />{translateText(" Xem đường cong tăng trưởng WHO")}</button>
                 </div>
               </div>
             </div>
@@ -249,10 +238,10 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
         {/* ─── THỐNG KÊ NHANH CHỈ SỐ GẦN NHẤT (UC81) ─── */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs">
-            <span className="text-xs font-bold text-slate-500 block">Cân nặng gần nhất</span>
+            <span className="text-xs font-bold text-slate-500 block">{translateText("Cân nặng gần nhất")}</span>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-2xl font-black text-slate-900">
-                {latestRecord?.weightKg !== undefined ? `${latestRecord.weightKg} kg` : "—"}
+                {translateText(latestRecord?.weightKg !== undefined ? `${latestRecord.weightKg} kg` : "—")}
               </span>
               {previousRecord && latestRecord && (
                 <span
@@ -267,41 +256,34 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                   ) : (
                     <TrendingDown className="h-3 w-3 inline mr-0.5" />
                   )}
-                  {Math.abs(Number(latestRecord.weightKg) - Number(previousRecord.weightKg)).toFixed(1)} kg
-                </span>
+                  {translateText(Math.abs(Number(latestRecord.weightKg) - Number(previousRecord.weightKg)).toFixed(1))}{translateText(" kg")}</span>
               )}
             </div>
-            <span className="mt-2 inline-block rounded-lg bg-teal-50 px-2 py-0.5 text-[11px] font-bold text-teal-800">
-              WAZ: {latestRecord?.waz !== undefined ? Number(latestRecord.waz).toFixed(2) : "—"} SD
-            </span>
+            <span className="mt-2 inline-block rounded-lg bg-teal-50 px-2 py-0.5 text-[11px] font-bold text-teal-800">{translateText("WAZ: ")}{translateText(latestRecord?.waz !== undefined ? Number(latestRecord.waz).toFixed(2) : "—")}{translateText(" SD")}</span>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs">
-            <span className="text-xs font-bold text-slate-500 block">Chiều cao gần nhất</span>
+            <span className="text-xs font-bold text-slate-500 block">{translateText("Chiều cao gần nhất")}</span>
             <div className="mt-1">
               <span className="text-2xl font-black text-slate-900">
-                {latestRecord?.heightCm !== undefined ? `${latestRecord.heightCm} cm` : "—"}
+                {translateText(latestRecord?.heightCm !== undefined ? `${latestRecord.heightCm} cm` : "—")}
               </span>
             </div>
-            <span className="mt-2 inline-block rounded-lg bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-800">
-              HAZ: {latestRecord?.haz !== undefined ? Number(latestRecord.haz).toFixed(2) : "—"} SD
-            </span>
+            <span className="mt-2 inline-block rounded-lg bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-800">{translateText("HAZ: ")}{translateText(latestRecord?.haz !== undefined ? Number(latestRecord.haz).toFixed(2) : "—")}{translateText(" SD")}</span>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs">
-            <span className="text-xs font-bold text-slate-500 block">Chỉ số BMI</span>
+            <span className="text-xs font-bold text-slate-500 block">{translateText("Chỉ số BMI")}</span>
             <div className="mt-1">
               <span className="text-2xl font-black text-slate-900">
-                {latestRecord?.bmi !== undefined ? Number(latestRecord.bmi).toFixed(1) : "—"}
+                {translateText(latestRecord?.bmi !== undefined ? Number(latestRecord.bmi).toFixed(1) : "—")}
               </span>
             </div>
-            <span className="mt-2 inline-block rounded-lg bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
-              BAZ: {latestRecord?.baz !== undefined ? Number(latestRecord.baz).toFixed(2) : "—"} SD
-            </span>
+            <span className="mt-2 inline-block rounded-lg bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">{translateText("BAZ: ")}{translateText(latestRecord?.baz !== undefined ? Number(latestRecord.baz).toFixed(2) : "—")}{translateText(" SD")}</span>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xs">
-            <span className="text-xs font-bold text-slate-500 block">Tình trạng thể chất</span>
+            <span className="text-xs font-bold text-slate-500 block">{translateText("Tình trạng thể chất")}</span>
             <div className="mt-2">
               <span
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black ${
@@ -312,19 +294,17 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
               >
                 {growthRiskAlert ? (
                   <>
-                    <AlertTriangle className="h-3.5 w-3.5" /> Có nguy cơ
-                  </>
+                    <AlertTriangle className="h-3.5 w-3.5" />{translateText(" Có nguy cơ")}</>
                 ) : (
                   <>
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Phát triển bình thường
-                  </>
+                    <CheckCircle2 className="h-3.5 w-3.5" />{translateText(" Phát triển bình thường")}</>
                 )}
               </span>
             </div>
             <span className="text-[11px] text-slate-500 block mt-2">
-              {latestRecord?.measurementDate
+              {translateText(latestRecord?.measurementDate
                 ? `Đo ngày ${latestRecord.measurementDate}`
-                : "Chưa có kỳ cân đo"}
+                : "Chưa có kỳ cân đo")}
             </span>
           </div>
         </div>
@@ -340,8 +320,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
-            <TrendingUp className="h-4 w-4" /> Biểu đồ WHO & Z-Score (UC83)
-          </button>
+            <TrendingUp className="h-4 w-4" />{translateText(" Biểu đồ WHO & Z-Score")}</button>
           <button
             type="button"
             onClick={() => setActiveTab("history")}
@@ -351,8 +330,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
-            <Calendar className="h-4 w-4" /> Lịch sử cân đo (UC81)
-          </button>
+            <Calendar className="h-4 w-4" />{translateText(" Lịch sử cân đo")}</button>
 
         </div>
 
@@ -361,24 +339,18 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-black text-slate-900">
-                  Biểu đồ tăng trưởng theo chuẩn WHO (LMS Standards)
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Đường cong bách phân vị và độ lệch chuẩn (SD: -3, -2, 0, +2, +3) theo độ tuổi của bé.
-                </p>
+                <h3 className="text-lg font-black text-slate-900">{translateText("Biểu đồ tăng trưởng theo chuẩn WHO (LMS Standards)")}</h3>
+                <p className="text-xs text-slate-500">{translateText("Đường cong bách phân vị và độ lệch chuẩn (SD: -3, -2, 0, +2, +3) theo độ tuổi của bé.")}</p>
               </div>
             </div>
 
             {loading ? (
               <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-slate-500">
                 <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-                <p className="text-sm font-semibold">Đang tổng hợp dữ liệu đường cong tăng trưởng...</p>
+                <p className="text-sm font-semibold">{translateText("Đang tổng hợp dữ liệu đường cong tăng trưởng...")}</p>
               </div>
             ) : history.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 text-sm">
-                Bé chưa có dữ liệu cân đo định kỳ để vẽ biểu đồ. Nhà trường sẽ cập nhật sau các đợt khám sức khỏe.
-              </div>
+              <div className="p-12 text-center text-slate-500 text-sm">{translateText("Bé chưa có dữ liệu cân đo định kỳ để vẽ biểu đồ. Nhà trường sẽ cập nhật sau các đợt khám sức khỏe.")}</div>
             ) : (
               <WhoGrowthChart
                 child={
@@ -400,46 +372,40 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
         {activeTab === "history" && (
           <div className="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-sm">
             <div className="p-6 border-b border-slate-100">
-              <h3 className="text-lg font-black text-slate-900">
-                Lịch sử ghi nhận thể chất định kỳ của bé (UC81)
-              </h3>
-              <p className="text-xs text-slate-500">
-                Tổng hợp các đợt cân đo thể chất do Y tế học đường và Giáo viên lớp thực hiện.
-              </p>
+              <h3 className="text-lg font-black text-slate-900">{translateText("Lịch sử ghi nhận thể chất định kỳ của bé")}</h3>
+              <p className="text-xs text-slate-500">{translateText("Tổng hợp các đợt cân đo thể chất do Y tế học đường và Giáo viên lớp thực hiện.")}</p>
             </div>
 
             {history.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 text-sm">
-                Chưa có bản ghi đo thể chất nào cho học sinh này.
-              </div>
+              <div className="p-12 text-center text-slate-500 text-sm">{translateText("Chưa có bản ghi đo thể chất nào cho học sinh này.")}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
                     <tr>
-                      <th className="py-3 px-4">Ngày đo</th>
-                      <th className="py-3 px-4">Độ tuổi (tháng)</th>
-                      <th className="py-3 px-4">Cân nặng (kg)</th>
-                      <th className="py-3 px-4">Chiều cao (cm)</th>
-                      <th className="py-3 px-4">Chỉ số BMI</th>
-                      <th className="py-3 px-4">WAZ (Cân/tuổi)</th>
-                      <th className="py-3 px-4">HAZ (Cao/tuổi)</th>
-                      <th className="py-3 px-4">BAZ (BMI/tuổi)</th>
-                      <th className="py-3 px-4">Đánh giá chung</th>
-                      <th className="py-3 px-4">Ghi chú sức khỏe</th>
+                      <th className="py-3 px-4">{translateText("Ngày đo")}</th>
+                      <th className="py-3 px-4">{translateText("Độ tuổi (tháng)")}</th>
+                      <th className="py-3 px-4">{translateText("Cân nặng (kg)")}</th>
+                      <th className="py-3 px-4">{translateText("Chiều cao (cm)")}</th>
+                      <th className="py-3 px-4">{translateText("Chỉ số BMI")}</th>
+                      <th className="py-3 px-4">{translateText("WAZ (Cân/tuổi)")}</th>
+                      <th className="py-3 px-4">{translateText("HAZ (Cao/tuổi)")}</th>
+                      <th className="py-3 px-4">{translateText("BAZ (BMI/tuổi)")}</th>
+                      <th className="py-3 px-4">{translateText("Đánh giá chung")}</th>
+                      <th className="py-3 px-4">{translateText("Ghi chú sức khỏe")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
                     {history.map((row) => (
                       <tr key={row.id} className="hover:bg-slate-50/50">
                         <td className="py-3 px-4 font-bold text-slate-900">
-                          {row.measurementDate}
+                          {translateText(row.measurementDate)}
                         </td>
-                        <td className="py-3 px-4 text-slate-600">{row.ageInMonths} tháng</td>
-                        <td className="py-3 px-4 font-bold text-teal-800">{row.weightKg} kg</td>
-                        <td className="py-3 px-4 font-bold text-sky-800">{row.heightCm} cm</td>
+                        <td className="py-3 px-4 text-slate-600">{row.ageInMonths}{translateText(" tháng")}</td>
+                        <td className="py-3 px-4 font-bold text-teal-800">{row.weightKg}{translateText(" kg")}</td>
+                        <td className="py-3 px-4 font-bold text-sky-800">{row.heightCm}{translateText(" cm")}</td>
                         <td className="py-3 px-4 font-bold text-slate-800">
-                          {row.bmi ? Number(row.bmi).toFixed(1) : "—"}
+                          {translateText(row.bmi ? Number(row.bmi).toFixed(1) : "—")}
                         </td>
                         <td className="py-3 px-4">
                           <span
@@ -449,7 +415,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                                 : "bg-slate-100 text-slate-700"
                             }`}
                           >
-                            {row.waz !== undefined ? Number(row.waz).toFixed(2) : "—"}
+                            {translateText(row.waz !== undefined ? Number(row.waz).toFixed(2) : "—")}
                           </span>
                         </td>
                         <td className="py-3 px-4">
@@ -460,7 +426,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                                 : "bg-slate-100 text-slate-700"
                             }`}
                           >
-                            {row.haz !== undefined ? Number(row.haz).toFixed(2) : "—"}
+                            {translateText(row.haz !== undefined ? Number(row.haz).toFixed(2) : "—")}
                           </span>
                         </td>
                         <td className="py-3 px-4">
@@ -471,11 +437,11 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                                 : "bg-slate-100 text-slate-700"
                             }`}
                           >
-                            {row.baz !== undefined ? Number(row.baz).toFixed(2) : "—"}
+                            {translateText(row.baz !== undefined ? Number(row.baz).toFixed(2) : "—")}
                           </span>
                         </td>
                         <td className="py-3 px-4 font-semibold text-slate-700">
-                          {row.overallNutritionalStatus || row.weightClassification || "Bình thường"}
+                          {translateText(row.overallNutritionalStatus || row.weightClassification || "Bình thường")}
                         </td>
                         <td className="py-3 px-4 text-slate-500 max-w-xs truncate">
                           {row.healthNotes || "—"}

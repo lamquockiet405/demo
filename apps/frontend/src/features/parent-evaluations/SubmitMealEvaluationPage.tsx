@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { schoolDate } from "../menus/utils/published-menus";
@@ -40,6 +42,7 @@ import {
 import { useAuthStore } from "../../core/stores/auth.store";
 
 export const SubmitMealEvaluationPage: React.FC = () => {
+  useLanguage();
   const { user } = useAuthStore();
   const [params] = useSearchParams();
   const requestedChildId = params.get("childId") || undefined;
@@ -248,7 +251,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
   const handleProposalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!proposalContent.trim()) {
-      alert("Vui lòng nhập nội dung đề xuất hoặc góp ý của bạn.");
+      alert(translateText("Vui lòng nhập nội dung đề xuất hoặc góp ý của bạn."));
       return;
     }
 
@@ -289,7 +292,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
       setTimeout(() => setProposalToast(null), 5000);
       await loadPortalData();
     } catch (err: any) {
-      alert("Lỗi gửi góp ý: " + (err.message || "Vui lòng thử lại"));
+      alert(translateText("Lỗi gửi góp ý: " + (err.message || "Vui lòng thử lại")));
     } finally {
       setIsSubmitting(false);
     }
@@ -313,12 +316,8 @@ export const SubmitMealEvaluationPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
         <Loader2 className="w-10 h-10 text-teal-600 animate-spin mb-3" />
-        <p className="text-sm font-bold text-slate-700">
-          Đang tải dữ liệu thực từ cơ sở dữ liệu KidMeal...
-        </p>
-        <p className="text-xs text-slate-500 mt-1">
-          Vui lòng chờ trong giây lát
-        </p>
+        <p className="text-sm font-bold text-slate-700">{translateText("Đang tải dữ liệu thực từ cơ sở dữ liệu KidMeal...")}</p>
+        <p className="text-xs text-slate-500 mt-1">{translateText("Vui lòng chờ trong giây lát")}</p>
       </div>
     );
   }
@@ -327,16 +326,12 @@ export const SubmitMealEvaluationPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
         <div className="p-5 bg-red-50 border border-red-200 rounded-2xl max-w-md">
-          <p className="text-sm font-bold text-red-800">
-            Không thể kết nối đến máy chủ
-          </p>
-          <p className="text-xs text-red-600 mt-1">{error}</p>
+          <p className="text-sm font-bold text-red-800">{translateText("Không thể kết nối đến máy chủ")}</p>
+          <p className="text-xs text-red-600 mt-1">{translateText(error)}</p>
           <button
             onClick={loadPortalData}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition cursor-pointer"
-          >
-            Thử lại
-          </button>
+          >{translateText("Thử lại")}</button>
         </div>
       </div>
     );
@@ -345,9 +340,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
   const child = data?.child || (data as any)?.childProfile;
   if (!child)
     return (
-      <div className="p-8 text-slate-600">
-        Ch?a c? h? s? h?c sinh li?n k?t v?i t?i kho?n.
-      </div>
+      <div className="p-8 text-slate-600">{translateText("Ch?a c? h? s? h?c sinh li?n k?t v?i t?i kho?n.")}</div>
     );
   const rawHistory: ParentHistoryItem[] = data?.history || [];
 
@@ -374,27 +367,19 @@ export const SubmitMealEvaluationPage: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50 border border-teal-200 text-teal-800 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Lắng nghe & Đồng hành cùng Gia Đình</span>
+                <span>{translateText("Lắng nghe & Đồng hành cùng Gia Đình")}</span>
                 <span className="text-teal-400">•</span>
-                <span className="normal-case font-medium">
-                  Học kỳ I (2026 - 2027)
-                </span>
+                <span className="normal-case font-medium">{translateText("Học kỳ I (2026 - 2027)")}</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-                Đánh Giá & Góp Ý Suất Ăn Bán Trú
-              </h1>
-              <p className="text-xs md:text-sm text-slate-600 mt-1">
-                Kênh kết nối trực tiếp hai chiều giữa Phụ huynh, Ban Giám Hiệu,
-                Chuyên gia Dinh dưỡng & Tổ Bếp
-              </p>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">{translateText("Đánh Giá & Góp Ý Suất Ăn Bán Trú")}</h1>
+              <p className="text-xs md:text-sm text-slate-600 mt-1">{translateText("Kênh kết nối trực tiếp hai chiều giữa Phụ huynh, Ban Giám Hiệu, Chuyên gia Dinh dưỡng & Tổ Bếp")}</p>
             </div>
 
             {/* Quick Hotline Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-2xl shadow-xs text-xs font-semibold text-slate-700">
               <Headphones className="w-4 h-4 text-teal-600" />
-              <span>
-                Hotline Dinh Dưỡng:{" "}
-                <strong className="text-teal-700">1900 6868 (Phím 2)</strong>
+              <span>{translateText("Hotline Dinh Dưỡng:")}{" "}
+                <strong className="text-teal-700">{translateText("1900 6868 (Phím 2)")}</strong>
               </span>
             </div>
           </div>
@@ -412,14 +397,8 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                   “
                 </span>
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-700 leading-relaxed italic">
-                    Mọi ý kiến đóng góp của Ba Mẹ đều là động lực quý giá để
-                    KidMeal không ngừng hoàn thiện từng bữa cơm dinh dưỡng, an
-                    toàn và ngập tràn niềm vui cho các thiên thần nhỏ.
-                  </p>
-                  <p className="text-xs font-bold text-teal-900">
-                    Ban Giám Hiệu & Ban Điều hành Tổ Dinh dưỡng
-                  </p>
+                  <p className="text-sm font-medium text-slate-700 leading-relaxed italic">{translateText("Mọi ý kiến đóng góp của Ba Mẹ đều là động lực quý giá để KidMeal không ngừng hoàn thiện từng bữa cơm dinh dưỡng, an toàn và ngập tràn niềm vui cho các thiên thần nhỏ.")}</p>
+                  <p className="text-xs font-bold text-teal-900">{translateText("Ban Giám Hiệu & Ban Điều hành Tổ Dinh dưỡng")}</p>
                 </div>
               </div>
             </div>
@@ -428,9 +407,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
             <div className="lg:col-span-4 grid grid-cols-2 gap-3">
               <div className="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-4 flex flex-col justify-between shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-900">
-                    Độ Hài Lòng
-                  </span>
+                  <span className="text-xs font-bold text-amber-900">{translateText("Độ Hài Lòng")}</span>
                   <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
                 </div>
                 <div className="my-1">
@@ -442,16 +419,12 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     / 5.0
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-600 font-medium">
-                  Từ hơn 480 phụ huynh đánh giá tích cực
-                </p>
+                <p className="text-[11px] text-slate-600 font-medium">{translateText("Từ hơn 480 phụ huynh đánh giá tích cực")}</p>
               </div>
 
               <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-2xl p-4 flex flex-col justify-between shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-900">
-                    Giải Quyết 24H
-                  </span>
+                  <span className="text-xs font-bold text-emerald-900">{translateText("Giải Quyết 24H")}</span>
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="my-1">
@@ -459,9 +432,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     100%
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-600 font-medium">
-                  Phản hồi minh bạch & giải pháp cụ thể
-                </p>
+                <p className="text-[11px] text-slate-600 font-medium">{translateText("Phản hồi minh bạch & giải pháp cụ thể")}</p>
               </div>
             </div>
           </div>
@@ -479,7 +450,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
             }`}
           >
             <Utensils className="w-3.5 h-3.5 text-teal-600" />
-            <span>Đánh giá bữa ăn</span>
+            <span>{translateText("Đánh giá bữa ăn")}</span>
           </button>
 
           <button
@@ -492,7 +463,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
             }`}
           >
             <Megaphone className="w-3.5 h-3.5 text-amber-600" />
-            <span>Đề xuất & Góp ý</span>
+            <span>{translateText("Đề xuất & Góp ý")}</span>
           </button>
 
           <button
@@ -505,7 +476,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
             }`}
           >
             <MessageSquareQuote className="w-3.5 h-3.5 text-blue-600" />
-            <span>Nhật ký & Phản hồi</span>
+            <span>{translateText("Nhật ký & Phản hồi")}</span>
             <span className="px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600">
               {rawHistory.length}
             </span>
@@ -523,11 +494,8 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     <Utensils className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-base md:text-lg font-bold text-slate-900">
-                      Đánh giá bữa ăn bán trú
-                    </h2>
-                    <p className="text-xs text-slate-500 font-medium">
-                      Bé {child?.name || "của phụ huynh"}
+                    <h2 className="text-base md:text-lg font-bold text-slate-900">{translateText("Đánh giá bữa ăn bán trú")}</h2>
+                    <p className="text-xs text-slate-500 font-medium">{translateText("Bé ")}{child?.name || translateText("của phụ huynh")}
                       {child?.className ? ` • ${child.className}` : ""}
                     </p>
                   </div>
@@ -536,7 +504,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
                   <Calendar className="w-3.5 h-3.5 text-slate-500" />
                   <span>
-                    {data?.todayMeal?.dateLabel || "Trưa Thứ Ba, 13/10/2026"}
+                    {translateText(data?.todayMeal?.dateLabel || "Trưa Thứ Ba, 13/10/2026")}
                   </span>
                 </div>
               </div>
@@ -548,64 +516,47 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                   <div className="md:col-span-5 relative rounded-xl overflow-hidden group shadow-xs">
                     <img
                       src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80"
-                      alt="Khay ăn mầm non thực tế"
+                      alt={translateText("Khay ăn mầm non thực tế")}
                       className="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute bottom-2 left-2 px-2.5 py-1 bg-black/75 backdrop-blur-xs text-white text-[11px] font-medium rounded-lg">
-                      📸 Khay ăn thực tế lưu mẫu lúc 10:45
-                    </div>
+                    <div className="absolute bottom-2 left-2 px-2.5 py-1 bg-black/75 backdrop-blur-xs text-white text-[11px] font-medium rounded-lg">{translateText("📸 Khay ăn thực tế lưu mẫu lúc 10:45")}</div>
                   </div>
 
                   {/* Dishes List */}
                   <div className="md:col-span-7 space-y-2 text-xs">
                     <div className="flex items-center gap-2 text-teal-800 font-bold uppercase tracking-wider text-[11px]">
-                      <span>📋 THỰC ĐƠN BỮA TRƯA DINH DƯỠNG TIÊU CHUẨN</span>
-                      <span className="px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 font-bold">
-                        ~540 kcal
-                      </span>
+                      <span>{translateText("📋 THỰC ĐƠN BỮA TRƯA DINH DƯỠNG TIÊU CHUẨN")}</span>
+                      <span className="px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 font-bold">{translateText("~540 kcal")}</span>
                     </div>
 
                     <div className="space-y-1.5 text-slate-700 font-medium pt-1">
                       <div className="flex items-baseline gap-2">
                         <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0"></span>
-                        <span className="font-bold text-slate-900 min-w-[85px]">
-                          Món mặn:
-                        </span>
-                        <span>
-                          Sườn non ram mặn sốt me đậm đà (Thịt nạc tươi ngon
-                          mềm)
-                        </span>
+                        <span className="font-bold text-slate-900 min-w-[85px]">{translateText("Món mặn:")}</span>
+                        <span>{translateText("Sườn non ram mặn sốt me đậm đà (Thịt nạc tươi ngon mềm)")}</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0"></span>
-                        <span className="font-bold text-slate-900 min-w-[85px]">
-                          Món canh:
-                        </span>
-                        <span>Canh cải ngọt nấu thịt thăn bằm thanh đạm</span>
+                        <span className="font-bold text-slate-900 min-w-[85px]">{translateText("Món canh:")}</span>
+                        <span>{translateText("Canh cải ngọt nấu thịt thăn bằm thanh đạm")}</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0"></span>
-                        <span className="font-bold text-slate-900 min-w-[85px]">
-                          Tinh bột:
-                        </span>
-                        <span>Cơm trắng dẻo thơm giống lúa ST25</span>
+                        <span className="font-bold text-slate-900 min-w-[85px]">{translateText("Tinh bột:")}</span>
+                        <span>{translateText("Cơm trắng dẻo thơm giống lúa ST25")}</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0"></span>
-                        <span className="font-bold text-slate-900 min-w-[85px]">
-                          Tráng miệng:
-                        </span>
-                        <span>Chuối tiêu chín tự nhiên / Thanh long đỏ</span>
+                        <span className="font-bold text-slate-900 min-w-[85px]">{translateText("Tráng miệng:")}</span>
+                        <span>{translateText("Chuối tiêu chín tự nhiên / Thanh long đỏ")}</span>
                       </div>
                     </div>
 
                     <div className="pt-2 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-semibold">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Kiểm soát dị ứng:</span>
-                        <strong className="text-emerald-900">
-                          An toàn tuyệt đối (Không chứa hải sản dị ứng)
-                        </strong>
+                        <span>{translateText("Kiểm soát dị ứng:")}</span>
+                        <strong className="text-emerald-900">{translateText("An toàn tuyệt đối (Không chứa hải sản dị ứng)")}</strong>
                       </span>
                     </div>
                   </div>
@@ -617,21 +568,16 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                 <div
                   className="mb-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900"
                   role="status"
-                >
-                  Bạn đã đánh giá bữa ăn này. Bạn có thể chỉnh sửa nội dung đã
-                  gửi.
-                </div>
+                >{translateText("Bạn đã đánh giá bữa ăn này. Bạn có thể chỉnh sửa nội dung đã gửi.")}</div>
               )}
               <fieldset
                 disabled={evaluationReadOnly || isSubmitting || loading}
               >
                 <div className="bg-amber-50/50 rounded-2xl p-4 md:p-5 border border-amber-200/70 mb-6">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <span className="text-xs md:text-sm font-bold text-slate-800">
-                      Mức độ hài lòng chung của con về bữa ăn:
-                    </span>
+                    <span className="text-xs md:text-sm font-bold text-slate-800">{translateText("Mức độ hài lòng chung của con về bữa ăn:")}</span>
                     <span className="text-xs font-bold text-amber-800 bg-amber-100/80 px-2.5 py-0.5 rounded-full">
-                      {getRatingLabel(hoverRating || rating)}
+                      {translateText(getRatingLabel(hoverRating || rating))}
                     </span>
                   </div>
 
@@ -646,7 +592,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                           onMouseEnter={() => setHoverRating(star)}
                           onMouseLeave={() => setHoverRating(0)}
                           className="p-1 hover:scale-115 active:scale-95 transition cursor-pointer"
-                          title={`${star} sao`}
+                          title={translateText(`${star} sao`)}
                         >
                           <Star
                             className={`w-9 h-9 md:w-10 md:h-10 transition-colors ${
@@ -663,18 +609,16 @@ export const SubmitMealEvaluationPage: React.FC = () => {
 
                 {/* 4 In-Depth Evaluation Criteria */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-slate-800 mb-2">
-                    Đánh giá chi tiết 4 tiêu chí cảm quan:
-                  </label>
+                  <label className="block text-xs font-bold text-slate-800 mb-2">{translateText("Đánh giá chi tiết 4 tiêu chí cảm quan:")}</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     {/* Criteria 1: Khẩu vị */}
                     <div className="p-3.5 rounded-2xl border border-teal-200 bg-teal-50/50 flex flex-col justify-between">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-teal-800 mb-2">
                         <Heart className="w-3.5 h-3.5 fill-teal-600 text-teal-600" />
-                        <span>Khẩu vị món ăn</span>
+                        <span>{translateText("Khẩu vị món ăn")}</span>
                       </div>
                       <div className="space-y-1 text-xs">
-                        {["Vừa miệng thanh đạm", "Hơi đậm đà", "Hơi nhạt"].map(
+                        {[translateText("Vừa miệng thanh đạm"), translateText("Hơi đậm đà"), translateText("Hơi nhạt")].map(
                           (opt) => (
                             <button
                               key={opt}
@@ -686,7 +630,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                                   : "bg-white hover:bg-teal-100 text-slate-700"
                               }`}
                             >
-                              <span>{opt}</span>
+                              <span>{translateText(opt)}</span>
                               {tastePreference === opt && (
                                 <Check className="w-3 h-3 text-white" />
                               )}
@@ -700,13 +644,13 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     <div className="p-3.5 rounded-2xl border border-sky-200 bg-sky-50/50 flex flex-col justify-between">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-sky-800 mb-2">
                         <ThumbsUp className="w-3.5 h-3.5 text-sky-600" />
-                        <span>Sức ăn của bé</span>
+                        <span>{translateText("Sức ăn của bé")}</span>
                       </div>
                       <div className="space-y-1 text-xs">
                         {[
-                          "Ăn hết sạch khay",
-                          "Ăn 2/3 khẩu phần",
-                          "Cần cô giáo dỗ thêm",
+                          translateText("Ăn hết sạch khay"),
+                          translateText("Ăn 2/3 khẩu phần"),
+                          translateText("Cần cô giáo dỗ thêm"),
                         ].map((opt) => (
                           <button
                             key={opt}
@@ -718,7 +662,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                                 : "bg-white hover:bg-sky-100 text-slate-700"
                             }`}
                           >
-                            <span>{opt}</span>
+                            <span>{translateText(opt)}</span>
                             {childAppetite === opt && (
                               <Check className="w-3 h-3 text-white" />
                             )}
@@ -731,13 +675,13 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     <div className="p-3.5 rounded-2xl border border-indigo-200 bg-indigo-50/50 flex flex-col justify-between">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-800 mb-2">
                         <Scale className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Định lượng phần ăn</span>
+                        <span>{translateText("Định lượng phần ăn")}</span>
                       </div>
                       <div className="space-y-1 text-xs">
                         {[
-                          "Vừa vặn thể trạng",
-                          "Cần tăng thêm cơm",
-                          "Cần thêm nước canh",
+                          translateText("Vừa vặn thể trạng"),
+                          translateText("Cần tăng thêm cơm"),
+                          translateText("Cần thêm nước canh"),
                         ].map((opt) => (
                           <button
                             key={opt}
@@ -749,7 +693,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                                 : "bg-white hover:bg-indigo-100 text-slate-700"
                             }`}
                           >
-                            <span>{opt}</span>
+                            <span>{translateText(opt)}</span>
                             {portionFit === opt && (
                               <Check className="w-3 h-3 text-white" />
                             )}
@@ -762,13 +706,13 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/50 flex flex-col justify-between">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 mb-2">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Độ an toàn vệ sinh</span>
+                        <span>{translateText("Độ an toàn vệ sinh")}</span>
                       </div>
                       <div className="space-y-1 text-xs">
                         {[
-                          "Tuyệt đối an tâm 100%",
-                          "Đạt chuẩn tươi sạch",
-                          "Cần lưu ý thêm",
+                          translateText("Tuyệt đối an tâm 100%"),
+                          translateText("Đạt chuẩn tươi sạch"),
+                          translateText("Cần lưu ý thêm"),
                         ].map((opt) => (
                           <button
                             key={opt}
@@ -780,7 +724,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                                 : "bg-white hover:bg-emerald-100 text-slate-700"
                             }`}
                           >
-                            <span>{opt}</span>
+                            <span>{translateText(opt)}</span>
                             {allergySafe === opt && (
                               <Check className="w-3 h-3 text-white" />
                             )}
@@ -793,9 +737,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
 
                 {/* 1-Click Quick Tags */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-slate-800 mb-2">
-                    Nhãn nhận xét nhanh 1-chạm (Bấm để chọn nhiều nhãn):
-                  </label>
+                  <label className="block text-xs font-bold text-slate-800 mb-2">{translateText("Nhãn nhận xét nhanh 1-chạm (Bấm để chọn nhiều nhãn):")}</label>
                   <div className="flex flex-wrap gap-2">
                     {quickTagOptions.map((tag) => {
                       const isSelected = selectedQuickTags.includes(tag);
@@ -813,7 +755,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                           {isSelected && (
                             <Check className="w-3 h-3 text-white" />
                           )}
-                          <span>{tag}</span>
+                          <span>{translateText(tag)}</span>
                         </button>
                       );
                     })}
@@ -823,19 +765,16 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                 {/* Message Box */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-bold text-slate-800">
-                      Lời nhắn gửi Cô giáo chủ nhiệm & Tổ bếp cấp dưỡng:
-                    </label>
+                    <label className="text-xs font-bold text-slate-800">{translateText("Lời nhắn gửi Cô giáo chủ nhiệm & Tổ bếp cấp dưỡng:")}</label>
                     <span className="text-[11px] text-slate-400 font-medium">
-                      {evalMessage.length}/300 ký tự
-                    </span>
+                      {evalMessage.length}{translateText("/300 ký tự")}</span>
                   </div>
                   <textarea
                     rows={3}
                     maxLength={300}
                     value={evalMessage}
                     onChange={(e) => setEvalMessage(e.target.value)}
-                    placeholder="Nhập cảm nhận thêm của bé hoặc lời dặn dò riêng cho cô giáo và tổ bếp..."
+                    placeholder={translateText("Nhập cảm nhận thêm của bé hoặc lời dặn dò riêng cho cô giáo và tổ bếp...")}
                     className="w-full text-xs p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition resize-none text-slate-800 font-medium"
                   />
                 </div>
@@ -845,14 +784,14 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                   className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"
                   role="alert"
                 >
-                  {evalError}
+                  {translateText(evalError)}
                 </div>
               )}
               {/* Success Toast */}
               {evalToast && (
                 <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center gap-2 animate-fadeIn">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{evalToast}</span>
+                  <span>{translateText(evalToast)}</span>
                 </div>
               )}
 
@@ -863,9 +802,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     type="button"
                     onClick={() => setIsEditing(true)}
                     className="px-6 py-2.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl"
-                  >
-                    Chỉnh sửa đánh giá
-                  </button>
+                  >{translateText("Chỉnh sửa đánh giá")}</button>
                 ) : (
                   <>
                     {(!currentEvaluation || currentEvaluation.isDrafting) && (
@@ -874,9 +811,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                         disabled={isSubmitting}
                         onClick={() => handleQuickEvaluationSubmit(true)}
                         className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl transition cursor-pointer"
-                      >
-                        Lưu bản nháp
-                      </button>
+                      >{translateText("Lưu bản nháp")}</button>
                     )}
                     {isEditing && (
                       <button
@@ -887,9 +822,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                           setEvalError(null);
                         }}
                         className="px-4 py-2.5 text-xs font-bold text-slate-700 border border-slate-200 rounded-xl"
-                      >
-                        Hủy chỉnh sửa
-                      </button>
+                      >{translateText("Hủy chỉnh sửa")}</button>
                     )}
 
                     <button
@@ -904,11 +837,11 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                         <Send className="w-4 h-4" />
                       )}
                       <span>
-                        {isSubmitting
+                        {translateText(isSubmitting
                           ? "Đang gửi..."
                           : currentEvaluation && !currentEvaluation.isDrafting
                             ? "Cập nhật đánh giá"
-                            : "Gửi đánh giá bữa ăn"}
+                            : "Gửi đánh giá bữa ăn")}
                       </span>
                     </button>
                   </>
@@ -927,53 +860,46 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                   <Megaphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base md:text-lg font-bold text-slate-900">
-                    Đề xuất & Kiến nghị trực tiếp đến Nhà trường
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Ban Giám Hiệu & Bác Sĩ Dinh Dưỡng tiếp nhận và giải quyết
-                    trong vòng 24 giờ
-                  </p>
+                  <h2 className="text-base md:text-lg font-bold text-slate-900">{translateText("Đề xuất & Kiến nghị trực tiếp đến Nhà trường")}</h2>
+                  <p className="text-xs text-slate-500 font-medium">{translateText("Ban Giám Hiệu & Bác Sĩ Dinh Dưỡng tiếp nhận và giải quyết trong vòng 24 giờ")}</p>
                 </div>
               </div>
 
               <form onSubmit={handleProposalSubmit} className="space-y-5">
                 {/* Category Selection Cards */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-2">
-                    Chọn chủ đề góp ý:
-                  </label>
+                  <label className="block text-xs font-bold text-slate-800 mb-2">{translateText("Chọn chủ đề góp ý:")}</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                     {[
                       {
-                        id: "Đề xuất món mới bé yêu thích",
+                        id: translateText("Đề xuất món mới bé yêu thích"),
                         icon: "🍲",
-                        desc: "Món ăn con yêu thích ở nhà",
+                        desc: translateText("Món ăn con yêu thích ở nhà"),
                       },
                       {
-                        id: "Chất lượng & độ tươi nguyên liệu",
+                        id: translateText("Chất lượng & độ tươi nguyên liệu"),
                         icon: "🥦",
-                        desc: "Kiểm soát vệ sinh nguồn thực phẩm",
+                        desc: translateText("Kiểm soát vệ sinh nguồn thực phẩm"),
                       },
                       {
-                        id: "Khẩu phần & thời gian ăn",
+                        id: translateText("Khẩu phần & thời gian ăn"),
                         icon: "⚖️",
-                        desc: "Định lượng và tốc độ ăn của bé",
+                        desc: translateText("Định lượng và tốc độ ăn của bé"),
                       },
                       {
-                        id: "Dị ứng & an toàn thực phẩm",
+                        id: translateText("Dị ứng & an toàn thực phẩm"),
                         icon: "🛡️",
-                        desc: "Dặn dò đặc biệt về cơ địa bé",
+                        desc: translateText("Dặn dò đặc biệt về cơ địa bé"),
                       },
                       {
-                        id: "Lời khen & Tri ân thầy cô, tổ bếp",
+                        id: translateText("Lời khen & Tri ân thầy cô, tổ bếp"),
                         icon: "💖",
-                        desc: "Động viên cô giáo và đầu bếp",
+                        desc: translateText("Động viên cô giáo và đầu bếp"),
                       },
                       {
-                        id: "Ý kiến khác",
+                        id: translateText("Ý kiến khác"),
                         icon: "💡",
-                        desc: "Các vấn đề bán trú khác",
+                        desc: translateText("Các vấn đề bán trú khác"),
                       },
                     ].map((cat) => (
                       <div
@@ -985,11 +911,11 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                             : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
                         }`}
                       >
-                        <span className="text-2xl">{cat.icon}</span>
+                        <span className="text-2xl">{translateText(cat.icon)}</span>
                         <div>
-                          <p className="text-xs font-bold">{cat.id}</p>
+                          <p className="text-xs font-bold">{translateText(cat.id)}</p>
                           <p className="text-[11px] text-slate-500">
-                            {cat.desc}
+                            {translateText(cat.desc)}
                           </p>
                         </div>
                       </div>
@@ -999,9 +925,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
 
                 {/* Priority Selection */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    Mức độ ưu tiên tiếp nhận:
-                  </label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">{translateText("Mức độ ưu tiên tiếp nhận:")}</label>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
@@ -1011,9 +935,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                           ? "bg-teal-600 text-white font-bold"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
-                    >
-                      Bình thường (Phản hồi định kỳ)
-                    </button>
+                    >{translateText("Bình thường (Phản hồi định kỳ)")}</button>
                     <button
                       type="button"
                       onClick={() => setProposalPriority("URGENT")}
@@ -1022,30 +944,25 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                           ? "bg-rose-600 text-white font-bold"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
-                    >
-                      Cần giải đáp sớm trước ngày mai ⚡
-                    </button>
+                    >{translateText("Cần giải đáp sớm trước ngày mai ⚡")}</button>
                   </div>
                 </div>
 
                 {/* Proposal Title */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    Tiêu đề ý kiến (Tóm tắt ngắn gọn):
-                  </label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">{translateText("Tiêu đề ý kiến (Tóm tắt ngắn gọn):")}</label>
                   <input
                     type="text"
                     value={proposalTitle}
                     onChange={(e) => setProposalTitle(e.target.value)}
-                    placeholder="Ví dụ: Đề xuất bổ sung thêm canh cua rau đay vào thực đơn mùa hè..."
+                    placeholder={translateText("Ví dụ: Đề xuất bổ sung thêm canh cua rau đay vào thực đơn mùa hè...")}
                     className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition font-medium text-slate-800"
                   />
                 </div>
 
                 {/* Proposal Detailed Content */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    Nội dung góp ý chi tiết:{" "}
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">{translateText("Nội dung góp ý chi tiết:")}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -1053,23 +970,21 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     required
                     value={proposalContent}
                     onChange={(e) => setProposalContent(e.target.value)}
-                    placeholder="Mô tả cụ thể mong muốn của gia đình để Ban Giám Hiệu và Tổ Dinh dưỡng có phương án phối hợp tốt nhất..."
+                    placeholder={translateText("Mô tả cụ thể mong muốn của gia đình để Ban Giám Hiệu và Tổ Dinh dưỡng có phương án phối hợp tốt nhất...")}
                     className="w-full text-xs p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-100 transition resize-none text-slate-800 font-medium"
                   />
                 </div>
 
                 {/* File / Image Attachment */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    Đính kèm hình ảnh minh họa (nếu có):
-                  </label>
+                  <label className="block text-xs font-bold text-slate-800 mb-1.5">{translateText("Đính kèm hình ảnh minh họa (nếu có):")}</label>
                   <div className="flex items-center gap-3">
                     <label className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition flex items-center gap-2">
                       <Upload className="w-3.5 h-3.5 text-slate-600" />
                       <span>
-                        {uploadedFileName
+                        {translateText(uploadedFileName
                           ? "Thay đổi ảnh"
-                          : "Chọn ảnh từ thiết bị"}
+                          : "Chọn ảnh từ thiết bị")}
                       </span>
                       <input
                         type="file"
@@ -1080,7 +995,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     </label>
                     {uploadedFileName && (
                       <span className="text-xs text-teal-700 font-medium truncate max-w-xs">
-                        📎 {uploadedFileName}
+                        📎 {translateText(uploadedFileName)}
                       </span>
                     )}
                   </div>
@@ -1099,16 +1014,14 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     htmlFor="anonymousCheck"
                     className="text-xs text-slate-700 font-medium cursor-pointer"
                   >
-                    <strong>Gửi ẩn danh:</strong> Bảo mật danh tính gia đình và
-                    bé, chỉ Ban Giám Hiệu tiếp nhận nội dung để xử lý.
-                  </label>
+                    <strong>{translateText("Gửi ẩn danh:")}</strong>{translateText(" Bảo mật danh tính gia đình và bé, chỉ Ban Giám Hiệu tiếp nhận nội dung để xử lý.")}</label>
                 </div>
 
                 {/* Success Toast */}
                 {proposalToast && (
                   <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center gap-2 animate-fadeIn">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>{proposalToast}</span>
+                    <span>{translateText(proposalToast)}</span>
                   </div>
                 )}
 
@@ -1125,9 +1038,9 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                       <Send className="w-4 h-4" />
                     )}
                     <span>
-                      {isSubmitting
+                      {translateText(isSubmitting
                         ? "Đang gửi..."
-                        : "Gửi kiến nghị đến Nhà trường"}
+                        : "Gửi kiến nghị đến Nhà trường")}
                     </span>
                   </button>
                 </div>
@@ -1147,13 +1060,8 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                     <MessageSquareQuote className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-base md:text-lg font-bold text-slate-900">
-                      Nhật ký Góp ý & Câu trả lời từ Ban Giám Hiệu
-                    </h2>
-                    <p className="text-xs text-slate-500 font-medium">
-                      Lịch sử tương tác và văn bản giải trình chính thức từ
-                      Trường Mẫu Giáo Hướng Dương
-                    </p>
+                    <h2 className="text-base md:text-lg font-bold text-slate-900">{translateText("Nhật ký Góp ý & Câu trả lời từ Ban Giám Hiệu")}</h2>
+                    <p className="text-xs text-slate-500 font-medium">{translateText("Lịch sử tương tác và văn bản giải trình chính thức từ Trường Mẫu Giáo Hướng Dương")}</p>
                   </div>
                 </div>
 
@@ -1167,8 +1075,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                         ? "bg-white text-slate-900 shadow-2xs font-bold"
                         : "text-slate-600 hover:text-slate-900"
                     }`}
-                  >
-                    Tất cả ({rawHistory.length})
+                  >{translateText("Tất cả (")}{rawHistory.length})
                   </button>
                   <button
                     type="button"
@@ -1178,9 +1085,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                         ? "bg-white text-emerald-800 shadow-2xs font-bold"
                         : "text-slate-600 hover:text-slate-900"
                     }`}
-                  >
-                    Đã phản hồi (
-                    {
+                  >{translateText("Đã phản hồi (")}{
                       rawHistory.filter(
                         (i) =>
                           i.status === "RESOLVED" || i.status === "RESPONDED",
@@ -1196,9 +1101,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                         ? "bg-white text-amber-800 shadow-2xs font-bold"
                         : "text-slate-600 hover:text-slate-900"
                     }`}
-                  >
-                    Đang xử lý (
-                    {rawHistory.filter((i) => i.status === "PENDING").length})
+                  >{translateText("Đang xử lý (")}{rawHistory.filter((i) => i.status === "PENDING").length})
                   </button>
                 </div>
               </div>
@@ -1218,13 +1121,12 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span className="px-2.5 py-0.5 rounded-md font-bold text-[11px] bg-sky-100 text-sky-800">
-                            {item.category || "Món ăn & Dinh dưỡng"}
+                            {translateText(item.category || "Món ăn & Dinh dưỡng")}
                           </span>
                           <span className="font-bold text-slate-800 text-xs">
-                            {item.title || item.code}
+                            {translateText(item.title || item.code)}
                           </span>
-                          <span className="text-slate-400">
-                            • Ngày gửi: {item.date}
+                          <span className="text-slate-400">{translateText("• Ngày gửi: ")}{translateText(item.date)}
                           </span>
                         </div>
 
@@ -1234,16 +1136,16 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                               <span>
-                                {item.statusLabel || "Đã Xử Lý Thỏa Đáng"}
+                                {translateText(item.statusLabel || "Đã Xử Lý Thỏa Đáng")}
                               </span>
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
                               <Clock className="w-3 h-3 text-amber-600" />
                               <span>
-                                {item.status === "DRAFT"
+                                {translateText(item.status === "DRAFT"
                                   ? "Bản nháp chưa gửi"
-                                  : "Đang xử lý cùng Tổ Bếp"}
+                                  : "Đang xử lý cùng Tổ Bếp")}
                               </span>
                             </span>
                           )}
@@ -1271,17 +1173,13 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                               <div className="text-xs">
                                 <span className="font-bold text-teal-950">
                                   {item.respondedByName ||
-                                    "Ban Giám Hiệu Nhà Trường"}
+                                    translateText("Ban Giám Hiệu Nhà Trường")}
                                 </span>
-                                <span className="text-teal-700 font-normal ml-1">
-                                  • Phản hồi chính thức
-                                </span>
+                                <span className="text-teal-700 font-normal ml-1">{translateText("• Phản hồi chính thức")}</span>
                               </div>
                             </div>
 
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-200/80 text-teal-900">
-                              Cam kết thực hiện
-                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-200/80 text-teal-900">{translateText("Cam kết thực hiện")}</span>
                           </div>
 
                           <p className="text-xs text-slate-700 leading-relaxed pl-9 font-medium">
@@ -1291,10 +1189,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                       ) : (
                         <div className="bg-slate-100/70 rounded-xl p-3 ml-2 sm:ml-4 text-xs text-slate-500 italic border border-slate-200 flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-amber-500" />
-                          <span>
-                            Ban Giám Hiệu & Tổ Dinh dưỡng đang kiểm tra quy
-                            trình và sẽ phản hồi đến Ba Mẹ trong 24 giờ.
-                          </span>
+                          <span>{translateText("Ban Giám Hiệu & Tổ Dinh dưỡng đang kiểm tra quy trình và sẽ phản hồi đến Ba Mẹ trong 24 giờ.")}</span>
                         </div>
                       )}
                     </div>

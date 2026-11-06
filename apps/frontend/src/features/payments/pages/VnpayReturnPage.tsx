@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
@@ -18,6 +20,7 @@ import { ElectronicReceiptModal } from '../components/ElectronicReceiptModal';
 import { ParentPortalTopNav } from '../../parent-evaluations/components/ParentPortalTopNav';
 
 export const VnpayReturnPage: React.FC = () => {
+  useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -137,7 +140,7 @@ export const VnpayReturnPage: React.FC = () => {
 
   const formatVND = (amt?: number) => {
     if (!amt) return '0 đ';
-    return new Intl.NumberFormat('vi-VN').format(amt) + ' đ';
+    return new Intl.NumberFormat(getLocale()).format(amt) + ' đ';
   };
 
   return (
@@ -148,12 +151,8 @@ export const VnpayReturnPage: React.FC = () => {
         {loading ? (
           <div className="bg-white rounded-3xl p-10 shadow-lg border border-slate-200 text-center space-y-4">
             <RefreshCw className="w-10 h-10 text-teal-600 animate-spin mx-auto" />
-            <h2 className="text-xl font-black text-slate-800">
-              Đang Xác Thực Kết Quả Giao Dịch VNPAY...
-            </h2>
-            <p className="text-xs text-slate-500">
-              Vui lòng không đóng trình duyệt, hệ thống đang đồng bộ dữ liệu giao dịch với máy chủ VNPAY.
-            </p>
+            <h2 className="text-xl font-black text-slate-800">{translateText("Đang Xác Thực Kết Quả Giao Dịch VNPAY...")}</h2>
+            <p className="text-xs text-slate-500">{translateText("Vui lòng không đóng trình duyệt, hệ thống đang đồng bộ dữ liệu giao dịch với máy chủ VNPAY.")}</p>
           </div>
         ) : result?.isSuccess ? (
           <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-emerald-200 text-center space-y-6 animate-scale-up">
@@ -162,41 +161,34 @@ export const VnpayReturnPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-black uppercase text-emerald-600 tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                Giao Dịch Hợp Lệ • Ký Số HMAC-SHA512 Thành Công
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">
-                Thanh Toán Ăn Xế Thành Công!
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-                Suất ăn xế chiều 17h00 của bé đã được ghi danh chính thức vào <strong>Snack Service Roster</strong> (Danh sách chuẩn bị suất ăn của nhà bếp).
-              </p>
+              <span className="text-xs font-black uppercase text-emerald-600 tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">{translateText("Giao Dịch Hợp Lệ • Ký Số HMAC-SHA512 Thành Công")}</span>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">{translateText("Thanh Toán Ăn Xế Thành Công!")}</h1>
+              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">{translateText("Suất ăn xế chiều 17h00 của bé đã được ghi danh chính thức vào ")}<strong>{translateText("Snack Service Roster")}</strong>{translateText(" (Danh sách chuẩn bị suất ăn của nhà bếp).")}</p>
             </div>
 
             <div className="bg-slate-50 rounded-2xl p-5 text-left space-y-3 border border-slate-200 text-xs sm:text-sm">
               <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                <span className="text-slate-500">Mã giao dịch VNPAY:</span>
+                <span className="text-slate-500">{translateText("Mã giao dịch VNPAY:")}</span>
                 <span className="font-mono font-bold text-slate-800">
-                  {result.transactionNo || 'N/A'}
+                  {translateText(result.transactionNo || 'N/A')}
                 </span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                <span className="text-slate-500">Mã đơn hàng nội bộ:</span>
+                <span className="text-slate-500">{translateText("Mã đơn hàng nội bộ:")}</span>
                 <span className="font-mono font-bold text-slate-800">
-                  {result.orderId || 'N/A'}
+                  {translateText(result.orderId || 'N/A')}
                 </span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                <span className="text-slate-500">Số tiền thanh toán:</span>
+                <span className="text-slate-500">{translateText("Số tiền thanh toán:")}</span>
                 <span className="font-black text-emerald-700 text-base">
-                  {formatVND(result.amount)}
+                  {translateText(formatVND(result.amount))}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Trạng thái vận hành:</span>
+                <span className="text-slate-500">{translateText("Trạng thái vận hành:")}</span>
                 <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg">
-                  <Coffee className="w-4 h-4" /> Đã Lên Danh Sách Suất Ăn Xế 17h
-                </span>
+                  <Coffee className="w-4 h-4" />{translateText(" Đã Lên Danh Sách Suất Ăn Xế 17h")}</span>
               </div>
             </div>
 
@@ -206,17 +198,13 @@ export const VnpayReturnPage: React.FC = () => {
                 disabled={loadingReceipt}
                 className="w-full py-3.5 px-6 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition"
               >
-                <FileText className="w-4 h-4" />
-                In & Tải Biên Lai Điện Tử (PDF)
-              </button>
+                <FileText className="w-4 h-4" />{translateText("In & Tải Biên Lai Điện Tử (PDF)")}</button>
 
               <button
                 onClick={() => navigate('/parent-snack-payment')}
                 className="w-full py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Quay Lại Trang Hóa Đơn & Dịch Vụ
-              </button>
+                <ArrowLeft className="w-4 h-4" />{translateText("Quay Lại Trang Hóa Đơn & Dịch Vụ")}</button>
             </div>
           </div>
         ) : (
@@ -226,15 +214,12 @@ export const VnpayReturnPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-black uppercase text-rose-600 tracking-wider bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
-                Giao Dịch Chưa Hoàn Tất (Mã lỗi: {result?.responseCode || 'N/A'})
+              <span className="text-xs font-black uppercase text-rose-600 tracking-wider bg-rose-50 px-3 py-1 rounded-full border border-rose-200">{translateText("Giao Dịch Chưa Hoàn Tất (Mã lỗi: ")}{result?.responseCode || translateText('N/A')})
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">
-                Thanh Toán Không Thành Công
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">{translateText("Thanh Toán Không Thành Công")}</h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-                {result?.message ||
-                  'Giao dịch đã bị hủy hoặc xảy ra lỗi trong quá trình xử lý qua cổng VNPAY.'}
+                {translateText(result?.message ||
+                  'Giao dịch đã bị hủy hoặc xảy ra lỗi trong quá trình xử lý qua cổng VNPAY.')}
               </p>
             </div>
 
@@ -243,9 +228,7 @@ export const VnpayReturnPage: React.FC = () => {
                 onClick={() => navigate('/parent-snack-payment')}
                 className="w-full py-3.5 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-md transition"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Thử Thanh Toán Lại
-              </button>
+                <ArrowLeft className="w-4 h-4" />{translateText("Thử Thanh Toán Lại")}</button>
             </div>
           </div>
         )}

@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Search, Camera, ChevronDown } from 'lucide-react';
 import { ParentEvaluationSummaryStats } from '../types';
@@ -33,6 +35,7 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
   onSortByChange,
   stats,
 }) => {
+  useLanguage();
   const total = stats?.totalCount ?? 0;
   const pending = stats?.pendingCount ?? 0;
   const responded = stats?.respondedCount ?? 0;
@@ -49,7 +52,7 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Tìm theo tên phụ huynh, tên bé, lớp học, ..."
+            placeholder={translateText("Tìm theo tên phụ huynh, tên bé, lớp học, ...")}
             className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200/90 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
           />
           {search && (
@@ -72,8 +75,7 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
                 ? 'bg-teal-700 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
             }`}
-          >
-            Tất cả ({total})
+          >{translateText("Tất cả (")}{total})
           </button>
 
           {/* Chưa phản hồi */}
@@ -86,7 +88,7 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${statusTab === 'PENDING' ? 'bg-white' : 'bg-rose-500'}`}></span>
-            <span>Chưa phản hồi ({pending})</span>
+            <span>{translateText("Chưa phản hồi (")}{pending})</span>
           </button>
 
           {/* Đã phản hồi */}
@@ -97,8 +99,7 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
                 ? 'bg-teal-700 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
             }`}
-          >
-            Đã phản hồi ({responded})
+          >{translateText("Đã phản hồi (")}{responded})
           </button>
 
           {/* Có đính kèm ảnh */}
@@ -111,7 +112,7 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>Có đính kèm ảnh ({photos})</span>
+            <span>{translateText("Có đính kèm ảnh (")}{photos})</span>
           </button>
         </div>
       </div>
@@ -120,21 +121,19 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1 border-t border-slate-100">
         {/* Dropdown 1: Đánh giá sao */}
         <div className="space-y-1">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            ĐÁNH GIÁ SAO
-          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{translateText("ĐÁNH GIÁ SAO")}</label>
           <div className="relative">
             <select
               value={ratingFilter}
               onChange={(e) => onRatingChange(Number(e.target.value))}
               className="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer"
             >
-              <option value={0}>Tất cả số sao</option>
-              <option value={5}>⭐⭐⭐⭐⭐ (5 sao)</option>
-              <option value={4}>⭐⭐⭐⭐☆ (4 sao)</option>
-              <option value={3}>⭐⭐⭐☆☆ (3 sao)</option>
-              <option value={2}>⭐⭐☆☆☆ (2 sao)</option>
-              <option value={1}>⭐☆☆☆☆ (1 sao)</option>
+              <option value={0}>{translateText("Tất cả số sao")}</option>
+              <option value={5}>{translateText("⭐⭐⭐⭐⭐ (5 sao)")}</option>
+              <option value={4}>{translateText("⭐⭐⭐⭐☆ (4 sao)")}</option>
+              <option value={3}>{translateText("⭐⭐⭐☆☆ (3 sao)")}</option>
+              <option value={2}>{translateText("⭐⭐☆☆☆ (2 sao)")}</option>
+              <option value={1}>{translateText("⭐☆☆☆☆ (1 sao)")}</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -142,20 +141,18 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
 
         {/* Dropdown 2: Bữa ăn / Thực đơn */}
         <div className="space-y-1">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            BỮA ĂN / THỰC ĐƠN
-          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{translateText("BỮA ĂN / THỰC ĐƠN")}</label>
           <div className="relative">
             <select
               value={mealFilter}
               onChange={(e) => onMealChange(e.target.value)}
               className="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer"
             >
-              <option value="ALL">Tất cả các bữa</option>
-              <option value="LUNCH">Bữa trưa chính</option>
-              <option value="AFTERNOON_SNACK">Gói ăn xế Năng Lượng Cao / Xế chiều</option>
-              <option value="BREAKFAST">Bữa sáng</option>
-              <option value="STANDARD">Suất ăn dinh dưỡng tiêu chuẩn</option>
+              <option value="ALL">{translateText("Tất cả các bữa")}</option>
+              <option value="LUNCH">{translateText("Bữa trưa chính")}</option>
+              <option value="AFTERNOON_SNACK">{translateText("Gói ăn xế Năng Lượng Cao / Xế chiều")}</option>
+              <option value="BREAKFAST">{translateText("Bữa sáng")}</option>
+              <option value="STANDARD">{translateText("Suất ăn dinh dưỡng tiêu chuẩn")}</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -163,22 +160,20 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
 
         {/* Dropdown 3: Khối lớp mầm non */}
         <div className="space-y-1">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            KHỐI LỚP MẦM NON
-          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{translateText("KHỐI LỚP MẦM NON")}</label>
           <div className="relative">
             <select
               value={classFilter}
               onChange={(e) => onClassChange(e.target.value)}
               className="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer"
             >
-              <option value="ALL">Tất cả các lớp</option>
-              <option value="Lớp Mầm 1">Lớp Mầm 1 (3-4 tuổi)</option>
-              <option value="Lớp Mầm 2">Lớp Mầm 2 (3-4 tuổi)</option>
-              <option value="Lớp Chồi 1">Lớp Chồi 1 (4-5 tuổi)</option>
-              <option value="Lớp Chồi 2">Lớp Chồi 2 (4-5 tuổi)</option>
-              <option value="Lớp Lá 1">Lớp Lá 1 (5-6 tuổi)</option>
-              <option value="Lớp Lá 2">Lớp Lá 2 (5-6 tuổi)</option>
+              <option value="ALL">{translateText("Tất cả các lớp")}</option>
+              <option value="Lớp Mầm 1">{translateText("Lớp Mầm 1 (3-4 tuổi)")}</option>
+              <option value="Lớp Mầm 2">{translateText("Lớp Mầm 2 (3-4 tuổi)")}</option>
+              <option value="Lớp Chồi 1">{translateText("Lớp Chồi 1 (4-5 tuổi)")}</option>
+              <option value="Lớp Chồi 2">{translateText("Lớp Chồi 2 (4-5 tuổi)")}</option>
+              <option value="Lớp Lá 1">{translateText("Lớp Lá 1 (5-6 tuổi)")}</option>
+              <option value="Lớp Lá 2">{translateText("Lớp Lá 2 (5-6 tuổi)")}</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -186,19 +181,17 @@ export const EvaluationFilterBar: React.FC<EvaluationFilterBarProps> = ({
 
         {/* Dropdown 4: Sắp xếp theo */}
         <div className="space-y-1">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            SẮP XẾP THEO
-          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{translateText("SẮP XẾP THEO")}</label>
           <div className="relative">
             <select
               value={sortBy}
               onChange={(e) => onSortByChange(e.target.value)}
               className="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer"
             >
-              <option value="NEWEST">Mới nhất trước</option>
-              <option value="OLDEST">Cũ nhất trước</option>
-              <option value="RATING_HIGH">Đánh giá cao nhất</option>
-              <option value="RATING_LOW">Đánh giá thấp nhất</option>
+              <option value="NEWEST">{translateText("Mới nhất trước")}</option>
+              <option value="OLDEST">{translateText("Cũ nhất trước")}</option>
+              <option value="RATING_HIGH">{translateText("Đánh giá cao nhất")}</option>
+              <option value="RATING_LOW">{translateText("Đánh giá thấp nhất")}</option>
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>

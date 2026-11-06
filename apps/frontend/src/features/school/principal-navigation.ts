@@ -89,7 +89,7 @@ export const principalNavigation = [
   },
   {
     group: "Dinh dưỡng & bữa ăn",
-    label: "Danh sách đăng ký ăn phụ",
+    label: "Danh sách đăng ký ăn sáng",
     path: "/snack-roster",
     icon: Coffee,
     functions: "64–65",

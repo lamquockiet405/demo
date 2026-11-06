@@ -18,6 +18,7 @@ import { Dish } from "../../dishes/entities/dish.entity";
 import {
   getPortionNutrition,
   hasVerifiedNutrition,
+  hasPlanningNutrition,
 } from "../../dishes/nutrition.util";
 import { NutritionalStandard } from "../entities/nutritional-standard.entity";
 import { MenuRuleViolation } from "../entities/menu-rule-violation.entity";
@@ -54,6 +55,8 @@ export interface DishWithNutrition {
   name: string;
   categoryCode: string;
   categoryName: string;
+  rotationKey?: string;
+  nutritionReference?: boolean;
   energyKcal: number;
   proteinG: number;
   fatG: number;
@@ -224,6 +227,7 @@ export class MenusService implements OnModuleInit {
         fat: number;
         carb: number;
         available: boolean;
+        reference: boolean;
       }
     > = {};
 
@@ -236,13 +240,19 @@ export class MenusService implements OnModuleInit {
              ROUND(COALESCE(SUM(dn.protein_g * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_prot,
              ROUND(COALESCE(SUM(dn.fat_g * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_fat,
              ROUND(COALESCE(SUM(dn.carb_g * COALESCE(mdi.portion_size_g / NULLIF(d.standard_serving_size_g, 0), 1)) / NULLIF(COUNT(DISTINCT md.id), 0), 0), 1) as avg_carb,
-             COUNT(mdi.id) > 0 AND COUNT(dn.dish_id) = COUNT(mdi.id) AS available
+             COUNT(mdi.id) > 0 AND COUNT(dn.dish_id) = COUNT(mdi.id) AS available,
+             COALESCE(BOOL_OR(dn.dish_id IS NOT NULL AND d.nutrition_verified = FALSE), FALSE) AS reference
            FROM menu_versions mv
            JOIN menu_days md ON md.menu_version_id = mv.id
            LEFT JOIN menu_meals mm ON mm.menu_day_id = md.id
            LEFT JOIN menu_dishes mdi ON mdi.menu_meal_id = mm.id
            LEFT JOIN dishes d ON d.id = mdi.dish_id
-           LEFT JOIN dish_nutrition dn ON dn.dish_id = mdi.dish_id AND d.nutrition_verified = TRUE
+           LEFT JOIN dish_nutrition dn ON dn.dish_id = mdi.dish_id AND (
+             d.nutrition_verified = TRUE OR (
+               d.source_metadata->>'recipeStatus' = 'APPROVED_REFERENCE'
+               AND d.source_metadata->'menuPlanningEnabled' = 'true'::jsonb
+               AND dn.source_metadata->>'status' = 'APPROVED_REFERENCE'
+             ))
            WHERE mv.menu_id = ANY($1)
              AND mv.version_number = (SELECT MAX(latest.version_number) FROM menu_versions latest WHERE latest.menu_id = mv.menu_id)
            GROUP BY mv.menu_id`,
@@ -255,6 +265,7 @@ export class MenusService implements OnModuleInit {
             fat: Number(row.avg_fat) || 0,
             carb: Number(row.avg_carb) || 0,
             available: row.available === true,
+            reference: row.reference === true,
           };
         }
       } catch (err: any) {
@@ -269,6 +280,7 @@ export class MenusService implements OnModuleInit {
         fat: 0,
         carb: 0,
         available: false,
+        reference: false,
       };
       return {
         id: String(m.id),
@@ -316,6 +328,7 @@ export class MenusService implements OnModuleInit {
         dailyAverageFatG: nut.fat,
         dailyAverageCarbG: nut.carb,
         nutritionAvailable: nut.available,
+        nutritionReference: nut.reference,
       };
     });
 
@@ -388,7 +401,8 @@ export class MenusService implements OnModuleInit {
       dishType: d.category?.code || "MAIN",
       isActive: d.status === "ACTIVE",
       standardServingSizeG: Number(d.standardServingSizeG) || 100,
-      nutritionAvailable: hasVerifiedNutrition(d),
+      nutritionAvailable: hasPlanningNutrition(d),
+      nutritionReference: hasPlanningNutrition(d) && !hasVerifiedNutrition(d),
       ...nutrition,
       totalCalories: nutrition.energyKcal,
       totalProteinG: nutrition.proteinG,
@@ -469,7 +483,7 @@ export class MenusService implements OnModuleInit {
         (dish) =>
           Number(dish.id) !== Number(source.id) &&
           dish.status === "ACTIVE" &&
-          hasVerifiedNutrition(dish) &&
+          hasPlanningNutrition(dish) &&
           dish.recipes?.length &&
           !restrictions.some((item) => matches(item, dish)),
       )
@@ -554,7 +568,8 @@ export class MenusService implements OnModuleInit {
             servingOrder: md.displayOrder || 1,
             portionSizeG:
               md.portionSizeG ?? md.dish?.standardServingSizeG ?? 100,
-            nutritionAvailable: hasVerifiedNutrition(md.dish),
+            nutritionAvailable: hasPlanningNutrition(md.dish),
+            nutritionReference: hasPlanningNutrition(md.dish) && !hasVerifiedNutrition(md.dish),
             plannedCalories: cal,
             specialDietNotes: md.specialDietNotes || null,
             dish: {
@@ -563,7 +578,7 @@ export class MenusService implements OnModuleInit {
               dishType: md.dish?.category?.code || "MAIN",
               targetAgeGroup: menu.ageGroup,
               standardServingSizeG: md.dish?.standardServingSizeG ?? 100,
-              nutritionAvailable: hasVerifiedNutrition(md.dish),
+              nutritionAvailable: hasPlanningNutrition(md.dish),
               totalCalories: getPortionNutrition(md.dish).energyKcal,
               totalProteinG: getPortionNutrition(md.dish).proteinG,
               totalFatG: getPortionNutrition(md.dish).fatG,
@@ -617,6 +632,7 @@ export class MenusService implements OnModuleInit {
       nutritionAvailable:
         menuDishes.length > 0 &&
         menuDishes.every((item) => item.nutritionAvailable),
+      nutritionReference: menuDishes.some((item) => item.nutritionReference),
       menuDishes,
       days: days.map((d) => ({
         id: String(d.id),
@@ -631,9 +647,15 @@ export class MenusService implements OnModuleInit {
             dishId: String(md.dishId),
             dishName: md.dish?.name || "Món ăn",
             categoryCode: md.dish?.category?.code || "MAIN",
-            categoryName: md.dish?.category?.name || "Món ăn",
+            categoryName:
+              (m.mealType === "BREAKFAST" || m.mealType === "MORNING_SNACK") &&
+              (md.dish?.category?.code === "SNACK_AFTERNOON" ||
+                md.dish?.category?.name?.includes("Xế") ||
+                md.dish?.category?.name?.includes("chiều"))
+                ? "Món sáng"
+                : md.dish?.category?.name || "Món ăn",
             portionSizeG: md.portionSizeG,
-            nutritionAvailable: hasVerifiedNutrition(md.dish),
+            nutritionAvailable: hasPlanningNutrition(md.dish),
             ...getPortionNutrition(md.dish, md.portionSizeG),
           })),
         })),
@@ -1473,7 +1495,7 @@ export class MenusService implements OnModuleInit {
     };
 
     for (const d of allDishes) {
-      if (!hasVerifiedNutrition(d) || Number(d.nutrition.energyKcal) <= 0)
+      if (!hasPlanningNutrition(d) || Number(d.nutrition.energyKcal) <= 0)
         continue;
       const code = d.category?.code || "MAIN";
       const entry: DishWithNutrition = {
@@ -1481,6 +1503,8 @@ export class MenusService implements OnModuleInit {
         name: d.name,
         categoryCode: code,
         categoryName: d.category?.name || "Món ăn",
+        rotationKey: d.sourceMetadata?.drinkFamily || String(d.id),
+        nutritionReference: !hasVerifiedNutrition(d),
         energyKcal: Number(d.nutrition?.energyKcal) || 0,
         proteinG: Number(d.nutrition?.proteinG) || 0,
         fatG: Number(d.nutrition?.fatG) || 0,
@@ -1633,6 +1657,8 @@ export class MenusService implements OnModuleInit {
       "Thứ Bảy",
     ];
     const usedDishIdsThisWeek = new Set<number>();
+    const drinkUseCounts = new Map<string, number>();
+    const drinksById = new Map(dishPool.DRINK.map((dish) => [dish.id, dish]));
     let previousDayDishIds = new Set<number>();
     const dailySummary: DayMealPlan[] = [];
 
@@ -1674,7 +1700,8 @@ export class MenusService implements OnModuleInit {
                 d.name.toLowerCase().includes("bánh bao"),
             ),
             ...dishPool.SNACK_MORNING,
-            ...dishPool.DRINK,
+            ...(dishPool.SNACK_MORNING.length || dishPool.SNACK_AFTERNOON.length
+              ? [] : dishPool.DRINK),
             ...dishPool.SNACK_AFTERNOON,
           ]);
           breakfastDish = this.pickDish(
@@ -1802,7 +1829,9 @@ export class MenusService implements OnModuleInit {
 
         // 3. Phụ chiều / Xế (AFTERNOON_SNACK): 1 món ăn xế + 1 thức uống
         // Món xế (SNACK_AFTERNOON) ~100-168 Kcal
-        const afternoonSnackPool = shuffleArray(dishPool.SNACK_AFTERNOON);
+        const afternoonSnackPool = shuffleArray(dishPool.SNACK_AFTERNOON.filter(
+          (dish) => dish.id !== breakfastDish?.id,
+        ));
         const afternoonDish = this.pickDish(
           afternoonSnackPool,
           usedDishIdsThisWeek,
@@ -1829,9 +1858,15 @@ export class MenusService implements OnModuleInit {
           });
         }
 
-        // Thức uống xế (DRINK) ~45-102 Kcal (cho phép lặp lại)
+        // Rotate drink families so aliases cannot displace another drink.
+        const drinkPool = dishPool.DRINK.filter((dish) => dish.id !== breakfastDish?.id);
+        const leastDrinkUses = Math.min(...drinkPool.map(
+          (dish) => drinkUseCounts.get(dish.rotationKey!) || 0,
+        ));
         const drinkDish = this.pickDish(
-          shuffleArray(dishPool.DRINK),
+          shuffleArray(drinkPool.filter(
+            (dish) => (drinkUseCounts.get(dish.rotationKey!) || 0) === leastDrinkUses,
+          )),
           usedDishIdsThisWeek,
           previousDayDishIds,
           recentDishIds,
@@ -1960,6 +1995,17 @@ export class MenusService implements OnModuleInit {
           );
         }
 
+        const referenceNames = bestPlan.dishes.filter((dish) =>
+          drinksById.get(Number(dish.dishId))?.nutritionReference,
+        ).map((dish) => dish.dishName);
+        if (referenceNames.length) {
+          bestPlan.violations.push(
+            `REFERENCE_NUTRITION: ${referenceNames.join(", ")} dùng công thức tham khảo; cần xác nhận định lượng của bếp.`,
+          );
+        }
+        if (dishPool.DRINK.length > 0 && new Set(dishPool.DRINK.map((dish) => dish.rotationKey)).size < daysCount) {
+          bestPlan.violations.push("LIMITED_DRINK_VARIETY: Chưa đủ loại thức uống để đổi món mỗi ngày trong tuần.");
+        }
         bestPlan.isCompliant = bestPlan.violations.length === 0;
         bestPlan.standardNote = bestPlan.isCompliant
           ? `✅ ĐẠT CHUẨN Thông tư 28 (${bestPlan.totalCalories} Kcal, P:${bestPlan.proteinPct}% L:${bestPlan.lipidPct}% G:${bestPlan.glucidPct}%)`
@@ -1968,6 +2014,8 @@ export class MenusService implements OnModuleInit {
         // Đánh dấu TẤT CẢ các món đã dùng trong tuần và thiết lập previousDayDishIds để chống trùng lặp tuyệt đối
         for (const d of bestPlan.dishes) {
           usedDishIdsThisWeek.add(Number(d.dishId));
+          const drink = drinksById.get(Number(d.dishId));
+          if (drink) drinkUseCounts.set(drink.rotationKey!, (drinkUseCounts.get(drink.rotationKey!) || 0) + 1);
         }
         previousDayDishIds = new Set(
           bestPlan.dishes.map((d) => Number(d.dishId)),
@@ -2091,7 +2139,7 @@ export class MenusService implements OnModuleInit {
     const planDayOffset = planToSave.some((day) => day.dayOfWeek === 1) ? 0 : 1;
     const eligibleDishes = allDishes.filter(
       (dish) =>
-        hasVerifiedNutrition(dish) && Number(dish.nutrition.energyKcal) > 0,
+        hasPlanningNutrition(dish) && Number(dish.nutrition.energyKcal) > 0,
     );
     for (let index = 0; index < daysCount; index++) {
       const dayPlan = planToSave.find(

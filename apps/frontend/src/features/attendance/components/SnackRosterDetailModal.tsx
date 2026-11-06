@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { X, ShieldCheck, AlertTriangle, Phone, User, Calendar, School, Utensils, Printer } from 'lucide-react';
 import { SnackRosterItem } from '../types';
@@ -13,6 +15,7 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
   onClose,
   item,
 }) => {
+  useLanguage();
   if (!isOpen || !item) return null;
 
   return (
@@ -25,11 +28,8 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
               <Utensils className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-800">
-                Chi tiết Suất Ăn Xế Học Sinh
-              </h3>
-              <p className="text-[11px] text-slate-500 font-mono">
-                Mã: {item.studentCode}
+              <h3 className="font-bold text-sm text-slate-800">{translateText("Chi tiết Suất Ăn Xế Học Sinh")}</h3>
+              <p className="text-[11px] text-slate-500 font-mono">{translateText("Mã: ")}{item.studentCode}
               </p>
             </div>
           </div>
@@ -47,7 +47,7 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
           {/* 1. Student Summary */}
           <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
             <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-sm">
-              {item.avatarInitials}
+              {translateText(item.avatarInitials)}
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
@@ -61,9 +61,9 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
               <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
                 <span>{item.blockName}</span>
                 <span>•</span>
-                <span>{item.formattedDob} ({item.ageLabel})</span>
+                <span>{translateText(item.formattedDob)} ({translateText(item.ageLabel)})</span>
                 <span>•</span>
-                <span>{item.gender === 'MALE' ? 'Nam' : 'Nữ'}</span>
+                <span>{translateText(item.gender === 'MALE' ? 'Nam' : 'Nữ')}</span>
               </div>
             </div>
           </div>
@@ -71,18 +71,14 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
           {/* 2. Snack Diet & Kitchen Instructions */}
           <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">
-                Chế độ ăn xế
-              </span>
+              <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">{translateText("Chế độ ăn xế")}</span>
               <span className="font-bold text-xs">
-                {item.snackDietBadgeText}
+                {translateText(item.snackDietBadgeText)}
               </span>
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-slate-700 mb-1">
-                Chỉ dẫn chuẩn bị của Nhà bếp:
-              </p>
+              <p className="text-xs font-semibold text-slate-700 mb-1">{translateText("Chỉ dẫn chuẩn bị của Nhà bếp:")}</p>
               <div
                 className={`p-3 rounded-xl text-xs font-medium leading-relaxed ${item.isKitchenHighlight
                   ? 'bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] font-bold'
@@ -99,27 +95,23 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
             <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Trạng thái phí</span>
+                <span>{translateText("Trạng thái phí")}</span>
               </div>
               <p className="text-sm font-black text-emerald-950 mt-1">
-                {item.paymentStatusLabel}
+                {translateText(item.paymentStatusLabel)}
               </p>
-              <p className="text-[11px] text-emerald-700 mt-0.5">
-                Đủ điều kiện xuất suất ăn
-              </p>
+              <p className="text-[11px] text-emerald-700 mt-0.5">{translateText("Đủ điều kiện xuất suất ăn")}</p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
                 <Utensils className="w-4 h-4 text-slate-500" />
-                <span>Suất ăn chiều</span>
+                <span>{translateText("Suất ăn chiều")}</span>
               </div>
               <p className="text-sm font-black text-slate-800 mt-1">
                 14:15 - 14:45
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                Bàn giao khay giữ nhiệt
-              </p>
+              <p className="text-[11px] text-slate-500 mt-0.5">{translateText("Bàn giao khay giữ nhiệt")}</p>
             </div>
           </div>
 
@@ -127,7 +119,7 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2 text-slate-600">
               <Phone className="w-4 h-4 text-slate-400" />
-              <span>Liên hệ phụ huynh:</span>
+              <span>{translateText("Liên hệ phụ huynh:")}</span>
               <strong className="text-slate-800 font-semibold">{item.emergencyContactName}</strong>
             </div>
             <a
@@ -146,15 +138,13 @@ export const SnackRosterDetailModal: React.FC<SnackRosterDetailModalProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200/60 rounded-xl transition"
           >
             <Printer className="w-4 h-4" />
-            <span>In thẻ suất ăn</span>
+            <span>{translateText("In thẻ suất ăn")}</span>
           </button>
 
           <button
             onClick={onClose}
             className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition"
-          >
-            Đóng
-          </button>
+          >{translateText("Đóng")}</button>
         </div>
       </div>
     </div>

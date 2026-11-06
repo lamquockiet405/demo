@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Star, Smile, Clock, CheckCircle2 } from 'lucide-react';
 import { ParentEvaluationSummaryStats } from '../types';
@@ -7,6 +9,7 @@ interface EvaluationSummaryCardsProps {
 }
 
 export const EvaluationSummaryCards: React.FC<EvaluationSummaryCardsProps> = ({ stats }) => {
+  useLanguage();
   const avgRating = stats?.avgRating != null ? Number(stats.avgRating).toFixed(1) : '4.9';
   const positiveRate = stats?.positiveRate != null ? Number(stats.positiveRate).toFixed(1) : '100.0';
   const pendingCount = stats?.pendingCount ?? 0;
@@ -80,7 +83,7 @@ export const EvaluationSummaryCards: React.FC<EvaluationSummaryCardsProps> = ({ 
             {/* Top Row: Title & Icon */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500 truncate mr-2">
-                {card.title}
+                {translateText(card.title)}
               </span>
               <div
                 className={`w-7 h-7 rounded-xl border flex items-center justify-center shrink-0 ${card.iconClass}`}
@@ -92,10 +95,10 @@ export const EvaluationSummaryCards: React.FC<EvaluationSummaryCardsProps> = ({ 
             {/* Middle Row: Large Value & Unit */}
             <div className="flex items-baseline gap-1.5 my-auto">
               <span className={`text-3xl font-black tracking-tight ${card.valueClass}`}>
-                {card.value}
+                {translateText(card.value)}
               </span>
               <span className="text-xs font-bold text-slate-400">
-                {card.unit}
+                {translateText(card.unit)}
               </span>
               {card.hasStar && (
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400 ml-0.5" />
@@ -107,10 +110,10 @@ export const EvaluationSummaryCards: React.FC<EvaluationSummaryCardsProps> = ({ 
               <span
                 className={`px-2 py-0.5 rounded-lg font-bold text-[11px] border shrink-0 ${card.badgeClass}`}
               >
-                {card.badge}
+                {translateText(card.badge)}
               </span>
               <span className="text-slate-500 text-xs truncate">
-                {card.subText}
+                {translateText(card.subText)}
               </span>
             </div>
           </div>

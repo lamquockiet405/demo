@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AttendanceTopNav } from './components/AttendanceTopNav';
@@ -23,6 +25,7 @@ interface MealEvaluationPageProps {
 }
 
 export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabChange }) => {
+  useLanguage();
   const navigate = useNavigate();
 
   // State
@@ -341,7 +344,7 @@ export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabCha
           ) : (
             <CheckCircle2 className="w-4 h-4 text-emerald-200" />
           )}
-          <span>{toast.message}</span>
+          <span>{translateText(toast.message)}</span>
           <button onClick={() => setToast(null)} className="ml-2 hover:opacity-80">
             <X className="w-3.5 h-3.5" />
           </button>
@@ -395,7 +398,7 @@ export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabCha
       {isLoading && !evaluationData ? (
         <div className="flex-1 flex flex-col items-center justify-center py-24">
           <Loader2 className="w-10 h-10 text-teal-600 animate-spin mb-3" />
-          <p className="text-sm font-bold text-slate-600">Đang tải dữ liệu đánh giá từ máy chủ...</p>
+          <p className="text-sm font-bold text-slate-600">{translateText("Đang tải dữ liệu đánh giá từ máy chủ...")}</p>
         </div>
       ) : evaluationData ? (
         <main className="flex-1 space-y-4 pb-12">
@@ -424,7 +427,7 @@ export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabCha
         </main>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-sm font-bold text-slate-600">Không tìm thấy dữ liệu đánh giá</p>
+          <p className="text-sm font-bold text-slate-600">{translateText("Không tìm thấy dữ liệu đánh giá")}</p>
         </div>
       )}
 

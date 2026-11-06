@@ -28,6 +28,12 @@ import {
   ApproveInterventionBudgetDto,
 } from "../dto/growth-notification-actions.dto";
 
+/**
+ * Điều phối cảnh báo tăng trưởng và các yêu cầu can thiệp, tư vấn, duyệt ngân sách.
+ * Các đường dẫn bên dưới được ghép với tiền tố toàn cục /api/v1.
+ * JwtAuthGuard xác thực tài khoản; RolesGuard kiểm tra quyền tại controller hoặc từng endpoint.
+ * Constructor nhận service qua Dependency Injection; các hàm chuyển dữ liệu request sang service.
+ */
 @ApiTags("Growth & Health Notifications Dispatch (UC85)")
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -35,6 +41,11 @@ import {
 export class GrowthDispatchController {
   constructor(private readonly growthDispatchService: GrowthDispatchService) {}
 
+  /**
+   * POST /growth-notifications/scan-dispatch: Quét nhân trắc học tự động & Điều phối thông báo bất thường theo vai trò (UC85).
+   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
+   * Chuyển xử lý sang GrowthDispatchService.scanAndDispatchNotifications() và trả kết quả cho client.
+   */
   @Post("scan-dispatch")
   @ApiOperation({
     summary:
@@ -47,6 +58,14 @@ export class GrowthDispatchController {
     );
   }
 
+  /**
+   * GET /growth-notifications: Lấy danh sách thông báo bất thường thể trạng theo phân quyền Scoping của 4 Role.
+   * @param query Bộ lọc trong query string.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang GrowthDispatchService.getNotificationsByRole() và trả kết quả cho client.
+   * Chuẩn hóa vai trò theo thứ tự quản lý trường, dinh dưỡng, giáo viên, phụ huynh.
+   * Trả danh sách kèm tổng số phần tử và roleScope được xác định.
+   */
   @Get()
   @ApiOperation({
     summary:
@@ -98,6 +117,11 @@ export class GrowthDispatchController {
     };
   }
 
+  /**
+   * GET /growth-notifications/executive-summary: Báo cáo tổng quan KPI thể chất & ca cảnh báo toàn trường dành cho Ban Giám Hiệu.
+   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
+   * Chuyển xử lý sang GrowthDispatchService.getExecutiveGrowthHealthSummary() và trả kết quả cho client.
+   */
   @Get("executive-summary")
   @ApiOperation({
     summary:
@@ -112,6 +136,14 @@ export class GrowthDispatchController {
     );
   }
 
+  /**
+   * PUT /growth-notifications/:id/acknowledge: Giáo viên hoặc Chuyên viên Dinh dưỡng xác nhận đã tiếp nhận chăm sóc học sinh (Acknowledge).
+   * @param id Giá trị id trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * @param dto Dữ liệu body JSON, kiểu AcknowledgeNotificationDto.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang GrowthDispatchService.acknowledgeNotification() và trả kết quả cho client.
+   * Lấy ID từ user.sub hoặc user.id; role dùng user.role, mặc định TEACHER.
+   */
   @Put(":id/acknowledge")
   @ApiOperation({
     summary:
@@ -139,6 +171,12 @@ export class GrowthDispatchController {
     );
   }
 
+  /**
+   * POST /growth-notifications/assign-intervention: Chuyên viên Dinh dưỡng lập Thực đơn can thiệp cá nhân hóa (Personalized Diet Plan).
+   * @param dto Dữ liệu body JSON, kiểu AssignInterventionDietDto.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang GrowthDispatchService.assignInterventionDiet() và trả kết quả cho client.
+   */
   @Post("assign-intervention")
   @ApiOperation({
     summary:
@@ -153,6 +191,12 @@ export class GrowthDispatchController {
     return this.growthDispatchService.assignInterventionDiet(dto, userId);
   }
 
+  /**
+   * POST /growth-notifications/request-consultation: Phụ huynh đặt lịch hẹn tư vấn dinh dưỡng 1-1 với Chuyên viên Dinh dưỡng.
+   * @param dto Dữ liệu body JSON, kiểu RequestConsultationDto.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang GrowthDispatchService.requestConsultation() và trả kết quả cho client.
+   */
   @Post("request-consultation")
   @ApiOperation({
     summary:
@@ -167,6 +211,12 @@ export class GrowthDispatchController {
     return this.growthDispatchService.requestConsultation(dto, userId);
   }
 
+  /**
+   * POST /growth-notifications/approve-budget: Ban Giám Hiệu phê duyệt ngân sách tài trợ dinh dưỡng can thiệp cho học sinh.
+   * @param dto Dữ liệu body JSON, kiểu ApproveInterventionBudgetDto.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang GrowthDispatchService.approveInterventionBudget() và trả kết quả cho client.
+   */
   @Post("approve-budget")
   @ApiOperation({
     summary:

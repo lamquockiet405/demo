@@ -1,9 +1,12 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
 import { apiClient } from "../../../core/api/axios";
 import { fetchKitchenCollection } from "../../kitchen/api/kitchen.api";
 import { SchoolPage, State, useSchoolResource } from "../components/SchoolUI";
 
 export function PrincipalMenuVersionsPage() {
+  useLanguage();
   const [search, setSearch] = useState(""),
     [status, setStatus] = useState(""),
     [age, setAge] = useState(""),
@@ -56,8 +59,8 @@ export function PrincipalMenuVersionsPage() {
         );
   return (
     <SchoolPage
-      title="Lịch sử phiên bản thực đơn"
-      description="Tìm thực đơn, lọc lịch sử và xem nội dung của đúng phiên bản đã lưu. Phiên bản cũ chỉ được xem."
+      title={translateText("Lịch sử phiên bản thực đơn")}
+      description={translateText("Tìm thực đơn, lọc lịch sử và xem nội dung của đúng phiên bản đã lưu. Phiên bản cũ chỉ được xem.")}
       actions={
         <button
           className="kp-button"
@@ -66,24 +69,22 @@ export function PrincipalMenuVersionsPage() {
             menus.reload();
             versions.reload();
           }}
-        >
-          Làm mới
-        </button>
+        >{translateText("Làm mới")}</button>
       }
     >
       <div className="kp-filters">
         <input
-          aria-label="Tìm thực đơn phiên bản"
-          placeholder="Tên thực đơn..."
+          aria-label={translateText("Tìm thực đơn phiên bản")}
+          placeholder={translateText("Tên thực đơn...")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          aria-label="Trạng thái thực đơn phiên bản"
+          aria-label={translateText("Trạng thái thực đơn phiên bản")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
           {[
             "DRAFT",
             "PENDING",
@@ -92,27 +93,27 @@ export function PrincipalMenuVersionsPage() {
             "ARCHIVED",
             "REJECTED",
           ].map((s) => (
-            <option key={s}>{s}</option>
+            <option key={s} value={s}>{translateText(s)}</option>
           ))}
         </select>
         <select
-          aria-label="Nhóm tuổi thực đơn phiên bản"
+          aria-label={translateText("Nhóm tuổi thực đơn phiên bản")}
           value={age}
           onChange={(e) => setAge(e.target.value)}
         >
-          <option value="">Tất cả nhóm tuổi</option>
-          <option value="NHA_TRE">Nhà trẻ</option>
-          <option value="MAU_GIAO">Mẫu giáo</option>
+          <option value="">{translateText("Tất cả nhóm tuổi")}</option>
+          <option value="NHA_TRE">{translateText("Nhà trẻ")}</option>
+          <option value="MAU_GIAO">{translateText("Mẫu giáo")}</option>
         </select>
         <select
-          aria-label="Chọn thực đơn xem phiên bản"
+          aria-label={translateText("Chọn thực đơn xem phiên bản")}
           value={menuId}
           onChange={(e) => choose(e.target.value)}
         >
-          <option value="">Chọn thực đơn</option>
+          <option value="">{translateText("Chọn thực đơn")}</option>
           {(menus.data || []).map((m) => (
             <option key={m.id} value={m.id}>
-              {m.title} · {m.startDate || m.weekStartDate}
+              {m.title} · {translateText(m.startDate || m.weekStartDate)}
             </option>
           ))}
         </select>
@@ -122,8 +123,8 @@ export function PrincipalMenuVersionsPage() {
         <>
           <input
             className="kp-input"
-            aria-label="Lọc lịch sử phiên bản"
-            placeholder="Số phiên bản, ghi chú, người tạo..."
+            aria-label={translateText("Lọc lịch sử phiên bản")}
+            placeholder={translateText("Số phiên bản, ghi chú, người tạo...")}
             value={versionSearch}
             onChange={(e) => setVersionSearch(e.target.value)}
           />
@@ -133,14 +134,14 @@ export function PrincipalMenuVersionsPage() {
               <thead>
                 <tr>
                   {[
-                    "Phiên bản",
-                    "Ghi chú thay đổi",
-                    "Người tạo",
-                    "Thời gian",
-                    "Nội dung",
+                    translateText("Phiên bản"),
+                    translateText("Ghi chú thay đổi"),
+                    translateText("Người tạo"),
+                    translateText("Thời gian"),
+                    translateText("Nội dung"),
                   ].map((h) => (
                     <th key={h} className="p-3">
-                      {h}
+                      {translateText(h)}
                     </th>
                   ))}
                 </tr>
@@ -148,22 +149,21 @@ export function PrincipalMenuVersionsPage() {
               <tbody>
                 {rows.map((v: any) => (
                   <tr key={v.id} className="border-t">
-                    <td className="p-3">{v.versionNumber}</td>
-                    <td className="p-3">{v.changeNote || "Chưa có ghi chú"}</td>
+                    <td className="p-3">{translateText(v.versionNumber)}</td>
+                    <td className="p-3">{translateText(v.changeNote || "Chưa có ghi chú")}</td>
                     <td className="p-3">
-                      {v.createdByName || "Chưa ghi nhận"}
+                      {v.createdByName || translateText("Chưa ghi nhận")}
                     </td>
                     <td className="p-3">
-                      {v.createdAt
-                        ? new Date(v.createdAt).toLocaleString("vi-VN")
-                        : "Chưa ghi nhận"}
+                      {translateText(v.createdAt
+                        ? new Date(v.createdAt).toLocaleString(getLocale())
+                        : "Chưa ghi nhận")}
                     </td>
                     <td className="p-3">
                       <button
                         className="kp-button"
                         onClick={() => setVersion(String(v.versionNumber))}
-                      >
-                        Xem phiên bản {v.versionNumber}
+                      >{translateText("Xem phiên bản ")}{translateText(v.versionNumber)}
                       </button>
                     </td>
                   </tr>
@@ -175,16 +175,16 @@ export function PrincipalMenuVersionsPage() {
       )}
       {version && (
         <>
-          <h2 className="font-bold">Nội dung phiên bản {version}</h2>
+          <h2 className="font-bold">{translateText("Nội dung phiên bản ")}{translateText(version)}</h2>
           <State resource={detail} />
           {detail.data && !detail.error && (
             <div className="overflow-auto bg-white border rounded-xl">
               <table className="w-full text-sm text-left">
                 <thead>
                   <tr>
-                    {["Ngày", "Bữa ăn", "Món ăn", "Khẩu phần (g)"].map((h) => (
+                    {[translateText("Ngày"), translateText("Bữa ăn"), translateText("Món ăn"), translateText("Khẩu phần (g)")].map((h) => (
                       <th className="p-3" key={h}>
-                        {h}
+                        {translateText(h)}
                       </th>
                     ))}
                   </tr>
@@ -197,11 +197,11 @@ export function PrincipalMenuVersionsPage() {
                           className="border-t"
                           key={`${d.id}-${m.id}-${dish.id}`}
                         >
-                          <td className="p-3">{d.date}</td>
-                          <td className="p-3">{m.mealType}</td>
+                          <td className="p-3">{translateText(d.date)}</td>
+                          <td className="p-3">{translateText(m.mealType)}</td>
                           <td className="p-3">{dish.dishName}</td>
                           <td className="p-3">
-                            {dish.portionSizeG ?? "Chưa ghi nhận"}
+                            {translateText(dish.portionSizeG ?? "Chưa ghi nhận")}
                           </td>
                         </tr>
                       )),

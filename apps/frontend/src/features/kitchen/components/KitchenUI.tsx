@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2, RefreshCw, X } from "lucide-react";
 
@@ -92,12 +94,13 @@ export function PageTitle({
   children?: React.ReactNode;
   eyebrow?: string;
 }) {
+  useLanguage();
   return (
     <div className="kp-page-title">
       <div>
-        <span className="kp-eyebrow">{eyebrow}</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
+        <span className="kp-eyebrow">{translateText(eyebrow)}</span>
+        <h1>{translateText(title)}</h1>
+        <p>{translateText(description)}</p>
       </div>
       <div className="kp-actions">{children}</div>
     </div>
@@ -110,6 +113,7 @@ export function Notice({
   error?: string;
   message?: string;
 }) {
+  useLanguage();
   if (!error && !message) return null;
   return (
     <div
@@ -117,7 +121,7 @@ export function Notice({
       role={error ? "alert" : "status"}
     >
       {error ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
-      <span>{error || message}</span>
+      <span>{translateText(error || message)}</span>
     </div>
   );
 }
@@ -128,15 +132,14 @@ export function ResourceState({
   resource: { loading: boolean; error: string; reload: () => Promise<void> };
   empty?: boolean;
 }) {
+  useLanguage();
   return (
     <>
       {resource.error && <Notice error={resource.error} />}
       {resource.loading ? (
-        <p className="kp-empty" role="status">
-          Đang tải dữ liệu…
-        </p>
+        <p className="kp-empty" role="status">{translateText("Đang tải dữ liệu…")}</p>
       ) : empty && !resource.error ? (
-        <p className="kp-empty">Không có dữ liệu phù hợp với bộ lọc.</p>
+        <p className="kp-empty">{translateText("Không có dữ liệu phù hợp với bộ lọc.")}</p>
       ) : null}
     </>
   );
@@ -148,15 +151,14 @@ export function ReloadButton({
   loading: boolean;
   reload: () => Promise<void>;
 }) {
+  useLanguage();
   return (
     <button
       className="kp-button"
       disabled={loading}
       onClick={() => void reload()}
     >
-      <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-      Làm mới
-    </button>
+      <RefreshCw size={15} className={loading ? "animate-spin" : ""} />{translateText("Làm mới")}</button>
   );
 }
 export function Pager({
@@ -170,26 +172,23 @@ export function Pager({
   limit?: number;
   onChange: (page: number) => void;
 }) {
+  useLanguage();
   const pages = Math.max(1, Math.ceil(total / limit));
   return (
     <div className="kp-pager">
       <span>
-        {total} kết quả · Trang {page}/{pages}
+        {total}{translateText(" kết quả · Trang ")}{page}/{pages}
       </span>
       <button
         className="kp-button"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
-      >
-        Trước
-      </button>
+      >{translateText("Trước")}</button>
       <button
         className="kp-button"
         disabled={page >= pages}
         onClick={() => onChange(page + 1)}
-      >
-        Sau
-      </button>
+      >{translateText("Sau")}</button>
     </div>
   );
 }
@@ -204,6 +203,7 @@ export function Modal({
   onClose: () => void;
   busy?: boolean;
 }) {
+  useLanguage();
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -221,14 +221,14 @@ export function Modal({
         event.preventDefault();
         if (!busy) onClose();
       }}
-      aria-label={title}
+      aria-label={translateText(title)}
     >
       <div className="kp-modal-header">
-        <h2>{title}</h2>
+        <h2>{translateText(title)}</h2>
         <button
           className="kp-button icon"
           disabled={busy}
-          aria-label="Đóng cửa sổ"
+          aria-label={translateText("Đóng cửa sổ")}
           onClick={onClose}
         >
           <X size={19} />

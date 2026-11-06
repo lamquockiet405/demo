@@ -1,3 +1,5 @@
+import { t as translateText } from '../core/i18n/language';
+import { useLanguage } from '../core/i18n/useLanguage';
 import { principalNavigation } from "../features/school/principal-navigation";
 import React, { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
@@ -19,6 +21,7 @@ import {
   Star,
   MessageSquareText,
   ClipboardCheck,
+  Menu,
 } from "lucide-react";
 import { UserProfileModal } from "../features/auth/components/UserProfileModal";
 import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
@@ -34,7 +37,18 @@ function getInitials(name?: string): string {
 }
 
 export const AdminDashboardLayout: React.FC = () => {
+  useLanguage();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [sidebarOpen]);
   const { user } = useAuthStore();
   const canManageParents = (user?.roles || []).some((role) =>
     [
@@ -94,7 +108,8 @@ export const AdminDashboardLayout: React.FC = () => {
   return (
     <div className="flex h-screen bg-[#f8fafc] font-sans antialiased text-slate-800">
       {/* 1. Sidebar Trái */}
-      <aside className="w-64 shrink-0 bg-white border-r border-slate-200/80 flex flex-col justify-between shadow-xs z-30">
+      {sidebarOpen && <button type="button" aria-label={translateText("Đóng menu quản trị")} className="fixed inset-0 bg-slate-900/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      <aside id="admin-sidebar" className={`${sidebarOpen ? 'flex' : 'hidden'} fixed inset-y-0 left-0 lg:static lg:flex w-64 shrink-0 bg-white border-r border-slate-200/80 flex-col justify-between shadow-xs z-40`}>
         <div className="flex-1 min-h-0 overflow-y-auto">
           {/* Header Sidebar: KidMeal BGH & Tên trường thực tế */}
           <div className="p-5 border-b border-slate-100 flex items-center gap-3">
@@ -111,9 +126,7 @@ export const AdminDashboardLayout: React.FC = () => {
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm text-slate-900 tracking-tight">
-                  KidMeal BGH
-                </span>
+                <span className="font-extrabold text-sm text-slate-900 tracking-tight">{translateText("KidMeal BGH")}</span>
               </div>
               <p
                 className="text-[11px] text-slate-500 font-medium truncate"
@@ -128,7 +141,7 @@ export const AdminDashboardLayout: React.FC = () => {
           <div className="px-4 pt-3.5 pb-1">
             <div className="bg-teal-50/80 border border-teal-200/60 rounded-full py-1 px-3 flex items-center gap-2 text-[11px] font-bold text-teal-800">
               <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
-              <span>CỔNG BAN GIÁM HIỆU</span>
+              <span>{translateText("CỔNG BAN GIÁM HIỆU")}</span>
             </div>
           </div>
 
@@ -148,7 +161,7 @@ export const AdminDashboardLayout: React.FC = () => {
                   {(index === 0 ||
                     item.group !== navItems[index - 1].group) && (
                     <p className="px-3 pt-4 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      {item.group}
+                      {translateText(item.group)}
                     </p>
                   )}
                   <Link
@@ -163,7 +176,7 @@ export const AdminDashboardLayout: React.FC = () => {
                     <Icon
                       className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`}
                     />
-                    <span>{item.label}</span>
+                    <span>{translateText(item.label)}</span>
                   </Link>
                 </React.Fragment>
               );
@@ -179,11 +192,9 @@ export const AdminDashboardLayout: React.FC = () => {
               <Headphones className="w-4 h-4" />
             </div>
             <div className="overflow-hidden">
-              <p className="text-[10px] text-slate-400 leading-tight">
-                Hotline Nhà trường
-              </p>
+              <p className="text-[10px] text-slate-400 leading-tight">{translateText("Hotline Nhà trường")}</p>
               <p className="text-xs font-bold text-teal-800 tracking-tight truncate">
-                {schoolPhone || "Chưa cập nhật"}
+                {translateText(schoolPhone || "Chưa cập nhật")}
               </p>
             </div>
           </div>
@@ -199,17 +210,15 @@ export const AdminDashboardLayout: React.FC = () => {
               </div>
               <div className="overflow-hidden">
                 <p className="text-xs font-bold text-slate-800 leading-tight truncate">
-                  {user?.fullName || user?.email || "Ban Giám Hiệu"}
+                  {user?.fullName || user?.email || translateText("Ban Giám Hiệu")}
                 </p>
-                <p className="text-[10px] text-slate-400">
-                  Hiệu trưởng / Quản lý
-                </p>
+                <p className="text-[10px] text-slate-400">{translateText("Hiệu trưởng / Quản lý")}</p>
               </div>
             </div>
 
             <button
               onClick={() => setIsProfileModalOpen(true)}
-              title="Xem & Cập nhật hồ sơ cá nhân"
+              title={translateText("Xem & Cập nhật hồ sơ cá nhân")}
               className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition shrink-0"
             >
               <MoreVertical className="w-4 h-4" />
@@ -221,16 +230,17 @@ export const AdminDashboardLayout: React.FC = () => {
       {/* 2. Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between z-20">
+        <header className="h-16 shrink-0 gap-3 bg-white border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between z-20">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-            <UtensilsCrossed className="w-4 h-4 text-teal-600" />
-            <span className="hover:text-slate-800 cursor-pointer">
+          <div className="min-w-0 flex-1 flex items-center gap-2 text-xs font-medium text-slate-500">
+            <button type="button" className="lg:hidden shrink-0 rounded-lg p-1 text-teal-700 hover:bg-teal-50" aria-label={translateText("Mở menu quản trị")} aria-expanded={sidebarOpen} aria-controls="admin-sidebar" onClick={() => setSidebarOpen(open => !open)}><Menu className="h-5 w-5" /></button>
+            <UtensilsCrossed className="hidden xl:block w-4 h-4 shrink-0 text-teal-600" />
+            <span className="hidden xl:inline truncate hover:text-slate-800 cursor-pointer">
               {schoolName}
             </span>
-            <span>›</span>
-            <span className="text-slate-900 font-semibold">
-              {getBreadcrumbTitle()}
+            <span className="hidden xl:inline">›</span>
+            <span className="truncate text-slate-900 font-semibold">
+              {translateText(getBreadcrumbTitle())}
             </span>
           </div>
 

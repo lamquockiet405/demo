@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import { coordinationApi } from "../../attendance/api/coordinationApi";
@@ -26,6 +28,7 @@ const blank = () => ({
   kitchenResponse: "",
 });
 export function KitchenNotesPage() {
+  useLanguage();
   const { user } = useAuthStore();
   const [date, setDate] = useState(getSchoolDate);
   const [status, setStatus] = useState("");
@@ -98,22 +101,18 @@ export function KitchenNotesPage() {
   return (
     <>
       <PageTitle
-        title="Ghi chú phối hợp bữa ăn"
-        description="Tiếp nhận yêu cầu từ giáo viên, phản hồi và theo dõi quá trình xử lý của bếp."
+        title={translateText("Ghi chú phối hợp bữa ăn")}
+        description={translateText("Tiếp nhận yêu cầu từ giáo viên, phản hồi và theo dõi quá trình xử lý của bếp.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button className="kp-button primary" onClick={() => open("new")}>
-          <Plus size={16} />
-          Tạo ghi chú
-        </button>
+          <Plus size={16} />{translateText("Tạo ghi chú")}</button>
       </PageTitle>
       <Notice error={action.error} message={action.message} />
       <div className="kp-filters">
-        <label>
-          Ngày bữa ăn
-          <input
+        <label>{translateText("Ngày bữa ăn")}<input
             type="date"
-            aria-label="Ngày ghi chú"
+            aria-label={translateText("Ngày ghi chú")}
             value={date}
             onChange={(e) => {
               if (e.target.value) setDate(e.target.value);
@@ -122,21 +121,21 @@ export function KitchenNotesPage() {
         </label>
         <input
           type="search"
-          aria-label="Tìm ghi chú"
-          placeholder="Tìm tiêu đề, nội dung, lớp…"
+          aria-label={translateText("Tìm ghi chú")}
+          placeholder={translateText("Tìm tiêu đề, nội dung, lớp…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          aria-label="Trạng thái ghi chú"
+          aria-label={translateText("Trạng thái ghi chú")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="PENDING">Chờ xử lý</option>
-          <option value="ACKNOWLEDGED">Đã tiếp nhận</option>
-          <option value="PROCESSING">Đang xử lý</option>
-          <option value="RESOLVED">Đã xử lý</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
+          <option value="PENDING">{translateText("Chờ xử lý")}</option>
+          <option value="ACKNOWLEDGED">{translateText("Đã tiếp nhận")}</option>
+          <option value="PROCESSING">{translateText("Đang xử lý")}</option>
+          <option value="RESOLVED">{translateText("Đã xử lý")}</option>
         </select>
       </div>
       <ResourceState resource={resource} empty={!notes.length} />
@@ -148,30 +147,28 @@ export function KitchenNotesPage() {
               <span
                 className={`kp-tag ${note.priority === "URGENT" ? "red" : "amber"}`}
               >
-                {note.priorityLabel}
+                {translateText(note.priorityLabel)}
               </span>
             </div>
             <span className="kp-tag">{note.className}</span>
-            <span className="kp-tag gray">{note.mealSessionLabel}</span>
-            <span className="kp-tag">{note.statusLabel}</span>
+            <span className="kp-tag gray">{translateText(note.mealSessionLabel)}</span>
+            <span className="kp-tag">{translateText(note.statusLabel)}</span>
             <p className="kp-note-text">{note.content}</p>
-            {note.child && <p>Học sinh: {note.child.fullName}</p>}
+            {note.child && <p>{translateText("Học sinh: ")}{note.child.fullName}</p>}
             {note.kitchenResponse && (
               <p className="kp-note-text">
-                <b>Phản hồi bếp:</b> {note.kitchenResponse}
+                <b>{translateText("Phản hồi bếp:")}</b> {note.kitchenResponse}
               </p>
             )}
             <p>
-              {note.teacherName} · {formatDateTime(note.createdAt)}
+              {note.teacherName} · {translateText(formatDateTime(note.createdAt))}
             </p>
             <div className="kp-actions">
               <button
                 className="kp-button"
                 disabled={action.busy}
                 onClick={() => open(note)}
-              >
-                Sửa / phản hồi
-              </button>
+              >{translateText("Sửa / phản hồi")}</button>
               {note.status === "PENDING" && (
                 <button
                   className="kp-button"
@@ -185,9 +182,7 @@ export function KitchenNotesPage() {
                       "Đã tiếp nhận ghi chú.",
                     )
                   }
-                >
-                  Tiếp nhận
-                </button>
+                >{translateText("Tiếp nhận")}</button>
               )}
               {!["RESOLVED", "CANCELLED"].includes(note.status) && (
                 <button
@@ -203,23 +198,19 @@ export function KitchenNotesPage() {
                       "Đã hoàn tất xử lý.",
                     )
                   }
-                >
-                  Hoàn tất
-                </button>
+                >{translateText("Hoàn tất")}</button>
               )}
               <button
                 className="kp-button danger"
                 disabled={action.busy}
                 onClick={() => {
-                  if (window.confirm(`Xóa ghi chú “${note.title}”?`))
+                  if (window.confirm(translateText(`Xóa ghi chú “${note.title}”?`)))
                     void work(
                       () => coordinationApi.deleteCoordinationNote(note.id),
                       "Đã xóa ghi chú.",
                     );
                 }}
-              >
-                Xóa
-              </button>
+              >{translateText("Xóa")}</button>
             </div>
           </article>
         ))}
@@ -227,9 +218,9 @@ export function KitchenNotesPage() {
       {editing && (
         <Modal
           title={
-            editing === "new"
+            translateText(editing === "new"
               ? "Tạo ghi chú phối hợp"
-              : "Chỉnh sửa / phản hồi ghi chú"
+              : "Chỉnh sửa / phản hồi ghi chú")
           }
           onClose={() => setEditing(null)}
           busy={action.busy}
@@ -237,19 +228,17 @@ export function KitchenNotesPage() {
           <Notice error={action.error} />
           <form onSubmit={save}>
             <div className="kp-form-grid">
-              <label className="kp-field">
-                Lớp
-                <select
+              <label className="kp-field">{translateText("Lớp")}<select
                   className="kp-input"
                   required
                   disabled={editing !== "new"}
-                  aria-label="Lớp"
+                  aria-label={translateText("Lớp")}
                   value={form.classId}
                   onChange={(e) =>
                     setForm({ ...form, classId: e.target.value })
                   }
                 >
-                  <option value="">Chọn lớp</option>
+                  <option value="">{translateText("Chọn lớp")}</option>
                   {resource.data?.availableClasses.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -257,51 +246,43 @@ export function KitchenNotesPage() {
                   ))}
                 </select>
               </label>
-              <label className="kp-field">
-                Bữa ăn
-                <select
+              <label className="kp-field">{translateText("Bữa ăn")}<select
                   className="kp-input"
                   value={form.mealSession}
                   onChange={(e) =>
                     setForm({ ...form, mealSession: e.target.value })
                   }
                 >
-                  <option value="LUNCH">Trưa chính</option>
-                  <option value="AFTERNOON_SNACK">Ăn phụ</option>
+                  <option value="LUNCH">{translateText("Trưa chính")}</option>
+                  <option value="AFTERNOON_SNACK">{translateText("Ăn phụ")}</option>
                 </select>
               </label>
-              <label className="kp-field">
-                Mức ưu tiên
-                <select
+              <label className="kp-field">{translateText("Mức ưu tiên")}<select
                   className="kp-input"
                   value={form.priority}
                   onChange={(e) =>
                     setForm({ ...form, priority: e.target.value })
                   }
                 >
-                  <option value="NORMAL">Bình thường</option>
-                  <option value="HIGH">Cao</option>
-                  <option value="URGENT">Khẩn cấp</option>
+                  <option value="NORMAL">{translateText("Bình thường")}</option>
+                  <option value="HIGH">{translateText("Cao")}</option>
+                  <option value="URGENT">{translateText("Khẩn cấp")}</option>
                 </select>
               </label>
-              <label className="kp-field">
-                Loại ghi chú
-                <select
+              <label className="kp-field">{translateText("Loại ghi chú")}<select
                   className="kp-input"
                   value={form.noteType}
                   onChange={(e) =>
                     setForm({ ...form, noteType: e.target.value })
                   }
                 >
-                  <option value="OTHER">Điều phối chung</option>
-                  <option value="ALLERGY_WARNING">Cảnh báo dị ứng</option>
-                  <option value="SPECIAL_DIET">Chế độ ăn riêng</option>
-                  <option value="PORTION_ADJUSTMENT">Điều chỉnh suất</option>
+                  <option value="OTHER">{translateText("Điều phối chung")}</option>
+                  <option value="ALLERGY_WARNING">{translateText("Cảnh báo dị ứng")}</option>
+                  <option value="SPECIAL_DIET">{translateText("Chế độ ăn riêng")}</option>
+                  <option value="PORTION_ADJUSTMENT">{translateText("Điều chỉnh suất")}</option>
                 </select>
               </label>
-              <label className="kp-field full">
-                Tiêu đề
-                <input
+              <label className="kp-field full">{translateText("Tiêu đề")}<input
                   className="kp-input"
                   required
                   maxLength={200}
@@ -309,9 +290,7 @@ export function KitchenNotesPage() {
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
               </label>
-              <label className="kp-field full">
-                Nội dung
-                <textarea
+              <label className="kp-field full">{translateText("Nội dung")}<textarea
                   className="kp-input"
                   required
                   maxLength={4000}
@@ -322,9 +301,7 @@ export function KitchenNotesPage() {
                 />
               </label>
               {editing !== "new" && (
-                <label className="kp-field full">
-                  Phản hồi của bếp
-                  <textarea
+                <label className="kp-field full">{translateText("Phản hồi của bếp")}<textarea
                     className="kp-input"
                     maxLength={2000}
                     value={form.kitchenResponse}
@@ -341,11 +318,9 @@ export function KitchenNotesPage() {
                 className="kp-button"
                 disabled={action.busy}
                 onClick={() => setEditing(null)}
-              >
-                Hủy
-              </button>
+              >{translateText("Hủy")}</button>
               <button className="kp-button primary" disabled={action.busy}>
-                {action.busy ? "Đang lưu…" : "Lưu ghi chú"}
+                {translateText(action.busy ? "Đang lưu…" : "Lưu ghi chú")}
               </button>
             </div>
           </form>

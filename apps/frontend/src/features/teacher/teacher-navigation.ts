@@ -3,7 +3,7 @@ export const teacherNavigation=[
  {path:'/teacher/students',label:'Hồ sơ học sinh',functions:'23–28'},
  {path:'/teacher/nutrition-profiles',label:'Hồ sơ dinh dưỡng',functions:'29'},
  {path:'/teacher/allergies',label:'Chế độ ăn & dị ứng',functions:'31–32'},
- {path:'/teacher/snack-roster',label:'Danh sách ăn phụ',functions:'64–65'},
+ {path:'/teacher/snack-roster',label:'Danh sách ăn sáng',functions:'64–65'},
  {path:'/teacher/portions',label:'Kế hoạch suất ăn',functions:'66'},
  {path:'/teacher/notes',label:'Ghi chú sau bữa ăn',functions:'67'},
  {path:'/teacher/meals',label:'Điểm danh & tình trạng ăn',functions:'68'},

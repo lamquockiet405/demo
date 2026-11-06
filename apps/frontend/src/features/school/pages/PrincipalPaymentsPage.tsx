@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { apiClient } from "../../../core/api/axios";
 import { rowsOf } from "../../kitchen/utils/kitchen-operations";
@@ -9,6 +11,7 @@ import {
   useSchoolAction,
 } from "../components/SchoolUI";
 export function PrincipalPaymentsPage() {
+  useLanguage();
   const [search, setSearch] = useState(""),
     [status, setStatus] = useState(""),
     [date, setDate] = useState("");
@@ -35,40 +38,36 @@ export function PrincipalPaymentsPage() {
     }, "Đã ghi nhận yêu cầu nhắc phí.");
   return (
     <SchoolPage
-      title="Lịch sử thanh toán & nhắc phí"
-      description="Tra cứu hóa đơn, thời điểm thanh toán và gửi nhắc phí cho hóa đơn đang chờ thanh toán."
+      title={translateText("Lịch sử thanh toán & nhắc phí")}
+      description={translateText("Tra cứu hóa đơn, thời điểm thanh toán và gửi nhắc phí cho hóa đơn đang chờ thanh toán.")}
       actions={
         <button
           className="kp-button"
           disabled={resource.loading}
           onClick={resource.reload}
-        >
-          Làm mới
-        </button>
+        >{translateText("Làm mới")}</button>
       }
     >
       <Feedback error={action.error} message={action.message} />
       <div className="kp-filters">
         <input
-          aria-label="Tìm hóa đơn"
-          placeholder="Tên học sinh, phụ huynh, lớp, mã hóa đơn…"
+          aria-label={translateText("Tìm hóa đơn")}
+          placeholder={translateText("Tên học sinh, phụ huynh, lớp, mã hóa đơn…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          aria-label="Trạng thái thanh toán"
+          aria-label={translateText("Trạng thái thanh toán")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="PENDING">Chờ thanh toán</option>
-          <option value="PAID">Đã thanh toán</option>
-          <option value="SUCCESS">Thành công</option>
-          <option value="FAILED">Thất bại</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
+          <option value="PENDING">{translateText("Chờ thanh toán")}</option>
+          <option value="PAID">{translateText("Đã thanh toán")}</option>
+          <option value="SUCCESS">{translateText("Thành công")}</option>
+          <option value="FAILED">{translateText("Thất bại")}</option>
         </select>
-        <label>
-          Ngày thanh toán
-          <input
+        <label>{translateText("Ngày thanh toán")}<input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -82,17 +81,17 @@ export function PrincipalPaymentsPage() {
             <thead className="bg-slate-50">
               <tr>
                 {[
-                  "Hóa đơn",
-                  "Học sinh / lớp",
-                  "Phụ huynh",
-                  "Gói dịch vụ",
-                  "Số tiền",
-                  "Trạng thái",
-                  "Thanh toán lúc",
-                  "Thao tác",
+                  translateText("Hóa đơn"),
+                  translateText("Học sinh / lớp"),
+                  translateText("Phụ huynh"),
+                  translateText("Gói dịch vụ"),
+                  translateText("Số tiền"),
+                  translateText("Trạng thái"),
+                  translateText("Thanh toán lúc"),
+                  translateText("Thao tác"),
                 ].map((s) => (
                   <th key={s} className="p-3 whitespace-nowrap">
-                    {s}
+                    {translateText(s)}
                   </th>
                 ))}
               </tr>
@@ -112,18 +111,18 @@ export function PrincipalPaymentsPage() {
                     {r.parentPhone}
                   </td>
                   <td className="p-3">
-                    {r.packageName || r.periodName || "—"}
+                    {translateText(r.packageName || r.periodName || "—")}
                   </td>
                   <td className="p-3">
-                    {r.amount == null
+                    {translateText(r.amount == null
                       ? "—"
-                      : Number(r.amount).toLocaleString("vi-VN") + " ₫"}
+                      : Number(r.amount).toLocaleString(getLocale()) + " ₫")}
                   </td>
-                  <td className="p-3">{r.status}</td>
+                  <td className="p-3">{translateText(r.status)}</td>
                   <td className="p-3">
-                    {r.paidAt
-                      ? new Date(r.paidAt).toLocaleString("vi-VN")
-                      : "Chưa thanh toán"}
+                    {translateText(r.paidAt
+                      ? new Date(r.paidAt).toLocaleString(getLocale())
+                      : "Chưa thanh toán")}
                   </td>
                   <td className="p-3">
                     {r.status === "PENDING" && (
@@ -131,9 +130,7 @@ export function PrincipalPaymentsPage() {
                         className="kp-button"
                         disabled={action.busy}
                         onClick={() => void remind(String(r.id))}
-                      >
-                        Nhắc phí
-                      </button>
+                      >{translateText("Nhắc phí")}</button>
                     )}
                   </td>
                 </tr>

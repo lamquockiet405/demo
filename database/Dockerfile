@@ -14,3 +14,4 @@ COPY database/migrations/20261105-meal-coordination-notes.sql /docker-entrypoint
 COPY database/migrations/20261105-attendance-kitchen-handoff.sql /docker-entrypoint-initdb.d/11-attendance-kitchen-handoff.sql
 COPY database/migrations/20261105-menu-meals-check.sql /docker-entrypoint-initdb.d/12-menu-meals-check.sql
 COPY database/realistic-preschool-seed.sql /docker-entrypoint-initdb.d/13-realistic-preschool-seed.sql
+COPY database/migrations/20261105-drink-recipes.sql /docker-entrypoint-initdb.d/14-drink-recipes.sql

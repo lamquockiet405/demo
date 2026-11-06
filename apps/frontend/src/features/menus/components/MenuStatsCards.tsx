@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from "react";
 import {
   CalendarDays,
@@ -20,6 +22,7 @@ export const MenuStatsCards: React.FC<MenuStatsCardsProps> = ({
   stats,
   loading,
 }) => {
+  useLanguage();
   const cards = [
     {
       title: "Tổng thực đơn tuần",
@@ -99,7 +102,7 @@ export const MenuStatsCards: React.FC<MenuStatsCardsProps> = ({
               <span
                 className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${card.badgeColor}`}
               >
-                {card.badge}
+                {translateText(card.badge)}
               </span>
               <div
                 className={`w-8 h-8 rounded-xl flex items-center justify-center ${card.iconBg}`}
@@ -110,7 +113,7 @@ export const MenuStatsCards: React.FC<MenuStatsCardsProps> = ({
 
             <div>
               <p className="text-xs font-semibold text-slate-500">
-                {card.title}
+                {translateText(card.title)}
               </p>
               <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
                 {loading ? (
@@ -123,7 +126,7 @@ export const MenuStatsCards: React.FC<MenuStatsCardsProps> = ({
 
             <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
               <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
-              <span className="truncate">{card.subText}</span>
+              <span className="truncate">{translateText(card.subText)}</span>
             </div>
           </div>
         );

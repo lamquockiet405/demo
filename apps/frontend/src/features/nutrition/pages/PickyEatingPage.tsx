@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -58,6 +60,7 @@ const TEMPLATE_SUGGESTIONS = [
 ];
 
 export function PickyEatingPage() {
+  useLanguage();
   const isTeacherPortal = useLocation().pathname.startsWith("/teacher/");
   const [classId, setClassId] = useState("");
   const [search, setSearch] = useState("");
@@ -171,16 +174,9 @@ export function PickyEatingPage() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-emerald-100">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-              Sàng lọc biếng ăn & Khẩu phần ăn
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Theo dõi Trẻ kén ăn & Tư vấn dinh dưỡng
-            </h1>
-            <p className="text-emerald-100/90 text-sm md:text-base leading-relaxed">
-              Phát hiện sớm trẻ bỏ bữa, ăn ít rau, lượng calo nạp thấp qua nhật ký suất ăn lớp mầm non. 
-              Chuyên gia dinh dưỡng rà soát yếu tố dị ứng và đồng hành cùng phụ huynh xây dựng phác đồ bổ sung tại nhà.
-            </p>
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />{translateText("Sàng lọc biếng ăn & Khẩu phần ăn")}</div>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{translateText("Theo dõi Trẻ kén ăn & Tư vấn dinh dưỡng")}</h1>
+            <p className="text-emerald-100/90 text-sm md:text-base leading-relaxed">{translateText("Phát hiện sớm trẻ bỏ bữa, ăn ít rau, lượng calo nạp thấp qua nhật ký suất ăn lớp mầm non. Chuyên gia dinh dưỡng rà soát yếu tố dị ứng và đồng hành cùng phụ huynh xây dựng phác đồ bổ sung tại nhà.")}</p>
           </div>
           <div className="flex items-center gap-3 self-start md:self-auto">
             <button
@@ -188,9 +184,7 @@ export function PickyEatingPage() {
               disabled={resource.loading}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-emerald-900 hover:bg-emerald-50 text-sm font-bold shadow-md transition-all active:scale-95 disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />
-              Phân tích lại
-            </button>
+              <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Phân tích lại")}</button>
           </div>
         </div>
       </section>
@@ -202,9 +196,7 @@ export function PickyEatingPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                Trẻ kén ăn
-              </span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{translateText("Trẻ kén ăn")}</span>
               <div className="w-8 h-8 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
                 <Baby className="w-4 h-4" />
               </div>
@@ -212,14 +204,12 @@ export function PickyEatingPage() {
             <div className="text-2xl md:text-3xl font-black text-slate-800">
               {summary.totalDetected}
             </div>
-            <p className="text-xs text-slate-400 mt-1">Được phát hiện từ bữa ăn</p>
+            <p className="text-xs text-slate-400 mt-1">{translateText("Được phát hiện từ bữa ăn")}</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-rose-600 uppercase tracking-wide">
-                Cần can thiệp gấp
-              </span>
+              <span className="text-xs font-semibold text-rose-600 uppercase tracking-wide">{translateText("Cần can thiệp gấp")}</span>
               <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
                 <AlertTriangle className="w-4 h-4" />
               </div>
@@ -227,14 +217,12 @@ export function PickyEatingPage() {
             <div className="text-2xl md:text-3xl font-black text-rose-600">
               {summary.severeCount}
             </div>
-            <p className="text-xs text-rose-500 mt-1">Bỏ cữ liên tục & ăn &lt; 30%</p>
+            <p className="text-xs text-rose-500 mt-1">{translateText("Bỏ cữ liên tục & ăn < 30%")}</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">
-                Theo dõi vừa & nhẹ
-              </span>
+              <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">{translateText("Theo dõi vừa & nhẹ")}</span>
               <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                 <TrendingDown className="w-4 h-4" />
               </div>
@@ -242,14 +230,12 @@ export function PickyEatingPage() {
             <div className="text-2xl md:text-3xl font-black text-amber-600">
               {summary.moderateCount + summary.mildCount}
             </div>
-            <p className="text-xs text-amber-500 mt-1">Kén rau, thịt hoặc ăn chậm</p>
+            <p className="text-xs text-amber-500 mt-1">{translateText("Kén rau, thịt hoặc ăn chậm")}</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">
-                Phụ huynh xác nhận
-              </span>
+              <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">{translateText("Phụ huynh xác nhận")}</span>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
@@ -257,7 +243,7 @@ export function PickyEatingPage() {
             <div className="text-2xl md:text-3xl font-black text-emerald-600">
               {summary.confirmedCount} / {summary.totalDetected || 1}
             </div>
-            <p className="text-xs text-emerald-600 mt-1">Đã tiếp nhận phác đồ</p>
+            <p className="text-xs text-emerald-600 mt-1">{translateText("Đã tiếp nhận phác đồ")}</p>
           </div>
         </div>
       )}
@@ -270,7 +256,7 @@ export function PickyEatingPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="search"
-            placeholder="Tìm theo tên học sinh, mã hồ sơ..."
+            placeholder={translateText("Tìm theo tên học sinh, mã hồ sơ...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
@@ -283,7 +269,7 @@ export function PickyEatingPage() {
             onChange={(e) => setClassId(e.target.value)}
             className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="">Tất cả các lớp</option>
+            <option value="">{translateText("Tất cả các lớp")}</option>
             {(resource.data?.classes || []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -296,10 +282,10 @@ export function PickyEatingPage() {
             onChange={(e) => setSeverityFilter(e.target.value)}
             className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="ALL">Tất cả mức độ</option>
-            <option value="SEVERE">Nghiêm trọng (SEVERE)</option>
-            <option value="MODERATE">Trung bình (MODERATE)</option>
-            <option value="MILD">Nhẹ (MILD)</option>
+            <option value="ALL">{translateText("Tất cả mức độ")}</option>
+            <option value="SEVERE">{translateText("Nghiêm trọng (SEVERE)")}</option>
+            <option value="MODERATE">{translateText("Trung bình (MODERATE)")}</option>
+            <option value="MILD">{translateText("Nhẹ (MILD)")}</option>
           </select>
 
           <select
@@ -307,10 +293,10 @@ export function PickyEatingPage() {
             onChange={(e) => setAdviceStatusFilter(e.target.value)}
             className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="ALL">Tất cả trạng thái tư vấn</option>
-            <option value="NOT_SENT">Chưa gửi tư vấn</option>
-            <option value="SENT">Đã gửi tư vấn</option>
-            <option value="PARENT_CONFIRMED">Phụ huynh đã xác nhận</option>
+            <option value="ALL">{translateText("Tất cả trạng thái tư vấn")}</option>
+            <option value="NOT_SENT">{translateText("Chưa gửi tư vấn")}</option>
+            <option value="SENT">{translateText("Đã gửi tư vấn")}</option>
+            <option value="PARENT_CONFIRMED">{translateText("Phụ huynh đã xác nhận")}</option>
           </select>
         </div>
       </div>
@@ -355,16 +341,14 @@ export function PickyEatingPage() {
                           : "bg-blue-50 text-blue-700 border border-blue-100"
                       }`}
                     >
-                      {child.severityLabel || child.severityLevel}
+                      {translateText(child.severityLabel || child.severityLevel)}
                     </span>
                   </div>
 
                   {/* Consumption Progress */}
                   <div className="p-3 rounded-2xl bg-slate-50 space-y-2">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-medium">
-                        Lượng ăn trung bình:
-                      </span>
+                      <span className="text-slate-500 font-medium">{translateText("Lượng ăn trung bình:")}</span>
                       <span className="font-bold text-slate-700">{consumption}%</span>
                     </div>
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -380,19 +364,16 @@ export function PickyEatingPage() {
                       />
                     </div>
                     <div className="flex justify-between items-center text-[11px] text-slate-400 pt-1">
-                      <span>Theo dõi: {child.totalMealsTracked} bữa</span>
+                      <span>{translateText("Theo dõi: ")}{child.totalMealsTracked}{translateText(" bữa")}</span>
                       <span className="text-rose-600 font-medium">
-                        {child.lowIntakeMealsCount} bữa ăn ít / bỏ
-                      </span>
+                        {child.lowIntakeMealsCount}{translateText(" bữa ăn ít / bỏ")}</span>
                     </div>
                   </div>
 
                   {/* Picky Symptoms */}
                   {child.pickySymptoms?.length > 0 && (
                     <div className="space-y-1.5">
-                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                        Dấu hiệu kén ăn
-                      </span>
+                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{translateText("Dấu hiệu kén ăn")}</span>
                       <div className="flex flex-wrap gap-1.5">
                         {child.pickySymptoms.map((sym, i) => (
                           <span
@@ -400,7 +381,7 @@ export function PickyEatingPage() {
                             className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-lg bg-orange-50 text-orange-700 font-medium border border-orange-100"
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                            {sym}
+                            {translateText(sym)}
                           </span>
                         ))}
                       </div>
@@ -411,8 +392,7 @@ export function PickyEatingPage() {
                   {child.allergies?.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-rose-50/80 border border-rose-100 flex items-start gap-2 text-xs text-rose-700 font-medium">
                       <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                      <span>
-                        Dị ứng đã ghi nhận: <strong>{child.allergies.join(", ")}</strong>
+                      <span>{translateText("Dị ứng đã ghi nhận: ")}<strong>{translateText(child.allergies.join(", "))}</strong>
                       </span>
                     </div>
                   )}
@@ -421,7 +401,7 @@ export function PickyEatingPage() {
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      {child.latestAdvice?.adviceDate || "Chưa có phác đồ"}
+                      {translateText(child.latestAdvice?.adviceDate || "Chưa có phác đồ")}
                     </span>
                     <span
                       className={`font-semibold ${
@@ -432,7 +412,7 @@ export function PickyEatingPage() {
                           : "text-slate-400"
                       }`}
                     >
-                      {child.adviceStatusLabel || "Chưa gửi tư vấn"}
+                      {translateText(child.adviceStatusLabel || "Chưa gửi tư vấn")}
                     </span>
                   </div>
                 </div>
@@ -443,7 +423,7 @@ export function PickyEatingPage() {
                   className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-teal-700 text-white font-medium text-xs tracking-wide shadow-sm transition-all"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
-                  {child.latestAdvice ? "Xem & Cập nhật tư vấn" : "Soạn tư vấn dinh dưỡng"}
+                  {translateText(child.latestAdvice ? "Xem & Cập nhật tư vấn" : "Soạn tư vấn dinh dưỡng")}
                 </button>
               </div>
             );
@@ -454,20 +434,15 @@ export function PickyEatingPage() {
           <div className="w-16 h-16 rounded-3xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-4 shadow-inner">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">
-            Không có trẻ nào có biểu hiện kén ăn cần can thiệp
-          </h3>
-          <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-            Hệ thống đối soát tự động nhật ký hoàn thành suất ăn do giáo viên cập nhật hàng ngày.
-            Hiện tại các lớp học sinh đều đạt tỷ lệ tiêu thụ dinh dưỡng an toàn theo quy chuẩn.
-          </p>
+          <h3 className="text-lg font-bold text-slate-800">{translateText("Không có trẻ nào có biểu hiện kén ăn cần can thiệp")}</h3>
+          <p className="text-sm text-slate-500 mt-2 leading-relaxed">{translateText("Hệ thống đối soát tự động nhật ký hoàn thành suất ăn do giáo viên cập nhật hàng ngày. Hiện tại các lớp học sinh đều đạt tỷ lệ tiêu thụ dinh dưỡng an toàn theo quy chuẩn.")}</p>
         </div>
       )}
 
       {/* Consultation Modal */}
       {selected && (
         <Modal
-          title={`Tư vấn dinh dưỡng · ${selected.fullName}`}
+          title={translateText(`Tư vấn dinh dưỡng · ${selected.fullName}`)}
           onClose={() => setSelected(null)}
           busy={action.busy}
         >
@@ -481,17 +456,16 @@ export function PickyEatingPage() {
                 <div>
                   <h4 className="font-bold text-slate-800">{selected.fullName}</h4>
                   <p className="text-xs text-slate-500">
-                    {selected.studentCode} · {selected.className} · Phụ huynh: {selected.parentName || "Chưa cập nhật"} ({selected.parentPhone || "N/A"})
+                    {selected.studentCode} · {selected.className}{translateText(" · Phụ huynh: ")}{selected.parentName || translateText("Chưa cập nhật")} ({selected.parentPhone || translateText("N/A")})
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
-                  {selected.severityLabel}
+                  {translateText(selected.severityLabel)}
                 </span>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  {selected.lowIntakeMealsCount} / {selected.totalMealsTracked} bữa ăn ít
-                </p>
+                  {selected.lowIntakeMealsCount} / {selected.totalMealsTracked}{translateText(" bữa ăn ít")}</p>
               </div>
             </div>
 
@@ -500,10 +474,8 @@ export function PickyEatingPage() {
               <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-sm">
                 <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="font-bold">LƯU Ý DỊ ỨNG QUAN TRỌNG:</strong>
-                  <p className="text-xs text-rose-700 mt-0.5">
-                    Học sinh bị dị ứng với: <strong>{selected.allergies.join(", ")}</strong>. Tuyệt đối không đề xuất các món có chứa thành phần này trong phác đồ dinh dưỡng gia đình.
-                  </p>
+                  <strong className="font-bold">{translateText("LƯU Ý DỊ ỨNG QUAN TRỌNG:")}</strong>
+                  <p className="text-xs text-rose-700 mt-0.5">{translateText("Học sinh bị dị ứng với: ")}<strong>{translateText(selected.allergies.join(", "))}</strong>{translateText(". Tuyệt đối không đề xuất các món có chứa thành phần này trong phác đồ dinh dưỡng gia đình.")}</p>
                 </div>
               </div>
             )}
@@ -511,9 +483,7 @@ export function PickyEatingPage() {
             {/* Quick Templates */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                  Gợi ý mẫu phác đồ chuẩn chuyên gia
-                </span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{translateText("Gợi ý mẫu phác đồ chuẩn chuyên gia")}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {TEMPLATE_SUGGESTIONS.map((tpl, i) => (
@@ -527,7 +497,7 @@ export function PickyEatingPage() {
                       {tpl.title}
                     </div>
                     <div className="text-slate-400 text-[11px] line-clamp-2 mt-1">
-                      {tpl.advice}
+                      {translateText(tpl.advice)}
                     </div>
                   </button>
                 ))}
@@ -537,8 +507,7 @@ export function PickyEatingPage() {
             {/* Form */}
             <form className="space-y-4" onSubmit={send}>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Tiêu đề thông điệp tư vấn <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Tiêu đề thông điệp tư vấn ")}<span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -546,17 +515,15 @@ export function PickyEatingPage() {
                   maxLength={255}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ví dụ: Phác đồ dinh dưỡng cải thiện khẩu vị cho bé..."
+                  placeholder={translateText("Ví dụ: Phác đồ dinh dưỡng cải thiện khẩu vị cho bé...")}
                   className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Vi chất cần tập trung bổ sung
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Vi chất cần tập trung bổ sung")}</label>
                 <div className="flex flex-wrap gap-2">
-                  {["Kẽm", "Sắt", "Canxi", "Vitamin A", "Vitamin D3", "Chất xơ", "Lysine", "Omega-3"].map((nut) => {
+                  {[translateText("Kẽm"), translateText("Sắt"), "Canxi", "Vitamin A", "Vitamin D3", translateText("Chất xơ"), "Lysine", "Omega-3"].map((nut) => {
                     const active = micronutrients.includes(nut);
                     return (
                       <button
@@ -569,8 +536,8 @@ export function PickyEatingPage() {
                             : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        {active ? "✓ " : "+ "}
-                        {nut}
+                        {translateText(active ? "✓ " : "+ ")}
+                        {translateText(nut)}
                       </button>
                     );
                   })}
@@ -578,8 +545,7 @@ export function PickyEatingPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Hướng dẫn chăm sóc & thực đơn tại nhà <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Hướng dẫn chăm sóc & thực đơn tại nhà ")}<span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   required
@@ -587,21 +553,19 @@ export function PickyEatingPage() {
                   rows={4}
                   value={advice}
                   onChange={(e) => setAdvice(e.target.value)}
-                  placeholder="Nhập chi tiết phác đồ chăm sóc, cách tương tác trong bữa ăn, thời gian biểu chia nhỏ cữ ăn..."
+                  placeholder={translateText("Nhập chi tiết phác đồ chăm sóc, cách tương tác trong bữa ăn, thời gian biểu chia nhỏ cữ ăn...")}
                   className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Món ăn bổ sung khuyên dùng (mỗi món 1 dòng)
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Món ăn bổ sung khuyên dùng (mỗi món 1 dòng)")}</label>
                 <textarea
                   maxLength={3000}
                   rows={3}
                   value={dishes}
                   onChange={(e) => setDishes(e.target.value)}
-                  placeholder="Ví dụ:&#10;Cháo tôm bí đỏ hạt sen&#10;Sinh tố bơ chuối sữa chua"
+                  placeholder={translateText("Ví dụ:&#10;Cháo tôm bí đỏ hạt sen&#10;Sinh tố bơ chuối sữa chua")}
                   className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 transition font-mono text-xs"
                 />
               </div>
@@ -611,16 +575,14 @@ export function PickyEatingPage() {
                   type="button"
                   onClick={() => setSelected(null)}
                   className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition"
-                >
-                  Đóng
-                </button>
+                >{translateText("Đóng")}</button>
                 <button
                   type="submit"
                   disabled={action.busy}
                   className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
-                  {action.busy ? "Đang gửi..." : "Gửi tư vấn cho phụ huynh"}
+                  {translateText(action.busy ? "Đang gửi..." : "Gửi tư vấn cho phụ huynh")}
                 </button>
               </div>
             </form>
@@ -628,9 +590,7 @@ export function PickyEatingPage() {
             {/* History */}
             <section className="border-t border-slate-100 pt-5">
               <h4 className="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-400" />
-                Lịch sử tư vấn đã gửi
-              </h4>
+                <Clock className="w-4 h-4 text-slate-400" />{translateText("Lịch sử tư vấn đã gửi")}</h4>
               <State resource={history} />
               <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
                 {(Array.isArray(history.data)
@@ -644,15 +604,15 @@ export function PickyEatingPage() {
                     <div className="flex items-center justify-between">
                       <strong className="text-slate-800 font-bold">{r.adviceTitle}</strong>
                       <span className="text-slate-400 text-[11px]">
-                        {r.createdAt
-                          ? new Date(r.createdAt).toLocaleDateString("vi-VN")
-                          : r.adviceDate}
+                        {translateText(r.createdAt
+                          ? new Date(r.createdAt).toLocaleDateString(getLocale())
+                          : r.adviceDate)}
                       </span>
                     </div>
                     <p className="text-slate-600 leading-relaxed">{r.homeSupplementAdvice}</p>
                     {r.parentFeedback && (
                       <div className="mt-2 p-2 rounded-xl bg-teal-50 border border-teal-100 text-teal-800">
-                        <strong>Phản hồi từ phụ huynh:</strong> {r.parentFeedback}
+                        <strong>{translateText("Phản hồi từ phụ huynh:")}</strong> {r.parentFeedback}
                       </div>
                     )}
                   </div>

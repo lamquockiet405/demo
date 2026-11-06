@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { apiClient } from "../../../core/api/axios";
 import { fetchKitchenCollection } from "../../kitchen/api/kitchen.api";
@@ -10,6 +12,7 @@ import {
 } from "../../school/components/SchoolUI";
 
 export function MenuEvaluationPage() {
+  useLanguage();
   const menus = useSchoolResource(() => fetchKitchenCollection("/menus"), []);
   const [menuId, setMenuId] = useState(""),
     [result, setResult] = useState<any>(null);
@@ -28,24 +31,24 @@ export function MenuEvaluationPage() {
     }, "Đã hoàn tất đánh giá thực đơn.");
   return (
     <SchoolPage
-      title="Đánh giá thực đơn theo 6 tiêu chí"
-      description="Đối chiếu thực đơn đã chọn với tiêu chuẩn và quy tắc đang cấu hình. Mục thiếu dữ liệu được ghi rõ, không tự kết luận đạt."
+      title={translateText("Đánh giá thực đơn theo 6 tiêu chí")}
+      description={translateText("Đối chiếu thực đơn đã chọn với tiêu chuẩn và quy tắc đang cấu hình. Mục thiếu dữ liệu được ghi rõ, không tự kết luận đạt.")}
     >
       <Feedback error={action.error} message={action.message} />
       <State resource={menus} />
       <div className="kp-filters">
         <select
-          aria-label="Thực đơn cần đánh giá"
+          aria-label={translateText("Thực đơn cần đánh giá")}
           value={menuId}
           onChange={(e) => {
             setMenuId(e.target.value);
             setResult(null);
           }}
         >
-          <option value="">Chọn thực đơn</option>
+          <option value="">{translateText("Chọn thực đơn")}</option>
           {(menus.data || []).map((m) => (
             <option key={m.id} value={m.id}>
-              {m.title} · v{m.version} · {m.status}
+              {m.title}{translateText(" · v")}{translateText(m.version)} · {translateText(m.status)}
             </option>
           ))}
         </select>
@@ -54,15 +57,14 @@ export function MenuEvaluationPage() {
           disabled={!menuId || action.busy}
           onClick={() => void evaluate()}
         >
-          {action.busy ? "Đang đánh giá…" : "Kiểm tra 6 tiêu chí"}
+          {translateText(action.busy ? "Đang đánh giá…" : "Kiểm tra 6 tiêu chí")}
         </button>
       </div>
       {result && (
         <>
-          <h2 className="font-bold">{result.menuTitle}</h2>
-          <p className="text-sm text-slate-500">
-            Điểm trên các tiêu chí đã đủ dữ liệu:{" "}
-            {result.complianceScore ?? "—"}% · {result.overallStatus}
+          <h2 className="font-bold">{translateText(result.menuTitle)}</h2>
+          <p className="text-sm text-slate-500">{translateText("Điểm trên các tiêu chí đã đủ dữ liệu:")}{" "}
+            {translateText(result.complianceScore ?? "—")}% · {translateText(result.overallStatus)}
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {(result.criteria || []).map((c: any) => (
@@ -73,17 +75,17 @@ export function MenuEvaluationPage() {
                 <div className="flex gap-3 justify-between">
                   <h3 className="font-semibold">{c.name}</h3>
                   <span className="text-xs">
-                    {c.status === "PASS"
+                    {translateText(c.status === "PASS"
                       ? "Đạt"
                       : c.status === "FAIL"
                         ? "Cần điều chỉnh"
-                        : "Chưa đủ dữ liệu"}
+                        : "Chưa đủ dữ liệu")}
                   </span>
                 </div>
                 <ul className="mt-3 text-sm space-y-2">
-                  {c.findings.map((s: string, i: number) => (
-                    <li key={i}>{s}</li>
-                  ))}
+                  {translateText(c.findings.map((s: string, i: number) => (
+                    <li key={i}>{translateText(s)}</li>
+                  )))}
                 </ul>
               </article>
             ))}

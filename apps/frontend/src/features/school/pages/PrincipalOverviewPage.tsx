@@ -1,3 +1,5 @@
+import { getLocale, t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -52,7 +54,7 @@ import {
 } from "../components/SchoolUI";
 
 const number = (value: unknown) =>
-  value == null ? "0" : Number(value).toLocaleString("vi-VN");
+  value == null ? "0" : Number(value).toLocaleString(getLocale());
 
 function exportJson(name: string, data: unknown) {
   const url = URL.createObjectURL(
@@ -74,6 +76,7 @@ const STATUS_COLORS = {
 };
 
 export function PrincipalOverviewPage() {
+  useLanguage();
   const resource = useSchoolResource(
     () => nutritionPhysicalDashboardApi.getSchoolManagerOverview(),
     [],
@@ -130,18 +133,12 @@ export function PrincipalOverviewPage() {
       <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              Ban Giám Hiệu • Báo Cáo Tổng Hợp
-            </span>
-            <span className="text-xs text-teal-200">Chuẩn WHO & Viện Dinh Dưỡng</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Ban Giám Hiệu • Báo Cáo Tổng Hợp")}</span>
+            <span className="text-xs text-teal-200">{translateText("Chuẩn WHO & Viện Dinh Dưỡng")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <BarChart3 className="w-8 h-8 text-amber-300" />
-            Dashboard Dinh Dưỡng & Thể Chất Trường Học
-          </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-            Giám sát trực quan phân bổ thể trạng học sinh, tỷ lệ tầm soát định kỳ, tiến độ can thiệp suy dinh dưỡng và chỉ số tuân thủ thực đơn toàn trường.
-          </p>
+            <BarChart3 className="w-8 h-8 text-amber-300" />{translateText("Dashboard Dinh Dưỡng & Thể Chất Trường Học")}</h1>
+          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Giám sát trực quan phân bổ thể trạng học sinh, tỷ lệ tầm soát định kỳ, tiến độ can thiệp suy dinh dưỡng và chỉ số tuân thủ thực đơn toàn trường.")}</p>
         </div>
 
         <div className="flex items-center gap-3 self-start md:self-auto">
@@ -150,17 +147,13 @@ export function PrincipalOverviewPage() {
             disabled={resource.loading}
             className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />
-            Làm mới dữ liệu
-          </button>
+            <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới dữ liệu")}</button>
           <button
             onClick={() => report && exportJson(`dashboard-bgh-${new Date().toISOString().slice(0, 10)}.json`, report)}
             disabled={!report}
             className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2"
           >
-            <Download className="w-4 h-4" />
-            Xuất dữ liệu
-          </button>
+            <Download className="w-4 h-4" />{translateText("Xuất dữ liệu")}</button>
         </div>
       </div>
 
@@ -173,75 +166,75 @@ export function PrincipalOverviewPage() {
             {/* Tổng học sinh */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-1">
               <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">Tổng học sinh</span>
+                <span className="text-xs font-semibold">{translateText("Tổng học sinh")}</span>
                 <Users className="w-4 h-4 text-teal-600" />
               </div>
-              <div className="text-2xl font-black text-slate-900">{number(k.totalStudents)}</div>
-              <p className="text-[11px] text-slate-400">Toàn bộ danh sách</p>
+              <div className="text-2xl font-black text-slate-900">{translateText(number(k.totalStudents))}</div>
+              <p className="text-[11px] text-slate-400">{translateText("Toàn bộ danh sách")}</p>
             </div>
 
             {/* Đã đánh giá */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-1">
               <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">Đã tầm soát</span>
+                <span className="text-xs font-semibold">{translateText("Đã tầm soát")}</span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
-              <div className="text-2xl font-black text-emerald-700">{number(k.evaluatedStudents)}</div>
+              <div className="text-2xl font-black text-emerald-700">{translateText(number(k.evaluatedStudents))}</div>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600">
                 <span>{evaluatedRate}%</span>
-                <span className="text-slate-400 font-normal">đã có kết quả</span>
+                <span className="text-slate-400 font-normal">{translateText("đã có kết quả")}</span>
               </div>
             </div>
 
             {/* Bình thường */}
             <div className="bg-white rounded-2xl border border-emerald-200 bg-emerald-50/20 p-4 shadow-xs space-y-1">
               <div className="flex items-center justify-between text-emerald-800">
-                <span className="text-xs font-bold">Bình thường</span>
+                <span className="text-xs font-bold">{translateText("Bình thường")}</span>
                 <HeartPulse className="w-4 h-4 text-emerald-600" />
               </div>
-              <div className="text-2xl font-black text-emerald-700">{number(k.normalCount)}</div>
+              <div className="text-2xl font-black text-emerald-700">{translateText(number(k.normalCount))}</div>
               <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700">
                 <span className="bg-emerald-100 px-2 py-0.5 rounded-full">{k.normalRate || Math.round((k.normalCount / (k.evaluatedStudents || 1)) * 100)}%</span>
-                <span className="text-slate-500 font-normal">học sinh</span>
+                <span className="text-slate-500 font-normal">{translateText("học sinh")}</span>
               </div>
             </div>
 
             {/* Nhẹ cân */}
             <div className="bg-white rounded-2xl border border-amber-200 bg-amber-50/20 p-4 shadow-xs space-y-1">
               <div className="flex items-center justify-between text-amber-800">
-                <span className="text-xs font-bold">Nhẹ cân</span>
+                <span className="text-xs font-bold">{translateText("Nhẹ cân")}</span>
                 <AlertTriangle className="w-4 h-4 text-amber-600" />
               </div>
-              <div className="text-2xl font-black text-amber-700">{number(k.underweightCount)}</div>
+              <div className="text-2xl font-black text-amber-700">{translateText(number(k.underweightCount))}</div>
               <div className="flex items-center gap-1 text-[11px] font-bold text-amber-700">
                 <span className="bg-amber-100 px-2 py-0.5 rounded-full">{k.underweightRate || 0}%</span>
-                <span className="text-slate-500 font-normal">cần bồi dưỡng</span>
+                <span className="text-slate-500 font-normal">{translateText("cần bồi dưỡng")}</span>
               </div>
             </div>
 
             {/* Thấp còi */}
             <div className="bg-white rounded-2xl border border-rose-200 bg-rose-50/20 p-4 shadow-xs space-y-1">
               <div className="flex items-center justify-between text-rose-800">
-                <span className="text-xs font-bold">Thấp còi</span>
+                <span className="text-xs font-bold">{translateText("Thấp còi")}</span>
                 <TrendingDown className="w-4 h-4 text-rose-600" />
               </div>
-              <div className="text-2xl font-black text-rose-700">{number(k.stuntedCount)}</div>
+              <div className="text-2xl font-black text-rose-700">{translateText(number(k.stuntedCount))}</div>
               <div className="flex items-center gap-1 text-[11px] font-bold text-rose-700">
                 <span className="bg-rose-100 px-2 py-0.5 rounded-full">{k.stuntedRate || 0}%</span>
-                <span className="text-slate-500 font-normal">cần can thiệp</span>
+                <span className="text-slate-500 font-normal">{translateText("cần can thiệp")}</span>
               </div>
             </div>
 
             {/* Thừa cân / Béo phì */}
             <div className="bg-white rounded-2xl border border-purple-200 bg-purple-50/20 p-4 shadow-xs space-y-1">
               <div className="flex items-center justify-between text-purple-800">
-                <span className="text-xs font-bold">Thừa cân/Béo phì</span>
+                <span className="text-xs font-bold">{translateText("Thừa cân/Béo phì")}</span>
                 <Scale className="w-4 h-4 text-purple-600" />
               </div>
-              <div className="text-2xl font-black text-purple-700">{number(k.overweightObeseCount)}</div>
+              <div className="text-2xl font-black text-purple-700">{translateText(number(k.overweightObeseCount))}</div>
               <div className="flex items-center gap-1 text-[11px] font-bold text-purple-700">
                 <span className="bg-purple-100 px-2 py-0.5 rounded-full">{k.overweightObeseRate || 0}%</span>
-                <span className="text-slate-500 font-normal">giảm ngọt/béo</span>
+                <span className="text-slate-500 font-normal">{translateText("giảm ngọt/béo")}</span>
               </div>
             </div>
           </div>
@@ -253,16 +246,11 @@ export function PrincipalOverviewPage() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                    <PieIcon className="w-5 h-5 text-teal-600" />
-                    Cơ Cấu Thể Trạng Học Sinh
-                  </h2>
+                    <PieIcon className="w-5 h-5 text-teal-600" />{translateText("Cơ Cấu Thể Trạng Học Sinh")}</h2>
                   <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-                    {number(k.evaluatedStudents)} bé đã đo
-                  </span>
+                    {translateText(number(k.evaluatedStudents))}{translateText(" bé đã đo")}</span>
                 </div>
-                <p className="text-xs text-slate-500 mb-4">
-                  Tỷ lệ học sinh đạt chuẩn WHO và tỷ lệ nguy cơ dinh dưỡng toàn trường.
-                </p>
+                <p className="text-xs text-slate-500 mb-4">{translateText("Tỷ lệ học sinh đạt chuẩn WHO và tỷ lệ nguy cơ dinh dưỡng toàn trường.")}</p>
               </div>
 
               <div className="h-64 relative flex items-center justify-center">
@@ -285,8 +273,8 @@ export function PrincipalOverviewPage() {
                       </Pie>
                       <Tooltip
                         formatter={(val: number, name: string) => [
-                          `${number(val)} bé (${Math.round((val / (k.evaluatedStudents || 1)) * 100)}%)`,
-                          name,
+                          translateText(`${number(val)} bé (${Math.round((val / (k.evaluatedStudents || 1)) * 100)}%)`),
+                          translateText(name),
                         ]}
                         contentStyle={{
                           backgroundColor: "#1e293b",
@@ -299,13 +287,13 @@ export function PrincipalOverviewPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="text-center text-xs text-slate-400">Chưa có dữ liệu thể trạng</div>
+                  <div className="text-center text-xs text-slate-400">{translateText("Chưa có dữ liệu thể trạng")}</div>
                 )}
 
                 {/* Center Badge */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-2xl font-black text-slate-900">{k.normalRate || 0}%</span>
-                  <span className="text-[11px] font-bold text-emerald-600 uppercase">Đạt chuẩn</span>
+                  <span className="text-[11px] font-bold text-emerald-600 uppercase">{translateText("Đạt chuẩn")}</span>
                 </div>
               </div>
 
@@ -313,19 +301,19 @@ export function PrincipalOverviewPage() {
               <div className="grid grid-cols-2 gap-2 pt-4 border-t border-slate-100 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
-                  <span className="text-slate-600">Bình thường: <strong>{number(k.normalCount)}</strong> ({k.normalRate}%)</span>
+                  <span className="text-slate-600">{translateText("Bình thường: ")}<strong>{translateText(number(k.normalCount))}</strong> ({k.normalRate}%)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0"></span>
-                  <span className="text-slate-600">Nhẹ cân: <strong>{number(k.underweightCount)}</strong> ({k.underweightRate}%)</span>
+                  <span className="text-slate-600">{translateText("Nhẹ cân: ")}<strong>{translateText(number(k.underweightCount))}</strong> ({k.underweightRate}%)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-rose-500 shrink-0"></span>
-                  <span className="text-slate-600">Thấp còi: <strong>{number(k.stuntedCount)}</strong> ({k.stuntedRate}%)</span>
+                  <span className="text-slate-600">{translateText("Thấp còi: ")}<strong>{translateText(number(k.stuntedCount))}</strong> ({k.stuntedRate}%)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-purple-500 shrink-0"></span>
-                  <span className="text-slate-600">Thừa cân: <strong>{number(k.overweightObeseCount)}</strong> ({k.overweightObeseRate}%)</span>
+                  <span className="text-slate-600">{translateText("Thừa cân: ")}<strong>{translateText(number(k.overweightObeseCount))}</strong> ({k.overweightObeseRate}%)</span>
                 </div>
               </div>
             </div>
@@ -335,14 +323,10 @@ export function PrincipalOverviewPage() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-teal-600" />
-                    So Sánh Thể Trạng Theo Khối Lớp
-                  </h2>
-                  <span className="text-xs text-slate-500">Phân theo độ tuổi</span>
+                    <BarChart3 className="w-5 h-5 text-teal-600" />{translateText("So Sánh Thể Trạng Theo Khối Lớp")}</h2>
+                  <span className="text-xs text-slate-500">{translateText("Phân theo độ tuổi")}</span>
                 </div>
-                <p className="text-xs text-slate-500 mb-4">
-                  Theo dõi số lượng học sinh đạt chuẩn vs nguy cơ theo từng khối mầm non.
-                </p>
+                <p className="text-xs text-slate-500 mb-4">{translateText("Theo dõi số lượng học sinh đạt chuẩn vs nguy cơ theo từng khối mầm non.")}</p>
               </div>
 
               <div className="h-64">
@@ -350,7 +334,7 @@ export function PrincipalOverviewPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="grade" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={{ stroke: "#cbd5e1" }} />
+                      <XAxis tickFormatter={value => translateText(String(value))} dataKey="grade" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={{ stroke: "#cbd5e1" }} />
                       <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={{ stroke: "#cbd5e1" }} />
                       <Tooltip
                         contentStyle={{
@@ -361,23 +345,21 @@ export function PrincipalOverviewPage() {
                           fontSize: "12px",
                         }}
                       />
-                      <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                      <Bar dataKey="Bình thường" fill={STATUS_COLORS.normal} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Nhẹ cân" fill={STATUS_COLORS.underweight} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Thấp còi" fill={STATUS_COLORS.stunted} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Thừa cân/Béo phì" fill={STATUS_COLORS.overweight} radius={[4, 4, 0, 0]} />
+                      <Legend formatter={value => translateText(String(value))} wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+                      <Bar name={translateText("Bình thường")} dataKey="Bình thường" fill={STATUS_COLORS.normal} radius={[4, 4, 0, 0]} />
+                      <Bar name={translateText("Nhẹ cân")} dataKey="Nhẹ cân" fill={STATUS_COLORS.underweight} radius={[4, 4, 0, 0]} />
+                      <Bar name={translateText("Thấp còi")} dataKey="Thấp còi" fill={STATUS_COLORS.stunted} radius={[4, 4, 0, 0]} />
+                      <Bar name={translateText("Thừa cân/Béo phì")} dataKey="Thừa cân/Béo phì" fill={STATUS_COLORS.overweight} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-slate-400">
-                    Chưa có dữ liệu phân theo khối lớp
-                  </div>
+                  <div className="flex h-full items-center justify-center text-xs text-slate-400">{translateText("Chưa có dữ liệu phân theo khối lớp")}</div>
                 )}
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Tuân thủ thực đơn trường: <strong className="text-emerald-700">{k.menuComplianceRate || 95}%</strong></span>
-                <span className="text-teal-700 font-bold">Khối có tỷ lệ đạt chuẩn cao nhất: {barData[0]?.grade || "Mẫu giáo"} ({barData[0]?.normalRate || 85}%)</span>
+                <span>{translateText("Tuân thủ thực đơn trường: ")}<strong className="text-emerald-700">{k.menuComplianceRate || 95}%</strong></span>
+                <span className="text-teal-700 font-bold">{translateText("Khối có tỷ lệ đạt chuẩn cao nhất: ")}{translateText(barData[0]?.grade || "Mẫu giáo")} ({barData[0]?.normalRate || 85}%)</span>
               </div>
             </div>
           </div>
@@ -388,16 +370,11 @@ export function PrincipalOverviewPage() {
             <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-teal-600" />
-                  Diễn Biến Tăng Trưởng Qua Các Kỳ Đo (Trends)
-                </h2>
-                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  Xu hướng tích cực +{k.normalRate ? Math.max(0, k.normalRate - 75) : 8}%
+                  <TrendingUp className="w-5 h-5 text-teal-600" />{translateText("Diễn Biến Tăng Trưởng Qua Các Kỳ Đo (Trends)")}</h2>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">{translateText("Xu hướng tích cực +")}{k.normalRate ? Math.max(0, k.normalRate - 75) : 8}%
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mb-4">
-                Biểu đồ tỷ lệ học sinh đạt chuẩn phát triển thể chất và giảm thiểu suy dinh dưỡng qua các mốc học kỳ.
-              </p>
+              <p className="text-xs text-slate-500 mb-4">{translateText("Biểu đồ tỷ lệ học sinh đạt chuẩn phát triển thể chất và giảm thiểu suy dinh dưỡng qua các mốc học kỳ.")}</p>
 
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -413,7 +390,7 @@ export function PrincipalOverviewPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="period" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={{ stroke: "#cbd5e1" }} />
+                    <XAxis tickFormatter={value => translateText(String(value))} dataKey="period" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={{ stroke: "#cbd5e1" }} />
                     <YAxis tick={{ fontSize: 11, fill: "#64748b" }} domain={[0, 100]} axisLine={{ stroke: "#cbd5e1" }} />
                     <Tooltip
                       contentStyle={{
@@ -424,10 +401,10 @@ export function PrincipalOverviewPage() {
                         fontSize: "12px",
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                    <Area type="monotone" dataKey="Bình thường (%)" stroke={STATUS_COLORS.normal} strokeWidth={2.5} fillOpacity={1} fill="url(#colorNormal)" />
-                    <Area type="monotone" dataKey="Nhẹ cân (%)" stroke={STATUS_COLORS.underweight} strokeWidth={2} fillOpacity={1} fill="url(#colorUnder)" />
-                    <Area type="monotone" dataKey="Thấp còi (%)" stroke={STATUS_COLORS.stunted} strokeWidth={1.5} fillOpacity={0} />
+                    <Legend formatter={value => translateText(String(value))} wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+                    <Area name={translateText("Bình thường (%)")} type="monotone" dataKey="Bình thường (%)" stroke={STATUS_COLORS.normal} strokeWidth={2.5} fillOpacity={1} fill="url(#colorNormal)" />
+                    <Area name={translateText("Nhẹ cân (%)")} type="monotone" dataKey="Nhẹ cân (%)" stroke={STATUS_COLORS.underweight} strokeWidth={2} fillOpacity={1} fill="url(#colorUnder)" />
+                    <Area name={translateText("Thấp còi (%)")} type="monotone" dataKey="Thấp còi (%)" stroke={STATUS_COLORS.stunted} strokeWidth={1.5} fillOpacity={0} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -441,48 +418,41 @@ export function PrincipalOverviewPage() {
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm">Chỉ Đạo BGH Khuyến Nghị</h3>
-                    <p className="text-[11px] text-slate-400">Kế hoạch can thiệp dinh dưỡng</p>
+                    <h3 className="font-bold text-sm">{translateText("Chỉ Đạo BGH Khuyến Nghị")}</h3>
+                    <p className="text-[11px] text-slate-400">{translateText("Kế hoạch can thiệp dinh dưỡng")}</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="bg-white/10 rounded-2xl p-3.5 space-y-1 backdrop-blur-sm">
                     <div className="flex items-center justify-between text-xs font-bold text-amber-300">
-                      <span>Bổ sung dinh dưỡng nhẹ cân</span>
-                      <span>{number(k.underweightCount)} bé</span>
+                      <span>{translateText("Bổ sung dinh dưỡng nhẹ cân")}</span>
+                      <span>{translateText(number(k.underweightCount))}{translateText(" bé")}</span>
                     </div>
-                    <p className="text-[11px] text-slate-300">
-                      Tăng cường khẩu phần đạm và sữa chua lúc xế chiều cho các lớp có tỷ lệ nhẹ cân cao.
-                    </p>
+                    <p className="text-[11px] text-slate-300">{translateText("Tăng cường khẩu phần đạm và sữa chua lúc xế chiều cho các lớp có tỷ lệ nhẹ cân cao.")}</p>
                   </div>
 
                   <div className="bg-white/10 rounded-2xl p-3.5 space-y-1 backdrop-blur-sm">
                     <div className="flex items-center justify-between text-xs font-bold text-rose-300">
-                      <span>Can thiệp thấp còi (Canxi & D3)</span>
-                      <span>{number(k.stuntedCount)} bé</span>
+                      <span>{translateText("Can thiệp thấp còi (Canxi & D3)")}</span>
+                      <span>{translateText(number(k.stuntedCount))}{translateText(" bé")}</span>
                     </div>
-                    <p className="text-[11px] text-slate-300">
-                      Khuyến khích hoạt động vận động ngoài trời 45 phút/ngày và uống sữa tươi giàu canxi.
-                    </p>
+                    <p className="text-[11px] text-slate-300">{translateText("Khuyến khích hoạt động vận động ngoài trời 45 phút/ngày và uống sữa tươi giàu canxi.")}</p>
                   </div>
 
                   <div className="bg-white/10 rounded-2xl p-3.5 space-y-1 backdrop-blur-sm">
                     <div className="flex items-center justify-between text-xs font-bold text-purple-300">
-                      <span>Tầm soát thể chất định kỳ</span>
-                      <span>{100 - evaluatedRate}% chưa đo</span>
+                      <span>{translateText("Tầm soát thể chất định kỳ")}</span>
+                      <span>{100 - evaluatedRate}{translateText("% chưa đo")}</span>
                     </div>
-                    <p className="text-[11px] text-slate-300">
-                      Nhắc nhở y tế trường hoàn tất cân đo cho {k.totalStudents - k.evaluatedStudents} học sinh còn lại.
-                    </p>
+                    <p className="text-[11px] text-slate-300">{translateText("Nhắc nhở y tế trường hoàn tất cân đo cho ")}{k.totalStudents - k.evaluatedStudents}{translateText(" học sinh còn lại.")}</p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400">Tỷ lệ tuân thủ: <strong className="text-emerald-400">{k.menuComplianceRate || 95}%</strong></span>
-                <Link to="/growth" className="text-teal-300 hover:text-white font-bold flex items-center gap-1">
-                  Xem chi tiết <ArrowRight className="w-3.5 h-3.5" />
+                <span className="text-slate-400">{translateText("Tỷ lệ tuân thủ: ")}<strong className="text-emerald-400">{k.menuComplianceRate || 95}%</strong></span>
+                <Link to="/growth" className="text-teal-300 hover:text-white font-bold flex items-center gap-1">{translateText("Xem chi tiết ")}<ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -493,30 +463,24 @@ export function PrincipalOverviewPage() {
             <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-teal-600" />
-                  Bảng Tổng Hợp Chi Tiết Theo Khối Lớp
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Dữ liệu số lượng và tỷ lệ % phân loại thể trạng của từng khối lớp mầm non.
-                </p>
+                  <Layers className="w-5 h-5 text-teal-600" />{translateText("Bảng Tổng Hợp Chi Tiết Theo Khối Lớp")}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{translateText("Dữ liệu số lượng và tỷ lệ % phân loại thể trạng của từng khối lớp mầm non.")}</p>
               </div>
-              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl self-start sm:self-auto">
-                Tổng số: <strong>{report?.gradeBreakdown?.length || 0}</strong> khối lớp
-              </span>
+              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl self-start sm:self-auto">{translateText("Tổng số: ")}<strong>{report?.gradeBreakdown?.length || 0}</strong>{translateText(" khối lớp")}</span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/70">
                   <tr>
-                    <th className="p-4">Khối Lớp</th>
-                    <th className="p-4 text-center">Tổng Học Sinh</th>
-                    <th className="p-4 text-center">Đã Đánh Giá</th>
-                    <th className="p-4">Bình Thường (Đạt Chuẩn)</th>
-                    <th className="p-4">Nhẹ Cân</th>
-                    <th className="p-4">Thấp Còi</th>
-                    <th className="p-4">Thừa Cân / Béo Phì</th>
-                    <th className="p-4 text-center">Tỷ Lệ Đạt</th>
+                    <th className="p-4">{translateText("Khối Lớp")}</th>
+                    <th className="p-4 text-center">{translateText("Tổng Học Sinh")}</th>
+                    <th className="p-4 text-center">{translateText("Đã Đánh Giá")}</th>
+                    <th className="p-4">{translateText("Bình Thường (Đạt Chuẩn)")}</th>
+                    <th className="p-4">{translateText("Nhẹ Cân")}</th>
+                    <th className="p-4">{translateText("Thấp Còi")}</th>
+                    <th className="p-4">{translateText("Thừa Cân / Béo Phì")}</th>
+                    <th className="p-4 text-center">{translateText("Tỷ Lệ Đạt")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -527,29 +491,29 @@ export function PrincipalOverviewPage() {
                     return (
                       <tr className="hover:bg-teal-50/20 transition" key={g.gradeCode}>
                         <td className="p-4 font-black text-slate-900 text-sm">{g.gradeName}</td>
-                        <td className="p-4 text-center font-bold text-slate-800">{number(g.totalStudents)}</td>
+                        <td className="p-4 text-center font-bold text-slate-800">{translateText(number(g.totalStudents))}</td>
                         <td className="p-4 text-center text-slate-600">
-                          {number(g.evaluatedStudents)}
+                          {translateText(number(g.evaluatedStudents))}
                           <span className="text-[10px] text-slate-400 block">
                             ({g.totalStudents > 0 ? Math.round((g.evaluatedStudents / g.totalStudents) * 100) : 0}%)
                           </span>
                         </td>
                         <td className="p-4 font-bold text-emerald-700">
-                          {number(g.normalCount)}
+                          {translateText(number(g.normalCount))}
                           <div className="w-24 bg-slate-100 h-1.5 rounded-full mt-1 overflow-hidden">
                             <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${pct}%` }}></div>
                           </div>
                         </td>
                         <td className="p-4 font-bold text-amber-700">
-                          {number(g.underweightCount)}
+                          {translateText(number(g.underweightCount))}
                           <span className="text-[10px] text-slate-400 font-normal ml-1">({g.underweightRate || 0}%)</span>
                         </td>
                         <td className="p-4 font-bold text-rose-700">
-                          {number(g.stuntedCount)}
+                          {translateText(number(g.stuntedCount))}
                           <span className="text-[10px] text-slate-400 font-normal ml-1">({g.stuntedRate || 0}%)</span>
                         </td>
                         <td className="p-4 font-bold text-purple-700">
-                          {number(g.overweightObeseCount)}
+                          {translateText(number(g.overweightObeseCount))}
                           <span className="text-[10px] text-slate-400 font-normal ml-1">({g.overweightObeseRate || 0}%)</span>
                         </td>
                         <td className="p-4 text-center">
@@ -573,23 +537,17 @@ export function PrincipalOverviewPage() {
               to="/growth"
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-teal-400 hover:text-teal-700 shadow-xs transition"
             >
-              <Activity className="w-4 h-4 text-teal-600" />
-              Sổ theo dõi thể chất chi tiết
-            </Link>
+              <Activity className="w-4 h-4 text-teal-600" />{translateText("Sổ theo dõi thể chất chi tiết")}</Link>
             <Link
               to="/child-alerts"
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-teal-400 hover:text-teal-700 shadow-xs transition"
             >
-              <ShieldAlert className="w-4 h-4 text-rose-600" />
-              Xem tổng hợp cảnh báo học sinh
-            </Link>
+              <ShieldAlert className="w-4 h-4 text-rose-600" />{translateText("Xem tổng hợp cảnh báo học sinh")}</Link>
             <Link
               to="/menu-approval"
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-teal-400 hover:text-teal-700 shadow-xs transition"
             >
-              <FileCheck2 className="w-4 h-4 text-emerald-600" />
-              Phê duyệt & công bố thực đơn
-            </Link>
+              <FileCheck2 className="w-4 h-4 text-emerald-600" />{translateText("Phê duyệt & công bố thực đơn")}</Link>
           </div>
         </>
       )}
@@ -598,6 +556,7 @@ export function PrincipalOverviewPage() {
 }
 
 export function PrincipalRevenuePage() {
+  useLanguage();
   const [month, setMonth] = useState(() => schoolDate().slice(0, 7));
   const params = {
     month: Number(month.slice(5, 7)),
@@ -611,17 +570,15 @@ export function PrincipalRevenuePage() {
     report = resource.error ? null : resource.data;
   return (
     <SchoolPage
-      title="Báo cáo doanh thu dịch vụ ăn phụ"
-      description="Đối chiếu đăng ký và giao dịch đã lưu theo tháng. Chi phí, hoàn phí chưa có sổ ghi nhận được để trống."
+      title={translateText("Báo cáo doanh thu dịch vụ ăn phụ")}
+      description={translateText("Đối chiếu đăng ký và giao dịch đã lưu theo tháng. Chi phí, hoàn phí chưa có sổ ghi nhận được để trống.")}
       actions={
         <>
           <button
             className="kp-button"
             disabled={resource.loading}
             onClick={resource.reload}
-          >
-            Làm mới
-          </button>
+          >{translateText("Làm mới")}</button>
           <button
             className="kp-button primary"
             disabled={!report || action.busy}
@@ -635,17 +592,13 @@ export function PrincipalRevenuePage() {
                 "Đã xuất báo cáo.",
               )
             }
-          >
-            Xuất dữ liệu
-          </button>
+          >{translateText("Xuất dữ liệu")}</button>
         </>
       }
     >
       <div className="kp-filters">
-        <label>
-          Tháng báo cáo
-          <input
-            aria-label="Tháng doanh thu"
+        <label>{translateText("Tháng báo cáo")}<input
+            aria-label={translateText("Tháng doanh thu")}
             type="month"
             value={month}
             onChange={(e) => e.target.value && setMonth(e.target.value)}
@@ -657,14 +610,14 @@ export function PrincipalRevenuePage() {
         <>
           <div className="kp-stats">
             {[
-              ["Tổng thu", report.collectionSummary?.collectedRevenue || 0],
-              ["Dự kiến", report.collectionSummary?.expectedRevenue || 0],
-              ["Đã thu", report.collectionSummary?.collectedRevenue || 0],
-              ["Còn nợ", report.collectionSummary?.pendingDebtAmount || 0],
+              [translateText("Tổng thu"), report.collectionSummary?.collectedRevenue || 0],
+              [translateText("Dự kiến"), report.collectionSummary?.expectedRevenue || 0],
+              [translateText("Đã thu"), report.collectionSummary?.collectedRevenue || 0],
+              [translateText("Còn nợ"), report.collectionSummary?.pendingDebtAmount || 0],
             ].map(([label, value]) => (
               <article className="kp-stat" key={String(label)}>
-                <span>{label}</span>
-                <strong>{number(value)} đ</strong>
+                <span>{translateText(label)}</span>
+                <strong>{translateText(number(value))}{translateText(" đ")}</strong>
               </article>
             ))}
           </div>
@@ -673,15 +626,15 @@ export function PrincipalRevenuePage() {
               <thead>
                 <tr>
                   {[
-                    "Học sinh",
-                    "Lớp",
-                    "Gói dịch vụ",
-                    "Số tiền",
-                    "Trạng thái",
-                    "Ngày nộp",
+                    translateText("Học sinh"),
+                    translateText("Lớp"),
+                    translateText("Gói dịch vụ"),
+                    translateText("Số tiền"),
+                    translateText("Trạng thái"),
+                    translateText("Ngày nộp"),
                   ].map((h) => (
                     <th className="p-3" key={h}>
-                      {h}
+                      {translateText(h)}
                     </th>
                   ))}
                 </tr>
@@ -692,9 +645,9 @@ export function PrincipalRevenuePage() {
                     <td className="p-3 font-semibold">{t.studentName}</td>
                     <td className="p-3">{t.className}</td>
                     <td className="p-3">{t.packageName || t.transactionCode}</td>
-                    <td className="p-3">{number(t.amount)} đ</td>
-                    <td className="p-3">{t.status}</td>
-                    <td className="p-3">{t.paidAt || "Chưa có"}</td>
+                    <td className="p-3">{translateText(number(t.amount))}{translateText(" đ")}</td>
+                    <td className="p-3">{translateText(t.status)}</td>
+                    <td className="p-3">{translateText(t.paidAt || "Chưa có")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -707,5 +660,6 @@ export function PrincipalRevenuePage() {
 }
 
 export function PrincipalPortionsPage() {
+  useLanguage();
   return <BghMealPortionsOverviewPage />;
 }

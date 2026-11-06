@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '@/core/api/axios';
 import { X, Save, AlertTriangle, Lock, Sparkles, Info, CheckCircle2 } from 'lucide-react';
@@ -22,6 +24,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  useLanguage();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [servingWeight, setServingWeight] = useState<number | ''>(100);
@@ -147,43 +150,43 @@ export const FoodModal: React.FC<FoodModalProps> = ({
 
       if (mode === 'create') {
         if (!formData.name.trim()) {
-          alert('Vui lòng nhập tên nguyên liệu / sản phẩm!');
+          alert(translateText('Vui lòng nhập tên nguyên liệu / sản phẩm!'));
           setLoading(false);
           return;
         }
         if (!formData.categoryId) {
-          alert('Vui lòng chọn nhóm thực phẩm!');
+          alert(translateText('Vui lòng chọn nhóm thực phẩm!'));
           setLoading(false);
           return;
         }
         const servingWeightNum = Number(servingWeight) || 0;
         if (servingWeightNum <= 0) {
-          alert('Khối lượng bao bì ghi trên nhãn phải lớn hơn 0!');
+          alert(translateText('Khối lượng bao bì ghi trên nhãn phải lớn hơn 0!'));
           setLoading(false);
           return;
         }
         if (formData.energyKcal === '' || Number(formData.energyKcal) <= 0) {
-          alert('Vui lòng nhập Năng lượng (kcal) ghi trên bao bì (bắt buộc > 0)!');
+          alert(translateText('Vui lòng nhập Năng lượng (kcal) ghi trên bao bì (bắt buộc > 0)!'));
           setLoading(false);
           return;
         }
         if (formData.proteinG === '' || Number(formData.proteinG) < 0) {
-          alert('Vui lòng nhập hàm lượng Đạm / Protein (g) ghi trên bao bì!');
+          alert(translateText('Vui lòng nhập hàm lượng Đạm / Protein (g) ghi trên bao bì!'));
           setLoading(false);
           return;
         }
         if (formData.fatG === '' || Number(formData.fatG) < 0) {
-          alert('Vui lòng nhập hàm lượng Chất béo / Fat (g) ghi trên bao bì!');
+          alert(translateText('Vui lòng nhập hàm lượng Chất béo / Fat (g) ghi trên bao bì!'));
           setLoading(false);
           return;
         }
         if (formData.carbG === '' || Number(formData.carbG) < 0) {
-          alert('Vui lòng nhập hàm lượng Carbohydrate / Tinh bột (g) ghi trên bao bì!');
+          alert(translateText('Vui lòng nhập hàm lượng Carbohydrate / Tinh bột (g) ghi trên bao bì!'));
           setLoading(false);
           return;
         }
         if (Number(formData.refuseRatePercent) < 0 || Number(formData.refuseRatePercent) > 100) {
-          alert('Tỉ lệ thải bỏ phải nằm trong khoảng từ 0% đến 100%!');
+          alert(translateText('Tỉ lệ thải bỏ phải nằm trong khoảng từ 0% đến 100%!'));
           setLoading(false);
           return;
         }
@@ -204,6 +207,16 @@ export const FoodModal: React.FC<FoodModalProps> = ({
           zincMg: formData.zincMg !== '' && formData.zincMg !== undefined ? Number((Number(formData.zincMg || 0) * factor).toFixed(2)) : 0,
           refuseRatePercent: Number(formData.refuseRatePercent || 0),
           status: formData.status || 'ACTIVE',
+          phosphorusMg: 0,
+          sodiumMg: 0,
+          vitaminAMcg: 0,
+          vitaminCMg: 0,
+          sourceMetadata: {
+            code: formData.code?.trim() || undefined,
+            supplier: formData.supplier?.trim() || undefined,
+            description: formData.description?.trim() || undefined,
+            allergens: allergenInput ? allergenInput.split(',').map((a) => a.trim()).filter(Boolean) : [],
+          },
         };
 
         await apiClient.post('/foods', createPayload);
@@ -224,9 +237,10 @@ export const FoodModal: React.FC<FoodModalProps> = ({
       
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving food:', error);
-      alert('Đã xảy ra lỗi khi lưu nguyên liệu!');
+      const msg = error?.response?.data?.message || error?.message || translateText('Đã xảy ra lỗi khi lưu nguyên liệu!');
+      alert(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setLoading(false);
     }
@@ -261,7 +275,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <h2 className="text-xl font-bold text-slate-800">
-            {mode === 'create' ? 'Thêm nguyên liệu mới' : mode === 'edit' ? 'Cập nhật nguyên liệu' : 'Chi tiết nguyên liệu'}
+            {translateText(mode === 'create' ? 'Thêm nguyên liệu mới' : mode === 'edit' ? 'Cập nhật nguyên liệu' : 'Chi tiết nguyên liệu')}
           </h2>
           <button
             onClick={onClose}
@@ -274,7 +288,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
         {/* Form Body */}
         <div className="p-6 overflow-y-auto flex-1">
           {loading && mode !== 'create' ? (
-            <div className="flex justify-center items-center py-20 text-slate-500">Đang tải dữ liệu...</div>
+            <div className="flex justify-center items-center py-20 text-slate-500">{translateText("Đang tải dữ liệu...")}</div>
           ) : (
             <form id="food-form" onSubmit={handleSubmit} className="space-y-6">
               
@@ -284,9 +298,8 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div className="text-xs text-blue-900 leading-relaxed">
-                    <strong className="font-bold">Khai báo sản phẩm mới (Sữa, Bánh, Đồ ăn đóng gói...):</strong>
-                    <p className="mt-0.5 text-blue-800">
-                      Hệ thống đã có sẵn các nguyên liệu tươi sống (thịt, cá, rau củ...). Tại đây, bạn nhập các chỉ số dinh dưỡng <strong>ghi trên nhãn bao bì</strong> (VD: hộp sữa 180ml hoặc gói bánh 25g). Hệ thống sẽ <strong>tự động quy đổi về mốc chuẩn 100g</strong>.
+                    <strong className="font-bold">{translateText("Khai báo sản phẩm mới (Sữa, Bánh, Đồ ăn đóng gói...):")}</strong>
+                    <p className="mt-0.5 text-blue-800">{translateText("Hệ thống đã có sẵn các nguyên liệu tươi sống (thịt, cá, rau củ...). Tại đây, bạn nhập các chỉ số dinh dưỡng ")}<strong>{translateText("ghi trên nhãn bao bì")}</strong>{translateText(" (VD: hộp sữa 180ml hoặc gói bánh 25g). Hệ thống sẽ ")}<strong>{translateText("tự động quy đổi về mốc chuẩn 100g")}</strong>.
                     </p>
                   </div>
                 </div>
@@ -294,7 +307,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Mã nguyên liệu *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{translateText("Mã nguyên liệu *")}</label>
                   <input
                     type="text"
                     name="code"
@@ -303,11 +316,11 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                     value={formData.code}
                     onChange={handleInputChange}
                     className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
-                    placeholder="VD: NL-HEO-012"
+                    placeholder={translateText("VD: NL-HEO-012")}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tên nguyên liệu *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{translateText("Tên nguyên liệu *")}</label>
                   <input
                     type="text"
                     name="name"
@@ -316,13 +329,13 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                     value={formData.name}
                     onChange={handleInputChange}
                     className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
-                    placeholder="VD: Sữa tươi tiệt trùng ít đường TH True Milk 180ml"
+                    placeholder={translateText("VD: Sữa tươi tiệt trùng ít đường TH True Milk 180ml")}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nguồn cung cấp / NSX</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{translateText("Nguồn cung cấp / NSX")}</label>
                 <input
                   type="text"
                   name="supplier"
@@ -330,7 +343,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                   value={formData.supplier}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
-                  placeholder="VD: Cty Cổ phần Chuỗi Thực phẩm TH"
+                  placeholder={translateText("VD: Cty Cổ phần Chuỗi Thực phẩm TH")}
                 />
               </div>
 
@@ -338,21 +351,18 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <label className="block text-xs font-bold text-slate-800">
-                        Khối lượng / Thể tích 1 khẩu phần ghi trên nhãn bao bì <span className="text-rose-500">*</span>
+                      <label className="block text-xs font-bold text-slate-800">{translateText("Khối lượng / Thể tích 1 khẩu phần ghi trên nhãn bao bì ")}<span className="text-rose-500">*</span>
                       </label>
-                      <p className="text-[11px] text-slate-500">
-                        Nhập đúng khối lượng ghi trên bao bì sản phẩm (VD: 1 hộp sữa 180ml, 1 gói bánh 25g, hoặc 100g)
-                      </p>
+                      <p className="text-[11px] text-slate-500">{translateText("Nhập đúng khối lượng ghi trên bao bì sản phẩm (VD: 1 hộp sữa 180ml, 1 gói bánh 25g, hoặc 100g)")}</p>
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[11px] text-slate-400 font-medium">Chọn nhanh:</span>
+                      <span className="text-[11px] text-slate-400 font-medium">{translateText("Chọn nhanh:")}</span>
                       {[
-                        { label: '100g (Chuẩn)', value: 100 },
-                        { label: '180ml (Hộp sữa)', value: 180 },
-                        { label: '110ml (Hộp nhỏ)', value: 110 },
-                        { label: '65ml (Sữa chua)', value: 65 },
-                        { label: '25g (Gói bánh)', value: 25 },
+                        { label: translateText('100g (Chuẩn)'), value: 100 },
+                        { label: translateText('180ml (Hộp sữa)'), value: 180 },
+                        { label: translateText('110ml (Hộp nhỏ)'), value: 110 },
+                        { label: translateText('65ml (Sữa chua)'), value: 65 },
+                        { label: translateText('25g (Gói bánh)'), value: 25 },
                       ].map((preset) => (
                         <button
                           key={preset.value}
@@ -364,7 +374,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                               : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
                           }`}
                         >
-                          {preset.label}
+                          {translateText(preset.label)}
                         </button>
                       ))}
                     </div>
@@ -377,7 +387,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                         min="1"
                         max="5000"
                         step="1"
-                        placeholder="100"
+                        placeholder={"100"}
                         value={servingWeight}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -396,23 +406,19 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                         className="w-full px-3 py-2 pr-12 rounded-xl border border-slate-200 bg-white font-black text-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                        {formData.defaultUnit === 'ml' || formData.defaultUnit === 'l' ? 'ml' : 'g'}
+                        {translateText(formData.defaultUnit === 'ml' || formData.defaultUnit === 'l' ? 'ml' : 'g')}
                       </span>
                     </div>
 
                     <div className="text-xs text-slate-600 flex items-center gap-2">
                       {Number(servingWeight) === 100 ? (
                         <span className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg font-semibold text-xs">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          Mốc chuẩn 100g (Dữ liệu dinh dưỡng được giữ nguyên)
-                        </span>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />{translateText("Mốc chuẩn 100g (Dữ liệu dinh dưỡng được giữ nguyên)")}</span>
                       ) : Number(servingWeight) > 0 ? (
                         <span className="inline-flex items-center gap-1.5 text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg font-semibold text-xs">
-                          <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          Tự động quy đổi từ {servingWeight}{formData.defaultUnit === 'ml' || formData.defaultUnit === 'l' ? 'ml' : 'g'} về chuẩn 100g
-                        </span>
+                          <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />{translateText("Tự động quy đổi từ ")}{translateText(servingWeight)}{translateText(formData.defaultUnit === 'ml' || formData.defaultUnit === 'l' ? 'ml' : 'g')}{translateText(" về chuẩn 100g")}</span>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">Nhập khối lượng khẩu phần (VD: 180ml hoặc 25g)</span>
+                        <span className="text-xs text-slate-400 italic">{translateText("Nhập khối lượng khẩu phần (VD: 180ml hoặc 25g)")}</span>
                       )}
                     </div>
                   </div>
@@ -421,7 +427,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nhóm thực phẩm *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{translateText("Nhóm thực phẩm *")}</label>
                   <select
                     name="categoryId"
                     required
@@ -430,7 +436,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 rounded-xl border text-sm ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600 appearance-none' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
                   >
-                    <option value="">-- Chọn nhóm thực phẩm ({categories.length} nhóm) --</option>
+                    <option value="">{translateText("-- Chọn nhóm thực phẩm (")}{categories.length}{translateText(" nhóm) --")}</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -439,7 +445,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Đơn vị tính *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{translateText("Đơn vị tính *")}</label>
                   <select
                     name="defaultUnit"
                     required
@@ -448,27 +454,24 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 rounded-xl border text-sm ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600 appearance-none' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none`}
                   >
-                    <option value="g">Gam (g)</option>
-                    <option value="kg">Kilogram (kg)</option>
-                    <option value="ml">Millilit (ml)</option>
-                    <option value="l">Lít (l)</option>
-                    <option value="hộp">Hộp (hộp)</option>
-                    <option value="gói">Gói (gói)</option>
-                    <option value="hũ">Hũ (hũ)</option>
-                    <option value="chai">Chai (chai)</option>
-                    <option value="cái">Cái (cái)</option>
+                    <option value="g">{translateText("Gam (g)")}</option>
+                    <option value="kg">{translateText("Kilogram (kg)")}</option>
+                    <option value="ml">{translateText("Millilit (ml)")}</option>
+                    <option value="l">{translateText("Lít (l)")}</option>
+                    <option value="hộp">{translateText("Hộp (hộp)")}</option>
+                    <option value="gói">{translateText("Gói (gói)")}</option>
+                    <option value="hũ">{translateText("Hũ (hũ)")}</option>
+                    <option value="chai">{translateText("Chai (chai)")}</option>
+                    <option value="cái">{translateText("Cái (cái)")}</option>
                   </select>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium text-slate-700">
-                      Tỉ lệ thải bỏ (%) {mode === 'create' && <span className="text-[11px] text-slate-400 font-normal">(Mặc định 0%)</span>}
+                    <label className="block text-sm font-medium text-slate-700">{translateText("Tỉ lệ thải bỏ (%) ")}{mode === 'create' && <span className="text-[11px] text-slate-400 font-normal">{translateText("(Mặc định 0%)")}</span>}
                     </label>
                     {mode !== 'create' && (
                       <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
-                        <Lock className="w-2.5 h-2.5 text-amber-600" />
-                        FCT Cố định
-                      </span>
+                        <Lock className="w-2.5 h-2.5 text-amber-600" />{translateText("FCT Cố định")}</span>
                     )}
                   </div>
                   <div className="relative">
@@ -497,19 +500,15 @@ export const FoodModal: React.FC<FoodModalProps> = ({
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-bold text-slate-800 text-sm">
-                    {mode === 'create'
+                    {translateText(mode === 'create'
                       ? `Thành phần dinh dưỡng ghi trên bao bì (theo ${servingWeight}${formData.defaultUnit === 'ml' || formData.defaultUnit === 'l' ? 'ml' : 'g'})`
-                      : 'Thành phần dinh dưỡng chính (trên 100g ăn được)'}
+                      : 'Thành phần dinh dưỡng chính (trên 100g ăn được)')}
                   </h3>
                   {mode === 'create' ? (
-                    <span className="text-[11px] text-rose-600 font-bold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
-                      * Bắt buộc 4 chỉ số chính
-                    </span>
+                    <span className="text-[11px] text-rose-600 font-bold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">{translateText("* Bắt buộc 4 chỉ số chính")}</span>
                   ) : mode === 'edit' ? (
                     <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
-                      <Lock className="w-3 h-3 text-amber-600" />
-                      Chỉ số chuẩn FCT (Cố định)
-                    </span>
+                      <Lock className="w-3 h-3 text-amber-600" />{translateText("Chỉ số chuẩn FCT (Cố định)")}</span>
                   ) : null}
                 </div>
 
@@ -518,15 +517,13 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                   <div className="mb-4 p-2.5 bg-white rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                      <span className="text-xs text-slate-600 font-medium">Quy chuẩn sơ chế Viện Dinh Dưỡng:</span>
+                      <span className="text-xs text-slate-600 font-medium">{translateText("Quy chuẩn sơ chế Viện Dinh Dưỡng:")}</span>
                     </div>
                     <div className="flex items-center gap-4 text-xs">
-                      <span className="text-slate-600">
-                        Tỉ lệ thải bỏ: <strong className="text-amber-800 font-black">{formData.refuseRatePercent}%</strong>
+                      <span className="text-slate-600">{translateText("Tỉ lệ thải bỏ: ")}<strong className="text-amber-800 font-black">{formData.refuseRatePercent}%</strong>
                       </span>
                       <span className="text-slate-300">|</span>
-                      <span className="text-slate-600">
-                        Tỉ lệ phần ăn được: <strong className="text-emerald-700 font-black">{Math.max(0, 100 - formData.refuseRatePercent)}%</strong>
+                      <span className="text-slate-600">{translateText("Tỉ lệ phần ăn được: ")}<strong className="text-emerald-700 font-black">{Math.max(0, 100 - formData.refuseRatePercent)}%</strong>
                       </span>
                     </div>
                   </div>
@@ -534,8 +531,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
 
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Năng lượng (kcal) {mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
+                    <label className="block text-xs font-medium text-slate-700 mb-1">{translateText("Năng lượng (kcal) ")}{mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
                     </label>
                     <input
                       type="number"
@@ -551,12 +547,11 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white font-bold'
                       } outline-none`}
-                      placeholder={mode === 'create' ? 'VD: 126' : ''}
+                      placeholder={translateText(mode === 'create' ? 'VD: 126' : '')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Đạm (g) {mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
+                    <label className="block text-xs font-medium text-slate-700 mb-1">{translateText("Đạm (g) ")}{mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
                     </label>
                     <input
                       type="number"
@@ -572,12 +567,11 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white font-bold'
                       } outline-none`}
-                      placeholder={mode === 'create' ? 'VD: 5.4' : ''}
+                      placeholder={translateText(mode === 'create' ? 'VD: 5.4' : '')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Béo (g) {mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
+                    <label className="block text-xs font-medium text-slate-700 mb-1">{translateText("Béo (g) ")}{mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
                     </label>
                     <input
                       type="number"
@@ -593,12 +587,11 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white font-bold'
                       } outline-none`}
-                      placeholder={mode === 'create' ? 'VD: 6.0' : ''}
+                      placeholder={translateText(mode === 'create' ? 'VD: 6.0' : '')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
-                      Carb (g) {mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
+                    <label className="block text-xs font-medium text-slate-700 mb-1">{translateText("Carb (g) ")}{mode === 'create' && <span className="text-rose-500 font-bold">*</span>}
                     </label>
                     <input
                       type="number"
@@ -614,22 +607,21 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white font-bold'
                       } outline-none`}
-                      placeholder={mode === 'create' ? 'VD: 12.6' : ''}
+                      placeholder={translateText(mode === 'create' ? 'VD: 12.6' : '')}
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between mb-3 mt-2">
-                  <h3 className="font-bold text-slate-800 text-sm">
-                    Vi chất khoáng bổ trợ {mode === 'create' && <span className="text-xs text-slate-400 font-normal">(Không bắt buộc)</span>}
+                  <h3 className="font-bold text-slate-800 text-sm">{translateText("Vi chất khoáng bổ trợ ")}{mode === 'create' && <span className="text-xs text-slate-400 font-normal">{translateText("(Không bắt buộc)")}</span>}
                   </h3>
                   {mode === 'edit' && (
-                    <span className="text-[10px] text-slate-400 italic">Không cho phép sửa chỉ số dinh dưỡng</span>
+                    <span className="text-[10px] text-slate-400 italic">{translateText("Không cho phép sửa chỉ số dinh dưỡng")}</span>
                   )}
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Canxi (mg)</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">{translateText("Canxi (mg)")}</label>
                     <input
                       type="number"
                       step="0.1"
@@ -643,11 +635,11 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white'
                       } outline-none`}
-                      placeholder="VD: 180"
+                      placeholder={translateText("VD: 180")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Sắt (mg)</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">{translateText("Sắt (mg)")}</label>
                     <input
                       type="number"
                       step="0.1"
@@ -661,11 +653,11 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white'
                       } outline-none`}
-                      placeholder="VD: 0.5"
+                      placeholder={translateText("VD: 0.5")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Kẽm (mg)</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">{translateText("Kẽm (mg)")}</label>
                     <input
                       type="number"
                       step="0.1"
@@ -679,7 +671,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                           ? 'bg-slate-100 border-slate-200 text-slate-700 font-bold cursor-default'
                           : 'border-slate-200 focus:ring-2 focus:ring-emerald-500 bg-white'
                       } outline-none`}
-                      placeholder="VD: 0.8"
+                      placeholder={translateText("VD: 0.8")}
                     />
                   </div>
                 </div>
@@ -689,55 +681,48 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                   <div className="mt-4 p-3.5 bg-white rounded-xl border border-emerald-200 shadow-2xs">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                        Bảng so sánh quy đổi chuẩn 100g ăn được
-                      </span>
-                      <span className="text-[10px] text-emerald-700 bg-emerald-50 font-bold px-2 py-0.5 rounded border border-emerald-200">
-                        Chuẩn FCT 100g
-                      </span>
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />{translateText("Bảng so sánh quy đổi chuẩn 100g ăn được")}</span>
+                      <span className="text-[10px] text-emerald-700 bg-emerald-50 font-bold px-2 py-0.5 rounded border border-emerald-200">{translateText("Chuẩn FCT 100g")}</span>
                     </div>
                     <div className="grid grid-cols-4 gap-2 text-center text-xs">
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <div className="text-[10px] text-slate-400">Năng lượng</div>
-                        <div className="text-slate-500 text-[11px] line-through">{rawEnergy} kcal</div>
+                        <div className="text-[10px] text-slate-400">{translateText("Năng lượng")}</div>
+                        <div className="text-slate-500 text-[11px] line-through">{rawEnergy}{translateText(" kcal")}</div>
                         <div className="font-black text-emerald-800 text-sm">
-                          {normEnergy} <span className="text-[10px] font-normal">kcal</span>
+                          {normEnergy} <span className="text-[10px] font-normal">{translateText("kcal")}</span>
                         </div>
                       </div>
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <div className="text-[10px] text-slate-400">Đạm (P)</div>
-                        <div className="text-slate-500 text-[11px] line-through">{rawProtein}g</div>
-                        <div className="font-black text-emerald-800 text-sm">{normProtein}g</div>
+                        <div className="text-[10px] text-slate-400">{translateText("Đạm (P)")}</div>
+                        <div className="text-slate-500 text-[11px] line-through">{rawProtein}{translateText("g")}</div>
+                        <div className="font-black text-emerald-800 text-sm">{normProtein}{translateText("g")}</div>
                       </div>
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <div className="text-[10px] text-slate-400">Béo (L)</div>
-                        <div className="text-slate-500 text-[11px] line-through">{rawFat}g</div>
-                        <div className="font-black text-emerald-800 text-sm">{normFat}g</div>
+                        <div className="text-[10px] text-slate-400">{translateText("Béo (L)")}</div>
+                        <div className="text-slate-500 text-[11px] line-through">{rawFat}{translateText("g")}</div>
+                        <div className="font-black text-emerald-800 text-sm">{normFat}{translateText("g")}</div>
                       </div>
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <div className="text-[10px] text-slate-400">Carb (G)</div>
-                        <div className="text-slate-500 text-[11px] line-through">{rawCarb}g</div>
-                        <div className="font-black text-emerald-800 text-sm">{normCarb}g</div>
+                        <div className="text-[10px] text-slate-400">{translateText("Carb (G)")}</div>
+                        <div className="text-slate-500 text-[11px] line-through">{rawCarb}{translateText("g")}</div>
+                        <div className="font-black text-emerald-800 text-sm">{normCarb}{translateText("g")}</div>
                       </div>
                     </div>
                     {(rawCalcium > 0 || rawIron > 0 || rawZinc > 0) && (
                       <div className="grid grid-cols-3 gap-2 text-center text-xs mt-2.5 pt-2 border-t border-slate-100">
                         {rawCalcium > 0 && (
-                          <div className="text-[11px] text-slate-600">
-                            Canxi: <span className="line-through text-slate-400">{rawCalcium}mg</span> ➔{' '}
-                            <strong className="text-emerald-700">{normCalcium}mg</strong>
+                          <div className="text-[11px] text-slate-600">{translateText("Canxi: ")}<span className="line-through text-slate-400">{rawCalcium}{translateText("mg")}</span> ➔{' '}
+                            <strong className="text-emerald-700">{normCalcium}{translateText("mg")}</strong>
                           </div>
                         )}
                         {rawIron > 0 && (
-                          <div className="text-[11px] text-slate-600">
-                            Sắt: <span className="line-through text-slate-400">{rawIron}mg</span> ➔{' '}
-                            <strong className="text-emerald-700">{normIron}mg</strong>
+                          <div className="text-[11px] text-slate-600">{translateText("Sắt: ")}<span className="line-through text-slate-400">{rawIron}{translateText("mg")}</span> ➔{' '}
+                            <strong className="text-emerald-700">{normIron}{translateText("mg")}</strong>
                           </div>
                         )}
                         {rawZinc > 0 && (
-                          <div className="text-[11px] text-slate-600">
-                            Kẽm: <span className="line-through text-slate-400">{rawZinc}mg</span> ➔{' '}
-                            <strong className="text-emerald-700">{normZinc}mg</strong>
+                          <div className="text-[11px] text-slate-600">{translateText("Kẽm: ")}<span className="line-through text-slate-400">{rawZinc}{translateText("mg")}</span> ➔{' '}
+                            <strong className="text-emerald-700">{normZinc}{translateText("mg")}</strong>
                           </div>
                         )}
                       </div>
@@ -748,25 +733,21 @@ export const FoodModal: React.FC<FoodModalProps> = ({
 
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1">
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
-                  Cảnh báo dị ứng (Phân cách bằng dấu phẩy)
-                </label>
+                  <AlertTriangle className="w-4 h-4 text-red-500" />{translateText("Cảnh báo dị ứng (Phân cách bằng dấu phẩy)")}</label>
                 <input
                   type="text"
                   readOnly={isReadOnly}
                   value={allergenInput}
                   onChange={(e) => setAllergenInput(e.target.value)}
                   className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-red-500'} outline-none`}
-                  placeholder="VD: Sữa bò, Đậu phộng..."
+                  placeholder={translateText("VD: Sữa bò, Đậu phộng...")}
                 />
               </div>
 
 
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Mô tả quy cách / Yêu cầu thêm
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{translateText("Mô tả quy cách / Yêu cầu thêm")}</label>
                 <textarea
                   name="description"
                   readOnly={isReadOnly}
@@ -774,7 +755,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
                   onChange={(e) => handleInputChange(e as unknown as React.ChangeEvent<HTMLInputElement>)}
                   rows={3}
                   className={`w-full px-4 py-2 rounded-xl border ${isReadOnly ? 'bg-slate-100 border-transparent text-slate-600' : 'border-slate-200 focus:ring-2 focus:ring-emerald-500'} outline-none resize-none`}
-                  placeholder="VD: Thịt phải cắt miếng vừa ăn cho trẻ..."
+                  placeholder={translateText("VD: Thịt phải cắt miếng vừa ăn cho trẻ...")}
                 />
               </div>
 
@@ -787,9 +768,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200 transition"
-          >
-            Đóng
-          </button>
+          >{translateText("Đóng")}</button>
           {!isReadOnly && (
             <button
               type="submit"
@@ -798,7 +777,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({
               className="flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {mode === 'create' ? 'Tạo mới' : 'Lưu thay đổi'}
+              {translateText(mode === 'create' ? 'Tạo mới' : 'Lưu thay đổi')}
             </button>
           )}
         </div>

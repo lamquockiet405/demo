@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AttendanceHistoryPage } from './AttendanceHistoryPage';
@@ -28,6 +30,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
   onTabChange,
   hideTopNav = false,
 }) => {
+  useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -325,7 +328,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
             ) : (
               <CheckCircle2 className="w-4 h-4" />
             )}
-            <span>{toast.message}</span>
+            <span>{translateText(toast.message)}</span>
             <button onClick={() => setToast(null)} className="ml-2 hover:opacity-80">
               <X className="w-4 h-4" />
             </button>
@@ -388,7 +391,7 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
         {isLoading && !attendanceData ? (
           <div className="bg-white rounded-3xl p-12 border border-slate-200 text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto" />
-            <p className="text-xs font-bold text-slate-500">Đang truy vấn cơ sở dữ liệu bán trú...</p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Đang truy vấn cơ sở dữ liệu bán trú...")}</p>
           </div>
         ) : attendanceData ? (
           <AttendanceTable
@@ -432,12 +435,11 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
       <footer className="mt-12 border-t border-slate-200 bg-white py-6 px-6 text-xs text-slate-500">
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-medium">
-            <strong className="text-teal-700">KidMeal</strong> © 2025 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.
-          </p>
+            <strong className="text-teal-700">{translateText("KidMeal")}</strong>{translateText(" © 2025 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.")}</p>
           <div className="flex items-center gap-6 font-semibold">
-            <span className="hover:text-teal-700 cursor-pointer">Quy chuẩn VSATTP Bộ Giáo dục</span>
-            <span className="hover:text-teal-700 cursor-pointer">Đồng bộ LiveSync Bếp 1 chiều</span>
-            <span className="hover:text-teal-700 cursor-pointer">Hỗ trợ kỹ thuật: <strong>1900 6868</strong></span>
+            <span className="hover:text-teal-700 cursor-pointer">{translateText("Quy chuẩn VSATTP Bộ Giáo dục")}</span>
+            <span className="hover:text-teal-700 cursor-pointer">{translateText("Đồng bộ LiveSync Bếp 1 chiều")}</span>
+            <span className="hover:text-teal-700 cursor-pointer">{translateText("Hỗ trợ kỹ thuật: ")}<strong>1900 6868</strong></span>
           </div>
         </div>
       </footer>

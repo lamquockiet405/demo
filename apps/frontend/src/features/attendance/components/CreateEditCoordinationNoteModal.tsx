@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from 'react';
 import { X, Save, AlertTriangle, ShieldAlert, Users, ChefHat } from 'lucide-react';
 import {
@@ -35,6 +37,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
   availableChildren,
   onSave,
 }) => {
+  useLanguage();
   const [classId, setClassId] = useState(selectedClassId);
   const [childId, setChildId] = useState('');
   const [mealDate, setMealDate] = useState(new Date().toISOString().split('T')[0]);
@@ -140,11 +143,9 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 shrink-0 bg-white">
           <div>
             <h3 className="text-base font-bold text-slate-900">
-              {noteToEdit ? 'Chỉnh sửa Ghi chú Điều phối' : 'Tạo mới Ghi chú Điều phối Suất ăn'}
+              {translateText(noteToEdit ? 'Chỉnh sửa Ghi chú Điều phối' : 'Tạo mới Ghi chú Điều phối Suất ăn')}
             </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Đồng bộ trực tiếp giữa Giáo viên chủ nhiệm, Nhà bếp và Y tế trường học
-            </p>
+            <p className="text-xs text-slate-500 font-medium">{translateText("Đồng bộ trực tiếp giữa Giáo viên chủ nhiệm, Nhà bếp và Y tế trường học")}</p>
           </div>
           <button
             type="button"
@@ -161,15 +162,14 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
             {errorMsg && (
               <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0 text-red-500" />
-                <span>{errorMsg}</span>
+                <span>{translateText(errorMsg)}</span>
               </div>
             )}
 
             {/* Row 1: Class & Child selection */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Lớp học <span className="text-red-500">*</span>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Lớp học ")}<span className="text-red-500">*</span>
                 </label>
                 <select
                   value={classId}
@@ -179,26 +179,23 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
                 >
                   {availableClasses.map((cls) => (
                     <option key={cls.id} value={cls.id}>
-                      {cls.name} ({cls.totalStudents} trẻ)
-                    </option>
+                      {cls.name} ({cls.totalStudents}{translateText(" trẻ)")}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Học sinh liên quan
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Học sinh liên quan")}</label>
                 <select
                   value={childId}
                   onChange={(e) => setChildId(e.target.value)}
                   disabled={!!noteToEdit}
                   className="w-full py-1.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800 focus:outline-none focus:border-teal-500 text-xs"
                 >
-                  <option value="">-- Áp dụng cho toàn thể lớp học --</option>
+                  <option value="">{translateText("-- Áp dụng cho toàn thể lớp học --")}</option>
                   {availableChildren.map((kid) => (
                     <option key={kid.id} value={kid.id}>
-                      {kid.fullName} ({kid.studentCode}){kid.allergy ? ` - ⚠️ ${kid.allergy}` : ''}
+                      {kid.fullName} ({kid.studentCode}){translateText(kid.allergy ? ` - ⚠️ ${kid.allergy}` : '')}
                     </option>
                   ))}
                 </select>
@@ -208,8 +205,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
             {/* Row 2: Date, Meal Session & Note Type */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Ngày phục vụ <span className="text-red-500">*</span>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Ngày phục vụ ")}<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -221,36 +217,34 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Bữa ăn <span className="text-red-500">*</span>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Bữa ăn ")}<span className="text-red-500">*</span>
                 </label>
                 <select
                   value={mealSession}
                   onChange={(e) => setMealSession(e.target.value)}
                   className="w-full py-1.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800 focus:outline-none focus:border-teal-500 text-xs"
                 >
-                  <option value="LUNCH">Bữa trưa chính (10:30)</option>
-                  <option value="BREAKFAST">Bữa sáng (07:30)</option>
-                  <option value="AFTERNOON_SNACK">Bữa xế chiều (14:30)</option>
-                  <option value="ALL_DAY">Cả ngày (Tất cả bữa)</option>
+                  <option value="LUNCH">{translateText("Bữa trưa chính (10:30)")}</option>
+                  <option value="BREAKFAST">{translateText("Bữa sáng (07:30)")}</option>
+                  <option value="AFTERNOON_SNACK">{translateText("Bữa xế chiều (14:30)")}</option>
+                  <option value="ALL_DAY">{translateText("Cả ngày (Tất cả bữa)")}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Phân loại điều phối <span className="text-red-500">*</span>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Phân loại điều phối ")}<span className="text-red-500">*</span>
                 </label>
                 <select
                   value={noteType}
                   onChange={(e) => setNoteType(e.target.value)}
                   className="w-full py-1.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800 focus:outline-none focus:border-teal-500 text-xs"
                 >
-                  <option value="PORTION_ADJUSTMENT">Cắt suất / Tăng giảm cơm</option>
-                  <option value="ALLERGY_WARNING">Cảnh báo dị ứng khẩn cấp</option>
-                  <option value="SPECIAL_DIET">Chế độ ăn riêng (Cháo mềm)</option>
-                  <option value="MEDICATION_FEEDING">Dặn dò uống thuốc</option>
-                  <option value="KITCHEN_REQUEST">Yêu cầu phối hợp nhà bếp</option>
-                  <option value="PARENT_DIRECTIVE">Dặn dò từ phụ huynh</option>
+                  <option value="PORTION_ADJUSTMENT">{translateText("Cắt suất / Tăng giảm cơm")}</option>
+                  <option value="ALLERGY_WARNING">{translateText("Cảnh báo dị ứng khẩn cấp")}</option>
+                  <option value="SPECIAL_DIET">{translateText("Chế độ ăn riêng (Cháo mềm)")}</option>
+                  <option value="MEDICATION_FEEDING">{translateText("Dặn dò uống thuốc")}</option>
+                  <option value="KITCHEN_REQUEST">{translateText("Yêu cầu phối hợp nhà bếp")}</option>
+                  <option value="PARENT_DIRECTIVE">{translateText("Dặn dò từ phụ huynh")}</option>
                 </select>
               </div>
             </div>
@@ -258,8 +252,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
             {/* Row 3: Priority & Target Role */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Mức độ ưu tiên <span className="text-red-500">*</span>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Mức độ ưu tiên ")}<span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-1.5">
                   <button
@@ -270,9 +263,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
                         ? 'bg-slate-800 text-white border-slate-800 shadow-xs'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                     }`}
-                  >
-                    Tiêu chuẩn
-                  </button>
+                  >{translateText("Tiêu chuẩn")}</button>
                   <button
                     type="button"
                     onClick={() => setPriority('HIGH')}
@@ -281,9 +272,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
                         ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
                         : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                     }`}
-                  >
-                    ⚠️ Quan trọng
-                  </button>
+                  >{translateText("⚠️ Quan trọng")}</button>
                   <button
                     type="button"
                     onClick={() => setPriority('URGENT')}
@@ -292,53 +281,48 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
                         ? 'bg-red-600 text-white border-red-600 shadow-xs ring-2 ring-red-500/20'
                         : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
                     }`}
-                  >
-                    🚨 Khẩn cấp
-                  </button>
+                  >{translateText("🚨 Khẩn cấp")}</button>
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Nơi tiếp nhận xử lý <span className="text-red-500">*</span>
+                <label className="block font-semibold text-slate-700 mb-1">{translateText("Nơi tiếp nhận xử lý ")}<span className="text-red-500">*</span>
                 </label>
                 <select
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                   className="w-full py-1.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800 focus:outline-none focus:border-teal-500 text-xs"
                 >
-                  <option value="KITCHEN">Bếp Bán Trú & Tiếp Phẩm</option>
-                  <option value="HEALTH_OFFICER">Phòng Y Tế & Chuyên viên DD</option>
-                  <option value="PRINCIPAL">Ban Giám Hiệu</option>
-                  <option value="PARENT">Phối hợp cùng Phụ Huynh</option>
+                  <option value="KITCHEN">{translateText("Bếp Bán Trú & Tiếp Phẩm")}</option>
+                  <option value="HEALTH_OFFICER">{translateText("Phòng Y Tế & Chuyên viên DD")}</option>
+                  <option value="PRINCIPAL">{translateText("Ban Giám Hiệu")}</option>
+                  <option value="PARENT">{translateText("Phối hợp cùng Phụ Huynh")}</option>
                 </select>
               </div>
             </div>
 
             {/* Row 4: Title */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Tiêu đề tóm tắt <span className="text-red-500">*</span>
+              <label className="block font-semibold text-slate-700 mb-1">{translateText("Tiêu đề tóm tắt ")}<span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="VD: Cắt 1 suất trưa do đón sớm / Đổi sang cháo hạt sen..."
+                placeholder={translateText("VD: Cắt 1 suất trưa do đón sớm / Đổi sang cháo hạt sen...")}
                 className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-900 focus:outline-none focus:border-teal-500 focus:bg-white text-xs"
               />
             </div>
 
             {/* Row 5: Detailed Content */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Nội dung dặn dò chi tiết <span className="text-red-500">*</span>
+              <label className="block font-semibold text-slate-700 mb-1">{translateText("Nội dung dặn dò chi tiết ")}<span className="text-red-500">*</span>
               </label>
               <textarea
                 rows={2.5}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Nhập chi tiết yêu cầu, lời dặn của phụ huynh, triệu chứng của bé hoặc yêu cầu chuẩn bị..."
+                placeholder={translateText("Nhập chi tiết yêu cầu, lời dặn của phụ huynh, triệu chứng của bé hoặc yêu cầu chuẩn bị...")}
                 className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-teal-500 focus:bg-white leading-relaxed text-xs resize-none"
               />
             </div>
@@ -348,12 +332,11 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
               <div className="p-2.5 bg-teal-50 border border-teal-200 rounded-lg text-xs space-y-1">
                 <div className="font-bold text-teal-900 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <ChefHat className="w-3.5 h-3.5 text-teal-600" />
-                    Phản hồi từ Nhà Bếp: {noteToEdit.kitchenAcknowledgedBy || 'Bếp Bán Trú'}
+                    <ChefHat className="w-3.5 h-3.5 text-teal-600" />{translateText("Phản hồi từ Nhà Bếp: ")}{translateText(noteToEdit.kitchenAcknowledgedBy || 'Bếp Bán Trú')}
                   </span>
                   {noteToEdit.kitchenAcknowledgedAt && (
                     <span className="text-[11px] text-teal-700 font-normal">
-                      {noteToEdit.kitchenAcknowledgedAt}
+                      {translateText(noteToEdit.kitchenAcknowledgedAt)}
                     </span>
                   )}
                 </div>
@@ -365,9 +348,7 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
 
             {/* Teacher Signature */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Giáo viên ký gửi
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">{translateText("Giáo viên ký gửi")}</label>
               <input
                 type="text"
                 value={teacherName}
@@ -384,16 +365,14 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
               onClick={onClose}
               disabled={isSubmitting}
               className="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200/70 rounded-lg transition"
-            >
-              Hủy bỏ
-            </button>
+            >{translateText("Hủy bỏ")}</button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex items-center gap-1.5 px-5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg shadow-sm transition disabled:opacity-50"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? 'Đang lưu...' : noteToEdit ? 'Lưu thay đổi' : 'Gửi ghi chú'}</span>
+              <span>{translateText(isSubmitting ? 'Đang lưu...' : noteToEdit ? 'Lưu thay đổi' : 'Gửi ghi chú')}</span>
             </button>
           </div>
         </form>

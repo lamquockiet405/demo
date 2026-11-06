@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import * as XLSX from "xlsx";
@@ -17,6 +19,7 @@ import {
 import { TeacherStatsOverview } from "../../teacher/components/TeacherStatsOverview";
 
 export function StudentManagementPage() {
+  useLanguage();
   const isTeacherPortal = useLocation().pathname.startsWith("/teacher/");
   const [params] = useSearchParams();
   const [search, setSearch] = useState(""),
@@ -124,30 +127,26 @@ export function StudentManagementPage() {
 
   return (
     <SchoolPage
-      title={isTeacherPortal ? "Hồ sơ học sinh lớp phụ trách" : "Hồ sơ học sinh"}
-      description="Quản lý danh sách học sinh thuộc lớp phụ trách, thông tin cá nhân và tài khoản phụ huynh liên kết."
+      title={translateText(isTeacherPortal ? "Hồ sơ học sinh lớp phụ trách" : "Hồ sơ học sinh")}
+      description={translateText("Quản lý danh sách học sinh thuộc lớp phụ trách, thông tin cá nhân và tài khoản phụ huynh liên kết.")}
       actions={
         <>
           <button
             className="kp-button"
             disabled={resource.loading}
             onClick={resource.reload}
-          >
-            Làm mới
-          </button>
+          >{translateText("Làm mới")}</button>
           <button
             className="kp-button"
             disabled={classes.loading || !!classes.error}
             onClick={() => input.current?.click()}
-          >
-            Nhập Excel/CSV
-          </button>
+          >{translateText("Nhập Excel/CSV")}</button>
           <button
             className="kp-button primary"
             disabled={classes.loading || !!classes.error || (isTeacherPortal && !classes.data?.length)}
             onClick={() => openForm()}
           >
-            {isTeacherPortal ? "Thêm học sinh vào lớp" : "Thêm học sinh"}
+            {translateText(isTeacherPortal ? "Thêm học sinh vào lớp" : "Thêm học sinh")}
           </button>
         </>
       }
@@ -167,18 +166,12 @@ export function StudentManagementPage() {
       {isTeacherPortal && <TeacherStatsOverview classes={classes.data} />}
 
       <details className="text-sm bg-white border rounded-xl p-4">
-        <summary className="cursor-pointer font-semibold">
-          Cấu trúc tệp nhập Excel/CSV
-        </summary>
-        <p className="mt-3 break-words">
-          Tên cột bắt buộc: fullName, dateOfBirth (YYYY-MM-DD), gender (MALE/FEMALE), classId.
-          Cột bổ sung: studentCode, parentName, parentEmail, parentPhone, parentRelationship, medicalNotes.
-          Mã học sinh đã tồn tại sẽ được cập nhật theo nội dung tệp.
-        </p>
+        <summary className="cursor-pointer font-semibold">{translateText("Cấu trúc tệp nhập Excel/CSV")}</summary>
+        <p className="mt-3 break-words">{translateText("Tên cột bắt buộc: fullName, dateOfBirth (YYYY-MM-DD), gender (MALE/FEMALE), classId. Cột bổ sung: studentCode, parentName, parentEmail, parentPhone, parentRelationship, medicalNotes. Mã học sinh đã tồn tại sẽ được cập nhật theo nội dung tệp.")}</p>
         <ul className="mt-2">
           {(classes.data || []).map((c) => (
             <li key={c.id}>
-              {c.name}: Mã lớp {c.id}
+              {c.name}{translateText(": Mã lớp ")}{translateText(c.id)}
             </li>
           ))}
         </ul>
@@ -187,23 +180,23 @@ export function StudentManagementPage() {
       <div className="kp-filters">
         <input
           type="search"
-          aria-label="Tìm học sinh"
+          aria-label={translateText("Tìm học sinh")}
           value={search}
-          placeholder="Tìm tên hoặc mã học sinh…"
+          placeholder={translateText("Tìm tên hoặc mã học sinh…")}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
         />
         <select
-          aria-label="Lớp học"
+          aria-label={translateText("Lớp học")}
           value={classId}
           onChange={(e) => {
             setClassId(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">{isTeacherPortal ? "Tất cả lớp được phân công" : "Tất cả lớp"}</option>
+          <option value="">{translateText(isTeacherPortal ? "Tất cả lớp được phân công" : "Tất cả lớp")}</option>
           {(classes.data || []).map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -224,16 +217,16 @@ export function StudentManagementPage() {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 {[
-                  "Mã học sinh",
-                  "Họ tên học sinh",
-                  "Ngày sinh",
-                  "Lớp",
-                  "Phụ huynh",
-                  "Tài khoản phụ huynh",
-                  "Thao tác",
+                  translateText("Mã học sinh"),
+                  translateText("Họ tên học sinh"),
+                  translateText("Ngày sinh"),
+                  translateText("Lớp"),
+                  translateText("Phụ huynh"),
+                  translateText("Tài khoản phụ huynh"),
+                  translateText("Thao tác"),
                 ].map((h) => (
                   <th className="p-3 whitespace-nowrap font-bold text-slate-700" key={h}>
-                    {h}
+                    {translateText(h)}
                   </th>
                 ))}
               </tr>
@@ -244,7 +237,7 @@ export function StudentManagementPage() {
                   <td className="p-3 font-mono font-medium text-slate-700">{row.studentCode || "—"}</td>
                   <td className="p-3 font-semibold text-slate-900">{row.fullName}</td>
                   <td className="p-3 text-slate-600">
-                    {row.dateOfBirth?.slice(0, 10) || "—"}
+                    {translateText(row.dateOfBirth?.slice(0, 10) || "—")}
                   </td>
                   <td className="p-3 text-slate-700">
                     {row.className ||
@@ -252,15 +245,15 @@ export function StudentManagementPage() {
                       (classes.data || []).find(
                         (c) => String(c.id) === String(row.classId),
                       )?.name ||
-                      "Chưa phân lớp"}
+                      translateText("Chưa phân lớp")}
                   </td>
                   <td className="p-3">
                     <strong className="text-slate-900 block">
-                      {row.parentName || row.emergencyContactName || "Chưa cập nhật"}
+                      {translateText(row.parentName || row.emergencyContactName || "Chưa cập nhật")}
                     </strong>
                     {row.parentRelationship && (
                       <span className="text-xs text-slate-500">
-                        ({row.parentRelationship})
+                        ({translateText(row.parentRelationship)})
                       </span>
                     )}
                   </td>
@@ -275,7 +268,7 @@ export function StudentManagementPage() {
                         {row.parentPhone || row.emergencyContactPhone}
                       </span>
                     ) : (
-                      !row.parentEmail && <span className="text-slate-400 italic text-xs">Chưa có tài khoản</span>
+                      !row.parentEmail && <span className="text-slate-400 italic text-xs">{translateText("Chưa có tài khoản")}</span>
                     )}
                   </td>
                   <td className="p-3">
@@ -283,15 +276,11 @@ export function StudentManagementPage() {
                       <button
                         className="kp-button text-xs"
                         onClick={() => setDetailId(String(row.id))}
-                      >
-                        Chi tiết
-                      </button>
+                      >{translateText("Chi tiết")}</button>
                       <button
                         className="kp-button text-xs"
                         onClick={() => openForm(row)}
-                      >
-                        Sửa
-                      </button>
+                      >{translateText("Sửa")}</button>
                     </div>
                   </td>
                 </tr>
@@ -303,28 +292,24 @@ export function StudentManagementPage() {
 
       <div className="flex gap-3 items-center text-sm mt-4">
         <span>
-          {total} học sinh · Trang {page}/{Math.max(1, Math.ceil(total / 25))}
+          {total}{translateText(" học sinh · Trang ")}{page}/{Math.max(1, Math.ceil(total / 25))}
         </span>
         <button
           className="kp-button"
           disabled={page <= 1}
           onClick={() => setPage(page - 1)}
-        >
-          Trước
-        </button>
+        >{translateText("Trước")}</button>
         <button
           className="kp-button"
           disabled={page * 25 >= total}
           onClick={() => setPage(page + 1)}
-        >
-          Sau
-        </button>
+        >{translateText("Sau")}</button>
       </div>
 
       {/* ─── MODAL THÊM / CẬP NHẬT HỒ SƠ HỌC SINH ─── */}
       {editing && (
         <Modal
-          title={editing.id ? "Cập nhật hồ sơ học sinh" : "Thêm hồ sơ học sinh mới"}
+          title={translateText(editing.id ? "Cập nhật hồ sơ học sinh" : "Thêm hồ sơ học sinh mới")}
           onClose={() => setEditing(null)}
           busy={action.busy}
         >
@@ -332,24 +317,22 @@ export function StudentManagementPage() {
             <Feedback error={action.error} />
 
             <div className="border-b pb-3 space-y-3">
-              <h3 className="font-bold text-sm text-emerald-900 uppercase tracking-wide">
-                1. Thông tin học sinh
-              </h3>
-              <Field label="Họ và tên học sinh">
+              <h3 className="font-bold text-sm text-emerald-900 uppercase tracking-wide">{translateText("1. Thông tin học sinh")}</h3>
+              <Field label={translateText("Họ và tên học sinh")}>
                 <input
                   className="kp-input"
                   required
-                  placeholder="VD: Nguyễn Gia Huy"
+                  placeholder={translateText("VD: Nguyễn Gia Huy")}
                   value={editing.fullName}
                   onChange={(e) =>
                     setEditing({ ...editing, fullName: e.target.value })
                   }
                 />
               </Field>
-              <Field label="Mã học sinh">
+              <Field label={translateText("Mã học sinh")}>
                 <input
                   className="kp-input"
-                  placeholder="VD: HD-2023-01 (tự động sinh nếu để trống)"
+                  placeholder={translateText("VD: HD-2023-01 (tự động sinh nếu để trống)")}
                   value={editing.studentCode}
                   onChange={(e) =>
                     setEditing({ ...editing, studentCode: e.target.value })
@@ -357,7 +340,7 @@ export function StudentManagementPage() {
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Ngày sinh">
+                <Field label={translateText("Ngày sinh")}>
                   <input
                     className="kp-input"
                     type="date"
@@ -369,7 +352,7 @@ export function StudentManagementPage() {
                     }
                   />
                 </Field>
-                <Field label="Giới tính">
+                <Field label={translateText("Giới tính")}>
                   <select
                     className="kp-input"
                     required
@@ -378,12 +361,12 @@ export function StudentManagementPage() {
                       setEditing({ ...editing, gender: e.target.value })
                     }
                   >
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
+                    <option value="MALE">{translateText("Nam")}</option>
+                    <option value="FEMALE">{translateText("Nữ")}</option>
                   </select>
                 </Field>
               </div>
-              <Field label="Lớp học">
+              <Field label={translateText("Lớp học")}>
                 <select
                   className="kp-input"
                   required
@@ -392,7 +375,7 @@ export function StudentManagementPage() {
                     setEditing({ ...editing, classId: e.target.value })
                   }
                 >
-                  <option value="">Chọn lớp</option>
+                  <option value="">{translateText("Chọn lớp")}</option>
                   {(classes.data || []).map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -403,13 +386,11 @@ export function StudentManagementPage() {
             </div>
 
             <div className="border-b pb-3 space-y-3">
-              <h3 className="font-bold text-sm text-emerald-900 uppercase tracking-wide">
-                2. Thông tin & Tài khoản phụ huynh
-              </h3>
-              <Field label="Họ tên phụ huynh">
+              <h3 className="font-bold text-sm text-emerald-900 uppercase tracking-wide">{translateText("2. Thông tin & Tài khoản phụ huynh")}</h3>
+              <Field label={translateText("Họ tên phụ huynh")}>
                 <input
                   className="kp-input"
-                  placeholder="VD: Nguyễn Gia Bảo"
+                  placeholder={translateText("VD: Nguyễn Gia Bảo")}
                   value={editing.parentName}
                   onChange={(e) =>
                     setEditing({
@@ -421,22 +402,22 @@ export function StudentManagementPage() {
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Tài khoản phụ huynh (Email đăng nhập)">
+                <Field label={translateText("Tài khoản phụ huynh (Email đăng nhập)")}>
                   <input
                     className="kp-input font-mono text-xs"
                     type="email"
-                    placeholder="VD: phuhuynh.huy@gmail.com"
+                    placeholder={translateText("VD: phuhuynh.huy@gmail.com")}
                     value={editing.parentEmail}
                     onChange={(e) =>
                       setEditing({ ...editing, parentEmail: e.target.value })
                     }
                   />
                 </Field>
-                <Field label="Điện thoại phụ huynh">
+                <Field label={translateText("Điện thoại phụ huynh")}>
                   <input
                     className="kp-input"
                     type="tel"
-                    placeholder="VD: 0908111222"
+                    placeholder={translateText("VD: 0908111222")}
                     value={editing.parentPhone}
                     onChange={(e) =>
                       setEditing({
@@ -448,7 +429,7 @@ export function StudentManagementPage() {
                   />
                 </Field>
               </div>
-              <Field label="Mối quan hệ">
+              <Field label={translateText("Mối quan hệ")}>
                 <select
                   className="kp-input"
                   value={editing.parentRelationship}
@@ -456,17 +437,17 @@ export function StudentManagementPage() {
                     setEditing({ ...editing, parentRelationship: e.target.value })
                   }
                 >
-                  <option value="FATHER">Bố</option>
-                  <option value="MOTHER">Mẹ</option>
-                  <option value="GUARDIAN">Người giám hộ</option>
+                  <option value="FATHER">{translateText("Bố")}</option>
+                  <option value="MOTHER">{translateText("Mẹ")}</option>
+                  <option value="GUARDIAN">{translateText("Người giám hộ")}</option>
                 </select>
               </Field>
             </div>
 
-            <Field label="Ghi chú y tế & sức khỏe">
+            <Field label={translateText("Ghi chú y tế & sức khỏe")}>
               <textarea
                 className="kp-input"
-                placeholder="VD: Tiền sử sốt co giật; Dị ứng nhẹ..."
+                placeholder={translateText("VD: Tiền sử sốt co giật; Dị ứng nhẹ...")}
                 value={editing.medicalNotes}
                 onChange={(e) =>
                   setEditing({ ...editing, medicalNotes: e.target.value })
@@ -478,7 +459,7 @@ export function StudentManagementPage() {
               className="kp-button primary w-full"
               disabled={action.busy || classes.loading || !!classes.error}
             >
-              {action.busy ? "Đang lưu…" : editing.id ? "Cập nhật hồ sơ học sinh" : "Lưu hồ sơ học sinh"}
+              {translateText(action.busy ? "Đang lưu…" : editing.id ? "Cập nhật hồ sơ học sinh" : "Lưu hồ sơ học sinh")}
             </button>
           </form>
         </Modal>
@@ -486,62 +467,55 @@ export function StudentManagementPage() {
 
       {/* ─── MODAL XEM CHI TIẾT HỒ SƠ HỌC SINH ─── */}
       {detailId && (
-        <Modal title="Chi tiết hồ sơ học sinh" onClose={() => setDetailId("")}>
+        <Modal title={translateText("Chi tiết hồ sơ học sinh")} onClose={() => setDetailId("")}>
           <State resource={detail} />
           {!detail.loading && !detail.error && detail.data && (
             <div className="space-y-4">
               <div className="border-b pb-3">
                 <h2 className="font-bold text-xl text-slate-900">{detail.data.fullName}</h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Mã học sinh: <b className="text-slate-800">{detail.data.studentCode || "—"}</b> · Ngày sinh:{" "}
-                  <b className="text-slate-800">{detail.data.dateOfBirth?.slice(0, 10) || "—"}</b> · Giới tính:{" "}
-                  <b className="text-slate-800">{detail.data.gender === "MALE" ? "Nam" : "Nữ"}</b>
+                <p className="text-sm text-slate-500 mt-1">{translateText("Mã học sinh: ")}<b className="text-slate-800">{detail.data.studentCode || "—"}</b>{translateText(" · Ngày sinh:")}{" "}
+                  <b className="text-slate-800">{translateText(detail.data.dateOfBirth?.slice(0, 10) || "—")}</b>{translateText(" · Giới tính:")}{" "}
+                  <b className="text-slate-800">{translateText(detail.data.gender === "MALE" ? "Nam" : "Nữ")}</b>
                 </p>
-                <p className="text-sm text-slate-500">
-                  Lớp học: <b className="text-slate-800">{detail.data.className || "Chưa phân lớp"}</b>
+                <p className="text-sm text-slate-500">{translateText("Lớp học: ")}<b className="text-slate-800">{detail.data.className || translateText("Chưa phân lớp")}</b>
                 </p>
               </div>
 
               <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-xl p-4 space-y-2">
-                <h3 className="font-bold text-sm text-emerald-900 uppercase tracking-wide">
-                  Thông tin & Tài khoản phụ huynh
-                </h3>
-                <p className="text-sm text-slate-800">
-                  Họ tên phụ huynh:{" "}
-                  <strong>{detail.data.parentName || detail.data.emergencyContactName || "Chưa cập nhật"}</strong>
-                  {detail.data.parentRelationship && ` (${detail.data.parentRelationship})`}
+                <h3 className="font-bold text-sm text-emerald-900 uppercase tracking-wide">{translateText("Thông tin & Tài khoản phụ huynh")}</h3>
+                <p className="text-sm text-slate-800">{translateText("Họ tên phụ huynh:")}{" "}
+                  <strong>{translateText(detail.data.parentName || detail.data.emergencyContactName || "Chưa cập nhật")}</strong>
+                  {translateText(detail.data.parentRelationship && ` (${detail.data.parentRelationship})`)}
                 </p>
-                <p className="text-sm text-slate-800">
-                  Tài khoản đăng nhập (Email):{" "}
+                <p className="text-sm text-slate-800">{translateText("Tài khoản đăng nhập (Email):")}{" "}
                   <strong className="font-mono text-emerald-800">
-                    {detail.data.parentEmail || "Chưa tạo tài khoản"}
+                    {detail.data.parentEmail || translateText("Chưa tạo tài khoản")}
                   </strong>
                 </p>
-                <p className="text-sm text-slate-800">
-                  Điện thoại liên hệ:{" "}
-                  <strong>{detail.data.parentPhone || detail.data.emergencyContactPhone || "—"}</strong>
+                <p className="text-sm text-slate-800">{translateText("Điện thoại liên hệ:")}{" "}
+                  <strong>{translateText(detail.data.parentPhone || detail.data.emergencyContactPhone || "—")}</strong>
                 </p>
               </div>
 
               <div className="space-y-1 text-sm bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <p>
-                  <strong>Ghi chú y tế:</strong>{" "}
-                  {detail.data.medicalNotes || "Bình thường / Chưa có ghi nhận đặc biệt"}
+                  <strong>{translateText("Ghi chú y tế:")}</strong>{" "}
+                  {detail.data.medicalNotes || translateText("Bình thường / Chưa có ghi nhận đặc biệt")}
                 </p>
               </div>
 
               <div className="border-t pt-3">
-                <h3 className="font-semibold text-sm mb-2 text-slate-800">Dị ứng đã ghi nhận</h3>
+                <h3 className="font-semibold text-sm mb-2 text-slate-800">{translateText("Dị ứng đã ghi nhận")}</h3>
                 {detail.data.allergies
                   ?.filter((a: any) => a.isActive !== false)
                   .map((a: any) => (
                     <p key={a.id} className="text-sm text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg mb-1 border border-rose-200">
-                      ⚠️ <b>{a.customAllergenName || a.allergen?.nameVi || "Dị ứng thực phẩm"}</b> ({a.severity})
-                      {a.note ? ` — ${a.note}` : ""}
+                      ⚠️ <b>{translateText(a.customAllergenName || a.allergen?.nameVi || "Dị ứng thực phẩm")}</b> ({translateText(a.severity)})
+                      {translateText(a.note ? ` — ${a.note}` : "")}
                     </p>
                   ))}
                 {!detail.data.allergies?.some((a: any) => a.isActive !== false) && (
-                  <p className="text-sm text-slate-500 italic">Chưa có khai báo dị ứng (Chế độ ăn tiêu chuẩn).</p>
+                  <p className="text-sm text-slate-500 italic">{translateText("Chưa có khai báo dị ứng (Chế độ ăn tiêu chuẩn).")}</p>
                 )}
               </div>
             </div>
@@ -552,19 +526,18 @@ export function StudentManagementPage() {
       {/* ─── MODAL XÁC NHẬN IMPORT EXCEL ─── */}
       {importRows && (
         <Modal
-          title="Xác nhận nhập danh sách học sinh"
+          title={translateText("Xác nhận nhập danh sách học sinh")}
           onClose={() => setImportRows(null)}
           busy={action.busy}
         >
           <p className="mb-4 text-sm text-slate-600">
-            {importRows.length} dòng hợp lệ. Mã học sinh đã tồn tại sẽ được cập nhật.
-          </p>
+            {importRows.length}{translateText(" dòng hợp lệ. Mã học sinh đã tồn tại sẽ được cập nhật.")}</p>
           <div className="max-h-72 overflow-auto text-xs space-y-1">
             {importRows.map((r, i) => (
               <p key={i} className="py-1.5 px-2 bg-slate-50 rounded border border-slate-100">
-                {i + 1}. <b>{r.fullName}</b> · Ngày sinh: {r.dateOfBirth} · Lớp {r.classId}
-                {r.parentName ? ` · Phụ huynh: ${r.parentName}` : ""}
-                {r.parentEmail ? ` (${r.parentEmail})` : ""}
+                {i + 1}. <b>{r.fullName}</b>{translateText(" · Ngày sinh: ")}{translateText(r.dateOfBirth)}{translateText(" · Lớp ")}{translateText(r.classId)}
+                {translateText(r.parentName ? ` · Phụ huynh: ${r.parentName}` : "")}
+                {translateText(r.parentEmail ? ` (${r.parentEmail})` : "")}
               </p>
             ))}
           </div>
@@ -574,7 +547,7 @@ export function StudentManagementPage() {
             disabled={action.busy}
             onClick={() => void importFile()}
           >
-            {action.busy ? "Đang nhập…" : "Xác nhận nhập"}
+            {translateText(action.busy ? "Đang nhập…" : "Xác nhận nhập")}
           </button>
         </Modal>
       )}

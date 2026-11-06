@@ -19,11 +19,26 @@ import { Public } from "../../../common/decorators/public.decorator";
 import { CurrentUser } from "../../../common/decorators/current-user.decorator";
 import { CreatePaymentUrlDto } from "../dto/create-payment-url.dto";
 
+/**
+ * Quản lý hóa đơn ăn xế và tiếp nhận luồng thanh toán, callback từ VNPAY.
+ * Các đường dẫn bên dưới được ghép với tiền tố toàn cục /api/v1.
+ * Xác thực, quyền hoặc @Public được khai báo riêng ở các endpoint bên dưới.
+ * Constructor nhận service qua Dependency Injection; các hàm chuyển dữ liệu request sang service.
+ */
 @ApiTags("Payments & VNPAY Billing (UC62)")
 @Controller("payments")
 export class PaymentsController {
   constructor(private readonly vnpayService: VnpayService) {}
 
+  /**
+   * POST /payments/create-url: Khởi tạo link thanh toán VNPAY kèm chữ ký HMAC-SHA512 (UC62 - Pay Snack Service Fee Online).
+   * @param body Dữ liệu body JSON, kiểu CreatePaymentUrlDto.
+   * @param req HTTP request để đọc thông tin người dùng, header hoặc địa chỉ IP.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang VnpayService.createPaymentUrl() và trả kết quả cho client.
+   * Lấy IP từ header hoặc socket; xác định registrationId trực tiếp hoặc từ phần cuối invoiceId.
+   * Với tài khoản PARENT, truyền thêm ID phụ huynh đang đăng nhập sang service.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Post("create-url")
@@ -55,6 +70,11 @@ export class PaymentsController {
     });
   }
 
+  /**
+   * GET /payments/vnpay-ipn: KÊNH 1: Server-to-Server IPN Webhook từ máy chủ VNPAY (Ngầm, Bảo mật & Idempotent).
+   * @param query Bộ lọc trong query string.
+   * Chuyển xử lý sang VnpayService.handleIpn() và trả kết quả cho client.
+   */
   @Public()
   @Get("vnpay-ipn")
   @ApiOperation({
@@ -65,6 +85,11 @@ export class PaymentsController {
     return this.vnpayService.handleIpn(query);
   }
 
+  /**
+   * GET /payments/vnpay-return: KÊNH 2: Xác thực kết quả giao dịch khi trình duyệt phụ huynh quay lại từ VNPAY.
+   * @param query Bộ lọc trong query string.
+   * Chuyển xử lý sang VnpayService.verifyReturnUrl() và trả kết quả cho client.
+   */
   @Public()
   @Get("vnpay-return")
   @ApiOperation({
@@ -75,6 +100,11 @@ export class PaymentsController {
     return this.vnpayService.verifyReturnUrl(query);
   }
 
+  /**
+   * GET /payments/my-invoices: Lấy danh sách các hóa đơn tiền ăn xế của con dành cho Phụ huynh.
+   * @param userId Trường sub của tài khoản đã xác thực (tùy chọn).
+   * Chuyển xử lý sang VnpayService.getMyInvoices() và trả kết quả cho client.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Get("my-invoices")
@@ -93,6 +123,12 @@ export class PaymentsController {
     return this.vnpayService.getMyInvoices(userId);
   }
 
+  /**
+   * GET /payments/receipt/:registrationId: Xuất chi tiết biên lai thu tiền điện tử (Electronic Receipt).
+   * @param registrationId Giá trị registrationId trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * @param userId Trường id của tài khoản đã xác thực (tùy chọn).
+   * Chuyển xử lý sang VnpayService.getElectronicReceipt() và trả kết quả cho client.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Get("receipt/:registrationId")
@@ -107,6 +143,10 @@ export class PaymentsController {
     return this.vnpayService.getElectronicReceipt(registrationId, userId);
   }
 
+  /**
+   * GET /payments/invoices: Lấy danh sách các hóa đơn tiền ăn xế toàn trường (BGH).
+   * Chuyển xử lý sang VnpayService.getInvoices() và trả kết quả cho client.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Get("invoices")
@@ -118,6 +158,13 @@ export class PaymentsController {
     return this.vnpayService.getInvoices();
   }
 
+  /**
+   * POST /payments/invoices: Tạo mới phiếu đăng ký / hóa đơn ăn xế.
+   * @param body Dữ liệu body JSON.
+   * @param user Thông tin tài khoản đã xác thực.
+   * Chuyển xử lý sang VnpayService.createInvoice() và trả kết quả cho client.
+   * Với tài khoản PARENT, parentId được lấy từ người đăng nhập thay cho giá trị trong body.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Post("invoices")
@@ -130,6 +177,11 @@ export class PaymentsController {
     });
   }
 
+  /**
+   * POST /payments/invoices/:id/remind: Gửi tin nhắn nhắc phụ huynh đóng phí ăn xế.
+   * @param id Giá trị id trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
+   * Chuyển xử lý sang VnpayService.remindInvoice() và trả kết quả cho client.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Post("invoices/:id/remind")
@@ -139,6 +191,10 @@ export class PaymentsController {
     return this.vnpayService.remindInvoice(id);
   }
 
+  /**
+   * POST /payments/invoices/batch-remind: Gửi nhắc phí hàng loạt cho các phụ huynh chưa thanh toán.
+   * Chuyển xử lý sang VnpayService.batchRemind() và trả kết quả cho client.
+   */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Post("invoices/batch-remind")

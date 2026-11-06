@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { UserCheck, Utensils, Flag, ShieldCheck, TrendingUp, Smile } from 'lucide-react';
 import { AttendanceHistoryResponse } from '../types';
@@ -7,6 +9,7 @@ interface HistorySummaryCardsProps {
 }
 
 export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summary }) => {
+  useLanguage();
   const attendanceRate = summary?.attendanceRate ?? 0;
   const attendanceDiff = summary?.attendanceRateDiff ?? 0;
   const avgAttendanceText = summary?.avgAttendanceText ?? '—';
@@ -31,7 +34,7 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-500">Tỷ lệ đi học ăn bán trú TB</p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Tỷ lệ đi học ăn bán trú TB")}</p>
             <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight">
               {attendanceRate}%
             </h3>
@@ -44,10 +47,10 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
         <div className="flex items-center gap-2 pt-4 mt-2 border-t border-slate-100 text-[11px]">
           <span className="inline-flex items-center gap-0.5 text-emerald-600 font-extrabold">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>+{attendanceDiff}% so tuần trước</span>
+            <span>+{attendanceDiff}{translateText("% so tuần trước")}</span>
           </span>
           <span className="text-slate-300">•</span>
-          <span className="text-slate-500 font-medium">{avgAttendanceText}</span>
+          <span className="text-slate-500 font-medium">{translateText(avgAttendanceText)}</span>
         </div>
       </div>
 
@@ -55,7 +58,7 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-500">Tỷ lệ ăn hết suất TB</p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Tỷ lệ ăn hết suất TB")}</p>
             <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight">
               {allEatenRate}%
             </h3>
@@ -68,10 +71,10 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
         <div className="flex items-center gap-2 pt-4 mt-2 border-t border-slate-100 text-[11px]">
           <span className="inline-flex items-center gap-1 text-sky-700 font-extrabold">
             <Smile className="w-3.5 h-3.5 text-sky-600" />
-            <span>{eatenEvaluationText}</span>
+            <span>{translateText(eatenEvaluationText)}</span>
           </span>
           <span className="text-slate-300">•</span>
-          <span className="text-slate-500 font-medium">{eatenTargetText}</span>
+          <span className="text-slate-500 font-medium">{translateText(eatenTargetText)}</span>
         </div>
       </div>
 
@@ -79,12 +82,12 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-500">Trẻ cần lưu ý dinh dưỡng</p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Trẻ cần lưu ý dinh dưỡng")}</p>
             <div className="flex items-baseline gap-1 mt-2">
               <h3 className="text-3xl font-black text-slate-900 tracking-tight">
-                {String(specialCareCount).padStart(2, '0')}
+                {translateText(String(specialCareCount).padStart(2, '0'))}
               </h3>
-              <span className="text-xs font-bold text-slate-500">bé</span>
+              <span className="text-xs font-bold text-slate-500">{translateText("bé")}</span>
             </div>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shadow-sm">
@@ -94,10 +97,10 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
 
         <div className="flex items-center gap-2 pt-4 mt-2 border-t border-slate-100 text-[11px]">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">
-            {specialCareTag}
+            {translateText(specialCareTag)}
           </span>
-          <span className="text-slate-500 font-medium truncate max-w-[120px]" title={specialCareChildren}>
-            {specialCareChildren}
+          <span className="text-slate-500 font-medium truncate max-w-[120px]" title={translateText(specialCareChildren)}>
+            {translateText(specialCareChildren)}
           </span>
         </div>
       </div>
@@ -106,12 +109,12 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-500">Suất ăn chế độ riêng / Dị ứng</p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Suất ăn chế độ riêng / Dị ứng")}</p>
             <div className="flex items-baseline gap-1 mt-2">
               <h3 className="text-3xl font-black text-slate-900 tracking-tight">
                 {specialDietCount}
               </h3>
-              <span className="text-xs font-bold text-slate-500">suất/tuần</span>
+              <span className="text-xs font-bold text-slate-500">{translateText("suất/tuần")}</span>
             </div>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shadow-sm">
@@ -122,10 +125,10 @@ export const HistorySummaryCards: React.FC<HistorySummaryCardsProps> = ({ summar
         <div className="flex items-center gap-2 pt-4 mt-2 border-t border-slate-100 text-[11px]">
           <span className="inline-flex items-center gap-1 text-teal-700 font-extrabold">
             <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-            <span>An toàn {dietSafetyRate}%</span>
+            <span>{translateText("An toàn ")}{dietSafetyRate}%</span>
           </span>
           <span className="text-slate-300">•</span>
-          <span className="text-slate-500 font-medium">{dietIncidentsCount} sự cố</span>
+          <span className="text-slate-500 font-medium">{dietIncidentsCount}{translateText(" sự cố")}</span>
         </div>
       </div>
     </div>

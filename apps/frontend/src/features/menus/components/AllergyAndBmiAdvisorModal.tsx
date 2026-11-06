@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
@@ -55,6 +57,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
   categoryLock = null,
   onSubstituteApplied,
 }) => {
+  useLanguage();
   const [activeTab, setActiveTab] = useState<TabType>(categoryLock || initialTab || 'STUNTED');
   const [internalLock, setInternalLock] = useState<'STUNTED' | 'OBESE' | 'ALLERGIES' | null>(categoryLock ?? null);
   const [advisory, setAdvisory] = useState<MenuAdvisoryResponse | null>(null);
@@ -320,54 +323,50 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           <div className={isObese ? 'bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 flex flex-col justify-between' : 'bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex flex-col justify-between'}>
             <div className={isObese ? 'flex items-center justify-between text-rose-700' : 'flex items-center justify-between text-amber-700'}>
-              <span className="text-[11px] font-bold uppercase tracking-wider">Tổng trẻ bị ảnh hưởng</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider">{translateText("Tổng trẻ bị ảnh hưởng")}</span>
               <User className="w-4 h-4" />
             </div>
             <div className={isObese ? 'mt-2 text-2xl sm:text-3xl font-black text-rose-950' : 'mt-2 text-2xl sm:text-3xl font-black text-amber-950'}>
               {group.count}
             </div>
             <span className={isObese ? 'text-[11px] text-rose-600/80 mt-1 font-medium' : 'text-[11px] text-amber-600/80 mt-1 font-medium'}>
-              {isObese ? 'Cần ghi chú giảm calo' : 'Cần ghi chú thêm lượng ăn'}
+              {translateText(isObese ? 'Cần ghi chú giảm calo' : 'Cần ghi chú thêm lượng ăn')}
             </span>
           </div>
 
           <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between text-blue-700">
-              <span className="text-[11px] font-bold uppercase tracking-wider">Tỷ lệ toàn trường</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider">{translateText("Tỷ lệ toàn trường")}</span>
               {isObese ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
             </div>
             <div className="mt-2 text-2xl sm:text-3xl font-black text-blue-950">
               {Math.round((group.count / Math.max(advisory?.bmiSummary.totalEvaluated || 1, 1)) * 100)}%
             </div>
-            <span className="text-[11px] text-blue-600/80 mt-1 font-medium">
-              Trên tổng {advisory?.bmiSummary.totalEvaluated || 0} trẻ
-            </span>
+            <span className="text-[11px] text-blue-600/80 mt-1 font-medium">{translateText("Trên tổng ")}{advisory?.bmiSummary.totalEvaluated || 0}{translateText(" trẻ")}</span>
           </div>
 
           <div className={isObese ? 'bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 flex flex-col justify-between' : 'bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex flex-col justify-between'}>
             <div className={isObese ? 'flex items-center justify-between text-rose-700' : 'flex items-center justify-between text-amber-700'}>
-              <span className="text-[11px] font-bold uppercase tracking-wider">Nguyên tắc định lượng</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider">{translateText("Nguyên tắc định lượng")}</span>
               <FileText className="w-4 h-4" />
             </div>
             <div className={isObese ? 'mt-2 text-xl sm:text-2xl font-black text-rose-950' : 'mt-2 text-xl sm:text-2xl font-black text-amber-950'}>
-              {isObese ? 'Giảm calo' : 'Tăng khối lượng'}
+              {translateText(isObese ? 'Giảm calo' : 'Tăng khối lượng')}
             </div>
             <span className={isObese ? 'text-[11px] text-rose-600/80 mt-1 font-medium' : 'text-[11px] text-amber-600/80 mt-1 font-medium'}>
-              {isObese ? 'Bớt 20% cơm, tăng rau' : 'Thêm +15-20% khẩu phần'}
+              {translateText(isObese ? 'Bớt 20% cơm, tăng rau' : 'Thêm +15-20% khẩu phần')}
             </span>
           </div>
 
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-600">
-              <span className="text-[11px] font-bold uppercase tracking-wider">Quy chuẩn áp dụng</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider">{translateText("Quy chuẩn áp dụng")}</span>
               <Info className="w-4 h-4" />
             </div>
             <div className="mt-2 text-sm font-black text-slate-900 leading-snug">
-              {regulationName}
+              {translateText(regulationName)}
             </div>
-            <span className="text-[11px] text-slate-500/80 mt-1 font-medium">
-              Bộ GD&ĐT / Bộ Y tế
-            </span>
+            <span className="text-[11px] text-slate-500/80 mt-1 font-medium">{translateText("Bộ GD&ĐT / Bộ Y tế")}</span>
           </div>
         </div>
 
@@ -380,10 +379,10 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
               isObese ? 'text-rose-900' : 'text-amber-900'
             }`}>
               <Info className={`w-4 h-4 ${isObese ? 'text-rose-600' : 'text-amber-600'}`} />
-              <span>Chiến lược Dinh dưỡng Lâm sàng</span>
+              <span>{translateText("Chiến lược Dinh dưỡng Lâm sàng")}</span>
             </h5>
             <p className="text-xs text-slate-700 leading-relaxed">
-              {group.clinicalStrategy}
+              {translateText(group.clinicalStrategy)}
             </p>
           </div>
 
@@ -394,7 +393,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
               isObese ? 'text-amber-900' : 'text-teal-900'
             }`}>
               <UtensilsCrossed className={`w-4 h-4 ${isObese ? 'text-amber-600' : 'text-teal-600'}`} />
-              <span>Hướng dẫn Bếp & Giáo viên trên Lớp</span>
+              <span>{translateText("Hướng dẫn Bếp & Giáo viên trên Lớp")}</span>
             </h5>
             <p className="text-xs text-slate-700 leading-relaxed">
               {group.portionAdvice}
@@ -406,7 +405,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
         <div className="space-y-3">
           <h5 className="text-xs font-black text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
             <Baby className="w-4 h-4 text-slate-600" />
-            <span>{childListTitle}:</span>
+            <span>{translateText(childListTitle)}:</span>
           </h5>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {group.children.map((child) => (
@@ -427,19 +426,18 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   </div>
                   <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
                     isObese ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-900'
-                  }`}>
-                    BMI {child.bmi}
+                  }`}>{translateText("BMI ")}{child.bmi}
                   </span>
                 </div>
                 <div className="text-[11px] text-slate-500 font-medium flex flex-wrap gap-1.5">
                   <span className="bg-slate-100 px-1.5 py-0.5 rounded">{child.className}</span>
-                  <span className="bg-slate-100 px-1.5 py-0.5 rounded">{child.weightKg}kg</span>
-                  <span className="bg-slate-100 px-1.5 py-0.5 rounded">{child.heightCm}cm</span>
+                  <span className="bg-slate-100 px-1.5 py-0.5 rounded">{child.weightKg}{translateText("kg")}</span>
+                  <span className="bg-slate-100 px-1.5 py-0.5 rounded">{child.heightCm}{translateText("cm")}</span>
                 </div>
                 <div className={`text-[10px] font-semibold italic ${
                   isObese ? 'text-rose-700' : 'text-amber-800'
                 }`}>
-                  {child.statusText}
+                  {translateText(child.statusText)}
                 </div>
               </div>
             ))}
@@ -455,22 +453,16 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
           </div>
           <div className="space-y-1 text-xs">
             <div className="font-black text-sm flex items-center gap-2">
-              <span>{isObese ? 'Quy chuẩn chia phần: Giảm lượng Calo' : 'Quy chuẩn chia phần: Thêm khối lượng thức ăn'}</span>
+              <span>{translateText(isObese ? 'Quy chuẩn chia phần: Giảm lượng Calo' : 'Quy chuẩn chia phần: Thêm khối lượng thức ăn')}</span>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                 isObese ? 'bg-rose-200/80 text-rose-900' : 'bg-amber-200/80 text-amber-900'
-              }`}>
-                Không bắt buộc món thay thế
-              </span>
+              }`}>{translateText("Không bắt buộc món thay thế")}</span>
             </div>
             <p className="leading-relaxed text-slate-700">
               {isObese ? (
-                <>
-                  Bé béo phì <strong>không cần tạo món thay thế</strong> mà chỉ cần ghi chú cho nhân viên bếp và giáo viên <strong>giảm lượng calo lại</strong>: Bớt 20% lượng cơm/tinh bột, bổ sung thêm rau xanh luộc và canh thanh đạm, tránh chan nước sốt dầu mỡ.
-                </>
+                <>{translateText("Bé béo phì ")}<strong>{translateText("không cần tạo món thay thế")}</strong>{translateText(" mà chỉ cần ghi chú cho nhân viên bếp và giáo viên ")}<strong>{translateText("giảm lượng calo lại")}</strong>{translateText(": Bớt 20% lượng cơm/tinh bột, bổ sung thêm rau xanh luộc và canh thanh đạm, tránh chan nước sốt dầu mỡ.")}</>
               ) : (
-                <>
-                  Bé thấp còi/suy dinh dưỡng <strong>không cần tạo món thay thế</strong> mà chỉ cần ghi chú cho nhân viên <strong>thêm khối lượng thức ăn</strong>: Tăng +15-20% khẩu phần cơm mềm, thịt/cá và canh giàu dinh dưỡng để hỗ trợ bé phục hồi thể trạng.
-                </>
+                <>{translateText("Bé thấp còi/suy dinh dưỡng ")}<strong>{translateText("không cần tạo món thay thế")}</strong>{translateText(" mà chỉ cần ghi chú cho nhân viên ")}<strong>{translateText("thêm khối lượng thức ăn")}</strong>{translateText(": Tăng +15-20% khẩu phần cơm mềm, thịt/cá và canh giàu dinh dưỡng để hỗ trợ bé phục hồi thể trạng.")}</>
               )}
             </p>
           </div>
@@ -483,7 +475,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-6xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col border border-slate-200/90 overflow-hidden">
         {/* MODAL HEADER */}
-        <div 
+        <div
           style={{ backgroundColor: '#064e3b' }}
           className="p-5 sm:p-6 bg-slate-900 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 text-white flex items-start justify-between relative overflow-hidden shrink-0"
         >
@@ -492,21 +484,20 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
           <div className="relative z-10 space-y-1.5 max-w-3xl">
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-bold tracking-wide uppercase ${headerInfo.badgeColor}`}>
               <headerInfo.badgeIcon className="w-3.5 h-3.5" />
-              <span>{headerInfo.badgeText}</span>
+              <span>{translateText(headerInfo.badgeText)}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2.5">
-              <span>{headerInfo.title}</span>
+              <span>{translateText(headerInfo.title)}</span>
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed font-normal">
-              Thực đơn: <strong className="text-white underline underline-offset-2 font-bold">{advisory?.menuTitle || menuTitle || 'Thực đơn tuần'}</strong>. 
-              {headerInfo.desc}
+            <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed font-normal">{translateText("Thực đơn: ")}<strong className="text-white underline underline-offset-2 font-bold">{translateText(advisory?.menuTitle || menuTitle || 'Thực đơn tuần')}</strong>.
+              {translateText(headerInfo.desc)}
             </p>
           </div>
 
           <button
             onClick={onClose}
             className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition active:scale-95 cursor-pointer relative z-10 border border-white/10"
-            title="Đóng modal"
+            title={translateText("Đóng modal")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -523,7 +514,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              <span>{feedback.message}</span>
+              <span>{translateText(feedback.message)}</span>
             </div>
             <button onClick={() => setFeedback(null)} className="text-white/80 hover:text-white">
               <X className="w-4 h-4" />
@@ -535,32 +526,29 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-4 sm:px-6 py-2.5 shrink-0">
           {internalLock ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold text-slate-500">Đang xem:</span>
+              <span className="text-xs font-bold text-slate-500">{translateText("Đang xem:")}</span>
               {activeTab === 'ALLERGIES' && (
                 <div className="px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-purple-700 text-white shadow-sm">
                   <ShieldAlert className="w-4 h-4" />
-                  <span>Loại 3: Dị ứng Thực phẩm</span>
+                  <span>{translateText("Loại 3: Dị ứng Thực phẩm")}</span>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-white/20">
-                    {focusMenuDishId ? filteredConflicts.length : allergyCount} bé
-                  </span>
+                    {focusMenuDishId ? filteredConflicts.length : allergyCount}{translateText(" bé")}</span>
                 </div>
               )}
               {activeTab === 'OBESE' && (
                 <div className="px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-rose-600 text-white shadow-sm">
                   <Flame className="w-4 h-4" />
-                  <span>Loại 2: Béo phì / Thừa cân</span>
+                  <span>{translateText("Loại 2: Béo phì / Thừa cân")}</span>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-white/20">
-                    {obeseCount} bé
-                  </span>
+                    {obeseCount}{translateText(" bé")}</span>
                 </div>
               )}
               {activeTab === 'STUNTED' && (
                 <div className="px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-amber-600 text-white shadow-sm">
                   <Heart className="w-4 h-4" />
-                  <span>Loại 1: Còi xương / Suy dinh dưỡng</span>
+                  <span>{translateText("Loại 1: Còi xương / Suy dinh dưỡng")}</span>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-white/20">
-                    {stuntedCount} bé
-                  </span>
+                    {stuntedCount}{translateText(" bé")}</span>
                 </div>
               )}
 
@@ -568,10 +556,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                 type="button"
                 onClick={() => setInternalLock(null)}
                 className="ml-2 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/80 transition cursor-pointer"
-                title="Bấm để mở danh sách cả 3 loại"
-              >
-                Chuyển xem loại khác
-              </button>
+                title={translateText("Bấm để mở danh sách cả 3 loại")}
+              >{translateText("Chuyển xem loại khác")}</button>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto">
@@ -585,8 +571,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                 }`}
               >
                 <Heart className="w-4 h-4" />
-                <span className="hidden sm:inline">Loại 1:</span>
-                <span>Còi xương / SDD</span>
+                <span className="hidden sm:inline">{translateText("Loại 1:")}</span>
+                <span>{translateText("Còi xương / SDD")}</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
                     activeTab === 'STUNTED' ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-800'
@@ -606,8 +592,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                 }`}
               >
                 <Flame className="w-4 h-4" />
-                <span className="hidden sm:inline">Loại 2:</span>
-                <span>Béo phì</span>
+                <span className="hidden sm:inline">{translateText("Loại 2:")}</span>
+                <span>{translateText("Béo phì")}</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
                     activeTab === 'OBESE' ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-700'
@@ -627,8 +613,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                 }`}
               >
                 <ShieldAlert className="w-4 h-4" />
-                <span className="hidden sm:inline">Loại 3:</span>
-                <span>Dị ứng</span>
+                <span className="hidden sm:inline">{translateText("Loại 3:")}</span>
+                <span>{translateText("Dị ứng")}</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
                     activeTab === 'ALLERGIES' ? 'bg-white/25 text-white' : 'bg-purple-100 text-purple-800'
@@ -645,20 +631,20 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
               onClick={handleApplyAllWeekNotes}
               disabled={applyingId === 'ALL_WEEK'}
               className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white transition text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
-              title="Tự động áp dụng ghi chú phân loại cho 3 nhóm học sinh (Dị ứng • Thấp còi • Béo phì) trên các món ăn trong tuần"
+              title={translateText("Tự động áp dụng ghi chú phân loại cho 3 nhóm học sinh (Dị ứng • Thấp còi • Béo phì) trên các món ăn trong tuần")}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{applyingId === 'ALL_WEEK' ? 'Đang gán...' : '⚡ Gán Note 3 nhóm cả tuần'}</span>
+              <span>{translateText(applyingId === 'ALL_WEEK' ? 'Đang gán...' : '⚡ Gán Note 3 nhóm cả tuần')}</span>
             </button>
 
             <button
               onClick={fetchAdvisory}
               disabled={loading}
               className="p-2 rounded-xl text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              title="Tải lại phân tích"
+              title={translateText("Tải lại phân tích")}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Làm mới</span>
+              <span className="hidden sm:inline">{translateText("Làm mới")}</span>
             </button>
           </div>
         </div>
@@ -667,7 +653,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
         <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
           {/* BANNER THÔNG TIN MÓN ĐANG ĐƯỢC CHỌN ĐỂ ĐỀ XUẤT THAY THẾ */}
           {focusedDish && (
-            <div 
+            <div
               style={{ backgroundColor: '#0f172a' }}
               className="p-4 rounded-2xl bg-slate-900 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex flex-wrap items-center justify-between gap-3 shadow-lg border border-slate-700 animate-in fade-in duration-200"
             >
@@ -677,11 +663,9 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-emerald-300 font-black uppercase tracking-wider bg-emerald-950/90 px-2.5 py-0.5 rounded-full border border-emerald-700/80">
-                      Món đang chọn ghi chú phân loại
-                    </span>
+                    <span className="text-[10px] text-emerald-300 font-black uppercase tracking-wider bg-emerald-950/90 px-2.5 py-0.5 rounded-full border border-emerald-700/80">{translateText("Món đang chọn ghi chú phân loại")}</span>
                     <span className="text-xs text-slate-200 font-bold">
-                      {dayNames[focusedDish.dayOfWeek]} • {mealTimeNames[focusedDish.mealTime] || focusedDish.mealTime}
+                      {translateText(dayNames[focusedDish.dayOfWeek])} • {translateText(mealTimeNames[focusedDish.mealTime] || focusedDish.mealTime)}
                     </span>
                   </div>
                   <h4 className="text-base sm:text-lg font-black text-white mt-1">
@@ -692,17 +676,14 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
 
               <div className="flex items-center gap-2">
                 <div className="bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-xl text-right">
-                  <span className="text-[10px] text-slate-400 block font-medium">Khẩu phần gốc</span>
+                  <span className="text-[10px] text-slate-400 block font-medium">{translateText("Khẩu phần gốc")}</span>
                   <span className="text-xs font-black text-amber-400">
-                    {focusedDish.plannedCalories || focusedDish.dish?.totalCalories} Kcal • {focusedDish.portionSizeG || 100}g
-                  </span>
+                    {focusedDish.plannedCalories || focusedDish.dish?.totalCalories}{translateText(" Kcal • ")}{focusedDish.portionSizeG || 100}{translateText("g")}</span>
                 </div>
                 {focusedDish.specialDietNotes && (
                   <div className="bg-amber-950/80 border border-amber-700/80 px-3 py-1.5 rounded-xl text-right max-w-xs">
                     <span className="text-[10px] text-amber-300 block font-bold flex items-center justify-end gap-1">
-                      <FileText className="w-3 h-3 text-amber-400" />
-                      Ghi chú Bếp & GV
-                    </span>
+                      <FileText className="w-3 h-3 text-amber-400" />{translateText("Ghi chú Bếp & GV")}</span>
                     <span className="text-xs font-bold text-amber-200 truncate block">
                       {focusedDish.specialDietNotes}
                     </span>
@@ -727,55 +708,48 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                     activeTab === 'ALLERGIES' ? 'text-purple-700' : activeTab === 'OBESE' ? 'text-rose-700' : 'text-amber-700'
                   }`} />
                   <span>
-                    {activeTab === 'ALLERGIES'
+                    {translateText(activeTab === 'ALLERGIES'
                       ? 'GHI CHÚ DỊ ỨNG CHO NHÂN VIÊN (BẾP & GV)'
                       : activeTab === 'OBESE'
                       ? 'GHI CHÚ GIẢM CALO CHO NHÂN VIÊN (BẾP & GV)'
-                      : 'GHI CHÚ THÊM KHỐI LƯỢNG THỨC ĂN CHO NHÂN VIÊN (BẾP & GV)'}
+                      : 'GHI CHÚ THÊM KHỐI LƯỢNG THỨC ĂN CHO NHÂN VIÊN (BẾP & GV)')}
                   </span>
                 </div>
                 <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                   activeTab === 'ALLERGIES' ? 'bg-purple-200 text-purple-900' : activeTab === 'OBESE' ? 'bg-rose-200 text-rose-900' : 'bg-amber-200 text-amber-900'
-                }`}>
-                  Không cần món thay thế
-                </span>
+                }`}>{translateText("Không cần món thay thế")}</span>
               </div>
 
               <p className="text-[11.5px] text-slate-700 leading-relaxed font-medium">
                 {activeTab === 'ALLERGIES' && (
                   <>
-                    💡 <strong>Nguyên tắc:</strong> Bé dị ứng <strong>không cần tạo món thay thế</strong> mà chỉ cần ghi chú cụ thể dị nguyên bé đang bị dị ứng để nhân viên hiểu và không chia phần ăn chứa dị nguyên đó cho bé.
-                  </>
+                    💡 <strong>{translateText("Nguyên tắc:")}</strong>{translateText(" Bé dị ứng ")}<strong>{translateText("không cần tạo món thay thế")}</strong>{translateText(" mà chỉ cần ghi chú cụ thể dị nguyên bé đang bị dị ứng để nhân viên hiểu và không chia phần ăn chứa dị nguyên đó cho bé.")}</>
                 )}
                 {activeTab === 'OBESE' && (
                   <>
-                    💡 <strong>Nguyên tắc:</strong> Bé béo phì <strong>không cần tạo món thay thế</strong> mà chỉ cần ghi chú cho nhân viên <strong>giảm lượng calo lại</strong> (bớt 20% cơm/tinh bột, tăng rau củ tươi và canh thanh đạm).
-                  </>
+                    💡 <strong>{translateText("Nguyên tắc:")}</strong>{translateText(" Bé béo phì ")}<strong>{translateText("không cần tạo món thay thế")}</strong>{translateText(" mà chỉ cần ghi chú cho nhân viên ")}<strong>{translateText("giảm lượng calo lại")}</strong>{translateText(" (bớt 20% cơm/tinh bột, tăng rau củ tươi và canh thanh đạm).")}</>
                 )}
                 {activeTab === 'STUNTED' && (
                   <>
-                    💡 <strong>Nguyên tắc:</strong> Bé thấp còi <strong>không cần tạo món thay thế</strong> mà chỉ cần ghi chú cho nhân viên <strong>thêm khối lượng thức ăn</strong> (+15-20% khẩu phần cơm/thịt/canh) để hỗ trợ bé tăng cân phục hồi thể trạng.
-                  </>
+                    💡 <strong>{translateText("Nguyên tắc:")}</strong>{translateText(" Bé thấp còi ")}<strong>{translateText("không cần tạo món thay thế")}</strong>{translateText(" mà chỉ cần ghi chú cho nhân viên ")}<strong>{translateText("thêm khối lượng thức ăn")}</strong>{translateText(" (+15-20% khẩu phần cơm/thịt/canh) để hỗ trợ bé tăng cân phục hồi thể trạng.")}</>
                 )}
               </p>
 
               <div className="space-y-1.5 pt-1">
                 <label className="text-[11px] font-bold text-slate-800 flex items-center justify-between">
-                  <span>Nội dung ghi chú cho Nhân viên chia phần:</span>
+                  <span>{translateText("Nội dung ghi chú cho Nhân viên chia phần:")}</span>
                   <button
                     type="button"
                     onClick={() => setCustomNoteText(defaultNoteForCurrent)}
                     className="text-[10px] text-emerald-700 hover:text-emerald-900 underline font-semibold cursor-pointer"
-                  >
-                    Dùng mẫu chuẩn
-                  </button>
+                  >{translateText("Dùng mẫu chuẩn")}</button>
                 </label>
                 <textarea
                   value={customNoteText}
                   onChange={(e) => setCustomNoteText(e.target.value)}
                   rows={2}
                   className="w-full p-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-inner"
-                  placeholder="Nhập nội dung ghi chú cho nhân viên khi chia phần..."
+                  placeholder={translateText("Nhập nội dung ghi chú cho nhân viên khi chia phần...")}
                 />
               </div>
 
@@ -793,7 +767,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  <span>{applyingId === focusedDish.id ? 'Đang lưu...' : '📝 Áp dụng Ghi chú cho Nhân viên'}</span>
+                  <span>{translateText(applyingId === focusedDish.id ? 'Đang lưu...' : '📝 Áp dụng Ghi chú cho Nhân viên')}</span>
                 </button>
 
                 {focusedDish.specialDietNotes && (
@@ -802,9 +776,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                     onClick={() => handleSaveStaffNote(focusedDish.id, null)}
                     disabled={applyingId === focusedDish.id}
                     className="py-1.5 px-3 rounded-xl text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200 cursor-pointer"
-                  >
-                    Xóa ghi chú
-                  </button>
+                  >{translateText("Xóa ghi chú")}</button>
                 )}
               </div>
             </div>
@@ -812,14 +784,14 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
           {loading && !advisory ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
               <RefreshCw className="w-8 h-8 animate-spin text-emerald-600" />
-              <p className="text-sm font-medium">Đang quét hồ sơ sức khỏe và dị ứng toàn bộ học sinh...</p>
+              <p className="text-sm font-medium">{translateText("Đang quét hồ sơ sức khỏe và dị ứng toàn bộ học sinh...")}</p>
             </div>
           ) : error ? (
             <div className="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-3">
               <AlertTriangle className="w-6 h-6 text-rose-600 shrink-0" />
               <div>
-                <h4 className="font-bold">Đã xảy ra lỗi</h4>
-                <p className="text-xs text-rose-700 mt-0.5">{error}</p>
+                <h4 className="font-bold">{translateText("Đã xảy ra lỗi")}</h4>
+                <p className="text-xs text-rose-700 mt-0.5">{translateText(error)}</p>
               </div>
             </div>
           ) : activeTab === 'STUNTED' ? (
@@ -836,11 +808,9 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   <h3 className="text-base font-black text-amber-950">
                     {focusedDish
                       ? `Loại 1: Ghi chú Thêm Khối lượng Món "${focusedDish.dish?.name}" cho Trẻ Thấp còi`
-                      : 'Loại 1: Phân loại & Ghi chú cho Trẻ Thấp còi / Suy dinh dưỡng'}
+                      : translateText('Loại 1: Phân loại & Ghi chú cho Trẻ Thấp còi / Suy dinh dưỡng')}
                   </h3>
-                  <p className="text-xs text-amber-900/80 leading-relaxed">
-                    Trẻ bị <strong>gầy còm (wasted)</strong>, <strong>thấp còi (stunted)</strong>, hoặc <strong>nhẹ cân (underweight)</strong> theo chỉ số Z-score WHO: <strong>Không cần đổi món ăn khác</strong>, chỉ cần ghi chú cho nhân viên bếp và giáo viên tăng cường 15-20% khối lượng thức ăn (thêm cơm, thịt, cá, canh) để bé nạp đủ năng lượng và phục hồi thể trạng.
-                  </p>
+                  <p className="text-xs text-amber-900/80 leading-relaxed">{translateText("Trẻ bị ")}<strong>{translateText("gầy còm (wasted)")}</strong>, <strong>{translateText("thấp còi (stunted)")}</strong>{translateText(", hoặc ")}<strong>{translateText("nhẹ cân (underweight)")}</strong>{translateText(" theo chỉ số Z-score WHO: ")}<strong>{translateText("Không cần đổi món ăn khác")}</strong>{translateText(", chỉ cần ghi chú cho nhân viên bếp và giáo viên tăng cường 15-20% khối lượng thức ăn (thêm cơm, thịt, cá, canh) để bé nạp đủ năng lượng và phục hồi thể trạng.")}</p>
                 </div>
               </div>
 
@@ -849,10 +819,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
               ) : (
                 <div className="py-12 text-center rounded-3xl bg-emerald-50 border border-dashed border-emerald-200 space-y-2">
                   <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                  <h4 className="font-bold text-slate-800 text-sm">Không có học sinh còi xương / suy dinh dưỡng</h4>
-                  <p className="text-xs text-slate-500">
-                    Tất cả học sinh trong trường đều có chỉ số tăng trưởng bình thường.
-                  </p>
+                  <h4 className="font-bold text-slate-800 text-sm">{translateText("Không có học sinh còi xương / suy dinh dưỡng")}</h4>
+                  <p className="text-xs text-slate-500">{translateText("Tất cả học sinh trong trường đều có chỉ số tăng trưởng bình thường.")}</p>
                 </div>
               )}
             </div>
@@ -870,11 +838,9 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   <h3 className="text-base font-black text-rose-950">
                     {focusedDish
                       ? `Loại 2: Ghi chú Giảm Calo Món "${focusedDish.dish?.name}" cho Trẻ Béo phì`
-                      : 'Loại 2: Phân loại & Ghi chú cho Trẻ Béo phì / Thừa cân'}
+                      : translateText('Loại 2: Phân loại & Ghi chú cho Trẻ Béo phì / Thừa cân')}
                   </h3>
-                  <p className="text-xs text-rose-900/80 leading-relaxed">
-                    Trẻ bị <strong>thừa cân (overweight)</strong> hoặc <strong>béo phì (obese)</strong>: <strong>Không cần đổi món ăn khác</strong>, chỉ cần ghi chú cho nhân viên giảm bớt 20% lượng cơm/tinh bột, bổ sung thêm rau xanh luộc và canh thanh đạm, tránh chan dầu mỡ theo Thông tư 28/2016/TT-BGDĐT.
-                  </p>
+                  <p className="text-xs text-rose-900/80 leading-relaxed">{translateText("Trẻ bị ")}<strong>{translateText("thừa cân (overweight)")}</strong>{translateText(" hoặc ")}<strong>{translateText("béo phì (obese)")}</strong>: <strong>{translateText("Không cần đổi món ăn khác")}</strong>{translateText(", chỉ cần ghi chú cho nhân viên giảm bớt 20% lượng cơm/tinh bột, bổ sung thêm rau xanh luộc và canh thanh đạm, tránh chan dầu mỡ theo Thông tư 28/2016/TT-BGDĐT.")}</p>
                 </div>
               </div>
 
@@ -883,10 +849,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
               ) : (
                 <div className="py-12 text-center rounded-3xl bg-emerald-50 border border-dashed border-emerald-200 space-y-2">
                   <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                  <h4 className="font-bold text-slate-800 text-sm">Không có học sinh béo phì / thừa cân</h4>
-                  <p className="text-xs text-slate-500">
-                    Tất cả học sinh đều có chỉ số BMI trong giới hạn bình thường.
-                  </p>
+                  <h4 className="font-bold text-slate-800 text-sm">{translateText("Không có học sinh béo phì / thừa cân")}</h4>
+                  <p className="text-xs text-slate-500">{translateText("Tất cả học sinh đều có chỉ số BMI trong giới hạn bình thường.")}</p>
                 </div>
               )}
             </div>
@@ -904,17 +868,13 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   <h3 className="text-base font-black text-purple-950">
                     {focusedDish
                       ? `Loại 3: Danh sách Học sinh Dị ứng Món "${focusedDish.dish?.name}"`
-                      : 'Loại 3: Phân loại & Ghi chú cho Trẻ bị Dị ứng Thực phẩm'}
+                      : translateText('Loại 3: Phân loại & Ghi chú cho Trẻ bị Dị ứng Thực phẩm')}
                   </h3>
                   <p className="text-xs text-purple-900/80 leading-relaxed">
                     {focusedDish ? (
-                      <>
-                        Phát hiện <strong>{dishAllergyKidsCount} học sinh</strong> trong trường bị dị ứng với thành phần món này (<strong>{Array.from(new Set(filteredConflicts.map((c) => c.allergenDetected))).join(', ') || 'Dị nguyên'}</strong>). Hãy lưu ghi chú cảnh báo để nhân viên tuyệt đối không chia phần có chứa dị nguyên cho bé.
-                      </>
+                      <>{translateText("Phát hiện ")}<strong>{dishAllergyKidsCount}{translateText(" học sinh")}</strong>{translateText(" trong trường bị dị ứng với thành phần món này (")}<strong>{translateText(Array.from(new Set(filteredConflicts.map((c) => c.allergenDetected))).join(', ') || 'Dị nguyên')}</strong>{translateText("). Hãy lưu ghi chú cảnh báo để nhân viên tuyệt đối không chia phần có chứa dị nguyên cho bé.")}</>
                     ) : (
-                      <>
-                        Dựa trên hồ sơ dị ứng do <strong>phụ huynh khai báo</strong>, hệ thống tự động quét toàn bộ nguyên liệu trong thực đơn tuần và phát hiện xung đột để bạn ghi chú trực tiếp cho nhân viên bếp và giáo viên chủ nhiệm khi chia phần ăn.
-                      </>
+                      <>{translateText("Dựa trên hồ sơ dị ứng do ")}<strong>{translateText("phụ huynh khai báo")}</strong>{translateText(", hệ thống tự động quét toàn bộ nguyên liệu trong thực đơn tuần và phát hiện xung đột để bạn ghi chú trực tiếp cho nhân viên bếp và giáo viên chủ nhiệm khi chia phần ăn.")}</>
                     )}
                   </p>
                 </div>
@@ -925,7 +885,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                 <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-rose-700">
                     <span className="text-[11px] font-bold uppercase tracking-wider">
-                      {focusMenuDishId ? 'Ca dị ứng món này' : 'Tổng ca xung đột'}
+                      {translateText(focusMenuDishId ? 'Ca dị ứng món này' : 'Tổng ca xung đột')}
                     </span>
                     <ShieldAlert className="w-4 h-4" />
                   </div>
@@ -933,32 +893,32 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                     {focusMenuDishId ? filteredConflicts.length : (advisory?.allergySummary.totalConflicts || 0)}
                   </div>
                   <span className="text-[11px] text-rose-600/80 mt-1 font-medium">
-                    {focusMenuDishId ? 'Học sinh xung đột trực tiếp' : 'Trong toàn bộ tuần học'}
+                    {translateText(focusMenuDishId ? 'Học sinh xung đột trực tiếp' : 'Trong toàn bộ tuần học')}
                   </span>
                 </div>
 
                 <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-amber-700">
                     <span className="text-[11px] font-bold uppercase tracking-wider">
-                      {focusMenuDishId ? 'Mức độ cảnh báo' : 'Nguy cấp (Severe)'}
+                      {translateText(focusMenuDishId ? 'Mức độ cảnh báo' : 'Nguy cấp (Severe)')}
                     </span>
                     <AlertTriangle className="w-4 h-4" />
                   </div>
                   <div className="mt-2 text-xl sm:text-2xl font-black text-amber-950">
-                    {focusMenuDishId
+                    {translateText(focusMenuDishId
                       ? filteredConflicts.some((c) => c.severity === 'SEVERE' || c.severity === 'ANAPHYLACTIC')
                         ? 'Nguy cấp'
                         : 'Cảnh báo'
-                      : (advisory?.allergySummary.criticalCount || 0)}
+                      : (advisory?.allergySummary.criticalCount || 0))}
                   </div>
                   <span className="text-[11px] text-amber-700/80 mt-1 font-medium">
-                    {focusMenuDishId ? 'Cần suất ăn riêng biệt tuyệt đối' : 'Cần suất ăn riêng biệt tuyệt đối'}
+                    {translateText(focusMenuDishId ? 'Cần suất ăn riêng biệt tuyệt đối' : 'Cần suất ăn riêng biệt tuyệt đối')}
                   </span>
                 </div>
 
                 <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-blue-700">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Trẻ bị ảnh hưởng</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">{translateText("Trẻ bị ảnh hưởng")}</span>
                     <User className="w-4 h-4" />
                   </div>
                   <div className="mt-2 text-2xl sm:text-3xl font-black text-blue-950">
@@ -967,24 +927,24 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                       : (advisory?.allergySummary.affectedChildrenCount || 0)}
                   </div>
                   <span className="text-[11px] text-blue-600/80 mt-1 font-medium">
-                    {focusMenuDishId ? 'Bé dị ứng món đang chọn' : 'Học sinh có tiền sử dị ứng'}
+                    {translateText(focusMenuDishId ? 'Bé dị ứng món đang chọn' : 'Học sinh có tiền sử dị ứng')}
                   </span>
                 </div>
 
                 <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-emerald-700">
                     <span className="text-[11px] font-bold uppercase tracking-wider">
-                      {focusMenuDishId ? 'Dị nguyên phát hiện' : 'Món ăn có dị nguyên'}
+                      {translateText(focusMenuDishId ? 'Dị nguyên phát hiện' : 'Món ăn có dị nguyên')}
                     </span>
                     <UtensilsCrossed className="w-4 h-4" />
                   </div>
                   <div className="mt-2 text-sm sm:text-base font-black text-emerald-950 truncate">
-                    {focusMenuDishId
+                    {translateText(focusMenuDishId
                       ? Array.from(new Set(filteredConflicts.map((c) => c.allergenDetected))).join(', ') || 'Không có'
-                      : `${advisory?.allergySummary.affectedDishesCount || 0} món`}
+                      : `${advisory?.allergySummary.affectedDishesCount || 0} món`)}
                   </div>
                   <span className="text-[11px] text-emerald-700/80 mt-1 font-medium">
-                    {focusMenuDishId ? 'Cần tránh tuyệt đối cho trẻ' : 'Cần gán món thay thế an toàn'}
+                    {translateText(focusMenuDishId ? 'Cần tránh tuyệt đối cho trẻ' : 'Cần gán món thay thế an toàn')}
                   </span>
                 </div>
               </div>
@@ -995,8 +955,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   {focusMenuDishId ? (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-100/90 border border-purple-200 text-purple-900 text-xs font-bold">
                       <UtensilsCrossed className="w-3.5 h-3.5 text-purple-700 shrink-0" />
-                      <span>
-                        Đang xem riêng học sinh dị ứng món: <strong className="underline underline-offset-2">{focusedDish?.dish?.name}</strong>
+                      <span>{translateText("Đang xem riêng học sinh dị ứng món: ")}<strong className="underline underline-offset-2">{focusedDish?.dish?.name}</strong>
                       </span>
                     </div>
                   ) : (
@@ -1009,9 +968,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                               ? 'bg-slate-900 text-white shadow-2xs'
                               : 'text-slate-600 hover:text-slate-900'
                           }`}
-                        >
-                          Tất cả
-                        </button>
+                        >{translateText("Tất cả")}</button>
                         <button
                           onClick={() => setSeverityFilter('CRITICAL')}
                           className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
@@ -1020,8 +977,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                               : 'text-rose-700 hover:bg-rose-50'
                           }`}
                         >
-                          <AlertTriangle className="w-3 h-3" />
-                          Nguy cấp ({advisory?.allergySummary.criticalCount || 0})
+                          <AlertTriangle className="w-3 h-3" />{translateText("Nguy cấp (")}{advisory?.allergySummary.criticalCount || 0})
                         </button>
                         <button
                           onClick={() => setSeverityFilter('WARNING')}
@@ -1030,8 +986,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                               ? 'bg-amber-600 text-white shadow-2xs'
                               : 'text-amber-700 hover:bg-amber-50'
                           }`}
-                        >
-                          Cảnh báo ({advisory?.allergySummary.warningCount || 0})
+                        >{translateText("Cảnh báo (")}{advisory?.allergySummary.warningCount || 0})
                         </button>
                       </div>
 
@@ -1041,14 +996,14 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                         onChange={(e) => setDayFilter(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value))}
                         className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                       >
-                        <option value="ALL">Tất cả các ngày trong tuần</option>
-                        <option value={1}>Thứ Hai</option>
-                        <option value={2}>Thứ Ba</option>
-                        <option value={3}>Thứ Tư</option>
-                        <option value={4}>Thứ Năm</option>
-                        <option value={5}>Thứ Sáu</option>
-                        <option value={6}>Thứ Bảy</option>
-                        <option value={7}>Chủ Nhật</option>
+                        <option value="ALL">{translateText("Tất cả các ngày trong tuần")}</option>
+                        <option value={1}>{translateText("Thứ Hai")}</option>
+                        <option value={2}>{translateText("Thứ Ba")}</option>
+                        <option value={3}>{translateText("Thứ Tư")}</option>
+                        <option value={4}>{translateText("Thứ Năm")}</option>
+                        <option value={5}>{translateText("Thứ Sáu")}</option>
+                        <option value={6}>{translateText("Thứ Bảy")}</option>
+                        <option value={7}>{translateText("Chủ Nhật")}</option>
                       </select>
                     </>
                   )}
@@ -1061,7 +1016,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                     type="text"
                     value={searchChild}
                     onChange={(e) => setSearchChild(e.target.value)}
-                    placeholder="Tìm tên bé, lớp, món ăn..."
+                    placeholder={translateText("Tìm tên bé, lớp, món ăn...")}
                     className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
@@ -1073,13 +1028,13 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                   <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
                   <h4 className="font-bold text-slate-800 text-sm">
                     {focusMenuDishId
-                      ? `Món "${focusedDish?.dish?.name || 'này'}" an toàn tuyệt đối`
-                      : 'Không có xung đột dị ứng nào theo bộ lọc'}
+                      ? `Món "${focusedDish?.dish?.name || translateText('này')}" an toàn tuyệt đối`
+                      : translateText('Không có xung đột dị ứng nào theo bộ lọc')}
                   </h4>
                   <p className="text-xs text-slate-500">
-                    {focusMenuDishId
+                    {translateText(focusMenuDishId
                       ? 'Không có bất kỳ học sinh nào trong trường bị dị ứng với nguyên liệu của món ăn này.'
-                      : 'Tất cả món ăn trong phạm vi đã chọn đều an toàn cho các bé.'}
+                      : 'Tất cả món ăn trong phạm vi đã chọn đều an toàn cho các bé.')}
                   </p>
                 </div>
               ) : (
@@ -1121,19 +1076,18 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                                     : 'bg-amber-100 text-amber-800 border border-amber-200'
                                 }`}
                               >
-                                {item.severity === 'ANAPHYLACTIC'
+                                {translateText(item.severity === 'ANAPHYLACTIC'
                                   ? 'Sốc phản vệ nguy cấp'
                                   : item.severity === 'SEVERE'
                                   ? 'Dị ứng nặng'
-                                  : 'Dị ứng vừa'}
+                                  : 'Dị ứng vừa')}
                               </span>
                             </div>
                             <div className="text-xs text-rose-700 font-bold flex items-center gap-1.5 mt-0.5">
                               <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-                              <span>Dị ứng: {item.allergenDetected}</span>
+                              <span>{translateText("Dị ứng: ")}{translateText(item.allergenDetected)}</span>
                               {item.reactionTreatment && (
-                                <span className="text-[11px] text-slate-500 font-normal">
-                                  — Xử trí khẩn cấp: {item.reactionTreatment}
+                                <span className="text-[11px] text-slate-500 font-normal">{translateText("— Xử trí khẩn cấp: ")}{item.reactionTreatment}
                                 </span>
                               )}
                             </div>
@@ -1142,19 +1096,16 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
 
                         {/* Món ăn xung đột trong thực đơn */}
                         <div className="text-right sm:text-right">
-                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            Món trong thực đơn
-                          </div>
+                          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{translateText("Món trong thực đơn")}</div>
                           <div className="text-sm font-black text-slate-900 mt-0.5 flex items-center gap-1.5 justify-end">
                             <span className="text-rose-600 underline underline-offset-2">
                               {item.dishName}
                             </span>
                             <span className="text-xs font-bold text-slate-500">
-                              ({item.portionSizeG}g - {item.plannedCalories} Kcal)
-                            </span>
+                              ({item.portionSizeG}{translateText("g - ")}{item.plannedCalories}{translateText(" Kcal)")}</span>
                           </div>
                           <div className="text-[11px] text-slate-500 mt-0.5 font-medium">
-                            {dayNames[item.dayOfWeek] || `Thứ ${item.dayOfWeek}`} • {mealTimeNames[item.mealTime] || item.mealTime}
+                            {translateText(dayNames[item.dayOfWeek] || `Thứ ${item.dayOfWeek}`)} • {translateText(mealTimeNames[item.mealTime] || item.mealTime)}
                           </div>
                         </div>
                       </div>
@@ -1163,26 +1114,21 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                       <div className="p-3 rounded-2xl bg-white border border-rose-200 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
                         <div className="flex items-center gap-2">
                           <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                          <span className="text-xs font-bold text-slate-800">
-                            Thành phần gây dị ứng trong món:
-                          </span>
+                          <span className="text-xs font-bold text-slate-800">{translateText("Thành phần gây dị ứng trong món:")}</span>
                           <div className="flex flex-wrap items-center gap-1.5">
                             {item.problematicIngredients.map((ing, idx) => (
                               <span
                                 key={idx}
                                 className="px-2.5 py-0.5 rounded-lg bg-rose-100 text-rose-800 text-xs font-black border border-rose-300"
                               >
-                                {ing.foodName} ({ing.netWeightPerPortionG}g)
-                              </span>
+                                {ing.foodName} ({ing.netWeightPerPortionG}{translateText("g)")}</span>
                             ))}
                           </div>
                         </div>
 
                         {/* Ghi chú dặn dò nhân viên chia phần */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-200">
-                            Chỉ cần ghi chú dị ứng cho Bếp & GV
-                          </span>
+                          <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-200">{translateText("Chỉ cần ghi chú dị ứng cho Bếp & GV")}</span>
                           <button
                             type="button"
                             onClick={() =>
@@ -1193,10 +1139,10 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                             }
                             disabled={applyingId === item.menuDishId}
                             className="px-3 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-[11px] font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                            title="Gán ghi chú trực tiếp cho nhân viên bếp và GV mà không cần tạo món thay thế"
+                            title={translateText("Gán ghi chú trực tiếp cho nhân viên bếp và GV mà không cần tạo món thay thế")}
                           >
                             <FileText className="w-3.5 h-3.5" />
-                            <span>{applyingId === item.menuDishId ? 'Đang lưu...' : 'Gán Ghi chú cho Món này'}</span>
+                            <span>{translateText(applyingId === item.menuDishId ? 'Đang lưu...' : 'Gán Ghi chú cho Món này')}</span>
                           </button>
                         </div>
                       </div>
@@ -1211,15 +1157,11 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
 
         {/* MODAL FOOTER */}
         <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
-          <div className="text-xs text-slate-500 font-medium hidden sm:block">
-            Ghi chú phân loại dinh dưỡng cho 3 nhóm học sinh sẽ tự động hiển thị trên thực đơn tuần và bảng điều phối chia phần.
-          </div>
+          <div className="text-xs text-slate-500 font-medium hidden sm:block">{translateText("Ghi chú phân loại dinh dưỡng cho 3 nhóm học sinh sẽ tự động hiển thị trên thực đơn tuần và bảng điều phối chia phần.")}</div>
           <button
             onClick={onClose}
             className="px-6 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition ml-auto cursor-pointer"
-          >
-            Đóng
-          </button>
+          >{translateText("Đóng")}</button>
         </div>
       </div>
     </div>

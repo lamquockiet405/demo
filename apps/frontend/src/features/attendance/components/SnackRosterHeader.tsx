@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Utensils, Download, Printer } from 'lucide-react';
 
@@ -10,6 +12,7 @@ export const SnackRosterHeader: React.FC<SnackRosterHeaderProps> = ({
   onExport,
   onPrint,
 }) => {
+  useLanguage();
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
       {/* Breadcrumb & Title */}
@@ -17,20 +20,16 @@ export const SnackRosterHeader: React.FC<SnackRosterHeaderProps> = ({
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
           <Utensils className="w-3.5 h-3.5 text-slate-400" />
-          <span className="hover:text-slate-700 cursor-pointer">Kế hoạch suất ăn</span>
+          <span className="hover:text-slate-700 cursor-pointer">{translateText("Kế hoạch suất ăn")}</span>
           <span>/</span>
-          <span className="font-semibold text-slate-700">Danh sách học sinh ăn xế</span>
+          <span className="font-semibold text-slate-700">{translateText("Danh sách học sinh ăn xế")}</span>
         </div>
 
         {/* Page Title */}
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-          Danh sách học sinh ăn xế
-        </h1>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">{translateText("Danh sách học sinh ăn xế")}</h1>
 
         {/* Subtitle */}
-        <p className="text-xs text-slate-500 mt-1">
-          Theo dõi học sinh đã đăng ký và hoàn thành phí ăn xế để chuẩn bị suất ăn phù hợp.
-        </p>
+        <p className="text-xs text-slate-500 mt-1">{translateText("Theo dõi học sinh đã đăng ký và hoàn thành phí ăn xế để chuẩn bị suất ăn phù hợp.")}</p>
       </div>
 
       {/* Action Buttons */}
@@ -41,7 +40,7 @@ export const SnackRosterHeader: React.FC<SnackRosterHeaderProps> = ({
           className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200/90 shadow-sm transition active:scale-95"
         >
           <Download className="w-4 h-4 text-slate-600" />
-          <span>Xuất danh sách</span>
+          <span>{translateText("Xuất danh sách")}</span>
         </button>
 
         {/* Print Button */}
@@ -50,7 +49,7 @@ export const SnackRosterHeader: React.FC<SnackRosterHeaderProps> = ({
           className="flex items-center gap-2 px-4 py-2.5 bg-[#1b4332] hover:bg-[#143527] text-white text-xs font-bold rounded-xl shadow-sm transition active:scale-95"
         >
           <Printer className="w-4 h-4 text-white" />
-          <span>In danh sách</span>
+          <span>{translateText("In danh sách")}</span>
         </button>
       </div>
     </div>

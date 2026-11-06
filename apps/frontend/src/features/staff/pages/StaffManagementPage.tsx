@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Users,
@@ -34,6 +36,7 @@ import { SoftDeleteConfirmModal } from "../components/SoftDeleteConfirmModal";
 import { useAuthStore } from "../../../core/stores/auth.store";
 
 export const StaffManagementPage: React.FC = () => {
+  useLanguage();
   const { user: currentUser } = useAuthStore();
   const [schoolName, setSchoolName] = useState(
     () => localStorage.getItem("school_name") || "Cơ sở Mầm non",
@@ -258,7 +261,7 @@ export const StaffManagementPage: React.FC = () => {
         }`}
       >
         {Icon && <Icon className="w-3 h-3" />}
-        {roleName}
+        {translateText(roleName)}
       </span>
     );
   };
@@ -361,7 +364,7 @@ export const StaffManagementPage: React.FC = () => {
           ) : (
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
           )}
-          <span className="text-xs font-semibold">{toastMessage.text}</span>
+          <span className="text-xs font-semibold">{translateText(toastMessage.text)}</span>
         </div>
       )}
 
@@ -369,18 +372,11 @@ export const StaffManagementPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-              CỔNG BAN GIÁM HIỆU
-            </span>
+            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("CỔNG BAN GIÁM HIỆU")}</span>
             <span className="text-xs text-slate-400">• {schoolName}</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
-            Quản Lý Nhân Sự & Đội Ngũ Bếp
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Quản trị tài khoản, phân công vai trò, tra cứu và bảo vệ dữ liệu với
-            quy chuẩn xóa mềm (UC08 – UC11).
-          </p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{translateText("Quản Lý Nhân Sự & Đội Ngũ Bếp")}</h1>
+          <p className="text-xs text-slate-500 mt-0.5">{translateText("Quản trị tài khoản, phân công vai trò, tra cứu và bảo vệ dữ liệu với quy chuẩn xóa mềm (UC08 – UC11).")}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -388,7 +384,7 @@ export const StaffManagementPage: React.FC = () => {
             onClick={() => Promise.all([loadStaffList(), loadStats()])}
             disabled={isListLoading}
             className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition"
-            title="Làm mới dữ liệu"
+            title={translateText("Làm mới dữ liệu")}
           >
             <RefreshCw
               className={`w-4 h-4 ${isListLoading ? "animate-spin text-teal-600" : ""}`}
@@ -399,7 +395,7 @@ export const StaffManagementPage: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Thêm Nhân Sự Mới</span>
+            <span>{translateText("Thêm Nhân Sự Mới")}</span>
           </button>
         </div>
       </div>
@@ -416,7 +412,7 @@ export const StaffManagementPage: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500">
-                  {c.label}
+                  {translateText(c.label)}
                 </span>
                 <div
                   className={`w-9 h-9 rounded-2xl flex items-center justify-center ${c.iconCls}`}
@@ -431,11 +427,11 @@ export const StaffManagementPage: React.FC = () => {
                   {c.value}
                 </span>
                 <span className="text-xs text-slate-400 font-medium ml-1">
-                  {c.unit}
+                  {translateText(c.unit)}
                 </span>
               </div>
               <div className={`mt-2 text-[11px] font-semibold ${c.subCls}`}>
-                {c.sub}
+                {translateText(c.sub)}
               </div>
             </div>
           );
@@ -450,7 +446,7 @@ export const StaffManagementPage: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo họ tên, email công việc, số điện thoại..."
+            placeholder={translateText("Tìm theo họ tên, email công việc, số điện thoại...")}
             className="w-full pl-10 pr-8 py-2.5 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
           />
           {search && (
@@ -472,7 +468,7 @@ export const StaffManagementPage: React.FC = () => {
             }}
             className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="">Tất cả vai trò</option>
+            <option value="">{translateText("Tất cả vai trò")}</option>
             {availableRoles.map((r) => (
               <option key={r.code} value={r.code}>
                 {r.name}
@@ -488,10 +484,10 @@ export const StaffManagementPage: React.FC = () => {
             }}
             className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
-            <option value="">Tất cả trạng thái</option>
-            <option value="ACTIVE">Đang hoạt động</option>
-            <option value="INACTIVE">Tạm khóa</option>
-            <option value="DELETED">Đã xóa mềm (Lưu trữ)</option>
+            <option value="">{translateText("Tất cả trạng thái")}</option>
+            <option value="ACTIVE">{translateText("Đang hoạt động")}</option>
+            <option value="INACTIVE">{translateText("Tạm khóa")}</option>
+            <option value="DELETED">{translateText("Đã xóa mềm (Lưu trữ)")}</option>
           </select>
 
           <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 transition">
@@ -504,7 +500,7 @@ export const StaffManagementPage: React.FC = () => {
               }}
               className="w-3.5 h-3.5 text-teal-600 rounded-sm focus:ring-teal-500"
             />
-            <span>Xem cả tài khoản xóa mềm</span>
+            <span>{translateText("Xem cả tài khoản xóa mềm")}</span>
           </label>
         </div>
       </div>
@@ -515,12 +511,12 @@ export const StaffManagementPage: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3.5 px-5">Nhân Sự & Email</th>
-                <th className="py-3.5 px-4">Số Điện Thoại</th>
-                <th className="py-3.5 px-4">Vai Trò Chuyên Môn</th>
-                <th className="py-3.5 px-4">Trạng Thái</th>
-                <th className="py-3.5 px-4">Tham Gia</th>
-                <th className="py-3.5 px-5 text-right">Thao Tác</th>
+                <th className="py-3.5 px-5">{translateText("Nhân Sự & Email")}</th>
+                <th className="py-3.5 px-4">{translateText("Số Điện Thoại")}</th>
+                <th className="py-3.5 px-4">{translateText("Vai Trò Chuyên Môn")}</th>
+                <th className="py-3.5 px-4">{translateText("Trạng Thái")}</th>
+                <th className="py-3.5 px-4">{translateText("Tham Gia")}</th>
+                <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -528,21 +524,15 @@ export const StaffManagementPage: React.FC = () => {
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
                     <div className="inline-block w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin mb-2" />
-                    <p className="font-semibold">
-                      Đang tải danh sách nhân sự...
-                    </p>
+                    <p className="font-semibold">{translateText("Đang tải danh sách nhân sự...")}</p>
                   </td>
                 </tr>
               ) : staffList.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
                     <UserX className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                    <p className="font-bold text-slate-700">
-                      Không tìm thấy tài khoản nhân sự phù hợp
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Thử điều chỉnh từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc.
-                    </p>
+                    <p className="font-bold text-slate-700">{translateText("Không tìm thấy tài khoản nhân sự phù hợp")}</p>
+                    <p className="text-[11px] text-slate-400 mt-1">{translateText("Thử điều chỉnh từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc.")}</p>
                   </td>
                 </tr>
               ) : (
@@ -577,9 +567,7 @@ export const StaffManagementPage: React.FC = () => {
                                 {staff.fullName}
                               </span>
                               {isCurrent && (
-                                <span className="text-[10px] font-bold bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded-full">
-                                  Bạn
-                                </span>
+                                <span className="text-[10px] font-bold bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded-full">{translateText("Bạn")}</span>
                               )}
                             </div>
                             <span className="text-[11px] text-slate-400 truncate block">
@@ -596,9 +584,7 @@ export const StaffManagementPage: React.FC = () => {
                             <span>{staff.phone}</span>
                           </div>
                         ) : (
-                          <span className="text-slate-300 italic">
-                            Chưa cập nhật
-                          </span>
+                          <span className="text-slate-300 italic">{translateText("Chưa cập nhật")}</span>
                         )}
                       </td>
 
@@ -609,9 +595,7 @@ export const StaffManagementPage: React.FC = () => {
                               renderRoleBadge(r.code, r.name),
                             )
                           ) : (
-                            <span className="text-slate-400 italic">
-                              Chưa phân vai trò
-                            </span>
+                            <span className="text-slate-400 italic">{translateText("Chưa phân vai trò")}</span>
                           )}
                         </div>
                       </td>
@@ -619,19 +603,13 @@ export const StaffManagementPage: React.FC = () => {
                       <td className="py-3.5 px-4">
                         {isSoftDeleted ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                            <Archive className="w-3 h-3 text-slate-500" />
-                            Đã xóa mềm (Lưu trữ)
-                          </span>
+                            <Archive className="w-3 h-3 text-slate-500" />{translateText("Đã xóa mềm (Lưu trữ)")}</span>
                         ) : staff.status === "ACTIVE" ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Hoạt động
-                          </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{translateText("Hoạt động")}</span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Tạm khóa
-                          </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />{translateText("Tạm khóa")}</span>
                         )}
                       </td>
 
@@ -639,9 +617,9 @@ export const StaffManagementPage: React.FC = () => {
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-slate-400" />
                           <span>
-                            {new Date(staff.createdAt).toLocaleDateString(
-                              "vi-VN",
-                            )}
+                            {translateText(new Date(staff.createdAt).toLocaleDateString(
+                              getLocale(),
+                            ))}
                           </span>
                         </div>
                       </td>
@@ -655,21 +633,21 @@ export const StaffManagementPage: React.FC = () => {
                               className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs flex items-center gap-1 transition"
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
-                              <span>Khôi phục</span>
+                              <span>{translateText("Khôi phục")}</span>
                             </button>
                           ) : (
                             <>
                               <button
                                 onClick={() => handleOpenDrawer("view", staff)}
                                 className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                title="Xem chi tiết nhân sự (UC08)"
+                                title={translateText("Xem chi tiết nhân sự (UC08)")}
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleOpenDrawer("edit", staff)}
                                 className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                title="Chỉnh sửa nhân sự (UC10)"
+                                title={translateText("Chỉnh sửa nhân sự (UC10)")}
                               >
                                 <Edit3 className="w-4 h-4" />
                               </button>
@@ -683,9 +661,9 @@ export const StaffManagementPage: React.FC = () => {
                                       : "text-amber-600 hover:text-emerald-600 hover:bg-emerald-50"
                                   }`}
                                   title={
-                                    staff.status === "ACTIVE"
+                                    translateText(staff.status === "ACTIVE"
                                       ? "Tạm khóa tài khoản"
-                                      : "Mở khóa tài khoản"
+                                      : "Mở khóa tài khoản")
                                   }
                                 >
                                   {staff.status === "ACTIVE" ? (
@@ -700,7 +678,7 @@ export const StaffManagementPage: React.FC = () => {
                                   onClick={() => setDeletingStaff(staff)}
                                   disabled={isActionSubmitting}
                                   className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
-                                  title="Chuyển vào lưu trữ (Xóa mềm)"
+                                  title={translateText("Chuyển vào lưu trữ (Xóa mềm)")}
                                 >
                                   <Archive className="w-4 h-4" />
                                 </button>
@@ -719,19 +697,15 @@ export const StaffManagementPage: React.FC = () => {
 
         {/* Pagination */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <div>
-            Hiển thị{" "}
+          <div>{translateText("Hiển thị")}{" "}
             <span className="font-bold text-slate-800">
               {staffList.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}
             </span>{" "}
             -{" "}
             <span className="font-bold text-slate-800">
               {Math.min(currentPage * pageSize, totalCount)}
-            </span>{" "}
-            trên tổng số{" "}
-            <span className="font-bold text-slate-800">{totalCount}</span> nhân
-            sự
-          </div>
+            </span>{" "}{translateText("trên tổng số")}{" "}
+            <span className="font-bold text-slate-800">{totalCount}</span>{translateText(" nhân sự")}</div>
 
           <div className="flex items-center gap-2">
             <button
@@ -741,8 +715,7 @@ export const StaffManagementPage: React.FC = () => {
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-3 font-semibold text-slate-700">
-              Trang {currentPage} / {totalPages}
+            <span className="px-3 font-semibold text-slate-700">{translateText("Trang ")}{currentPage} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}

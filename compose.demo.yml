@@ -1,0 +1,16 @@
+# Public, temporary demo for the existing isolated Docker stack.
+# Start compose.test.yml first. No Cloudflare account or token is required.
+name: kidmeal-demo
+
+services:
+  tunnel:
+    image: cloudflare/cloudflared@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba
+    command: ["tunnel", "--no-autoupdate", "--protocol", "http2", "--url", "http://frontend:80"]
+    restart: unless-stopped
+    networks:
+      - application
+
+networks:
+  application:
+    external: true
+    name: kidmeal-test_default

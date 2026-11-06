@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { apiClient } from "../../../core/api/axios";
 import {
@@ -39,6 +41,7 @@ const getEmptyForm = () => ({
 });
 
 export function PrincipalSnackServicesPage() {
+  useLanguage();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [editing, setEditing] = useState<any>(null);
@@ -183,19 +186,19 @@ export function PrincipalSnackServicesPage() {
       await fetchData();
       setTimeout(() => setToast(null), 4000);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Không thể thay đổi trạng thái gói dịch vụ.");
+      alert(translateText(err.response?.data?.message || "Không thể thay đổi trạng thái gói dịch vụ."));
     }
   };
 
   const handleDelete = async (row: any) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa gói "${row.name}" không?`)) return;
+    if (!window.confirm(translateText(`Bạn có chắc muốn xóa gói "${row.name}" không?`))) return;
     try {
       await apiClient.delete(`/snack-services/${row.id}`);
       setToast("Đã xóa gói dịch vụ thành công!");
       await fetchData();
       setTimeout(() => setToast(null), 4000);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Không thể xóa gói dịch vụ.");
+      alert(translateText(err.response?.data?.message || "Không thể xóa gói dịch vụ."));
     }
   };
 
@@ -214,18 +217,12 @@ export function PrincipalSnackServicesPage() {
       <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              Ban Giám Hiệu • Dịch Vụ Bán Trú
-            </span>
-            <span className="text-xs text-teal-200">Suất ăn sáng & xế chiều</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Ban Giám Hiệu • Dịch Vụ Bán Trú")}</span>
+            <span className="text-xs text-teal-200">{translateText("Suất ăn sáng & xế chiều")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <Coffee className="w-8 h-8 text-amber-300" />
-            Quản Lý Gói Dịch Vụ Ăn Phụ
-          </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-            Thiết lập các kỳ dịch vụ ăn sáng, ăn xế nhẹ dinh dưỡng, cấu hình mức phí trọn kỳ và mở cổng đăng ký trực tuyến cho Phụ huynh toàn trường.
-          </p>
+            <Coffee className="w-8 h-8 text-amber-300" />{translateText("Quản Lý Gói Dịch Vụ Ăn Phụ")}</h1>
+          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Thiết lập các kỳ dịch vụ ăn sáng, ăn xế nhẹ dinh dưỡng, cấu hình mức phí trọn kỳ và mở cổng đăng ký trực tuyến cho Phụ huynh toàn trường.")}</p>
         </div>
 
         <div className="flex items-center gap-3 self-start md:self-auto">
@@ -234,16 +231,12 @@ export function PrincipalSnackServicesPage() {
             disabled={loading}
             className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Làm mới
-          </button>
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
           <button
             onClick={() => void openModal()}
             className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-2xl text-xs font-black shadow-md transition flex items-center gap-2"
           >
-            <PlusCircle className="w-4 h-4" />
-            Tạo Dịch Vụ Mới
-          </button>
+            <PlusCircle className="w-4 h-4" />{translateText("Tạo Dịch Vụ Mới")}</button>
         </div>
       </div>
 
@@ -251,7 +244,7 @@ export function PrincipalSnackServicesPage() {
       {toast && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center gap-3 shadow-sm animate-in fade-in">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <span className="text-sm font-semibold">{toast}</span>
+          <span className="text-sm font-semibold">{translateText(toast)}</span>
         </div>
       )}
 
@@ -259,7 +252,7 @@ export function PrincipalSnackServicesPage() {
       {error && !editing && (
         <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
           <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
-          <span className="text-sm font-semibold">{error}</span>
+          <span className="text-sm font-semibold">{translateText(error)}</span>
         </div>
       )}
 
@@ -270,7 +263,7 @@ export function PrincipalSnackServicesPage() {
             <Coffee className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500">Tổng số gói</p>
+            <p className="text-xs font-semibold text-slate-500">{translateText("Tổng số gói")}</p>
             <p className="text-2xl font-black text-slate-900">{rows.length}</p>
           </div>
         </div>
@@ -280,7 +273,7 @@ export function PrincipalSnackServicesPage() {
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-emerald-800">Đang mở đăng ký</p>
+            <p className="text-xs font-semibold text-emerald-800">{translateText("Đang mở đăng ký")}</p>
             <p className="text-2xl font-black text-emerald-700">{openCount}</p>
           </div>
         </div>
@@ -290,7 +283,7 @@ export function PrincipalSnackServicesPage() {
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500">Đã đóng / kết thúc</p>
+            <p className="text-xs font-semibold text-slate-500">{translateText("Đã đóng / kết thúc")}</p>
             <p className="text-2xl font-black text-slate-700">{closedCount}</p>
           </div>
         </div>
@@ -300,8 +293,8 @@ export function PrincipalSnackServicesPage() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-amber-800">Tổng học sinh đăng ký</p>
-            <p className="text-2xl font-black text-amber-700">{totalRegistered}</p>
+            <p className="text-xs font-semibold text-amber-800">{translateText("Tổng học sinh đăng ký")}</p>
+            <p className="text-2xl font-black text-amber-700">{translateText(totalRegistered)}</p>
           </div>
         </div>
       </div>
@@ -312,7 +305,7 @@ export function PrincipalSnackServicesPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Tìm theo tên gói dịch vụ..."
+            placeholder={translateText("Tìm theo tên gói dịch vụ...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -326,10 +319,10 @@ export function PrincipalSnackServicesPage() {
             onChange={(e) => setStatus(e.target.value)}
             className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-auto"
           >
-            <option value="">Tất cả trạng thái</option>
-            <option value="OPEN">Đang mở đăng ký (OPEN)</option>
-            <option value="CLOSED">Đã đóng (CLOSED)</option>
-            <option value="DRAFT">Bản nháp (DRAFT)</option>
+            <option value="">{translateText("Tất cả trạng thái")}</option>
+            <option value="OPEN">{translateText("Đang mở đăng ký (OPEN)")}</option>
+            <option value="CLOSED">{translateText("Đã đóng (CLOSED)")}</option>
+            <option value="DRAFT">{translateText("Bản nháp (DRAFT)")}</option>
           </select>
         </div>
       </div>
@@ -339,27 +332,25 @@ export function PrincipalSnackServicesPage() {
         {loading ? (
           <div className="p-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
             <RefreshCw className="w-8 h-8 text-teal-600 animate-spin" />
-            <p className="text-sm font-medium">Đang tải danh sách dịch vụ ăn phụ...</p>
+            <p className="text-sm font-medium">{translateText("Đang tải danh sách dịch vụ ăn phụ...")}</p>
           </div>
         ) : rows.length === 0 ? (
           <div className="p-12 text-center space-y-3">
             <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mx-auto">
               <Coffee className="w-7 h-7" />
             </div>
-            <h3 className="text-base font-bold text-slate-800">Không tìm thấy gói dịch vụ ăn phụ nào</h3>
+            <h3 className="text-base font-bold text-slate-800">{translateText("Không tìm thấy gói dịch vụ ăn phụ nào")}</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              {search || status
+              {translateText(search || status
                 ? "Thử thay đổi từ khóa tìm kiếm hoặc bỏ lọc trạng thái để xem các gói khác."
-                : "Chưa có gói dịch vụ nào được tạo. Hãy bấm 'Tạo Dịch Vụ Mới' để công bố cho phụ huynh."}
+                : "Chưa có gói dịch vụ nào được tạo. Hãy bấm 'Tạo Dịch Vụ Mới' để công bố cho phụ huynh.")}
             </p>
             {!search && !status && (
               <button
                 onClick={() => void openModal()}
                 className="mt-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 shadow-sm transition"
               >
-                <PlusCircle className="w-4 h-4" />
-                Tạo gói đầu tiên
-              </button>
+                <PlusCircle className="w-4 h-4" />{translateText("Tạo gói đầu tiên")}</button>
             )}
           </div>
         ) : (
@@ -367,13 +358,13 @@ export function PrincipalSnackServicesPage() {
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/70">
                 <tr>
-                  <th className="p-4">Tên Gói Dịch Vụ</th>
-                  <th className="p-4">Thời Gian Phục Vụ</th>
-                  <th className="p-4">Hạn Đăng Ký</th>
-                  <th className="p-4">Mức Phí Trọn Kỳ</th>
-                  <th className="p-4 text-center">Đã Đăng Ký</th>
-                  <th className="p-4 text-center">Trạng Thái</th>
-                  <th className="p-4 text-right">Thao Tác</th>
+                  <th className="p-4">{translateText("Tên Gói Dịch Vụ")}</th>
+                  <th className="p-4">{translateText("Thời Gian Phục Vụ")}</th>
+                  <th className="p-4">{translateText("Hạn Đăng Ký")}</th>
+                  <th className="p-4">{translateText("Mức Phí Trọn Kỳ")}</th>
+                  <th className="p-4 text-center">{translateText("Đã Đăng Ký")}</th>
+                  <th className="p-4 text-center">{translateText("Trạng Thái")}</th>
+                  <th className="p-4 text-right">{translateText("Thao Tác")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -388,23 +379,22 @@ export function PrincipalSnackServicesPage() {
                     <td className="p-4 text-slate-700 font-medium">
                       <span className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        {r.startDate} ~ {r.endDate}
+                        {translateText(r.startDate)} ~ {translateText(r.endDate)}
                       </span>
                     </td>
                     <td className="p-4 text-slate-600">
                       <span className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-amber-500" />
-                        {r.registrationDeadline || "Không giới hạn"}
+                        {translateText(r.registrationDeadline || "Không giới hạn")}
                       </span>
                     </td>
                     <td className="p-4 font-black text-emerald-700 text-sm">
-                      {r.feeAmount == null ? "0 đ" : `${Number(r.feeAmount).toLocaleString("vi-VN")} đ`}
+                      {translateText(r.feeAmount == null ? "0 đ" : `${Number(r.feeAmount).toLocaleString(getLocale())} đ`)}
                     </td>
                     <td className="p-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800">
                         <Users className="w-3 h-3 text-slate-500" />
-                        {r.registeredCount || 0} bé
-                      </span>
+                        {translateText(r.registeredCount || 0)}{translateText(" bé")}</span>
                     </td>
                     <td className="p-4 text-center">
                       <span
@@ -416,28 +406,28 @@ export function PrincipalSnackServicesPage() {
                             : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}
                       >
-                        {r.status === "OPEN" ? "● Đang mở" : r.status === "DRAFT" ? "Bản nháp" : "Đã đóng"}
+                        {translateText(r.status === "OPEN" ? "● Đang mở" : r.status === "DRAFT" ? "Bản nháp" : "Đã đóng")}
                       </span>
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => void openDetail(r.id)}
-                          title="Xem chi tiết & danh sách đăng ký"
+                          title={translateText("Xem chi tiết & danh sách đăng ký")}
                           className="p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold transition inline-flex items-center"
                         >
                           <Eye className="w-3.5 h-3.5 text-slate-500" />
                         </button>
                         <button
                           onClick={() => void openModal(r)}
-                          title="Chỉnh sửa gói"
+                          title={translateText("Chỉnh sửa gói")}
                           className="p-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center shadow-xs"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => void togglePeriodStatus(r.id)}
-                          title={r.status === "OPEN" ? "Đóng gói đăng ký" : "Mở lại gói đăng ký"}
+                          title={translateText(r.status === "OPEN" ? "Đóng gói đăng ký" : "Mở lại gói đăng ký")}
                           className={`p-2 rounded-xl font-bold transition inline-flex items-center border ${
                             r.status === "OPEN"
                               ? "border-amber-200 text-amber-700 hover:bg-amber-50"
@@ -448,7 +438,7 @@ export function PrincipalSnackServicesPage() {
                         </button>
                         <button
                           onClick={() => void handleDelete(r)}
-                          title="Xóa gói dịch vụ"
+                          title={translateText("Xóa gói dịch vụ")}
                           className="p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold transition inline-flex items-center"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -473,7 +463,7 @@ export function PrincipalSnackServicesPage() {
                   <Coffee className="w-5 h-5" />
                 </div>
                 <h3 className="font-black text-slate-900 text-lg">
-                  {editing.id ? "Cập Nhật Gói Dịch Vụ Ăn Phụ" : "Tạo Gói Dịch Vụ Ăn Phụ Mới"}
+                  {translateText(editing.id ? "Cập Nhật Gói Dịch Vụ Ăn Phụ" : "Tạo Gói Dịch Vụ Ăn Phụ Mới")}
                 </h3>
               </div>
               <button
@@ -489,18 +479,17 @@ export function PrincipalSnackServicesPage() {
               {error && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-3 text-xs font-semibold flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{error}</span>
+                  <span>{translateText(error)}</span>
                 </div>
               )}
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Tên gói dịch vụ ăn phụ <span className="text-rose-500">*</span>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Tên gói dịch vụ ăn phụ ")}<span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: Suất ăn sáng dinh dưỡng Tháng 11/2026"
+                  placeholder={translateText("Ví dụ: Suất ăn sáng dinh dưỡng Tháng 11/2026")}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -509,8 +498,7 @@ export function PrincipalSnackServicesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Ngày bắt đầu phục vụ <span className="text-rose-500">*</span>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Ngày bắt đầu phục vụ ")}<span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -521,8 +509,7 @@ export function PrincipalSnackServicesPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Ngày kết thúc phục vụ <span className="text-rose-500">*</span>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Ngày kết thúc phục vụ ")}<span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -536,8 +523,7 @@ export function PrincipalSnackServicesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Hạn chót đăng ký <span className="text-rose-500">*</span>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Hạn chót đăng ký ")}<span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -548,15 +534,14 @@ export function PrincipalSnackServicesPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Mức phí trọn kỳ (VNĐ) <span className="text-rose-500">*</span>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Mức phí trọn kỳ (VNĐ) ")}<span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="number"
                     required
                     min={0}
                     step={1000}
-                    placeholder="Ví dụ: 300000"
+                    placeholder={translateText("Ví dụ: 300000")}
                     value={form.feeAmount}
                     onChange={(e) => setForm({ ...form, feeAmount: e.target.value })}
                     className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-black text-emerald-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -565,23 +550,23 @@ export function PrincipalSnackServicesPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Trạng thái công bố</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Trạng thái công bố")}</label>
                 <select
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value })}
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
-                  <option value="OPEN">Mở cho Phụ huynh đăng ký & thanh toán (OPEN)</option>
-                  <option value="CLOSED">Đóng đăng ký (CLOSED)</option>
-                  {!editing.id && <option value="DRAFT">Lưu nháp nội bộ (DRAFT)</option>}
+                  <option value="OPEN">{translateText("Mở cho Phụ huynh đăng ký & thanh toán (OPEN)")}</option>
+                  <option value="CLOSED">{translateText("Đóng đăng ký (CLOSED)")}</option>
+                  {!editing.id && <option value="DRAFT">{translateText("Lưu nháp nội bộ (DRAFT)")}</option>}
                 </select>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Mô tả & ghi chú dinh dưỡng</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">{translateText("Mô tả & ghi chú dinh dưỡng")}</label>
                 <textarea
                   rows={3}
-                  placeholder="Thông tin chi tiết về thực đơn, thời gian phục vụ 07h00 hoặc 17h00..."
+                  placeholder={translateText("Thông tin chi tiết về thực đơn, thời gian phục vụ 07h00 hoặc 17h00...")}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -594,16 +579,14 @@ export function PrincipalSnackServicesPage() {
                   onClick={() => setEditing(null)}
                   disabled={submitting}
                   className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
-                >
-                  Hủy
-                </button>
+                >{translateText("Hủy")}</button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5"
                 >
                   {submitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                  {submitting ? "Đang lưu..." : "Lưu & Công Bố Gói"}
+                  {translateText(submitting ? "Đang lưu..." : "Lưu & Công Bố Gói")}
                 </button>
               </div>
             </form>
@@ -617,7 +600,7 @@ export function PrincipalSnackServicesPage() {
           <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 bg-gradient-to-r from-teal-50 to-emerald-50 shrink-0">
               <div>
-                <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider">Chi Tiết Gói Dịch Vụ</span>
+                <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider">{translateText("Chi Tiết Gói Dịch Vụ")}</span>
                 <h3 className="font-black text-slate-900 text-lg">{detail.name}</h3>
               </div>
               <button
@@ -632,24 +615,23 @@ export function PrincipalSnackServicesPage() {
             <div className="p-6 overflow-y-auto space-y-5">
               <div className="bg-slate-50 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Thời gian phục vụ</span>
-                  <strong className="text-slate-800">{detail.startDate} ~ {detail.endDate}</strong>
+                  <span className="text-slate-400 block text-[11px]">{translateText("Thời gian phục vụ")}</span>
+                  <strong className="text-slate-800">{translateText(detail.startDate)} ~ {translateText(detail.endDate)}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Hạn đăng ký</span>
-                  <strong className="text-slate-800">{detail.registrationDeadline || "Không giới hạn"}</strong>
+                  <span className="text-slate-400 block text-[11px]">{translateText("Hạn đăng ký")}</span>
+                  <strong className="text-slate-800">{translateText(detail.registrationDeadline || "Không giới hạn")}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Mức phí trọn kỳ</span>
+                  <span className="text-slate-400 block text-[11px]">{translateText("Mức phí trọn kỳ")}</span>
                   <strong className="text-emerald-700 text-sm font-black">
-                    {Number(detail.feeAmount).toLocaleString("vi-VN")} đ
-                  </strong>
+                    {translateText(Number(detail.feeAmount).toLocaleString(getLocale()))}{translateText(" đ")}</strong>
                 </div>
               </div>
 
               {detail.description && (
                 <div>
-                  <h4 className="text-xs font-bold text-slate-700 uppercase mb-1">Mô tả dịch vụ</h4>
+                  <h4 className="text-xs font-bold text-slate-700 uppercase mb-1">{translateText("Mô tả dịch vụ")}</h4>
                   <p className="text-xs text-slate-600 bg-white p-3 border border-slate-200 rounded-xl leading-relaxed">
                     {detail.description}
                   </p>
@@ -659,18 +641,16 @@ export function PrincipalSnackServicesPage() {
               {/* Thực đơn dịch vụ */}
               <div>
                 <h4 className="text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-1.5">
-                  <Coffee className="w-4 h-4 text-teal-600" />
-                  Lịch Thực Đơn Ăn Phụ Trong Tuần
-                </h4>
+                  <Coffee className="w-4 h-4 text-teal-600" />{translateText("Lịch Thực Đơn Ăn Phụ Trong Tuần")}</h4>
                 {!detail.menuSchedule?.length ? (
-                  <p className="text-xs text-slate-400 italic">Chưa có lịch thực đơn cụ thể.</p>
+                  <p className="text-xs text-slate-400 italic">{translateText("Chưa có lịch thực đơn cụ thể.")}</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {detail.menuSchedule.map((m: any, i: number) => (
                       <div key={i} className="border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-xs space-y-1">
-                        <span className="font-bold text-teal-800">{m.dayLabel}</span>
+                        <span className="font-bold text-teal-800">{translateText(m.dayLabel)}</span>
                         <p className="text-slate-600">
-                          {[m.mainDish, m.drinkItem, m.fruitOrSide].filter(Boolean).join(" · ")}
+                          {translateText([m.mainDish, m.drinkItem, m.fruitOrSide].filter(Boolean).join(" · "))}
                         </p>
                       </div>
                     ))}
@@ -682,21 +662,19 @@ export function PrincipalSnackServicesPage() {
               <div>
                 <h4 className="text-xs font-bold text-slate-700 uppercase mb-2 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-teal-600" />
-                    Danh Sách Học Sinh Đã Đăng Ký
-                  </span>
-                  <span className="text-teal-700 font-black">({detail.registrations?.length || 0} bé)</span>
+                    <Users className="w-4 h-4 text-teal-600" />{translateText("Danh Sách Học Sinh Đã Đăng Ký")}</span>
+                  <span className="text-teal-700 font-black">({translateText(detail.registrations?.length || 0)}{translateText(" bé)")}</span>
                 </h4>
                 {!detail.registrations?.length ? (
-                  <p className="text-xs text-slate-400 italic">Chưa có học sinh nào đăng ký gói này.</p>
+                  <p className="text-xs text-slate-400 italic">{translateText("Chưa có học sinh nào đăng ký gói này.")}</p>
                 ) : (
                   <div className="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
                     <table className="w-full text-xs text-left">
                       <thead className="bg-slate-100 text-slate-600 font-bold">
                         <tr>
-                          <th className="p-2.5">Học Sinh</th>
-                          <th className="p-2.5">Lớp</th>
-                          <th className="p-2.5 text-right">Trạng Thái</th>
+                          <th className="p-2.5">{translateText("Học Sinh")}</th>
+                          <th className="p-2.5">{translateText("Lớp")}</th>
+                          <th className="p-2.5 text-right">{translateText("Trạng Thái")}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -704,7 +682,7 @@ export function PrincipalSnackServicesPage() {
                           <tr key={r.id} className="hover:bg-slate-50">
                             <td className="p-2.5 font-bold text-slate-800">{r.studentName}</td>
                             <td className="p-2.5 text-slate-600">{r.className}</td>
-                            <td className="p-2.5 text-right font-semibold text-emerald-700">{r.status}</td>
+                            <td className="p-2.5 text-right font-semibold text-emerald-700">{translateText(r.status)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -719,9 +697,7 @@ export function PrincipalSnackServicesPage() {
                 type="button"
                 onClick={() => setDetail(null)}
                 className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition"
-              >
-                Đóng
-              </button>
+              >{translateText("Đóng")}</button>
             </div>
           </div>
         </div>

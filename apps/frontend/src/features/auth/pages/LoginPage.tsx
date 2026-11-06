@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, Shield, Phone } from "lucide-react";
@@ -8,8 +10,10 @@ import {
   LoginResponse,
 } from "../../../core/api/auth.api";
 import { ForgotPasswordModal } from "../components/ForgotPasswordModal";
+import { LanguageSwitcher } from '../../../core/components/LanguageSwitcher';
 
 export const LoginPage: React.FC = () => {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuth, setTenantId, isAuthenticated, user } = useAuthStore();
@@ -149,26 +153,19 @@ export const LoginPage: React.FC = () => {
       <header className="flex items-center justify-between px-6 py-3 bg-white/80 backdrop-blur-sm border-b border-slate-100 relative z-10">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md">
-            <span className="text-white font-black text-sm leading-none">
-              Kid
-              <br />
-              Meal
-            </span>
+            <span className="text-white font-black text-sm leading-none">{translateText("Kid")}<br />{translateText("Meal")}</span>
           </div>
-          <span className="text-sm font-semibold text-slate-600">
-            Bán trú yêu thương
-          </span>
+          <span className="hidden sm:inline text-sm font-semibold text-slate-600">{translateText("Bán trú yêu thương")}</span>
         </div>
         <div className="flex items-center gap-6 text-xs text-slate-500">
-          <div className="flex items-center gap-1.5">
+          <LanguageSwitcher />
+          <div className="hidden md:flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Máy chủ vận hành ổn định</span>
+            <span>{translateText("Máy chủ vận hành ổn định")}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="hidden lg:flex items-center gap-1.5">
             <Phone className="w-3.5 h-3.5" />
-            <span className="font-semibold text-slate-700">
-              Hotline: 1900 6826
-            </span>
+            <span className="font-semibold text-slate-700">{translateText("Hotline: 1900 6826")}</span>
           </div>
         </div>
       </header>
@@ -186,32 +183,24 @@ export const LoginPage: React.FC = () => {
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-900/5 border border-white/60 px-8 py-10 sm:px-10">
             {/* Badge Bán trú */}
             <div className="flex justify-center mb-4">
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
-                🏫 Hệ thống Quản trị Bán trú Mầm non KidMeal
-              </span>
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">{translateText("🏫 Hệ thống Quản trị Bán trú Mầm non KidMeal")}</span>
             </div>
 
             {/* Heading */}
-            <h1 className="text-center text-3xl font-black text-slate-900 mb-2">
-              Chào mừng trở lại! 👋
-            </h1>
-            <p className="text-center text-sm text-slate-500 mb-8">
-              Đăng nhập để quản lý thực đơn, dinh dưỡng và sĩ số học sinh.
-            </p>
+            <h1 className="text-center text-3xl font-black text-slate-900 mb-2">{translateText("Chào mừng trở lại! 👋")}</h1>
+            <p className="text-center text-sm text-slate-500 mb-8">{translateText("Đăng nhập để quản lý thực đơn, dinh dưỡng và sĩ số học sinh.")}</p>
 
             {/* Error Alert */}
             {error && (
               <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium animate-shake">
-                {error}
+                {translateText(error)}
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-5">
               {/* Email Input */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Tên đăng nhập hoặc Email / SĐT
-                </label>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Tên đăng nhập hoặc Email / SĐT")}</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                   <input
@@ -219,7 +208,7 @@ export const LoginPage: React.FC = () => {
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="hieutruong@huongduong.edu.vn"
+                    placeholder={translateText("hieutruong@huongduong.edu.vn")}
                     autoComplete="email"
                     required
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 outline-none"
@@ -229,9 +218,7 @@ export const LoginPage: React.FC = () => {
 
               {/* Password Input */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Mật khẩu
-                </label>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Mật khẩu")}</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                   <input
@@ -239,7 +226,7 @@ export const LoginPage: React.FC = () => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder={"••••••••"}
                     autoComplete="current-password"
                     required
                     minLength={6}
@@ -250,7 +237,7 @@ export const LoginPage: React.FC = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    aria-label={translateText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu")}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4.5 h-4.5" />
@@ -264,9 +251,7 @@ export const LoginPage: React.FC = () => {
               {/* 2FA Code (conditional) */}
               {show2Fa && (
                 <div className="animate-fadeIn">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Mã xác thực 2FA
-                  </label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Mã xác thực 2FA")}</label>
                   <div className="relative">
                     <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                     <input
@@ -278,7 +263,7 @@ export const LoginPage: React.FC = () => {
                           e.target.value.replace(/\D/g, "").slice(0, 6),
                         )
                       }
-                      placeholder="Nhập 6 chữ số từ app Authenticator"
+                      placeholder={translateText("Nhập 6 chữ số từ app Authenticator")}
                       autoComplete="one-time-code"
                       inputMode="numeric"
                       maxLength={6}
@@ -297,17 +282,13 @@ export const LoginPage: React.FC = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-400 cursor-pointer"
                   />
-                  <span className="text-sm text-slate-600">
-                    Ghi nhớ đăng nhập
-                  </span>
+                  <span className="text-sm text-slate-600">{translateText("Ghi nhớ đăng nhập")}</span>
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
                   className="text-sm text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
-                >
-                  Quên mật khẩu?
-                </button>
+                >{translateText("Quên mật khẩu?")}</button>
               </div>
 
               {/* Submit Button */}
@@ -334,11 +315,9 @@ export const LoginPage: React.FC = () => {
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                       />
-                    </svg>
-                    Đang xử lý...
-                  </span>
+                    </svg>{translateText("Đang xử lý...")}</span>
                 ) : (
-                  "Đăng nhập vào KidMeal 🎉"
+                  translateText("Đăng nhập vào KidMeal 🎉")
                 )}
               </button>
             </form>
@@ -346,10 +325,7 @@ export const LoginPage: React.FC = () => {
             {/* Security badge */}
             <div className="mt-8 text-center">
               <p className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
-                <Shield className="w-3 h-3 text-emerald-500" />
-                Bảo mật mã hóa SSL 256-bit • Dành riêng cho cán bộ, giáo viên &
-                phụ huynh mầm non
-              </p>
+                <Shield className="w-3 h-3 text-emerald-500" />{translateText("Bảo mật mã hóa SSL 256-bit • Dành riêng cho cán bộ, giáo viên & phụ huynh mầm non")}</p>
             </div>
           </div>
         </div>
@@ -370,22 +346,13 @@ export const LoginPage: React.FC = () => {
 
       {/* ─── Footer ──────────────────────────────────────────────────────── */}
       <footer className="px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 relative z-10">
-        <p>
-          © 2024 KidMeal - Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non.
-          All rights reserved.
-        </p>
+        <p>{translateText("© 2024 KidMeal - Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non. All rights reserved.")}</p>
         <div className="flex items-center gap-4">
-          <a href="#" className="hover:text-slate-600 transition-colors">
-            Hướng dẫn bảo mật
-          </a>
+          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Hướng dẫn bảo mật")}</a>
           <span>•</span>
-          <a href="#" className="hover:text-slate-600 transition-colors">
-            Điều khoản sử dụng
-          </a>
+          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Điều khoản sử dụng")}</a>
           <span>•</span>
-          <a href="#" className="hover:text-slate-600 transition-colors">
-            Trung tâm trợ giúp
-          </a>
+          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Trung tâm trợ giúp")}</a>
         </div>
       </footer>
     </div>

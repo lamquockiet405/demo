@@ -1,8 +1,11 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import { CreateKitchenInspectionModal } from "../components/CreateKitchenInspectionModal";
 import React, { useState } from "react";
 import { Download, Eye, Plus, Upload } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
 import { getSchoolDate, normalizeSearch } from "../utils/kds-data";
+import { sanitizeInspectionNote } from "../utils/inspection-note";
 import {
   downloadCsv,
   formatDateTime,
@@ -33,6 +36,7 @@ export function InspectionDetail({
   onSaved: () => Promise<void>;
   mode?: "kitchen" | "review";
 }) {
+  useLanguage();
   const resource = useKitchenResource(
     async () =>
       (await apiClient.get(`/inspections/${encodeURIComponent(id)}`)).data,
@@ -131,7 +135,7 @@ export function InspectionDetail({
   };
   return (
     <Modal
-      title="Chi tiết biên bản kiểm thực"
+      title={translateText("Chi tiết biên bản kiểm thực")}
       busy={action.busy || imageBusy}
       onClose={onClose}
     >
@@ -141,39 +145,39 @@ export function InspectionDetail({
         <>
           <dl className="kp-detail-list">
             <div>
-              <dt>Mã biên bản</dt>
-              <dd>{record.code}</dd>
+              <dt>{translateText("Mã biên bản")}</dt>
+              <dd>{translateText(record.code)}</dd>
             </div>
             <div>
-              <dt>Ngày / bữa</dt>
+              <dt>{translateText("Ngày / bữa")}</dt>
               <dd>
-                {record.mealDate || record.date} · {record.mealTime}
+                {translateText(record.mealDate || record.date)} · {translateText(record.mealTime)}
               </dd>
             </div>
             <div>
-              <dt>Người kiểm tra</dt>
+              <dt>{translateText("Người kiểm tra")}</dt>
               <dd>{record.performerName}</dd>
             </div>
             <div>
-              <dt>Trạng thái</dt>
-              <dd>{record.approvalStatusLabel || record.status}</dd>
+              <dt>{translateText("Trạng thái")}</dt>
+              <dd>{translateText(record.approvalStatusLabel || record.status)}</dd>
             </div>
             {record.approvedBy && (
               <div>
-                <dt>Người duyệt</dt>
-                <dd>{record.approvedBy}</dd>
+                <dt>{translateText("Người duyệt")}</dt>
+                <dd>{translateText(record.approvedBy)}</dd>
               </div>
             )}
             {record.approvedAt && (
               <div>
-                <dt>Thời điểm duyệt</dt>
-                <dd>{formatDateTime(record.approvedAt)}</dd>
+                <dt>{translateText("Thời điểm duyệt")}</dt>
+                <dd>{translateText(formatDateTime(record.approvedAt))}</dd>
               </div>
             )}
             {record.kitchenSubmittedAt && (
               <div>
-                <dt>Bếp gửi duyệt lúc</dt>
-                <dd>{formatDateTime(record.kitchenSubmittedAt)}</dd>
+                <dt>{translateText("Bếp gửi duyệt lúc")}</dt>
+                <dd>{translateText(formatDateTime(record.kitchenSubmittedAt))}</dd>
               </div>
             )}
           </dl>
@@ -181,8 +185,7 @@ export function InspectionDetail({
             <Notice error={`Yêu cầu bổ sung: ${record.rejectionReason}`} />
           )}
           {record.dishes?.length > 0 && (
-            <p className="mb-4 text-xs text-slate-600">
-              Món kiểm thực: {record.dishes.join(", ")}
+            <p className="mb-4 text-xs text-slate-600">{translateText("Món kiểm thực: ")}{translateText(record.dishes.join(", "))}
             </p>
           )}
           <form onSubmit={submit}>
@@ -196,16 +199,15 @@ export function InspectionDetail({
                     : [];
                 return (
                   <section className="kp-step-card" key={step}>
-                    <h3>
-                      Bước {step} · {stepTitles[step - 1]}
+                    <h3>{translateText("Bước ")}{step} · {translateText(stepTitles[step - 1])}
                     </h3>
                     <span
                       className={`kp-tag ${record[`step${step}Status`] === "Không đạt" ? "red" : ""}`}
                     >
-                      {record[`step${step}Status`] || "Chưa thực hiện"}
+                      {translateText(record[`step${step}Status`] || "Chưa thực hiện")}
                     </span>
                     <p className="text-[10px] text-slate-500 mt-2">
-                      {formatDateTime(record[`step${step}Time`])}
+                      {translateText(formatDateTime(record[`step${step}Time`]))}
                     </p>
                     {storedPhotos.map((photo, index) => (
                       <a
@@ -216,17 +218,16 @@ export function InspectionDetail({
                       >
                         <img
                           src={photo}
-                          alt={`Minh chứng bước ${step}, ảnh ${index + 1}`}
+                          alt={translateText(`Minh chứng bước ${step}, ảnh ${index + 1}`)}
                         />
                       </a>
                     ))}
                     {photos[step] && (
-                      <img src={photos[step]} alt={`Ảnh mới bước ${step}`} />
+                      <img src={photos[step]} alt={translateText(`Ảnh mới bước ${step}`)} />
                     )}
                     {!approved && mode === "kitchen" && (
                       <>
-                        <label className="kp-field">
-                          Ghi nhận bước {step}
+                        <label className="kp-field">{translateText("Ghi nhận bước ")}{step}
                           <textarea
                             className="kp-input"
                             maxLength={2000}
@@ -244,11 +245,10 @@ export function InspectionDetail({
                         </label>
                         <label className="kp-field">
                           <span>
-                            <Upload size={13} className="inline mr-1" />
-                            Ảnh minh chứng bước {step}
+                            <Upload size={13} className="inline mr-1" />{translateText("Ảnh minh chứng bước ")}{step}
                           </span>
                           <input
-                            aria-label={`Ảnh minh chứng bước ${step}`}
+                            aria-label={translateText(`Ảnh minh chứng bước ${step}`)}
                             disabled={imageBusy || action.busy}
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
@@ -270,14 +270,13 @@ export function InspectionDetail({
                                 [step]: e.target.checked,
                               })
                             }
-                          />
-                          Đã kiểm tra và đạt ở bước {step}
+                          />{translateText("Đã kiểm tra và đạt ở bước ")}{step}
                         </label>
                       </>
                     )}
                     {(approved || mode === "review") && (
                       <p className="kp-note-text">
-                        {record[`step${step}Note`] || "Không có ghi chú thêm."}
+                        {translateText(sanitizeInspectionNote(record[`step${step}Note`]) || "Không có ghi chú thêm.")}
                       </p>
                     )}
                   </section>
@@ -290,11 +289,11 @@ export function InspectionDetail({
                   className="kp-button primary"
                   disabled={action.busy || imageBusy}
                 >
-                  {imageBusy
+                  {translateText(imageBusy
                     ? "Đang xử lý ảnh…"
                     : action.busy
                       ? "Đang gửi…"
-                      : "Lưu minh chứng & gửi duyệt"}
+                      : "Lưu minh chứng & gửi duyệt")}
                 </button>
               </div>
             )}
@@ -302,7 +301,7 @@ export function InspectionDetail({
           {mode === "review" && pending && (
             <section
               className="mt-5 border-t pt-5 space-y-4"
-              aria-label="Thao tác phê duyệt kiểm thực"
+              aria-label={translateText("Thao tác phê duyệt kiểm thực")}
             >
               {!complete && (
                 <Notice error="Biên bản chưa có đủ kết quả đạt và ảnh minh chứng cho 3 bước. Có thể yêu cầu bếp bổ sung." />
@@ -313,18 +312,14 @@ export function InspectionDetail({
                   checked={reviewConfirmed}
                   disabled={!complete || action.busy}
                   onChange={(e) => setReviewConfirmed(e.target.checked)}
-                />
-                Tôi đã kiểm tra kết quả và ảnh minh chứng của cả 3 bước.
-              </label>
-              <label className="kp-field">
-                Lý do yêu cầu bổ sung
-                <textarea
+                />{translateText("Tôi đã kiểm tra kết quả và ảnh minh chứng của cả 3 bước.")}</label>
+              <label className="kp-field">{translateText("Lý do yêu cầu bổ sung")}<textarea
                   className="kp-input"
-                  aria-label="Lý do yêu cầu bổ sung"
+                  aria-label={translateText("Lý do yêu cầu bổ sung")}
                   maxLength={2000}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Ghi rõ bước cần bổ sung và nội dung cần điều chỉnh…"
+                  placeholder={translateText("Ghi rõ bước cần bổ sung và nội dung cần điều chỉnh…")}
                 />
               </label>
               <div className="kp-form-actions">
@@ -333,25 +328,21 @@ export function InspectionDetail({
                   className="kp-button danger"
                   disabled={action.busy || reason.trim().length < 5}
                   onClick={() => void review("reject")}
-                >
-                  Yêu cầu bổ sung
-                </button>
+                >{translateText("Yêu cầu bổ sung")}</button>
                 <button
                   type="button"
                   className="kp-button primary"
                   disabled={action.busy || !complete || !reviewConfirmed}
                   onClick={() => void review("approve")}
                 >
-                  {action.busy ? "Đang lưu…" : "Phê duyệt biên bản"}
+                  {translateText(action.busy ? "Đang lưu…" : "Phê duyệt biên bản")}
                 </button>
               </div>
             </section>
           )}
           {mode === "review" &&
             record.approvalStatus === "YEU_CAU_CHUP_LAI" && (
-              <p className="mt-4 text-sm text-amber-800">
-                Đang chờ bếp bổ sung minh chứng và gửi duyệt lại.
-              </p>
+              <p className="mt-4 text-sm text-amber-800">{translateText("Đang chờ bếp bổ sung minh chứng và gửi duyệt lại.")}</p>
             )}
         </>
       )}
@@ -364,6 +355,7 @@ export function KitchenInspectionsPage({
 }: {
   audience?: "kitchen" | "principal" | "nutritionist";
 }) {
+  useLanguage();
   const [reviewMode, setReviewMode] = useState(audience !== "kitchen");
   const reviewer = audience !== "kitchen" && reviewMode;
   const resource = useKitchenResource(
@@ -389,17 +381,17 @@ export function KitchenInspectionsPage({
     <>
       <PageTitle
         eyebrow={
-          reviewer
+          translateText(reviewer
             ? audience === "principal"
               ? "BAN GIÁM HIỆU"
               : "CHUYÊN GIA DINH DƯỠNG"
-            : undefined
+            : undefined)
         }
-        title={reviewer ? "Phê duyệt kiểm thực 3 bước" : "Kiểm thực 3 bước"}
+        title={translateText(reviewer ? "Phê duyệt kiểm thực 3 bước" : "Kiểm thực 3 bước")}
         description={
-          reviewer
+          translateText(reviewer
             ? "Kiểm tra minh chứng bếp gửi, phê duyệt hoặc yêu cầu bổ sung; tra cứu người duyệt và thời điểm duyệt."
-            : "Tạo biên bản, xem kết quả kiểm tra và gửi ảnh minh chứng trước chế biến, trong chế biến, trước khi ăn."
+            : "Tạo biên bản, xem kết quả kiểm tra và gửi ảnh minh chứng trước chế biến, trong chế biến, trước khi ăn.")
         }
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
@@ -431,14 +423,10 @@ export function KitchenInspectionsPage({
             ])
           }
         >
-          <Download size={15} />
-          Xuất nhật ký
-        </button>
+          <Download size={15} />{translateText("Xuất nhật ký")}</button>
         {audience === "kitchen" && (
           <button className="kp-button primary" onClick={() => setCreate(true)}>
-            <Plus size={16} />
-            Tạo biên bản
-          </button>
+            <Plus size={16} />{translateText("Tạo biên bản")}</button>
         )}
       </PageTitle>
 
@@ -446,7 +434,7 @@ export function KitchenInspectionsPage({
         <div
           className="flex gap-2 mb-4"
           role="group"
-          aria-label="Chế độ kiểm thực"
+          aria-label={translateText("Chế độ kiểm thực")}
         >
           <button
             className={`kp-button ${reviewMode ? "primary" : ""}`}
@@ -455,9 +443,7 @@ export function KitchenInspectionsPage({
               setDetail(null);
               setStatus("CHO_DUYET");
             }}
-          >
-            Phê duyệt biên bản
-          </button>
+          >{translateText("Phê duyệt biên bản")}</button>
           <button
             className={`kp-button ${!reviewMode ? "primary" : ""}`}
             onClick={() => {
@@ -465,39 +451,35 @@ export function KitchenInspectionsPage({
               setDetail(null);
               setStatus("");
             }}
-          >
-            Xem / bổ sung minh chứng
-          </button>
+          >{translateText("Xem / bổ sung minh chứng")}</button>
         </div>
       )}
 
       <div className="kp-filters">
         <input
           type="search"
-          aria-label="Tìm biên bản kiểm thực"
-          placeholder="Tìm mã biên bản, món, người kiểm…"
+          aria-label={translateText("Tìm biên bản kiểm thực")}
+          placeholder={translateText("Tìm mã biên bản, món, người kiểm…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <label>
-          Ngày
-          <input
+        <label>{translateText("Ngày")}<input
             type="date"
-            aria-label="Lọc ngày kiểm thực"
+            aria-label={translateText("Lọc ngày kiểm thực")}
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </label>
         <select
-          aria-label="Trạng thái kiểm thực"
+          aria-label={translateText("Trạng thái kiểm thực")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="CHO_BEP_TAI_ANH">Chờ bếp tải ảnh</option>
-          <option value="CHO_DUYET">Chờ duyệt</option>
-          <option value="DA_DUYET">Đã duyệt</option>
-          <option value="YEU_CAU_CHUP_LAI">Yêu cầu bổ sung</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
+          <option value="CHO_BEP_TAI_ANH">{translateText("Chờ bếp tải ảnh")}</option>
+          <option value="CHO_DUYET">{translateText("Chờ duyệt")}</option>
+          <option value="DA_DUYET">{translateText("Đã duyệt")}</option>
+          <option value="YEU_CAU_CHUP_LAI">{translateText("Yêu cầu bổ sung")}</option>
         </select>
         <button
           className="kp-button"
@@ -506,64 +488,60 @@ export function KitchenInspectionsPage({
             setSearch("");
             setStatus("");
           }}
-        >
-          Xóa bộ lọc
-        </button>
+        >{translateText("Xóa bộ lọc")}</button>
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       <div className="kp-table-wrap">
         <table className="kp-table">
           <thead>
             <tr>
-              <th>Biên bản</th>
-              <th>Bữa / ngày</th>
-              <th>Bước 1</th>
-              <th>Bước 2</th>
-              <th>Bước 3</th>
-              <th>Duyệt</th>
-              <th>Chi tiết</th>
+              <th>{translateText("Biên bản")}</th>
+              <th>{translateText("Bữa / ngày")}</th>
+              <th>{translateText("Bước 1")}</th>
+              <th>{translateText("Bước 2")}</th>
+              <th>{translateText("Bước 3")}</th>
+              <th>{translateText("Duyệt")}</th>
+              <th>{translateText("Chi tiết")}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id}>
                 <td>
-                  <strong>{r.code}</strong>
+                  <strong>{translateText(r.code)}</strong>
                   <small>{r.performerName}</small>
                 </td>
                 <td>
-                  {r.mealDate || r.date}
-                  <small>{r.mealTime}</small>
+                  {translateText(r.mealDate || r.date)}
+                  <small>{translateText(r.mealTime)}</small>
                 </td>
                 {[1, 2, 3].map((step) => (
                   <td key={step}>
                     <span
                       className={`kp-tag ${r[`step${step}Status`] === "Không đạt" ? "red" : r[`step${step}Status`] === "Chưa thực hiện" ? "gray" : ""}`}
                     >
-                      {r[`step${step}Status`]}
+                      {translateText(r[`step${step}Status`])}
                     </span>
                     <small>
-                      {r[`step${step}Photos`]?.length ||
-                        (r[`step${step}PhotoUrl`] ? 1 : 0)}{" "}
-                      ảnh
-                    </small>
+                      {translateText(r[`step${step}Photos`]?.length ||
+                        (r[`step${step}PhotoUrl`] ? 1 : 0))}{" "}{translateText("ảnh")}</small>
                   </td>
                 ))}
                 <td>
                   <span
                     className={`kp-tag ${r.approvalStatus === "DA_DUYET" ? "" : "amber"}`}
                   >
-                    {r.approvalStatusLabel || r.status}
+                    {translateText(r.approvalStatusLabel || r.status)}
                   </span>
                 </td>
                 <td>
                   <button
                     className="kp-button"
-                    aria-label={`Xem biên bản ${r.code}`}
+                    aria-label={translateText(`Xem biên bản ${r.code}`)}
                     onClick={() => setDetail(String(r.id))}
                   >
                     <Eye size={14} />
-                    {reviewer ? "Xem / duyệt" : "Xem / bổ sung ảnh"}
+                    {translateText(reviewer ? "Xem / duyệt" : "Xem / bổ sung ảnh")}
                   </button>
                 </td>
               </tr>

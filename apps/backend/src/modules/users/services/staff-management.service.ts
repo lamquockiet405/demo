@@ -30,7 +30,7 @@ export class StaffManagementService {
     @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
     @InjectRepository(StaffProfile)
     private readonly staffRepo: Repository<StaffProfile>,
-  ) {}
+  ) { }
   private async resolveRoles(codes: string[]) {
     if (!codes.length)
       throw new BadRequestException("Chọn ít nhất một vai trò nhân viên.");
@@ -145,9 +145,16 @@ export class StaffManagementService {
         phone: dto.phone || null,
         passwordHash: await bcrypt.hash(initialPassword, 10),
         status: dto.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
-        roles,
       }),
     );
+    if (typeof this.userRepo.query === "function") {
+      for (const role of roles) {
+        await this.userRepo.query(
+          `INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [user.id, role.id],
+        );
+      }
+    }
     const staffType =
       dto.staffType ||
       (roles.some((r) => r.code === "TEACHER")
@@ -172,29 +179,50 @@ export class StaffManagementService {
   }
   async update(id: number, dto: UpdateStaffDto) {
     await this.findOne(id);
-    const user = await this.userRepo.findOne({
-      where: { id },
-      relations: ["roles"],
-    });
-    if (dto.fullName !== undefined) user.fullName = dto.fullName.trim();
-    if (dto.phone !== undefined) user.phone = dto.phone;
+    const updateFields: Record<string, any> = {};
+    if (dto.fullName !== undefined) updateFields.fullName = dto.fullName.trim();
+    if (dto.phone !== undefined) updateFields.phone = dto.phone;
     if (dto.status !== undefined) {
       if (!["ACTIVE", "INACTIVE"].includes(dto.status))
         throw new BadRequestException("Trạng thái không hợp lệ.");
-      user.status = dto.status;
+      updateFields.status = dto.status;
     }
-    if (dto.roleCode || dto.roleCodes)
-      user.roles = await this.resolveRoles(dto.roleCodes || [dto.roleCode]);
     if (dto.newPassword) {
       if (dto.newPassword.length < 8)
         throw new BadRequestException("Mật khẩu cần ít nhất 8 ký tự.");
-      user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+      updateFields.passwordHash = await bcrypt.hash(dto.newPassword, 10);
     }
-    await this.userRepo.save(user);
+    if (dto.roleCode || dto.roleCodes) {
+      const roles = await this.resolveRoles(dto.roleCodes || [dto.roleCode]);
+      if (typeof this.userRepo.query === "function") {
+        const roleIds = roles.map((r) => r.id);
+        await this.userRepo.query(
+          `DELETE FROM user_roles WHERE user_id = $1 AND NOT (role_id = ANY($2::bigint[]))`,
+          [id, roleIds],
+        );
+        for (const role of roles) {
+          await this.userRepo.query(
+            `INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            [id, role.id],
+          );
+        }
+      } else {
+        updateFields.roles = roles;
+      }
+    }
+    if (Object.keys(updateFields).length > 0) {
+      if (typeof this.userRepo.update === "function") {
+        await this.userRepo.update(id, updateFields);
+      } else {
+        await this.userRepo.save({ id, ...updateFields });
+      }
+    }
     const p = await this.staffRepo.findOne({ where: { userId: id } });
-    if (dto.staffType !== undefined) p.staffType = dto.staffType;
-    if (dto.position !== undefined) p.position = dto.position;
-    await this.staffRepo.save(p);
+    if (p) {
+      if (dto.staffType !== undefined) p.staffType = dto.staffType;
+      if (dto.position !== undefined) p.position = dto.position;
+      await this.staffRepo.save(p);
+    }
     return this.findOne(id);
   }
   async remove(id: number) {

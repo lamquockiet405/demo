@@ -39,11 +39,14 @@ export class UserProfileService {
       throw new NotFoundException("Không tìm thấy thông tin tài khoản");
     }
 
-    if (dto.fullName !== undefined) user.fullName = dto.fullName.trim();
-    if (dto.phone !== undefined) user.phone = dto.phone;
-    if (dto.avatar !== undefined) user.avatar = dto.avatar;
+    const updateData: Partial<User> = {};
+    if (dto.fullName !== undefined) updateData.fullName = dto.fullName.trim();
+    if (dto.phone !== undefined) updateData.phone = dto.phone;
+    if (dto.avatar !== undefined) updateData.avatar = dto.avatar;
 
-    await this.userRepo.save(user);
+    if (Object.keys(updateData).length > 0) {
+      await this.userRepo.update(userId, updateData);
+    }
     return this.getProfile(userId);
   }
 }

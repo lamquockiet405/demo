@@ -1,7 +1,10 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiClient } from "../../../core/api/axios";
 import { fetchKitchenCollection } from "../../kitchen/api/kitchen.api";
+import { rowsOf } from "../../kitchen/utils/kitchen-operations";
 import {
   SchoolPage,
   Feedback,
@@ -13,6 +16,7 @@ import {
 } from "../components/SchoolUI";
 
 export function ClassManagementPage() {
+  useLanguage();
   const [search, setSearch] = useState(""),
     [age, setAge] = useState(""),
     [status, setStatus] = useState("");
@@ -35,11 +39,23 @@ export function ClassManagementPage() {
     [detailId],
   );
   const teachers = useSchoolResource(
-    () =>
-      fetchKitchenCollection("/users/staff", {
-        roleCode: "TEACHER",
-        status: "ACTIVE",
-      }),
+    async () => {
+      try {
+        const staff = await fetchKitchenCollection("/users/staff", {
+          roleCode: "TEACHER",
+          status: "ACTIVE",
+        });
+        if (Array.isArray(staff) && staff.length > 0) return staff;
+      } catch (e) {
+        console.warn("fetchKitchenCollection /users/staff failed:", e);
+      }
+      const res = (
+        await apiClient.get("/users/staff", {
+          params: { roleCode: "TEACHER", status: "ACTIVE", limit: 200 },
+        })
+      ).data;
+      return rowsOf(res);
+    },
     [],
   );
   const action = useSchoolAction();
@@ -82,20 +98,16 @@ export function ClassManagementPage() {
   };
   return (
     <SchoolPage
-      title="Quản lý lớp học"
-      description="Xem, tìm kiếm, tạo và cập nhật lớp học, giáo viên chủ nhiệm và danh sách học sinh."
+      title={translateText("Quản lý lớp học")}
+      description={translateText("Xem, tìm kiếm, tạo và cập nhật lớp học, giáo viên chủ nhiệm và danh sách học sinh.")}
       actions={
         <>
           <button
             className="kp-button"
             onClick={resource.reload}
             disabled={resource.loading}
-          >
-            Làm mới
-          </button>
-          <button className="kp-button primary" onClick={() => openForm()}>
-            Tạo lớp học
-          </button>
+          >{translateText("Làm mới")}</button>
+          <button className="kp-button primary" onClick={() => openForm()}>{translateText("Tạo lớp học")}</button>
         </>
       }
     >
@@ -103,28 +115,28 @@ export function ClassManagementPage() {
       <div className="kp-filters">
         <input
           type="search"
-          aria-label="Tìm lớp học"
-          placeholder="Tìm tên lớp…"
+          aria-label={translateText("Tìm lớp học")}
+          placeholder={translateText("Tìm tên lớp…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          aria-label="Nhóm tuổi"
+          aria-label={translateText("Nhóm tuổi")}
           value={age}
           onChange={(e) => setAge(e.target.value)}
         >
-          <option value="">Tất cả nhóm tuổi</option>
-          <option value="NHA_TRE">Nhà trẻ</option>
-          <option value="MAU_GIAO">Mẫu giáo</option>
+          <option value="">{translateText("Tất cả nhóm tuổi")}</option>
+          <option value="NHA_TRE">{translateText("Nhà trẻ")}</option>
+          <option value="MAU_GIAO">{translateText("Mẫu giáo")}</option>
         </select>
         <select
-          aria-label="Trạng thái lớp"
+          aria-label={translateText("Trạng thái lớp")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="ACTIVE">Hoạt động</option>
-          <option value="INACTIVE">Ngừng hoạt động</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
+          <option value="ACTIVE">{translateText("Hoạt động")}</option>
+          <option value="INACTIVE">{translateText("Ngừng hoạt động")}</option>
         </select>
       </div>
       <State resource={resource} empty={!rows.length} />
@@ -134,16 +146,16 @@ export function ClassManagementPage() {
             <thead className="bg-slate-50">
               <tr>
                 {[
-                  "Lớp học",
-                  "Nhóm tuổi",
-                  "Năm học",
-                  "Giáo viên chủ nhiệm",
-                  "Sĩ số",
-                  "Trạng thái",
-                  "Thao tác",
+                  translateText("Lớp học"),
+                  translateText("Nhóm tuổi"),
+                  translateText("Năm học"),
+                  translateText("Giáo viên chủ nhiệm"),
+                  translateText("Sĩ số"),
+                  translateText("Trạng thái"),
+                  translateText("Thao tác"),
                 ].map((h) => (
                   <th key={h} className="p-3 whitespace-nowrap">
-                    {h}
+                    {translateText(h)}
                   </th>
                 ))}
               </tr>
@@ -153,34 +165,30 @@ export function ClassManagementPage() {
                 <tr className="border-t" key={row.id}>
                   <td className="p-3 font-semibold">{row.name}</td>
                   <td className="p-3">
-                    {row.ageGroup === "NHA_TRE"
+                    {translateText(row.ageGroup === "NHA_TRE"
                       ? "Nhà trẻ"
                       : row.ageGroup === "MAU_GIAO"
                         ? "Mẫu giáo"
-                        : row.ageGroup || "—"}
+                        : row.ageGroup || "—")}
                   </td>
-                  <td className="p-3">{row.schoolYear || "—"}</td>
+                  <td className="p-3">{translateText(row.schoolYear || "—")}</td>
                   <td className="p-3">
-                    {row.homeroomTeacher?.fullName || "Chưa phân công"}
+                    {row.homeroomTeacher?.fullName || translateText("Chưa phân công")}
                   </td>
-                  <td className="p-3">{row.studentCount ?? "—"}</td>
+                  <td className="p-3">{translateText(row.studentCount ?? "—")}</td>
                   <td className="p-3">
-                    {row.status === "ACTIVE" ? "Hoạt động" : "Ngừng hoạt động"}
+                    {translateText(row.status === "ACTIVE" ? "Hoạt động" : "Ngừng hoạt động")}
                   </td>
                   <td className="p-3">
                     <div className="flex gap-2">
                       <button
                         className="kp-button"
                         onClick={() => setDetailId(String(row.id))}
-                      >
-                        Chi tiết
-                      </button>
+                      >{translateText("Chi tiết")}</button>
                       <button
                         className="kp-button"
                         onClick={() => openForm(row)}
-                      >
-                        Sửa
-                      </button>
+                      >{translateText("Sửa")}</button>
                     </div>
                   </td>
                 </tr>
@@ -191,13 +199,13 @@ export function ClassManagementPage() {
       )}
       {editing && (
         <Modal
-          title={editing.id ? "Cập nhật lớp học" : "Tạo lớp học"}
+          title={translateText(editing.id ? "Cập nhật lớp học" : "Tạo lớp học")}
           onClose={() => setEditing(null)}
           busy={action.busy}
         >
           <form onSubmit={save} className="space-y-4">
             <Feedback error={action.error} />
-            <Field label="Tên lớp">
+            <Field label={translateText("Tên lớp")}>
               <input
                 className="kp-input"
                 required
@@ -207,7 +215,7 @@ export function ClassManagementPage() {
                 }
               />
             </Field>
-            <Field label="Nhóm tuổi">
+            <Field label={translateText("Nhóm tuổi")}>
               <select
                 className="kp-input"
                 required
@@ -216,12 +224,12 @@ export function ClassManagementPage() {
                   setEditing({ ...editing, ageGroup: e.target.value })
                 }
               >
-                <option value="">Chọn nhóm tuổi</option>
-                <option value="NHA_TRE">Nhà trẻ</option>
-                <option value="MAU_GIAO">Mẫu giáo</option>
+                <option value="">{translateText("Chọn nhóm tuổi")}</option>
+                <option value="NHA_TRE">{translateText("Nhà trẻ")}</option>
+                <option value="MAU_GIAO">{translateText("Mẫu giáo")}</option>
               </select>
             </Field>
-            <Field label="Năm học (YYYY-YYYY)">
+            <Field label={translateText("Năm học (YYYY-YYYY)")}>
               <input
                 className="kp-input"
                 required
@@ -232,7 +240,7 @@ export function ClassManagementPage() {
                 }
               />
             </Field>
-            <Field label="Giáo viên chủ nhiệm">
+            <Field label={translateText("Giáo viên chủ nhiệm")}>
               <select
                 className="kp-input"
                 value={editing.homeroomTeacherId}
@@ -240,16 +248,16 @@ export function ClassManagementPage() {
                   setEditing({ ...editing, homeroomTeacherId: e.target.value })
                 }
               >
-                <option value="">Chưa phân công</option>
-                {(teachers.data || []).map((t) => (
+                <option value="">{translateText("Chưa phân công")}</option>
+                {(teachers.data || []).map((t: any) => (
                   <option key={t.id} value={t.id}>
-                    {t.fullName}
+                    {t.fullName}{t.phone ? ` (${t.phone})` : ""}
                   </option>
                 ))}
               </select>
             </Field>
             <Feedback error={teachers.error} />
-            <Field label="Trạng thái">
+            <Field label={translateText("Trạng thái")}>
               <select
                 className="kp-input"
                 value={editing.status}
@@ -257,36 +265,32 @@ export function ClassManagementPage() {
                   setEditing({ ...editing, status: e.target.value })
                 }
               >
-                <option value="ACTIVE">Hoạt động</option>
-                <option value="INACTIVE">Ngừng hoạt động</option>
+                <option value="ACTIVE">{translateText("Hoạt động")}</option>
+                <option value="INACTIVE">{translateText("Ngừng hoạt động")}</option>
               </select>
             </Field>
             <button
               className="kp-button primary"
               disabled={action.busy || teachers.loading}
             >
-              {action.busy ? "Đang lưu…" : "Lưu lớp học"}
+              {translateText(action.busy ? "Đang lưu…" : "Lưu lớp học")}
             </button>
           </form>
         </Modal>
       )}
       {detailId && (
-        <Modal title="Chi tiết lớp học" onClose={() => setDetailId("")}>
+        <Modal title={translateText("Chi tiết lớp học")} onClose={() => setDetailId("")}>
           <State resource={detail} />
           {!detail.loading && !detail.error && detail.data && (
             <div className="space-y-4">
               <h2 className="font-bold">{detail.data.name}</h2>
-              <p>
-                Giáo viên:{" "}
-                {detail.data.homeroomTeacher?.fullName || "Chưa phân công"} · Sĩ
-                số: {detail.data.studentCount ?? "—"}
+              <p>{translateText("Giáo viên:")}{" "}
+                {detail.data.homeroomTeacher?.fullName || translateText("Chưa phân công")}{translateText(" · Sĩ số: ")}{translateText(detail.data.studentCount ?? "—")}
               </p>
               <Link
                 className="text-teal-700 underline"
                 to={`/students?classId=${detailId}`}
-              >
-                Quản lý học sinh của lớp
-              </Link>
+              >{translateText("Quản lý học sinh của lớp")}</Link>
               <ul className="divide-y">
                 {(detail.data.students || []).map((s: any) => (
                   <li className="py-3" key={s.id}>
@@ -295,7 +299,7 @@ export function ClassManagementPage() {
                 ))}
               </ul>
               {!detail.data.students?.length && (
-                <p>Chưa có học sinh trong lớp.</p>
+                <p>{translateText("Chưa có học sinh trong lớp.")}</p>
               )}
             </div>
           )}

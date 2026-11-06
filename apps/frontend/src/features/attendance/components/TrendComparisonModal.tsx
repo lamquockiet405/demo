@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { X, TrendingUp, BarChart2, CheckCircle2, Award, Sparkles } from 'lucide-react';
 import {
@@ -30,6 +32,7 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
   trends,
   summary,
 }) => {
+  useLanguage();
   if (!isOpen) return null;
 
   const weeklyTrendData = trends?.weeklyTrend && trends.weeklyTrend.length > 0
@@ -62,12 +65,9 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
               <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600">
                 <TrendingUp className="w-4 h-4" />
               </div>
-              <h3 className="text-lg font-black text-slate-900">
-                Biểu Đồ So Sánh Xu Hướng Dinh Dưỡng & Sức Ăn
-              </h3>
+              <h3 className="text-lg font-black text-slate-900">{translateText("Biểu Đồ So Sánh Xu Hướng Dinh Dưỡng & Sức Ăn")}</h3>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Phân tích xu hướng dựa trên dữ liệu thực tế • {classNameTitle}
+            <p className="text-xs text-slate-500 font-medium mt-1">{translateText("Phân tích xu hướng dựa trên dữ liệu thực tế • ")}{classNameTitle}
             </p>
           </div>
 
@@ -82,38 +82,38 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
         {/* Highlights Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80">
-            <span className="text-[11px] font-bold text-teal-700 uppercase">Tỷ lệ ăn hết suất</span>
+            <span className="text-[11px] font-bold text-teal-700 uppercase">{translateText("Tỷ lệ ăn hết suất")}</span>
             <p className="text-2xl font-black text-teal-900 mt-1">{currentEatenRate}%</p>
             <p className="text-[11px] text-teal-600 font-medium mt-0.5">
-              {eatenDiff !== null ? (
+              {translateText(eatenDiff !== null ? (
                 eatenDiff >= 0
                   ? `↗ Tăng ${eatenDiff}% so với ${prevWeek?.week}`
                   : `↘ Giảm ${Math.abs(eatenDiff)}% so với ${prevWeek?.week}`
               ) : (
                 'Theo dữ liệu thống kê kỳ hiện tại'
-              )}
+              ))}
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200/80">
-            <span className="text-[11px] font-bold text-sky-700 uppercase">Tỷ lệ chuyên cần bán trú</span>
+            <span className="text-[11px] font-bold text-sky-700 uppercase">{translateText("Tỷ lệ chuyên cần bán trú")}</span>
             <p className="text-2xl font-black text-sky-900 mt-1">{currentAttendanceRate}%</p>
             <p className="text-[11px] text-sky-600 font-medium mt-0.5">
-              {attDiff !== null ? (
+              {translateText(attDiff !== null ? (
                 attDiff >= 0
                   ? `↗ Tăng ${attDiff}% so với ${prevWeek?.week}`
                   : `↘ Giảm ${Math.abs(attDiff)}% so với ${prevWeek?.week}`
               ) : (
                 'Theo dữ liệu thống kê kỳ hiện tại'
-              )}
+              ))}
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80">
-            <span className="text-[11px] font-bold text-amber-700 uppercase">Mục tiêu dinh dưỡng</span>
-            <p className="text-2xl font-black text-amber-900 mt-1">Đạt {nutritionTargetRate}%</p>
+            <span className="text-[11px] font-bold text-amber-700 uppercase">{translateText("Mục tiêu dinh dưỡng")}</span>
+            <p className="text-2xl font-black text-amber-900 mt-1">{translateText("Đạt ")}{nutritionTargetRate}%</p>
             <p className="text-[11px] text-amber-600 font-medium mt-0.5">
-              {currentEatenRate >= 80 ? '✓ Đạt chuẩn mục tiêu dinh dưỡng' : 'Cần theo dõi thêm khẩu phần'}
+              {translateText(currentEatenRate >= 80 ? '✓ Đạt chuẩn mục tiêu dinh dưỡng' : 'Cần theo dõi thêm khẩu phần')}
             </p>
           </div>
         </div>
@@ -122,14 +122,12 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
         <div className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">
-                1. Xu hướng Tỷ lệ ăn hết suất & Điểm danh các tuần
-              </h4>
-              <p className="text-[11px] text-slate-500">So sánh chỉ số thực tế với mục tiêu chuẩn 80%</p>
+              <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">{translateText("1. Xu hướng Tỷ lệ ăn hết suất & Điểm danh các tuần")}</h4>
+              <p className="text-[11px] text-slate-500">{translateText("So sánh chỉ số thực tế với mục tiêu chuẩn 80%")}</p>
             </div>
             <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${currentEatenRate >= 80 ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'
               }`}>
-              {currentEatenRate >= 80 ? 'Xu hướng tích cực' : 'Cần cải thiện'}
+              {translateText(currentEatenRate >= 80 ? 'Xu hướng tích cực' : 'Cần cải thiện')}
             </span>
           </div>
 
@@ -137,17 +135,17 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={weeklyTrendData} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#64748b' }} />
+                <XAxis tickFormatter={value => translateText(String(value))} dataKey="week" tick={{ fontSize: 11, fill: '#64748b' }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#64748b' }} unit="%" />
                 <Tooltip
                   formatter={(val: number) => [`${val}%`]}
                   contentStyle={{ borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: '10px' }} />
+                <Legend formatter={value => translateText(String(value))} wrapperStyle={{ fontSize: 11, paddingTop: '10px' }} />
                 <Line
                   type="monotone"
                   dataKey="attendanceRate"
-                  name="Tỷ lệ đi học ăn (%)"
+                  name={translateText("Tỷ lệ đi học ăn (%)")}
                   stroke="#0284c7"
                   strokeWidth={2.5}
                   dot={{ r: 4 }}
@@ -155,7 +153,7 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
                 <Line
                   type="monotone"
                   dataKey="allEatenRate"
-                  name="Tỷ lệ ăn hết suất (%)"
+                  name={translateText("Tỷ lệ ăn hết suất (%)")}
                   stroke="#0d9488"
                   strokeWidth={2.5}
                   dot={{ r: 4 }}
@@ -163,7 +161,7 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
                 <Line
                   type="monotone"
                   dataKey="targetRate"
-                  name="Mục tiêu chuẩn (80%)"
+                  name={translateText("Mục tiêu chuẩn (80%)")}
                   stroke="#f59e0b"
                   strokeDasharray="5 5"
                   strokeWidth={2}
@@ -176,27 +174,25 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
         {/* Chart 2: Phân bố mức độ ăn trong tuần */}
         <div className="border border-slate-200 p-5 rounded-2xl bg-slate-50/50 space-y-3">
           <div>
-            <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">
-              2. Số lượng trẻ theo mức độ ăn thực tế
-            </h4>
-            <p className="text-[11px] text-slate-500">Thống kê chi tiết các bữa ăn theo từng ngày</p>
+            <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide">{translateText("2. Số lượng trẻ theo mức độ ăn thực tế")}</h4>
+            <p className="text-[11px] text-slate-500">{translateText("Thống kê chi tiết các bữa ăn theo từng ngày")}</p>
           </div>
 
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={consumptionBreakdownData} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#64748b' }} />
+                <XAxis tickFormatter={value => translateText(String(value))} dataKey="day" tick={{ fontSize: 11, fill: '#64748b' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
                 <Tooltip
-                  formatter={(val: number) => [`${val} bé`]}
+                  formatter={(val: number) => [translateText(`${val} bé`)]}
                   contentStyle={{ borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: '10px' }} />
-                <Bar dataKey="ateAll" name="Ăn hết suất" fill="#0d9488" stackId="a" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="ateHalf" name="Ăn nửa suất" fill="#f59e0b" stackId="a" />
-                <Bar dataKey="ateLittle" name="Ăn ít / Bỏ bữa" fill="#ef4444" stackId="a" />
-                <Bar dataKey="absent" name="Nghỉ phép" fill="#94a3b8" stackId="a" radius={[4, 4, 0, 0]} />
+                <Legend formatter={value => translateText(String(value))} wrapperStyle={{ fontSize: 11, paddingTop: '10px' }} />
+                <Bar dataKey="ateAll" name={translateText("Ăn hết suất")} fill="#0d9488" stackId="a" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="ateHalf" name={translateText("Ăn nửa suất")} fill="#f59e0b" stackId="a" />
+                <Bar dataKey="ateLittle" name={translateText("Ăn ít / Bỏ bữa")} fill="#ef4444" stackId="a" />
+                <Bar dataKey="absent" name={translateText("Nghỉ phép")} fill="#94a3b8" stackId="a" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -207,9 +203,7 @@ export const TrendComparisonModal: React.FC<TrendComparisonModalProps> = ({
           <button
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition"
-          >
-            Đóng
-          </button>
+          >{translateText("Đóng")}</button>
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from "react";
 import { X, Sparkles, Scale, AlertCircle, Check } from "lucide-react";
 import {
@@ -76,6 +78,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
   onClose,
   onSubmit,
 }) => {
+  useLanguage();
   const isEditMode = Boolean(rule);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -194,13 +197,11 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
             </div>
             <div>
               <h2 className="text-base font-extrabold text-slate-900">
-                {isEditMode
+                {translateText(isEditMode
                   ? "Chỉnh Sửa Tiêu Chuẩn Dinh Dưỡng"
-                  : "Thêm Tiêu Chuẩn Dinh Dưỡng Mới"}
+                  : "Thêm Tiêu Chuẩn Dinh Dưỡng Mới")}
               </h2>
-              <p className="text-xs text-slate-400 font-medium">
-                Cấu hình năng lượng Calo và tỷ lệ P-L-G chuẩn Thông tư 28
-              </p>
+              <p className="text-xs text-slate-400 font-medium">{translateText("Cấu hình năng lượng Calo và tỷ lệ P-L-G chuẩn Thông tư 28")}</p>
             </div>
           </div>
           <button
@@ -219,45 +220,42 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
           {errorMessage && (
             <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2.5 text-red-700">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
+              <span>{translateText(errorMessage)}</span>
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label className="block font-bold text-slate-700 mb-1.5">
-                Tên quy chuẩn dinh dưỡng <span className="text-red-500">*</span>
+              <label className="block font-bold text-slate-700 mb-1.5">{translateText("Tên quy chuẩn dinh dưỡng ")}<span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ví dụ: Quy chuẩn Mẫu giáo Cơ sở Sao Mai"
+                placeholder={translateText("Ví dụ: Quy chuẩn Mẫu giáo Cơ sở Sao Mai")}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="font-bold text-slate-700">
-                  Nhóm lứa tuổi học sinh <span className="text-red-500">*</span>
+                <label className="font-bold text-slate-700">{translateText("Nhóm lứa tuổi học sinh ")}<span className="text-red-500">*</span>
                 </label>
                 <span className="text-[11px] text-teal-600 font-semibold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Gợi ý chuẩn TT 28
-                </span>
+                  <Sparkles className="w-3 h-3" />{translateText(" Gợi ý chuẩn TT 28")}</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   {
                     id: "NHA_TRE",
-                    title: "Nhà trẻ (12 - 36 tháng)",
+                    title: translateText("Nhà trẻ (12 - 36 tháng)"),
                     desc: "600 - 651 Kcal (60-70%) • P:13-20% L:30-40% G:47-50%",
                     match: ["TODDLER_18_36M", "NHA_TRE"],
                   },
                   {
                     id: "MAU_GIAO",
-                    title: "Mẫu giáo (3 - 6 tuổi)",
+                    title: translateText("Mẫu giáo (3 - 6 tuổi)"),
                     desc: "615 - 726 Kcal (50-55%) • P:13-20% L:25-35% G:52-60%",
                     match: [
                       "KINDERGARTEN_3_4Y",
@@ -277,9 +275,9 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                         : "border-slate-200 text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    <p className="font-bold">{p.title}</p>
+                    <p className="font-bold">{translateText(p.title)}</p>
                     <p className="text-[10px] text-slate-500 font-normal">
-                      {p.desc}
+                      {translateText(p.desc)}
                     </p>
                   </button>
                 ))}
@@ -287,9 +285,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1.5">
-                Phạm vi bữa ăn áp dụng (Theo Thông tư 28/51)
-              </label>
+              <label className="block font-bold text-slate-700 mb-1.5">{translateText("Phạm vi bữa ăn áp dụng (Theo Thông tư 28/51)")}</label>
               <select
                 value={form.mealScope}
                 onChange={(e) =>
@@ -297,26 +293,17 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 }
                 className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-semibold text-slate-700 bg-white"
               >
-                <option value="DAYBOARDING">
-                  Bán trú tại trường (Nhà trẻ: 2 chính + 1 phụ [60-70%] • Mẫu
-                  giáo: 1 chính + 1 phụ [50-55%])
-                </option>
-                <option value="FULL_DAY">
-                  Cả ngày (100% nhu cầu khuyến nghị VN-RDA)
-                </option>
+                <option value="DAYBOARDING">{translateText("Bán trú tại trường (Nhà trẻ: 2 chính + 1 phụ [60-70%] • Mẫu giáo: 1 chính + 1 phụ [50-55%])")}</option>
+                <option value="FULL_DAY">{translateText("Cả ngày (100% nhu cầu khuyến nghị VN-RDA)")}</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-3 pt-3 border-t border-slate-100">
-            <h3 className="font-bold uppercase tracking-wider text-slate-400">
-              1. Nhu Cầu Năng Lượng (Kcal)
-            </h3>
+            <h3 className="font-bold uppercase tracking-wider text-slate-400">{translateText("1. Nhu Cầu Năng Lượng (Kcal)")}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">
-                  Calo tối thiểu (Kcal)
-                </label>
+                <label className="block text-slate-600 font-semibold mb-1">{translateText("Calo tối thiểu (Kcal)")}</label>
                 <input
                   type="number"
                   required
@@ -326,9 +313,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">
-                  Calo tối đa (Kcal)
-                </label>
+                <label className="block text-slate-600 font-semibold mb-1">{translateText("Calo tối đa (Kcal)")}</label>
                 <input
                   type="number"
                   required
@@ -342,24 +327,18 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
 
           <div className="space-y-3 pt-3 border-t border-slate-100">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold uppercase tracking-wider text-slate-400">
-                2. Cơ Cấu Tỷ Lệ Năng Lượng (P : L : G)
-              </h3>
-              <span className="text-[10px] text-slate-400 italic">
-                Tổng tỷ lệ = 100%
-              </span>
+              <h3 className="font-bold uppercase tracking-wider text-slate-400">{translateText("2. Cơ Cấu Tỷ Lệ Năng Lượng (P : L : G)")}</h3>
+              <span className="text-[10px] text-slate-400 italic">{translateText("Tổng tỷ lệ = 100%")}</span>
             </div>
             {MACRO_CONFIG.map((m) => (
               <div
                 key={m.label}
                 className={`p-3 border rounded-2xl space-y-2 ${m.box}`}
               >
-                <span className={`font-bold block ${m.title}`}>{m.label}</span>
+                <span className={`font-bold block ${m.title}`}>{translateText(m.label)}</span>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`text-[11px] ${m.sub}`}>
-                      Tối thiểu (%)
-                    </label>
+                    <label className={`text-[11px] ${m.sub}`}>{translateText("Tối thiểu (%)")}</label>
                     <input
                       type="number"
                       step="0.5"
@@ -369,7 +348,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                     />
                   </div>
                   <div>
-                    <label className={`text-[11px] ${m.sub}`}>Tối đa (%)</label>
+                    <label className={`text-[11px] ${m.sub}`}>{translateText("Tối đa (%)")}</label>
                     <input
                       type="number"
                       step="0.5"
@@ -384,18 +363,16 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
           </div>
 
           <div className="space-y-3 pt-3 border-t border-slate-100">
-            <h3 className="font-bold uppercase tracking-wider text-slate-400">
-              3. Vi Chất & Tỷ Lệ Canxi / Photpho
-            </h3>
+            <h3 className="font-bold uppercase tracking-wider text-slate-400">{translateText("3. Vi Chất & Tỷ Lệ Canxi / Photpho")}</h3>
             <div className="grid grid-cols-3 gap-2.5">
               {[
                 { label: "Canxi (mg)", key: "minCalciumMg" as const },
-                { label: "Sắt (mg)", key: "minIronMg" as const },
-                { label: "Kẽm (mg)", key: "minZincMg" as const },
+                { label: translateText("Sắt (mg)"), key: "minIronMg" as const },
+                { label: translateText("Kẽm (mg)"), key: "minZincMg" as const },
               ].map((mi) => (
                 <div key={mi.key}>
                   <label className="text-slate-600 font-semibold block mb-1">
-                    {mi.label}
+                    {translateText(mi.label)}
                   </label>
                   <input
                     type="number"
@@ -409,9 +386,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-3 mt-2">
               <div>
-                <label className="text-slate-600 font-semibold block mb-1">
-                  Tỷ lệ Ca:P Min
-                </label>
+                <label className="text-slate-600 font-semibold block mb-1">{translateText("Tỷ lệ Ca:P Min")}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -421,9 +396,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 />
               </div>
               <div>
-                <label className="text-slate-600 font-semibold block mb-1">
-                  Tỷ lệ Ca:P Max
-                </label>
+                <label className="text-slate-600 font-semibold block mb-1">{translateText("Tỷ lệ Ca:P Max")}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -442,9 +415,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
             onClick={onClose}
             disabled={isLoading}
             className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-          >
-            Hủy bỏ
-          </button>
+          >{translateText("Hủy bỏ")}</button>
           <button
             type="submit"
             form="nutrition-rule-drawer-form"
@@ -453,11 +424,11 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
           >
             <Check className="w-4 h-4" />
             <span>
-              {isLoading
+              {translateText(isLoading
                 ? "Đang lưu..."
                 : isEditMode
                   ? "Lưu Thay Đổi"
-                  : "Tạo Tiêu Chuẩn"}
+                  : "Tạo Tiêu Chuẩn")}
             </span>
           </button>
         </div>

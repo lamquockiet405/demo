@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
 import { Download, Save } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
@@ -13,6 +15,7 @@ import {
 } from "../components/KitchenUI";
 
 export function KitchenPortionsPage() {
+  useLanguage();
   const [date, setDate] = useState(getSchoolDate);
   const [meal, setMeal] = useState("LUNCH");
   const [search, setSearch] = useState("");
@@ -77,8 +80,8 @@ export function KitchenPortionsPage() {
   return (
     <>
       <PageTitle
-        title="Kế hoạch suất ăn hằng ngày"
-        description="Nhận số suất giáo viên chốt theo lớp, ngày và bữa ăn; ghi nhận số suất bếp chuẩn bị. Tự làm mới mỗi 30 giây."
+        title={translateText("Kế hoạch suất ăn hằng ngày")}
+        description={translateText("Nhận số suất giáo viên chốt theo lớp, ngày và bữa ăn; ghi nhận số suất bếp chuẩn bị. Tự làm mới mỗi 30 giây.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button
@@ -98,17 +101,13 @@ export function KitchenPortionsPage() {
             ])
           }
         >
-          <Download size={15} />
-          Xuất kế hoạch
-        </button>
+          <Download size={15} />{translateText("Xuất kế hoạch")}</button>
       </PageTitle>
       <Notice error={action.error} message={action.message} />
       <div className="kp-filters">
-        <label>
-          Ngày phục vụ
-          <input
+        <label>{translateText("Ngày phục vụ")}<input
             type="date"
-            aria-label="Ngày kế hoạch"
+            aria-label={translateText("Ngày kế hoạch")}
             disabled={action.busy}
             value={date}
             onChange={(e) => {
@@ -117,19 +116,19 @@ export function KitchenPortionsPage() {
           />
         </label>
         <select
-          aria-label="Bữa lập kế hoạch"
+          aria-label={translateText("Bữa lập kế hoạch")}
           disabled={action.busy}
           value={meal}
           onChange={(e) => setMeal(e.target.value)}
         >
-          <option value="BREAKFAST">Buổi sáng (09:00)</option>
-          <option value="LUNCH">Bữa trưa chính</option>
-          <option value="AFTERNOON_SNACK">Bữa phụ xế</option>
+          <option value="BREAKFAST">{translateText("Buổi sáng (09:00)")}</option>
+          <option value="LUNCH">{translateText("Bữa trưa chính")}</option>
+          <option value="AFTERNOON_SNACK">{translateText("Bữa phụ xế")}</option>
         </select>
         <input
           type="search"
-          aria-label="Tìm lớp lập kế hoạch"
-          placeholder="Tìm tên lớp…"
+          aria-label={translateText("Tìm lớp lập kế hoạch")}
+          placeholder={translateText("Tìm tên lớp…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -140,13 +139,13 @@ export function KitchenPortionsPage() {
           <table className="kp-table">
             <thead>
               <tr>
-                <th>Lớp</th>
-                <th>Độ tuổi</th>
-                <th>Số suất yêu cầu</th>
-                <th>Giáo viên chốt điểm danh</th>
-                <th>Đã đăng ký bếp chuẩn bị</th>
-                <th>Số suất chuẩn bị</th>
-                <th>Lưu</th>
+                <th>{translateText("Lớp")}</th>
+                <th>{translateText("Độ tuổi")}</th>
+                <th>{translateText("Số suất yêu cầu")}</th>
+                <th>{translateText("Giáo viên chốt điểm danh")}</th>
+                <th>{translateText("Đã đăng ký bếp chuẩn bị")}</th>
+                <th>{translateText("Số suất chuẩn bị")}</th>
+                <th>{translateText("Lưu")}</th>
               </tr>
             </thead>
             <tbody>
@@ -155,16 +154,16 @@ export function KitchenPortionsPage() {
                   <td>
                     <strong>{r.className}</strong>
                   </td>
-                  <td>{r.ageGroup || "—"}</td>
-                  <td>{formatNumber(r[field]?.planned, 0)}</td>
+                  <td>{translateText(r.ageGroup || "—")}</td>
+                  <td>{translateText(formatNumber(r[field]?.planned, 0))}</td>
                   <td>
                     {r[field]?.submittedAt ? <>
-                      <strong className="text-emerald-700">Đã nhận · {formatDateTime(r[field].submittedAt)}</strong>
-                      <p className="text-xs mt-1">Có mặt: {r[field].present} · Vắng: {r[field].absent}</p>
+                      <strong className="text-emerald-700">{translateText("Đã nhận · ")}{translateText(formatDateTime(r[field].submittedAt))}</strong>
+                      <p className="text-xs mt-1">{translateText("Có mặt: ")}{translateText(r[field].present)}{translateText(" · Vắng: ")}{translateText(r[field].absent)}</p>
                       {(r[field].notes || []).map((item: any, i: number) => <p className="text-xs mt-1" key={i}>{item.fullName}: {item.note}</p>)}
-                    </> : <span className="text-amber-700">Chưa nhận điểm danh cho ngày/bữa này</span>}
+                    </> : <span className="text-amber-700">{translateText("Chưa nhận điểm danh cho ngày/bữa này")}</span>}
                   </td>
-                  <td>{formatNumber(r[field]?.actual, 0)}</td>
+                  <td>{translateText(formatNumber(r[field]?.actual, 0))}</td>
                   <td>
                     <input
                       className="kp-input"
@@ -172,7 +171,7 @@ export function KitchenPortionsPage() {
                       min={0}
                       step={1}
                       disabled={action.busy || resource.loading || r[field]?.planned == null}
-                      aria-label={`Số suất ${r.className}`}
+                      aria-label={translateText(`Số suất ${r.className}`)}
                       value={draft[r.classId] ?? r[field]?.actual ?? ""}
                       onChange={(e) =>
                         setDraft({ ...draft, [r.classId]: e.target.value })
@@ -185,9 +184,7 @@ export function KitchenPortionsPage() {
                       disabled={action.busy || resource.loading || r[field]?.planned == null}
                       onClick={() => void save(r)}
                     >
-                      <Save size={14} />
-                      Đăng ký
-                    </button>
+                      <Save size={14} />{translateText("Đăng ký")}</button>
                   </td>
                 </tr>
               ))}

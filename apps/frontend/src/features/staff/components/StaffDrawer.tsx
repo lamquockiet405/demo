@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -114,6 +116,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
   onSwitchToEdit,
   onSubmit,
 }) => {
+  useLanguage();
   const activeMode = mode || (staff ? "edit" : "create");
   const isViewMode = activeMode === "view";
   const isEditMode = activeMode === "edit";
@@ -232,18 +235,18 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
             </div>
             <div>
               <h2 className="text-base font-extrabold text-slate-900">
-                {isViewMode
+                {translateText(isViewMode
                   ? "Chi Tiết Hồ Sơ Nhân Sự"
                   : isEditMode
                     ? "Chỉnh Sửa Thông Tin Nhân Sự"
-                    : "Thêm Nhân Sự Mới"}
+                    : "Thêm Nhân Sự Mới")}
               </h2>
               <p className="text-xs text-slate-400 font-medium">
-                {isViewMode
+                {translateText(isViewMode
                   ? "Thông tin định danh, quyền hạn và lịch sử hoạt động (UC08)"
                   : isEditMode
                     ? "Cập nhật vai trò chuyên môn và quyền hạn nhân viên (UC10)"
-                    : "Tạo tài khoản và phân quyền chức năng trong trường (UC09)"}
+                    : "Tạo tài khoản và phân quyền chức năng trong trường (UC09)")}
               </p>
             </div>
           </div>
@@ -264,43 +267,36 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
           {errorMessage && (
             <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2.5 text-xs text-red-700">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
+              <span>{translateText(errorMessage)}</span>
             </div>
           )}
 
           {isViewMode && staff && (
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 grid grid-cols-2 gap-3 text-xs">
               <div>
-                <span className="text-slate-400 block text-[11px]">
-                  Ngày tham gia
-                </span>
+                <span className="text-slate-400 block text-[11px]">{translateText("Ngày tham gia")}</span>
                 <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
                   <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                  {new Date(staff.createdAt).toLocaleDateString("vi-VN")}
+                  {translateText(new Date(staff.createdAt).toLocaleDateString(getLocale()))}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px]">
-                  Đăng nhập gần nhất
-                </span>
+                <span className="text-slate-400 block text-[11px]">{translateText("Đăng nhập gần nhất")}</span>
                 <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
                   <Clock className="w-3.5 h-3.5 text-teal-600" />
-                  {staff.lastLoginAt
-                    ? new Date(staff.lastLoginAt).toLocaleString("vi-VN")
-                    : "Chưa đăng nhập"}
+                  {translateText(staff.lastLoginAt
+                    ? new Date(staff.lastLoginAt).toLocaleString(getLocale())
+                    : "Chưa đăng nhập")}
                 </span>
               </div>
             </div>
           )}
 
           <div className="space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Thông Tin Định Danh
-            </h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{translateText("Thông Tin Định Danh")}</h3>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Họ và tên nhân sự{" "}
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">{translateText("Họ và tên nhân sự")}{" "}
                 {!isViewMode && <span className="text-red-500">*</span>}
               </label>
               <input
@@ -309,14 +305,13 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                 disabled={isViewMode}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Ví dụ: Cô Nguyễn Thị Hoa"
+                placeholder={translateText("Ví dụ: Cô Nguyễn Thị Hoa")}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Email công việc{" "}
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">{translateText("Email công việc")}{" "}
                 {!isViewMode && <span className="text-red-500">*</span>}
               </label>
               <div className="relative">
@@ -327,16 +322,14 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                   disabled={isEditMode || isViewMode}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="giaovien@saomai.edu.vn"
+                  placeholder={translateText("giaovien@saomai.edu.vn")}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm disabled:bg-slate-100 disabled:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Số điện thoại liên lạc
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">{translateText("Số điện thoại liên lạc")}</label>
               <div className="relative">
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -344,7 +337,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                   disabled={isViewMode}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Ví dụ: 0903111222"
+                  placeholder={translateText("Ví dụ: 0903111222")}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
@@ -354,12 +347,8 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
           {/* Roles */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Vai Trò & Chức Năng
-              </h3>
-              <span className="text-[11px] text-teal-600 font-semibold">
-                Đã chọn: {selectedRoleCodes.length} vai trò
-              </span>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{translateText("Vai Trò & Chức Năng")}</h3>
+              <span className="text-[11px] text-teal-600 font-semibold">{translateText("Đã chọn: ")}{selectedRoleCodes.length}{translateText(" vai trò")}</span>
             </div>
 
             <div className="space-y-2">
@@ -368,7 +357,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                   icon: UserCheck,
                   label: role.name || role.code,
                   color: "border-slate-400 bg-slate-50 text-slate-800",
-                  desc: role.description || "Nhân sự nhà trường",
+                  desc: role.description || translateText("Nhân sự nhà trường"),
                 };
                 const Icon = cfg.icon;
                 const isSelected = selectedRoleCodes.includes(role.code);
@@ -412,7 +401,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                         </div>
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
-                        {cfg.desc}
+                        {translateText(cfg.desc)}
                       </p>
                     </div>
                   </div>
@@ -423,9 +412,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
 
           {/* Status & Password */}
           <div className="space-y-4 pt-2 border-t border-slate-100">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Trạng Thái & Bảo Mật
-            </h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{translateText("Trạng Thái & Bảo Mật")}</h3>
 
             <div className="grid grid-cols-2 gap-3">
               {(["ACTIVE", "INACTIVE"] as const).map((st) => {
@@ -447,7 +434,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                     <span
                       className={`w-2 h-2 rounded-full ${st === "ACTIVE" ? "bg-emerald-500" : "bg-amber-500"}`}
                     />
-                    {st === "ACTIVE" ? "Đang hoạt động" : "Tạm khóa tài khoản"}
+                    {translateText(st === "ACTIVE" ? "Đang hoạt động" : "Tạm khóa tài khoản")}
                   </button>
                 );
               })}
@@ -457,9 +444,9 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-bold text-slate-700">
-                    {isEditMode
+                    {translateText(isEditMode
                       ? "Đặt lại mật khẩu mới (Tùy chọn)"
-                      : "Mật khẩu khởi tạo"}
+                      : "Mật khẩu khởi tạo")}
                   </label>
                   <button
                     type="button"
@@ -469,8 +456,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                     }}
                     className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1"
                   >
-                    <RefreshCw className="w-3 h-3" /> Sinh ngẫu nhiên
-                  </button>
+                    <RefreshCw className="w-3 h-3" />{translateText(" Sinh ngẫu nhiên")}</button>
                 </div>
 
                 <div className="relative">
@@ -480,9 +466,9 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={
-                      isEditMode
+                      translateText(isEditMode
                         ? "Để trống nếu không đổi mật khẩu"
-                        : "Nhập mật khẩu..."
+                        : "Nhập mật khẩu...")
                     }
                     className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
@@ -499,12 +485,12 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                       {copiedPass ? (
                         <>
                           <Check className="w-3 h-3 text-emerald-600" />
-                          <span className="text-emerald-700">Đã chép</span>
+                          <span className="text-emerald-700">{translateText("Đã chép")}</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-3 h-3 text-slate-500" />
-                          <span>Sao chép</span>
+                          <span>{translateText("Sao chép")}</span>
                         </>
                       )}
                     </button>
@@ -522,9 +508,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
             onClick={onClose}
             disabled={isLoading}
             className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-          >
-            Đóng
-          </button>
+          >{translateText("Đóng")}</button>
           {isViewMode ? (
             onSwitchToEdit && (
               <button
@@ -533,7 +517,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                 className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 transition flex items-center gap-2"
               >
                 <Edit3 className="w-4 h-4" />
-                <span>Chỉnh sửa nhân sự</span>
+                <span>{translateText("Chỉnh sửa nhân sự")}</span>
               </button>
             )
           ) : (
@@ -548,7 +532,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
               ) : (
                 <Check className="w-4 h-4" />
               )}
-              <span>{isEditMode ? "Lưu Thay Đổi" : "Tạo Tài Khoản"}</span>
+              <span>{translateText(isEditMode ? "Lưu Thay Đổi" : "Tạo Tài Khoản")}</span>
             </button>
           )}
         </div>

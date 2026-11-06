@@ -1,3 +1,4 @@
+import { getLocale, t } from '../../../core/i18n/language';
 export function calculateGrossWeight(
   netGramsPerPortion: number,
   portions: number,
@@ -57,7 +58,7 @@ export function makeCsv(rows: unknown[][]): string {
 
 export function downloadCsv(filename: string, rows: unknown[][]) {
   const url = URL.createObjectURL(
-    new Blob([makeCsv(rows)], { type: "text/csv;charset=utf-8" }),
+    new Blob([makeCsv(rows.map((row, index) => index === 0 ? row.map(t) : row))], { type: "text/csv;charset=utf-8" }),
   );
   const link = document.createElement("a");
   link.href = url;
@@ -66,16 +67,23 @@ export function downloadCsv(filename: string, rows: unknown[][]) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export const rowsOf = (value: any): any[] =>
-  Array.isArray(value) ? value : Array.isArray(value?.items) ? value.items : [];
+export const rowsOf = (value: any): any[] => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.data)) return value.data;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.rows)) return value.rows;
+  if (Array.isArray(value?.data?.data)) return value.data.data;
+  if (Array.isArray(value?.data?.items)) return value.data.items;
+  return [];
+};
 export const formatNumber = (value: unknown, digits = 1) =>
   value == null || value === "" || !Number.isFinite(Number(value))
     ? "—"
-    : Number(value).toLocaleString("vi-VN", { maximumFractionDigits: digits });
+    : Number(value).toLocaleString(getLocale(), { maximumFractionDigits: digits });
 export const formatDateTime = (value: string | null | undefined) =>
   !value || !Number.isFinite(Date.parse(value))
     ? "—"
-    : new Date(value).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
+    : new Date(value).toLocaleString(getLocale(), { timeZone: "Asia/Ho_Chi_Minh" });
 
 // Bound the three proof images together to fit the existing JSON upload API.
 export async function prepareProofImage(file: File): Promise<string> {

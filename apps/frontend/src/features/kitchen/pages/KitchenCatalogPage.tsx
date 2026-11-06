@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useMemo, useState } from "react";
 import { Eye } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
@@ -36,6 +38,7 @@ function CatalogDetail({
   id: string;
   onClose: () => void;
 }) {
+  useLanguage();
   const food = kind === "foods";
   const resource = useKitchenResource(
     async () =>
@@ -46,7 +49,7 @@ function CatalogDetail({
   const nutrition = item?.nutrition;
   return (
     <Modal
-      title={food ? "Chi tiết nguyên liệu" : "Chi tiết món ăn"}
+      title={translateText(food ? "Chi tiết nguyên liệu" : "Chi tiết món ăn")}
       onClose={onClose}
     >
       <ResourceState resource={resource} />
@@ -57,36 +60,36 @@ function CatalogDetail({
           </h3>
           <dl className="kp-detail-list">
             <div>
-              <dt>Mã</dt>
-              <dd>{item.code || `#${item.id}`}</dd>
+              <dt>{translateText("Mã")}</dt>
+              <dd>{translateText(item.code || `#${item.id}`)}</dd>
             </div>
             <div>
-              <dt>Nhóm</dt>
-              <dd>{groupName(item)}</dd>
+              <dt>{translateText("Nhóm")}</dt>
+              <dd>{translateText(groupName(item))}</dd>
             </div>
             <div>
-              <dt>{food ? "Đơn vị" : "Định lượng / suất"}</dt>
+              <dt>{translateText(food ? "Đơn vị" : "Định lượng / suất")}</dt>
               <dd>
-                {food
+                {translateText(food
                   ? item.unit || item.defaultUnit || "—"
-                  : `${formatNumber(item.standardServingSizeG)} g`}
+                  : `${formatNumber(item.standardServingSizeG)} g`)}
               </dd>
             </div>
             <div>
-              <dt>{food ? "Tỷ lệ hao hụt" : "Trạng thái công thức"}</dt>
+              <dt>{translateText(food ? "Tỷ lệ hao hụt" : "Trạng thái công thức")}</dt>
               <dd>
-                {food
+                {translateText(food
                   ? `${formatNumber(item.refuseRatePercent ?? item.refuse_rate_percent)} %`
                   : item.nutritionStatus === "VERIFIED"
                     ? "Đã xác minh"
                     : item.nutritionStatus === "REFERENCE"
                       ? "Tham khảo"
-                      : "Chưa xác minh"}
+                      : "Chưa xác minh")}
               </dd>
             </div>
           </dl>
           <div className="kp-panel">
-            <h2>Dinh dưỡng {food ? "trên 100g" : "theo suất"}</h2>
+            <h2>{translateText("Dinh dưỡng ")}{translateText(food ? "trên 100g" : "theo suất")}</h2>
             <dl className="kp-detail-list">
               {[
                 [
@@ -145,22 +148,22 @@ function CatalogDetail({
                 ],
               ].map(([label, unit, value]) => (
                 <div key={String(label)}>
-                  <dt>{label}</dt>
+                  <dt>{translateText(label)}</dt>
                   <dd>
-                    {formatNumber(value)} {unit}
+                    {translateText(formatNumber(value))} {translateText(unit)}
                   </dd>
                 </div>
               ))}
             </dl>
             <p>
-              {allergyNames(item).length
+              {translateText(allergyNames(item).length
                 ? `Dị nguyên: ${allergyNames(item).join(", ")}`
-                : "Chưa có dị nguyên được ghi nhận trong dữ liệu."}
+                : "Chưa có dị nguyên được ghi nhận trong dữ liệu.")}
             </p>
           </div>
           {!food && (
             <section className="kp-panel">
-              <h2>Công thức / định lượng từng suất</h2>
+              <h2>{translateText("Công thức / định lượng từng suất")}</h2>
               {rowsOf(
                 item.recipeItems?.length ? item.recipeItems : item.recipes,
               ).length ? (
@@ -168,10 +171,10 @@ function CatalogDetail({
                   <table className="kp-table">
                     <thead>
                       <tr>
-                        <th>Nguyên liệu</th>
-                        <th>Khối lượng tinh</th>
-                        <th>Khối lượng thô</th>
-                        <th>Ghi chú</th>
+                        <th>{translateText("Nguyên liệu")}</th>
+                        <th>{translateText("Khối lượng tinh")}</th>
+                        <th>{translateText("Khối lượng thô")}</th>
+                        <th>{translateText("Ghi chú")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -182,20 +185,16 @@ function CatalogDetail({
                       ).map((r, i) => (
                         <tr key={r.id || i}>
                           <td>
-                            {r.ingredientName || r.food?.name || "Chưa có tên"}
+                            {r.ingredientName || r.food?.name || translateText("Chưa có tên")}
                           </td>
                           <td>
-                            {formatNumber(
+                            {translateText(formatNumber(
                               r.netWeightPerPortionG ?? r.netWeightG,
-                            )}{" "}
-                            g
-                          </td>
+                            ))}{" "}{translateText("g")}</td>
                           <td>
-                            {formatNumber(
+                            {translateText(formatNumber(
                               r.grossWeightPerPortionG ?? r.grossWeightG,
-                            )}{" "}
-                            g
-                          </td>
+                            ))}{" "}{translateText("g")}</td>
                           <td>{r.note || "—"}</td>
                         </tr>
                       ))}
@@ -203,7 +202,7 @@ function CatalogDetail({
                   </table>
                 </div>
               ) : (
-                <p>Chưa có công thức định lượng.</p>
+                <p>{translateText("Chưa có công thức định lượng.")}</p>
               )}
             </section>
           )}
@@ -211,15 +210,15 @@ function CatalogDetail({
             item.cookingInstructions ||
             item.presentationNotes) && (
             <section className="kp-panel">
-              <h2>Mô tả / hướng dẫn chế biến</h2>
+              <h2>{translateText("Mô tả / hướng dẫn chế biến")}</h2>
               <p className="kp-note-text">
-                {[
+                {translateText([
                   item.description,
                   item.cookingInstructions,
                   item.presentationNotes,
                 ]
                   .filter(Boolean)
-                  .join("\n")}
+                  .join("\n"))}
               </p>
             </section>
           )}
@@ -230,6 +229,7 @@ function CatalogDetail({
 }
 
 export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
+  useLanguage();
   const food = kind === "foods";
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -270,11 +270,11 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
   return (
     <>
       <PageTitle
-        title={food ? "Nguyên liệu thực phẩm" : "Danh sách món ăn"}
+        title={translateText(food ? "Nguyên liệu thực phẩm" : "Danh sách món ăn")}
         description={
-          food
+          translateText(food
             ? "Tra cứu thành phần dinh dưỡng, nhóm thực phẩm, dị nguyên và tỷ lệ hao hụt."
-            : "Xem thành phần công thức, định lượng và hướng dẫn chế biến; lọc theo nhóm, dị nguyên và trạng thái."
+            : "Xem thành phần công thức, định lượng và hướng dẫn chế biến; lọc theo nhóm, dị nguyên và trạng thái.")
         }
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
@@ -282,40 +282,40 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
       <div className="kp-filters">
         <input
           type="search"
-          aria-label={food ? "Tìm nguyên liệu" : "Tìm món ăn"}
-          placeholder={food ? "Tìm tên, mã nguyên liệu…" : "Tìm tên món ăn…"}
+          aria-label={translateText(food ? "Tìm nguyên liệu" : "Tìm món ăn")}
+          placeholder={translateText(food ? "Tìm tên, mã nguyên liệu…" : "Tìm tên món ăn…")}
           value={search}
           onChange={(e) => filter(setSearch, e.target.value)}
         />
         <select
-          aria-label="Nhóm thực phẩm hoặc món ăn"
+          aria-label={translateText("Nhóm thực phẩm hoặc món ăn")}
           value={category}
           onChange={(e) => filter(setCategory, e.target.value)}
         >
-          <option value="">Tất cả nhóm</option>
+          <option value="">{translateText("Tất cả nhóm")}</option>
           {categories.map((name) => (
             <option key={name} value={name}>
-              {name}
+              {translateText(name)}
             </option>
           ))}
         </select>
         <select
-          aria-label="Lọc dị nguyên"
+          aria-label={translateText("Lọc dị nguyên")}
           value={allergen}
           onChange={(e) => filter(setAllergen, e.target.value)}
         >
-          <option value="">Tất cả dị nguyên</option>
-          <option value="WARNING">Có dị nguyên ghi nhận</option>
-          <option value="SAFE">Chưa ghi nhận dị nguyên</option>
+          <option value="">{translateText("Tất cả dị nguyên")}</option>
+          <option value="WARNING">{translateText("Có dị nguyên ghi nhận")}</option>
+          <option value="SAFE">{translateText("Chưa ghi nhận dị nguyên")}</option>
         </select>
         <select
-          aria-label="Trạng thái danh mục"
+          aria-label={translateText("Trạng thái danh mục")}
           value={status}
           onChange={(e) => filter(setStatus, e.target.value)}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="ACTIVE">Đang sử dụng</option>
-          <option value="INACTIVE">Ngừng sử dụng</option>
+          <option value="">{translateText("Tất cả trạng thái")}</option>
+          <option value="ACTIVE">{translateText("Đang sử dụng")}</option>
+          <option value="INACTIVE">{translateText("Ngừng sử dụng")}</option>
         </select>
         <button
           className="kp-button"
@@ -326,9 +326,7 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
             setStatus("");
             setPage(1);
           }}
-        >
-          Xóa bộ lọc
-        </button>
+        >{translateText("Xóa bộ lọc")}</button>
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       {resource.data && (
@@ -337,12 +335,12 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
             <table className="kp-table">
               <thead>
                 <tr>
-                  <th>{food ? "Nguyên liệu" : "Món ăn"}</th>
-                  <th>Nhóm</th>
-                  <th>{food ? "Năng lượng / 100g" : "Năng lượng / suất"}</th>
-                  <th>{food ? "Hao hụt" : "Định lượng"}</th>
-                  <th>Dị nguyên</th>
-                  <th>Thao tác</th>
+                  <th>{translateText(food ? "Nguyên liệu" : "Món ăn")}</th>
+                  <th>{translateText("Nhóm")}</th>
+                  <th>{translateText(food ? "Năng lượng / 100g" : "Năng lượng / suất")}</th>
+                  <th>{translateText(food ? "Hao hụt" : "Định lượng")}</th>
+                  <th>{translateText("Dị nguyên")}</th>
+                  <th>{translateText("Thao tác")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -350,45 +348,41 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
                   <tr key={item.id}>
                     <td>
                       <strong>{item.name}</strong>
-                      <small>{item.code || `#${item.id}`}</small>
+                      <small>{translateText(item.code || `#${item.id}`)}</small>
                     </td>
-                    <td>{groupName(item)}</td>
+                    <td>{translateText(groupName(item))}</td>
                     <td>
-                      {formatNumber(
+                      {translateText(formatNumber(
                         !food && item.nutritionAvailable === false
                           ? null
                           : (item.energyKcal ??
                               item.energyKcal100g ??
                               item.nutrition?.energyKcal ??
                               item.totalCalories),
-                      )}{" "}
-                      kcal
-                    </td>
+                      ))}{" "}{translateText("kcal")}</td>
                     <td>
-                      {food
+                      {translateText(food
                         ? `${formatNumber(item.refuseRatePercent ?? item.refuse_rate_percent)} %`
-                        : `${formatNumber(item.standardServingSizeG)} g`}
+                        : `${formatNumber(item.standardServingSizeG)} g`)}
                     </td>
                     <td>
                       {allergyNames(item).length ? (
                         allergyNames(item).map((a, i) => (
                           <span className="kp-tag red" key={i}>
-                            {a}
+                            {translateText(a)}
                           </span>
                         ))
                       ) : (
-                        <span className="kp-tag gray">Chưa ghi nhận</span>
+                        <span className="kp-tag gray">{translateText("Chưa ghi nhận")}</span>
                       )}
                     </td>
                     <td>
                       <button
                         className="kp-button"
-                        aria-label={`Chi tiết ${item.name}`}
+                        aria-label={translateText(`Chi tiết ${item.name}`)}
                         onClick={() => setDetail(String(item.id))}
                       >
-                        <Eye size={14} />
-                        Chi tiết
-                      </button>
+                        <Eye size={14} />{translateText("Chi tiết")}</button>
                     </td>
                   </tr>
                 ))}

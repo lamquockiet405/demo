@@ -1,7 +1,9 @@
+import { t as translateText } from '../i18n/language';
+import { useLanguage } from '../i18n/useLanguage';
 import React, { useState, useRef, useEffect, useLayoutEffect, useId } from "react";
 import { createPortal } from 'react-dom';
 import { useNavigate } from "react-router-dom";
-import { User, ChevronDown, Settings, LogOut } from "lucide-react";
+import { User, ChevronDown, Settings, LogOut, Languages } from "lucide-react";
 import { useAuthStore } from "../stores/auth.store";
 import { UserProfileModal } from "../../features/auth/components/UserProfileModal";
 
@@ -16,6 +18,7 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
   customSubtitle,
   className = "",
 }) => {
+  const { language, setLanguage } = useLanguage();
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -155,7 +158,7 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
         onKeyDown={event => { if (event.key === 'ArrowDown') { event.preventDefault(); setIsOpen(true); } }}
         className="flex items-center gap-2.5 p-1 rounded-2xl hover:bg-slate-100/80 transition cursor-pointer"
         aria-expanded={isOpen}
-        aria-label={`Menu tài khoản ${user?.fullName || ''}`}
+        aria-label={translateText(`Menu tài khoản ${user?.fullName || ''}`)}
         aria-haspopup="menu"
         aria-controls={isOpen ? menuId : undefined}
       >
@@ -163,7 +166,7 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
           {user?.avatarUrl ? (
             <img
               src={user.avatarUrl}
-              alt={user?.fullName || "Avatar"}
+              alt={user?.fullName || translateText("Avatar")}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -172,10 +175,10 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
         </div>
         <div className="text-left hidden sm:block">
           <p className="text-xs font-bold text-slate-900 leading-tight">
-            {user?.fullName || "Tài khoản hệ thống"}
+            {user?.fullName || translateText("Tài khoản hệ thống")}
           </p>
           <p className="text-[11px] text-slate-500 font-medium">
-            {subtitle}
+            {translateText(subtitle)}
           </p>
         </div>
         <ChevronDown
@@ -187,7 +190,7 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
 
       {/* Dropdown Menu Card */}
       {isOpen && createPortal(
-        <div ref={menuRef} id={menuId} role="menu" aria-label="Menu tài khoản"
+        <div ref={menuRef} id={menuId} role="menu" aria-label={translateText("Menu tài khoản")}
           className="bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5"
           style={{ position: 'fixed', zIndex: 1000, width: 256, maxWidth: 'calc(100vw - 16px)', overflowY: 'auto',
             left: position?.left ?? 0, top: position?.top ?? 0, maxHeight: position?.maxHeight, visibility: position ? 'visible' : 'hidden' }}
@@ -206,14 +209,14 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <p className="text-xs font-bold text-slate-900 truncate">
-                {user?.fullName || "Tài khoản hệ thống"}
+                {user?.fullName || translateText("Tài khoản hệ thống")}
               </p>
             </div>
             <p className="text-[11px] text-slate-500 truncate mt-0.5">
               {user?.email || ""}
             </p>
             <span className="inline-block mt-1 text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-              {roleBadge}
+              {translateText(roleBadge)}
             </span>
           </div>
 
@@ -227,9 +230,39 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
             }}
             className="w-full text-left px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition cursor-pointer"
           >
-            <Settings className="w-4 h-4 text-slate-400" />
-            Thông tin cá nhân & đổi mật khẩu
-          </button>
+            <Settings className="w-4 h-4 text-slate-400" />{translateText("Thông tin cá nhân & đổi mật khẩu")}</button>
+
+          {/* Action: Ngôn ngữ / Language */}
+          <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-700">
+            <span className="flex items-center gap-2 font-medium">
+              <Languages className="w-4 h-4 text-teal-600" />
+              {translateText("Ngôn ngữ")}
+            </span>
+            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[11px] font-semibold">
+              <button
+                type="button"
+                onClick={() => setLanguage('vi')}
+                className={`px-2 py-0.5 rounded-md transition ${
+                  language === 'vi'
+                    ? 'bg-teal-700 text-white shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Tiếng Việt
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-0.5 rounded-md transition ${
+                  language === 'en'
+                    ? 'bg-teal-700 text-white shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                English
+              </button>
+            </div>
+          </div>
 
           {/* Action 2: Logout */}
           <button
@@ -242,9 +275,7 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
             }}
             className="w-full text-left px-4 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition border-t border-slate-100 cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
-            Đăng xuất hệ thống
-          </button>
+            <LogOut className="w-4 h-4" />{translateText("Đăng xuất hệ thống")}</button>
         </div>, document.body
       )}
 

@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import { useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import {
@@ -37,6 +39,7 @@ import { AllergenDrawer } from "../components/AllergenDrawer";
 import { NutritionistAllergyManagementPage } from "./NutritionistAllergyManagementPage";
 
 export const NutritionRulesPage: React.FC = () => {
+  useLanguage();
   const navigate = useNavigate(),
     location = useLocation();
   const [activeTab, setActiveTab] = useState<
@@ -178,7 +181,7 @@ export const NutritionRulesPage: React.FC = () => {
       );
     if (
       !window.confirm(
-        `Xác nhận chuyển quy chuẩn "${rule.name}" vào danh sách lưu trữ (xóa mềm)?`,
+        translateText(`Xác nhận chuyển quy chuẩn "${rule.name}" vào danh sách lưu trữ (xóa mềm)?`),
       )
     )
       return;
@@ -305,7 +308,7 @@ export const NutritionRulesPage: React.FC = () => {
           ) : (
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
           )}
-          <span className="text-xs font-semibold">{toast.text}</span>
+          <span className="text-xs font-semibold">{translateText(toast.text)}</span>
         </div>
       )}
 
@@ -313,29 +316,22 @@ export const NutritionRulesPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-              CHUYÊN VIÊN DINH DƯỠNG & BGH
-            </span>
-            <span className="text-xs text-slate-400">
-              • Thông tư 28/2016 & 51/2020/TT-BGDĐT
-            </span>
+            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("CHUYÊN VIÊN DINH DƯỠNG & BGH")}</span>
+            <span className="text-xs text-slate-400">{translateText("• Thông tư 28/2016 & 51/2020/TT-BGDĐT")}</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
-            {location.pathname.startsWith("/nutritionist")
+            {translateText(location.pathname.startsWith("/nutritionist")
               ? "Quy chuẩn dinh dưỡng, dị ứng & Rule Engine"
-              : "Cấu hình tiêu chuẩn dinh dưỡng"}
+              : "Cấu hình tiêu chuẩn dinh dưỡng")}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Cấu hình tỷ lệ P-L-G, quản trị danh mục dị ứng Codex và quét kiểm
-            tra thực đơn tự động.
-          </p>
+          <p className="text-xs text-slate-500 mt-0.5">{translateText("Cấu hình tỷ lệ P-L-G, quản trị danh mục dị ứng Codex và quét kiểm tra thực đơn tự động.")}</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={refreshAll}
             className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition"
-            title="Làm mới dữ liệu từ Database"
+            title={translateText("Làm mới dữ liệu từ Database")}
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -349,7 +345,7 @@ export const NutritionRulesPage: React.FC = () => {
                 }}
                 className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
               >
-                <Plus className="w-4 h-4" /> <span>Thêm Tiêu Chuẩn Mới</span>
+                <Plus className="w-4 h-4" /> <span>{translateText("Thêm Tiêu Chuẩn Mới")}</span>
               </button>
             </>
           )}
@@ -362,7 +358,7 @@ export const NutritionRulesPage: React.FC = () => {
               }}
               className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-rose-600/25 transition"
             >
-              <Plus className="w-4 h-4" /> <span>Thêm Nhóm Chuẩn Codex</span>
+              <Plus className="w-4 h-4" /> <span>{translateText("Thêm Nhóm Chuẩn Codex")}</span>
             </button>
           )}
 
@@ -374,9 +370,9 @@ export const NutritionRulesPage: React.FC = () => {
             >
               <Sparkles className="w-4 h-4" />
               <span>
-                {isScanning
+                {translateText(isScanning
                   ? "Đang Quét Rule Engine..."
-                  : "Quét Kiểm Tra Tự Động"}
+                  : "Quét Kiểm Tra Tự Động")}
               </span>
             </button>
           )}
@@ -396,7 +392,7 @@ export const NutritionRulesPage: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500">
-                  {c.label}
+                  {translateText(c.label)}
                 </span>
                 <div
                   className={`w-9 h-9 rounded-2xl flex items-center justify-center ${c.iconCls}`}
@@ -408,11 +404,11 @@ export const NutritionRulesPage: React.FC = () => {
                 <span
                   className={`text-2xl font-black tracking-tight ${c.valCls}`}
                 >
-                  {c.val}
+                  {translateText(c.val)}
                 </span>
                 {c.unit && (
                   <span className="text-xs text-slate-400 font-medium ml-1">
-                    {c.unit}
+                    {translateText(c.unit)}
                   </span>
                 )}
               </div>
@@ -422,7 +418,7 @@ export const NutritionRulesPage: React.FC = () => {
                 {c.dot && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 )}
-                <span>{c.sub}</span>
+                <span>{translateText(c.sub)}</span>
               </div>
             </div>
           ))}
@@ -433,7 +429,7 @@ export const NutritionRulesPage: React.FC = () => {
         {[
           {
             id: "STANDARDS" as const,
-            label: "Tiêu Chuẩn Dinh Dưỡng (Thông tư 28)",
+            label: translateText("Tiêu Chuẩn Dinh Dưỡng (Thông tư 28)"),
             count: rules.length,
             icon: Scale,
             activeCls: "bg-teal-600 text-white shadow-md shadow-teal-600/25",
@@ -441,7 +437,7 @@ export const NutritionRulesPage: React.FC = () => {
           },
           {
             id: "ALLERGENS" as const,
-            label: "Quy Tắc & Danh Mục Dị Ứng",
+            label: translateText("Quy Tắc & Danh Mục Dị Ứng"),
             count: allergens.length,
             icon: ShieldAlert,
             activeCls: "bg-rose-600 text-white shadow-md shadow-rose-600/25",
@@ -449,7 +445,7 @@ export const NutritionRulesPage: React.FC = () => {
           },
           {
             id: "SCANNER" as const,
-            label: "Bộ Quét & Kiểm Tra Thực Đơn (Rule Engine)",
+            label: translateText("Bộ Quét & Kiểm Tra Thực Đơn (Rule Engine)"),
             count: null,
             icon: Sparkles,
             activeCls:
@@ -473,12 +469,12 @@ export const NutritionRulesPage: React.FC = () => {
               }`}
             >
               <t.icon className="w-4 h-4" />
-              <span>{t.label}</span>
+              <span>{translateText(t.label)}</span>
               {t.count !== null && (
                 <span
                   className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === t.id ? t.badgeCls : "bg-slate-200 text-slate-700"}`}
                 >
-                  {t.count}
+                  {translateText(t.count)}
                 </span>
               )}
             </button>
@@ -495,7 +491,7 @@ export const NutritionRulesPage: React.FC = () => {
                 type="text"
                 value={ruleSearch}
                 onChange={(e) => setRuleSearch(e.target.value)}
-                placeholder="Tìm quy chuẩn theo tên hoặc nhóm tuổi..."
+                placeholder={translateText("Tìm quy chuẩn theo tên hoặc nhóm tuổi...")}
                 className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:ring-2 focus:ring-teal-500"
               />
             </div>
@@ -506,12 +502,12 @@ export const NutritionRulesPage: React.FC = () => {
                 onChange={(e) => setRuleAgeFilter(e.target.value)}
                 className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
               >
-                <option value="">Tất cả độ tuổi</option>
-                <option value="MAU_GIAO">Mẫu giáo (3 - 6 tuổi)</option>
-                <option value="NHA_TRE">Nhà trẻ (12 - 36 tháng)</option>
-                <option value="TODDLER_18_36M">Nhà trẻ (18 - 36 tháng)</option>
-                <option value="KINDERGARTEN_3_4Y">Mẫu giáo (3 - 4 tuổi)</option>
-                <option value="ALL_AGES">Mọi lứa tuổi</option>
+                <option value="">{translateText("Tất cả độ tuổi")}</option>
+                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
+                <option value="NHA_TRE">{translateText("Nhà trẻ (12 - 36 tháng)")}</option>
+                <option value="TODDLER_18_36M">{translateText("Nhà trẻ (18 - 36 tháng)")}</option>
+                <option value="KINDERGARTEN_3_4Y">{translateText("Mẫu giáo (3 - 4 tuổi)")}</option>
+                <option value="ALL_AGES">{translateText("Mọi lứa tuổi")}</option>
               </select>
 
               <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
@@ -521,7 +517,7 @@ export const NutritionRulesPage: React.FC = () => {
                   onChange={(e) => setIncludeDeletedRules(e.target.checked)}
                   className="w-3.5 h-3.5 text-teal-600 rounded-sm"
                 />
-                <span>Xem quy chuẩn đã xóa mềm</span>
+                <span>{translateText("Xem quy chuẩn đã xóa mềm")}</span>
               </label>
             </div>
           </div>
@@ -531,13 +527,13 @@ export const NutritionRulesPage: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3.5 px-5">Tên Quy Chuẩn</th>
-                    <th className="py-3.5 px-4">Nhóm Tuổi</th>
-                    <th className="py-3.5 px-4">Năng Lượng (Kcal)</th>
-                    <th className="py-3.5 px-4">Cơ Cấu P : L : G (%)</th>
-                    <th className="py-3.5 px-4">Vi Chất Canxi / Ca:P</th>
-                    <th className="py-3.5 px-4">Phân Loại</th>
-                    <th className="py-3.5 px-5 text-right">Thao Tác</th>
+                    <th className="py-3.5 px-5">{translateText("Tên Quy Chuẩn")}</th>
+                    <th className="py-3.5 px-4">{translateText("Nhóm Tuổi")}</th>
+                    <th className="py-3.5 px-4">{translateText("Năng Lượng (Kcal)")}</th>
+                    <th className="py-3.5 px-4">{translateText("Cơ Cấu P : L : G (%)")}</th>
+                    <th className="py-3.5 px-4">{translateText("Vi Chất Canxi / Ca:P")}</th>
+                    <th className="py-3.5 px-4">{translateText("Phân Loại")}</th>
+                    <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -548,9 +544,7 @@ export const NutritionRulesPage: React.FC = () => {
                         className="py-12 text-center text-slate-400"
                       >
                         <Scale className="w-8 h-8 mx-auto text-slate-300 mb-2" />
-                        <p className="font-bold text-slate-700">
-                          Chưa tìm thấy quy chuẩn dinh dưỡng phù hợp
-                        </p>
+                        <p className="font-bold text-slate-700">{translateText("Chưa tìm thấy quy chuẩn dinh dưỡng phù hợp")}</p>
                       </td>
                     </tr>
                   ) : (
@@ -569,73 +563,63 @@ export const NutritionRulesPage: React.FC = () => {
                               <div
                                 className={`w-8 h-8 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs ${item.isSystemRule ? "bg-amber-100 text-amber-800" : "bg-teal-100 text-teal-800"}`}
                               >
-                                {item.isSystemRule ? "BGD" : "TRƯỜNG"}
+                                {translateText(item.isSystemRule ? "BGD" : "TRƯỜNG")}
                               </div>
                               <div>
                                 <span className="font-bold text-slate-900 block">
                                   {item.name ||
                                     `Quy chuẩn TT 28 (${item.targetAgeGroup})`}
                                 </span>
-                                <span className="text-[11px] text-slate-400">
-                                  Phạm vi:{" "}
-                                  {item.mealScope === "DAYBOARDING"
+                                <span className="text-[11px] text-slate-400">{translateText("Phạm vi:")}{" "}
+                                  {translateText(item.mealScope === "DAYBOARDING"
                                     ? "Bán trú tại trường (50-70% Calo)"
-                                    : "Cả ngày (100% Calo)"}
+                                    : "Cả ngày (100% Calo)")}
                                 </span>
                               </div>
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
                             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
-                              {isToddler
+                              {translateText(isToddler
                                 ? "Nhà trẻ (12-36 tháng)"
                                 : item.targetAgeGroup === "ALL_AGES"
                                   ? "Mọi lứa tuổi"
-                                  : "Mẫu giáo (3-6 tuổi)"}
+                                  : "Mẫu giáo (3-6 tuổi)")}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-bold text-slate-800">
-                            {item.minCaloriesKcal ??
+                            {translateText(item.minCaloriesKcal ??
                               (item as any).minEnergyKcal ??
-                              "—"}{" "}
+                              "—")}{" "}
                             -{" "}
-                            {item.maxCaloriesKcal ??
+                            {translateText(item.maxCaloriesKcal ??
                               (item as any).maxEnergyKcal ??
-                              "—"}{" "}
-                            Kcal
-                          </td>
+                              "—")}{" "}{translateText("Kcal")}</td>
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-1.5 font-semibold text-[11px]">
-                              <span className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-                                P: {item.minProteinPercent ?? "—"}-
-                                {item.maxProteinPercent ?? "—"}%
+                              <span className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">{translateText("P: ")}{translateText(item.minProteinPercent ?? "—")}-
+                                {translateText(item.maxProteinPercent ?? "—")}%
                               </span>
-                              <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                                L: {item.minFatPercent ?? "—"}-
-                                {item.maxFatPercent ?? "—"}%
+                              <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">{translateText("L: ")}{translateText(item.minFatPercent ?? "—")}-
+                                {translateText(item.maxFatPercent ?? "—")}%
                               </span>
-                              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                G: {item.minCarbPercent ?? "—"}-
-                                {item.maxCarbPercent ?? "—"}%
+                              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">{translateText("G: ")}{translateText(item.minCarbPercent ?? "—")}-
+                                {translateText(item.maxCarbPercent ?? "—")}%
                               </span>
                             </div>
                           </td>
                           <td className="py-3.5 px-4 text-slate-600 text-[11px]">
-                            <div>Ca: ≥ {item.minCalciumMg ?? "—"}mg</div>
-                            <div className="text-slate-400">
-                              Ca/P: {item.caPRatioMin || 1.0} -{" "}
+                            <div>{translateText("Ca: ≥ ")}{translateText(item.minCalciumMg ?? "—")}{translateText("mg")}</div>
+                            <div className="text-slate-400">{translateText("Ca/P: ")}{item.caPRatioMin || 1.0} -{" "}
                               {item.caPRatioMax || 1.5}
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
                             {isDeleted ? (
                               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                <Archive className="w-3 h-3" /> Đã xóa mềm
-                              </span>
+                                <Archive className="w-3 h-3" />{translateText(" Đã xóa mềm")}</span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                                Chuẩn Áp Dụng
-                              </span>
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">{translateText("Chuẩn Áp Dụng")}</span>
                             )}
                           </td>
                           <td className="py-3.5 px-5 text-right">
@@ -646,7 +630,7 @@ export const NutritionRulesPage: React.FC = () => {
                                   className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs flex items-center gap-1"
                                 >
                                   <RotateCcw className="w-3.5 h-3.5" />{" "}
-                                  <span>Khôi phục</span>
+                                  <span>{translateText("Khôi phục")}</span>
                                 </button>
                               ) : (
                                 <>
@@ -656,14 +640,14 @@ export const NutritionRulesPage: React.FC = () => {
                                       setIsRuleDrawerOpen(true);
                                     }}
                                     className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                    title="Chỉnh sửa quy chuẩn"
+                                    title={translateText("Chỉnh sửa quy chuẩn")}
                                   >
                                     <Edit3 className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleSoftDeleteRule(item)}
                                     className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
-                                    title="Chuyển vào lưu trữ"
+                                    title={translateText("Chuyển vào lưu trữ")}
                                   >
                                     <Archive className="w-4 h-4" />
                                   </button>
@@ -698,17 +682,9 @@ export const NutritionRulesPage: React.FC = () => {
           <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-teal-800 text-white p-6 rounded-3xl shadow-lg">
             <div className="max-w-2xl space-y-2">
               <span className="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" /> Hệ Thống Kiểm Duyệt Tự Động
-                KidMeal Rule Engine
-              </span>
-              <h2 className="text-xl font-black">
-                Quét & Thẩm Định Thực Đơn Theo Thông Tư 28 và Hồ Sơ Dị Ứng
-              </h2>
-              <p className="text-xs text-indigo-200 leading-relaxed">
-                Tự động rà soát vi chất, năng lượng Calo, cơ cấu P:L:G, đối
-                chiếu trực tiếp danh sách nguyên liệu thực đơn với cơ sở dữ liệu
-                trẻ dị ứng toàn trường để phát hiện nguy cơ phản vệ.
-              </p>
+                <Sparkles className="w-4 h-4" />{translateText(" Hệ Thống Kiểm Duyệt Tự Động KidMeal Rule Engine")}</span>
+              <h2 className="text-xl font-black">{translateText("Quét & Thẩm Định Thực Đơn Theo Thông Tư 28 và Hồ Sơ Dị Ứng")}</h2>
+              <p className="text-xs text-indigo-200 leading-relaxed">{translateText("Tự động rà soát vi chất, năng lượng Calo, cơ cấu P:L:G, đối chiếu trực tiếp danh sách nguyên liệu thực đơn với cơ sở dữ liệu trẻ dị ứng toàn trường để phát hiện nguy cơ phản vệ.")}</p>
               <div className="pt-2">
                 <button
                   onClick={handleTriggerScan}
@@ -717,9 +693,9 @@ export const NutritionRulesPage: React.FC = () => {
                 >
                   <Play className="w-4 h-4 fill-current" />
                   <span>
-                    {isScanning
+                    {translateText(isScanning
                       ? "Đang Phân Tích Thực Đơn..."
-                      : "Bắt Đầu Quét Thực Đơn Tuần Hiện Tại"}
+                      : "Bắt Đầu Quét Thực Đơn Tuần Hiện Tại")}
                   </span>
                 </button>
               </div>
@@ -740,14 +716,10 @@ export const NutritionRulesPage: React.FC = () => {
                     }`}
                   >
                     <span>{scanResult.complianceScore}</span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      / 100 ĐIỂM
-                    </span>
+                    <span className="text-[10px] font-bold text-slate-400">{translateText("/ 100 ĐIỂM")}</span>
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                      Trạng Thái Thẩm Định:
-                    </span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{translateText("Trạng Thái Thẩm Định:")}</span>
                     <span
                       className={`text-lg font-black mt-0.5 inline-block ${
                         scanResult.overallStatus === "PASS"
@@ -757,47 +729,38 @@ export const NutritionRulesPage: React.FC = () => {
                             : "text-red-600"
                       }`}
                     >
-                      {scanResult.overallStatus === "PASS"
+                      {translateText(scanResult.overallStatus === "PASS"
                         ? "✓ ĐẠT CHUẨN THÔNG TƯ 28"
                         : scanResult.overallStatus === "WARNING"
                           ? "⚠ CẦN ĐIỀU CHỈNH"
-                          : "✕ PHÁT HIỆN VI PHẠM"}
+                          : "✕ PHÁT HIỆN VI PHẠM")}
                     </span>
                     <p className="text-xs text-slate-500 mt-1">
-                      {scanResult.menuTitle}
+                      {translateText(scanResult.menuTitle)}
                     </p>
                   </div>
                 </div>
 
                 <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                      Quy chuẩn áp dụng:
-                    </span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{translateText("Quy chuẩn áp dụng:")}</span>
                     <p className="text-sm font-bold text-slate-900 mt-1">
                       {scanResult.appliedRuleName}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Chuẩn Calo: {scanResult.standardReference.minEnergyKcal} -{" "}
-                      {scanResult.standardReference.maxEnergyKcal} Kcal/trẻ
-                    </p>
+                    <p className="text-xs text-slate-500 mt-1">{translateText("Chuẩn Calo: ")}{scanResult.standardReference.minEnergyKcal} -{" "}
+                      {scanResult.standardReference.maxEnergyKcal}{translateText(" Kcal/trẻ")}</p>
                   </div>
-                  <div className="text-[11px] text-teal-700 font-semibold bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100">
-                    Thực tế: {scanResult.summaryNutrition.totalEnergyKcal}{" "}
-                    Kcal/suất
-                  </div>
+                  <div className="text-[11px] text-teal-700 font-semibold bg-teal-50 px-3 py-1.5 rounded-xl border border-teal-100">{translateText("Thực tế: ")}{scanResult.summaryNutrition.totalEnergyKcal}{" "}{translateText("Kcal/suất")}</div>
                 </div>
 
                 <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                      Tổng số phát hiện:
-                    </span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{translateText("Tổng số phát hiện:")}</span>
                     <div className="flex items-center gap-2 mt-2">
                       <span className="text-2xl font-black text-slate-900">
                         {scanResult.violations.length}
                       </span>
-                      <span className="text-xs text-slate-400">mục lưu ý</span>
+                      <span className="text-xs text-slate-400">{translateText("mục lưu ý")}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold">
@@ -806,17 +769,13 @@ export const NutritionRulesPage: React.FC = () => {
                         scanResult.violations.filter(
                           (v) => v.severity === "CRITICAL",
                         ).length
-                      }{" "}
-                      Nghiêm trọng
-                    </span>
+                      }{" "}{translateText("Nghiêm trọng")}</span>
                     <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
                       {
                         scanResult.violations.filter(
                           (v) => v.severity === "WARNING",
                         ).length
-                      }{" "}
-                      Cảnh báo
-                    </span>
+                      }{" "}{translateText("Cảnh báo")}</span>
                   </div>
                 </div>
               </div>
@@ -824,14 +783,12 @@ export const NutritionRulesPage: React.FC = () => {
               <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <Scale className="w-4 h-4 text-teal-600" />
-                  <span>
-                    Cơ Cấu Tỷ Lệ Năng Lượng Thực Tế vs Tiêu Chuẩn Thông Tư 28
-                  </span>
+                  <span>{translateText("Cơ Cấu Tỷ Lệ Năng Lượng Thực Tế vs Tiêu Chuẩn Thông Tư 28")}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     {
-                      label: "Đạm (Protein - P)",
+                      label: translateText("Đạm (Protein - P)"),
                       pct: scanResult.summaryNutrition.proteinRatioPercent,
                       g: scanResult.summaryNutrition.totalProteinG,
                       min: scanResult.standardReference.minProteinPercent,
@@ -842,7 +799,7 @@ export const NutritionRulesPage: React.FC = () => {
                       mult: 2.5,
                     },
                     {
-                      label: "Béo (Lipid - L)",
+                      label: translateText("Béo (Lipid - L)"),
                       pct: scanResult.summaryNutrition.lipidRatioPercent,
                       g: scanResult.summaryNutrition.totalLipidG,
                       min: scanResult.standardReference.minFatPercent,
@@ -853,7 +810,7 @@ export const NutritionRulesPage: React.FC = () => {
                       mult: 2.5,
                     },
                     {
-                      label: "Bột Đường (Glucid - G)",
+                      label: translateText("Bột Đường (Glucid - G)"),
                       pct: scanResult.summaryNutrition.glucidRatioPercent,
                       g: scanResult.summaryNutrition.totalGlucidG,
                       min: scanResult.standardReference.minCarbPercent,
@@ -869,7 +826,7 @@ export const NutritionRulesPage: React.FC = () => {
                       className={`p-4 border rounded-2xl space-y-2 ${m.box}`}
                     >
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold">{m.label}</span>
+                        <span className="font-bold">{translateText(m.label)}</span>
                         <span className="font-black">{m.pct}%</span>
                       </div>
                       <div
@@ -880,9 +837,7 @@ export const NutritionRulesPage: React.FC = () => {
                           style={{ width: `${Math.min(m.pct * m.mult, 100)}%` }}
                         />
                       </div>
-                      <p className="text-[11px] opacity-85">
-                        Chuẩn: {m.min}% - {m.max}% (Thực tế: {m.g}g)
-                      </p>
+                      <p className="text-[11px] opacity-85">{translateText("Chuẩn: ")}{m.min}% - {m.max}{translateText("% (Thực tế: ")}{m.g}{translateText("g)")}</p>
                     </div>
                   ))}
                 </div>
@@ -892,12 +847,9 @@ export const NutritionRulesPage: React.FC = () => {
                 <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
                   <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4 text-red-500" /> Chi Tiết
-                      Xung Đột Dị Ứng & Cảnh Báo Dinh Dưỡng
-                    </span>
+                      <ShieldAlert className="w-4 h-4 text-red-500" />{translateText(" Chi Tiết Xung Đột Dị Ứng & Cảnh Báo Dinh Dưỡng")}</span>
                     <span className="text-xs text-slate-400 font-normal">
-                      {scanResult.violations.length} mục cần can thiệp
-                    </span>
+                      {scanResult.violations.length}{translateText(" mục cần can thiệp")}</span>
                   </h3>
                   <div className="space-y-3">
                     {scanResult.violations.map((v, idx) => (
@@ -917,22 +869,21 @@ export const NutritionRulesPage: React.FC = () => {
                         <div className="flex-1 text-xs">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-slate-900">
-                              {v.title}
+                              {translateText(v.title)}
                             </span>
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${v.severity === "CRITICAL" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}`}
                             >
-                              {v.severity === "CRITICAL"
+                              {translateText(v.severity === "CRITICAL"
                                 ? "NGUY HIỂM"
-                                : "CẢNH BÁO"}
+                                : "CẢNH BÁO")}
                             </span>
                           </div>
-                          <p className="text-slate-600 mt-1">{v.message}</p>
+                          <p className="text-slate-600 mt-1">{translateText(v.message)}</p>
                           <div className="mt-2 text-slate-800 font-semibold bg-white/80 p-2.5 rounded-xl border border-slate-200/80">
-                            <span className="text-teal-700">
-                              Khuyến nghị giải quyết:{" "}
+                            <span className="text-teal-700">{translateText("Khuyến nghị giải quyết:")}{" "}
                             </span>
-                            {v.recommendation}
+                            {translateText(v.recommendation)}
                           </div>
                         </div>
                       </div>
@@ -944,15 +895,13 @@ export const NutritionRulesPage: React.FC = () => {
               <div className="bg-emerald-50/80 border border-emerald-200 rounded-3xl p-6 shadow-xs space-y-3">
                 <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>
-                    Kế Hoạch Khắc Phục Đề Xuất Cho Bếp & Ban Giám Hiệu
-                  </span>
+                  <span>{translateText("Kế Hoạch Khắc Phục Đề Xuất Cho Bếp & Ban Giám Hiệu")}</span>
                 </h3>
                 <ul className="space-y-2 text-xs text-emerald-900 font-medium">
                   {scanResult.actionableRecommendations.map((rec, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
-                      <span>{rec}</span>
+                      <span>{translateText(rec)}</span>
                     </li>
                   ))}
                 </ul>

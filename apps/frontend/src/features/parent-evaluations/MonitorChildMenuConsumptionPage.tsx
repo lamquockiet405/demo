@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SubmitMealEvaluationPage } from "./SubmitMealEvaluationPage";
@@ -24,6 +26,7 @@ import { useAuthStore } from "../../core/stores/auth.store";
 import { PublishedMenusBrowser } from "../menus/components/PublishedMenusBrowser";
 
 const ChildMenuConsumptionView: React.FC = () => {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
 
@@ -212,17 +215,12 @@ const ChildMenuConsumptionView: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50 border border-teal-200 text-teal-800 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Theo dõi toàn diện</span>
+              <span>{translateText("Theo dõi toàn diện")}</span>
               <span className="text-teal-400">•</span>
-              <span className="normal-case font-medium">Bữa ăn bán trú</span>
+              <span className="normal-case font-medium">{translateText("Bữa ăn bán trú")}</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-              Thực đơn & Sức ăn của Bé
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Cập nhật trực tiếp thực đơn hằng ngày, lượng nước uống và đánh giá
-              sức ăn từ giáo viên chủ nhiệm & tổ bếp
-            </p>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">{translateText("Thực đơn & Sức ăn của Bé")}</h1>
+            <p className="text-xs text-slate-500 mt-1">{translateText("Cập nhật trực tiếp thực đơn hằng ngày, lượng nước uống và đánh giá sức ăn từ giáo viên chủ nhiệm & tổ bếp")}</p>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -233,7 +231,7 @@ const ChildMenuConsumptionView: React.FC = () => {
                   value={selectedChildId}
                   onChange={(e) => handleSelectChild(e.target.value)}
                   className="text-xs font-bold text-slate-800 bg-transparent outline-none cursor-pointer"
-                  aria-label="Chọn bé để theo dõi"
+                  aria-label={translateText("Chọn bé để theo dõi")}
                 >
                   {children.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -245,7 +243,7 @@ const ChildMenuConsumptionView: React.FC = () => {
             )}
             <input
               type="date"
-              aria-label="Ngày xem thực đơn và sức ăn"
+              aria-label={translateText("Ngày xem thực đơn và sức ăn")}
               value={selectedDate}
               onChange={event => { if (event.target.value) setSelectedDate(event.target.value); }}
               className="min-w-0 max-w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700"
@@ -259,7 +257,7 @@ const ChildMenuConsumptionView: React.FC = () => {
               className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
-              <span>Làm mới</span>
+              <span>{translateText("Làm mới")}</span>
             </button>
           </div>
         </div>
@@ -267,21 +265,16 @@ const ChildMenuConsumptionView: React.FC = () => {
         <PublishedMenusBrowser audience="parent" embedded syncDate />
 
         <section className="mt-8" aria-labelledby="child-consumption-heading">
-          <h2 id="child-consumption-heading" className="text-xl font-black text-slate-900 mb-4">
-            Sức ăn của bé ngày {selectedDate.split("-").reverse().join("/")}
+          <h2 id="child-consumption-heading" className="text-xl font-black text-slate-900 mb-4">{translateText("Sức ăn của bé ngày ")}{translateText(selectedDate.split("-").reverse().join("/"))}
           </h2>
           {loading && (
             <div className="py-10 flex items-center justify-center gap-2 text-sm text-slate-600" role="status">
-              <Loader2 className="w-5 h-5 animate-spin text-teal-600" />
-              Đang tải dữ liệu sức ăn của bé…
-            </div>
+              <Loader2 className="w-5 h-5 animate-spin text-teal-600" />{translateText("Đang tải dữ liệu sức ăn của bé…")}</div>
           )}
           {error && (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" role="alert">
-              <p>{error}</p>
-              <button type="button" onClick={() => void loadData(selectedDate, selectedChildId)} className="mt-2 underline font-bold">
-                Thử lại dữ liệu sức ăn
-              </button>
+              <p>{translateText(error)}</p>
+              <button type="button" onClick={() => void loadData(selectedDate, selectedChildId)} className="mt-2 underline font-bold">{translateText("Thử lại dữ liệu sức ăn")}</button>
             </div>
           )}
           {!loading && !error && data && <>
@@ -293,28 +286,23 @@ const ChildMenuConsumptionView: React.FC = () => {
 
         {/* 3.2. Trạng thái đồng bộ với thực đơn trường đã công bố */}
         {published.loading ? (
-          <div className="mb-4 text-xs text-slate-500" role="status">
-            Đang tải thực đơn đã công bố…
-          </div>
+          <div className="mb-4 text-xs text-slate-500" role="status">{translateText("Đang tải thực đơn đã công bố…")}</div>
         ) : published.error ? (
           <div
             className="mb-4 p-3 rounded-xl bg-red-50 text-red-700 text-xs"
             role="alert"
           >
-            {published.error}
+            {translateText(published.error)}
           </div>
         ) : isMenuPublished ? (
           publishedMenuTitle && (
             <div className="mb-4 px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span>Thực đơn trường đã công bố: {publishedMenuTitle}</span>
+              <span>{translateText("Thực đơn trường đã công bố: ")}{translateText(publishedMenuTitle)}</span>
             </div>
           )
         ) : (
-          <div className="mb-4 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold">
-            Nhà trường chưa công bố thực đơn cho ngày đang xem. Bạn vẫn có thể
-            chọn xem các thực đơn đã công bố trước đây trong mục lịch sử.
-          </div>
+          <div className="mb-4 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold">{translateText("Nhà trường chưa công bố thực đơn cho ngày đang xem. Bạn vẫn có thể chọn xem các thực đơn đã công bố trước đây trong mục lịch sử.")}</div>
         )}
 
         {/* 4. Weekday Selector Tabs */}
@@ -353,6 +341,7 @@ const ChildMenuConsumptionView: React.FC = () => {
 };
 
 export const MonitorChildMenuConsumptionPage: React.FC = () => {
+  useLanguage();
   const [params] = useSearchParams();
   return params.get("tab") === "evaluation" ? (
     <SubmitMealEvaluationPage />

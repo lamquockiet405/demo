@@ -286,6 +286,8 @@
 }
 .kp-filters input,
 .kp-filters select,
+.kp-field input,
+.kp-field select,
 .kp-input {
   font: inherit;
   font-size: 12px;

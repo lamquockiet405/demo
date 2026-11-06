@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
@@ -20,6 +22,7 @@ export function CreateKitchenInspectionModal({
   onClose: () => void;
   onCreated: (id: string | null) => Promise<void>;
 }) {
+  useLanguage();
   const { user } = useAuthStore();
   const [form, setForm] = useState({
     mealDate: initialDate,
@@ -81,13 +84,11 @@ export function CreateKitchenInspectionModal({
     });
   };
   return (
-    <Modal title="Tạo biên bản kiểm thực" busy={action.busy} onClose={onClose}>
+    <Modal title={translateText("Tạo biên bản kiểm thực")} busy={action.busy} onClose={onClose}>
       <Notice error={action.error} />
       <form onSubmit={save}>
         <div className="kp-form-grid">
-          <label className="kp-field">
-            Ngày kiểm thực
-            <input
+          <label className="kp-field">{translateText("Ngày kiểm thực")}<input
               className="kp-input"
               type="date"
               required
@@ -99,31 +100,27 @@ export function CreateKitchenInspectionModal({
               }}
             />
           </label>
-          <label className="kp-field">
-            Bữa ăn
-            <select
+          <label className="kp-field">{translateText("Bữa ăn")}<select
               className="kp-input"
-              aria-label="Bữa ăn kiểm thực"
+              aria-label={translateText("Bữa ăn kiểm thực")}
               disabled={action.busy}
               value={form.mealSession}
               onChange={(event) =>
                 changeServing({ mealSession: event.target.value })
               }
             >
-              <option value="BREAKFAST">Bữa sáng</option>
-              <option value="LUNCH">Bữa trưa</option>
-              <option value="AFTERNOON_SNACK">Bữa phụ xế</option>
+              <option value="BREAKFAST">{translateText("Bữa sáng")}</option>
+              <option value="LUNCH">{translateText("Bữa trưa")}</option>
+              <option value="AFTERNOON_SNACK">{translateText("Bữa phụ xế")}</option>
             </select>
           </label>
           <fieldset
             className="kp-inspection-menu kp-field full"
             aria-busy={menu.loading}
           >
-            <legend>Các món kiểm thực theo thực đơn</legend>
+            <legend>{translateText("Các món kiểm thực theo thực đơn")}</legend>
             <div className="kp-inspection-menu-heading">
-              <p>
-                Tự lấy món từ thực đơn đã duyệt đúng ngày và bữa ăn đã chọn.
-              </p>
+              <p>{translateText("Tự lấy món từ thực đơn đã duyệt đúng ngày và bữa ăn đã chọn.")}</p>
               <button
                 type="button"
                 className="kp-button"
@@ -133,32 +130,23 @@ export function CreateKitchenInspectionModal({
                 <RefreshCw
                   size={13}
                   className={menu.loading ? "animate-spin" : ""}
-                />
-                Tải lại thực đơn
-              </button>
+                />{translateText("Tải lại thực đơn")}</button>
             </div>
             {menu.loading ? (
-              <p className="kp-inspection-menu-state" role="status">
-                Đang lấy món ăn từ thực đơn…
-              </p>
+              <p className="kp-inspection-menu-state" role="status">{translateText("Đang lấy món ăn từ thực đơn…")}</p>
             ) : menu.error ? (
               <Notice error={menu.error} />
             ) : !choices.length ? (
-              <p className="kp-inspection-menu-state">
-                Chưa có món trong thực đơn đã duyệt cho ngày và bữa ăn này. Bạn
-                có thể nhập món bổ sung bên dưới.
-              </p>
+              <p className="kp-inspection-menu-state">{translateText("Chưa có món trong thực đơn đã duyệt cho ngày và bữa ăn này. Bạn có thể nhập món bổ sung bên dưới.")}</p>
             ) : (
               <>
                 <div className="kp-inspection-menu-selection">
-                  <span>
-                    Đã chọn{" "}
+                  <span>{translateText("Đã chọn")}{" "}
                     {
                       choices.filter((dish) => selected.includes(dish.id))
                         .length
                     }
-                    /{choices.length} món
-                  </span>
+                    /{choices.length}{translateText(" món")}</span>
                   <div>
                     <button
                       type="button"
@@ -166,16 +154,12 @@ export function CreateKitchenInspectionModal({
                       onClick={() =>
                         setSelected(choices.map((dish) => dish.id))
                       }
-                    >
-                      Chọn tất cả
-                    </button>
+                    >{translateText("Chọn tất cả")}</button>
                     <button
                       type="button"
                       disabled={action.busy}
                       onClick={() => setSelected([])}
-                    >
-                      Bỏ chọn
-                    </button>
+                    >{translateText("Bỏ chọn")}</button>
                   </div>
                 </div>
                 <div className="kp-inspection-menu-options">
@@ -183,7 +167,7 @@ export function CreateKitchenInspectionModal({
                     <label key={dish.id}>
                       <input
                         type="checkbox"
-                        aria-label={`Kiểm thực ${dish.name}`}
+                        aria-label={translateText(`Kiểm thực ${dish.name}`)}
                         disabled={action.busy}
                         checked={selected.includes(dish.id)}
                         onChange={(event) =>
@@ -196,7 +180,7 @@ export function CreateKitchenInspectionModal({
                       />
                       <span>
                         <strong>{dish.name}</strong>
-                        <small>{dish.menus.join(" · ")}</small>
+                        <small>{translateText(dish.menus.join(" · "))}</small>
                       </span>
                     </label>
                   ))}
@@ -213,14 +197,12 @@ export function CreateKitchenInspectionModal({
               disabled={action.busy}
               onClick={() => setShowAdditional((previous) => !previous)}
             >
-              {showAdditional
+              {translateText(showAdditional
                 ? "Ẩn phần nhập món bổ sung"
-                : "+ Nhập món bổ sung ngoài thực đơn"}
+                : "+ Nhập món bổ sung ngoài thực đơn")}
             </button>
             {showAdditional && (
-              <label className="kp-field">
-                Món bổ sung (mỗi dòng một món)
-                <textarea
+              <label className="kp-field">{translateText("Món bổ sung (mỗi dòng một món)")}<textarea
                   id="inspection-additional-dishes"
                   className="kp-input"
                   maxLength={2000}
@@ -231,9 +213,7 @@ export function CreateKitchenInspectionModal({
               </label>
             )}
           </div>
-          <label className="kp-field full">
-            Ghi chú ban đầu
-            <textarea
+          <label className="kp-field full">{translateText("Ghi chú ban đầu")}<textarea
               className="kp-input"
               maxLength={2000}
               disabled={action.busy}
@@ -246,13 +226,12 @@ export function CreateKitchenInspectionModal({
         </div>
         <div className="kp-form-actions kp-inspection-form-actions">
           <span className="kp-inspection-menu-total">
-            {names.length} món kiểm thực
-          </span>
+            {names.length}{translateText(" món kiểm thực")}</span>
           <button
             className="kp-button primary"
             disabled={action.busy || menu.loading || !names.length}
           >
-            {action.busy ? "Đang tạo…" : "Tạo và bổ sung 3 bước"}
+            {translateText(action.busy ? "Đang tạo…" : "Tạo và bổ sung 3 bước")}
           </button>
         </div>
       </form>

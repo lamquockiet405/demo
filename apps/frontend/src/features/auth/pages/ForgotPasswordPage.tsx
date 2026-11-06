@@ -1,3 +1,6 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
+import { LanguageSwitcher } from '../../../core/components/LanguageSwitcher';
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
@@ -23,6 +26,7 @@ import {
 type Step = 'EMAIL' | 'OTP' | 'NEW_PASSWORD' | 'SUCCESS';
 
 export const ForgotPasswordPage: React.FC = () => {
+  useLanguage();
   const navigate = useNavigate();
 
   // Navigation & step
@@ -223,23 +227,20 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <Link to="/login" className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md">
-              <span className="text-white font-black text-sm leading-none">
-                Kid
-                <br />
-                Meal
-              </span>
+              <span className="text-white font-black text-sm leading-none">{translateText("Kid")}<br />{translateText("Meal")}</span>
             </div>
-            <span className="text-sm font-semibold text-slate-600">Bán trú yêu thương</span>
+            <span className="hidden sm:inline text-sm font-semibold text-slate-600">{translateText("Bán trú yêu thương")}</span>
           </Link>
         </div>
         <div className="flex items-center gap-6 text-xs text-slate-500">
-          <div className="flex items-center gap-1.5">
+          <LanguageSwitcher />
+          <div className="hidden md:flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Máy chủ vận hành ổn định</span>
+            <span>{translateText("Máy chủ vận hành ổn định")}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="hidden lg:flex items-center gap-1.5">
             <Phone className="w-3.5 h-3.5" />
-            <span className="font-semibold text-slate-700">Hotline: 1900 6826</span>
+            <span className="font-semibold text-slate-700">{translateText("Hotline: 1900 6826")}</span>
           </div>
         </div>
       </header>
@@ -257,16 +258,11 @@ export const ForgotPasswordPage: React.FC = () => {
             {/* Header Badge */}
             <div className="flex justify-center mb-3">
               <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
-                <KeyRound className="w-3.5 h-3.5" /> Khôi phục mật khẩu tài khoản
-              </span>
+                <KeyRound className="w-3.5 h-3.5" />{translateText(" Khôi phục mật khẩu tài khoản")}</span>
             </div>
 
-            <h1 className="text-center text-2xl sm:text-3xl font-black text-slate-900 mb-2">
-              Quên mật khẩu? 🔐
-            </h1>
-            <p className="text-center text-xs sm:text-sm text-slate-500 mb-6">
-              Xác thực qua mã OTP Email để đặt lại mật khẩu mới cho tài khoản KidMeal của bạn.
-            </p>
+            <h1 className="text-center text-2xl sm:text-3xl font-black text-slate-900 mb-2">{translateText("Quên mật khẩu? 🔐")}</h1>
+            <p className="text-center text-xs sm:text-sm text-slate-500 mb-6">{translateText("Xác thực qua mã OTP Email để đặt lại mật khẩu mới cho tài khoản KidMeal của bạn.")}</p>
 
             {/* Stepper Dots */}
             <div className="flex items-center justify-center gap-2 mb-6">
@@ -296,7 +292,7 @@ export const ForgotPasswordPage: React.FC = () => {
             {error && (
               <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs sm:text-sm text-red-700 font-medium flex items-start gap-2.5 animate-shake">
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                <span>{error}</span>
+                <span>{translateText(error)}</span>
               </div>
             )}
 
@@ -304,7 +300,7 @@ export const ForgotPasswordPage: React.FC = () => {
             {infoMessage && !error && (
               <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-800 font-medium flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>{infoMessage}</span>
+                <span>{translateText(infoMessage)}</span>
               </div>
             )}
 
@@ -312,16 +308,14 @@ export const ForgotPasswordPage: React.FC = () => {
             {step === 'EMAIL' && (
               <form onSubmit={handleRequestOtp} className="space-y-5">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Địa chỉ Email đăng ký của bạn
-                  </label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Địa chỉ Email đăng ký của bạn")}</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="hieutruong@huongduong.edu.vn"
+                      placeholder={translateText("hieutruong@huongduong.edu.vn")}
                       required
                       autoFocus
                       className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition outline-none"
@@ -337,10 +331,10 @@ export const ForgotPasswordPage: React.FC = () => {
                   {loading ? (
                     <>
                       <RefreshCw className="w-5 h-5 animate-spin" />
-                      <span>Đang gửi mã OTP...</span>
+                      <span>{translateText("Đang gửi mã OTP...")}</span>
                     </>
                   ) : (
-                    'Gửi mã xác thực OTP 🚀'
+                    translateText('Gửi mã xác thực OTP 🚀')
                   )}
                 </button>
 
@@ -349,9 +343,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     to="/login"
                     className="text-xs text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1.5"
                   >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    Quay lại màn hình đăng nhập
-                  </Link>
+                    <ArrowLeft className="w-3.5 h-3.5" />{translateText("Quay lại màn hình đăng nhập")}</Link>
                 </div>
               </form>
             )}
@@ -363,10 +355,9 @@ export const ForgotPasswordPage: React.FC = () => {
                   <span className="inline-block p-3 bg-emerald-50 text-emerald-600 rounded-2xl mb-2">
                     <Shield className="w-7 h-7" />
                   </span>
-                  <h4 className="text-sm font-bold text-slate-800">Nhập mã xác thực OTP</h4>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Mã OTP 6 chữ số đã được gửi đến: <br />
-                    <strong className="text-slate-800 font-semibold">{email}</strong>
+                  <h4 className="text-sm font-bold text-slate-800">{translateText("Nhập mã xác thực OTP")}</h4>
+                  <p className="text-xs text-slate-500 mt-1">{translateText("Mã OTP 6 chữ số đã được gửi đến: ")}<br />
+                    <strong className="text-slate-800 font-semibold">{translateText(email)}</strong>
                   </p>
                 </div>
 
@@ -393,9 +384,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     type="button"
                     onClick={() => setStep('EMAIL')}
                     className="text-slate-500 hover:text-slate-700 transition"
-                  >
-                    Đổi email khác
-                  </button>
+                  >{translateText("Đổi email khác")}</button>
 
                   {canResend ? (
                     <button
@@ -404,12 +393,9 @@ export const ForgotPasswordPage: React.FC = () => {
                       disabled={loading}
                       className="text-emerald-600 font-bold hover:underline transition flex items-center gap-1"
                     >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      Gửi lại mã OTP
-                    </button>
+                      <RefreshCw className="w-3.5 h-3.5" />{translateText("Gửi lại mã OTP")}</button>
                   ) : (
-                    <span className="text-slate-400">
-                      Gửi lại mã sau <strong className="text-emerald-600 font-semibold">{countdown}s</strong>
+                    <span className="text-slate-400">{translateText("Gửi lại mã sau ")}<strong className="text-emerald-600 font-semibold">{countdown}{translateText("s")}</strong>
                     </span>
                   )}
                 </div>
@@ -422,10 +408,10 @@ export const ForgotPasswordPage: React.FC = () => {
                   {loading ? (
                     <>
                       <RefreshCw className="w-5 h-5 animate-spin" />
-                      <span>Đang kiểm tra...</span>
+                      <span>{translateText("Đang kiểm tra...")}</span>
                     </>
                   ) : (
-                    'Xác nhận mã OTP'
+                    translateText('Xác nhận mã OTP')
                   )}
                 </button>
               </form>
@@ -435,16 +421,14 @@ export const ForgotPasswordPage: React.FC = () => {
             {step === 'NEW_PASSWORD' && (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Mật khẩu mới
-                  </label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Mật khẩu mới")}</label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Tối thiểu 8 ký tự"
+                      placeholder={translateText("Tối thiểu 8 ký tự")}
                       required
                       minLength={8}
                       className="w-full pl-11 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition"
@@ -462,9 +446,9 @@ export const ForgotPasswordPage: React.FC = () => {
                   {newPassword && (
                     <div className="mt-2 space-y-1.5">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500">Độ mạnh mật khẩu:</span>
+                        <span className="text-slate-500">{translateText("Độ mạnh mật khẩu:")}</span>
                         <span className={`font-bold ${getStrengthLabel(strengthScore).text}`}>
-                          {getStrengthLabel(strengthScore).label}
+                          {translateText(getStrengthLabel(strengthScore).label)}
                         </span>
                       </div>
                       <div className="grid grid-cols-4 gap-1.5 h-1.5">
@@ -484,16 +468,14 @@ export const ForgotPasswordPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Xác nhận mật khẩu mới
-                  </label>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Xác nhận mật khẩu mới")}</label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Nhập lại mật khẩu mới"
+                      placeholder={translateText("Nhập lại mật khẩu mới")}
                       required
                       className="w-full pl-11 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition"
                     />
@@ -506,7 +488,7 @@ export const ForgotPasswordPage: React.FC = () => {
                     </button>
                   </div>
                   {confirmPassword && newPassword !== confirmPassword && (
-                    <p className="text-[11px] text-red-500 mt-1">Mật khẩu xác nhận chưa khớp</p>
+                    <p className="text-[11px] text-red-500 mt-1">{translateText("Mật khẩu xác nhận chưa khớp")}</p>
                   )}
                 </div>
 
@@ -519,10 +501,10 @@ export const ForgotPasswordPage: React.FC = () => {
                     {loading ? (
                       <>
                         <RefreshCw className="w-5 h-5 animate-spin" />
-                        <span>Đang lưu mật khẩu...</span>
+                        <span>{translateText("Đang lưu mật khẩu...")}</span>
                       </>
                     ) : (
-                      'Cập nhật mật khẩu mới ✨'
+                      translateText('Cập nhật mật khẩu mới ✨')
                     )}
                   </button>
                 </div>
@@ -537,22 +519,15 @@ export const ForgotPasswordPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Đặt lại mật khẩu thành công! 🎉
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Mật khẩu tài khoản <strong className="text-slate-800">{email}</strong> đã được cập nhật an toàn.
-                    Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.
-                  </p>
+                  <h3 className="text-xl font-bold text-slate-900">{translateText("Đặt lại mật khẩu thành công! 🎉")}</h3>
+                  <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">{translateText("Mật khẩu tài khoản ")}<strong className="text-slate-800">{translateText(email)}</strong>{translateText(" đã được cập nhật an toàn. Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.")}</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => navigate('/login', { state: { email: email.trim() } })}
                   className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg shadow-emerald-500/25 transition active:scale-[0.98]"
-                >
-                  Đăng nhập ngay bây giờ
-                </button>
+                >{translateText("Đăng nhập ngay bây giờ")}</button>
               </div>
             )}
           </div>
@@ -561,11 +536,11 @@ export const ForgotPasswordPage: React.FC = () => {
 
       {/* Footer */}
       <footer className="px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
-        <p>© 2024 KidMeal - Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non. All rights reserved.</p>
+        <p>{translateText("© 2024 KidMeal - Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non. All rights reserved.")}</p>
         <div className="flex items-center gap-4">
-          <a href="#" className="hover:text-slate-600 transition-colors">Hướng dẫn bảo mật</a>
+          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Hướng dẫn bảo mật")}</a>
           <span>•</span>
-          <a href="#" className="hover:text-slate-600 transition-colors">Điều khoản sử dụng</a>
+          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Điều khoản sử dụng")}</a>
         </div>
       </footer>
     </div>

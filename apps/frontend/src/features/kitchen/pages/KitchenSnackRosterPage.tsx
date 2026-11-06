@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
 import { Download, Eye } from "lucide-react";
 import { attendanceApi } from "../../attendance/api/attendanceApi";
@@ -14,6 +16,7 @@ import { downloadCsv, formatNumber } from "../utils/kitchen-operations";
 import { getSchoolDate } from "../utils/kds-data";
 
 export function KitchenSnackRosterPage() {
+  useLanguage();
   const [date, setDate] = useState(getSchoolDate);
   const [search, setSearch] = useState("");
   const [classId, setClassId] = useState("");
@@ -36,15 +39,15 @@ export function KitchenSnackRosterPage() {
   return (
     <>
       <PageTitle
-        title="Danh sách đăng ký ăn phụ"
-        description="Tra cứu đăng ký, tình trạng phí và yêu cầu ăn phụ để chuẩn bị suất theo từng lớp."
+        title={translateText("Danh sách đăng ký ăn sáng")}
+        description={translateText("Tra cứu đăng ký, tình trạng phí và yêu cầu ăn sáng để chuẩn bị suất theo từng lớp.")}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button
           className="kp-button"
           disabled={!resource.data?.items?.length}
           onClick={() =>
-            downloadCsv(`an-phu-${date}-trang-${page}.csv`, [
+            downloadCsv(`an-sang-${date}-trang-${page}.csv`, [
               [
                 "Học sinh",
                 "Mã",
@@ -64,29 +67,25 @@ export function KitchenSnackRosterPage() {
             ])
           }
         >
-          <Download size={15} />
-          Xuất trang hiện tại
-        </button>
+          <Download size={15} />{translateText("Xuất trang hiện tại")}</button>
       </PageTitle>
       <div className="kp-stats">
         {[
-          ["Đã đăng ký", stats?.totalRegistered],
-          ["Đủ điều kiện", stats?.totalEligible],
-          ["Suất hôm nay", stats?.todayTotalPortions],
-          ["Suất ăn riêng", stats?.specialDietPortions],
+          [translateText("Đã đăng ký"), stats?.totalRegistered],
+          [translateText("Đủ điều kiện"), stats?.totalEligible],
+          [translateText("Suất hôm nay"), stats?.todayTotalPortions],
+          [translateText("Suất ăn riêng"), stats?.specialDietPortions],
         ].map(([label, value]) => (
           <div className="kp-stat" key={String(label)}>
-            <span>{label}</span>
-            <strong>{formatNumber(value, 0)}</strong>
+            <span>{translateText(label)}</span>
+            <strong>{translateText(formatNumber(value, 0))}</strong>
           </div>
         ))}
       </div>
       <div className="kp-filters">
-        <label>
-          Ngày
-          <input
+        <label>{translateText("Ngày")}<input
             type="date"
-            aria-label="Ngày ăn phụ"
+            aria-label={translateText("Ngày ăn sáng")}
             value={date}
             onChange={(e) => {
               if (e.target.value) {
@@ -98,8 +97,8 @@ export function KitchenSnackRosterPage() {
         </label>
         <input
           type="search"
-          aria-label="Tìm đăng ký ăn phụ"
-          placeholder="Tìm học sinh hoặc mã…"
+          aria-label={translateText("Tìm đăng ký ăn sáng")}
+          placeholder={translateText("Tìm học sinh hoặc mã…")}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -107,14 +106,14 @@ export function KitchenSnackRosterPage() {
           }}
         />
         <select
-          aria-label="Lớp ăn phụ"
+          aria-label={translateText("Lớp ăn sáng")}
           value={classId}
           onChange={(e) => {
             setClassId(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">Tất cả lớp</option>
+          <option value="">{translateText("Tất cả lớp")}</option>
           {resource.data?.classes?.map((c: any) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -122,16 +121,16 @@ export function KitchenSnackRosterPage() {
           ))}
         </select>
         <select
-          aria-label="Trạng thái phí ăn phụ"
+          aria-label={translateText("Trạng thái phí ăn sáng")}
           value={payment}
           onChange={(e) => {
             setPayment(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">Tất cả tình trạng phí</option>
-          <option value="PAID">Đã thanh toán</option>
-          <option value="UNPAID">Chưa thanh toán</option>
+          <option value="">{translateText("Tất cả tình trạng phí")}</option>
+          <option value="PAID">{translateText("Đã thanh toán")}</option>
+          <option value="UNPAID">{translateText("Chưa thanh toán")}</option>
         </select>
         <button
           className="kp-button"
@@ -141,9 +140,7 @@ export function KitchenSnackRosterPage() {
             setPayment("");
             setPage(1);
           }}
-        >
-          Xóa bộ lọc
-        </button>
+        >{translateText("Xóa bộ lọc")}</button>
       </div>
       <ResourceState
         resource={resource}
@@ -155,12 +152,12 @@ export function KitchenSnackRosterPage() {
             <table className="kp-table">
               <thead>
                 <tr>
-                  <th>Học sinh</th>
-                  <th>Lớp</th>
-                  <th>Tình trạng phí</th>
-                  <th>Suất ăn phụ</th>
-                  <th>Ghi chú bếp</th>
-                  <th>Chi tiết</th>
+                  <th>{translateText("Học sinh")}</th>
+                  <th>{translateText("Lớp")}</th>
+                  <th>{translateText("Tình trạng phí")}</th>
+                  <th>{translateText("Suất ăn sáng")}</th>
+                  <th>{translateText("Ghi chú bếp")}</th>
+                  <th>{translateText("Chi tiết")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,20 +172,18 @@ export function KitchenSnackRosterPage() {
                       <span
                         className={`kp-tag ${r.paymentStatus === "PAID" ? "" : "amber"}`}
                       >
-                        {r.paymentStatusLabel || r.paymentStatus}
+                        {translateText(r.paymentStatusLabel || r.paymentStatus)}
                       </span>
                     </td>
-                    <td>{r.snackDietBadgeText || "—"}</td>
+                    <td>{translateText(r.snackDietBadgeText || "—")}</td>
                     <td>{r.kitchenNotes || "—"}</td>
                     <td>
                       <button
                         className="kp-button"
-                        aria-label={`Chi tiết đăng ký ${r.fullName}`}
+                        aria-label={translateText(`Chi tiết đăng ký ${r.fullName}`)}
                         onClick={() => setDetail(r)}
                       >
-                        <Eye size={14} />
-                        Chi tiết
-                      </button>
+                        <Eye size={14} />{translateText("Chi tiết")}</button>
                     </td>
                   </tr>
                 ))}
