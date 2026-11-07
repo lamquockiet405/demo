@@ -122,6 +122,16 @@ export class CreateNutritionRuleDto {
   @IsNumber()
   maxSodiumMg?: number;
 
+  @ApiPropertyOptional({ example: 800 })
+  @IsOptional()
+  @IsNumber()
+  waterMlMin?: number;
+
+  @ApiPropertyOptional({ example: 1100 })
+  @IsOptional()
+  @IsNumber()
+  waterMlMax?: number;
+
   @ApiPropertyOptional({ example: 1.0 })
   @IsOptional()
   @IsNumber()

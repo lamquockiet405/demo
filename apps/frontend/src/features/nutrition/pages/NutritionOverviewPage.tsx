@@ -111,7 +111,7 @@ export function NutritionOverviewPage() {
       <div className="bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-emerald-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Chuyên Gia Dinh Dưỡng • NutriKid")}</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-emerald-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Chuyên Gia Dinh Dưỡng • KidMeal")}</span>
             <span className="text-xs text-emerald-200">{translateText("Giám sát lâm sàng & Thể trạng")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
@@ -370,7 +370,7 @@ export function NutritionAlertsPage() {
       <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Cảnh Báo Lâm Sàng • NutriKid")}</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Cảnh Báo Lâm Sàng • KidMeal")}</span>
             <span className="text-xs text-teal-200">{translateText("Dị ứng thực phẩm & Thể lực WHO")}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">

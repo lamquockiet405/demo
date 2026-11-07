@@ -190,6 +190,8 @@ export interface AutoGeneratePayload {
   excludePreviousDays?: number;
   referenceMenuId?: string;
   includeBreakfast?: boolean;
+  includeLunch?: boolean;
+  includeAfternoonSnack?: boolean;
   previewOnly?: boolean;
   dailyPlan?: any[];
 }

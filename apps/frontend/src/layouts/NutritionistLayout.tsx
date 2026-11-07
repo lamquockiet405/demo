@@ -15,16 +15,18 @@ import {
 import { useAuthStore } from "../core/stores/auth.store";
 import { UserProfileModal } from "../features/auth/components/UserProfileModal";
 import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
+import { useSchoolBranding } from "../core/hooks/useSchoolBranding";
 
 export const NutritionistLayout: React.FC = () => {
   useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const schoolBranding = useSchoolBranding();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
-  // 10 Tabs ngang chuẩn xác theo ảnh thiết kế NutriKid
+  // 10 Tabs ngang chuẩn xác theo thiết kế KidMeal
   const navTabs = nutritionistNavigation;
 
   // Xác định tiêu đề breadcrumb theo URL hiện tại
@@ -49,27 +51,45 @@ export const NutritionistLayout: React.FC = () => {
       }
       className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans"
     >
-      {/* ─── 1. TOPBAR HEADER CHUẨN XÁC 100% THEO HÌNH ẢNH NUTRIKID ─── */}
+      {/* ─── 1. TOPBAR HEADER CHUẨN XÁC 100% THEO HÌNH ẢNH KIDMEAL ─── */}
       <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          {/* Hàng 1: Logo NutriKid, Search Bar trung tâm, Thông báo & Profile BS. Hoàng Mai Trang */}
+          {/* Hàng 1: Logo KidMeal, Search Bar trung tâm, Thông báo & Profile BS. Hoàng Mai Trang */}
           <div className="flex items-center justify-between h-16 gap-4">
-            {/* Logo bên trái: Khung xanh rêu bo tròn + Tên NutriKid + Badge BẢN CHUẨN */}
+            {/* Logo bên trái: Khung xanh rêu bo tròn + Tên KidMeal + Badge BẢN CHUẨN */}
             <div className="flex items-center gap-3 shrink-0">
               <Link
                 to="/nutritionist/dashboard"
                 className="flex items-center gap-2.5 group"
               >
-                <div className="w-10 h-10 rounded-2xl bg-[#0f382c] border border-emerald-800 flex items-center justify-center text-emerald-400 shadow-md group-hover:scale-105 transition-transform">
-                  <svg className="w-6 h-6 fill-emerald-300" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z" />
-                  </svg>
+                <div className="w-10 h-10 rounded-2xl bg-[#0f382c] border border-emerald-800 flex items-center justify-center text-emerald-400 shadow-md group-hover:scale-105 transition-transform overflow-hidden shrink-0">
+                  {schoolBranding.logoUrl ? (
+                    <img
+                      src={schoolBranding.logoUrl}
+                      alt={schoolBranding.name}
+                      className="w-full h-full object-contain p-1"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <svg className="w-6 h-6 fill-emerald-300" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z" />
+                    </svg>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-base text-slate-900 tracking-tight">{translateText("NutriKid")}{" "}
-                    <span className="hidden sm:inline text-slate-500 font-medium text-xs sm:text-sm">{translateText("- Dinh dưỡng Mầm non")}</span>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-base text-slate-900 tracking-tight leading-tight">
+                      {translateText("KidMeal")}
+                    </span>
+                    <span className="hidden md:inline bg-[#4eed9c]/25 border border-emerald-500/30 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      {translateText("BẢN CHUẨN")}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-teal-700 font-semibold truncate max-w-[150px] sm:max-w-[260px]" title={schoolBranding.name}>
+                    {schoolBranding.name}
                   </span>
-                  <span className="hidden md:inline bg-[#4eed9c]/25 border border-emerald-500/30 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">{translateText("BẢN CHUẨN")}</span>
                 </div>
               </Link>
             </div>

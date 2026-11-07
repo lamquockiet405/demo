@@ -11,12 +11,14 @@ import {
 } from "../../../core/api/auth.api";
 import { ForgotPasswordModal } from "../components/ForgotPasswordModal";
 import { LanguageSwitcher } from '../../../core/components/LanguageSwitcher';
+import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 
 export const LoginPage: React.FC = () => {
   useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuth, setTenantId, isAuthenticated, user } = useAuthStore();
+  const schoolBranding = useSchoolBranding();
 
   const getPortalPath = (roles?: any[]): string => {
     if (!roles || roles.length === 0) return "/dashboard";
@@ -152,10 +154,23 @@ export const LoginPage: React.FC = () => {
       {/* ─── Header Bar ──────────────────────────────────────────────────────── */}
       <header className="flex items-center justify-between px-6 py-3 bg-white/80 backdrop-blur-sm border-b border-slate-100 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md">
-            <span className="text-white font-black text-sm leading-none">{translateText("Kid")}<br />{translateText("Meal")}</span>
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md overflow-hidden shrink-0">
+            {schoolBranding.logoUrl ? (
+              <img
+                src={schoolBranding.logoUrl}
+                alt={schoolBranding.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <span className="text-white font-black text-sm leading-none">{translateText("Kid")}<br />{translateText("Meal")}</span>
+            )}
           </div>
-          <span className="hidden sm:inline text-sm font-semibold text-slate-600">{translateText("Bán trú yêu thương")}</span>
+          <span className="hidden sm:inline text-sm font-semibold text-slate-700 truncate max-w-[240px]" title={schoolBranding.name}>
+            {schoolBranding.name || translateText("Bán trú yêu thương")}
+          </span>
         </div>
         <div className="flex items-center gap-6 text-xs text-slate-500">
           <LanguageSwitcher />
@@ -164,8 +179,10 @@ export const LoginPage: React.FC = () => {
             <span>{translateText("Máy chủ vận hành ổn định")}</span>
           </div>
           <div className="hidden lg:flex items-center gap-1.5">
-            <Phone className="w-3.5 h-3.5" />
-            <span className="font-semibold text-slate-700">{translateText("Hotline: 1900 6826")}</span>
+            <Phone className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="font-semibold text-slate-700">
+              {schoolBranding.phone ? `Hotline: ${schoolBranding.phone}` : translateText("Hotline: 1900 6826")}
+            </span>
           </div>
         </div>
       </header>
@@ -183,7 +200,9 @@ export const LoginPage: React.FC = () => {
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-900/5 border border-white/60 px-8 py-10 sm:px-10">
             {/* Badge Bán trú */}
             <div className="flex justify-center mb-4">
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">{translateText("🏫 Hệ thống Quản trị Bán trú Mầm non KidMeal")}</span>
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+                {schoolBranding.name ? `🏫 ${schoolBranding.name} • KidMeal` : translateText("🏫 Hệ thống Quản trị Bán trú Mầm non KidMeal")}
+              </span>
             </div>
 
             {/* Heading */}
@@ -346,7 +365,7 @@ export const LoginPage: React.FC = () => {
 
       {/* ─── Footer ──────────────────────────────────────────────────────── */}
       <footer className="px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 relative z-10">
-        <p>{translateText("© 2024 KidMeal - Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non. All rights reserved.")}</p>
+        <p>© {new Date().getFullYear()} {schoolBranding.name || "KidMeal"} - {translateText("Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non. All rights reserved.")}</p>
         <div className="flex items-center gap-4">
           <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Hướng dẫn bảo mật")}</a>
           <span>•</span>

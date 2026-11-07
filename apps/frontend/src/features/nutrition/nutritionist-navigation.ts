@@ -17,11 +17,6 @@ export const nutritionistNavigation = [
     functions: "38–43",
   },
   {
-    label: "Tiêu chuẩn dinh dưỡng",
-    path: "/nutritionist/rules",
-    functions: "44",
-  },
-  {
     label: "Thực đơn tuần",
     path: "/nutritionist/menus",
     functions: "47–52,55",

@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
+import { useSchoolBranding } from "../core/hooks/useSchoolBranding";
 import "../features/kitchen/kitchen-portal.css";
 
 const teacherGroups = [
@@ -98,6 +99,7 @@ export function TeacherPortalLayout() {
   useLanguage();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const schoolBranding = useSchoolBranding();
 
   const current =
     teacherGroups
@@ -133,12 +135,25 @@ export function TeacherPortalLayout() {
         id="teacher-sidebar"
       >
         <NavLink to="/teacher/classes" className="kp-logo">
-          <span>
-            <GraduationCap size={28} />
+          <span className="overflow-hidden flex items-center justify-center w-8 h-8 rounded-xl bg-teal-500/10 shrink-0">
+            {schoolBranding.logoUrl ? (
+              <img
+                src={schoolBranding.logoUrl}
+                alt={schoolBranding.name}
+                className="w-full h-full object-contain p-0.5"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <GraduationCap size={24} className="text-teal-600" />
+            )}
           </span>
-          <div>
-            <strong>{translateText("KidMeal")}</strong>
-            <small>{translateText("GIÁO VIÊN MẦM NON (3-6 TUỔI)")}</small>
+          <div className="overflow-hidden">
+            <strong className="truncate block" title={schoolBranding.name}>
+              {schoolBranding.name}
+            </strong>
+            <small>{translateText("GIÁO VIÊN MẦM NON")}</small>
           </div>
         </NavLink>
 

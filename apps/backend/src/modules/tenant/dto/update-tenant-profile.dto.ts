@@ -5,6 +5,7 @@ export class UpdateTenantProfileDto {
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() code?: string;
   @IsOptional() @IsString() domain?: string;
+  @IsOptional() @IsString() logo?: string;
   @IsOptional() maxChildren?: number;
   @IsOptional() operationalSettings?: any;
 

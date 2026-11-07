@@ -29,9 +29,12 @@ import {
   X,
   UtensilsCrossed,
   ArrowRight,
+  PieChart,
 } from 'lucide-react';
 import { WeeklyMenu, MenuDishItem, MenuAdvisoryResponse, DishItem, weeklyMenusApi } from '../api/weekly-menus.api';
+import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 import { RecipeInspectionModal } from './RecipeInspectionModal';
+import { DailyMealBreakdownModal } from './DailyMealBreakdownModal';
 import { buildSubstituteCandidates, detectDishCategory } from '../utils/substitute-candidates';
 import { calculateSelectedDietNutrition } from '../utils/selected-diet-nutrition';
 import { getDishAllergyConflicts, groupAllergyConflictsByChild } from '../utils/allergy-conflicts';
@@ -180,6 +183,10 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   const [substituteStaffNote, setSubstituteStaffNote] = useState<string>('');
   const [isApplyingSub, setIsApplyingSub] = useState<boolean>(false);
   const [subApplySuccess, setSubApplySuccess] = useState<string | null>(null);
+
+  // State mở Modal Bảng thành phần ăn theo bữa (% calo & dinh dưỡng từng bữa trong ngày)
+  const [isDailyBreakdownOpen, setIsDailyBreakdownOpen] = useState<boolean>(false);
+  const [breakdownDay, setBreakdownDay] = useState<number | 'AVG'>(1);
 
   const [universalModalDish, setUniversalModalDish] = useState<{
     menuDish: MenuDishItem;
@@ -336,11 +343,26 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   };
 
   const hasMenuDishes = menu?.menuDishes?.some(dish => !dish.deletedAt);
+  const schoolBranding = useSchoolBranding();
+  const configuredMealTimes = schoolBranding.operationalSettings?.mealTimes || [
+    'BREAKFAST',
+    'LUNCH',
+    'AFTERNOON_SNACK',
+  ];
+
+  // Chỉ hiển thị các bữa ăn đã được trường bật trong Cấu hình trường (/settings)
+  // HOẶC bữa ăn đã có sẵn món trong thực đơn hiện tại (tránh làm mất hiển thị dữ liệu lịch sử)
+  const activeMealSlots = allMealSlots.filter(
+    (slot) =>
+      configuredMealTimes.includes(slot.key) ||
+      allDays.some((day) => getDishesInSlot(day.dayOfWeek, slot.key).length > 0),
+  );
+
   const days = showEmptySlots ? allDays : hasMenuDishes
-    ? allDays.filter(day => allMealSlots.some(slot => getDishesInSlot(day.dayOfWeek, slot.key).length > 0))
+    ? allDays.filter(day => activeMealSlots.some(slot => getDishesInSlot(day.dayOfWeek, slot.key).length > 0))
     : allDays.filter(day => !day.isWeekend);
-  const mealSlots = showEmptySlots || !hasMenuDishes ? allMealSlots
-    : allMealSlots.filter(slot => days.some(day => getDishesInSlot(day.dayOfWeek, slot.key).length > 0));
+  const mealSlots = showEmptySlots || !hasMenuDishes ? activeMealSlots
+    : activeMealSlots.filter(slot => days.some(day => getDishesInSlot(day.dayOfWeek, slot.key).length > 0));
 
   // Tính toán dinh dưỡng chi tiết & chuẩn xác cho từng ngày cho CẢ 4 NHÓM:
   // 1. Thực đơn tổng (Trẻ bình thường • Chuẩn TT 28/2016)
@@ -573,6 +595,19 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               {translateText(avgG.toFixed(1))}{translateText("g ")}<span className="text-[10px] text-teal-700 font-semibold">({avgGPct}%)</span>
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setBreakdownDay('AVG');
+              setIsDailyBreakdownOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-md shadow-sky-600/20 transition cursor-pointer shrink-0"
+            title={translateText("Xem bảng thành phần ăn trong ngày (% calo & dinh dưỡng từng bữa)")}
+          >
+            <PieChart className="w-4 h-4 text-sky-200" />
+            <span className="hidden sm:inline">{translateText("Bảng % calo theo bữa")}</span>
+          </button>
         </div>
       </div>
 
@@ -1073,6 +1108,17 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           {translateText(day.shortLabel)}
                         </span>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBreakdownDay(day.dayOfWeek);
+                          setIsDailyBreakdownOpen(true);
+                        }}
+                        className="p-0.5 rounded text-sky-600 hover:text-sky-800 hover:bg-sky-100 transition cursor-pointer"
+                        title={translateText("Xem bảng thành phần % calo từng bữa của ngày")}
+                      >
+                        <PieChart className="w-3 h-3" />
+                      </button>
                     </div>
                   </div>
                 </th>
@@ -1536,6 +1582,19 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       <ShieldAlert className="w-3 h-3" />
                       <span>{translateText("Dị ứng")}</span>
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBreakdownDay('AVG');
+                        setIsDailyBreakdownOpen(true);
+                      }}
+                      className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 shadow-2xs"
+                      title={translateText("Xem bảng thành phần ăn trong ngày (% calo & dinh dưỡng từng bữa)")}
+                    >
+                      <PieChart className="w-3 h-3 text-sky-600" />
+                      <span>{translateText("Bảng % theo bữa")}</span>
+                    </button>
                   </div>
                 </div>
               </td>
@@ -1911,6 +1970,14 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               }
             : undefined
         }
+      />
+
+      {/* Modal Bảng thành phần ăn trong một ngày (% calo & dinh dưỡng từng bữa) */}
+      <DailyMealBreakdownModal
+        isOpen={isDailyBreakdownOpen}
+        onClose={() => setIsDailyBreakdownOpen(false)}
+        menu={menu}
+        initialDay={typeof breakdownDay === 'number' ? breakdownDay : 1}
       />
 
       {/* ══════════════════════════════════════════════════════════════════════════════════ */}

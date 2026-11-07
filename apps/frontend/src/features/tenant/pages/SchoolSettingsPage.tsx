@@ -129,7 +129,27 @@ export const SchoolSettingsPage: React.FC = () => {
 
   const applyProfileState = useCallback((data: TenantProfile) => {
     setProfile(data);
-    if (data.name) localStorage.setItem("school_name", data.name);
+    if (data.name) {
+      localStorage.setItem("school_name", data.name);
+      document.title = `${data.name} · KidMeal`;
+    }
+    const logoUrl = data.branding?.logoUrl || "";
+    localStorage.setItem("school_logo", logoUrl);
+    if (data.phone) localStorage.setItem("school_phone", data.phone);
+    if (data.address) localStorage.setItem("school_address", data.address);
+    if (data.contactEmail) localStorage.setItem("school_email", data.contactEmail);
+    if (data.branding?.primaryColor) localStorage.setItem("school_primary_color", data.branding.primaryColor);
+
+    if (logoUrl) {
+      let favicon = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+      if (!favicon) {
+        favicon = document.createElement("link");
+        favicon.rel = "icon";
+        document.getElementsByTagName("head")[0].appendChild(favicon);
+      }
+      favicon.href = logoUrl;
+    }
+
     if (data.operationalSettings) {
       setOperational({
         mealTimes: data.operationalSettings.mealTimes?.length
@@ -150,6 +170,10 @@ export const SchoolSettingsPage: React.FC = () => {
     window.dispatchEvent(
       new CustomEvent("tenant-profile-updated", { detail: data }),
     );
+    window.dispatchEvent(
+      new CustomEvent("school-branding-updated", { detail: data }),
+    );
+    window.dispatchEvent(new Event("storage"));
   }, []);
 
   const fetchProfile = useCallback(async () => {

@@ -18,8 +18,8 @@ export class NutritionIntakeStandard {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @Column({ name: 'school_id', type: 'bigint', default: 1, transformer: BigIntTransformer })
-  schoolId: number;
+  @Column({ name: 'school_id', type: 'bigint', nullable: true, transformer: BigIntTransformer })
+  schoolId: number | null;
 
   @Column({ name: 'standard_name', length: 200 })
   standardName: string;
@@ -87,6 +87,13 @@ export class NutritionIntakeStandard {
   // Phụ lục 6: Vitamin A (µg RAE/ngày)
   @Column({ name: 'vitamin_a_rae_mcg_min', type: 'numeric', precision: 8, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
   vitaminARaeMcgMin: number | null;
+
+  // Nhu cầu nước khuyến nghị (ml/ngày) theo 01/VBHN-BGDĐT
+  @Column({ name: 'water_ml_min', type: 'numeric', precision: 8, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
+  waterMlMin: number | null;
+
+  @Column({ name: 'water_ml_max', type: 'numeric', precision: 8, scale: 2, nullable: true, transformer: NullableIntakeNumericTransformer })
+  waterMlMax: number | null;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;

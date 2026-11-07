@@ -68,6 +68,13 @@ export const principalNavigation = [
   },
   {
     group: "Dinh dưỡng & bữa ăn",
+    label: "Tiêu chuẩn dinh dưỡng",
+    path: "/nutrition-standards",
+    icon: Scale,
+    functions: "44",
+  },
+  {
+    group: "Dinh dưỡng & bữa ăn",
     label: "Duyệt & công bố thực đơn",
     path: "/menu-approval",
     icon: FileCheck2,

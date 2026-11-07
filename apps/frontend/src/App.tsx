@@ -192,8 +192,8 @@ export const App: React.FC = () => {
             element={<Navigate to="/nutritionist/menus" replace />}
           />
           <Route path="menus" element={<WeeklyMenuManagementPage />} />
-          <Route path="rules" element={<NutritionRulesPage />} />
-          <Route path="food-group-rules" element={<Navigate to="/nutritionist/rules" replace />} />
+          <Route path="rules" element={<Navigate to="/nutritionist/dashboard" replace />} />
+          <Route path="food-group-rules" element={<Navigate to="/nutritionist/dashboard" replace />} />
           <Route
             path="allergens"
             element={<NutritionistAllergyManagementPage />}
@@ -271,7 +271,7 @@ export const App: React.FC = () => {
           path="/nutrition-rules"
           element={
             <ProtectedRoute>
-              <Navigate to="/nutritionist/rules" replace />
+              <Navigate to="/nutrition-standards" replace />
             </ProtectedRoute>
           }
         />
@@ -279,9 +279,9 @@ export const App: React.FC = () => {
           path="/food-group-rules"
           element={
             <ProtectedRoute
-              allowedRoles={["NUTRITIONIST", "SUPER_ADMIN", "PRINCIPAL"]}
+              allowedRoles={["SUPER_ADMIN", "PRINCIPAL", "SCHOOL_MANAGEMENT", "SCHOOL_MANAGER"]}
             >
-              <Navigate to="/nutritionist/rules" replace />
+              <Navigate to="/nutrition-standards" replace />
             </ProtectedRoute>
           }
         />
@@ -331,7 +331,7 @@ export const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/nutrition-standards" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/nutrition-standards" element={<NutritionRulesPage />} />
           <Route
             path="/menu-evaluation"
             element={<Navigate to="/menu-approval" replace />}

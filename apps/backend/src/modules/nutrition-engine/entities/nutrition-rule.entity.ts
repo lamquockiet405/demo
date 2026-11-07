@@ -144,6 +144,26 @@ export class NutritionalStandard {
   })
   maxSodiumMg: number;
 
+  @Column({
+    name: "water_ml_min",
+    type: "numeric",
+    precision: 8,
+    scale: 2,
+    nullable: true,
+    transformer: NumericTransformer,
+  })
+  waterMlMin: number | null;
+
+  @Column({
+    name: "water_ml_max",
+    type: "numeric",
+    precision: 8,
+    scale: 2,
+    nullable: true,
+    transformer: NumericTransformer,
+  })
+  waterMlMax: number | null;
+
   @Column({ length: 20, default: "ACTIVE" })
   status: string;
 }

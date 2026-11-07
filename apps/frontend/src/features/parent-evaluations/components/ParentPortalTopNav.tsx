@@ -46,6 +46,38 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
   const schoolBranding = useSchoolBranding();
 
+  const theme = React.useMemo(() => {
+    switch (schoolBranding.primaryColor) {
+      case "YELLOW":
+        return {
+          gradient: "from-amber-500 to-yellow-500",
+          activeTab: "bg-amber-600 text-white font-bold shadow-xs",
+          hoverTab: "text-slate-600 hover:text-amber-700 hover:bg-slate-50 font-semibold",
+          titleColor: "text-amber-900",
+          subColor: "text-amber-700",
+          badgeColor: "text-amber-800 bg-amber-50 border-amber-200",
+        };
+      case "ORANGE":
+        return {
+          gradient: "from-orange-500 to-amber-500",
+          activeTab: "bg-orange-600 text-white font-bold shadow-xs",
+          hoverTab: "text-slate-600 hover:text-orange-700 hover:bg-slate-50 font-semibold",
+          titleColor: "text-orange-900",
+          subColor: "text-orange-700",
+          badgeColor: "text-orange-800 bg-orange-50 border-orange-200",
+        };
+      default:
+        return {
+          gradient: "from-teal-600 to-emerald-500",
+          activeTab: "bg-teal-600 text-white font-bold shadow-xs",
+          hoverTab: "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-semibold",
+          titleColor: "text-teal-800",
+          subColor: "text-teal-700",
+          badgeColor: "text-teal-700 bg-teal-50 border-teal-200",
+        };
+    }
+  }, [schoolBranding.primaryColor]);
+
   const currentTab = (() => {
     const p = location.pathname;
     if (p.includes("/growth")) return "growth";
@@ -67,7 +99,7 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
               to="/child-menu-consumption"
               className="flex items-center gap-2 hover:opacity-90 transition"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 p-0.5 flex items-center justify-center text-white shadow-sm overflow-hidden shrink-0">
+              <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${theme.gradient} p-0.5 flex items-center justify-center text-white shadow-sm overflow-hidden shrink-0`}>
                 {schoolBranding.logoUrl ? (
                   <img
                     src={schoolBranding.logoUrl}
@@ -82,17 +114,17 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-teal-800 leading-none">{translateText("Kid")}<span className="text-emerald-500">{translateText("Meal")}</span>
+                <span className={`text-xl font-black tracking-tight ${theme.titleColor} leading-none`}>{translateText("Kid")}<span className="text-emerald-500">{translateText("Meal")}</span>
                 </span>
                 <span
-                  className="text-[10px] text-teal-700 font-semibold truncate max-w-[110px] sm:max-w-[160px]"
+                  className={`text-[10px] ${theme.subColor} font-semibold truncate max-w-[110px] sm:max-w-[160px]`}
                   title={translateText(schoolBranding.name)}
                 >
                   {schoolBranding.name}
                 </span>
               </div>
             </Link>
-            <span className="hidden sm:inline-flex text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">{translateText("Cổng Phụ Huynh")}</span>
+            <span className={`hidden sm:inline-flex text-[11px] font-bold ${theme.badgeColor} border px-2.5 py-0.5 rounded-full uppercase tracking-wider`}>{translateText("Cổng Phụ Huynh")}</span>
 
             {/* Child Profile Button (UC26) */}
             <button
@@ -126,8 +158,8 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
             to="/child-menu-consumption"
             className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
               currentTab === "menu-consumption" || currentTab === "published-menus"
-                ? "bg-teal-600 text-white font-bold shadow-xs"
-                : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-semibold"
+                ? theme.activeTab
+                : theme.hoverTab
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
@@ -139,8 +171,8 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
             to="/declare-allergy"
             className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
               currentTab === "allergies"
-                ? "bg-teal-600 text-white font-bold shadow-xs"
-                : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-semibold"
+                ? theme.activeTab
+                : theme.hoverTab
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5" />
@@ -152,8 +184,8 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
             to="/parent/growth"
             className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
               currentTab === "growth"
-                ? "bg-teal-600 text-white font-bold shadow-xs"
-                : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-semibold"
+                ? theme.activeTab
+                : theme.hoverTab
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
@@ -165,8 +197,8 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
             to="/parent/alerts"
             className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
               currentTab === "alerts"
-                ? "bg-teal-600 text-white font-bold shadow-xs"
-                : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-semibold"
+                ? theme.activeTab
+                : theme.hoverTab
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
@@ -191,8 +223,8 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
             to="/submit-evaluation"
             className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
               currentTab === "evaluation"
-                ? "bg-teal-600 text-white font-bold shadow-xs"
-                : "text-slate-600 hover:text-teal-700 hover:bg-slate-50 font-semibold"
+                ? theme.activeTab
+                : theme.hoverTab
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />

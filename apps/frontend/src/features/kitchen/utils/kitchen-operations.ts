@@ -29,20 +29,22 @@ export type SampleState = "STORED" | "DUE" | "DISPOSED" | "UNKNOWN";
 export function getSampleState(
   sample: { status?: string; storedAt?: string | null },
   now = Date.now(),
+  retentionHours = 24,
 ): SampleState {
   if (sample.status === "DISPOSED") return "DISPOSED";
   if (!sample.storedAt || !Number.isFinite(Date.parse(sample.storedAt)))
     return "UNKNOWN";
-  return now - Date.parse(sample.storedAt) >= 24 * 60 * 60 * 1000
+  return now - Date.parse(sample.storedAt) >= retentionHours * 60 * 60 * 1000
     ? "DUE"
     : "STORED";
 }
 
 export function sampleDueAt(
   storedAt: string | null | undefined,
+  retentionHours = 24,
 ): string | null {
   if (!storedAt || !Number.isFinite(Date.parse(storedAt))) return null;
-  const due = new Date(Date.parse(storedAt) + 86400000);
+  const due = new Date(Date.parse(storedAt) + retentionHours * 3600000);
   return Number.isFinite(due.getTime()) ? due.toISOString() : null;
 }
 

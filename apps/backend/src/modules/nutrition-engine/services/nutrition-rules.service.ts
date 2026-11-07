@@ -37,6 +37,8 @@ export class NutritionRulesService {
       minIronMg: r.minIronMg,
       minZincMg: r.minZincMg,
       maxSodiumMg: r.maxSodiumMg,
+      waterMlMin: r.waterMlMin != null ? Number(r.waterMlMin) : null,
+      waterMlMax: r.waterMlMax != null ? Number(r.waterMlMax) : null,
       isActive: r.status === "ACTIVE",
       isDeleted: r.status === "INACTIVE",
       status: r.status,
@@ -81,6 +83,11 @@ export class NutritionRulesService {
     next.ruleName = dto.name ?? current.ruleName ?? null;
     for (const key of ["minCalciumMg", "minIronMg", "minZincMg", "maxSodiumMg"])
       next[key] = dto[key] ?? current[key] ?? 0;
+    if (dto.waterMlMin !== undefined) next.waterMlMin = dto.waterMlMin != null && dto.waterMlMin !== "" ? Number(dto.waterMlMin) : null;
+    if (dto.waterMlMax !== undefined) next.waterMlMax = dto.waterMlMax != null && dto.waterMlMax !== "" ? Number(dto.waterMlMax) : null;
+    if (next.waterMlMin != null && next.waterMlMax != null && next.waterMlMin > next.waterMlMax) {
+      throw new BadRequestException("Nhu cầu nước tối thiểu không được lớn hơn tối đa.");
+    }
     next.status =
       dto.status ??
       (dto.isActive === undefined

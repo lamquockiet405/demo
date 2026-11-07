@@ -1,7 +1,7 @@
 {
   "name": "@kidsnutri/backend",
   "version": "1.0.0",
-  "description": "KidsNutriJournal - NestJS Backend Core",
+  "description": "KidMeal - NestJS Backend Core",
   "private": true,
   "scripts": {
     "build": "nest build",

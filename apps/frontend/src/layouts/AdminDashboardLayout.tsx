@@ -27,7 +27,7 @@ import { UserProfileModal } from "../features/auth/components/UserProfileModal";
 import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
 import { LogoutButton } from "../core/components/LogoutButton";
 import { useAuthStore } from "../core/stores/auth.store";
-import { tenantApi, TenantProfile } from "../core/api/tenant.api";
+import { useSchoolBranding } from "../core/hooks/useSchoolBranding";
 
 function getInitials(name?: string): string {
   if (!name || !name.trim()) return "BGH";
@@ -50,6 +50,10 @@ export const AdminDashboardLayout: React.FC = () => {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [sidebarOpen]);
   const { user } = useAuthStore();
+  const schoolBranding = useSchoolBranding();
+  const schoolName = schoolBranding.name;
+  const schoolLogo = schoolBranding.logoUrl;
+  const schoolPhone = schoolBranding.phone;
   const canManageParents = (user?.roles || []).some((role) =>
     [
       "SCHOOL_MANAGER",
@@ -59,46 +63,17 @@ export const AdminDashboardLayout: React.FC = () => {
     ].includes(role.toUpperCase()),
   );
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [schoolName, setSchoolName] = useState<string>(
-    () => localStorage.getItem("school_name") || "Hệ thống Bán trú KidMeal",
-  );
-  const [schoolLogo, setSchoolLogo] = useState<string>("");
-  const [schoolPhone, setSchoolPhone] = useState<string>("");
 
-  useEffect(() => {
-    let mounted = true;
-    tenantApi
-      .getProfile()
-      .then((profile) => {
-        if (!mounted || !profile) return;
-        if (profile.name) {
-          setSchoolName(profile.name);
-          localStorage.setItem("school_name", profile.name);
-        }
-        setSchoolLogo(profile.branding?.logoUrl || "");
-        setSchoolPhone(profile.phone || "");
-      })
-      .catch(() => {
-        // Giữ nguyên giá trị từ localStorage nếu chưa tải được
-      });
+  // Danh mục menu Ban Giám Hiệu (gắn retention hours thực tế từ cấu hình trường)
+  const retentionHours = schoolBranding.operationalSettings?.foodRetentionHours || 24;
+  const navItems = React.useMemo(() => {
+    return principalNavigation.map((item) =>
+      item.path === "/food-samples"
+        ? { ...item, label: `Lưu mẫu thực phẩm ${retentionHours} giờ` }
+        : item,
+    );
+  }, [retentionHours]);
 
-    const handleTenantUpdated = (e: Event) => {
-      const detail = (e as CustomEvent<TenantProfile>).detail;
-      if (detail) {
-        if (detail.name) setSchoolName(detail.name);
-        setSchoolLogo(detail.branding?.logoUrl || "");
-        setSchoolPhone(detail.phone || "");
-      }
-    };
-    window.addEventListener("tenant-profile-updated", handleTenantUpdated);
-    return () => {
-      mounted = false;
-      window.removeEventListener("tenant-profile-updated", handleTenantUpdated);
-    };
-  }, []);
-
-  // Danh mục menu Ban Giám Hiệu
-  const navItems = principalNavigation;
   const getBreadcrumbTitle = () =>
     navItems.find((item) => location.pathname === item.path)?.label ||
     "Cổng Ban Giám Hiệu";

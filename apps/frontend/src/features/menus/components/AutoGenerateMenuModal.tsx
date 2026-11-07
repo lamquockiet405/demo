@@ -23,6 +23,7 @@ import {
   AutoGeneratePreviewResponse,
   WeeklyMenu,
 } from "../api/weekly-menus.api";
+import { useSchoolBranding } from "../../../core/hooks/useSchoolBranding";
 
 interface AutoGenerateMenuModalProps {
   isOpen: boolean;
@@ -40,6 +41,19 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
   existingMenus = [],
 }) => {
   useLanguage();
+  const schoolBranding = useSchoolBranding();
+  const schoolMealTimes = schoolBranding.operationalSettings?.mealTimes || [
+    "BREAKFAST",
+    "LUNCH",
+    "AFTERNOON_SNACK",
+  ];
+  const schoolHasBreakfast = schoolMealTimes.includes("BREAKFAST");
+  const schoolHasLunch = schoolMealTimes.includes("LUNCH");
+  const schoolHasAfternoonSnack = schoolMealTimes.includes("AFTERNOON_SNACK");
+  const cycleWeeks =
+    Number(schoolBranding.operationalSettings?.standardWeeklyCycleLength) || 2;
+  const defaultExcludeDays = cycleWeeks * 7;
+
   // Form State
   const [targetAgeGroup, setTargetAgeGroup] = useState<
     "KINDERGARTEN_3_5Y" | "TODDLER_18_36M"
@@ -47,14 +61,21 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
   const [daysCount, setDaysCount] = useState<number>(5);
   const [cycleWeekNumber, setCycleWeekNumber] = useState<number>(() => {
     return currentMenu?.cycleWeekNumber
-      ? (currentMenu.cycleWeekNumber % 52) + 1
+      ? currentMenu.cycleWeekNumber + 1
       : 1;
   });
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [title, setTitle] = useState<string>("");
-  const [excludePreviousDays, setExcludePreviousDays] = useState<number>(14);
-  const [includeBreakfast, setIncludeBreakfast] = useState<boolean>(true);
+  const [excludePreviousDays, setExcludePreviousDays] =
+    useState<number>(defaultExcludeDays);
+
+  // Đồng bộ chu kỳ khi mở modal hoặc khi cấu hình trường thay đổi
+  useEffect(() => {
+    if (isOpen) {
+      setExcludePreviousDays(cycleWeeks * 7);
+    }
+  }, [isOpen, cycleWeeks]);
 
   // Preview & Processing State
   const [loadingPreview, setLoadingPreview] = useState<boolean>(false);
@@ -106,10 +127,10 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
     const newMonStr = baseDate.toISOString().split("T")[0];
 
     const fri = new Date(baseDate);
-    fri.setDate(baseDate.getDate() + (daysCount === 6 ? 5 : 4));
+    fri.setDate(baseDate.getDate() + 4);
     const newFriStr = fri.toISOString().split("T")[0];
 
-    const nextWeek = (cycleWeekNumber % 52) + 1;
+    const nextWeek = cycleWeekNumber + 1;
     setStartDate(newMonStr);
     setEndDate(newFriStr);
     setCycleWeekNumber(nextWeek);
@@ -120,59 +141,84 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
     setErrorMsg(null);
   };
 
-  // Khởi tạo ngày: Tự động tìm tuần trống đầu tiên gần nhất
+  // Khởi tạo ngày: Tự động bắt đầu với chu kỳ mới nhất từ danh sách thực đơn đã có
   useEffect(() => {
     if (isOpen) {
-      const now = new Date();
-      const day = now.getDay();
-      const diffToMonday = day === 0 ? 1 : (8 - day) % 7 || 7;
-      const initialMon = new Date(now);
-      initialMon.setDate(now.getDate() + diffToMonday);
+      const validMenus = (existingMenus || []).filter(
+        (m) => m.status !== "REJECTED" && m.status !== "ARCHIVED",
+      );
 
-      // Thử tìm tuần trống trong 12 tuần kế tiếp
-      let chosenMonStr = "";
-      let chosenFriStr = "";
-      let weekOffset = 0;
+      // Lọc các thực đơn cùng nhóm tuổi nếu có
+      const isTargetToddler = targetAgeGroup === "TODDLER_18_36M";
+      const sameAgeMenus = validMenus.filter((m) => {
+        if (!m.targetAgeGroup || m.targetAgeGroup === "ALL_AGES") return true;
+        const isMageToddler =
+          m.targetAgeGroup === "TODDLER_18_36M" || m.targetAgeGroup === "NHA_TRE";
+        return isMageToddler === isTargetToddler;
+      });
 
-      for (let i = 0; i < 12; i++) {
-        const testMon = new Date(initialMon);
-        testMon.setDate(initialMon.getDate() + i * 7);
-        const testFri = new Date(testMon);
-        testFri.setDate(testMon.getDate() + (daysCount === 6 ? 5 : 4));
+      const poolMenus = sameAgeMenus.length > 0 ? sameAgeMenus : validMenus;
 
-        const mStr = testMon.toISOString().split("T")[0];
-        const fStr = testFri.toISOString().split("T")[0];
+      let latestMenu: WeeklyMenu | null = null;
+      let latestEndMs = 0;
+      let maxWeekNum = 0;
 
-        const conflict = findOverlappingMenu(mStr, fStr, targetAgeGroup);
-        if (!conflict) {
-          chosenMonStr = mStr;
-          chosenFriStr = fStr;
-          weekOffset = i;
-          break;
+      for (const m of poolMenus) {
+        const endStr = m.endDate || m.startDate;
+        if (endStr) {
+          const ms = new Date(endStr).getTime();
+          if (ms > latestEndMs) {
+            latestEndMs = ms;
+            latestMenu = m;
+          }
         }
+        let w = m.cycleWeekNumber || 0;
+        if (!w && m.title) {
+          const match = m.title.match(/Tuần\s*(\d+)/i);
+          if (match) w = parseInt(match[1], 10);
+        }
+        if (w > maxWeekNum) maxWeekNum = w;
       }
 
-      if (!chosenMonStr) {
-        chosenMonStr = initialMon.toISOString().split("T")[0];
-        const f = new Date(initialMon);
-        f.setDate(initialMon.getDate() + (daysCount === 6 ? 5 : 4));
-        chosenFriStr = f.toISOString().split("T")[0];
+      let chosenMonDate: Date;
+      let nextWeekNumber: number;
+
+      if (latestMenu && latestEndMs > 0) {
+        // Lấy ngày Thứ Hai ngay sau ngày kết thúc của thực đơn mới nhất
+        const lastEnd = new Date(latestMenu.endDate || latestMenu.startDate);
+        const nextMon = new Date(lastEnd);
+        do {
+          nextMon.setDate(nextMon.getDate() + 1);
+        } while (nextMon.getDay() !== 1);
+        chosenMonDate = nextMon;
+
+        nextWeekNumber = maxWeekNum > 0 ? maxWeekNum + 1 : 1;
+      } else {
+        // Dự phòng khi chưa có thực đơn nào: Thứ Hai tới gần nhất
+        const now = new Date();
+        const day = now.getDay();
+        const diffToMonday = day === 0 ? 1 : (8 - day) % 7 || 7;
+        const nextMon = new Date(now);
+        nextMon.setDate(now.getDate() + diffToMonday);
+        chosenMonDate = nextMon;
+        nextWeekNumber = 1;
       }
 
-      const initialWeekNum = currentMenu?.cycleWeekNumber
-        ? (currentMenu.cycleWeekNumber + weekOffset) % 52 || 1
-        : 1 + weekOffset;
+      const chosenMonStr = chosenMonDate.toISOString().split("T")[0];
+      const endD = new Date(chosenMonDate);
+      endD.setDate(chosenMonDate.getDate() + 4);
+      const chosenFriStr = endD.toISOString().split("T")[0];
 
       setStartDate(chosenMonStr);
       setEndDate(chosenFriStr);
-      setCycleWeekNumber(initialWeekNum);
+      setCycleWeekNumber(nextWeekNumber);
       setTitle(
-        `Thực đơn Bán trú Thông minh Tuần ${initialWeekNum} (${targetAgeGroup === "KINDERGARTEN_3_5Y" ? "Mẫu giáo" : "Nhà trẻ"})`,
+        `Thực đơn Bán trú Thông minh Tuần ${nextWeekNumber} (${targetAgeGroup === "KINDERGARTEN_3_5Y" ? "Mẫu giáo" : "Nhà trẻ"})`,
       );
       setPreviewData(null);
       setErrorMsg(null);
     }
-  }, [isOpen, daysCount, targetAgeGroup]);
+  }, [isOpen, daysCount, targetAgeGroup, existingMenus]);
 
   // Handle DaysCount change -> update endDate
   const handleDaysCountChange = (count: number) => {
@@ -205,7 +251,9 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
         daysCount,
         cycleWeekNumber,
         excludePreviousDays,
-        includeBreakfast,
+        includeBreakfast: schoolHasBreakfast,
+        includeLunch: schoolHasLunch,
+        includeAfternoonSnack: schoolHasAfternoonSnack,
         previewOnly: true,
       };
 
@@ -242,7 +290,9 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
         daysCount,
         cycleWeekNumber,
         excludePreviousDays,
-        includeBreakfast,
+        includeBreakfast: schoolHasBreakfast,
+        includeLunch: schoolHasLunch,
+        includeAfternoonSnack: schoolHasAfternoonSnack,
         previewOnly: false,
         dailyPlan: previewData?.dailySummary,
       };
@@ -342,45 +392,10 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
               {/* Số ngày bán trú */}
               <div>
                 <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Số ngày bán trú")}</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleDaysCountChange(5)}
-                    className={`py-2 text-xs font-bold rounded-xl border transition ${
-                      daysCount === 5
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >{translateText("5 ngày (T2 - T6)")}</button>
-                  <button
-                    type="button"
-                    onClick={() => handleDaysCountChange(6)}
-                    className={`py-2 text-xs font-bold rounded-xl border transition ${
-                      daysCount === 6
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >{translateText("6 ngày (+T7)")}</button>
+                <div className="w-full h-[38px] px-3 text-xs font-bold rounded-xl border border-emerald-600 bg-emerald-600 text-white shadow-xs flex items-center justify-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {translateText("5 ngày (T2 - T6)")}
                 </div>
-              </div>
-
-              {/* Tuần áp dụng */}
-              <div>
-                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Tuần chu kỳ (1 - 52)")}</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="52"
-                  value={cycleWeekNumber}
-                  onChange={(e) => {
-                    const val = Number(e.target.value) || 1;
-                    setCycleWeekNumber(val);
-                    setTitle(
-                      `Thực đơn Bán trú Thông minh Tuần ${val} (${targetAgeGroup === "KINDERGARTEN_3_5Y" ? "Mẫu giáo" : "Nhà trẻ"})`,
-                    );
-                  }}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
               </div>
 
               {/* Ngày bắt đầu */}
@@ -389,56 +404,38 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setStartDate(val);
+                    if (val) {
+                      const d = new Date(val);
+                      d.setDate(d.getDate() + 4);
+                      setEndDate(d.toISOString().split("T")[0]);
+                    }
+                  }}
+                  className="w-full h-[38px] px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
 
               {/* Ngày kết thúc */}
               <div>
-                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Ngày kết thúc")}</label>
+                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Ngày kết thúc (Thứ 6)")}</label>
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  readOnly
+                  disabled
+                  className="w-full h-[38px] px-3 py-2 rounded-xl border border-slate-200 bg-slate-100 text-xs font-semibold text-slate-600 cursor-not-allowed"
                 />
               </div>
 
-              {/* Quy tắc chống ngán 2 tuần */}
-              <div>
-                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Quy tắc chống ngán")}</label>
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+              {/* Quy tắc chống ngán */}
+              <div className="sm:col-span-2">
+                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Quy tắc chống ngán (Từ cấu hình trường)")}</label>
+                <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold h-[38px]">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{translateText("Cách ly 2 tuần (")}{excludePreviousDays}{translateText(" ngày)")}</span>
+                  <span>{translateText(`Cách ly ${cycleWeeks} tuần (`)}{excludePreviousDays}{translateText(" ngày - không lặp món tuần trước)")}</span>
                 </div>
-              </div>
-
-              <div className="sm:col-span-2 lg:col-span-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900">
-                <p className="font-bold">{translateText("Bữa trưa luôn có cơm")}</p>
-                <p className="mt-1">{translateText("Thứ Hai–Thứ Năm: cơm thường kèm món mặn. Thứ Sáu: cơm chiên Dương Châu hoặc cơm chiên hải sản, không kèm món mặn riêng.")}</p>
-              </div>
-
-              {/* Tùy chọn Buổi sáng (09:00) */}
-              <div className="sm:col-span-2 lg:col-span-4 flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold">
-                    <Sun className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <span className="text-xs sm:text-sm font-bold text-slate-800 block">{translateText("Bao gồm Buổi sáng (09:00)")}</span>
-                    <span className="text-[11px] text-slate-500 font-medium">{translateText("Tự động phân bổ món sáng (bún/phở/cháo/súp/sữa) lúc 09:00 theo chuẩn dinh dưỡng mầm non")}</span>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={includeBreakfast}
-                    onChange={(e) => setIncludeBreakfast(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
-                </label>
               </div>
 
               {/* Cảnh báo nếu trùng lặp thời gian với thực đơn đã có */}
@@ -533,7 +530,7 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                   <span className="text-[10px] text-emerald-700 font-bold block mt-0.5">{translateText("0 món trùng lặp giữa các ngày")}</span>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-slate-500 block">{translateText("Chu kỳ 2 tuần")}</span>
+                  <span className="text-[11px] font-semibold text-slate-500 block">{translateText(`Chu kỳ ${cycleWeeks} tuần`)}</span>
                   <span className="text-base font-extrabold text-emerald-800">{translateText("Không lặp lại món")}</span>
                   <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
                     {translateText(previewData.antiFatigueReport.cycleCompliance)}
@@ -593,52 +590,56 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                       )}
 
                       {/* Bữa Trưa */}
-                      <div className="space-y-1.5 border-t border-slate-100 pt-2 flex-1">
-                        <div className="flex items-center gap-1 text-[10px] font-black text-teal-800">
-                          <Utensils className="w-3 h-3 text-teal-600" />
-                          <span>{translateText("BỮA TRƯA (11:00)")}</span>
+                      {day.dishes.some((d) => d.mealTime === "LUNCH") && (
+                        <div className="space-y-1.5 border-t border-slate-100 pt-2 flex-1">
+                          <div className="flex items-center gap-1 text-[10px] font-black text-teal-800">
+                            <Utensils className="w-3 h-3 text-teal-600" />
+                            <span>{translateText("BỮA TRƯA (11:00)")}</span>
+                          </div>
+                          <div className="space-y-1 text-[11px]">
+                            {day.dishes
+                              .filter((d) => d.mealTime === "LUNCH")
+                              .map((dish, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-1.5 rounded-lg bg-slate-50 border border-slate-100/90 text-slate-800 text-[10.5px]"
+                                >
+                                  <span className="font-semibold block leading-tight">
+                                    {dish.dishName}
+                                  </span>
+                                  <span className="text-[9.5px] text-slate-400 font-medium">
+                                    {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
+                                </div>
+                              ))}
+                          </div>
                         </div>
-                        <div className="space-y-1 text-[11px]">
-                          {day.dishes
-                            .filter((d) => d.mealTime === "LUNCH")
-                            .map((dish, idx) => (
-                              <div
-                                key={idx}
-                                className="p-1.5 rounded-lg bg-slate-50 border border-slate-100/90 text-slate-800 text-[10.5px]"
-                              >
-                                <span className="font-semibold block leading-tight">
-                                  {dish.dishName}
-                                </span>
-                                <span className="text-[9.5px] text-slate-400 font-medium">
-                                  {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
+                      )}
 
                       {/* Bữa Xế Chiều */}
-                      <div className="space-y-1.5 border-t border-slate-100 pt-2">
-                        <div className="flex items-center gap-1 text-[10px] font-black text-purple-800">
-                          <Coffee className="w-3 h-3 text-purple-600" />
-                          <span>{translateText("XẾ CHIỀU (14:30)")}</span>
+                      {day.dishes.some((d) => d.mealTime === "AFTERNOON_SNACK") && (
+                        <div className="space-y-1.5 border-t border-slate-100 pt-2">
+                          <div className="flex items-center gap-1 text-[10px] font-black text-purple-800">
+                            <Coffee className="w-3 h-3 text-purple-600" />
+                            <span>{translateText("XẾ CHIỀU (14:30)")}</span>
+                          </div>
+                          <div className="space-y-1 text-[11px]">
+                            {day.dishes
+                              .filter((d) => d.mealTime === "AFTERNOON_SNACK")
+                              .map((dish, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-1.5 rounded-lg bg-purple-50/50 border border-purple-100/80 text-slate-800 text-[10.5px]"
+                                >
+                                  <span className="font-semibold block leading-tight">
+                                    {dish.dishName}
+                                  </span>
+                                  <span className="text-[9.5px] text-slate-400 font-medium">
+                                    {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
+                                </div>
+                              ))}
+                          </div>
                         </div>
-                        <div className="space-y-1 text-[11px]">
-                          {day.dishes
-                            .filter((d) => d.mealTime === "AFTERNOON_SNACK")
-                            .map((dish, idx) => (
-                              <div
-                                key={idx}
-                                className="p-1.5 rounded-lg bg-purple-50/50 border border-purple-100/80 text-slate-800 text-[10.5px]"
-                              >
-                                <span className="font-semibold block leading-tight">
-                                  {dish.dishName}
-                                </span>
-                                <span className="text-[9.5px] text-slate-400 font-medium">
-                                  {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
+                      )}
 
                       {/* Dinh Dưỡng Cuối Cột Của Ngày */}
                       <div className="pt-2 border-t border-slate-100 text-[10px] space-y-1 bg-slate-50/80 -mx-3.5 -mb-3.5 p-2.5">

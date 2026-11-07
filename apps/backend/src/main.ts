@@ -57,7 +57,7 @@ async function bootstrap() {
 
   // Swagger Documentation
   const config = new DocumentBuilder()
-    .setTitle('KidMeal (NutriBud) API')
+    .setTitle('KidMeal API')
     .setDescription(
       'Hệ thống Quản lý Dinh dưỡng và Bữa ăn Bán trú tại Trường Mầm non theo Thông tư 28/2016/TT-BGDĐT & QĐ 1246/QĐ-BYT',
     )

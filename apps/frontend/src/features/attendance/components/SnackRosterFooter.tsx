@@ -10,7 +10,7 @@ export const SnackRosterFooter: React.FC = () => {
         {/* Left System Info */}
         <div className="flex items-center gap-2 font-medium">
           <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-          <span>{translateText("Hệ thống NutriKid • Quản trị dinh dưỡng khẩu phần học đường tiêu chuẩn Mầm Non")}</span>
+          <span>{translateText("Hệ thống KidMeal • Quản trị dinh dưỡng khẩu phần học đường tiêu chuẩn Mầm Non")}</span>
         </div>
 
         {/* Right Badges / Standards */}
@@ -21,7 +21,7 @@ export const SnackRosterFooter: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 text-center text-[11px] text-slate-400">{translateText("© 2024 NutriKid Catering System. Dành riêng cho Nhân viên Cấp dưỡng & Ban Quản lý Bếp ăn Học đường.")}</div>
+      <div className="mt-4 text-center text-[11px] text-slate-400">{translateText("© 2024 KidMeal Catering System. Dành riêng cho Nhân viên Cấp dưỡng & Ban Quản lý Bếp ăn Học đường.")}</div>
     </footer>
   );
 };

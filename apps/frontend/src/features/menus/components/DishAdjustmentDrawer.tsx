@@ -21,6 +21,7 @@ import {
   MenuDishItem,
   AdjustDishPayload,
 } from "../api/weekly-menus.api";
+import { useSchoolBranding } from "../../../core/hooks/useSchoolBranding";
 
 interface DishAdjustmentDrawerProps {
   isOpen: boolean;
@@ -81,8 +82,26 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
   initialSlot,
 }) => {
   useLanguage();
+  const schoolBranding = useSchoolBranding();
+  const configuredMealTimes = schoolBranding.operationalSettings?.mealTimes || [
+    "BREAKFAST",
+    "LUNCH",
+    "AFTERNOON_SNACK",
+  ];
+  const hasBreakfast = configuredMealTimes.includes("BREAKFAST");
+  const hasLunch = configuredMealTimes.includes("LUNCH");
+  const hasAfternoonSnack = configuredMealTimes.includes("AFTERNOON_SNACK");
+
+  const firstAvailableMeal = hasLunch
+    ? "LUNCH"
+    : hasAfternoonSnack
+      ? "AFTERNOON_SNACK"
+      : hasBreakfast
+        ? "BREAKFAST"
+        : "LUNCH";
+
   const [dayOfWeek, setDayOfWeek] = useState<number>(1);
-  const [mealTime, setMealTime] = useState<string>("LUNCH");
+  const [mealTime, setMealTime] = useState<string>(firstAvailableMeal);
   const [selectedDishId, setSelectedDishId] = useState<string>("");
   const [portionSizeG, setPortionSizeG] = useState<number>(100);
   const [substituteDishId, setSubstituteDishId] = useState<string>("");
@@ -115,7 +134,17 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
   useEffect(() => {
     if (initialSlot) {
       setDayOfWeek(initialSlot.dayOfWeek);
-      setMealTime(initialSlot.mealTime === 'MORNING_SNACK' ? 'BREAKFAST' : initialSlot.mealTime);
+      let chosenMeal = initialSlot.mealTime === 'MORNING_SNACK' ? 'BREAKFAST' : initialSlot.mealTime;
+      if (!initialSlot.existingDish) {
+        if ((chosenMeal === 'BREAKFAST' || chosenMeal === 'MORNING_SNACK') && !hasBreakfast) {
+          chosenMeal = firstAvailableMeal;
+        } else if (chosenMeal === 'LUNCH' && !hasLunch) {
+          chosenMeal = firstAvailableMeal;
+        } else if (chosenMeal === 'AFTERNOON_SNACK' && !hasAfternoonSnack) {
+          chosenMeal = firstAvailableMeal;
+        }
+      }
+      setMealTime(chosenMeal);
       if (initialSlot.existingDish) {
         setSelectedDishId(initialSlot.existingDish.dishId);
         setPortionSizeG(Number(initialSlot.existingDish.portionSizeG) || 100);
@@ -293,9 +322,21 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                   onChange={(e) => setMealTime(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition bg-white"
                 >
-                  <option value="BREAKFAST">{translateText("Buổi sáng (09h00)")}</option>
-                  <option value="LUNCH">{translateText("Bữa trưa chính (11h00)")}</option>
-                  <option value="AFTERNOON_SNACK">{translateText("Phụ chiều / Xế (14h30)")}</option>
+                  {hasBreakfast ? (
+                    <option value="BREAKFAST">{translateText("Buổi sáng (09h00)")}</option>
+                  ) : (
+                    <option value="BREAKFAST" disabled>{translateText("Buổi sáng (09h00) - Trường không cấu hình")}</option>
+                  )}
+                  {hasLunch ? (
+                    <option value="LUNCH">{translateText("Bữa trưa chính (11h00)")}</option>
+                  ) : (
+                    <option value="LUNCH" disabled>{translateText("Bữa trưa chính (11h00) - Trường không cấu hình")}</option>
+                  )}
+                  {hasAfternoonSnack ? (
+                    <option value="AFTERNOON_SNACK">{translateText("Phụ chiều / Xế (14h30)")}</option>
+                  ) : (
+                    <option value="AFTERNOON_SNACK" disabled>{translateText("Phụ chiều / Xế (14h30) - Trường không cấu hình")}</option>
+                  )}
                   <option value="LATE_SNACK">{translateText("Ăn xế 17h (Dịch vụ)")}</option>
                 </select>
               </div>

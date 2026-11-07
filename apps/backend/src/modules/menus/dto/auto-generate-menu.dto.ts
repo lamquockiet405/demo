@@ -52,6 +52,16 @@ export class AutoGenerateMenuDto {
   @IsBoolean()
   includeBreakfast?: boolean;
 
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  includeLunch?: boolean;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  includeAfternoonSnack?: boolean;
+
   @ApiPropertyOptional({ example: false })
   @IsOptional()
   @IsBoolean()

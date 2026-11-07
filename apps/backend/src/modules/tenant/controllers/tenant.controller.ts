@@ -50,7 +50,7 @@ export class TenantController {
    */
   @Patch("profile")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN")
+  @Roles("SCHOOL_MANAGER", "SCHOOL_MANAGEMENT", "PRINCIPAL", "SUPER_ADMIN")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Cập nhật thông tin trường mầm non (Dành cho BGH)" })
   async updateProfile(
@@ -68,7 +68,7 @@ export class TenantController {
    */
   @Post("upload-logo")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN")
+  @Roles("SCHOOL_MANAGER", "SCHOOL_MANAGEMENT", "PRINCIPAL", "SUPER_ADMIN")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Tải lên logo trường mầm non" })
   async uploadLogo(
@@ -84,7 +84,7 @@ export class TenantController {
    */
   @Post("sync-education-db")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN")
+  @Roles("SCHOOL_MANAGER", "SCHOOL_MANAGEMENT", "PRINCIPAL", "SUPER_ADMIN")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Đồng bộ cơ sở dữ liệu ngành GD&ĐT" })
   async syncEducationDb() {

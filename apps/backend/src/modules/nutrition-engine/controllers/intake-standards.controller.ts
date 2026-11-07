@@ -88,7 +88,7 @@ export class IntakeStandardsController {
    */
   @Post()
   @ApiOperation({ summary: 'Tạo định mức nhu cầu dinh dưỡng & vi chất mới' })
-  @Roles('NUTRITIONIST', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async create(@Body() dto: CreateIntakeStandardDto, @CurrentTenant() tenantId: number) {
     return this.intakeStandardsService.create(dto, Number(tenantId) || 1);
   }
@@ -102,7 +102,7 @@ export class IntakeStandardsController {
    */
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật định mức dinh dưỡng' })
-  @Roles('NUTRITIONIST', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateIntakeStandardDto,
@@ -119,7 +119,7 @@ export class IntakeStandardsController {
    */
   @Patch(':id/toggle')
   @ApiOperation({ summary: 'Bật/tắt trạng thái định mức dinh dưỡng' })
-  @Roles('NUTRITIONIST', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async toggleActive(@Param('id', ParseIntPipe) id: number, @CurrentTenant() tenantId: number) {
     return this.intakeStandardsService.toggleActive(id, Number(tenantId) || 1);
   }
@@ -132,7 +132,7 @@ export class IntakeStandardsController {
    */
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa định mức dinh dưỡng' })
-  @Roles('NUTRITIONIST', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentTenant() tenantId: number) {
     return this.intakeStandardsService.remove(id, Number(tenantId) || 1);
   }

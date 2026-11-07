@@ -54,7 +54,7 @@ export class TenantService {
       },
       branding: {
         ...settings.branding,
-        logoUrl: settings.branding?.logoUrl ?? school.logo ?? "",
+        logoUrl: settings.branding?.logoUrl !== undefined ? (settings.branding.logoUrl || "") : (school.logo || ""),
       },
       isEducationDbSynced: false,
       syncedAt: null,
@@ -75,11 +75,15 @@ export class TenantService {
     if (dto.contactEmail !== undefined) school.email = dto.contactEmail;
     if (dto.legalRepresentative?.name !== undefined)
       school.principalName = dto.legalRepresentative.name;
-    if (
-      dto.branding?.logoUrl !== undefined &&
-      dto.branding.logoUrl.length <= 500
-    )
-      school.logo = dto.branding.logoUrl;
+    if (dto.logo !== undefined)
+      school.logo = dto.logo ? dto.logo : null;
+    if (dto.branding?.logoUrl !== undefined) {
+      if (!dto.branding.logoUrl) {
+        school.logo = null;
+      } else if (dto.branding.logoUrl.length <= 500) {
+        school.logo = dto.branding.logoUrl;
+      }
+    }
     const current: any = await readState(
       this.schoolRepo.manager,
       "school-profile:" + schoolId,

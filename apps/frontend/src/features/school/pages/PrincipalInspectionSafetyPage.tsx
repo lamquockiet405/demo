@@ -26,6 +26,7 @@ import { foodSafetyApi } from "../../food-safety/api/food-safety.api";
 import { downloadCsv, rowsOf } from "../../kitchen/utils/kitchen-operations";
 import { normalizeSearch } from "../../kitchen/utils/kds-data";
 import { schoolDate } from "../../menus/utils/published-menus";
+import { useSchoolBranding } from "../../../core/hooks/useSchoolBranding";
 import {
   Feedback,
   State,
@@ -36,6 +37,9 @@ import { InspectionDetail } from "../../kitchen/pages/KitchenInspectionsPage";
 
 export function PrincipalInspectionSafetyPage() {
   useLanguage();
+  const schoolBranding = useSchoolBranding();
+  const retentionHours = schoolBranding.operationalSettings?.foodRetentionHours || 24;
+
   const [activeTab, setActiveTab] = useState<"inspections" | "safety">("inspections");
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
@@ -178,7 +182,7 @@ export function PrincipalInspectionSafetyPage() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
             <ShieldCheck className="w-8 h-8 text-amber-300" />{translateText("Kiểm Thực 3 Bước & An Toàn Thực Phẩm")}</h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Hợp nhất quy trình phê duyệt minh chứng kiểm thực bếp (trước, trong chế biến, trước ăn) và tra cứu hồ sơ tuân thủ an toàn thực phẩm, mẫu lưu 24h.")}</p>
+          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText(`Hợp nhất quy trình phê duyệt minh chứng kiểm thực bếp (trước, trong chế biến, trước ăn) và tra cứu hồ sơ tuân thủ an toàn thực phẩm, mẫu lưu ${retentionHours}h.`)}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
@@ -248,7 +252,7 @@ export function PrincipalInspectionSafetyPage() {
 
         <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold">{translateText("Mẫu lưu thực phẩm 24h")}</span>
+            <span className="text-xs font-semibold">{translateText(`Mẫu lưu thực phẩm ${retentionHours}h`)}</span>
             <Thermometer className="w-4 h-4 text-teal-600" />
           </div>
           <div className="text-2xl font-black text-slate-900">{sampleCount}</div>
@@ -466,7 +470,7 @@ export function PrincipalInspectionSafetyPage() {
           {/* Danh mục mẫu lưu thực phẩm 24h */}
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <Thermometer className="w-5 h-5 text-teal-600" />{translateText("Danh Sách Mẫu Lưu Thực Phẩm 24 Giờ Ngày ")}{translateText(reportDate)}
+              <Thermometer className="w-5 h-5 text-teal-600" />{translateText(`Danh Sách Mẫu Lưu Thực Phẩm ${retentionHours} Giờ Ngày `)}{translateText(reportDate)}
             </h3>
 
             {safetyReport?.sampleRetention24h?.samples?.length ? (

@@ -21,6 +21,8 @@ import {
   Play,
   CloudDownload,
   Database,
+  PieChart,
+  Droplets,
   X,
 } from "lucide-react";
 import {
@@ -37,16 +39,33 @@ import {
 import { NutritionRuleDrawer } from "../components/NutritionRuleDrawer";
 import { AllergenDrawer } from "../components/AllergenDrawer";
 import { NutritionistAllergyManagementPage } from "./NutritionistAllergyManagementPage";
+import { MealDistributionPanel } from "../components/MealDistributionPanel";
+import { useAuthStore } from "../../../core/stores/auth.store";
 
 export const NutritionRulesPage: React.FC = () => {
   useLanguage();
   const navigate = useNavigate(),
     location = useLocation();
+  const { user } = useAuthStore();
+  const isPrincipalOrAdmin = (user?.roles || []).some((r: any) => {
+    const role = typeof r === "string" ? r : r?.code || r?.name || "";
+    return [
+      "PRINCIPAL",
+      "SCHOOL_MANAGEMENT",
+      "SCHOOL_MANAGER",
+      "SUPER_ADMIN",
+      "ADMIN",
+    ].includes(role.toUpperCase());
+  });
   const [activeTab, setActiveTab] = useState<
-    "STANDARDS" | "ALLERGENS" | "SCANNER"
+    "STANDARDS" | "MEAL_DISTRIBUTION" | "ALLERGENS" | "SCANNER"
   >("STANDARDS");
 
   useEffect(() => {
+    if (location.search.includes("tab=MEAL_DISTRIBUTION")) {
+      setActiveTab("MEAL_DISTRIBUTION");
+      return;
+    }
     if (
       location.pathname.startsWith("/nutritionist") &&
       (location.pathname.includes("/allergens") ||
@@ -293,6 +312,28 @@ export const NutritionRulesPage: React.FC = () => {
     },
   ];
 
+  if (!isPrincipalOrAdmin) {
+    return (
+      <div className="p-8 max-w-lg mx-auto text-center space-y-4 my-16 bg-white border border-slate-200/80 rounded-3xl shadow-sm">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200 shadow-sm">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-black text-slate-900">{translateText("Giới hạn quyền truy cập")}</h2>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          {translateText("Chức năng cấu hình và ban hành Tiêu chuẩn dinh dưỡng & Phân bổ bữa ăn thuộc thẩm quyền quản trị của Ban Giám Hiệu & Hiệu Trưởng. Tài khoản Chuyên viên dinh dưỡng không có quyền thực hiện thao tác này.")}
+        </p>
+        <div className="pt-2">
+          <button
+            onClick={() => navigate("/nutritionist/menus")}
+            className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-teal-600/25 transition"
+          >
+            {translateText("Quay lại Quản lý thực đơn")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full space-y-6 text-slate-800">
       {toast && (
@@ -316,15 +357,13 @@ export const NutritionRulesPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("CHUYÊN VIÊN DINH DƯỠNG & BGH")}</span>
-            <span className="text-xs text-slate-400">{translateText("• Thông tư 28/2016 & 51/2020/TT-BGDĐT")}</span>
+            <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("BAN GIÁM HIỆU & HIỆU TRƯỞNG")}</span>
+            <span className="text-xs text-slate-400">{translateText("• Thông tư 28/2016 & 01/VBHN-BGDĐT")}</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
-            {translateText(location.pathname.startsWith("/nutritionist")
-              ? "Quy chuẩn dinh dưỡng, dị ứng & Rule Engine"
-              : "Cấu hình tiêu chuẩn dinh dưỡng")}
+            {translateText("Tiêu chuẩn dinh dưỡng & Phân bổ bữa ăn")}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">{translateText("Cấu hình tỷ lệ P-L-G, quản trị danh mục dị ứng Codex và quét kiểm tra thực đơn tự động.")}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{translateText("Cấu hình tỷ lệ P-L-G, định mức nước, phân bổ năng lượng các bữa ăn theo quy chuẩn của Bộ GD&ĐT.")}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -381,11 +420,7 @@ export const NutritionRulesPage: React.FC = () => {
 
       {/* Top KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {kpiCards
-          .filter(
-            (_, i) => location.pathname.startsWith("/nutritionist") || i === 0,
-          )
-          .map((c) => (
+        {kpiCards.map((c) => (
             <div
               key={c.label}
               className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition"
@@ -424,6 +459,36 @@ export const NutritionRulesPage: React.FC = () => {
           ))}
       </div>
 
+      {/* Banner hướng dẫn chuyển nhanh sang Bảng Phân Bổ Theo Bữa */}
+      <div className="bg-gradient-to-r from-sky-50 via-teal-50 to-white border border-sky-200/90 rounded-3xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-sky-500/25">
+            <PieChart className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-slate-900 text-sm">
+                {translateText("Bảng Phân Bổ % Calo, Dinh Dưỡng & Nước Theo Từng Bữa Ăn Trong Ngày")}
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                {translateText("Dữ liệu thật Database")}
+              </span>
+            </div>
+            <p className="text-slate-600 text-xs mt-0.5">
+              {translateText("Định mức Sáng / Trưa / Chiều, năng lượng Calo, đạm P, béo L, đường G và nước uống (ml) theo Thông tư 28 & 01/VBHN-BGDĐT.")}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setActiveTab("MEAL_DISTRIBUTION")}
+          className="px-4 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold shrink-0 shadow-md shadow-sky-600/25 transition flex items-center gap-1.5"
+        >
+          <span>{translateText("Mở Bảng Phân Bổ Bữa Ăn")}</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+
       {/* Segmented Tab Bar */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
         {[
@@ -434,6 +499,14 @@ export const NutritionRulesPage: React.FC = () => {
             icon: Scale,
             activeCls: "bg-teal-600 text-white shadow-md shadow-teal-600/25",
             badgeCls: "bg-teal-700 text-teal-100",
+          },
+          {
+            id: "MEAL_DISTRIBUTION" as const,
+            label: translateText("Phân Bổ Calo & Nước Theo Bữa"),
+            count: "BẢNG MỚI",
+            icon: PieChart,
+            activeCls: "bg-sky-600 text-white shadow-md shadow-sky-600/25",
+            badgeCls: "bg-amber-400 text-slate-900",
           },
           {
             id: "ALLERGENS" as const,
@@ -456,7 +529,8 @@ export const NutritionRulesPage: React.FC = () => {
           .filter(
             (t) =>
               location.pathname.startsWith("/nutritionist") ||
-              t.id === "STANDARDS",
+              t.id === "STANDARDS" ||
+              t.id === "MEAL_DISTRIBUTION",
           )
           .map((t) => (
             <button
@@ -531,6 +605,7 @@ export const NutritionRulesPage: React.FC = () => {
                     <th className="py-3.5 px-4">{translateText("Nhóm Tuổi")}</th>
                     <th className="py-3.5 px-4">{translateText("Năng Lượng (Kcal)")}</th>
                     <th className="py-3.5 px-4">{translateText("Cơ Cấu P : L : G (%)")}</th>
+                    <th className="py-3.5 px-4">{translateText("Nhu Cầu Nước (ml)")}</th>
                     <th className="py-3.5 px-4">{translateText("Vi Chất Canxi / Ca:P")}</th>
                     <th className="py-3.5 px-4">{translateText("Phân Loại")}</th>
                     <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
@@ -540,7 +615,7 @@ export const NutritionRulesPage: React.FC = () => {
                   {rules.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         className="py-12 text-center text-slate-400"
                       >
                         <Scale className="w-8 h-8 mx-auto text-slate-300 mb-2" />
@@ -608,6 +683,18 @@ export const NutritionRulesPage: React.FC = () => {
                               </span>
                             </div>
                           </td>
+                          <td className="py-3.5 px-4">
+                            {item.waterMlMin || item.waterMlMax ? (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200/80 text-cyan-800 text-xs font-bold">
+                                <Droplets className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                                <span>
+                                  {Number(item.waterMlMin).toLocaleString('vi-VN')} – {Number(item.waterMlMax).toLocaleString('vi-VN')} ml
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 text-xs italic">—</span>
+                            )}
+                          </td>
                           <td className="py-3.5 px-4 text-slate-600 text-[11px]">
                             <div>{translateText("Ca: ≥ ")}{translateText(item.minCalciumMg ?? "—")}{translateText("mg")}</div>
                             <div className="text-slate-400">{translateText("Ca/P: ")}{item.caPRatioMin || 1.0} -{" "}
@@ -665,6 +752,9 @@ export const NutritionRulesPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* TAB: PHÂN BỔ NĂNG LƯỢNG & DINH DƯỠNG THEO BỮA */}
+      {activeTab === "MEAL_DISTRIBUTION" && <MealDistributionPanel />}
 
       {/* TAB 2: ALLERGENS (UC43) */}
       {activeTab === "ALLERGENS" && (

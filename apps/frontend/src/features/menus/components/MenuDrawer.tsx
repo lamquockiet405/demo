@@ -66,25 +66,67 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
       setCycleWeekNumber(initialData.cycleWeekNumber || 1);
       setMenuCycleType(initialData.menuCycleType || 'WEEKLY');
     } else {
-      // Default: Tuần hiện tại
-      const now = new Date();
-      const monday = new Date(now);
-      const day = monday.getDay();
-      const diff = monday.getDate() - day + (day === 0 ? -6 : 1); // Monday
-      monday.setDate(diff);
+      // Bắt đầu với chu kỳ mới nhất từ danh sách thực đơn đã có
+      const validMenus = (existingMenus || []).filter(
+        (m) => m.status !== "REJECTED" && m.status !== "ARCHIVED",
+      );
+      let latestMenu: WeeklyMenu | null = null;
+      let latestEndMs = 0;
+      let maxWeek = 0;
 
-      const friday = new Date(monday);
-      friday.setDate(monday.getDate() + 4);
+      for (const m of validMenus) {
+        const endStr = m.endDate || m.startDate;
+        if (endStr) {
+          const ms = new Date(endStr).getTime();
+          if (ms > latestEndMs) {
+            latestEndMs = ms;
+            latestMenu = m;
+          }
+        }
+        let w = m.cycleWeekNumber || 0;
+        if (!w && m.title) {
+          const match = m.title.match(/Tuần\s*(\d+)/i);
+          if (match) w = parseInt(match[1], 10);
+        }
+        if (w > maxWeek) maxWeek = w;
+      }
 
-      setTitle(`Thực đơn Bán trú Tuần ${getWeekNumber(now)} Tháng ${now.getMonth() + 1}`);
-      setStartDate(monday.toISOString().split('T')[0]);
-      setEndDate(friday.toISOString().split('T')[0]);
-      setCycleWeekNumber(getWeekNumber(now));
+      let mondayStr = '';
+      let fridayStr = '';
+      let nextWeekNum = 1;
+
+      if (latestMenu && latestEndMs > 0) {
+        const d = new Date(latestMenu.endDate || latestMenu.startDate);
+        do {
+          d.setDate(d.getDate() + 1);
+        } while (d.getDay() !== 1);
+        mondayStr = d.toISOString().split('T')[0];
+        const fri = new Date(d);
+        fri.setDate(d.getDate() + 4);
+        fridayStr = fri.toISOString().split('T')[0];
+        nextWeekNum = maxWeek > 0 ? maxWeek + 1 : 1;
+      } else {
+        const now = new Date();
+        const monday = new Date(now);
+        const day = monday.getDay();
+        const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+        monday.setDate(diff);
+        const friday = new Date(monday);
+        friday.setDate(monday.getDate() + 4);
+        mondayStr = monday.toISOString().split('T')[0];
+        fridayStr = friday.toISOString().split('T')[0];
+        nextWeekNum = getWeekNumber(now);
+      }
+
+      setTitle(`Thực đơn Bán trú Tuần ${nextWeekNum}`);
+      setStartDate(mondayStr);
+      setEndDate(fridayStr);
+      setCycleWeekNumber(nextWeekNum);
       setTargetAgeGroup('ALL_AGES');
       setMenuCycleType('WEEKLY');
     }
     setError(null);
-  }, [initialData, mode, isOpen]);
+  }, [initialData, mode, isOpen, existingMenus]);
 
   function getWeekNumber(d: Date) {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -267,7 +309,6 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
                 <input
                   type="number"
                   min={1}
-                  max={52}
                   value={cycleWeekNumber}
                   onChange={(e) => setCycleWeekNumber(Number(e.target.value))}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"

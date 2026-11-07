@@ -325,7 +325,7 @@ export function NutritionStudentsPage() {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              {translateText(isTeacherPortal ? "Giáo viên • Lớp phụ trách" : "Chuyên Gia Dinh Dưỡng • NutriKid")}
+              {translateText(isTeacherPortal ? "Giáo viên • Lớp phụ trách" : "Chuyên Gia Dinh Dưỡng • KidMeal")}
             </span>
             <span className="text-xs text-teal-200">{translateText("Quản lý hồ sơ dinh dưỡng cá nhân")}</span>
           </div>

@@ -12,6 +12,7 @@ import { MenuVersion } from "../menus/entities/menu-version.entity";
 import { DishFrequencyRule } from "./entities/dish-frequency-rule.entity";
 import { DishSpacingRule } from "./entities/dish-spacing-rule.entity";
 import { NutritionIntakeStandard } from "./entities/nutrition-intake-standard.entity";
+import { MealEnergyDistribution } from "./entities/meal-energy-distribution.entity";
 
 // Services
 import { NutritionCalculatorService } from "./services/nutrition-calculator.service";
@@ -23,6 +24,7 @@ import { RuleEngineService } from "./services/rule-engine.service";
 import { FrequencyRulesService } from "./services/frequency-rules.service";
 import { SpacingRulesService } from "./services/spacing-rules.service";
 import { IntakeStandardsService } from "./services/intake-standards.service";
+import { MealDistributionsService } from "./services/meal-distributions.service";
 
 // Controllers
 import { NutritionStandardsController } from "./controllers/nutrition-standards.controller";
@@ -31,6 +33,7 @@ import { MenuScannerController } from "./controllers/menu-scanner.controller";
 import { FrequencyRulesController } from "./controllers/frequency-rules.controller";
 import { SpacingRulesController } from "./controllers/spacing-rules.controller";
 import { IntakeStandardsController } from "./controllers/intake-standards.controller";
+import { MealDistributionsController } from "./controllers/meal-distributions.controller";
 
 @Module({
   imports: [
@@ -45,6 +48,7 @@ import { IntakeStandardsController } from "./controllers/intake-standards.contro
       DishFrequencyRule,
       DishSpacingRule,
       NutritionIntakeStandard,
+      MealEnergyDistribution,
     ]),
   ],
   controllers: [
@@ -53,6 +57,7 @@ import { IntakeStandardsController } from "./controllers/intake-standards.contro
     FrequencyRulesController,
     SpacingRulesController,
     IntakeStandardsController,
+    MealDistributionsController,
     NutritionStandardsController,
   ],
   providers: [
@@ -65,6 +70,7 @@ import { IntakeStandardsController } from "./controllers/intake-standards.contro
     FrequencyRulesService,
     SpacingRulesService,
     IntakeStandardsService,
+    MealDistributionsService,
   ],
   exports: [
     NutritionCalculatorService,

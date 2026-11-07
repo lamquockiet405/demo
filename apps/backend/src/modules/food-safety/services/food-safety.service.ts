@@ -16,6 +16,7 @@ import { AuditLogsService } from "../../audit-logs/services/audit-logs.service";
 import { SignMonthlyLogDto } from "../dto/sign-monthly-log.dto";
 import { NutritionistReviewDto } from "../dto/nutritionist-review.dto";
 import { SuspendSupplierDto } from "../dto/suspend-supplier.dto";
+import { readState } from "../../../common/utils/persisted-state";
 
 export interface SupplierItem {
   id: number;
@@ -233,6 +234,14 @@ export class FoodSafetyService {
       "SELECT name FROM schools WHERE id = $1",
       [schoolId || 1],
     );
+    const profile: any = await readState(
+      this.inspectionRepo.manager,
+      "school-profile:1",
+      {},
+    );
+    const retentionHours =
+      Number(profile?.operationalSettings?.foodRetentionHours) || 24;
+
     return {
       schoolName: schools[0]?.name || "",
       reportPeriod: { month, year, targetDate: date },
@@ -262,7 +271,7 @@ export class FoodSafetyService {
         },
       },
       sampleRetention24h: {
-        decisionStandard: "Lưu mẫu 24 giờ",
+        decisionStandard: `Lưu mẫu ${retentionHours} giờ`,
         sampleRetentionRate: null,
         totalSamplesStored: samples.length,
         standardWeightComplianceRate: rate(

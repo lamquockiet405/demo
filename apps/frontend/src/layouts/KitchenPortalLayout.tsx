@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuthStore } from "../core/stores/auth.store";
+import { useSchoolBranding } from "../core/hooks/useSchoolBranding";
 import { UserProfileModal } from "../features/auth/components/UserProfileModal";
 import { UserHeaderDropdown } from "../core/components/UserHeaderDropdown";
 import "../features/kitchen/kitchen-portal.css";
@@ -93,11 +94,26 @@ const groups = [
 export const KitchenPortalLayout: React.FC = () => {
   useLanguage();
   const { user } = useAuthStore();
+  const schoolBranding = useSchoolBranding();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(false);
+
+  const retentionHours = schoolBranding.operationalSettings?.foodRetentionHours || 24;
+
+  const dynamicGroups = React.useMemo(() => {
+    return groups.map((g) => ({
+      ...g,
+      items: g.items.map((it) =>
+        it.to === "/kitchen/samples"
+          ? { ...it, label: `Lưu mẫu ${retentionHours} giờ` }
+          : it,
+      ),
+    }));
+  }, [retentionHours]);
+
   const current =
-    groups
+    dynamicGroups
       .flatMap((group) => group.items)
       .find((item) => item.to === location.pathname)?.label || "Bếp bán trú";
   useEffect(() => {
@@ -125,11 +141,24 @@ export const KitchenPortalLayout: React.FC = () => {
         id="kitchen-sidebar"
       >
         <NavLink to="/kitchen" className="kp-logo">
-          <span>
-            <ChefHat size={28} />
+          <span className="overflow-hidden">
+            {schoolBranding.logoUrl ? (
+              <img
+                src={schoolBranding.logoUrl}
+                alt={schoolBranding.name}
+                className="w-full h-full object-cover rounded-[13px]"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <ChefHat size={28} />
+            )}
           </span>
-          <div>
-            <strong>{translateText("KidMeal")}</strong>
+          <div className="overflow-hidden">
+            <strong className="truncate max-w-[145px]" title={schoolBranding.name}>
+              {schoolBranding.name || translateText("KidMeal")}
+            </strong>
             <small>{translateText("BẾP BÁN TRÚ")}</small>
           </div>
         </NavLink>
@@ -141,7 +170,7 @@ export const KitchenPortalLayout: React.FC = () => {
           <X size={20} />
         </button>
         <nav>
-          {groups.map((group) => (
+          {dynamicGroups.map((group) => (
             <div className="kp-nav-group" key={group.title}>
               <p>{translateText(group.title)}</p>
               {group.items.map((item) => (

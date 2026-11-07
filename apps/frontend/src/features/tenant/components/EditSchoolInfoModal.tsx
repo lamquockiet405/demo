@@ -118,9 +118,16 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
     try {
       const updated = await tenantApi.updateProfile(payload);
       if (updated?.name) localStorage.setItem("school_name", updated.name);
+      if (updated?.phone) localStorage.setItem("school_phone", updated.phone);
+      if (updated?.address) localStorage.setItem("school_address", updated.address);
+      if (updated?.contactEmail) localStorage.setItem("school_email", updated.contactEmail);
       window.dispatchEvent(
         new CustomEvent("tenant-profile-updated", { detail: updated }),
       );
+      window.dispatchEvent(
+        new CustomEvent("school-branding-updated", { detail: updated }),
+      );
+      window.dispatchEvent(new Event("storage"));
       onSaved(updated);
       onClose();
     } catch (err: any) {

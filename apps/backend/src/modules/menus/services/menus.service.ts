@@ -6,6 +6,7 @@ import {
   Logger,
   OnModuleInit,
 } from "@nestjs/common";
+import { readState } from "../../../common/utils/persisted-state";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, In } from "typeorm";
 import { Menu } from "../entities/menu.entity";
@@ -1233,7 +1234,7 @@ export class MenusService implements OnModuleInit {
         targetEntity: "MENU",
         targetId: String(id),
         ipAddress: submitter?.ip || "127.0.0.1",
-        userAgent: submitter?.userAgent || "NutriKid Web Application",
+        userAgent: submitter?.userAgent || "KidMeal Web Application",
         details: {
           menuId: id,
           title: menu.title,
@@ -1437,6 +1438,36 @@ export class MenusService implements OnModuleInit {
       dto.title ||
       `Thực đơn Bán trú Tuần ${dto.cycleWeekNumber || 1} (${ageGroup === "MAU_GIAO" ? "Mẫu giáo" : "Nhà trẻ"})`;
 
+    // ── Step 0: Kiểm tra cấu hình vận hành trường học (operationalSettings) ────
+    const schoolProfile: any = await readState(
+      this.menuRepo.manager,
+      "school-profile:1",
+      {},
+    );
+    const configuredMealTimes: string[] =
+      schoolProfile?.operationalSettings?.mealTimes || [
+        "BREAKFAST",
+        "LUNCH",
+        "AFTERNOON_SNACK",
+      ];
+    const standardWeeklyCycleLength: number =
+      Number(schoolProfile?.operationalSettings?.standardWeeklyCycleLength) || 2;
+    const schoolHasBreakfast = configuredMealTimes.includes("BREAKFAST");
+    const schoolHasLunch = configuredMealTimes.includes("LUNCH");
+    const schoolHasAfternoonSnack = configuredMealTimes.includes("AFTERNOON_SNACK");
+
+    const effectiveIncludeBreakfast =
+      schoolHasBreakfast && dto.includeBreakfast !== false;
+    const effectiveIncludeLunch =
+      schoolHasLunch && dto.includeLunch !== false;
+    const effectiveIncludeAfternoonSnack =
+      schoolHasAfternoonSnack && dto.includeAfternoonSnack !== false;
+
+    this.logger.log(
+      `⚙️ Cấu hình bữa ăn trường: [${configuredMealTimes.join(", ")}]. Chu kỳ: ${standardWeeklyCycleLength} tuần. ` +
+      `Bữa sáng: ${effectiveIncludeBreakfast}, Bữa trưa: ${effectiveIncludeLunch}, Bữa xế: ${effectiveIncludeAfternoonSnack}`,
+    );
+
     // ── Step 1: Load nutritional standards from DB ──────────────────────────
     const standard = await this.standardRepo.findOne({
       where: { ageGroup, mealScope: "DAYBOARDING", status: "ACTIVE" },
@@ -1472,8 +1503,24 @@ export class MenusService implements OnModuleInit {
         "Tiêu chuẩn dinh dưỡng chưa có đủ chỉ tiêu hợp lệ.",
       );
 
+    // Tính toán năng lượng mục tiêu tương ứng theo các bữa ăn được tổ chức
+    let activeWeight = 0;
+    if (effectiveIncludeBreakfast) activeWeight += 0.15;
+    if (effectiveIncludeLunch) activeWeight += 0.60;
+    if (effectiveIncludeAfternoonSnack) activeWeight += 0.25;
+    if (activeWeight === 0) activeWeight = 1.0;
+
+    const baseConfiguredWeight =
+      (schoolHasBreakfast ? 0.15 : 0) +
+      (schoolHasLunch ? 0.60 : 0) +
+      (schoolHasAfternoonSnack ? 0.25 : 0) || 1.0;
+    const targetScale = Math.min(1.0, activeWeight / baseConfiguredWeight);
+
+    const effectiveMinKcal = Math.round(minKcal * targetScale);
+    const effectiveMaxKcal = Math.round(maxKcal * targetScale);
+
     this.logger.log(
-      `📋 Chuẩn dinh dưỡng ${ageGroup} DAYBOARDING: ${minKcal}–${maxKcal} Kcal, P:${minProtPct}–${maxProtPct}%, L:${minFatPct}–${maxFatPct}%, G:${minCarbPct}–${maxCarbPct}%`,
+      `📋 Chuẩn dinh dưỡng ${ageGroup} DAYBOARDING: ${minKcal}–${maxKcal} Kcal (Hiệu dụng: ${effectiveMinKcal}–${effectiveMaxKcal} Kcal), P:${minProtPct}–${maxProtPct}%, L:${minFatPct}–${maxFatPct}%, G:${minCarbPct}–${maxCarbPct}%`,
     );
 
     // ── Step 2: Load all dishes with nutrition data ─────────────────────────
@@ -1541,21 +1588,18 @@ export class MenusService implements OnModuleInit {
       }
     }
 
-    // ── Step 3: Quét chu kỳ 4 tuần qua menu_cycles & lịch sử thực đơn ────────
+    // ── Step 3: Quét chu kỳ theo cấu hình trường (standardWeeklyCycleLength) qua menu_cycles & lịch sử thực đơn ────
     const activeCycle = await this.cycleRepo.findOne({
       where: { ageGroup, status: "ACTIVE" },
       order: { id: "DESC" },
     });
 
-    const fourWeeksAgo = new Date(weekStartDate);
-    fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
-    const fourWeeksAgoStr = fourWeeksAgo.toISOString().split("T")[0];
+    const cycleDays = standardWeeklyCycleLength * 7;
+    const cycleStartDate = new Date(weekStartDate);
+    cycleStartDate.setDate(cycleStartDate.getDate() - cycleDays);
+    const cycleStartDateStr = cycleStartDate.toISOString().split("T")[0];
 
-    const twoWeeksAgo = new Date(weekStartDate);
-    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-    const twoWeeksAgoStr = twoWeeksAgo.toISOString().split("T")[0];
-
-    // Quét tần suất xuất hiện của các món trong 4 tuần qua
+    // Quét tần suất xuất hiện của các món trong chu kỳ xoay vòng qua
     const past4WeeksDishesRaw = await this.menuDishRepo
       .createQueryBuilder("md")
       .innerJoin("md.menuMeal", "mm")
@@ -1569,7 +1613,7 @@ export class MenusService implements OnModuleInit {
       .addSelect("c.code", "categoryCode")
       .addSelect("COUNT(md.id)", "occurrenceCount")
       .where("m.ageGroup = :ageGroup", { ageGroup })
-      .andWhere("m.weekStartDate >= :fourWeeksAgoStr", { fourWeeksAgoStr })
+      .andWhere("m.weekStartDate >= :cycleStartDateStr", { cycleStartDateStr })
       .andWhere("m.weekStartDate < :weekStartDate", { weekStartDate })
       .groupBy("md.dishId")
       .addGroupBy("d.name")
@@ -1629,7 +1673,13 @@ export class MenusService implements OnModuleInit {
       }
     }
 
-    // Quét các món 14 ngày gần nhất để chống ngán
+    // Quét các món trong thời gian cách ly (chống ngán theo chu kỳ trường)
+    const excludeDays =
+      Number(dto.excludePreviousDays) || standardWeeklyCycleLength * 7;
+    const recentStartDate = new Date(weekStartDate);
+    recentStartDate.setDate(recentStartDate.getDate() - excludeDays);
+    const recentStartDateStr = recentStartDate.toISOString().split("T")[0];
+
     const recentDishIds = new Set<number>();
     const past14DaysRaw = await this.menuDishRepo
       .createQueryBuilder("md")
@@ -1639,7 +1689,7 @@ export class MenusService implements OnModuleInit {
       .innerJoin("mv.menu", "m")
       .select("DISTINCT md.dishId", "dishId")
       .where("m.ageGroup = :ageGroup", { ageGroup })
-      .andWhere("m.weekStartDate >= :twoWeeksAgoStr", { twoWeeksAgoStr })
+      .andWhere("m.weekStartDate >= :recentStartDateStr", { recentStartDateStr })
       .andWhere("m.weekStartDate < :weekStartDate", { weekStartDate })
       .getRawMany();
 
@@ -1684,7 +1734,7 @@ export class MenusService implements OnModuleInit {
         let breakfastDish: any = null;
 
         // 0. Buổi sáng (BREAKFAST - 09:00): 1 món cháo / súp / bún / phở / bánh canh / nui / sữa ~150-250 Kcal
-        if (dto.includeBreakfast !== false) {
+        if (effectiveIncludeBreakfast) {
           const breakfastPool = shuffleArray([
             ...dishPool.SNACK_AFTERNOON.filter(
               (d) =>
@@ -1729,163 +1779,168 @@ export class MenusService implements OnModuleInit {
         }
 
         // 2. Bữa trưa chính (LUNCH): Cơm + Món chính + Canh + Tráng miệng
-        // Cơm (RICE) ~172-269 Kcal (cho phép lặp lại vì số lượng món tinh bột hạn chế)
-        const riceDish = this.pickDish(
-          shuffleArray(fridayLunch ? friedRicePool : plainRicePool),
-          usedDishIdsThisWeek,
-          previousDayDishIds,
-          recentDishIds,
-          cycleExclusionDishIds,
-          attempt > 20,
-        );
-        if (riceDish) {
-          dayDishes.push({
-            dishId: String(riceDish.id),
-            dishName: riceDish.name,
-            dishType: "RICE",
-            mealTime: "LUNCH",
-            servingOrder: 2,
-            portionSizeG: riceDish.portionSizeG,
-            plannedCalories: riceDish.energyKcal,
-            proteinG: riceDish.proteinG,
-            fatG: riceDish.fatG,
-            carbG: riceDish.carbG,
-          });
-        }
+        let mainDish: any = null;
+        if (effectiveIncludeLunch) {
+          // Cơm (RICE) ~172-269 Kcal (cho phép lặp lại vì số lượng món tinh bột hạn chế)
+          const riceDish = this.pickDish(
+            shuffleArray(fridayLunch ? friedRicePool : plainRicePool),
+            usedDishIdsThisWeek,
+            previousDayDishIds,
+            recentDishIds,
+            cycleExclusionDishIds,
+            attempt > 20,
+          );
+          if (riceDish) {
+            dayDishes.push({
+              dishId: String(riceDish.id),
+              dishName: riceDish.name,
+              dishType: "RICE",
+              mealTime: "LUNCH",
+              servingOrder: 2,
+              portionSizeG: riceDish.portionSizeG,
+              plannedCalories: riceDish.energyKcal,
+              proteinG: riceDish.proteinG,
+              fatG: riceDish.fatG,
+              carbG: riceDish.carbG,
+            });
+          }
 
-        // Món chính (MAIN) ~60-144 Kcal (tuyệt đối không lặp lại trong tuần & không vượt chu kỳ 4 tuần)
-        const mainDish = fridayLunch
-          ? null
-          : this.pickDish(
-              shuffleArray(dishPool.MAIN),
-              usedDishIdsThisWeek,
-              previousDayDishIds,
-              recentDishIds,
-              cycleExclusionDishIds,
-              attempt > 35,
-            );
-        if (mainDish) {
-          dayDishes.push({
-            dishId: String(mainDish.id),
-            dishName: mainDish.name,
-            dishType: "MAIN",
-            mealTime: "LUNCH",
-            servingOrder: 3,
-            portionSizeG: mainDish.portionSizeG,
-            plannedCalories: mainDish.energyKcal,
-            proteinG: mainDish.proteinG,
-            fatG: mainDish.fatG,
-            carbG: mainDish.carbG,
-          });
-        }
+          // Món chính (MAIN) ~60-144 Kcal (tuyệt đối không lặp lại trong tuần & không vượt chu kỳ 4 tuần)
+          mainDish = fridayLunch
+            ? null
+            : this.pickDish(
+                shuffleArray(dishPool.MAIN),
+                usedDishIdsThisWeek,
+                previousDayDishIds,
+                recentDishIds,
+                cycleExclusionDishIds,
+                attempt > 35,
+              );
+          if (mainDish) {
+            dayDishes.push({
+              dishId: String(mainDish.id),
+              dishName: mainDish.name,
+              dishType: "MAIN",
+              mealTime: "LUNCH",
+              servingOrder: 3,
+              portionSizeG: mainDish.portionSizeG,
+              plannedCalories: mainDish.energyKcal,
+              proteinG: mainDish.proteinG,
+              fatG: mainDish.fatG,
+              carbG: mainDish.carbG,
+            });
+          }
 
-        // Canh súp (SOUP) ~25-105 Kcal
-        const soupDish = this.pickDish(
-          shuffleArray(dishPool.SOUP),
-          usedDishIdsThisWeek,
-          previousDayDishIds,
-          recentDishIds,
-          cycleExclusionDishIds,
-          attempt > 30,
-        );
-        if (soupDish) {
-          dayDishes.push({
-            dishId: String(soupDish.id),
-            dishName: soupDish.name,
-            dishType: "SOUP",
-            mealTime: "LUNCH",
-            servingOrder: 4,
-            portionSizeG: soupDish.portionSizeG,
-            plannedCalories: soupDish.energyKcal,
-            proteinG: soupDish.proteinG,
-            fatG: soupDish.fatG,
-            carbG: soupDish.carbG,
-          });
-        }
+          // Canh súp (SOUP) ~25-105 Kcal
+          const soupDish = this.pickDish(
+            shuffleArray(dishPool.SOUP),
+            usedDishIdsThisWeek,
+            previousDayDishIds,
+            recentDishIds,
+            cycleExclusionDishIds,
+            attempt > 30,
+          );
+          if (soupDish) {
+            dayDishes.push({
+              dishId: String(soupDish.id),
+              dishName: soupDish.name,
+              dishType: "SOUP",
+              mealTime: "LUNCH",
+              servingOrder: 4,
+              portionSizeG: soupDish.portionSizeG,
+              plannedCalories: soupDish.energyKcal,
+              proteinG: soupDish.proteinG,
+              fatG: soupDish.fatG,
+              carbG: soupDish.carbG,
+            });
+          }
 
-        // Tráng miệng (DESSERT) ~20-150 Kcal
-        const dessertDish = this.pickDish(
-          shuffleArray(dishPool.DESSERT),
-          usedDishIdsThisWeek,
-          previousDayDishIds,
-          recentDishIds,
-          cycleExclusionDishIds,
-          attempt > 30,
-        );
-        if (dessertDish) {
-          dayDishes.push({
-            dishId: String(dessertDish.id),
-            dishName: dessertDish.name,
-            dishType: "DESSERT",
-            mealTime: "LUNCH",
-            servingOrder: 5,
-            portionSizeG: dessertDish.portionSizeG,
-            plannedCalories: dessertDish.energyKcal,
-            proteinG: dessertDish.proteinG,
-            fatG: dessertDish.fatG,
-            carbG: dessertDish.carbG,
-          });
+          // Tráng miệng (DESSERT) ~20-150 Kcal
+          const dessertDish = this.pickDish(
+            shuffleArray(dishPool.DESSERT),
+            usedDishIdsThisWeek,
+            previousDayDishIds,
+            recentDishIds,
+            cycleExclusionDishIds,
+            attempt > 30,
+          );
+          if (dessertDish) {
+            dayDishes.push({
+              dishId: String(dessertDish.id),
+              dishName: dessertDish.name,
+              dishType: "DESSERT",
+              mealTime: "LUNCH",
+              servingOrder: 5,
+              portionSizeG: dessertDish.portionSizeG,
+              plannedCalories: dessertDish.energyKcal,
+              proteinG: dessertDish.proteinG,
+              fatG: dessertDish.fatG,
+              carbG: dessertDish.carbG,
+            });
+          }
         }
 
         // 3. Phụ chiều / Xế (AFTERNOON_SNACK): 1 món ăn xế + 1 thức uống
-        // Món xế (SNACK_AFTERNOON) ~100-168 Kcal
-        const afternoonSnackPool = shuffleArray(dishPool.SNACK_AFTERNOON.filter(
-          (dish) => dish.id !== breakfastDish?.id,
-        ));
-        const afternoonDish = this.pickDish(
-          afternoonSnackPool,
-          usedDishIdsThisWeek,
-          previousDayDishIds,
-          recentDishIds,
-          cycleExclusionDishIds,
-          attempt > 30,
-        );
-        if (
-          afternoonDish &&
-          (!breakfastDish || afternoonDish.id !== breakfastDish.id)
-        ) {
-          dayDishes.push({
-            dishId: String(afternoonDish.id),
-            dishName: afternoonDish.name,
-            dishType: "SNACK_AFTERNOON",
-            mealTime: "AFTERNOON_SNACK",
-            servingOrder: 6,
-            portionSizeG: afternoonDish.portionSizeG,
-            plannedCalories: afternoonDish.energyKcal,
-            proteinG: afternoonDish.proteinG,
-            fatG: afternoonDish.fatG,
-            carbG: afternoonDish.carbG,
-          });
-        }
+        if (effectiveIncludeAfternoonSnack) {
+          // Món xế (SNACK_AFTERNOON) ~100-168 Kcal
+          const afternoonSnackPool = shuffleArray(dishPool.SNACK_AFTERNOON.filter(
+            (dish) => dish.id !== breakfastDish?.id,
+          ));
+          const afternoonDish = this.pickDish(
+            afternoonSnackPool,
+            usedDishIdsThisWeek,
+            previousDayDishIds,
+            recentDishIds,
+            cycleExclusionDishIds,
+            attempt > 30,
+          );
+          if (
+            afternoonDish &&
+            (!breakfastDish || afternoonDish.id !== breakfastDish.id)
+          ) {
+            dayDishes.push({
+              dishId: String(afternoonDish.id),
+              dishName: afternoonDish.name,
+              dishType: "SNACK_AFTERNOON",
+              mealTime: "AFTERNOON_SNACK",
+              servingOrder: 6,
+              portionSizeG: afternoonDish.portionSizeG,
+              plannedCalories: afternoonDish.energyKcal,
+              proteinG: afternoonDish.proteinG,
+              fatG: afternoonDish.fatG,
+              carbG: afternoonDish.carbG,
+            });
+          }
 
-        // Rotate drink families so aliases cannot displace another drink.
-        const drinkPool = dishPool.DRINK.filter((dish) => dish.id !== breakfastDish?.id);
-        const leastDrinkUses = Math.min(...drinkPool.map(
-          (dish) => drinkUseCounts.get(dish.rotationKey!) || 0,
-        ));
-        const drinkDish = this.pickDish(
-          shuffleArray(drinkPool.filter(
-            (dish) => (drinkUseCounts.get(dish.rotationKey!) || 0) === leastDrinkUses,
-          )),
-          usedDishIdsThisWeek,
-          previousDayDishIds,
-          recentDishIds,
-          cycleExclusionDishIds,
-          attempt > 20,
-        );
-        if (drinkDish && (!breakfastDish || drinkDish.id !== breakfastDish.id)) {
-          dayDishes.push({
-            dishId: String(drinkDish.id),
-            dishName: drinkDish.name,
-            dishType: "DRINK",
-            mealTime: "AFTERNOON_SNACK",
-            servingOrder: 7,
-            portionSizeG: drinkDish.portionSizeG,
-            plannedCalories: drinkDish.energyKcal,
-            proteinG: drinkDish.proteinG,
-            fatG: drinkDish.fatG,
-            carbG: drinkDish.carbG,
-          });
+          // Rotate drink families so aliases cannot displace another drink.
+          const drinkPool = dishPool.DRINK.filter((dish) => dish.id !== breakfastDish?.id);
+          const leastDrinkUses = Math.min(...drinkPool.map(
+            (dish) => drinkUseCounts.get(dish.rotationKey!) || 0,
+          ));
+          const drinkDish = this.pickDish(
+            shuffleArray(drinkPool.filter(
+              (dish) => (drinkUseCounts.get(dish.rotationKey!) || 0) === leastDrinkUses,
+            )),
+            usedDishIdsThisWeek,
+            previousDayDishIds,
+            recentDishIds,
+            cycleExclusionDishIds,
+            attempt > 20,
+          );
+          if (drinkDish && (!breakfastDish || drinkDish.id !== breakfastDish.id)) {
+            dayDishes.push({
+              dishId: String(drinkDish.id),
+              dishName: drinkDish.name,
+              dishType: "DRINK",
+              mealTime: "AFTERNOON_SNACK",
+              servingOrder: 7,
+              portionSizeG: drinkDish.portionSizeG,
+              plannedCalories: drinkDish.energyKcal,
+              proteinG: drinkDish.proteinG,
+              fatG: drinkDish.fatG,
+              carbG: drinkDish.carbG,
+            });
+          }
         }
 
         // Tính tổng năng lượng & tỷ lệ P:L:G
@@ -1906,11 +1961,11 @@ export class MenusService implements OnModuleInit {
         // Chấm điểm mức độ chuẩn hóa
         let score = 0;
 
-        // Tiêu chí 1: Năng lượng Kcal nằm trong dải chuẩn (Nhà trẻ: 600–750; Mẫu giáo: 615–770)
-        if (totalCal >= minKcal && totalCal <= maxKcal) {
+        // Tiêu chí 1: Năng lượng Kcal nằm trong dải chuẩn hiệu dụng
+        if (totalCal >= effectiveMinKcal && totalCal <= effectiveMaxKcal) {
           score += 150;
         } else {
-          const kcalMid = (minKcal + maxKcal) / 2;
+          const kcalMid = (effectiveMinKcal + effectiveMaxKcal) / 2;
           const kcalDist = Math.abs(totalCal - kcalMid) / kcalMid;
           score -= kcalDist * 300;
         }
@@ -1943,8 +1998,8 @@ export class MenusService implements OnModuleInit {
             lipidPct: Math.round(fPct * 10) / 10,
             glucidPct: Math.round(cPct * 10) / 10,
             isCompliant:
-              totalCal >= minKcal &&
-              totalCal <= maxKcal &&
+              totalCal >= effectiveMinKcal &&
+              totalCal <= effectiveMaxKcal &&
               pPct >= minProtPct &&
               pPct <= maxProtPct &&
               fPct >= minFatPct &&
@@ -1961,14 +2016,14 @@ export class MenusService implements OnModuleInit {
 
       if (bestPlan) {
         // Kiểm tra dải Kcal
-        if (bestPlan.totalCalories < minKcal) {
+        if (bestPlan.totalCalories < effectiveMinKcal) {
           bestPlan.violations.push(
-            `CALORIE_DEFICIT: ${dayName} tổng năng lượng ${bestPlan.totalCalories} Kcal < ${minKcal} Kcal (chuẩn tối thiểu Thông tư 28)`,
+            `CALORIE_DEFICIT: ${dayName} tổng năng lượng ${bestPlan.totalCalories} Kcal < ${effectiveMinKcal} Kcal (chuẩn tối thiểu cấu hình trường)`,
           );
         }
-        if (bestPlan.totalCalories > maxKcal) {
+        if (bestPlan.totalCalories > effectiveMaxKcal) {
           bestPlan.violations.push(
-            `CALORIE_EXCESS: ${dayName} tổng năng lượng ${bestPlan.totalCalories} Kcal > ${maxKcal} Kcal (chuẩn tối đa Thông tư 28)`,
+            `CALORIE_EXCESS: ${dayName} tổng năng lượng ${bestPlan.totalCalories} Kcal > ${effectiveMaxKcal} Kcal (chuẩn tối đa cấu hình trường)`,
           );
         }
 
@@ -2089,8 +2144,8 @@ export class MenusService implements OnModuleInit {
       overlappedWithPrevious14DaysCount: overlappedWith14,
       cycleCompliance:
         cycleViolations.length === 0
-          ? `TUÂN THỦ 100% CHU KỲ 4 TUẦN (${activeCycle ? activeCycle.name : "Chu kỳ chuẩn 4 tuần"}) — Không món nào vượt tần suất`
-          : `CẢNH BÁO: Có ${cycleViolations.length} món vượt tần suất trong chu kỳ 4 tuần`,
+          ? `TUÂN THỦ 100% CHU KỲ ${standardWeeklyCycleLength} TUẦN (${activeCycle ? activeCycle.name : `Chu kỳ chuẩn ${standardWeeklyCycleLength} tuần`}) — Không món nào vượt tần suất`
+          : `CẢNH BÁO: Có ${cycleViolations.length} món vượt tần suất trong chu kỳ ${standardWeeklyCycleLength} tuần`,
       standardEvaluation: `${compliantDays}/${numDays} ngày ĐẠT CHUẨN Thông tư 28 (TB: ${avgCal} Kcal/ngày, chuẩn ${minKcal}–${maxKcal} Kcal)`,
       violationCount: allViolations.length,
       violations: allViolations,

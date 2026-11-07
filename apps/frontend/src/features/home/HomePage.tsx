@@ -33,12 +33,14 @@ import {
   Apple
 } from 'lucide-react';
 import { useAuthStore } from '../../core/stores/auth.store';
+import { useSchoolBranding } from '../../core/hooks/useSchoolBranding';
 import { LanguageSwitcher } from '../../core/components/LanguageSwitcher';
 
 export const HomePage: React.FC = () => {
   useLanguage();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const schoolBranding = useSchoolBranding();
   const [activeTab, setActiveTab] = useState<'principal' | 'nutritionist' | 'teacher' | 'kitchen' | 'parent'>('nutritionist');
 
   const roles = user?.roles || [];
@@ -72,13 +74,26 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Logo & Brand */}
           <Link to="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition-transform">
-              <UtensilsCrossed className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 group-hover:scale-105 transition-transform overflow-hidden">
+              {schoolBranding.logoUrl ? (
+                <img
+                  src={schoolBranding.logoUrl}
+                  alt={schoolBranding.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
+              ) : (
+                <UtensilsCrossed className="w-6 h-6" />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-600 bg-clip-text text-transparent">{translateText("KidMeal")}</span>
-                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">{translateText("NutriBud")}</span>
+                <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-600 bg-clip-text text-transparent truncate max-w-[280px]" title={schoolBranding.name}>
+                  {schoolBranding.name || translateText("KidMeal")}
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">{translateText("BẢN CHUẨN")}</span>
               </div>
               <p className="text-[11px] font-medium text-slate-500">{translateText("Hệ Thống Dinh Dưỡng & Suất Ăn Mầm Non")}</p>
             </div>
@@ -339,7 +354,7 @@ export const HomePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div className="space-y-5">
                   <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">
-                    <UtensilsCrossed className="w-3.5 h-3.5" />{translateText("Cổng Chuyên Gia Dinh Dưỡng (NutriKid)")}</div>
+                    <UtensilsCrossed className="w-3.5 h-3.5" />{translateText("Cổng Chuyên Gia Dinh Dưỡng (KidMeal)")}</div>
                   <h3 className="text-2xl font-black text-slate-900">{translateText("Lên Thực Đơn Thông Minh & Rule Engine Cân Đối Calo")}</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">{translateText("Công cụ đắc lực cho nhân viên y tế và chuyên gia dinh dưỡng: Tự động tính toán tỷ lệ Đạm - Béo - Đường (P:L:G), kiểm tra xung đột dị ứng từng bé và vẽ biểu đồ tăng trưởng WHO LMS Z-score.")}</p>
                   <ul className="space-y-2.5 text-xs sm:text-sm font-semibold text-slate-700">
@@ -711,13 +726,26 @@ export const HomePage: React.FC = () => {
             {/* Col 1 */}
             <div className="space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold">
-                  <UtensilsCrossed className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold overflow-hidden shrink-0">
+                  {schoolBranding.logoUrl ? (
+                    <img
+                      src={schoolBranding.logoUrl}
+                      alt={schoolBranding.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <UtensilsCrossed className="w-5 h-5" />
+                  )}
                 </div>
-                <span className="text-xl font-black text-white">{translateText("KidMeal")}</span>
+                <span className="text-xl font-black text-white">{schoolBranding.name || translateText("KidMeal")}</span>
               </div>
               <p className="text-slate-400 text-xs leading-relaxed">{translateText("Hệ sinh thái chuyển đổi số quản lý dinh dưỡng, an toàn thực phẩm và thanh toán ăn xế cho các trường mầm non tại Việt Nam.")}</p>
-              <div className="text-[11px] text-slate-500">{translateText("Bản quyền © 2026 KidMeal / NutriBud. Tất cả các quyền được bảo lưu.")}</div>
+              <div className="text-[11px] text-slate-500">
+                © {new Date().getFullYear()} {schoolBranding.name || "KidMeal"}. {translateText("Tất cả các quyền được bảo lưu.")}
+              </div>
             </div>
 
             {/* Col 2 */}
@@ -749,15 +777,15 @@ export const HomePage: React.FC = () => {
               <div className="space-y-2 text-xs">
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{translateText("Hotline: 1900 6868 (8:00 - 18:00)")}</span>
+                  <span>Hotline: {schoolBranding.phone || "1900 6868 (8:00 - 18:00)"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{translateText("Email: support@kidmeal.edu.vn")}</span>
+                  <span>Email: {schoolBranding.contactEmail || "support@kidmeal.edu.vn"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>{translateText("Khu Công Nghệ Cao, TP. Hồ Chí Minh")}</span>
+                  <span>{schoolBranding.address || translateText("Khu Công Nghệ Cao, TP. Hồ Chí Minh")}</span>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from "react";
-import { X, Sparkles, Scale, AlertCircle, Check } from "lucide-react";
+import { X, Sparkles, Scale, AlertCircle, Check, Droplets } from "lucide-react";
 import {
   NutritionRule,
   CreateNutritionRulePayload,
@@ -31,6 +31,8 @@ const DEFAULT_FORM = {
   maxFatPercent: "" as any,
   minCarbPercent: "" as any,
   maxCarbPercent: "" as any,
+  waterMlMin: "" as any,
+  waterMlMax: "" as any,
   minCalciumMg: "" as any,
   minIronMg: "" as any,
   minZincMg: "" as any,
@@ -107,6 +109,10 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
           rule.minCarbPercent == null ? "" : Number(rule.minCarbPercent),
         maxCarbPercent:
           rule.maxCarbPercent == null ? "" : Number(rule.maxCarbPercent),
+        waterMlMin:
+          rule.waterMlMin == null ? "" : Number(rule.waterMlMin),
+        waterMlMax:
+          rule.waterMlMax == null ? "" : Number(rule.waterMlMax),
         minCalciumMg:
           rule.minCalciumMg == null ? "" : Number(rule.minCalciumMg),
         minIronMg: rule.minIronMg == null ? "" : Number(rule.minIronMg),
@@ -146,6 +152,15 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
       return setErrorMessage(
         "Tỷ lệ Glucid tối đa không thể nhỏ hơn tối thiểu.",
       );
+    if (
+      form.waterMlMin !== "" &&
+      form.waterMlMax !== "" &&
+      Number(form.waterMlMax) < Number(form.waterMlMin)
+    ) {
+      return setErrorMessage(
+        "Nhu cầu nước tối đa không thể nhỏ hơn nước tối thiểu.",
+      );
+    }
 
     try {
       const requiredKeys = [
@@ -406,6 +421,49 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 />
               </div>
             </div>
+          </div>
+
+          <div className="space-y-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Droplets className="w-4 h-4 text-cyan-600" />
+                {translateText("4. Nhu Cầu Nước Cần Thiết (ml)")}
+              </h3>
+              <span className="text-[10px] text-cyan-700 font-semibold bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200">
+                {translateText("Nước uống, sữa & canh")}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1 text-xs">
+                  {translateText("Nước tối thiểu (ml)")}
+                </label>
+                <input
+                  type="number"
+                  step="10"
+                  value={form.waterMlMin}
+                  onChange={(e) => setNum("waterMlMin", e.target.value)}
+                  placeholder="VD: 800"
+                  className="w-full px-3 py-2 rounded-xl border border-cyan-200 text-sm font-bold text-slate-800 bg-cyan-50/20"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1 text-xs">
+                  {translateText("Nước tối đa (ml)")}
+                </label>
+                <input
+                  type="number"
+                  step="10"
+                  value={form.waterMlMax}
+                  onChange={(e) => setNum("waterMlMax", e.target.value)}
+                  placeholder="VD: 1100"
+                  className="w-full px-3 py-2 rounded-xl border border-cyan-200 text-sm font-bold text-slate-800 bg-cyan-50/20"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400 italic">
+              {translateText("Theo 01/VBHN-BGDĐT: Mẫu giáo bán trú 800–1.100 ml (cả ngày 1.600–2.000 ml); Nhà trẻ bán trú 500–700 ml (cả ngày 800–1.000 ml).")}
+            </p>
           </div>
         </form>
 

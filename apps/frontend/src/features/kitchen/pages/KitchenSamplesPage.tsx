@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Download, Eye, Plus, Camera, Image as ImageIcon, X } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
 import { useAuthStore } from "../../../core/stores/auth.store";
+import { useSchoolBranding } from "../../../core/hooks/useSchoolBranding";
 import { getSchoolDate, normalizeSearch } from "../utils/kds-data";
 import {
   downloadCsv,
@@ -24,12 +25,6 @@ import {
   useKitchenResource,
 } from "../components/KitchenUI";
 
-const labels = {
-  STORED: "Đang lưu",
-  DUE: "Đủ 24 giờ, chờ hủy",
-  DISPOSED: "Đã hủy",
-  UNKNOWN: "Chưa rõ thời gian lưu",
-};
 export function KitchenSamplesPage({
   audience = "kitchen",
 }: {
@@ -37,6 +32,15 @@ export function KitchenSamplesPage({
 }) {
   useLanguage();
   const { user } = useAuthStore();
+  const schoolBranding = useSchoolBranding();
+  const retentionHours = schoolBranding.operationalSettings?.foodRetentionHours || 24;
+
+  const labels: Record<string, string> = {
+    STORED: "Đang lưu",
+    DUE: `Đủ ${retentionHours} giờ, chờ hủy`,
+    DISPOSED: "Đã hủy",
+    UNKNOWN: "Chưa rõ thời gian lưu",
+  };
   const canDispose = (user?.roles || []).some((role) =>
     [
       "KITCHEN_STAFF",
@@ -75,11 +79,11 @@ export function KitchenSamplesPage({
   const action = useKitchenAction();
   const now = resource.data?.loadedAt ?? Date.now();
   const all = resource.data?.items || [];
-  const due = all.filter((r) => getSampleState(r, now) === "DUE");
+  const due = all.filter((r) => getSampleState(r, now, retentionHours) === "DUE");
   const rows = all.filter(
     (r) =>
       (!date || (r.mealDate || r.date) === date) &&
-      (!status || getSampleState(r, now) === status) &&
+      (!status || getSampleState(r, now, retentionHours) === status) &&
       normalizeSearch(
         `${r.sampleCode || r.code} ${r.dishName} ${r.collectorName}`,
       ).includes(normalizeSearch(search)),
@@ -115,9 +119,9 @@ export function KitchenSamplesPage({
       const current = (
         await apiClient.get(`/inspections/samples/${dispose.id}`)
       ).data;
-      if (getSampleState(current) !== "DUE")
+      if (getSampleState(current, Date.now(), retentionHours) !== "DUE")
         throw new Error(
-          "Mẫu chưa đủ thời gian lưu 24 giờ hoặc đã được hủy. Vui lòng tải lại.",
+          `Mẫu chưa đủ thời gian lưu ${retentionHours} giờ hoặc đã được hủy. Vui lòng tải lại.`,
         );
       await apiClient.patch(`/inspections/samples/${dispose.id}/dispose`);
       setDispose(null);
@@ -134,8 +138,8 @@ export function KitchenSamplesPage({
               ? "CHUYÊN GIA DINH DƯỠNG"
               : undefined)
         }
-        title={translateText("Lưu mẫu thực phẩm 24 giờ")}
-        description={translateText("Quản lý mẫu niêm phong, tra cứu thời gian lưu và xác nhận hủy khi đủ 24 giờ. Thời hạn được kiểm tra khi tải dữ liệu.")}
+        title={translateText(`Lưu mẫu thực phẩm ${retentionHours} giờ`)}
+        description={translateText(`Quản lý mẫu niêm phong, tra cứu thời gian lưu và xác nhận hủy khi đủ ${retentionHours} giờ. Thời hạn được kiểm tra khi tải dữ liệu.`)}
       >
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button
@@ -150,7 +154,7 @@ export function KitchenSamplesPage({
                 "Khối lượng (g)",
                 "Nhiệt độ (°C)",
                 "Lưu lúc",
-                "Đủ 24 giờ lúc",
+                `Đủ ${retentionHours} giờ lúc`,
                 "Trạng thái",
                 "Người lấy",
                 "Tủ lưu",
@@ -162,8 +166,8 @@ export function KitchenSamplesPage({
                 r.sampleWeight,
                 r.storageTemp ?? r.temperatureC,
                 formatDateTime(r.storedAt),
-                r.storedAt ? formatDateTime(sampleDueAt(r.storedAt)) : "",
-                labels[getSampleState(r, now)],
+                r.storedAt ? formatDateTime(sampleDueAt(r.storedAt, retentionHours)) : "",
+                labels[getSampleState(r, now, retentionHours)],
                 r.collectorName,
                 r.fridgeUnit,
               ]),
@@ -178,7 +182,7 @@ export function KitchenSamplesPage({
       {due.length > 0 && (
         <div className="kp-notice error" role="status">
           <span>
-            <b>{due.length}{translateText(" mẫu đã đủ 24 giờ, cần kiểm tra trước khi hủy.")}</b>{" "}
+            <b>{due.length}{translateText(` mẫu đã đủ ${retentionHours} giờ, cần kiểm tra trước khi hủy.`)}</b>{" "}
             <button
               className="underline"
               onClick={() => {
@@ -277,7 +281,7 @@ export function KitchenSamplesPage({
                   </td>
                   <td>
                     {translateText(r.storedAt && Number.isFinite(Date.parse(r.storedAt))
-                      ? formatDateTime(sampleDueAt(r.storedAt))
+                      ? formatDateTime(sampleDueAt(r.storedAt, retentionHours))
                       : "—")}
                   </td>
                   <td>
@@ -515,7 +519,7 @@ export function KitchenSamplesPage({
               [translateText("Người lấy"), detail.collectorName],
               [translateText("Vị trí"), detail.storageLocation || detail.fridgeUnit],
               [translateText("Lưu lúc"), formatDateTime(detail.storedAt)],
-              [translateText("Trạng thái"), labels[getSampleState(detail)]],
+              [translateText("Trạng thái"), labels[getSampleState(detail, now, retentionHours)]],
               [translateText("Khối lượng"), `${formatNumber(detail.sampleWeight)} g`],
               [
                 translateText("Nhiệt độ"),

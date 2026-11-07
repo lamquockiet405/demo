@@ -60,7 +60,7 @@ export class NutritionStandardsController {
    * Chuyển xử lý sang NutritionRulesService.syncRdaStandards() và trả kết quả cho client.
    */
   @Post("sync-rda")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGEMENT", "PRINCIPAL", "ADMIN")
+  @Roles("SCHOOL_MANAGEMENT", "PRINCIPAL", "SCHOOL_MANAGER", "SUPER_ADMIN", "ADMIN")
   @ApiOperation({ summary: "Đồng bộ quy chuẩn Quốc gia (VN-RDA 2024 & TT 28)" })
   async syncRda() {
     return this.rulesService.syncRdaStandards();
@@ -83,7 +83,7 @@ export class NutritionStandardsController {
    * Chuyển xử lý sang NutritionRulesService.create() và trả kết quả cho client.
    */
   @Post()
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGEMENT", "SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN", "ADMIN")
   @ApiOperation({ summary: "Thêm mới quy tắc chuẩn dinh dưỡng" })
   async create(@Body() dto: CreateNutritionRuleDto) {
     return this.rulesService.create(dto);
@@ -96,7 +96,7 @@ export class NutritionStandardsController {
    * Chuyển xử lý sang NutritionRulesService.update() và trả kết quả cho client.
    */
   @Put(":id")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGEMENT", "SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN", "ADMIN")
   @ApiOperation({ summary: "Cập nhật chỉ tiêu dinh dưỡng" })
   async update(
     @Param("id", ParseIntPipe) id: number,
@@ -113,7 +113,7 @@ export class NutritionStandardsController {
    * Chuyển isActive trong body thành status ACTIVE hoặc INACTIVE trước khi cập nhật.
    */
   @Patch(":id/status")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGEMENT", "SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN", "ADMIN")
   @ApiOperation({ summary: "Bật/tắt trạng thái áp dụng quy tắc" })
   async toggleStatus(
     @Param("id", ParseIntPipe) id: number,
@@ -130,7 +130,7 @@ export class NutritionStandardsController {
    * Chuyển xử lý sang NutritionRulesService.restore() và trả kết quả cho client.
    */
   @Patch(":id/restore")
-  @Roles("NUTRITIONIST", "PRINCIPAL", "SCHOOL_MANAGER", "SUPER_ADMIN")
+  @Roles("SCHOOL_MANAGEMENT", "PRINCIPAL", "SCHOOL_MANAGER", "SUPER_ADMIN", "ADMIN")
   async restore(@Param("id", ParseIntPipe) id: number) {
     return this.rulesService.restore(id);
   }
@@ -141,7 +141,7 @@ export class NutritionStandardsController {
    * Chuyển xử lý sang NutritionRulesService.remove() và trả kết quả cho client.
    */
   @Delete(":id")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGEMENT", "SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN", "ADMIN")
   @ApiOperation({ summary: "Xóa quy tắc dinh dưỡng" })
   async remove(@Param("id", ParseIntPipe) id: number) {
     return this.rulesService.remove(id);

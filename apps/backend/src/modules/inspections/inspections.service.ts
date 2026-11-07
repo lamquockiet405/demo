@@ -10,6 +10,7 @@ import { InspectionSampleItem } from "./entities/inspection-sample-item.entity";
 import { InspectionImage } from "./entities/inspection-image.entity";
 import { SealSampleDto } from "./dto/seal-sample.dto";
 import { KitchenGateway } from "../websocket/kitchen.gateway";
+import { readState } from "../../common/utils/persisted-state";
 
 export interface FormattedInspectionSession {
   id: string;
@@ -429,15 +430,23 @@ export class InspectionsService {
   }
 
   /**
-   * Lấy danh sách mẫu thức ăn lưu 24h (QĐ 1246/QĐ-BYT)
+   * Lấy danh sách mẫu thức ăn lưu theo cấu hình trường (24h/48h/72h)
    */
   async getSamples() {
+    const profile: any = await readState(
+      this.inspectionRepo.manager,
+      "school-profile:1",
+      {},
+    );
+    const retentionHours =
+      Number(profile?.operationalSettings?.foodRetentionHours) || 24;
+
     const samples = await this.sampleRepo.find({ order: { storedAt: "DESC" } });
     return samples.map((s) => {
       const storedTime = s.storedAt
         ? new Date(s.storedAt).getTime()
         : Date.now();
-      const expiresTime = storedTime + 24 * 60 * 60 * 1000;
+      const expiresTime = storedTime + retentionHours * 60 * 60 * 1000;
       const hoursRemaining = Math.max(
         0,
         (expiresTime - Date.now()) / (1000 * 60 * 60),
@@ -465,6 +474,7 @@ export class InspectionsService {
         temperatureC: s.storageTemp != null ? Number(s.storageTemp) : null,
         fridgeUnit: s.fridgeUnit || null,
         collectorName: s.collectorName || "Chưa cập nhật",
+        retentionHours,
         countdownHours: parseFloat(hoursRemaining.toFixed(1)),
         note: s.note,
         imageUrl: s.imageUrl || this.getSampleFallbackImage(s.dishName),
@@ -473,14 +483,22 @@ export class InspectionsService {
   }
 
   /**
-   * Xem chi tiết mẫu thức ăn lưu 24h
+   * Xem chi tiết mẫu thức ăn lưu
    */
   async getSampleDetail(id: number) {
     const s = await this.sampleRepo.findOne({ where: { id } });
     if (!s) throw new NotFoundException("Không tìm thấy mẫu thức ăn lưu");
 
+    const profile: any = await readState(
+      this.sampleRepo.manager,
+      "school-profile:1",
+      {},
+    );
+    const retentionHours =
+      Number(profile?.operationalSettings?.foodRetentionHours) || 24;
+
     const storedTime = s.storedAt ? new Date(s.storedAt).getTime() : Date.now();
-    const expiresTime = storedTime + 24 * 60 * 60 * 1000;
+    const expiresTime = storedTime + retentionHours * 60 * 60 * 1000;
     const hoursRemaining = Math.max(
       0,
       (expiresTime - Date.now()) / (1000 * 60 * 60),
@@ -503,6 +521,7 @@ export class InspectionsService {
       sampleWeight: s.sampleWeightG == null ? null : Number(s.sampleWeightG),
       fridgeUnit: s.fridgeUnit || null,
       collectorName: s.collectorName || "Chưa cập nhật",
+      retentionHours,
       countdownHours: parseFloat(hoursRemaining.toFixed(1)),
       note: s.note,
       sealIntegrity: "NGUYÊN VẸN",
