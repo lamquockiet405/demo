@@ -26,6 +26,8 @@
     "db:relations:test": "node scripts/test-relations-docker.cjs",
     "test:database": "node --test scripts/test/*.test.cjs",
     "check:frontend": "node scripts/check-frontend-navigation.cjs",
+    "test:academic-years": "npm --prefix apps/backend test -- --config test/jest-academic.json --runInBand",
+    "db:academic-years:apply": "node scripts/apply-academic-years-docker.cjs",
     "docker:test:up": "node scripts/prepare-docker-test.cjs && docker compose --env-file .docker-test/test.env -f compose.test.yml up -d --build --wait"
   },
   "devDependencies": {

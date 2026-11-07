@@ -18,3 +18,4 @@ COPY database/migrations/20261105-drink-recipes.sql /docker-entrypoint-initdb.d/
 COPY database/migrations/20261106-meal-energy-distribution.sql /docker-entrypoint-initdb.d/15-meal-energy-distribution.sql
 COPY database/migrations/20261106-water-intake-requirement.sql /docker-entrypoint-initdb.d/16-water-intake-requirement.sql
 COPY database/migrations/20261106-system-meal-distribution-templates.sql /docker-entrypoint-initdb.d/17-system-meal-distribution-templates.sql
+COPY database/migrations/20261107-academic-years.sql /docker-entrypoint-initdb.d/18-academic-years.sql

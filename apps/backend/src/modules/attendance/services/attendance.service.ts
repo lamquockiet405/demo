@@ -1,3 +1,4 @@
+import { activeAcademicYear } from '../../classes/active-academic-year';
 import { Injectable, Optional, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -82,7 +83,7 @@ export class AttendanceService {
   }
 
   async getClasses() {
-    const classes = await this.classRepo.find({ order: { name: 'ASC' } });
+    const classes = await this.classRepo.find({ where: { academicYearId: activeAcademicYear() }, order: { name: 'ASC' } });
     return Promise.all(
       classes.map(async (cls) => {
         const studentCount = await this.childRepo.count({ where: { classId: cls.id } });
@@ -119,6 +120,7 @@ export class AttendanceService {
       LEFT JOIN meal_attendances ma_lunch ON ma_lunch.student_id = s.id AND ma_lunch.date = $1 AND ma_lunch.meal_type = 'LUNCH'
       LEFT JOIN meal_attendances ma_snack ON ma_snack.student_id = s.id AND ma_snack.date = $1 AND ma_snack.meal_type = 'AFTERNOON_SNACK'
       LEFT JOIN student_allergies sa ON sa.student_id = s.id
+      WHERE c.academic_year_id IN (SELECT id FROM academic_year WHERE status='ACTIVE')
       GROUP BY c.id, c.name, c.age_group, u.full_name
       ORDER BY c.id ASC;`,
       [date],
@@ -786,7 +788,7 @@ export class AttendanceService {
   }
 
   async getKitchenKdsData(date?: string, tenantId = 1) {
-    const classes = await this.classRepo.find({ where: { schoolId: tenantId }, order: { id: 'ASC' } });
+    const classes = await this.classRepo.find({ where: { schoolId: tenantId, academicYearId: activeAcademicYear() }, order: { id: 'ASC' } });
     const today = date || new Date().toISOString().split('T')[0];
 
     const todayMenu = await this.getMenuForDate(today, 'LUNCH');

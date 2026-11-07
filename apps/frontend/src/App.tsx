@@ -2,6 +2,7 @@ import { useLanguage } from './core/i18n/useLanguage';
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AdminDashboardLayout } from "./layouts/AdminDashboardLayout";
+import { AcademicYearsPage } from "./features/academic-years/AcademicYearsPage";
 import { NutritionistLayout } from "./layouts/NutritionistLayout";
 import { TeacherPortalLayout } from "./layouts/TeacherPortalLayout";
 import { TeacherClassesPage, TeacherMealsPage, TeacherReadPage, TeacherPortionsPage, TeacherNotesPage, TeacherGrowthPage } from "./features/teacher/TeacherWorkspace";
@@ -305,6 +306,7 @@ export const App: React.FC = () => {
           <Route path="/tenant/settings" element={<SchoolSettingsPage />} />
           <Route path="/settings" element={<SchoolSettingsPage />} />
           <Route path="/classes" element={<ClassManagementPage />} />
+          <Route path="/academic-years" element={<AcademicYearsPage />} />
           <Route path="/students" element={<StudentManagementPage />} />
           <Route path="/meal-portions" element={<PrincipalPortionsPage />} />
           <Route

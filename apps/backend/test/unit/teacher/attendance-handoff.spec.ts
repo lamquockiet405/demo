@@ -58,6 +58,6 @@ describe('Kitchen daily portion requests', () => {
     expect(result.items[0].lunch).toMatchObject({ planned: 0, actual: 0, present: 0, absent: 1 });
     expect(result.items[1].lunch).toMatchObject({ planned: null, actual: null, submittedAt: null });
     expect(result.totalLunch).toBe(0);
-    expect(classes.find).toHaveBeenCalledWith(expect.objectContaining({ where: { schoolId: 1 } }));
+    expect(classes.find).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ schoolId: 1 }) }));
   });
 });

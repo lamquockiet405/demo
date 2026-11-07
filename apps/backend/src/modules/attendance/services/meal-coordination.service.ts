@@ -37,6 +37,7 @@ export class MealCoordinationService {
       SELECT c.id, c.name, c.age_group as "gradeLevel", COUNT(s.id)::int as "totalStudents"
       FROM classes c
       LEFT JOIN students s ON s.class_id = c.id
+      WHERE c.academic_year_id IN (SELECT id FROM academic_year WHERE status='ACTIVE')
       GROUP BY c.id, c.name, c.age_group
       ORDER BY c.id ASC;
     `);

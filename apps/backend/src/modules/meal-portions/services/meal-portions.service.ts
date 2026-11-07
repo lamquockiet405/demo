@@ -1,3 +1,4 @@
+import { activeAcademicYear } from '../../classes/active-academic-year';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,7 +18,7 @@ export class MealPortionsService {
 
   async findAll(query: MealPortionsQueryDto, tenantId = 1) {
     const date = query.date || schoolDate();
-    const classes = await this.classRepo.find({ where: { schoolId: tenantId }, order: { name: 'ASC' } });
+    const classes = await this.classRepo.find({ where: { schoolId: tenantId, academicYearId: activeAcademicYear() }, order: { name: 'ASC' } });
 
     const portions = await this.portionRepo.find({
       where: { date },

@@ -13,14 +13,14 @@ export const MEALS=['BREAKFAST','MORNING_SNACK','LUNCH','AFTERNOON_SNACK'];
 @Injectable()
 export class TeacherService {
  constructor(private readonly db:DataSource,private readonly classes:ClassesService,private readonly children:ChildrenService,private readonly growth:GrowthService,private readonly dispatch:GrowthDispatchService,private readonly advice:NutritionAdviceService,private readonly notes:MealCoordinationService){}
- async scope(actor:any){if(!actor?.sub)throw new ForbiddenException();return this.db.query('SELECT id,name,age_group AS "ageGroup",school_year AS "schoolYear",status FROM classes WHERE homeroom_teacher_id=$1 AND school_id=$2 ORDER BY name',[Number(actor.sub),Number(actor.tenantId)||1]);}
+ async scope(actor:any){if(!actor?.sub)throw new ForbiddenException();return this.db.query('SELECT id,name,age_group AS "ageGroup",school_year AS "schoolYear",status FROM classes WHERE homeroom_teacher_id=$1 AND school_id=$2 AND academic_year_id IN (SELECT id FROM academic_year WHERE status=\'ACTIVE\') ORDER BY name',[Number(actor.sub),Number(actor.tenantId)||1]);}
  async classAccess(actor:any,id:any){const classes=await this.scope(actor);if(!classes.some(c=>Number(c.id)===Number(id)))throw new ForbiddenException('Lớp không thuộc phân công của giáo viên.');return Number(id);}
  async childAccess(actor:any,id:any){const rows=await this.db.query('SELECT id,class_id FROM students WHERE id=$1',[Number(id)]);if(!rows[0])throw new NotFoundException('Không tìm thấy học sinh.');await this.classAccess(actor,rows[0].class_id);return rows[0];}
  async allowedIds(actor:any,classId?:any){const assigned=await this.scope(actor);if(classId&&classId!=='ALL'){await this.classAccess(actor,classId);return [Number(classId)];}return assigned.map(c=>Number(c.id));}
  date(value?:string){const date=value||schoolDate();if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(new Date(date+'T12:00:00Z').getTime()))throw new BadRequestException('Ngày không hợp lệ.');return date;}
  meal(value?:string){const m=value||'LUNCH';if(!MEALS.includes(m))throw new BadRequestException('Bữa ăn không hợp lệ.');return m;}
  noteMeal(value?:string){const m=value||'LUNCH';if(!Object.prototype.hasOwnProperty.call(COORDINATION_MEAL_LABELS,m))throw new BadRequestException('Bữa ăn không hợp lệ.');return m;}
- async classList(actor:any,q:any){const ids=await this.allowedIds(actor);return (await this.classes.findAll(q)).filter(c=>ids.includes(Number(c.id)));}
+ async classList(actor:any,q:any){const ids=await this.allowedIds(actor);return (await this.classes.findAll(q,Number(actor.tenantId)||1)).filter(c=>ids.includes(Number(c.id)));}
  async classDetail(actor:any,id:any){await this.classAccess(actor,id);return this.classes.findOne(Number(id));}
  async updateClass(actor:any,id:any,data:any){await this.classAccess(actor,id);if(data.homeroomTeacherId!==undefined&&Number(data.homeroomTeacherId)!==Number(actor.sub))throw new ForbiddenException('Giáo viên không được thay đổi người phụ trách.');const {name,ageGroup,schoolYear}=data;return this.classes.update(Number(id),{...(name!==undefined?{name}:{}),...(ageGroup!==undefined?{ageGroup}:{}),...(schoolYear!==undefined?{schoolYear}:{})});}
  async childList(actor:any,q:any){

@@ -1,5 +1,6 @@
 import {
   Building2,
+  CalendarRange,
   ClipboardCheck,
   Coffee,
   FileCheck2,
@@ -44,6 +45,13 @@ export const principalNavigation = [
     path: "/classes",
     icon: GraduationCap,
     functions: "12–16",
+  },
+  {
+    group: "Quản trị trường",
+    label: "Quản lý năm học",
+    path: "/academic-years",
+    icon: CalendarRange,
+    functions: "Năm học",
   },
   {
     group: "Quản trị trường",

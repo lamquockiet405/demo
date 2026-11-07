@@ -1,3 +1,4 @@
+import { activeAcademicYear } from '../../classes/active-academic-year';
 import { Injectable, BadRequestException, ForbiddenException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -68,7 +69,7 @@ export class SnackRosterService {
     let classes: ClassEntity[] = [];
     try {
       if (this.classRepo) {
-        classes = await this.classRepo.find({ order: { name: 'ASC' } });
+        classes = await this.classRepo.find({ where: { academicYearId: activeAcademicYear() }, order: { name: 'ASC' } });
       }
     } catch {
       classes = [];

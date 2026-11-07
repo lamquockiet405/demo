@@ -1,3 +1,4 @@
+import { activeAcademicYear } from '../../classes/active-academic-year';
 import { Injectable, NotFoundException, Optional } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -429,7 +430,7 @@ export class NutritionPhysicalDashboardService {
     }
 
     // Danh sách lớp học và tình trạng dinh dưỡng từng lớp
-    const classes = await this.classRepo.find({ order: { name: "ASC" } });
+    const classes = await this.classRepo.find({ where: { academicYearId: activeAcademicYear() }, order: { name: "ASC" } });
     const classBreakdown = classes.map((c) => {
       const classStudents = students.filter(
         (s) => Number(s.classId) === Number(c.id),

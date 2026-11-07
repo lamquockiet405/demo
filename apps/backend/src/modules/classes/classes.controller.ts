@@ -18,6 +18,7 @@ import { FilterClassDto } from './dto/filter-class.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 
 /**
  * Quản lý lớp học và việc gán hoặc đưa học sinh ra khỏi lớp.
@@ -39,8 +40,8 @@ export class ClassesController {
    */
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách các lớp học có đếm số trẻ và cảnh báo dị ứng' })
-  async findAll(@Query() filter: FilterClassDto) {
-    return this.classesService.findAll(filter);
+  async findAll(@Query() filter: FilterClassDto, @CurrentTenant() schoolId: number) {
+    return this.classesService.findAll(filter, schoolId);
   }
 
   /**
@@ -62,8 +63,8 @@ export class ClassesController {
   @Post()
   @Roles('SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
   @ApiOperation({ summary: 'Tạo lớp học mới (BGH)' })
-  async create(@Body() dto: CreateClassDto) {
-    return this.classesService.create(dto);
+  async create(@Body() dto: CreateClassDto, @CurrentTenant() schoolId: number) {
+    return this.classesService.create(dto, schoolId);
   }
 
   /**
