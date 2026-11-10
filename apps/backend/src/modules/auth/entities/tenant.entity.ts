@@ -23,4 +23,7 @@ export class SchoolTenant {
 
   @Column({ length: 500, nullable: true })
   logo: string;
+
+  @Column({ name: 'default_language_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  defaultLanguageId: number | null;
 }
