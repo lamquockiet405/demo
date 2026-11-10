@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Mail,
@@ -34,6 +36,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   onSuccessLogin,
   initialEmail = '',
 }) => {
+  useLanguage();
   // Navigation & step
   const [step, setStep] = useState<Step>('EMAIL');
 
@@ -251,7 +254,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition"
-            aria-label="Đóng"
+            aria-label={translateText("Đóng")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -261,8 +264,8 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
               <KeyRound className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold">Khôi phục mật khẩu</h3>
-              <p className="text-xs text-emerald-100">Hệ thống Quản trị Bán trú KidMeal</p>
+              <h3 className="text-lg font-bold">{translateText("Khôi phục mật khẩu")}</h3>
+              <p className="text-xs text-emerald-100">{translateText("Hệ thống Quản trị Bán trú KidMeal")}</p>
             </div>
           </div>
 
@@ -297,7 +300,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium flex items-start gap-2 animate-shake">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <span>{error}</span>
+              <span>{translateText(error)}</span>
             </div>
           )}
 
@@ -305,7 +308,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           {infoMessage && !error && (
             <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium flex items-start gap-2">
               <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>{infoMessage}</span>
+              <span>{translateText(infoMessage)}</span>
             </div>
           )}
 
@@ -313,22 +316,18 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           {step === 'EMAIL' && (
             <form onSubmit={handleRequestOtp} className="space-y-4">
               <div className="text-center sm:text-left mb-2">
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Nhập địa chỉ email tài khoản KidMeal của bạn. Hệ thống sẽ gửi mã OTP gồm 6 chữ số để xác thực việc đặt lại mật khẩu.
-                </p>
+                <p className="text-xs text-slate-500 leading-relaxed">{translateText("Nhập địa chỉ email tài khoản KidMeal của bạn. Hệ thống sẽ gửi mã OTP gồm 6 chữ số để xác thực việc đặt lại mật khẩu.")}</p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Địa chỉ Email đăng ký
-                </label>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Địa chỉ Email đăng ký")}</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ví dụ: hieutruong@huongduong.edu.vn"
+                    placeholder={translateText("ví dụ: hieutruong@huongduong.edu.vn")}
                     required
                     autoFocus
                     className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition outline-none"
@@ -345,10 +344,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   {loading ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Đang gửi mã OTP...</span>
+                      <span>{translateText("Đang gửi mã OTP...")}</span>
                     </>
                   ) : (
-                    'Gửi mã xác thực OTP 🚀'
+                    translateText('Gửi mã xác thực OTP 🚀')
                   )}
                 </button>
               </div>
@@ -359,9 +358,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   onClick={onClose}
                   className="text-xs text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1.5"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  Quay lại màn hình đăng nhập
-                </button>
+                  <ArrowLeft className="w-3.5 h-3.5" />{translateText("Quay lại màn hình đăng nhập")}</button>
               </div>
             </form>
           )}
@@ -373,10 +370,9 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <span className="inline-block p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl mb-2">
                   <Shield className="w-6 h-6" />
                 </span>
-                <h4 className="text-sm font-bold text-slate-800">Nhập mã xác thực OTP</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Mã OTP 6 chữ số đã được gửi đến: <br />
-                  <strong className="text-slate-700 font-semibold">{email}</strong>
+                <h4 className="text-sm font-bold text-slate-800">{translateText("Nhập mã xác thực OTP")}</h4>
+                <p className="text-xs text-slate-500 mt-1">{translateText("Mã OTP 6 chữ số đã được gửi đến: ")}<br />
+                  <strong className="text-slate-700 font-semibold">{translateText(email)}</strong>
                 </p>
               </div>
 
@@ -403,9 +399,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   type="button"
                   onClick={() => setStep('EMAIL')}
                   className="text-slate-500 hover:text-slate-700 transition"
-                >
-                  Đổi email khác
-                </button>
+                >{translateText("Đổi email khác")}</button>
 
                 {canResend ? (
                   <button
@@ -414,12 +408,9 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     disabled={loading}
                     className="text-emerald-600 font-bold hover:underline transition flex items-center gap-1"
                   >
-                    <RefreshCw className="w-3 h-3" />
-                    Gửi lại mã OTP
-                  </button>
+                    <RefreshCw className="w-3 h-3" />{translateText("Gửi lại mã OTP")}</button>
                 ) : (
-                  <span className="text-slate-400">
-                    Gửi lại mã sau <strong className="text-emerald-600 font-semibold">{countdown}s</strong>
+                  <span className="text-slate-400">{translateText("Gửi lại mã sau ")}<strong className="text-emerald-600 font-semibold">{countdown}{translateText("s")}</strong>
                   </span>
                 )}
               </div>
@@ -433,10 +424,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   {loading ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Đang kiểm tra...</span>
+                      <span>{translateText("Đang kiểm tra...")}</span>
                     </>
                   ) : (
-                    'Xác nhận mã OTP'
+                    translateText('Xác nhận mã OTP')
                   )}
                 </button>
               </div>
@@ -447,24 +438,20 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           {step === 'NEW_PASSWORD' && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="text-center sm:text-left mb-1">
-                <h4 className="text-sm font-bold text-slate-800">Thiết lập mật khẩu mới</h4>
-                <p className="text-xs text-slate-500">
-                  Mật khẩu cần đảm bảo độ bảo mật để bảo vệ thông tin học sinh và trường học.
-                </p>
+                <h4 className="text-sm font-bold text-slate-800">{translateText("Thiết lập mật khẩu mới")}</h4>
+                <p className="text-xs text-slate-500">{translateText("Mật khẩu cần đảm bảo độ bảo mật để bảo vệ thông tin học sinh và trường học.")}</p>
               </div>
 
               {/* Mật khẩu mới */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Mật khẩu mới
-                </label>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Mật khẩu mới")}</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Ít nhất 8 ký tự"
+                    placeholder={translateText("Ít nhất 8 ký tự")}
                     required
                     minLength={8}
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition"
@@ -482,9 +469,9 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 {newPassword && (
                   <div className="mt-2 space-y-1.5">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500">Độ mạnh:</span>
+                      <span className="text-slate-500">{translateText("Độ mạnh:")}</span>
                       <span className={`font-bold ${getStrengthLabel(strengthScore).text}`}>
-                        {getStrengthLabel(strengthScore).label}
+                        {translateText(getStrengthLabel(strengthScore).label)}
                       </span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5 h-1.5">
@@ -505,16 +492,14 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
               {/* Xác nhận mật khẩu mới */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Xác nhận mật khẩu mới
-                </label>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Xác nhận mật khẩu mới")}</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Nhập lại mật khẩu mới"
+                    placeholder={translateText("Nhập lại mật khẩu mới")}
                     required
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition"
                   />
@@ -527,7 +512,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   </button>
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
-                  <p className="text-[11px] text-red-500 mt-1">Mật khẩu xác nhận chưa khớp</p>
+                  <p className="text-[11px] text-red-500 mt-1">{translateText("Mật khẩu xác nhận chưa khớp")}</p>
                 )}
               </div>
 
@@ -540,10 +525,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                   {loading ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Đang lưu mật khẩu mới...</span>
+                      <span>{translateText("Đang lưu mật khẩu mới...")}</span>
                     </>
                   ) : (
-                    'Cập nhật mật khẩu mới ✨'
+                    translateText('Cập nhật mật khẩu mới ✨')
                   )}
                 </button>
               </div>
@@ -558,13 +543,8 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
               </div>
 
               <div>
-                <h4 className="text-base font-bold text-slate-900">
-                  Đặt lại mật khẩu thành công! 🎉
-                </h4>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Mật khẩu tài khoản <strong className="text-slate-700">{email}</strong> đã được cập nhật thành công.
-                  Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.
-                </p>
+                <h4 className="text-base font-bold text-slate-900">{translateText("Đặt lại mật khẩu thành công! 🎉")}</h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{translateText("Mật khẩu tài khoản ")}<strong className="text-slate-700">{translateText(email)}</strong>{translateText(" đã được cập nhật thành công. Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.")}</p>
               </div>
 
               <div className="pt-2">
@@ -575,9 +555,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                     if (onSuccessLogin) onSuccessLogin(email);
                   }}
                   className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-[0.98]"
-                >
-                  Đăng nhập ngay bây giờ
-                </button>
+                >{translateText("Đăng nhập ngay bây giờ")}</button>
               </div>
             </div>
           )}

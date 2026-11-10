@@ -119,20 +119,21 @@ describe('PasswordResetService (Forgot & Reset Password)', () => {
       const res = await service.resetPassword(
         'mock-reset-token',
         'NewPassword@2026',
-        'NewPassword@2026',
       );
       expect(res.success).toBe(true);
-      expect(mockUserRepo.update).toHaveBeenCalledWith(
-        'user-uuid-1',
+      expect(mockUserRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({
           passwordHash: expect.any(String),
         }),
       );
     });
 
-    it('should throw BadRequestException when confirmPassword does not match newPassword', async () => {
+    it('should throw BadRequestException when resetToken is invalid', async () => {
+      mockJwtService.verify.mockImplementationOnce(() => {
+        throw new Error('invalid token');
+      });
       await expect(
-        service.resetPassword('mock-reset-token', 'NewPassword@2026', 'Mismatch@2026'),
+        service.resetPassword('invalid-token', 'NewPassword@2026'),
       ).rejects.toThrow(BadRequestException);
     });
   });
