@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Sparkles, Layers, ShieldCheck, AlertCircle } from 'lucide-react';
 import { WeeklyMenu, CreateMenuPayload } from '../api/weekly-menus.api';
@@ -19,6 +21,7 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
   mode = 'create',
   existingMenus = [],
 }) => {
+  useLanguage();
   const [title, setTitle] = useState('');
   const [targetAgeGroup, setTargetAgeGroup] = useState('ALL_AGES');
   const [startDate, setStartDate] = useState('');
@@ -63,25 +66,67 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
       setCycleWeekNumber(initialData.cycleWeekNumber || 1);
       setMenuCycleType(initialData.menuCycleType || 'WEEKLY');
     } else {
-      // Default: Tuần hiện tại
-      const now = new Date();
-      const monday = new Date(now);
-      const day = monday.getDay();
-      const diff = monday.getDate() - day + (day === 0 ? -6 : 1); // Monday
-      monday.setDate(diff);
+      // Bắt đầu với chu kỳ mới nhất từ danh sách thực đơn đã có
+      const validMenus = (existingMenus || []).filter(
+        (m) => m.status !== "REJECTED" && m.status !== "ARCHIVED",
+      );
+      let latestMenu: WeeklyMenu | null = null;
+      let latestEndMs = 0;
+      let maxWeek = 0;
 
-      const friday = new Date(monday);
-      friday.setDate(monday.getDate() + 4);
+      for (const m of validMenus) {
+        const endStr = m.endDate || m.startDate;
+        if (endStr) {
+          const ms = new Date(endStr).getTime();
+          if (ms > latestEndMs) {
+            latestEndMs = ms;
+            latestMenu = m;
+          }
+        }
+        let w = m.cycleWeekNumber || 0;
+        if (!w && m.title) {
+          const match = m.title.match(/Tuần\s*(\d+)/i);
+          if (match) w = parseInt(match[1], 10);
+        }
+        if (w > maxWeek) maxWeek = w;
+      }
 
-      setTitle(`Thực đơn Bán trú Tuần ${getWeekNumber(now)} Tháng ${now.getMonth() + 1}`);
-      setStartDate(monday.toISOString().split('T')[0]);
-      setEndDate(friday.toISOString().split('T')[0]);
-      setCycleWeekNumber(getWeekNumber(now));
+      let mondayStr = '';
+      let fridayStr = '';
+      let nextWeekNum = 1;
+
+      if (latestMenu && latestEndMs > 0) {
+        const d = new Date(latestMenu.endDate || latestMenu.startDate);
+        do {
+          d.setDate(d.getDate() + 1);
+        } while (d.getDay() !== 1);
+        mondayStr = d.toISOString().split('T')[0];
+        const fri = new Date(d);
+        fri.setDate(d.getDate() + 4);
+        fridayStr = fri.toISOString().split('T')[0];
+        nextWeekNum = maxWeek > 0 ? maxWeek + 1 : 1;
+      } else {
+        const now = new Date();
+        const monday = new Date(now);
+        const day = monday.getDay();
+        const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+        monday.setDate(diff);
+        const friday = new Date(monday);
+        friday.setDate(monday.getDate() + 4);
+        mondayStr = monday.toISOString().split('T')[0];
+        fridayStr = friday.toISOString().split('T')[0];
+        nextWeekNum = getWeekNumber(now);
+      }
+
+      setTitle(`Thực đơn Bán trú Tuần ${nextWeekNum}`);
+      setStartDate(mondayStr);
+      setEndDate(fridayStr);
+      setCycleWeekNumber(nextWeekNum);
       setTargetAgeGroup('ALL_AGES');
       setMenuCycleType('WEEKLY');
     }
     setError(null);
-  }, [initialData, mode, isOpen]);
+  }, [initialData, mode, isOpen, existingMenus]);
 
   function getWeekNumber(d: Date) {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -165,10 +210,10 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900">
-                  {mode === 'create' ? 'Tạo thực đơn tuần mới' : 'Chỉnh sửa thông tin thực đơn'}
+                  {translateText(mode === 'create' ? 'Tạo thực đơn tuần mới' : 'Chỉnh sửa thông tin thực đơn')}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {mode === 'create' ? 'Thiết lập chu kỳ dinh dưỡng mầm non' : `Phiên bản v${initialData?.version || 1}.0`}
+                  {translateText(mode === 'create' ? 'Thiết lập chu kỳ dinh dưỡng mầm non' : `Phiên bản v${initialData?.version || 1}.0`)}
                 </p>
               </div>
             </div>
@@ -185,20 +230,19 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
             {error && (
               <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-2.5 text-xs text-rose-700">
                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <span>{error}</span>
+                <span>{translateText(error)}</span>
               </div>
             )}
 
             {/* Tên thực đơn */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Tên thực đơn tuần <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Tên thực đơn tuần ")}<span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ví dụ: Thực đơn Tuần 38 (Khối Mầm - Chồi - Lá)"
+                placeholder={translateText("Ví dụ: Thực đơn Tuần 38 (Khối Mầm - Chồi - Lá)")}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
                 required
               />
@@ -206,27 +250,25 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
 
             {/* Nhóm tuổi áp dụng */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Độ tuổi / Khối lớp <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Độ tuổi / Khối lớp ")}<span className="text-rose-500">*</span>
               </label>
               <select
                 value={targetAgeGroup}
                 onChange={(e) => setTargetAgeGroup(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition bg-white"
               >
-                <option value="ALL_AGES">Toàn trường (Khối Mầm - Chồi - Lá)</option>
-                <option value="TODDLER_18_36M">Nhà trẻ (18 - 36 tháng)</option>
-                <option value="KINDERGARTEN_3_4Y">Mẫu giáo Bé (3 - 4 tuổi)</option>
-                <option value="KINDERGARTEN_4_5Y">Mẫu giáo Nhỡ (4 - 5 tuổi)</option>
-                <option value="KINDERGARTEN_5_6Y">Mẫu giáo Lớn (5 - 6 tuổi)</option>
+                <option value="ALL_AGES">{translateText("Toàn trường (Khối Mầm - Chồi - Lá)")}</option>
+                <option value="TODDLER_18_36M">{translateText("Nhà trẻ (18 - 36 tháng)")}</option>
+                <option value="KINDERGARTEN_3_4Y">{translateText("Mẫu giáo Bé (3 - 4 tuổi)")}</option>
+                <option value="KINDERGARTEN_4_5Y">{translateText("Mẫu giáo Nhỡ (4 - 5 tuổi)")}</option>
+                <option value="KINDERGARTEN_5_6Y">{translateText("Mẫu giáo Lớn (5 - 6 tuổi)")}</option>
               </select>
             </div>
 
             {/* Ngày bắt đầu & Ngày kết thúc */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Từ ngày (Thứ 2) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Từ ngày (Thứ 2) ")}<span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -237,8 +279,7 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Đến ngày (Thứ 6) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Đến ngày (Thứ 6) ")}<span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -255,10 +296,8 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
               <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2.5 shadow-xs">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block text-rose-900">Trùng lặp thời gian thực đơn</span>
-                  <span>
-                    Khoảng thời gian từ <strong>{startDate}</strong> đến <strong>{endDate}</strong> đã có thực đơn "<strong>{conflictingMenu.title}</strong>" (Trạng thái: {conflictingMenu.status}). Vui lòng chọn tuần khác.
-                  </span>
+                  <span className="font-bold block text-rose-900">{translateText("Trùng lặp thời gian thực đơn")}</span>
+                  <span>{translateText("Khoảng thời gian từ ")}<strong>{translateText(startDate)}</strong>{translateText(" đến ")}<strong>{translateText(endDate)}</strong>{translateText(" đã có thực đơn \"")}<strong>{translateText(conflictingMenu.title)}</strong>{translateText("\" (Trạng thái: ")}{translateText(conflictingMenu.status)}{translateText("). Vui lòng chọn tuần khác.")}</span>
                 </div>
               </div>
             )}
@@ -266,31 +305,26 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
             {/* Tuần chu kỳ & Loại chu kỳ */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Tuần số (Học kỳ)
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Tuần số (Học kỳ)")}</label>
                 <input
                   type="number"
                   min={1}
-                  max={52}
                   value={cycleWeekNumber}
                   onChange={(e) => setCycleWeekNumber(Number(e.target.value))}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Loại chu kỳ
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Loại chu kỳ")}</label>
                 <select
                   value={menuCycleType}
                   onChange={(e) => setMenuCycleType(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition bg-white"
                 >
-                  <option value="WEEKLY">Theo tuần (5 ngày T2 - T6)</option>
-                  <option value="BIWEEKLY">Theo 2 tuần</option>
-                  <option value="MONTHLY">Theo tháng</option>
-                  <option value="CUSTOM">Tùy biến</option>
+                  <option value="WEEKLY">{translateText("Theo tuần (5 ngày T2 - T6)")}</option>
+                  <option value="BIWEEKLY">{translateText("Theo 2 tuần")}</option>
+                  <option value="MONTHLY">{translateText("Theo tháng")}</option>
+                  <option value="CUSTOM">{translateText("Tùy biến")}</option>
                 </select>
               </div>
             </div>
@@ -299,10 +333,8 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
             <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div className="text-xs text-emerald-900">
-                <p className="font-bold">Tiêu chuẩn dinh dưỡng Thông tư 28/2016/TT-BGDĐT</p>
-                <p className="text-emerald-700 mt-0.5 leading-relaxed">
-                  Hệ thống tự động kích hoạt Rule Engine kiểm tra calo (600 - 882 Kcal), tỷ lệ P:L:G (13-20% : 25-35% : 52-60%) và quét dị ứng cho từng trẻ.
-                </p>
+                <p className="font-bold">{translateText("Tiêu chuẩn dinh dưỡng Thông tư 28/2016/TT-BGDĐT")}</p>
+                <p className="text-emerald-700 mt-0.5 leading-relaxed">{translateText("Hệ thống tự động kích hoạt Rule Engine kiểm tra calo (600 - 882 Kcal), tỷ lệ P:L:G (13-20% : 25-35% : 52-60%) và quét dị ứng cho từng trẻ.")}</p>
               </div>
             </div>
           </form>
@@ -314,9 +346,7 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
               onClick={onClose}
               disabled={isSubmitting}
               className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition"
-            >
-              Hủy bỏ
-            </button>
+            >{translateText("Hủy bỏ")}</button>
             <button
               type="submit"
               form="menu-form"
@@ -326,12 +356,12 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
               {isSubmitting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  <span>Đang lưu...</span>
+                  <span>{translateText("Đang lưu...")}</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>{mode === 'create' ? 'Tạo thực đơn' : 'Cập nhật'}</span>
+                  <span>{translateText(mode === 'create' ? 'Tạo thực đơn' : 'Cập nhật')}</span>
                 </>
               )}
             </button>

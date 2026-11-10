@@ -28,6 +28,9 @@ export class Menu {
   @Column({ name: 'age_group', length: 20 })
   ageGroup: string;
 
+  @Column({ name: 'nutritional_standard_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  nutritionalStandardId: number | null;
+
   @Column({ length: 200 })
   title: string;
 
@@ -63,6 +66,18 @@ export class Menu {
 
   @Column({ name: 'approved_at', type: 'timestamptz', nullable: true })
   approvedAt: Date;
+
+  @Column({ name: 'approval_notes', type: 'text', nullable: true })
+  approvalNotes: string;
+
+  @Column({ name: 'rejection_reason', type: 'text', nullable: true })
+  rejectionReason: string;
+
+  @Column({ name: 'rejected_at', type: 'timestamptz', nullable: true })
+  rejectedAt: Date;
+
+  @Column({ name: 'published_at', type: 'timestamptz', nullable: true })
+  publishedAt: Date;
 
   @ManyToOne(() => MenuCycle, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'cycle_id' })
