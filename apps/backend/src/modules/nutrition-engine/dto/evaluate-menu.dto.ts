@@ -1,10 +1,18 @@
-import { IsNotEmpty, IsOptional, IsString, IsArray, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsArray, IsNumber, Min, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DishEvaluationItem {
   @ApiProperty({ example: 1 })
   @IsNumber()
+  @Type(() => Number)
   dishId: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0.01)
+  @Type(() => Number)
+  portionSizeG?: number;
 
   @ApiPropertyOptional({ example: 'MORNING_SNACK' })
   @IsOptional()
@@ -15,6 +23,8 @@ export class DishEvaluationItem {
 export class EvaluateMenuDto {
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   menuId?: number;
 
   @ApiPropertyOptional({ example: 'MAU_GIAO', enum: ['NHA_TRE', 'MAU_GIAO'] })
@@ -40,5 +50,7 @@ export class EvaluateMenuDto {
   @ApiPropertyOptional({ type: [DishEvaluationItem] })
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DishEvaluationItem)
   dishes?: DishEvaluationItem[];
 }
