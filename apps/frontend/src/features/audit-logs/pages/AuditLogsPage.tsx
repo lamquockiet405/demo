@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   ShieldAlert,
@@ -27,6 +29,7 @@ import {
 import { AuditLogDetailModal } from '../components/AuditLogDetailModal';
 
 export const AuditLogsPage: React.FC = () => {
+  useLanguage();
   // State danh sách & phân trang
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [stats, setStats] = useState<AuditLogStats | null>(null);
@@ -172,7 +175,7 @@ export const AuditLogsPage: React.FC = () => {
     if (act.includes('DELETE') || act.includes('REMOVE') || act.includes('REJECT')) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-          {action}
+          {translateText(action)}
         </span>
       );
     }
@@ -180,7 +183,7 @@ export const AuditLogsPage: React.FC = () => {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-          {action}
+          {translateText(action)}
         </span>
       );
     }
@@ -188,19 +191,19 @@ export const AuditLogsPage: React.FC = () => {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
           <AlertTriangle className="w-3 h-3 text-amber-600" />
-          {action}
+          {translateText(action)}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-        {action}
+        {translateText(action)}
       </span>
     );
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 w-full space-y-6">
       {/* 1. Header & Title */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -208,13 +211,9 @@ export const AuditLogsPage: React.FC = () => {
             <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 shadow-inner">
               <ShieldAlert className="w-5 h-5" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Nhật ký Kiểm toán & Truy vết Hệ thống
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{translateText("Nhật ký Kiểm toán & Truy vết Hệ thống")}</h1>
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Theo dõi, giám sát các hoạt động nhạy cảm (dị ứng, thể lực WHO, thực đơn, kiểm thực bếp) theo chuẩn an toàn thông tin
-          </p>
+          <p className="text-sm text-slate-500 mt-1">{translateText("Theo dõi, giám sát các hoạt động nhạy cảm (dị ứng, thể lực WHO, thực đơn, kiểm thực bếp) theo chuẩn an toàn thông tin")}</p>
         </div>
 
         <button
@@ -224,18 +223,16 @@ export const AuditLogsPage: React.FC = () => {
           }}
           className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-xs"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          Làm mới
-        </button>
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />{translateText("Làm mới")}</button>
       </div>
 
       {/* 2. Thống kê nhanh (Stats Cards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng số sự kiện</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Tổng số sự kiện")}</p>
             <h3 className="text-2xl font-black text-slate-900 mt-1">{stats?.totalLogs ?? totalCount}</h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">Toàn bộ lịch sử</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">{translateText("Toàn bộ lịch sử")}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
             <Layers className="w-6 h-6" />
@@ -244,9 +241,9 @@ export const AuditLogsPage: React.FC = () => {
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hoạt động hôm nay</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Hoạt động hôm nay")}</p>
             <h3 className="text-2xl font-black text-emerald-600 mt-1">{stats?.todayLogs ?? 0}</h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">Sự kiện 24 giờ qua</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">{translateText("Sự kiện 24 giờ qua")}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <Activity className="w-6 h-6" />
@@ -255,9 +252,9 @@ export const AuditLogsPage: React.FC = () => {
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Thao tác nhạy cảm</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Thao tác nhạy cảm")}</p>
             <h3 className="text-2xl font-black text-amber-600 mt-1">{stats?.sensitiveCount ?? 0}</h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">Dị ứng, thể lực, phê duyệt</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">{translateText("Dị ứng, thể lực, phê duyệt")}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
             <Lock className="w-6 h-6" />
@@ -266,9 +263,9 @@ export const AuditLogsPage: React.FC = () => {
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tác nhân hoạt động</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{translateText("Tác nhân hoạt động")}</p>
             <h3 className="text-2xl font-black text-indigo-600 mt-1">{stats?.activeUsersCount ?? 0}</h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">Nhân sự & Phụ huynh</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">{translateText("Nhân sự & Phụ huynh")}</p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
             <User className="w-6 h-6" />
@@ -280,21 +277,19 @@ export const AuditLogsPage: React.FC = () => {
       <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
-            <Filter className="w-4 h-4 text-teal-600" /> Bộ lọc kiểm toán đa chiều
-          </div>
+            <Filter className="w-4 h-4 text-teal-600" />{translateText(" Bộ lọc kiểm toán đa chiều")}</div>
           <button
             onClick={handleResetFilters}
             className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-teal-600 transition"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Đặt lại mặc định
-          </button>
+            <RotateCcw className="w-3.5 h-3.5" />{translateText(" Đặt lại mặc định")}</button>
         </div>
 
         {/* Cảnh báo khoảng ngày không hợp lệ (EX-01) */}
         {dateError && (
           <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>{dateError}</span>
+            <span>{translateText(dateError)}</span>
           </div>
         )}
 
@@ -304,7 +299,7 @@ export const AuditLogsPage: React.FC = () => {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm theo email, tên, ghi chú, IP..."
+              placeholder={translateText("Tìm theo email, tên, ghi chú, IP...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 placeholder:text-slate-400"
@@ -321,10 +316,10 @@ export const AuditLogsPage: React.FC = () => {
               }}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800"
             >
-              <option value="ALL">Tất cả hành động</option>
+              <option value="ALL">{translateText("Tất cả hành động")}</option>
               {filterOptions.actions.map((act) => (
                 <option key={act} value={act}>
-                  {act}
+                  {translateText(act)}
                 </option>
               ))}
             </select>
@@ -340,10 +335,10 @@ export const AuditLogsPage: React.FC = () => {
               }}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800"
             >
-              <option value="ALL">Tất cả thực thể</option>
+              <option value="ALL">{translateText("Tất cả thực thể")}</option>
               {filterOptions.targetEntities.map((ent) => (
                 <option key={ent} value={ent}>
-                  {ent}
+                  {translateText(ent)}
                 </option>
               ))}
             </select>
@@ -355,7 +350,7 @@ export const AuditLogsPage: React.FC = () => {
               type="date"
               value={startDate}
               onChange={(e) => handleStartDateChange(e.target.value)}
-              title="Từ ngày"
+              title={translateText("Từ ngày")}
               className={`w-full px-3 py-2 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-slate-800 ${
                 dateError ? 'border-rose-300 ring-rose-200' : 'border-slate-200 focus:border-teal-500'
               }`}
@@ -368,7 +363,7 @@ export const AuditLogsPage: React.FC = () => {
               type="date"
               value={endDate}
               onChange={(e) => handleEndDateChange(e.target.value)}
-              title="Đến ngày"
+              title={translateText("Đến ngày")}
               className={`w-full px-3 py-2 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-slate-800 ${
                 dateError ? 'border-rose-300 ring-rose-200' : 'border-slate-200 focus:border-teal-500'
               }`}
@@ -383,21 +378,19 @@ export const AuditLogsPage: React.FC = () => {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider">
-                <th className="py-3 px-4">Thời gian</th>
-                <th className="py-3 px-4">Tác nhân (Actor)</th>
-                <th className="py-3 px-4">Hành động</th>
-                <th className="py-3 px-4">Đối tượng tác động</th>
-                <th className="py-3 px-4">Địa chỉ IP</th>
-                <th className="py-3 px-4 text-right">Chi tiết</th>
+                <th className="py-3 px-4">{translateText("Thời gian")}</th>
+                <th className="py-3 px-4">{translateText("Tác nhân (Actor)")}</th>
+                <th className="py-3 px-4">{translateText("Hành động")}</th>
+                <th className="py-3 px-4">{translateText("Đối tượng tác động")}</th>
+                <th className="py-3 px-4">{translateText("Địa chỉ IP")}</th>
+                <th className="py-3 px-4 text-right">{translateText("Chi tiết")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto text-teal-600 mb-2" />
-                    Đang tải nhật ký kiểm toán...
-                  </td>
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto text-teal-600 mb-2" />{translateText("Đang tải nhật ký kiểm toán...")}</td>
                 </tr>
               ) : logs.length === 0 ? (
                 /* Ngoại lệ EX-02: Không có dữ liệu phù hợp bộ lọc */
@@ -407,16 +400,13 @@ export const AuditLogsPage: React.FC = () => {
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
                         <Search className="w-6 h-6" />
                       </div>
-                      <h4 className="text-sm font-bold text-slate-800">Không tìm thấy bản ghi kiểm toán phù hợp</h4>
-                      <p className="text-xs text-slate-500">
-                        Không có sự kiện nào khớp với tiêu chí tìm kiếm hoặc khoảng thời gian bạn đã chọn.
-                      </p>
+                      <h4 className="text-sm font-bold text-slate-800">{translateText("Không tìm thấy bản ghi kiểm toán phù hợp")}</h4>
+                      <p className="text-xs text-slate-500">{translateText("Không có sự kiện nào khớp với tiêu chí tìm kiếm hoặc khoảng thời gian bạn đã chọn.")}</p>
                       <button
                         onClick={handleResetFilters}
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-100 font-semibold text-xs transition"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" /> Đặt lại toàn bộ bộ lọc
-                      </button>
+                        <RotateCcw className="w-3.5 h-3.5" />{translateText(" Đặt lại toàn bộ bộ lọc")}</button>
                     </div>
                   </td>
                 </tr>
@@ -427,24 +417,24 @@ export const AuditLogsPage: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <div className="font-semibold text-slate-800 flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        {formatRelativeTime(log.createdAt)}
+                        {translateText(formatRelativeTime(log.createdAt))}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-                        {new Date(log.createdAt).toLocaleDateString('vi-VN')} {new Date(log.createdAt).toLocaleTimeString('vi-VN')}
+                        {translateText(new Date(log.createdAt).toLocaleDateString(getLocale()))} {translateText(new Date(log.createdAt).toLocaleTimeString(getLocale()))}
                       </div>
                     </td>
 
                     {/* Tác nhân */}
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-800">
-                        {log.userName || 'Tài khoản hệ thống'}
+                        {log.userName || translateText('Tài khoản hệ thống')}
                       </div>
                       <div className="text-[11px] text-slate-500 font-mono">
-                        {log.userEmail || 'N/A'}
+                        {log.userEmail || translateText('N/A')}
                       </div>
                       {log.userRole && (
                         <span className="inline-block mt-0.5 text-[10px] px-1.5 py-0.2 rounded font-semibold bg-slate-100 text-slate-600">
-                          {log.userRole}
+                          {translateText(log.userRole)}
                         </span>
                       )}
                     </td>
@@ -457,11 +447,11 @@ export const AuditLogsPage: React.FC = () => {
                     {/* Đối tượng tác động */}
                     <td className="py-3.5 px-4">
                       <span className="font-mono font-semibold text-slate-700">
-                        {log.targetEntity || 'HỆ THỐNG'}
+                        {translateText(log.targetEntity || 'HỆ THỐNG')}
                       </span>
                       {log.targetId && (
                         <span className="ml-1 text-[11px] text-slate-400 font-mono">
-                          #{log.targetId}
+                          #{translateText(log.targetId)}
                         </span>
                       )}
                     </td>
@@ -480,8 +470,7 @@ export const AuditLogsPage: React.FC = () => {
                         }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 transition"
                       >
-                        <Eye className="w-3.5 h-3.5" /> Xem
-                      </button>
+                        <Eye className="w-3.5 h-3.5" />{translateText(" Xem")}</button>
                     </td>
                   </tr>
                 ))
@@ -493,13 +482,10 @@ export const AuditLogsPage: React.FC = () => {
         {/* Phân trang (Pagination) */}
         {!isLoading && logs.length > 0 && (
           <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <div>
-              Hiển thị <span className="font-semibold text-slate-800">{(currentPage - 1) * pageSize + 1}</span> đến{' '}
+            <div>{translateText("Hiển thị ")}<span className="font-semibold text-slate-800">{(currentPage - 1) * pageSize + 1}</span>{translateText(" đến")}{' '}
               <span className="font-semibold text-slate-800">
                 {Math.min(currentPage * pageSize, totalCount)}
-              </span>{' '}
-              trong tổng số <span className="font-bold text-slate-800">{totalCount}</span> sự kiện
-            </div>
+              </span>{' '}{translateText("trong tổng số ")}<span className="font-bold text-slate-800">{totalCount}</span>{translateText(" sự kiện")}</div>
 
             <div className="flex items-center gap-2">
               <button
@@ -509,8 +495,7 @@ export const AuditLogsPage: React.FC = () => {
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="font-semibold px-2 text-slate-700">
-                Trang {currentPage} / {totalPages}
+              <span className="font-semibold px-2 text-slate-700">{translateText("Trang ")}{currentPage} / {totalPages}
               </span>
               <button
                 disabled={currentPage >= totalPages}
@@ -528,9 +513,9 @@ export const AuditLogsPage: React.FC = () => {
                 }}
                 className="ml-2 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none"
               >
-                <option value={10}>10 dòng/trang</option>
-                <option value={20}>20 dòng/trang</option>
-                <option value={50}>50 dòng/trang</option>
+                <option value={10}>{translateText("10 dòng/trang")}</option>
+                <option value={20}>{translateText("20 dòng/trang")}</option>
+                <option value={50}>{translateText("50 dòng/trang")}</option>
               </select>
             </div>
           </div>
