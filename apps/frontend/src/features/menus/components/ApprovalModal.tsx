@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, XCircle, AlertCircle, ShieldAlert, Sparkles } from 'lucide-react';
@@ -18,6 +20,7 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
   onApprove,
   onReject,
 }) => {
+  useLanguage();
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
   const [notes, setNotes] = useState('');
   const [reason, setReason] = useState('');
@@ -73,9 +76,9 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                {actionType === 'approve' ? 'Phê duyệt thực đơn tuần' : 'Từ chối thực đơn tuần'}
+                {translateText(actionType === 'approve' ? 'Phê duyệt thực đơn tuần' : 'Từ chối thực đơn tuần')}
               </h3>
-              <p className="text-xs text-slate-500">{menu.title} (Bản v{menu.version}.0)</p>
+              <p className="text-xs text-slate-500">{menu.title}{translateText(" (Bản v")}{menu.version}.0)</p>
             </div>
           </div>
           <button
@@ -101,7 +104,7 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             }`}
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Phê duyệt áp dụng</span>
+            <span>{translateText("Phê duyệt áp dụng")}</span>
           </button>
           <button
             type="button"
@@ -116,7 +119,7 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             }`}
           >
             <XCircle className="w-4 h-4 text-rose-600" />
-            <span>Từ chối (Yêu cầu sửa)</span>
+            <span>{translateText("Từ chối (Yêu cầu sửa)")}</span>
           </button>
         </div>
 
@@ -124,28 +127,28 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2 text-xs text-rose-700">
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
-              <span>{error}</span>
+              <span>{translateText(error)}</span>
             </div>
           )}
 
           {/* Tóm tắt dinh dưỡng thực đơn */}
           <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-1.5 text-xs text-slate-700">
             <div className="flex justify-between">
-              <span className="text-slate-500">Chu kỳ áp dụng:</span>
+              <span className="text-slate-500">{translateText("Chu kỳ áp dụng:")}</span>
               <span className="font-semibold text-slate-900">
-                {menu.startDate?.split('T')[0]} đến {menu.endDate?.split('T')[0]} (Tuần {menu.cycleWeekNumber})
+                {translateText(menu.startDate?.split('T')[0])}{translateText(" đến ")}{translateText(menu.endDate?.split('T')[0])}{translateText(" (Tuần ")}{menu.cycleWeekNumber})
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Năng lượng trung bình:</span>
+              <span className="text-slate-500">{translateText("Năng lượng trung bình:")}</span>
               <span className="font-bold text-emerald-700">
-                {menu.dailyAverageCalories ? `${menu.dailyAverageCalories} Kcal / ngày (Chuẩn VN-RDA)` : 'Chưa có định lượng Kcal'}
+                {translateText(menu.dailyAverageCalories ? `${menu.dailyAverageCalories} Kcal / ngày (Chuẩn VN-RDA)` : 'Chưa có định lượng Kcal')}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Người lập / Gửi duyệt:</span>
+              <span className="text-slate-500">{translateText("Người lập / Gửi duyệt:")}</span>
               <span className="font-medium text-slate-800">
-                {menu.submittedByName || menu.createdByName || 'Chuyên viên Dinh dưỡng'}
+                {translateText(menu.submittedByName || menu.createdByName || 'Chuyên viên Dinh dưỡng')}
               </span>
             </div>
           </div>
@@ -156,14 +159,12 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div className="flex-1 space-y-0.5">
                 <div className="font-bold flex items-center justify-between">
-                  <span>Bản cam kết chuyên môn dinh dưỡng đã ký số</span>
+                  <span>{translateText("Bản cam kết chuyên môn dinh dưỡng đã ký số")}</span>
                   <span className="text-[10px] text-emerald-700 font-semibold">
-                    {menu.submittedAt ? new Date(menu.submittedAt).toLocaleDateString('vi-VN') : 'Đã xác nhận'}
+                    {translateText(menu.submittedAt ? new Date(menu.submittedAt).toLocaleDateString(getLocale()) : 'Đã xác nhận')}
                   </span>
                 </div>
-                <p className="text-[11px] text-emerald-800 leading-normal">
-                  Chuyên viên đã cam kết tuân thủ Thông tư 28/2016/TT-BGDĐT, an toàn VSTP theo Quyết định 1246/QĐ-BYT và rà soát dị ứng học sinh.
-                </p>
+                <p className="text-[11px] text-emerald-800 leading-normal">{translateText("Chuyên viên đã cam kết tuân thủ Thông tư 28/2016/TT-BGDĐT, an toàn VSTP theo Quyết định 1246/QĐ-BYT và rà soát dị ứng học sinh.")}</p>
               </div>
             </div>
           ) : null}
@@ -173,37 +174,34 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl space-y-1.5 text-xs text-amber-950">
               <div className="font-bold flex items-center gap-1.5 text-amber-900">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>Giải trình can thiệp / vượt ngưỡng của Chuyên viên Dinh dưỡng:</span>
+                <span>{translateText("Giải trình can thiệp / vượt ngưỡng của Chuyên viên Dinh dưỡng:")}</span>
               </div>
               <p className="text-[11px] text-amber-900 bg-white/80 p-2.5 rounded-xl border border-amber-200 whitespace-pre-wrap leading-relaxed">
-                "{menu.overrideJustification}"
+                "{translateText(menu.overrideJustification)}"
               </p>
             </div>
           ) : null}
 
           {actionType === 'approve' ? (
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Ghi chú phê duyệt của Ban Giám Hiệu
-              </label>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">{translateText("Ghi chú phê duyệt của Ban Giám Hiệu")}</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                placeholder="Nhập nhận xét hoặc ý kiến chỉ đạo (tùy chọn)..."
+                placeholder={translateText("Nhập nhận xét hoặc ý kiến chỉ đạo (tùy chọn)...")}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-bold text-rose-700 uppercase tracking-wider mb-1.5">
-                Lý do từ chối (Bắt buộc) <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-rose-700 uppercase tracking-wider mb-1.5">{translateText("Lý do từ chối (Bắt buộc) ")}<span className="text-rose-500">*</span>
               </label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
-                placeholder="Ví dụ: Thiếu món tráng miệng ngày thứ 4, giảm bớt đồ chiên rán..."
+                placeholder={translateText("Ví dụ: Thiếu món tráng miệng ngày thứ 4, giảm bớt đồ chiên rán...")}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-rose-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                 required
               />
@@ -216,9 +214,7 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
               onClick={onClose}
               disabled={isSubmitting}
               className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition"
-            >
-              Hủy
-            </button>
+            >{translateText("Hủy")}</button>
             <button
               type="submit"
               disabled={isSubmitting}
@@ -231,17 +227,17 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
               {isSubmitting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  <span>Đang xử lý...</span>
+                  <span>{translateText("Đang xử lý...")}</span>
                 </>
               ) : actionType === 'approve' ? (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Xác nhận Phê duyệt</span>
+                  <span>{translateText("Xác nhận Phê duyệt")}</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-3.5 h-3.5" />
-                  <span>Xác nhận Từ chối</span>
+                  <span>{translateText("Xác nhận Từ chối")}</span>
                 </>
               )}
             </button>
