@@ -77,44 +77,48 @@ export class CreateIntakeStandardDto {
   @ApiPropertyOptional({ description: 'Chất xơ tối thiểu (g)' })
   @IsOptional()
   @IsNumber()
-  fiberGMin?: number;
+  fiberGMin?: number | null;
 
   @ApiPropertyOptional({ description: 'Chất xơ tối đa (g)' })
   @IsOptional()
   @IsNumber()
-  fiberGMax?: number;
+  fiberGMax?: number | null;
 
-  @ApiProperty({ description: 'Canxi tối thiểu (mg)', example: 350 })
+  @ApiPropertyOptional({ description: 'Canxi tối thiểu (mg)', example: 350 })
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  calciumMgMin: number;
+  calciumMgMin?: number | null;
 
   @ApiPropertyOptional({ description: 'Mức hấp thu sắt', default: '10%', enum: ['10%', '15%'] })
   @IsOptional()
   @IsString()
   @IsIn(['10%', '15%'])
-  ironAbsorptionRate?: string;
+  ironAbsorptionRate?: string | null;
 
-  @ApiProperty({ description: 'Sắt tối thiểu (mg)', example: 4.8 })
+  @ApiPropertyOptional({ description: 'Sắt tối thiểu (mg)', example: 4.8 })
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  ironMgMin: number;
+  ironMgMin?: number | null;
 
   @ApiPropertyOptional({ description: 'Mức hấp thu kẽm', default: 'MEDIUM', enum: ['POOR', 'MEDIUM', 'GOOD'] })
   @IsOptional()
   @IsString()
   @IsIn(['POOR', 'MEDIUM', 'GOOD'])
-  zincAbsorptionLevel?: string;
+  zincAbsorptionLevel?: string | null;
 
-  @ApiProperty({ description: 'Kẽm tối thiểu (mg)', example: 3.3 })
+  @ApiPropertyOptional({ description: 'Kẽm tối thiểu (mg)', example: 3.3 })
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  zincMgMin: number;
+  zincMgMin?: number | null;
 
-  @ApiProperty({ description: 'Vitamin A tối thiểu (µg RAE)', example: 250 })
+  @ApiPropertyOptional({ description: 'Vitamin A tối thiểu (µg RAE)', example: 250 })
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  vitaminARaeMcgMin: number;
+  vitaminARaeMcgMin?: number | null;
 
   @ApiPropertyOptional({ description: 'Trạng thái', default: true })
   @IsOptional()

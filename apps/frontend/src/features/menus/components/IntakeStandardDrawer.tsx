@@ -1,38 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Activity, AlertCircle, Check } from 'lucide-react';
-import { NutritionIntakeStandard } from '../api/nutrition-rule-engine.api';
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
+import React, { useState, useEffect } from "react";
+import { X, Sparkles, Activity, AlertCircle, Check } from "lucide-react";
+import { NutritionIntakeStandard } from "../api/nutrition-rule-engine.api";
 
 interface IntakeStandardDrawerProps {
   isOpen: boolean;
   standard: NutritionIntakeStandard | null;
   isLoading: boolean;
   onClose: () => void;
-  onSubmit: (payload: Partial<NutritionIntakeStandard>, id?: number) => Promise<void>;
+  onSubmit: (
+    payload: Partial<NutritionIntakeStandard>,
+    id?: number,
+  ) => Promise<void>;
 }
 
 const DEFAULT_FORM: Partial<NutritionIntakeStandard> = {
-  standardName: '',
-  ageGroup: 'MAU_GIAO',
-  gender: 'ALL',
-  mealScope: 'DAYBOARDING',
-  energyKcalMin: 615,
-  energyKcalMax: 726,
-  proteinRatioMin: 13,
-  proteinRatioMax: 20,
-  lipidRatioMin: 25,
-  lipidRatioMax: 35,
-  carbohydrateRatioMin: 52,
-  carbohydrateRatioMax: 60,
-  fiberGMin: 10,
-  fiberGMax: 15,
-  calciumMgMin: 350,
-  ironAbsorptionRate: '10%',
-  ironMgMin: 4.8,
-  zincAbsorptionLevel: 'MEDIUM',
-  zincMgMin: 3.3,
-  vitaminARaeMcgMin: 250,
+  standardName: "",
+  ageGroup: "MAU_GIAO",
+  gender: "ALL",
+  mealScope: "DAYBOARDING",
+  energyKcalMin: null,
+  energyKcalMax: null,
+  proteinRatioMin: null,
+  proteinRatioMax: null,
+  lipidRatioMin: null,
+  lipidRatioMax: null,
+  carbohydrateRatioMin: null,
+  carbohydrateRatioMax: null,
+  fiberGMin: null,
+  fiberGMax: null,
+  calciumMgMin: null,
+  ironAbsorptionRate: null,
+  ironMgMin: null,
+  zincAbsorptionLevel: null,
+  zincMgMin: null,
+  vitaminARaeMcgMin: null,
   isActive: true,
-  note: '',
+  note: "",
 };
 
 export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
@@ -42,8 +47,10 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
   onClose,
   onSubmit,
 }) => {
+  useLanguage();
   const isEditMode = Boolean(standard);
-  const [form, setForm] = useState<Partial<NutritionIntakeStandard>>(DEFAULT_FORM);
+  const [form, setForm] =
+    useState<Partial<NutritionIntakeStandard>>(DEFAULT_FORM);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,17 +70,24 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
     setErrorMessage(null);
 
     if (!form.standardName?.trim()) {
-      setErrorMessage('Vui lòng nhập tên định mức dinh dưỡng');
+      setErrorMessage("Vui lòng nhập tên định mức dinh dưỡng");
       return;
     }
     if ((form.energyKcalMin ?? 0) > (form.energyKcalMax ?? 0)) {
-      setErrorMessage('Năng lượng tối thiểu không được lớn hơn năng lượng tối đa');
+      setErrorMessage(
+        "Năng lượng tối thiểu không được lớn hơn năng lượng tối đa",
+      );
+      return;
     }
 
     try {
       await onSubmit(form, standard?.id);
     } catch (err: any) {
-      setErrorMessage(err?.response?.data?.message || err?.message || 'Có lỗi xảy ra khi lưu định mức dinh dưỡng');
+      setErrorMessage(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Có lỗi xảy ra khi lưu định mức dinh dưỡng",
+      );
     }
   };
 
@@ -88,11 +102,11 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 text-base">
-                {isEditMode ? 'Chỉnh sửa Định mức Dinh dưỡng & Vi chất' : 'Thêm mới Định mức Dinh dưỡng (Phụ lục 1-6)'}
+                {translateText(isEditMode
+                  ? "Chỉnh sửa Định mức Dinh dưỡng & Vi chất"
+                  : "Thêm mới Định mức Dinh dưỡng (Phụ lục 1-6)")}
               </h3>
-              <p className="text-xs text-slate-500">
-                Nhu cầu Năng lượng (Kcal), Tỷ lệ P:L:G, Chất xơ, Sắt, Kẽm, Canxi, Vitamin A theo lứa tuổi
-              </p>
+              <p className="text-xs text-slate-500">{translateText("Nhu cầu Năng lượng (Kcal), Tỷ lệ P:L:G, Chất xơ, Sắt, Kẽm, Canxi, Vitamin A theo lứa tuổi")}</p>
             </div>
           </div>
           <button
@@ -104,24 +118,29 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
         </div>
 
         {/* Body */}
-        <form id="intake-standard-form" onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
+        <form
+          id="intake-standard-form"
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto flex-1 space-y-4"
+        >
           {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-700 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
+              <span>{translateText(errorMessage)}</span>
             </div>
           )}
 
           {/* Tên định mức */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Tên định mức chuẩn <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Tên định mức chuẩn ")}<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={form.standardName || ''}
-              onChange={(e) => setForm((prev) => ({ ...prev, standardName: e.target.value }))}
-              placeholder="VD: Định mức chuẩn Mẫu giáo bán trú (3-6 tuổi)"
+              value={form.standardName || ""}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, standardName: e.target.value }))
+              }
+              placeholder={translateText("VD: Định mức chuẩn Mẫu giáo bán trú (3-6 tuổi)")}
               className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
@@ -130,76 +149,84 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
           {/* Lứa tuổi, Giới tính, Phạm vi */}
           <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Lứa tuổi
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Lứa tuổi")}</label>
               <select
                 value={form.ageGroup}
-                onChange={(e) => setForm((prev) => ({ ...prev, ageGroup: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, ageGroup: e.target.value }))
+                }
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
               >
-                <option value="MAU_GIAO">Mẫu giáo (3 - 6T)</option>
-                <option value="NHA_TRE">Nhà trẻ (1 - 3T)</option>
-                <option value="PRIMARY_6_7">Tiểu học 6-7 tuổi</option>
-                <option value="PRIMARY_8_9">Tiểu học 8-9 tuổi</option>
-                <option value="SECONDARY_10_11">THCS 10-11 tuổi</option>
-                <option value="SECONDARY_12_14">THCS 12-14 tuổi</option>
+                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6T)")}</option>
+                <option value="NHA_TRE">{translateText("Nhà trẻ (1 - 3T)")}</option>
+                <option value="PRIMARY_6_7">{translateText("Tiểu học 6-7 tuổi")}</option>
+                <option value="PRIMARY_8_9">{translateText("Tiểu học 8-9 tuổi")}</option>
+                <option value="SECONDARY_10_11">{translateText("THCS 10-11 tuổi")}</option>
+                <option value="SECONDARY_12_14">{translateText("THCS 12-14 tuổi")}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Giới tính
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Giới tính")}</label>
               <select
                 value={form.gender}
-                onChange={(e) => setForm((prev) => ({ ...prev, gender: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, gender: e.target.value }))
+                }
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
               >
-                <option value="ALL">Chung (Nam & Nữ)</option>
-                <option value="MALE">Học sinh Nam</option>
-                <option value="FEMALE">Học sinh Nữ</option>
+                <option value="ALL">{translateText("Chung (Nam & Nữ)")}</option>
+                <option value="MALE">{translateText("Học sinh Nam")}</option>
+                <option value="FEMALE">{translateText("Học sinh Nữ")}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Phạm vi bữa ăn
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Phạm vi bữa ăn")}</label>
               <select
                 value={form.mealScope}
-                onChange={(e) => setForm((prev) => ({ ...prev, mealScope: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, mealScope: e.target.value }))
+                }
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
               >
-                <option value="DAYBOARDING">Bán trú (50-55%)</option>
-                <option value="ALL_DAY">Cả ngày (100%)</option>
-                <option value="LUNCH_ONLY">Chỉ bữa trưa (35%)</option>
+                <option value="DAYBOARDING">{translateText("Bán trú (50-55%)")}</option>
+                <option value="ALL_DAY">{translateText("Cả ngày (100%)")}</option>
+                <option value="LUNCH_ONLY">{translateText("Chỉ bữa trưa (35%)")}</option>
               </select>
             </div>
           </div>
 
           {/* Phụ lục 1: Năng lượng Kcal */}
           <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-2">
-            <span className="text-xs font-bold text-amber-900 block">
-              ⚡ Phụ lục 1: Nhu cầu Năng lượng (Kcal)
-            </span>
+            <span className="text-xs font-bold text-amber-900 block">{translateText("⚡ Phụ lục 1: Nhu cầu Năng lượng (Kcal)")}</span>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] text-amber-800 font-medium">Năng lượng tối thiểu</label>
+                <label className="block text-[11px] text-amber-800 font-medium">{translateText("Năng lượng tối thiểu")}</label>
                 <input
                   type="number"
-                  value={form.energyKcalMin ?? 615}
-                  onChange={(e) => setForm((prev) => ({ ...prev, energyKcalMin: parseFloat(e.target.value) || 0 }))}
+                  value={form.energyKcalMin ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      energyKcalMin: parseFloat(e.target.value) || 0,
+                    }))
+                  }
                   className="w-full px-2.5 py-1.5 text-xs border border-amber-300 rounded-lg bg-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-amber-800 font-medium">Năng lượng tối đa</label>
+                <label className="block text-[11px] text-amber-800 font-medium">{translateText("Năng lượng tối đa")}</label>
                 <input
                   type="number"
-                  value={form.energyKcalMax ?? 726}
-                  onChange={(e) => setForm((prev) => ({ ...prev, energyKcalMax: parseFloat(e.target.value) || 0 }))}
+                  value={form.energyKcalMax ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      energyKcalMax: parseFloat(e.target.value) || 0,
+                    }))
+                  }
                   className="w-full px-2.5 py-1.5 text-xs border border-amber-300 rounded-lg bg-white"
                   required
                 />
@@ -209,65 +236,93 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
 
           {/* Cân đối P:L:G (%) */}
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-            <span className="text-xs font-bold text-slate-800 block">
-              🥗 Tỷ lệ năng lượng P : L : G (%) theo Thông tư 28
-            </span>
+            <span className="text-xs font-bold text-slate-800 block">{translateText("🥗 Tỷ lệ năng lượng P : L : G (%) theo Thông tư 28")}</span>
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-[10px] text-slate-600 font-medium">Đạm (Protein: 13-20%)</label>
+                <label className="block text-[10px] text-slate-600 font-medium">{translateText("Đạm (Protein: 13-20%)")}</label>
                 <div className="flex gap-1">
                   <input
                     type="number"
-                    placeholder="Min"
-                    value={form.proteinRatioMin ?? 13}
-                    onChange={(e) => setForm((prev) => ({ ...prev, proteinRatioMin: parseFloat(e.target.value) || 0 }))}
+                    placeholder={translateText("Min")}
+                    value={form.proteinRatioMin ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        proteinRatioMin: parseFloat(e.target.value) || 0,
+                      }))
+                    }
                     className="w-1/2 px-1.5 py-1 text-xs border rounded bg-white text-center"
                   />
                   <input
                     type="number"
-                    placeholder="Max"
-                    value={form.proteinRatioMax ?? 20}
-                    onChange={(e) => setForm((prev) => ({ ...prev, proteinRatioMax: parseFloat(e.target.value) || 0 }))}
+                    placeholder={translateText("Max")}
+                    value={form.proteinRatioMax ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        proteinRatioMax: parseFloat(e.target.value) || 0,
+                      }))
+                    }
                     className="w-1/2 px-1.5 py-1 text-xs border rounded bg-white text-center"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] text-slate-600 font-medium">Béo (Lipid: 25-35%)</label>
+                <label className="block text-[10px] text-slate-600 font-medium">{translateText("Béo (Lipid: 25-35%)")}</label>
                 <div className="flex gap-1">
                   <input
                     type="number"
-                    placeholder="Min"
-                    value={form.lipidRatioMin ?? 25}
-                    onChange={(e) => setForm((prev) => ({ ...prev, lipidRatioMin: parseFloat(e.target.value) || 0 }))}
+                    placeholder={translateText("Min")}
+                    value={form.lipidRatioMin ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        lipidRatioMin: parseFloat(e.target.value) || 0,
+                      }))
+                    }
                     className="w-1/2 px-1.5 py-1 text-xs border rounded bg-white text-center"
                   />
                   <input
                     type="number"
-                    placeholder="Max"
-                    value={form.lipidRatioMax ?? 35}
-                    onChange={(e) => setForm((prev) => ({ ...prev, lipidRatioMax: parseFloat(e.target.value) || 0 }))}
+                    placeholder={translateText("Max")}
+                    value={form.lipidRatioMax ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        lipidRatioMax: parseFloat(e.target.value) || 0,
+                      }))
+                    }
                     className="w-1/2 px-1.5 py-1 text-xs border rounded bg-white text-center"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] text-slate-600 font-medium">Đường (Glucid: 52-60%)</label>
+                <label className="block text-[10px] text-slate-600 font-medium">{translateText("Đường (Glucid: 52-60%)")}</label>
                 <div className="flex gap-1">
                   <input
                     type="number"
-                    placeholder="Min"
-                    value={form.carbohydrateRatioMin ?? 52}
-                    onChange={(e) => setForm((prev) => ({ ...prev, carbohydrateRatioMin: parseFloat(e.target.value) || 0 }))}
+                    placeholder={translateText("Min")}
+                    value={form.carbohydrateRatioMin ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        carbohydrateRatioMin: parseFloat(e.target.value) || 0,
+                      }))
+                    }
                     className="w-1/2 px-1.5 py-1 text-xs border rounded bg-white text-center"
                   />
                   <input
                     type="number"
-                    placeholder="Max"
-                    value={form.carbohydrateRatioMax ?? 60}
-                    onChange={(e) => setForm((prev) => ({ ...prev, carbohydrateRatioMax: parseFloat(e.target.value) || 0 }))}
+                    placeholder={translateText("Max")}
+                    value={form.carbohydrateRatioMax ?? ""}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        carbohydrateRatioMax: parseFloat(e.target.value) || 0,
+                      }))
+                    }
                     className="w-1/2 px-1.5 py-1 text-xs border rounded bg-white text-center"
                   />
                 </div>
@@ -275,37 +330,55 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
             </div>
           </div>
 
+          <p className="text-xs text-slate-500">{translateText("Để trống chỉ tiêu chưa có nguồn định mức. Không tự điền số 0 hoặc dùng giá trị mặc định.")}</p>
           {/* Phụ lục 2 & 3: Chất xơ (g) & Canxi (mg) */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl space-y-1">
-              <span className="text-[11px] font-bold text-emerald-900 block">🌾 Phụ lục 2: Chất xơ (g)</span>
+              <span className="text-[11px] font-bold text-emerald-900 block">{translateText("🌾 Phụ lục 2: Chất xơ (g)")}</span>
               <div className="flex gap-1.5">
                 <input
                   type="number"
-                  placeholder="Min"
-                  value={form.fiberGMin ?? 10}
-                  onChange={(e) => setForm((prev) => ({ ...prev, fiberGMin: parseFloat(e.target.value) || 0 }))}
+                  placeholder={translateText("Min")}
+                  value={form.fiberGMin ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      fiberGMin:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    }))
+                  }
                   className="w-1/2 px-2 py-1 text-xs border border-emerald-300 rounded bg-white text-center"
                 />
                 <input
                   type="number"
-                  placeholder="Max"
-                  value={form.fiberGMax ?? 15}
-                  onChange={(e) => setForm((prev) => ({ ...prev, fiberGMax: parseFloat(e.target.value) || 0 }))}
+                  placeholder={translateText("Max")}
+                  value={form.fiberGMax ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      fiberGMax:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    }))
+                  }
                   className="w-1/2 px-2 py-1 text-xs border border-emerald-300 rounded bg-white text-center"
                 />
               </div>
             </div>
 
             <div className="p-3 bg-blue-50/50 border border-blue-200 rounded-xl space-y-1">
-              <span className="text-[11px] font-bold text-blue-900 block">🥛 Phụ lục 3: Canxi (mg)</span>
+              <span className="text-[11px] font-bold text-blue-900 block">{translateText("🥛 Phụ lục 3: Canxi (mg)")}</span>
               <input
                 type="number"
-                placeholder="Canxi tối thiểu (mg)"
-                value={form.calciumMgMin ?? 350}
-                onChange={(e) => setForm((prev) => ({ ...prev, calciumMgMin: parseFloat(e.target.value) || 0 }))}
+                placeholder={translateText("Canxi tối thiểu (mg)")}
+                value={form.calciumMgMin ?? ""}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    calciumMgMin:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  }))
+                }
                 className="w-full px-2.5 py-1 text-xs border border-blue-300 rounded bg-white"
-                required
               />
             </div>
           </div>
@@ -313,46 +386,68 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
           {/* Phụ lục 4 & 5: Sắt & Kẽm */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-rose-50/50 border border-rose-200 rounded-xl space-y-1">
-              <span className="text-[11px] font-bold text-rose-900 block">🥩 Phụ lục 4: Sắt (mg)</span>
+              <span className="text-[11px] font-bold text-rose-900 block">{translateText("🥩 Phụ lục 4: Sắt (mg)")}</span>
               <div className="flex gap-1.5 items-center">
                 <select
-                  value={form.ironAbsorptionRate}
-                  onChange={(e) => setForm((prev) => ({ ...prev, ironAbsorptionRate: e.target.value }))}
+                  value={form.ironAbsorptionRate ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      ironAbsorptionRate: e.target.value || null,
+                    }))
+                  }
                   className="w-1/2 px-1.5 py-1 text-[11px] border border-rose-300 rounded bg-white"
                 >
-                  <option value="10%">Hấp thu 10%</option>
-                  <option value="15%">Hấp thu 15%</option>
+                  <option value="">{translateText("Chưa xác định")}</option>
+                  <option value="10%">{translateText("Hấp thu 10%")}</option>
+                  <option value="15%">{translateText("Hấp thu 15%")}</option>
                 </select>
                 <input
                   type="number"
                   step="0.1"
-                  value={form.ironMgMin ?? 4.8}
-                  onChange={(e) => setForm((prev) => ({ ...prev, ironMgMin: parseFloat(e.target.value) || 0 }))}
+                  value={form.ironMgMin ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      ironMgMin:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    }))
+                  }
                   className="w-1/2 px-2 py-1 text-xs border border-rose-300 rounded bg-white text-center"
-                  required
                 />
               </div>
             </div>
 
             <div className="p-3 bg-indigo-50/50 border border-indigo-200 rounded-xl space-y-1">
-              <span className="text-[11px] font-bold text-indigo-900 block">🛡️ Phụ lục 5: Kẽm (mg)</span>
+              <span className="text-[11px] font-bold text-indigo-900 block">{translateText("🛡️ Phụ lục 5: Kẽm (mg)")}</span>
               <div className="flex gap-1.5 items-center">
                 <select
-                  value={form.zincAbsorptionLevel}
-                  onChange={(e) => setForm((prev) => ({ ...prev, zincAbsorptionLevel: e.target.value }))}
+                  value={form.zincAbsorptionLevel ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      zincAbsorptionLevel: e.target.value || null,
+                    }))
+                  }
                   className="w-1/2 px-1.5 py-1 text-[11px] border border-indigo-300 rounded bg-white"
                 >
-                  <option value="MEDIUM">Vừa 30%</option>
-                  <option value="GOOD">Tốt 50%</option>
-                  <option value="POOR">Kém 15%</option>
+                  <option value="">{translateText("Chưa xác định")}</option>
+                  <option value="MEDIUM">{translateText("Vừa 30%")}</option>
+                  <option value="GOOD">{translateText("Tốt 50%")}</option>
+                  <option value="POOR">{translateText("Kém 15%")}</option>
                 </select>
                 <input
                   type="number"
                   step="0.1"
-                  value={form.zincMgMin ?? 3.3}
-                  onChange={(e) => setForm((prev) => ({ ...prev, zincMgMin: parseFloat(e.target.value) || 0 }))}
+                  value={form.zincMgMin ?? ""}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      zincMgMin:
+                        e.target.value === "" ? null : Number(e.target.value),
+                    }))
+                  }
                   className="w-1/2 px-2 py-1 text-xs border border-indigo-300 rounded bg-white text-center"
-                  required
                 />
               </div>
             </div>
@@ -360,24 +455,31 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
 
           {/* Phụ lục 6: Vitamin A RAE (µg) */}
           <div className="p-3 bg-teal-50/50 border border-teal-200 rounded-xl space-y-1">
-            <span className="text-[11px] font-bold text-teal-900 block">🥕 Phụ lục 6: Vitamin A RAE (µg)</span>
+            <span className="text-[11px] font-bold text-teal-900 block">{translateText("🥕 Phụ lục 6: Vitamin A RAE (µg)")}</span>
             <input
               type="number"
-              value={form.vitaminARaeMcgMin ?? 250}
-              onChange={(e) => setForm((prev) => ({ ...prev, vitaminARaeMcgMin: parseFloat(e.target.value) || 0 }))}
+              value={form.vitaminARaeMcgMin ?? ""}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  vitaminARaeMcgMin:
+                    e.target.value === "" ? null : Number(e.target.value),
+                }))
+              }
               className="w-full px-2.5 py-1 text-xs border border-teal-300 rounded bg-white"
-              required
             />
           </div>
 
           {/* Ghi chú */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Ghi chú</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">{translateText("Ghi chú")}</label>
             <textarea
               rows={1}
-              value={form.note || ''}
-              onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
-              placeholder="Quyết định dinh dưỡng học đường năm 2026..."
+              value={form.note || ""}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, note: e.target.value }))
+              }
+              placeholder={translateText("Quyết định dinh dưỡng học đường năm 2026...")}
               className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
@@ -389,21 +491,22 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
             type="button"
             onClick={onClose}
             className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors"
-          >
-            Hủy bỏ
-          </button>
+          >{translateText("Hủy bỏ")}</button>
           <button
             type="submit"
             form="intake-standard-form"
             disabled={isLoading}
             className="px-5 py-2 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
           >
-            {isLoading ? <Sparkles className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            <span>{isEditMode ? 'Lưu thay đổi' : 'Tạo định mức'}</span>
+            {isLoading ? (
+              <Sparkles className="w-4 h-4 animate-spin" />
+            ) : (
+              <Check className="w-4 h-4" />
+            )}
+            <span>{translateText(isEditMode ? "Lưu thay đổi" : "Tạo định mức")}</span>
           </button>
         </div>
       </div>
     </div>
   );
 };
-

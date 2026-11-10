@@ -20,6 +20,8 @@ export interface NutritionRule {
   maxSodiumMg: number | null;
   caPRatioMin: number;
   caPRatioMax: number;
+  waterMlMin?: number | null;
+  waterMlMax?: number | null;
   isStrict: boolean;
   isActive: boolean;
   createdAt: string;
@@ -117,6 +119,8 @@ export interface CreateNutritionRulePayload {
   minIronMg?: number;
   minZincMg?: number;
   maxSodiumMg?: number;
+  waterMlMin?: number | null;
+  waterMlMax?: number | null;
   caPRatioMin?: number;
   caPRatioMax?: number;
   isStrict?: boolean;
@@ -357,6 +361,31 @@ export const nutritionEngineApi = {
     return res.data;
   },
 
+  // --- BẢNG 4: PHÂN BỔ NĂNG LƯỢNG & DINH DƯỠNG THEO BỮA TRONG NGÀY ---
+  async getMealDistributions(ageGroup?: string): Promise<MealEnergyDistribution[]> {
+    const res = await apiClient.get('/nutrition-rules/meal-distributions', { params: { ageGroup } });
+    const raw = res.data as any;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw?.data)) return raw.data;
+    return [];
+  },
+
+  async getMealDistributionOverview(ageGroup: string): Promise<MealDistributionOverview> {
+    const res = await apiClient.get('/nutrition-rules/meal-distributions/overview', { params: { ageGroup } });
+    return (res.data as any)?.data || res.data;
+  },
+
+  async updateMealDistribution(id: number | string, payload: Partial<MealEnergyDistribution>): Promise<MealEnergyDistribution> {
+    const res = await apiClient.put('/nutrition-rules/meal-distributions/' + id, payload);
+    return (res.data as any)?.data || res.data;
+  },
+
+  async resetMealDistributions(ageGroup: string): Promise<MealEnergyDistribution[]> {
+    const res = await apiClient.post('/nutrition-rules/meal-distributions/reset', null, { params: { ageGroup } });
+    const raw = res.data as any;
+    return Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+  },
+
   // --- QUÉT & ĐÁNH GIÁ THỰC ĐƠN BẰNG RULE ENGINE ---
   async evaluateMenu(payload: EvaluateMenuPayload): Promise<MenuScanResult> {
     const res = await apiClient.post<MenuScanResult>('/rule-engine/evaluate-menu', payload);
@@ -423,14 +452,84 @@ export interface NutritionIntakeStandard {
   carbohydrateRatioMax: number;
   fiberGMin?: number | null;
   fiberGMax?: number | null;
-  calciumMgMin: number;
-  ironAbsorptionRate: string;
-  ironMgMin: number;
-  zincAbsorptionLevel: string;
-  zincMgMin: number;
-  vitaminARaeMcgMin: number;
+  waterMlMin?: number | null;
+  waterMlMax?: number | null;
+  calciumMgMin: number | null;
+  ironAbsorptionRate: string | null;
+  ironMgMin: number | null;
+  zincAbsorptionLevel: string | null;
+  zincMgMin: number | null;
+  vitaminARaeMcgMin: number | null;
   isActive: boolean;
   note?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface MealEnergyDistribution {
+  id: number;
+  schoolId: number;
+  ageGroup: string; // 'NHA_TRE' | 'MAU_GIAO'
+  mealType: string; // 'BREAKFAST' | 'LUNCH' | 'AFTERNOON_SNACK' | 'LATE_SNACK'
+  mealLabel: string;
+  mealTime: string | null;
+  displayOrder: number;
+  energyPctMin: number;
+  energyPctMax: number;
+  waterPctMin?: number | null;
+  waterPctMax?: number | null;
+  waterMlMin?: number | null;
+  waterMlMax?: number | null;
+  isActive: boolean;
+  note?: string | null;
+}
+
+export interface NutrientRange { min: number; max: number }
+
+export interface MealNutrientTarget {
+  energyPct: NutrientRange;
+  energyKcal: NutrientRange;
+  proteinG: NutrientRange;
+  lipidG: NutrientRange;
+  carbohydrateG: NutrientRange;
+  waterMl?: NutrientRange;
+  waterPct?: NutrientRange;
+}
+
+export interface MealDistributionOverview {
+  ageGroup: string;
+  dailyStandard: {
+    source: 'SCHOOL_CONFIG' | 'REFERENCE';
+    standardName: string;
+    energy: NutrientRange;
+    water: NutrientRange;
+    protein: NutrientRange;
+    lipid: NutrientRange;
+    carbohydrate: NutrientRange;
+    atSchoolPct: NutrientRange;
+    atSchoolWaterPct?: NutrientRange;
+  };
+  meals: Array<MealNutrientTarget & {
+    id: number;
+    mealType: string;
+    mealLabel: string;
+    mealTime: string | null;
+    displayOrder: number;
+    note?: string | null;
+    waterMl: NutrientRange;
+    waterPct: NutrientRange;
+  }>;
+  totals: {
+    atSchool: MealNutrientTarget & {
+      waterMl: NutrientRange;
+      waterPct: NutrientRange;
+    };
+    atHome: MealNutrientTarget & {
+      waterMl: NutrientRange;
+      waterPct: NutrientRange;
+    };
+    recommendedAtSchoolPct: NutrientRange;
+    recommendedAtSchoolWaterPct?: NutrientRange;
+  };
+  warnings: string[];
 }
