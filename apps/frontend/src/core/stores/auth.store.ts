@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { isJwtExpired, getJwtRemainingTimeMs } from '../utils/jwt';
+import { fetchCurrentUser } from '../api/auth.api';
+import { refreshAccessToken, authTokensChangedEvent, authSessionExpiredEvent } from '../api/axios';
 
-/**
- * Auth User — dữ liệu user nhận từ API login response.
- */
 export interface AuthUser {
   id: string;
   email: string;
@@ -14,9 +13,6 @@ export interface AuthUser {
   tenantId: string;
 }
 
-/**
- * Tenant — dữ liệu trường mầm non cho dropdown.
- */
 export interface TenantInfo {
   id: string;
   code: string;
@@ -25,220 +21,136 @@ export interface TenantInfo {
 }
 
 interface AuthState {
-  /** User hiện tại (null nếu chưa login) */
   user: AuthUser | null;
-  /** JWT access token */
   accessToken: string | null;
-  /** JWT refresh token */
   refreshToken: string | null;
-  /** Tenant UUID đang chọn */
   selectedTenantId: string | null;
-  /** Computed: user !== null */
   isAuthenticated: boolean;
-
-  /** Lưu kết quả login vào state + localStorage */
   setAuth: (user: AuthUser, accessToken: string, refreshToken: string) => void;
-  /** Chọn tenant cho login */
   setTenantId: (tenantId: string) => void;
-  /** Xóa toàn bộ auth state + localStorage */
   logout: () => void;
-  /** Hydrate từ localStorage khi app khởi động */
   hydrate: () => void;
+  refreshProfile: () => Promise<void>;
 }
 
-let autoLogoutTimer: any = null;
-
-const scheduleAutoLogout = (token: string) => {
-  if (autoLogoutTimer) {
-    clearTimeout(autoLogoutTimer);
-    autoLogoutTimer = null;
-  }
-
-  const remainingMs = getJwtRemainingTimeMs(token);
-  if (remainingMs <= 0) {
-    useAuthStore.getState().logout();
-    window.location.href = '/home';
-    return;
-  }
-
-  autoLogoutTimer = setTimeout(() => {
-    console.warn('[AuthStore] Access token đã hết hạn, tự động đăng xuất về trang Home...');
-    useAuthStore.getState().logout();
-    window.location.href = '/home';
-  }, remainingMs);
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+const validToken = (token: string | null): token is string =>
+  !!token && token !== 'undefined' && token !== 'null';
+const anonymous = {
+  user: null, accessToken: null, refreshToken: null,
+  selectedTenantId: null, isAuthenticated: false,
 };
 
-/**
- * Lấy trạng thái Auth ban đầu từ localStorage một cách đồng bộ
- * Đảm bảo ngay từ lần render đầu tiên đã xác định chính xác người dùng còn Access Token hay không.
- */
-const getInitialAuthState = (): {
-  user: AuthUser | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  selectedTenantId: string | null;
-  isAuthenticated: boolean;
-} => {
-  if (typeof window === 'undefined') {
-    return {
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      selectedTenantId: null,
-      isAuthenticated: false,
-    };
-  }
+function clearRefreshTimer() {
+  if (refreshTimer !== null) clearTimeout(refreshTimer);
+  refreshTimer = null;
+}
 
+async function renewSession() {
+  try {
+    await refreshAccessToken();
+  } catch {
+    // An outage must not destroy a renewable session. Retry when online or after a short delay.
+    if (useAuthStore.getState().isAuthenticated) {
+      clearRefreshTimer();
+      refreshTimer = setTimeout(() => { void renewSession(); }, 30000);
+    }
+  }
+}
+
+function scheduleRefresh(token: string) {
+  clearRefreshTimer();
+  const refreshToken = localStorage.getItem('refresh_token');
+  const aheadMs = validToken(refreshToken) ? 60000 : 0;
+  const delay = Math.max(0, getJwtRemainingTimeMs(token) - aheadMs);
+  refreshTimer = setTimeout(() => { void renewSession(); }, Math.min(delay, 2147483647));
+}
+
+function readStoredSession() {
+  if (typeof window === 'undefined') return anonymous;
   const accessToken = localStorage.getItem('access_token');
   const refreshToken = localStorage.getItem('refresh_token');
-  const tenantId = localStorage.getItem('tenant_id');
   const userJson = localStorage.getItem('auth_user');
-
-  if (
-    accessToken &&
-    accessToken !== 'undefined' &&
-    accessToken !== 'null' &&
-    userJson
-  ) {
-    if (isJwtExpired(accessToken)) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('auth_user');
-      return {
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        selectedTenantId: null,
-        isAuthenticated: false,
-      };
-    }
-
-    try {
-      const user = JSON.parse(userJson) as AuthUser;
-      scheduleAutoLogout(accessToken);
-      return {
-        user,
-        accessToken,
-        refreshToken,
-        selectedTenantId: tenantId || '1',
-        isAuthenticated: true,
-      };
-    } catch {
-      localStorage.removeItem('auth_user');
-    }
+  if (!validToken(accessToken) || !userJson) return anonymous;
+  const canRefresh = validToken(refreshToken) && !isJwtExpired(refreshToken);
+  if (isJwtExpired(accessToken) && !canRefresh) {
+    for (const key of ['access_token', 'refresh_token', 'auth_user']) localStorage.removeItem(key);
+    return anonymous;
   }
+  try {
+    const user = JSON.parse(userJson) as AuthUser;
+    if (!user?.id) return anonymous;
+    return {
+      user, accessToken, refreshToken,
+      selectedTenantId: localStorage.getItem('tenant_id') || user.tenantId || '1',
+      isAuthenticated: true,
+    };
+  } catch {
+    localStorage.removeItem('auth_user');
+    return anonymous;
+  }
+}
 
-  return {
-    user: null,
-    accessToken: null,
-    refreshToken: null,
-    selectedTenantId: null,
-    isAuthenticated: false,
-  };
-};
+export const useAuthStore = create<AuthState>((set, get) => ({
+  ...readStoredSession(),
 
-const initialState = getInitialAuthState();
-
-/**
- * Zustand Auth Store — Quản lý trạng thái xác thực.
- * Tự động tính toán thời hạn Access Token và tự động đăng xuất về /home khi hết hạn.
- */
-export const useAuthStore = create<AuthState>((set) => ({
-  user: initialState.user,
-  accessToken: initialState.accessToken,
-  refreshToken: initialState.refreshToken,
-  selectedTenantId: initialState.selectedTenantId,
-  isAuthenticated: initialState.isAuthenticated,
+  refreshProfile: async () => {
+    const startedForUser = get().user;
+    if (!startedForUser || !get().accessToken) return;
+    try {
+      const profile = await fetchCurrentUser();
+      const current = get().user;
+      if (!current || current.id !== startedForUser.id || String(profile.id) !== current.id) return;
+      const updated = { ...current, fullName: profile.fullName, phone: profile.phone, avatarUrl: profile.avatarUrl };
+      localStorage.setItem('auth_user', JSON.stringify(updated));
+      set({ user: updated });
+    } catch {
+      // Keep the existing session when a profile refresh is temporarily unavailable.
+    }
+  },
 
   setAuth: (user, accessToken, refreshToken) => {
-    // Persist vào localStorage
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('tenant_id', user.tenantId);
     localStorage.setItem('auth_user', JSON.stringify(user));
-
-    set({
-      user,
-      accessToken,
-      refreshToken,
-      selectedTenantId: user.tenantId,
-      isAuthenticated: true,
-    });
-
-    scheduleAutoLogout(accessToken);
+    set({ user, accessToken, refreshToken, selectedTenantId: user.tenantId, isAuthenticated: true });
+    scheduleRefresh(accessToken);
   },
 
-  setTenantId: (tenantId) => {
-    localStorage.setItem('tenant_id', tenantId);
-    set({ selectedTenantId: tenantId });
+  setTenantId: selectedTenantId => {
+    localStorage.setItem('tenant_id', selectedTenantId);
+    set({ selectedTenantId });
   },
 
   logout: () => {
-    if (autoLogoutTimer) {
-      clearTimeout(autoLogoutTimer);
-      autoLogoutTimer = null;
-    }
-
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('tenant_id');
-    localStorage.removeItem('auth_user');
-
-    set({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      selectedTenantId: null,
-      isAuthenticated: false,
-    });
+    clearRefreshTimer();
+    for (const key of ['access_token', 'refresh_token', 'tenant_id', 'auth_user']) localStorage.removeItem(key);
+    set({ ...anonymous });
   },
 
   hydrate: () => {
-    const accessToken = localStorage.getItem('access_token');
-    const refreshToken = localStorage.getItem('refresh_token');
-    const tenantId = localStorage.getItem('tenant_id');
-    const userJson = localStorage.getItem('auth_user');
-
-    if (
-      accessToken &&
-      accessToken !== 'undefined' &&
-      accessToken !== 'null' &&
-      userJson
-    ) {
-      // Nếu Access Token trong LocalStorage đã hết hạn thì tự động logout
-      if (isJwtExpired(accessToken)) {
-        console.warn('[AuthStore] Access token lưu trong LocalStorage đã hết hạn.');
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('auth_user');
-        set({
-          user: null,
-          accessToken: null,
-          refreshToken: null,
-          selectedTenantId: null,
-          isAuthenticated: false,
-        });
-        return;
-      }
-
-      try {
-        const user = JSON.parse(userJson) as AuthUser;
-        set({
-          user,
-          accessToken,
-          refreshToken,
-          selectedTenantId: tenantId || '1',
-          isAuthenticated: true,
-        });
-
-        scheduleAutoLogout(accessToken);
-      } catch {
-        localStorage.removeItem('auth_user');
-      }
-    } else if (accessToken === 'undefined' || accessToken === 'null') {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('auth_user');
-    }
+    clearRefreshTimer();
+    const session = readStoredSession();
+    set(session);
+    if (session.accessToken) scheduleRefresh(session.accessToken);
   },
 }));
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(authTokensChangedEvent, () => useAuthStore.getState().hydrate());
+  window.addEventListener(authSessionExpiredEvent, () => useAuthStore.getState().logout());
+  window.addEventListener('storage', event => {
+    if (event.key === null || ['access_token', 'refresh_token', 'auth_user'].includes(event.key)) {
+      useAuthStore.getState().hydrate();
+    }
+  });
+  const resume = () => {
+    const { isAuthenticated, accessToken } = useAuthStore.getState();
+    if (document.visibilityState === 'visible' && isAuthenticated &&
+        getJwtRemainingTimeMs(accessToken) <= 60000) void renewSession();
+  };
+  window.addEventListener('focus', resume);
+  window.addEventListener('online', resume);
+  document.addEventListener('visibilitychange', resume);
+}
