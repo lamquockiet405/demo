@@ -58,6 +58,9 @@ export class DishFrequencyRule {
   @Column({ type: 'text', nullable: true })
   note: string | null;
 
+  @Column({ name: 'source_metadata', type: 'jsonb', nullable: true })
+  sourceMetadata: Record<string, unknown> | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
