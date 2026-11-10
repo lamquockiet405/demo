@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -51,6 +53,7 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
   onSubmit,
   detectedViolations = [],
 }) => {
+  useLanguage();
   const { user } = useAuthStore();
 
   const [selectedCommitments, setSelectedCommitments] = useState<string[]>([
@@ -151,11 +154,9 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
-                Gửi Duyệt Thực Đơn Kèm Cam Kết Chuyên Môn
-              </h3>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">{translateText("Gửi Duyệt Thực Đơn Kèm Cam Kết Chuyên Môn")}</h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                {menu.title} • {menu.targetAgeGroup === 'NHA_TRE' ? 'Nhóm Nhà trẻ (18-36T)' : 'Nhóm Mẫu giáo (3-5T)'}
+                {menu.title} • {translateText(menu.targetAgeGroup === 'NHA_TRE' ? 'Nhóm Nhà trẻ (18-36T)' : 'Nhóm Mẫu giáo (3-5T)')}
               </p>
             </div>
           </div>
@@ -172,7 +173,7 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
           {error && (
             <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2.5 text-xs text-rose-700 animate-in fade-in">
               <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-              <span className="font-medium">{error}</span>
+              <span className="font-medium">{translateText(error)}</span>
             </div>
           )}
 
@@ -180,39 +181,34 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
           <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2 text-xs">
             <div className="flex items-center justify-between font-bold text-slate-800">
               <span className="flex items-center gap-1.5 text-slate-900">
-                <Activity className="w-4 h-4 text-teal-600" />
-                Đối soát tiền kiểm định mức (TT 28/2016/TT-BGDĐT)
-              </span>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
-                Sẵn sàng gửi BGH
-              </span>
+                <Activity className="w-4 h-4 text-teal-600" />{translateText("Đối soát tiền kiểm định mức (TT 28/2016/TT-BGDĐT)")}</span>
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">{translateText("Sẵn sàng gửi BGH")}</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
               <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
                 <div className="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
-                  <Flame className="w-3 h-3 text-amber-500" /> Năng lượng TB
-                </div>
+                  <Flame className="w-3 h-3 text-amber-500" />{translateText(" Năng lượng TB")}</div>
                 <div className="text-sm font-bold text-slate-900 mt-0.5">
-                  {menu.dailyAverageCalories || 0} <span className="text-[10px] font-normal text-slate-500">Kcal</span>
+                  {menu.dailyAverageCalories || 0} <span className="text-[10px] font-normal text-slate-500">{translateText("Kcal")}</span>
                 </div>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Chất đạm (P)</div>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">{translateText("Chất đạm (P)")}</div>
                 <div className="text-sm font-bold text-indigo-700 mt-0.5">
-                  {menu.dailyAverageProteinG || 0} <span className="text-[10px] font-normal text-slate-500">g</span>
+                  {menu.dailyAverageProteinG || 0} <span className="text-[10px] font-normal text-slate-500">{translateText("g")}</span>
                 </div>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Chất béo (L)</div>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">{translateText("Chất béo (L)")}</div>
                 <div className="text-sm font-bold text-amber-700 mt-0.5">
-                  {menu.dailyAverageFatG || 0} <span className="text-[10px] font-normal text-slate-500">g</span>
+                  {menu.dailyAverageFatG || 0} <span className="text-[10px] font-normal text-slate-500">{translateText("g")}</span>
                 </div>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-slate-200/60">
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Bột đường (G)</div>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">{translateText("Bột đường (G)")}</div>
                 <div className="text-sm font-bold text-emerald-700 mt-0.5">
-                  {menu.dailyAverageCarbG || 0} <span className="text-[10px] font-normal text-slate-500">g</span>
+                  {menu.dailyAverageCarbG || 0} <span className="text-[10px] font-normal text-slate-500">{translateText("g")}</span>
                 </div>
               </div>
             </div>
@@ -224,12 +220,8 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
               <div className="flex items-start gap-2.5">
                 <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide">
-                    Phát hiện {warnings.length} cảnh báo quy tắc cần giải trình can thiệp
-                  </h4>
-                  <p className="text-[11px] text-amber-700 mt-0.5">
-                    Hệ thống yêu cầu Chuyên viên Dinh dưỡng giải trình lý do chuyên môn trước khi Ban Giám Hiệu xem xét phê duyệt.
-                  </p>
+                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide">{translateText("Phát hiện ")}{warnings.length}{translateText(" cảnh báo quy tắc cần giải trình can thiệp")}</h4>
+                  <p className="text-[11px] text-amber-700 mt-0.5">{translateText("Hệ thống yêu cầu Chuyên viên Dinh dưỡng giải trình lý do chuyên môn trước khi Ban Giám Hiệu xem xét phê duyệt.")}</p>
                 </div>
               </div>
 
@@ -237,9 +229,9 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
               <div className="space-y-1.5 pl-7">
                 {warnings.map((w, idx) => (
                   <div key={idx} className="text-xs text-amber-800 bg-white/80 p-2 rounded-xl border border-amber-200/70 flex items-center justify-between">
-                    <span className="font-medium">• {w.message}</span>
+                    <span className="font-medium">• {translateText(w.message)}</span>
                     <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
-                      {w.ruleCode || 'CẢNH BÁO'}
+                      {w.ruleCode || translateText('CẢNH BÁO')}
                     </span>
                   </div>
                 ))}
@@ -248,18 +240,16 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
               {/* Ô giải trình bắt buộc */}
               <div className="pt-1">
                 <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                  <span>
-                    Giải trình chuyên môn của Chuyên viên Dinh dưỡng <span className="text-rose-600">*</span>
+                  <span>{translateText("Giải trình chuyên môn của Chuyên viên Dinh dưỡng ")}<span className="text-rose-600">*</span>
                   </span>
                   <span className="text-[10px] font-normal text-amber-700">
-                    {overrideJustification.trim().length} / 10 ký tự tối thiểu
-                  </span>
+                    {overrideJustification.trim().length}{translateText(" / 10 ký tự tối thiểu")}</span>
                 </label>
                 <textarea
                   value={overrideJustification}
                   onChange={(e) => setOverrideJustification(e.target.value)}
                   rows={3}
-                  placeholder="Ví dụ: Bổ sung món canh rau củ tươi luân phiên từ nguồn VietGAP nhằm tăng cường vitamin A và chất xơ trong tuần..."
+                  placeholder={translateText("Ví dụ: Bổ sung món canh rau củ tươi luân phiên từ nguồn VietGAP nhằm tăng cường vitamin A và chất xơ trong tuần...")}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 placeholder:text-slate-400"
                   required
                 />
@@ -269,9 +259,9 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
             <div className="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl flex items-center justify-between text-xs text-emerald-800">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-semibold">Thực đơn đạt chuẩn 100% quy tắc nhóm thực phẩm & khoảng cách món.</span>
+                <span className="font-semibold">{translateText("Thực đơn đạt chuẩn 100% quy tắc nhóm thực phẩm & khoảng cách món.")}</span>
               </div>
-              <span className="text-[11px] text-emerald-600 font-medium">Không có vi phạm</span>
+              <span className="text-[11px] text-emerald-600 font-medium">{translateText("Không có vi phạm")}</span>
             </div>
           )}
 
@@ -279,15 +269,13 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
           <div className="space-y-3 pt-1">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                <FileSignature className="w-4 h-4 text-teal-600" />
-                Bản cam kết trách nhiệm chuyên môn (Bắt buộc)
-              </label>
+                <FileSignature className="w-4 h-4 text-teal-600" />{translateText("Bản cam kết trách nhiệm chuyên môn (Bắt buộc)")}</label>
               <button
                 type="button"
                 onClick={handleSelectAllCommitments}
                 className="text-[11px] font-semibold text-teal-600 hover:text-teal-800 transition"
               >
-                {isAllCommitmentsChecked ? 'Bỏ chọn tất cả' : 'Chọn tất cả điều khoản'}
+                {translateText(isAllCommitmentsChecked ? 'Bỏ chọn tất cả' : 'Chọn tất cả điều khoản')}
               </button>
             </div>
 
@@ -312,10 +300,10 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
                     />
                     <div className="flex-1">
                       <div className="text-xs font-bold text-slate-900 leading-tight">
-                        {item.title}
+                        {translateText(item.title)}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5 leading-normal">
-                        {item.desc}
+                        {translateText(item.desc)}
                       </p>
                     </div>
                   </div>
@@ -327,13 +315,12 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
           {/* 4. Digital Signature Footer Notice */}
           <div className="p-3 bg-slate-100/70 border border-slate-200 rounded-xl flex items-center justify-between text-xs text-slate-600">
             <div>
-              <span className="text-slate-400">Người nộp duyệt:</span>{' '}
+              <span className="text-slate-400">{translateText("Người nộp duyệt:")}</span>{' '}
               <span className="font-semibold text-slate-800">
-                {user?.fullName || 'Chuyên viên Dinh dưỡng'}
+                {user?.fullName || translateText('Chuyên viên Dinh dưỡng')}
               </span>
             </div>
-            <div className="text-[11px] text-slate-500">
-              Thời gian: {new Date().toLocaleTimeString('vi-VN')} {new Date().toLocaleDateString('vi-VN')}
+            <div className="text-[11px] text-slate-500">{translateText("Thời gian: ")}{translateText(new Date().toLocaleTimeString(getLocale()))} {translateText(new Date().toLocaleDateString(getLocale()))}
             </div>
           </div>
         </form>
@@ -345,9 +332,7 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
             onClick={onClose}
             disabled={isSubmitting}
             className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition"
-          >
-            Quay lại chỉnh sửa
-          </button>
+          >{translateText("Quay lại chỉnh sửa")}</button>
           <button
             type="button"
             onClick={handleSubmit}
@@ -361,12 +346,12 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
             {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Đang gửi Ban Giám Hiệu...</span>
+                <span>{translateText("Đang gửi Ban Giám Hiệu...")}</span>
               </>
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4" />
-                <span>Ký số & Gửi Ban Giám Hiệu phê duyệt</span>
+                <span>{translateText("Ký số & Gửi Ban Giám Hiệu phê duyệt")}</span>
               </>
             )}
           </button>

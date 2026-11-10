@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, XCircle, AlertCircle, ShieldAlert, FileText, User } from 'lucide-react';
@@ -18,6 +20,7 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
   onApprove,
   onReject,
 }) => {
+  useLanguage();
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
   const [notes, setNotes] = useState('');
   const [rejectReason, setRejectReason] = useState('');
@@ -78,12 +81,12 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900 tracking-tight">
-                {actionType === 'approve'
+                {translateText(actionType === 'approve'
                   ? 'Chấp thuận cho phép chỉnh sửa thực đơn'
-                  : 'Từ chối yêu cầu xin chỉnh sửa'}
+                  : 'Từ chối yêu cầu xin chỉnh sửa')}
               </h3>
               <p className="text-xs text-slate-500 font-medium">
-                {menu.title} (v{menu.version}.0)
+                {menu.title}{translateText(" (v")}{menu.version}.0)
               </p>
             </div>
           </div>
@@ -99,21 +102,17 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
         <div className="my-4 p-4 bg-amber-50/90 border border-amber-200/90 rounded-2xl">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-amber-700" />
-              Tờ trình xin phép từ Chuyên viên Dinh dưỡng
-            </span>
+              <FileText className="w-3.5 h-3.5 text-amber-700" />{translateText("Tờ trình xin phép từ Chuyên viên Dinh dưỡng")}</span>
             {menu.editRequestAt && (
               <span className="text-[10px] text-amber-800 font-medium">
-                {new Date(menu.editRequestAt).toLocaleString('vi-VN')}
+                {translateText(new Date(menu.editRequestAt).toLocaleString(getLocale()))}
               </span>
             )}
           </div>
           <p className="text-xs text-amber-950 font-bold bg-white/70 p-3 rounded-xl border border-amber-200/60 leading-relaxed">
-            "{menu.editRequestReason || 'Chuyên viên dinh dưỡng đề xuất điều chỉnh thực đơn tuần.'}"
+            "{translateText(menu.editRequestReason || 'Chuyên viên dinh dưỡng đề xuất điều chỉnh thực đơn tuần.')}"
           </p>
-          <p className="text-[11px] text-amber-800 mt-2 font-medium">
-            💡 Nếu Hiệu trưởng chấp thuận, thực đơn sẽ được <strong>mở khóa về trạng thái Bản dự thảo (DRAFT)</strong> để Chuyên viên Dinh dưỡng chỉnh sửa lại các món ăn và gửi duyệt lại.
-          </p>
+          <p className="text-[11px] text-amber-800 mt-2 font-medium">{translateText("💡 Nếu Hiệu trưởng chấp thuận, thực đơn sẽ được ")}<strong>{translateText("mở khóa về trạng thái Bản dự thảo (DRAFT)")}</strong>{translateText(" để Chuyên viên Dinh dưỡng chỉnh sửa lại các món ăn và gửi duyệt lại.")}</p>
         </div>
 
         {/* Tabs chọn Quyết định của Hiệu trưởng */}
@@ -128,7 +127,7 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Chấp thuận mở khóa</span>
+            <span>{translateText("Chấp thuận mở khóa")}</span>
           </button>
           <button
             type="button"
@@ -140,35 +139,33 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
             }`}
           >
             <XCircle className="w-3.5 h-3.5" />
-            <span>Từ chối yêu cầu</span>
+            <span>{translateText("Từ chối yêu cầu")}</span>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {actionType === 'approve' ? (
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1.5">
-                Ý kiến chỉ đạo / Ghi chú của Hiệu trưởng (Không bắt buộc):
-              </label>
+              <label className="text-xs font-bold text-slate-700 block mb-1.5">{translateText("Ý kiến chỉ đạo / Ghi chú của Hiệu trưởng (Không bắt buộc):")}</label>
               <textarea
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ví dụ: Đồng ý mở khóa để điều chỉnh món ăn thay thế cho học sinh dị ứng hải sản..."
+                placeholder={translateText("Ví dụ: Đồng ý mở khóa để điều chỉnh món ăn thay thế cho học sinh dị ứng hải sản...")}
                 className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none font-medium leading-relaxed"
               />
             </div>
           ) : (
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1">
-                <span>Lý do Hiệu trưởng từ chối mở khóa:</span>
+                <span>{translateText("Lý do Hiệu trưởng từ chối mở khóa:")}</span>
                 <span className="text-rose-500">*</span>
               </label>
               <textarea
                 rows={3}
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Nhập lý do không cho phép chỉnh sửa thực đơn này..."
+                placeholder={translateText("Nhập lý do không cho phép chỉnh sửa thực đơn này...")}
                 className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 resize-none font-medium leading-relaxed"
               />
             </div>
@@ -177,7 +174,7 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-              <span>{error}</span>
+              <span>{translateText(error)}</span>
             </div>
           )}
 
@@ -186,9 +183,7 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
               type="button"
               onClick={onClose}
               className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-            >
-              Đóng
-            </button>
+            >{translateText("Đóng")}</button>
             <button
               type="submit"
               disabled={isSubmitting}
@@ -201,12 +196,12 @@ export const RespondEditRequestModal: React.FC<RespondEditRequestModalProps> = (
               {actionType === 'approve' ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Đang xử lý...' : 'Xác nhận Chấp thuận mở khóa'}</span>
+                  <span>{translateText(isSubmitting ? 'Đang xử lý...' : 'Xác nhận Chấp thuận mở khóa')}</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Đang xử lý...' : 'Xác nhận Từ chối yêu cầu'}</span>
+                  <span>{translateText(isSubmitting ? 'Đang xử lý...' : 'Xác nhận Từ chối yêu cầu')}</span>
                 </>
               )}
             </button>
