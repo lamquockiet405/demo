@@ -1,7 +1,9 @@
-import { IsOptional, IsString } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsOptional, IsString } from "class-validator";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class UpdateStaffDto {
+  @IsOptional() @IsArray() @IsString({ each: true }) roleCodes?: string[];
+  @IsOptional() @IsString() newPassword?: string;
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

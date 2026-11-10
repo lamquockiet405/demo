@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { AlertTriangle, Archive, X } from 'lucide-react';
 import { StaffUser } from '../api/staff.api';
@@ -20,6 +22,7 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  useLanguage();
   if (!isOpen || !staff) return null;
 
   return (
@@ -44,12 +47,8 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
             <Archive className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">
-              Chuyển vào lưu trữ (Xóa mềm)?
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Bạn đang yêu cầu chuyển tài khoản nhân sự sang danh mục lưu trữ.
-            </p>
+            <h3 className="text-lg font-bold text-slate-900">{translateText("Chuyển vào lưu trữ (Xóa mềm)?")}</h3>
+            <p className="text-xs text-slate-500 mt-1">{translateText("Bạn đang yêu cầu chuyển tài khoản nhân sự sang danh mục lưu trữ.")}</p>
           </div>
         </div>
 
@@ -68,11 +67,7 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
         <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3.5 mb-6 flex gap-2.5">
           <AlertTriangle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <div className="text-xs text-emerald-800 leading-relaxed">
-            <span className="font-bold">Bảo toàn dữ liệu: </span>
-            Hệ thống áp dụng cơ chế <strong>xóa mềm</strong>. Toàn bộ lịch sử điểm danh học sinh,
-            sổ kiểm thực 3 bước và phân công lớp học của nhân sự này vẫn được lưu giữ nguyên vẹn
-            và có thể khôi phục bất cứ lúc nào.
-          </div>
+            <span className="font-bold">{translateText("Bảo toàn dữ liệu: ")}</span>{translateText("Hệ thống áp dụng cơ chế ")}<strong>{translateText("xóa mềm")}</strong>{translateText(". Toàn bộ lịch sử điểm danh học sinh, sổ kiểm thực 3 bước và phân công lớp học của nhân sự này vẫn được lưu giữ nguyên vẹn và có thể khôi phục bất cứ lúc nào.")}</div>
         </div>
 
         {/* Nút hành động */}
@@ -82,9 +77,7 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
             onClick={onClose}
             disabled={isLoading}
             className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-          >
-            Hủy bỏ
-          </button>
+          >{translateText("Hủy bỏ")}</button>
           <button
             type="button"
             onClick={onConfirm}
@@ -96,7 +89,7 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
             ) : (
               <Archive className="w-4 h-4" />
             )}
-            <span>Xác nhận xóa mềm</span>
+            <span>{translateText("Xác nhận xóa mềm")}</span>
           </button>
         </div>
       </div>
