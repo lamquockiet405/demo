@@ -26,7 +26,7 @@ export class User {
   @Column({ length: 20, nullable: true })
   phone: string;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ type: 'text', nullable: true })
   avatar: string;
 
   @Column({ length: 20, default: 'ACTIVE' })
