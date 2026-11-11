@@ -423,6 +423,7 @@ export const SchoolSettingsPage: React.FC = () => {
   ];
 
   return (
+    <>
     <div className="w-full space-y-6 pb-12">
       {/* 1. Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -938,6 +939,7 @@ export const SchoolSettingsPage: React.FC = () => {
           </form>
         </div>
       </div>
+    </div>
 
       <EditSchoolInfoModal
         isOpen={isEditModalOpen}
@@ -945,6 +947,6 @@ export const SchoolSettingsPage: React.FC = () => {
         profile={profile}
         onSaved={applyProfileState}
       />
-    </div>
+    </>
   );
 };
