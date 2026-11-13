@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ServiceUnavailableException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -42,7 +48,8 @@ export class PasswordResetService {
   }
 
   async forgotPassword(email: string) {
-    const user = await this.userRepository.findOne({ where: { email: email.toLowerCase() } });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
     if (!user) {
       throw new NotFoundException('Không tìm thấy tài khoản với email này');
     }
@@ -61,7 +68,7 @@ export class PasswordResetService {
     if (this.transporter) {
       try {
         await this.transporter.sendMail({
-          from: this.configService.get<string>('mail.from'),
+          from: this.configService.get<string>('mail.from') || this.configService.get<string>('mail.user'),
           to: user.email,
           subject: '[KidMeal] Mã OTP đặt lại mật khẩu',
           html: `
@@ -77,7 +84,10 @@ export class PasswordResetService {
           `,
         });
       } catch (err: any) {
-        this.logger.warn(`Failed to send reset email via SMTP: ${err.message}. Using console OTP: ${otp}`);
+        this.logger.error(`Failed to send reset email via SMTP: ${err.message}`);
+        throw new ServiceUnavailableException(
+          'Không thể gửi email OTP qua SMTP. Vui lòng kiểm tra lại Gmail App Password hoặc cấu hình mail.',
+        );
       }
     }
 
@@ -89,12 +99,14 @@ export class PasswordResetService {
   }
 
   async verifyResetOtp(email: string, otp: string) {
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedOtp = otp.trim();
     const entry = this.otpStore.get(normalizedEmail);
 
-    // Allow dev universal OTP '123456' or valid matched OTP
-    const isDevMatch = otp === '123456';
-    const isRealMatch = entry && entry.otp === otp && entry.expiresAt > Date.now();
+    // Allow dev universal OTP '123456' only outside production, or valid matched OTP
+    const isDevMode = this.configService.get<string>('nodeEnv') !== 'production';
+    const isDevMatch = isDevMode && normalizedOtp === '123456';
+    const isRealMatch = entry && entry.otp === normalizedOtp && entry.expiresAt > Date.now();
 
     if (!isDevMatch && !isRealMatch) {
       throw new BadRequestException('Mã OTP không đúng hoặc đã hết hạn');

@@ -104,6 +104,34 @@ describe('PasswordResetService (Forgot & Reset Password)', () => {
         BadRequestException,
       );
     });
+
+    it('should reject dev OTP 123456 in production and accept real generated OTP with trimmed email', async () => {
+      mockUserRepo.findOne.mockResolvedValue({
+        id: 'user-uuid-1',
+        email: 'user@example.com',
+        fullName: 'Nguyen Van A',
+        status: 'ACTIVE',
+      });
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'nodeEnv') return 'production';
+        if (key === 'jwt.secret') return 'test-secret';
+        return undefined;
+      });
+
+      await service.forgotPassword('  User@Example.COM  ');
+      expect(mockUserRepo.findOne).toHaveBeenCalledWith({
+        where: { email: 'user@example.com' },
+      });
+
+      await expect(
+        service.verifyResetOtp('user@example.com', '123456'),
+      ).rejects.toThrow(BadRequestException);
+
+      const storedOtp = (service as any).otpStore.get('user@example.com').otp;
+      const res = await service.verifyResetOtp('  USER@example.com ', ` ${storedOtp} `);
+      expect(res.success).toBe(true);
+      expect(res.resetToken).toBe('mock-reset-token');
+    });
   });
 
   describe('resetPassword', () => {
