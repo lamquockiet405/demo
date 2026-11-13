@@ -8,7 +8,7 @@ export const SnackRosterFooter: React.FC = () => {
         <div className="flex items-center gap-2 font-medium">
           <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
           <span>
-            Hệ thống NutriKid • Quản trị dinh dưỡng khẩu phần học đường tiêu chuẩn Mầm Non
+            Hệ thống KidMeal • Quản trị dinh dưỡng khẩu phần học đường tiêu chuẩn Mầm Non
           </span>
         </div>
 
@@ -27,7 +27,7 @@ export const SnackRosterFooter: React.FC = () => {
       </div>
 
       <div className="mt-4 text-center text-[11px] text-slate-400">
-        © 2024 NutriKid Catering System. Dành riêng cho Nhân viên Cấp dưỡng & Ban Quản lý Bếp ăn Học đường.
+        © 2026 KidMeal System. Dành riêng cho Nhân viên Cấp dưỡng & Ban Quản lý Bếp ăn Học đường.
       </div>
     </footer>
   );

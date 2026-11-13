@@ -862,7 +862,7 @@ CREATE TABLE IF NOT EXISTS dish_frequency_rules (
     target_id               BIGINT,
     target_code             VARCHAR(50) NOT NULL, -- 'MAIN', 'RICE', 'SOUP', 'SIDE', 'DESSERT', 'SNACK_MORNING', 'SNACK_AFTERNOON', 'MEAT', 'SEAFOOD'...
     target_name             VARCHAR(150) NOT NULL,
-    age_group               VARCHAR(30) NOT NULL DEFAULT 'ALL', -- 'NHA_TRE', 'MAU_GIAO', 'PRIMARY_6_7', 'PRIMARY_8_9', 'ALL'
+    age_group               VARCHAR(30) NOT NULL DEFAULT 'MAU_GIAO', -- 'MAU_GIAO' | 'ALL' (LI-12: Single standardized menu ages 3-6)
     period_type             VARCHAR(20) NOT NULL DEFAULT 'PER_CYCLE_4_WEEKS', -- 'PER_DAY', 'PER_WEEK', 'PER_CYCLE_4_WEEKS'
     min_occurrences         INT NOT NULL DEFAULT 0,
     max_occurrences         INT NOT NULL,

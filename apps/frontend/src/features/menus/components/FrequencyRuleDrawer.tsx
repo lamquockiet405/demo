@@ -219,11 +219,8 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
                 onChange={(e) => setForm((prev) => ({ ...prev, ageGroup: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
               >
-                <option value="ALL">{translateText("Tất cả khối lớp")}</option>
                 <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
-                <option value="NHA_TRE">{translateText("Nhà trẻ (1 - 3 tuổi)")}</option>
-                <option value="PRIMARY_6_7">{translateText("Tiểu học (6 - 7 tuổi)")}</option>
-                <option value="PRIMARY_8_9">{translateText("Tiểu học (8 - 9 tuổi)")}</option>
+                <option value="ALL">{translateText("Toàn trường (3 - 6 tuổi)")}</option>
               </select>
             </div>
 

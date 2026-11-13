@@ -44,13 +44,12 @@ export const NutriKidHeader: React.FC<NutriKidHeaderProps> = ({
     { label: 'Thực đơn', path: '/menus' },
     { label: 'Kiểm thực', path: '/food-safety' },
     { label: 'Tăng trưởng', path: '/growth' },
-    { label: 'Báo cáo', path: '/finances' },
   ];
 
   return (
     <>
       <header className="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
-        {/* Hàng 1: Logo NutriKid, Search Bar trung tâm, Thông báo & Profile BS. Hoàng Mai Trang */}
+        {/* Hàng 1: Logo KidMeal, Search Bar trung tâm, Thông báo & Profile */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             {/* Logo bên trái: Khối vuông xanh rêu + Icon + Tên + Badge BẢN CHUẨN */}
@@ -64,7 +63,7 @@ export const NutriKidHeader: React.FC<NutriKidHeaderProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-extrabold text-base text-slate-900 tracking-tight">
-                    NutriKid <span className="text-slate-500 font-medium text-xs sm:text-sm">- Dinh dưỡng Mầm non</span>
+                    KidMeal <span className="text-slate-500 font-medium text-xs sm:text-sm">- Dinh dưỡng Mầm non</span>
                   </span>
                   <span className="bg-[#4eed9c]/25 border border-emerald-500/30 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                     BẢN CHUẨN

@@ -27,7 +27,6 @@ import { QueryMenuDto } from "../dto/query-menu.dto";
 import { CreateMenuDto } from "../dto/create-menu.dto";
 import { UpdateMenuDto } from "../dto/update-menu.dto";
 import { AdjustDishDto } from "../dto/adjust-dish.dto";
-import { AutoGenerateMenuDto } from "../dto/auto-generate-menu.dto";
 import { SubmitMenuDto } from "../dto/submit-menu.dto";
 import { AuditLogsService } from "../../audit-logs/services/audit-logs.service";
 import { DishFrequencyRule } from "../../nutrition-engine/entities/dish-frequency-rule.entity";
@@ -40,7 +39,7 @@ import {
   matchesDeclaredAllergy,
 } from "./allergy-matching";
 
-// ── Helper: Fisher-Yates shuffle for true randomness ───────────────────────
+// â”€â”€ Helper: Fisher-Yates shuffle for true randomness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -50,7 +49,7 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-// ── Interfaces for structured daily nutrition ──────────────────────────────
+// â”€â”€ Interfaces for structured daily nutrition â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export interface DishWithNutrition {
   id: number;
   name: string;
@@ -116,10 +115,10 @@ export class MenusService implements OnModuleInit {
         CREATE INDEX IF NOT EXISTS idx_menus_submitted_at ON menus(submitted_at);
       `);
       this.logger.log(
-        "Tự động đồng bộ các cột nộp duyệt vào bảng menus thành công.",
+        "Tá»± Ä‘á»™ng Ä‘á»“ng bá»™ cÃ¡c cá»™t ná»™p duyá»‡t vÃ o báº£ng menus thÃ nh cÃ´ng.",
       );
     } catch (err: any) {
-      this.logger.warn(`Kiểm tra cấu trúc bảng menus: ${err.message}`);
+      this.logger.warn(`Kiá»ƒm tra cáº¥u trÃºc báº£ng menus: ${err.message}`);
     }
   }
   private readonly logger = new Logger(MenusService.name);
@@ -218,7 +217,7 @@ export class MenusService implements OnModuleInit {
 
     const [items, total] = await qb.getManyAndCount();
 
-    // Tính toán dinh dưỡng thực tế 100% từ cơ sở dữ liệu dish_nutrition
+    // TÃ­nh toÃ¡n dinh dÆ°á»¡ng thá»±c táº¿ 100% tá»« cÆ¡ sá»Ÿ dá»¯ liá»‡u dish_nutrition
     const menuIds = items.map((m) => m.id);
     const nutritionMap: Record<
       number,
@@ -270,7 +269,7 @@ export class MenusService implements OnModuleInit {
           };
         }
       } catch (err: any) {
-        this.logger.warn(`Lỗi tính toán dinh dưỡng thực tế: ${err.message}`);
+        this.logger.warn(`Lá»—i tÃ­nh toÃ¡n dinh dÆ°á»¡ng thá»±c táº¿: ${err.message}`);
       }
     }
 
@@ -296,13 +295,13 @@ export class MenusService implements OnModuleInit {
         status: m.status,
         cycleId: m.cycleId ? String(m.cycleId) : null,
         cycleWeekNumber: 1,
-        createdByName: m.creator?.fullName || "Chuyên viên Dinh dưỡng",
+        createdByName: m.creator?.fullName || "ChuyÃªn viÃªn Dinh dÆ°á»¡ng",
         approvedByName: m.approver?.fullName || null,
         approvedAt: m.approvedAt ? m.approvedAt.toISOString() : null,
         submittedBy: m.submittedBy ? String(m.submittedBy) : null,
         submittedByName:
           m.submitter?.fullName ||
-          (m.submittedBy ? "Chuyên viên Dinh dưỡng" : null),
+          (m.submittedBy ? "ChuyÃªn viÃªn Dinh dÆ°á»¡ng" : null),
         submittedAt: m.submittedAt ? m.submittedAt.toISOString() : null,
         createdAt: m.submittedAt ? m.submittedAt.toISOString() : null,
         updatedAt: m.approvedAt
@@ -378,7 +377,7 @@ export class MenusService implements OnModuleInit {
       publishedMenus: published,
       rejected: 0,
       avgCalories: realAvgCalories,
-      nutritionStandard: "Thông tư 28/2016/TT-BGDĐT",
+      nutritionStandard: "ThÃ´ng tÆ° 28/2016/TT-BGDÄT",
     };
   }
 
@@ -398,7 +397,7 @@ export class MenusService implements OnModuleInit {
       id: String(d.id),
       name: d.name,
       categoryCode: d.category?.code || "MAIN",
-      categoryName: d.category?.name || "Món ăn",
+      categoryName: d.category?.name || "MÃ³n Äƒn",
       dishType: d.category?.code || "MAIN",
       isActive: d.status === "ACTIVE",
       standardServingSizeG: Number(d.standardServingSizeG) || 100,
@@ -433,7 +432,7 @@ export class MenusService implements OnModuleInit {
     );
     if (!original)
       throw new NotFoundException(
-        "Món gốc không còn trong phiên bản thực đơn hiện tại. Vui lòng tải lại.",
+        "MÃ³n gá»‘c khÃ´ng cÃ²n trong phiÃªn báº£n thá»±c Ä‘Æ¡n hiá»‡n táº¡i. Vui lÃ²ng táº£i láº¡i.",
       );
     const dishes = await this.dishRepo.find({
       where: [{ status: "ACTIVE" }, { id: Number(original.dishId) }],
@@ -451,7 +450,7 @@ export class MenusService implements OnModuleInit {
     );
     if (!source)
       throw new NotFoundException(
-        "Món gốc không còn trong danh mục. Vui lòng tải lại.",
+        "MÃ³n gá»‘c khÃ´ng cÃ²n trong danh má»¥c. Vui lÃ²ng táº£i láº¡i.",
       );
     const declarations = await this.getActiveAllergyDeclarations();
     const matches = (declaration: any, dish: Dish) =>
@@ -496,14 +495,14 @@ export class MenusService implements OnModuleInit {
       versionNumber !== undefined &&
       (!Number.isSafeInteger(versionNumber) || versionNumber < 1)
     )
-      throw new BadRequestException("Số phiên bản không hợp lệ.");
+      throw new BadRequestException("Sá»‘ phiÃªn báº£n khÃ´ng há»£p lá»‡.");
     const menu = await this.menuRepo.findOne({
       where: { id },
       relations: ["creator", "approver", "submitter"],
     });
 
     if (!menu) {
-      throw new NotFoundException(`Không tìm thấy thực đơn với ID: ${id}`);
+      throw new NotFoundException(`KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n vá»›i ID: ${id}`);
     }
 
     // Find latest version
@@ -517,7 +516,7 @@ export class MenusService implements OnModuleInit {
 
     if (!version) {
       throw new NotFoundException(
-        "Chưa có dữ liệu phiên bản thực đơn được chọn.",
+        "ChÆ°a cÃ³ dá»¯ liá»‡u phiÃªn báº£n thá»±c Ä‘Æ¡n Ä‘Æ°á»£c chá»n.",
       );
     }
 
@@ -575,7 +574,7 @@ export class MenusService implements OnModuleInit {
             specialDietNotes: md.specialDietNotes || null,
             dish: {
               id: String(md.dish?.id),
-              name: md.dish?.name || "Món ăn",
+              name: md.dish?.name || "MÃ³n Äƒn",
               dishType: md.dish?.category?.code || "MAIN",
               targetAgeGroup: menu.ageGroup,
               standardServingSizeG: md.dish?.standardServingSizeG ?? 100,
@@ -607,13 +606,13 @@ export class MenusService implements OnModuleInit {
       targetAgeGroup: menu.ageGroup,
       status: menu.status,
       cycleId: menu.cycleId ? String(menu.cycleId) : null,
-      createdByName: menu.creator?.fullName || "Chuyên viên Dinh dưỡng",
+      createdByName: menu.creator?.fullName || "ChuyÃªn viÃªn Dinh dÆ°á»¡ng",
       approvedByName: menu.approver?.fullName || null,
       approvedAt: menu.approvedAt ? menu.approvedAt.toISOString() : null,
       submittedBy: menu.submittedBy ? String(menu.submittedBy) : null,
       submittedByName:
         menu.submitter?.fullName ||
-        (menu.submittedBy ? "Chuyên viên Dinh dưỡng" : null),
+        (menu.submittedBy ? "ChuyÃªn viÃªn Dinh dÆ°á»¡ng" : null),
       submittedAt: menu.submittedAt ? menu.submittedAt.toISOString() : null,
       approvalNotes: menu.approvalNotes || null,
       rejectionReason: menu.rejectionReason || null,
@@ -646,15 +645,15 @@ export class MenusService implements OnModuleInit {
           dishes: (m.dishes || []).map((md) => ({
             id: String(md.id),
             dishId: String(md.dishId),
-            dishName: md.dish?.name || "Món ăn",
+            dishName: md.dish?.name || "MÃ³n Äƒn",
             categoryCode: md.dish?.category?.code || "MAIN",
             categoryName:
               (m.mealType === "BREAKFAST" || m.mealType === "MORNING_SNACK") &&
               (md.dish?.category?.code === "SNACK_AFTERNOON" ||
-                md.dish?.category?.name?.includes("Xế") ||
-                md.dish?.category?.name?.includes("chiều"))
-                ? "Món sáng"
-                : md.dish?.category?.name || "Món ăn",
+                md.dish?.category?.name?.includes("Xáº¿") ||
+                md.dish?.category?.name?.includes("chiá»u"))
+                ? "MÃ³n sÃ¡ng"
+                : md.dish?.category?.name || "MÃ³n Äƒn",
             portionSizeG: md.portionSizeG,
             nutritionAvailable: hasPlanningNutrition(md.dish),
             ...getPortionNutrition(md.dish, md.portionSizeG),
@@ -686,10 +685,10 @@ export class MenusService implements OnModuleInit {
     const menu = await this.menuRepo.findOne({ where: { id: menuId } });
     const menuDetail = await this.findOne(menuId);
 
-    // 1. Tải danh sách dị ứng học sinh từ database
+    // 1. Táº£i danh sÃ¡ch dá»‹ á»©ng há»c sinh tá»« database
     const studentAllergiesRaw = await this.getActiveAllergyDeclarations();
 
-    // 2. Tải danh sách tăng trưởng BMI / WHO Z-score từ database
+    // 2. Táº£i danh sÃ¡ch tÄƒng trÆ°á»Ÿng BMI / WHO Z-score tá»« database
     const bmiStudentsRaw = await this.menuDishRepo.manager.query(`
       SELECT s.id as student_id, s.full_name, c.name as class_name, gz.classification, pm.weight_kg, pm.height_cm, gz.baz
       FROM growth_zscores gz
@@ -699,7 +698,7 @@ export class MenusService implements OnModuleInit {
       ORDER BY s.full_name ASC
     `);
 
-    // 3. Quét xung đột dị ứng giữa món ăn trong tuần và các bé
+    // 3. QuÃ©t xung Ä‘á»™t dá»‹ á»©ng giá»¯a mÃ³n Äƒn trong tuáº§n vÃ  cÃ¡c bÃ©
     const allergyConflicts: any[] = [];
     const dishIds = [
       ...new Set(
@@ -748,7 +747,7 @@ export class MenusService implements OnModuleInit {
             childId: String(sa.student_id),
             childName: sa.full_name,
             classId: sa.class_id ? String(sa.class_id) : null,
-            className: sa.class_name || "Chưa có lớp",
+            className: sa.class_name || "ChÆ°a cÃ³ lá»›p",
             allergenDetected: sa.allergen_name,
             matchReasons,
             allergenCode: sa.allergen_code || "ALLERGEN",
@@ -756,7 +755,7 @@ export class MenusService implements OnModuleInit {
             reactionTreatment: sa.reaction_treatment || null,
             menuDishId: String(md.id),
             dishId: String(md.dishId),
-            dishName: md.dish?.name || "Món ăn",
+            dishName: md.dish?.name || "MÃ³n Äƒn",
             dishType: md.dish?.dishType || "MAIN",
             dayOfWeek: md.dayOfWeek,
             mealTime: md.mealTime,
@@ -773,7 +772,7 @@ export class MenusService implements OnModuleInit {
       }
     }
 
-    // 4. Nhóm trẻ thừa cân / béo phì (Loại 2)
+    // 4. NhÃ³m tráº» thá»«a cÃ¢n / bÃ©o phÃ¬ (Loáº¡i 2)
     const overweightChildren = bmiStudentsRaw
       .filter(
         (s: any) =>
@@ -786,19 +785,19 @@ export class MenusService implements OnModuleInit {
         return {
           childId: String(s.student_id),
           childName: s.full_name,
-          className: s.class_name || "Lớp Mẫu giáo",
+          className: s.class_name || "Lá»›p Máº«u giÃ¡o",
           weightKg: w,
           heightCm: h,
           bmi,
           baz: Number(s.baz) || 2.1,
           classification: s.classification,
-          statusText: "Thừa cân / Nguy cơ béo phì (WHO)",
+          statusText: "Thá»«a cÃ¢n / Nguy cÆ¡ bÃ©o phÃ¬ (WHO)",
           healthNotes:
-            "Cần giảm 10–15% chất béo & calo, hạn chế món chiên rán, tăng cường rau củ theo TT 28",
+            "Cáº§n giáº£m 10â€“15% cháº¥t bÃ©o & calo, háº¡n cháº¿ mÃ³n chiÃªn rÃ¡n, tÄƒng cÆ°á»ng rau cá»§ theo TT 28",
         };
       });
 
-    // 5. Nhóm trẻ còi xương / suy dinh dưỡng (Loại 1)
+    // 5. NhÃ³m tráº» cÃ²i xÆ°Æ¡ng / suy dinh dÆ°á»¡ng (Loáº¡i 1)
     const wastedChildren = bmiStudentsRaw
       .filter(
         (s: any) =>
@@ -811,15 +810,15 @@ export class MenusService implements OnModuleInit {
         return {
           childId: String(s.student_id),
           childName: s.full_name,
-          className: s.class_name || "Lớp Mầm 1",
+          className: s.class_name || "Lá»›p Máº§m 1",
           weightKg: w,
           heightCm: h,
           bmi,
           baz: Number(s.baz) || -1.2,
           classification: s.classification,
-          statusText: "Còi xương / Thấp còi / Suy dinh dưỡng (WHO)",
+          statusText: "CÃ²i xÆ°Æ¡ng / Tháº¥p cÃ²i / Suy dinh dÆ°á»¡ng (WHO)",
           healthNotes:
-            "Cần tăng đạm sinh học cao, bổ sung dầu gấc/oliu, tăng 15–20% khẩu phần ăn theo QĐ 1246 & TT 28",
+            "Cáº§n tÄƒng Ä‘áº¡m sinh há»c cao, bá»• sung dáº§u gáº¥c/oliu, tÄƒng 15â€“20% kháº©u pháº§n Äƒn theo QÄ 1246 & TT 28",
         };
       });
 
@@ -828,7 +827,7 @@ export class MenusService implements OnModuleInit {
 
     return {
       menuId: String(menuId),
-      menuTitle: menu?.title || "Thực đơn tuần",
+      menuTitle: menu?.title || "Thá»±c Ä‘Æ¡n tuáº§n",
       targetAgeGroup: menu?.ageGroup || "MAU_GIAO",
       allergySummary: {
         totalConflicts: allergyConflicts.length,
@@ -855,24 +854,24 @@ export class MenusService implements OnModuleInit {
       },
       bmiRecommendations: {
         overweightGroup: {
-          label: "Nhóm Thừa cân & Béo phì",
+          label: "NhÃ³m Thá»«a cÃ¢n & BÃ©o phÃ¬",
           count: overweightChildren.length,
           severity: "WARNING",
           clinicalStrategy:
-            "Giảm 10–15% tinh bột & chất béo bão hòa, hạn chế món chiên xào mặn, tăng rau củ theo Thông tư 28",
+            "Giáº£m 10â€“15% tinh bá»™t & cháº¥t bÃ©o bÃ£o hÃ²a, háº¡n cháº¿ mÃ³n chiÃªn xÃ o máº·n, tÄƒng rau cá»§ theo ThÃ´ng tÆ° 28",
           portionAdvice:
-            "Khuyến khích ăn nhiều canh rau trước, giảm cơm & nước ngọt",
+            "Khuyáº¿n khÃ­ch Äƒn nhiá»u canh rau trÆ°á»›c, giáº£m cÆ¡m & nÆ°á»›c ngá»t",
           children: overweightChildren,
           recommendedSubstituteDishes: [],
         },
         wastedGroup: {
-          label: "Nhóm Còi xương & Suy dinh dưỡng",
+          label: "NhÃ³m CÃ²i xÆ°Æ¡ng & Suy dinh dÆ°á»¡ng",
           count: wastedChildren.length,
           severity: "WARNING",
           clinicalStrategy:
-            "Tăng cường chất đạm sinh học cao, bổ sung dầu oliu/dầu gấc, tăng 15–20% khẩu phần theo QĐ 1246 & TT 28",
+            "TÄƒng cÆ°á»ng cháº¥t Ä‘áº¡m sinh há»c cao, bá»• sung dáº§u oliu/dáº§u gáº¥c, tÄƒng 15â€“20% kháº©u pháº§n theo QÄ 1246 & TT 28",
           portionAdvice:
-            "Chia nhỏ bữa ăn, khuyến khích uống thêm sữa và món xế bổ dưỡng",
+            "Chia nhá» bá»¯a Äƒn, khuyáº¿n khÃ­ch uá»‘ng thÃªm sá»¯a vÃ  mÃ³n xáº¿ bá»• dÆ°á»¡ng",
           children: wastedChildren,
           recommendedSubstituteDishes: [],
         },
@@ -902,7 +901,7 @@ export class MenusService implements OnModuleInit {
       menuId: savedMenu.id,
       versionNumber: 1,
       createdBy: userId || 3,
-      changeNote: "Khởi tạo thực đơn tuần",
+      changeNote: "Khá»Ÿi táº¡o thá»±c Ä‘Æ¡n tuáº§n",
     });
     const savedVersion = await this.versionRepo.save(version);
 
@@ -937,7 +936,7 @@ export class MenusService implements OnModuleInit {
 
   async update(id: number, dto: UpdateMenuDto) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException("Không tìm thấy thực đơn");
+    if (!menu) throw new NotFoundException("KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n");
 
     if (dto.title) menu.title = dto.title;
     if (dto.weekStartDate) menu.weekStartDate = dto.weekStartDate;
@@ -951,7 +950,7 @@ export class MenusService implements OnModuleInit {
       ?.logAction({
         tenantId: 1,
         userId: 1,
-        userName: "Ban Giám Hiệu",
+        userName: "Ban GiÃ¡m Hiá»‡u",
         userRole: "PRINCIPAL",
         action: "UPDATE_MENU",
         targetEntity: "MENU",
@@ -974,7 +973,7 @@ export class MenusService implements OnModuleInit {
     );
     if (!Number.isSafeInteger(targetId) || targetId <= 0) {
       throw new BadRequestException(
-        "Vui lòng chọn một món ăn hợp lệ từ danh mục.",
+        "Vui lÃ²ng chá»n má»™t mÃ³n Äƒn há»£p lá»‡ tá»« danh má»¥c.",
       );
     }
     try {
@@ -989,18 +988,18 @@ export class MenusService implements OnModuleInit {
           where: { id: menuId },
           lock: { mode: "pessimistic_write" },
         });
-        if (!menu) throw new NotFoundException("Không tìm thấy thực đơn");
+        if (!menu) throw new NotFoundException("KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n");
         const target = await dishes.findOne({
           where: { id: targetId },
           lock: { mode: "pessimistic_read" },
         });
         if (!target)
           throw new NotFoundException(
-            "Món thay thế không còn trong danh mục. Vui lòng tải lại và chọn món khác.",
+            "MÃ³n thay tháº¿ khÃ´ng cÃ²n trong danh má»¥c. Vui lÃ²ng táº£i láº¡i vÃ  chá»n mÃ³n khÃ¡c.",
           );
         if (target.status !== "ACTIVE")
           throw new BadRequestException(
-            "Món thay thế đã tạm ngưng. Vui lòng chọn món khác.",
+            "MÃ³n thay tháº¿ Ä‘Ã£ táº¡m ngÆ°ng. Vui lÃ²ng chá»n mÃ³n khÃ¡c.",
           );
 
         let version = await versions.findOne({
@@ -1010,7 +1009,7 @@ export class MenusService implements OnModuleInit {
         if (!version) {
           if (dto.menuDishId)
             throw new NotFoundException(
-              "Ô món gốc không còn trong phiên bản thực đơn hiện tại.",
+              "Ã” mÃ³n gá»‘c khÃ´ng cÃ²n trong phiÃªn báº£n thá»±c Ä‘Æ¡n hiá»‡n táº¡i.",
             );
           version = await versions.save(
             versions.create({
@@ -1033,7 +1032,7 @@ export class MenusService implements OnModuleInit {
               Number(version.id)
           ) {
             throw new NotFoundException(
-              "Ô món gốc không còn trong phiên bản thực đơn hiện tại. Vui lòng tải lại.",
+              "Ã” mÃ³n gá»‘c khÃ´ng cÃ²n trong phiÃªn báº£n thá»±c Ä‘Æ¡n hiá»‡n táº¡i. Vui lÃ²ng táº£i láº¡i.",
             );
           }
           if (
@@ -1041,7 +1040,7 @@ export class MenusService implements OnModuleInit {
             Number(original.dishId) !== Number(dto.oldDishId)
           ) {
             throw new BadRequestException(
-              "Món gốc đã được thay đổi. Vui lòng tải lại thực đơn.",
+              "MÃ³n gá»‘c Ä‘Ã£ Ä‘Æ°á»£c thay Ä‘á»•i. Vui lÃ²ng táº£i láº¡i thá»±c Ä‘Æ¡n.",
             );
           }
           meal = original.menuMeal;
@@ -1056,11 +1055,11 @@ export class MenusService implements OnModuleInit {
               "LATE_SNACK",
             ].includes(mealType)
           ) {
-            throw new BadRequestException("Bữa ăn không hợp lệ.");
+            throw new BadRequestException("Bá»¯a Äƒn khÃ´ng há»£p lá»‡.");
           }
           const rawDay = Number(dto.dayOfWeek ?? 1);
           if (!Number.isInteger(rawDay) || rawDay < 1 || rawDay > 7)
-            throw new BadRequestException("Ngày trong tuần không hợp lệ.");
+            throw new BadRequestException("NgÃ y trong tuáº§n khÃ´ng há»£p lá»‡.");
           let dbDay = rawDay;
           if (
             rawDay <= 5 &&
@@ -1095,7 +1094,7 @@ export class MenusService implements OnModuleInit {
             });
             if (!original)
               throw new NotFoundException(
-                "Món gốc không còn trong bữa ăn đã chọn. Vui lòng tải lại.",
+                "MÃ³n gá»‘c khÃ´ng cÃ²n trong bá»¯a Äƒn Ä‘Ã£ chá»n. Vui lÃ²ng táº£i láº¡i.",
               );
           }
         }
@@ -1116,7 +1115,7 @@ export class MenusService implements OnModuleInit {
           !Number.isFinite(menuDish.portionSizeG) ||
           menuDish.portionSizeG <= 0
         )
-          throw new BadRequestException("Khẩu phần phải lớn hơn 0.");
+          throw new BadRequestException("Kháº©u pháº§n pháº£i lá»›n hÆ¡n 0.");
         if (dto.specialDietNotes !== undefined)
           menuDish.specialDietNotes = dto.specialDietNotes || null;
         // Save first, then remove the original within the same transaction.
@@ -1132,7 +1131,7 @@ export class MenusService implements OnModuleInit {
           success: true,
           menuDishId: String(menuDish.id),
           dishId: String(targetId),
-          message: "Đã cập nhật món ăn trong thực đơn thành công",
+          message: "ÄÃ£ cáº­p nháº­t mÃ³n Äƒn trong thá»±c Ä‘Æ¡n thÃ nh cÃ´ng",
         };
       });
     } catch (error) {
@@ -1141,7 +1140,7 @@ export class MenusService implements OnModuleInit {
         error.constraint === "menu_dishes_dish_id_fkey"
       ) {
         throw new BadRequestException(
-          "Danh mục món ăn đã thay đổi. Vui lòng tải lại thực đơn và chọn món khác.",
+          "Danh má»¥c mÃ³n Äƒn Ä‘Ã£ thay Ä‘á»•i. Vui lÃ²ng táº£i láº¡i thá»±c Ä‘Æ¡n vÃ  chá»n mÃ³n khÃ¡c.",
         );
       }
       throw error;
@@ -1159,9 +1158,9 @@ export class MenusService implements OnModuleInit {
       relations: ["creator", "submitter"],
     });
     if (!menu)
-      throw new NotFoundException("Không tìm thấy thực đơn để gửi duyệt");
+      throw new NotFoundException("KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n Ä‘á»ƒ gá»­i duyá»‡t");
 
-    // 1. Kiểm tra trạng thái thực đơn hợp lệ (DRAFT, REJECTED, PENDING, SUBMITTED_FOR_REVIEW)
+    // 1. Kiá»ƒm tra tráº¡ng thÃ¡i thá»±c Ä‘Æ¡n há»£p lá»‡ (DRAFT, REJECTED, PENDING, SUBMITTED_FOR_REVIEW)
     const allowedStatuses = [
       "DRAFT",
       "REJECTED",
@@ -1170,18 +1169,18 @@ export class MenusService implements OnModuleInit {
     ];
     if (!allowedStatuses.includes(menu.status)) {
       throw new BadRequestException(
-        `Thực đơn đang ở trạng thái "${menu.status}", không thể gửi duyệt lại.`,
+        `Thá»±c Ä‘Æ¡n Ä‘ang á»Ÿ tráº¡ng thÃ¡i "${menu.status}", khÃ´ng thá»ƒ gá»­i duyá»‡t láº¡i.`,
       );
     }
 
-    // 2. Kiểm tra bản cam kết trách nhiệm chuyên môn (Nutritionist Commitment)
+    // 2. Kiá»ƒm tra báº£n cam káº¿t trÃ¡ch nhiá»‡m chuyÃªn mÃ´n (Nutritionist Commitment)
     if (dto && dto.commitmentSigned === false) {
       throw new BadRequestException(
-        "Chuyên viên Dinh dưỡng bắt buộc phải xác nhận ký số cam kết trách nhiệm chuyên môn",
+        "ChuyÃªn viÃªn Dinh dÆ°á»¡ng báº¯t buá»™c pháº£i xÃ¡c nháº­n kÃ½ sá»‘ cam káº¿t trÃ¡ch nhiá»‡m chuyÃªn mÃ´n",
       );
     }
 
-    // 3. Kiểm tra giải trình vượt ngưỡng nếu có cảnh báo (Override Justification)
+    // 3. Kiá»ƒm tra giáº£i trÃ¬nh vÆ°á»£t ngÆ°á»¡ng náº¿u cÃ³ cáº£nh bÃ¡o (Override Justification)
     const hasWarnings =
       Array.isArray(dto?.violationsSnapshot) &&
       dto.violationsSnapshot.length > 0;
@@ -1189,12 +1188,12 @@ export class MenusService implements OnModuleInit {
       const justification = dto?.overrideJustification?.trim();
       if (!justification || justification.length < 10) {
         throw new BadRequestException(
-          "Thực đơn có cảnh báo vượt ngưỡng quy tắc dinh dưỡng / lặp món. Chuyên viên Dinh dưỡng bắt buộc phải nhập giải trình chuyên môn cụ thể (tối thiểu 10 ký tự).",
+          "Thá»±c Ä‘Æ¡n cÃ³ cáº£nh bÃ¡o vÆ°á»£t ngÆ°á»¡ng quy táº¯c dinh dÆ°á»¡ng / láº·p mÃ³n. ChuyÃªn viÃªn Dinh dÆ°á»¡ng báº¯t buá»™c pháº£i nháº­p giáº£i trÃ¬nh chuyÃªn mÃ´n cá»¥ thá»ƒ (tá»‘i thiá»ƒu 10 kÃ½ tá»±).",
         );
       }
     }
 
-    // 4. Lưu thông tin nộp duyệt vào Menu entity
+    // 4. LÆ°u thÃ´ng tin ná»™p duyá»‡t vÃ o Menu entity
     const submitterId =
       submitter?.id ||
       submitter?.sub ||
@@ -1206,7 +1205,7 @@ export class MenusService implements OnModuleInit {
       dto?.commitmentSigned !== undefined ? dto.commitmentSigned : true;
     menu.commitmentText =
       dto?.commitmentText ||
-      "Cam kết thực đơn tuân thủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn thực phẩm Quyết định 1246/QĐ-BYT";
+      "Cam káº¿t thá»±c Ä‘Æ¡n tuÃ¢n thá»§ Ä‘á»‹nh má»©c ThÃ´ng tÆ° 28/2016/TT-BGDÄT vÃ  an toÃ n thá»±c pháº©m Quyáº¿t Ä‘á»‹nh 1246/QÄ-BYT";
     menu.commitmentItems =
       dto?.commitmentItems && dto.commitmentItems.length > 0
         ? dto.commitmentItems
@@ -1221,13 +1220,13 @@ export class MenusService implements OnModuleInit {
 
     await this.menuRepo.save(menu);
 
-    // 5. Ghi vết kiểm toán trực tiếp vào bảng audit_logs của PostgreSQL
+    // 5. Ghi váº¿t kiá»ƒm toÃ¡n trá»±c tiáº¿p vÃ o báº£ng audit_logs cá»§a PostgreSQL
     try {
       await this.auditLogsService?.logAction({
         tenantId: submitter?.tenantId || 1,
         userId: submitterId,
         userName:
-          submitter?.fullName || submitter?.name || "Chuyên viên Dinh dưỡng",
+          submitter?.fullName || submitter?.name || "ChuyÃªn viÃªn Dinh dÆ°á»¡ng",
         userEmail: submitter?.email || "dinhduong@huongduong.edu.vn",
         userRole: "NUTRITIONIST",
         action: "SUBMIT_MENU_FOR_REVIEW",
@@ -1252,7 +1251,7 @@ export class MenusService implements OnModuleInit {
       });
     } catch (auditErr: any) {
       this.logger.warn(
-        `[MenusService] Ghi audit log submit thất bại: ${auditErr.message}`,
+        `[MenusService] Ghi audit log submit tháº¥t báº¡i: ${auditErr.message}`,
       );
     }
 
@@ -1261,12 +1260,12 @@ export class MenusService implements OnModuleInit {
 
   async approveMenu(id: number, approverId: number, notes?: string) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException("Không tìm thấy thực đơn");
+    if (!menu) throw new NotFoundException("KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n");
 
-    // Chỉ thực đơn đang PENDING hoặc SUBMITTED_FOR_REVIEW mới được phê duyệt
+    // Chá»‰ thá»±c Ä‘Æ¡n Ä‘ang PENDING hoáº·c SUBMITTED_FOR_REVIEW má»›i Ä‘Æ°á»£c phÃª duyá»‡t
     if (menu.status !== "PENDING" && menu.status !== "SUBMITTED_FOR_REVIEW") {
       throw new BadRequestException(
-        `Chỉ thực đơn đang "Chờ BGH duyệt" mới có thể phê duyệt. Trạng thái hiện tại: ${menu.status}`,
+        `Chá»‰ thá»±c Ä‘Æ¡n Ä‘ang "Chá» BGH duyá»‡t" má»›i cÃ³ thá»ƒ phÃª duyá»‡t. Tráº¡ng thÃ¡i hiá»‡n táº¡i: ${menu.status}`,
       );
     }
 
@@ -1280,7 +1279,7 @@ export class MenusService implements OnModuleInit {
       ?.logAction({
         tenantId: 1,
         userId: approverId || 1,
-        userName: "Ban Giám Hiệu",
+        userName: "Ban GiÃ¡m Hiá»‡u",
         userRole: "PRINCIPAL",
         action: "APPROVE_MENU",
         targetEntity: "MENU",
@@ -1289,7 +1288,7 @@ export class MenusService implements OnModuleInit {
         details: {
           menuId: id,
           title: menu.title,
-          note: notes || "Phê duyệt thực đơn tuần đạt chuẩn",
+          note: notes || "PhÃª duyá»‡t thá»±c Ä‘Æ¡n tuáº§n Ä‘áº¡t chuáº©n",
           approvedAt: menu.approvedAt,
         },
       })
@@ -1300,12 +1299,12 @@ export class MenusService implements OnModuleInit {
 
   async rejectMenu(id: number, approverId: number, reason: string) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException("Không tìm thấy thực đơn");
+    if (!menu) throw new NotFoundException("KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n");
 
-    // Chỉ thực đơn đang PENDING hoặc SUBMITTED_FOR_REVIEW mới được từ chối
+    // Chá»‰ thá»±c Ä‘Æ¡n Ä‘ang PENDING hoáº·c SUBMITTED_FOR_REVIEW má»›i Ä‘Æ°á»£c tá»« chá»‘i
     if (menu.status !== "PENDING" && menu.status !== "SUBMITTED_FOR_REVIEW") {
       throw new BadRequestException(
-        `Chỉ thực đơn đang "Chờ BGH duyệt" mới có thể từ chối. Trạng thái hiện tại: ${menu.status}`,
+        `Chá»‰ thá»±c Ä‘Æ¡n Ä‘ang "Chá» BGH duyá»‡t" má»›i cÃ³ thá»ƒ tá»« chá»‘i. Tráº¡ng thÃ¡i hiá»‡n táº¡i: ${menu.status}`,
       );
     }
 
@@ -1318,7 +1317,7 @@ export class MenusService implements OnModuleInit {
       ?.logAction({
         tenantId: 1,
         userId: approverId || 1,
-        userName: "Ban Giám Hiệu",
+        userName: "Ban GiÃ¡m Hiá»‡u",
         userRole: "PRINCIPAL",
         action: "REJECT_MENU",
         targetEntity: "MENU",
@@ -1332,12 +1331,12 @@ export class MenusService implements OnModuleInit {
 
   async publishMenu(id: number) {
     const menu = await this.menuRepo.findOne({ where: { id } });
-    if (!menu) throw new NotFoundException("Không tìm thấy thực đơn");
+    if (!menu) throw new NotFoundException("KhÃ´ng tÃ¬m tháº¥y thá»±c Ä‘Æ¡n");
 
-    // Chỉ thực đơn đã APPROVED mới được công bố toàn trường
+    // Chá»‰ thá»±c Ä‘Æ¡n Ä‘Ã£ APPROVED má»›i Ä‘Æ°á»£c cÃ´ng bá»‘ toÃ n trÆ°á»ng
     if (menu.status !== "APPROVED") {
       throw new BadRequestException(
-        `Chỉ thực đơn "Đã duyệt" mới có thể công bố toàn trường. Trạng thái hiện tại: ${menu.status}`,
+        `Chá»‰ thá»±c Ä‘Æ¡n "ÄÃ£ duyá»‡t" má»›i cÃ³ thá»ƒ cÃ´ng bá»‘ toÃ n trÆ°á»ng. Tráº¡ng thÃ¡i hiá»‡n táº¡i: ${menu.status}`,
       );
     }
 
@@ -1349,7 +1348,7 @@ export class MenusService implements OnModuleInit {
       ?.logAction({
         tenantId: 1,
         userId: 1,
-        userName: "Ban Giám Hiệu",
+        userName: "Ban GiÃ¡m Hiá»‡u",
         userRole: "PRINCIPAL",
         action: "PUBLISH_MENU",
         targetEntity: "MENU",
@@ -1368,10 +1367,10 @@ export class MenusService implements OnModuleInit {
   }
 
   /**
-   * Tìm thực đơn trường ĐÃ CÔNG BỐ (PUBLISHED / ACTIVE) áp dụng cho một ngày cụ thể.
-   * - Chỉ xét thực đơn cùng nhóm tuổi (NHA_TRE / MAU_GIAO) nếu có truyền vào.
-   * - Bắt buộc weekStartDate <= date <= weekEndDate.
-   * - Trả về chi tiết đầy đủ (giống findOne) hoặc null nếu chưa có thực đơn công bố.
+   * TÃ¬m thá»±c Ä‘Æ¡n trÆ°á»ng ÄÃƒ CÃ”NG Bá» (PUBLISHED / ACTIVE) Ã¡p dá»¥ng cho má»™t ngÃ y cá»¥ thá»ƒ.
+   * - Chá»‰ xÃ©t thá»±c Ä‘Æ¡n cÃ¹ng nhÃ³m tuá»•i (NHA_TRE / MAU_GIAO) náº¿u cÃ³ truyá»n vÃ o.
+   * - Báº¯t buá»™c weekStartDate <= date <= weekEndDate.
+   * - Tráº£ vá» chi tiáº¿t Ä‘áº§y Ä‘á»§ (giá»‘ng findOne) hoáº·c null náº¿u chÆ°a cÃ³ thá»±c Ä‘Æ¡n cÃ´ng bá»‘.
    */
   async findPublishedMenuForDate(date: string, ageGroup?: string | null) {
     const qb = this.menuRepo
@@ -1402,896 +1401,13 @@ export class MenusService implements OnModuleInit {
       menuId: id,
       versionNumber: nextVersion,
       createdBy: userId || 3,
-      changeNote: `Phiên bản v${nextVersion}.0`,
+      changeNote: `PhiÃªn báº£n v${nextVersion}.0`,
     });
     await this.versionRepo.save(newVersion);
     return this.findOne(id);
   }
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // AUTO-GENERATE: Constrained Nutrition-Aware Menu Generation
-  // Thông tư 28/2016/TT-BGDĐT compliant
-  // ════════════════════════════════════════════════════════════════════════════
-
-  async autoGenerate(dto: AutoGenerateMenuDto, userId?: number) {
-    const rawAge = dto.ageGroup || dto.targetAgeGroup || "MAU_GIAO";
-    const ageGroup =
-      rawAge === "TODDLER_18_36M"
-        ? "NHA_TRE"
-        : rawAge === "KINDERGARTEN_3_5Y"
-          ? "MAU_GIAO"
-          : rawAge;
-    const weekStartDate =
-      dto.weekStartDate ||
-      dto.startDate ||
-      new Date().toISOString().split("T")[0];
-    const daysCount = dto.daysCount || 5;
-
-    let weekEndDate = dto.endDate;
-    if (!weekEndDate) {
-      const d = new Date(weekStartDate);
-      d.setDate(d.getDate() + (daysCount === 6 ? 5 : 4));
-      weekEndDate = d.toISOString().split("T")[0];
-    }
-
-    const title =
-      dto.title ||
-      `Thực đơn Bán trú Tuần ${dto.cycleWeekNumber || 1} (${ageGroup === "MAU_GIAO" ? "Mẫu giáo" : "Nhà trẻ"})`;
-
-    // ── Step 0: Kiểm tra cấu hình vận hành trường học (operationalSettings) ────
-    const schoolProfile: any = await readState(
-      this.menuRepo.manager,
-      "school-profile:1",
-      {},
-    );
-    const configuredMealTimes: string[] =
-      schoolProfile?.operationalSettings?.mealTimes || [
-        "BREAKFAST",
-        "LUNCH",
-        "AFTERNOON_SNACK",
-      ];
-    const standardWeeklyCycleLength: number =
-      Number(schoolProfile?.operationalSettings?.standardWeeklyCycleLength) || 2;
-    const schoolHasBreakfast = configuredMealTimes.includes("BREAKFAST");
-    const schoolHasLunch = configuredMealTimes.includes("LUNCH");
-    const schoolHasAfternoonSnack = configuredMealTimes.includes("AFTERNOON_SNACK");
-
-    const effectiveIncludeBreakfast =
-      schoolHasBreakfast && dto.includeBreakfast !== false;
-    const effectiveIncludeLunch =
-      schoolHasLunch && dto.includeLunch !== false;
-    const effectiveIncludeAfternoonSnack =
-      schoolHasAfternoonSnack && dto.includeAfternoonSnack !== false;
-
-    this.logger.log(
-      `⚙️ Cấu hình bữa ăn trường: [${configuredMealTimes.join(", ")}]. Chu kỳ: ${standardWeeklyCycleLength} tuần. ` +
-      `Bữa sáng: ${effectiveIncludeBreakfast}, Bữa trưa: ${effectiveIncludeLunch}, Bữa xế: ${effectiveIncludeAfternoonSnack}`,
-    );
-
-    // ── Step 1: Load nutritional standards from DB ──────────────────────────
-    const standard = await this.standardRepo.findOne({
-      where: { ageGroup, mealScope: "DAYBOARDING", status: "ACTIVE" },
-    });
-
-    if (!standard)
-      throw new BadRequestException(
-        "Chưa cấu hình tiêu chuẩn dinh dưỡng đang áp dụng cho nhóm tuổi này.",
-      );
-    const minKcal = Number(standard.minEnergyKcal),
-      maxKcal = Number(standard.maxEnergyKcal),
-      minProtPct = Number(standard.minProteinPct),
-      maxProtPct = Number(standard.maxProteinPct),
-      minFatPct = Number(standard.minFatPct),
-      maxFatPct = Number(standard.maxFatPct),
-      minCarbPct = Number(standard.minCarbPct),
-      maxCarbPct = Number(standard.maxCarbPct);
-    if (
-      ![
-        minKcal,
-        maxKcal,
-        minProtPct,
-        maxProtPct,
-        minFatPct,
-        maxFatPct,
-        minCarbPct,
-        maxCarbPct,
-      ].every(Number.isFinite) ||
-      minKcal <= 0 ||
-      maxKcal < minKcal
-    )
-      throw new BadRequestException(
-        "Tiêu chuẩn dinh dưỡng chưa có đủ chỉ tiêu hợp lệ.",
-      );
-
-    // Tính toán năng lượng mục tiêu tương ứng theo các bữa ăn được tổ chức
-    let activeWeight = 0;
-    if (effectiveIncludeBreakfast) activeWeight += 0.15;
-    if (effectiveIncludeLunch) activeWeight += 0.60;
-    if (effectiveIncludeAfternoonSnack) activeWeight += 0.25;
-    if (activeWeight === 0) activeWeight = 1.0;
-
-    const baseConfiguredWeight =
-      (schoolHasBreakfast ? 0.15 : 0) +
-      (schoolHasLunch ? 0.60 : 0) +
-      (schoolHasAfternoonSnack ? 0.25 : 0) || 1.0;
-    const targetScale = Math.min(1.0, activeWeight / baseConfiguredWeight);
-
-    const effectiveMinKcal = Math.round(minKcal * targetScale);
-    const effectiveMaxKcal = Math.round(maxKcal * targetScale);
-
-    this.logger.log(
-      `📋 Chuẩn dinh dưỡng ${ageGroup} DAYBOARDING: ${minKcal}–${maxKcal} Kcal (Hiệu dụng: ${effectiveMinKcal}–${effectiveMaxKcal} Kcal), P:${minProtPct}–${maxProtPct}%, L:${minFatPct}–${maxFatPct}%, G:${minCarbPct}–${maxCarbPct}%`,
-    );
-
-    // ── Step 2: Load all dishes with nutrition data ─────────────────────────
-    const allDishes = await this.dishRepo.find({
-      relations: ["category", "nutrition"],
-      where: { status: "ACTIVE" },
-      order: { name: "ASC" },
-    });
-
-    // Categorize dishes
-    const dishPool: Record<string, DishWithNutrition[]> = {
-      MAIN: [],
-      SOUP: [],
-      RICE: [],
-      DESSERT: [],
-      SNACK_MORNING: [],
-      SNACK_AFTERNOON: [],
-      DRINK: [],
-    };
-
-    for (const d of allDishes) {
-      if (!hasPlanningNutrition(d) || Number(d.nutrition.energyKcal) <= 0)
-        continue;
-      const code = d.category?.code || "MAIN";
-      const entry: DishWithNutrition = {
-        id: d.id,
-        name: d.name,
-        categoryCode: code,
-        categoryName: d.category?.name || "Món ăn",
-        rotationKey: d.sourceMetadata?.drinkFamily || String(d.id),
-        nutritionReference: !hasVerifiedNutrition(d),
-        energyKcal: Number(d.nutrition?.energyKcal) || 0,
-        proteinG: Number(d.nutrition?.proteinG) || 0,
-        fatG: Number(d.nutrition?.fatG) || 0,
-        carbG: Number(d.nutrition?.carbG) || 0,
-        portionSizeG: Number(d.standardServingSizeG) || 100,
-      };
-      if (dishPool[code]) {
-        dishPool[code].push(entry);
-      }
-    }
-
-    if (Object.values(dishPool).every((pool) => pool.length === 0)) {
-      throw new BadRequestException(
-        "Chưa có món ăn có công thức định lượng được xác nhận để tự động lập thực đơn.",
-      );
-    }
-
-    const plainRicePool = dishPool.RICE.filter(
-      (dish) => !isFriedRice(dish.name),
-    );
-    const friedRicePool = dishPool.RICE.filter((dish) =>
-      isFriedRice(dish.name),
-    );
-    for (let index = 0; index < daysCount; index++) {
-      if (isFriday(weekStartDate, index)) {
-        if (!friedRicePool.length)
-          throw new BadRequestException(
-            "Chưa có cơm chiên đủ công thức và dinh dưỡng cho bữa trưa thứ Sáu.",
-          );
-      } else if (!plainRicePool.length || !dishPool.MAIN.length) {
-        throw new BadRequestException(
-          "Chưa có cơm thường hoặc món mặn đủ công thức và dinh dưỡng cho bữa trưa.",
-        );
-      }
-    }
-
-    // ── Step 3: Quét chu kỳ theo cấu hình trường (standardWeeklyCycleLength) qua menu_cycles & lịch sử thực đơn ────
-    const activeCycle = await this.cycleRepo.findOne({
-      where: { ageGroup, status: "ACTIVE" },
-      order: { id: "DESC" },
-    });
-
-    const cycleDays = standardWeeklyCycleLength * 7;
-    const cycleStartDate = new Date(weekStartDate);
-    cycleStartDate.setDate(cycleStartDate.getDate() - cycleDays);
-    const cycleStartDateStr = cycleStartDate.toISOString().split("T")[0];
-
-    // Quét tần suất xuất hiện của các món trong chu kỳ xoay vòng qua
-    const past4WeeksDishesRaw = await this.menuDishRepo
-      .createQueryBuilder("md")
-      .innerJoin("md.menuMeal", "mm")
-      .innerJoin("mm.menuDay", "mday")
-      .innerJoin("mday.menuVersion", "mv")
-      .innerJoin("mv.menu", "m")
-      .innerJoin("md.dish", "d")
-      .innerJoin("d.category", "c")
-      .select("md.dishId", "dishId")
-      .addSelect("d.name", "dishName")
-      .addSelect("c.code", "categoryCode")
-      .addSelect("COUNT(md.id)", "occurrenceCount")
-      .where("m.ageGroup = :ageGroup", { ageGroup })
-      .andWhere("m.weekStartDate >= :cycleStartDateStr", { cycleStartDateStr })
-      .andWhere("m.weekStartDate < :weekStartDate", { weekStartDate })
-      .groupBy("md.dishId")
-      .addGroupBy("d.name")
-      .addGroupBy("c.code")
-      .getRawMany();
-
-    const dynamicLimits = new Map<string, number>();
-    if (this.freqRuleRepo) {
-      try {
-        const customRules = await this.freqRuleRepo.find({
-          where: [
-            {
-              targetType: "DISH_CATEGORY",
-              ageGroup,
-              isActive: true,
-              periodType: "PER_CYCLE_4_WEEKS",
-            },
-            {
-              targetType: "DISH_CATEGORY",
-              ageGroup: "ALL",
-              isActive: true,
-              periodType: "PER_CYCLE_4_WEEKS",
-            },
-          ],
-        });
-        for (const cr of customRules) {
-          if (cr.targetCode && cr.maxOccurrences > 0) {
-            dynamicLimits.set(cr.targetCode, cr.maxOccurrences);
-          }
-        }
-      } catch (err: any) {
-        this.logger.warn(
-          "Could not load dynamic frequency rules: " + err.message,
-        );
-      }
-    }
-
-    const cycleDishCounts = new Map<
-      number,
-      { count: number; name: string; categoryCode: string }
-    >();
-    const cycleExclusionDishIds = new Set<number>();
-
-    for (const row of past4WeeksDishesRaw) {
-      const dishId = Number(row.dishId);
-      const count = Number(row.occurrenceCount) || 0;
-      const code = row.categoryCode || "MAIN";
-      cycleDishCounts.set(dishId, {
-        count,
-        name: row.dishName,
-        categoryCode: code,
-      });
-
-      const maxLimit = this.getMaxCycleLimit(code, dynamicLimits);
-      if (count >= maxLimit) {
-        cycleExclusionDishIds.add(dishId);
-      }
-    }
-
-    // Quét các món trong thời gian cách ly (chống ngán theo chu kỳ trường)
-    const excludeDays =
-      Number(dto.excludePreviousDays) || standardWeeklyCycleLength * 7;
-    const recentStartDate = new Date(weekStartDate);
-    recentStartDate.setDate(recentStartDate.getDate() - excludeDays);
-    const recentStartDateStr = recentStartDate.toISOString().split("T")[0];
-
-    const recentDishIds = new Set<number>();
-    const past14DaysRaw = await this.menuDishRepo
-      .createQueryBuilder("md")
-      .innerJoin("md.menuMeal", "mm")
-      .innerJoin("mm.menuDay", "mday")
-      .innerJoin("mday.menuVersion", "mv")
-      .innerJoin("mv.menu", "m")
-      .select("DISTINCT md.dishId", "dishId")
-      .where("m.ageGroup = :ageGroup", { ageGroup })
-      .andWhere("m.weekStartDate >= :recentStartDateStr", { recentStartDateStr })
-      .andWhere("m.weekStartDate < :weekStartDate", { weekStartDate })
-      .getRawMany();
-
-    for (const r of past14DaysRaw) {
-      recentDishIds.add(Number(r.dishId));
-    }
-
-    // ── Step 4: Sinh thực đơn từng ngày đảm bảo Kcal & P:L:G ──────────────────
-    const dayNames = [
-      "Thứ Hai",
-      "Thứ Ba",
-      "Thứ Tư",
-      "Thứ Năm",
-      "Thứ Sáu",
-      "Thứ Bảy",
-    ];
-    const usedDishIdsThisWeek = new Set<number>();
-    const drinkUseCounts = new Map<string, number>();
-    const drinksById = new Map(dishPool.DRINK.map((dish) => [dish.id, dish]));
-    let previousDayDishIds = new Set<number>();
-    const dailySummary: DayMealPlan[] = [];
-
-    const shuffleArray = <T>(arr: T[]): T[] => {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    };
-
-    for (let dayIndex = 0; dayIndex < daysCount; dayIndex++) {
-      const dayOfWeek = dayIndex + 1; // 1 = T2 ... 5 = T6
-      const dayName = dayNames[dayIndex] || `Ngày ${dayIndex + 1}`;
-      const fridayLunch = isFriday(weekStartDate, dayIndex);
-
-      let bestPlan: DayMealPlan | null = null;
-      let bestScore = -Infinity;
-
-      for (let attempt = 0; attempt < 50; attempt++) {
-        const dayDishes: DayDishSlot[] = [];
-        let breakfastDish: any = null;
-
-        // 0. Buổi sáng (BREAKFAST - 09:00): 1 món cháo / súp / bún / phở / bánh canh / nui / sữa ~150-250 Kcal
-        if (effectiveIncludeBreakfast) {
-          const breakfastPool = shuffleArray([
-            ...dishPool.SNACK_AFTERNOON.filter(
-              (d) =>
-                d.name.toLowerCase().includes("bún") ||
-                d.name.toLowerCase().includes("phở") ||
-                d.name.toLowerCase().includes("cháo") ||
-                d.name.toLowerCase().includes("miến") ||
-                d.name.toLowerCase().includes("nui") ||
-                d.name.toLowerCase().includes("bánh canh") ||
-                d.name.toLowerCase().includes("súp") ||
-                d.name.toLowerCase().includes("hủ tiếu") ||
-                d.name.toLowerCase().includes("mì") ||
-                d.name.toLowerCase().includes("bánh bao"),
-            ),
-            ...dishPool.SNACK_MORNING,
-            ...(dishPool.SNACK_MORNING.length || dishPool.SNACK_AFTERNOON.length
-              ? [] : dishPool.DRINK),
-            ...dishPool.SNACK_AFTERNOON,
-          ]);
-          breakfastDish = this.pickDish(
-            breakfastPool,
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 30,
-          );
-          if (breakfastDish) {
-            dayDishes.push({
-              dishId: String(breakfastDish.id),
-              dishName: breakfastDish.name,
-              dishType: breakfastDish.categoryCode,
-              mealTime: "BREAKFAST",
-              servingOrder: 1,
-              portionSizeG: breakfastDish.portionSizeG,
-              plannedCalories: breakfastDish.energyKcal,
-              proteinG: breakfastDish.proteinG,
-              fatG: breakfastDish.fatG,
-              carbG: breakfastDish.carbG,
-            });
-          }
-        }
-
-        // 2. Bữa trưa chính (LUNCH): Cơm + Món chính + Canh + Tráng miệng
-        let mainDish: any = null;
-        if (effectiveIncludeLunch) {
-          // Cơm (RICE) ~172-269 Kcal (cho phép lặp lại vì số lượng món tinh bột hạn chế)
-          const riceDish = this.pickDish(
-            shuffleArray(fridayLunch ? friedRicePool : plainRicePool),
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 20,
-          );
-          if (riceDish) {
-            dayDishes.push({
-              dishId: String(riceDish.id),
-              dishName: riceDish.name,
-              dishType: "RICE",
-              mealTime: "LUNCH",
-              servingOrder: 2,
-              portionSizeG: riceDish.portionSizeG,
-              plannedCalories: riceDish.energyKcal,
-              proteinG: riceDish.proteinG,
-              fatG: riceDish.fatG,
-              carbG: riceDish.carbG,
-            });
-          }
-
-          // Món chính (MAIN) ~60-144 Kcal (tuyệt đối không lặp lại trong tuần & không vượt chu kỳ 4 tuần)
-          mainDish = fridayLunch
-            ? null
-            : this.pickDish(
-                shuffleArray(dishPool.MAIN),
-                usedDishIdsThisWeek,
-                previousDayDishIds,
-                recentDishIds,
-                cycleExclusionDishIds,
-                attempt > 35,
-              );
-          if (mainDish) {
-            dayDishes.push({
-              dishId: String(mainDish.id),
-              dishName: mainDish.name,
-              dishType: "MAIN",
-              mealTime: "LUNCH",
-              servingOrder: 3,
-              portionSizeG: mainDish.portionSizeG,
-              plannedCalories: mainDish.energyKcal,
-              proteinG: mainDish.proteinG,
-              fatG: mainDish.fatG,
-              carbG: mainDish.carbG,
-            });
-          }
-
-          // Canh súp (SOUP) ~25-105 Kcal
-          const soupDish = this.pickDish(
-            shuffleArray(dishPool.SOUP),
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 30,
-          );
-          if (soupDish) {
-            dayDishes.push({
-              dishId: String(soupDish.id),
-              dishName: soupDish.name,
-              dishType: "SOUP",
-              mealTime: "LUNCH",
-              servingOrder: 4,
-              portionSizeG: soupDish.portionSizeG,
-              plannedCalories: soupDish.energyKcal,
-              proteinG: soupDish.proteinG,
-              fatG: soupDish.fatG,
-              carbG: soupDish.carbG,
-            });
-          }
-
-          // Tráng miệng (DESSERT) ~20-150 Kcal
-          const dessertDish = this.pickDish(
-            shuffleArray(dishPool.DESSERT),
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 30,
-          );
-          if (dessertDish) {
-            dayDishes.push({
-              dishId: String(dessertDish.id),
-              dishName: dessertDish.name,
-              dishType: "DESSERT",
-              mealTime: "LUNCH",
-              servingOrder: 5,
-              portionSizeG: dessertDish.portionSizeG,
-              plannedCalories: dessertDish.energyKcal,
-              proteinG: dessertDish.proteinG,
-              fatG: dessertDish.fatG,
-              carbG: dessertDish.carbG,
-            });
-          }
-        }
-
-        // 3. Phụ chiều / Xế (AFTERNOON_SNACK): 1 món ăn xế + 1 thức uống
-        if (effectiveIncludeAfternoonSnack) {
-          // Món xế (SNACK_AFTERNOON) ~100-168 Kcal
-          const afternoonSnackPool = shuffleArray(dishPool.SNACK_AFTERNOON.filter(
-            (dish) => dish.id !== breakfastDish?.id,
-          ));
-          const afternoonDish = this.pickDish(
-            afternoonSnackPool,
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 30,
-          );
-          if (
-            afternoonDish &&
-            (!breakfastDish || afternoonDish.id !== breakfastDish.id)
-          ) {
-            dayDishes.push({
-              dishId: String(afternoonDish.id),
-              dishName: afternoonDish.name,
-              dishType: "SNACK_AFTERNOON",
-              mealTime: "AFTERNOON_SNACK",
-              servingOrder: 6,
-              portionSizeG: afternoonDish.portionSizeG,
-              plannedCalories: afternoonDish.energyKcal,
-              proteinG: afternoonDish.proteinG,
-              fatG: afternoonDish.fatG,
-              carbG: afternoonDish.carbG,
-            });
-          }
-
-          // Rotate drink families so aliases cannot displace another drink.
-          const drinkPool = dishPool.DRINK.filter((dish) => dish.id !== breakfastDish?.id);
-          const leastDrinkUses = Math.min(...drinkPool.map(
-            (dish) => drinkUseCounts.get(dish.rotationKey!) || 0,
-          ));
-          const drinkDish = this.pickDish(
-            shuffleArray(drinkPool.filter(
-              (dish) => (drinkUseCounts.get(dish.rotationKey!) || 0) === leastDrinkUses,
-            )),
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 20,
-          );
-          if (drinkDish && (!breakfastDish || drinkDish.id !== breakfastDish.id)) {
-            dayDishes.push({
-              dishId: String(drinkDish.id),
-              dishName: drinkDish.name,
-              dishType: "DRINK",
-              mealTime: "AFTERNOON_SNACK",
-              servingOrder: 7,
-              portionSizeG: drinkDish.portionSizeG,
-              plannedCalories: drinkDish.energyKcal,
-              proteinG: drinkDish.proteinG,
-              fatG: drinkDish.fatG,
-              carbG: drinkDish.carbG,
-            });
-          }
-        }
-
-        // Tính tổng năng lượng & tỷ lệ P:L:G
-        const totalCal = dayDishes.reduce((s, d) => s + d.plannedCalories, 0);
-        const totalProt = dayDishes.reduce((s, d) => s + d.proteinG, 0);
-        const totalFat = dayDishes.reduce((s, d) => s + d.fatG, 0);
-        const totalCarb = dayDishes.reduce((s, d) => s + d.carbG, 0);
-
-        const protKcal = totalProt * 4;
-        const fatKcal = totalFat * 9;
-        const carbKcal = totalCarb * 4;
-        const macroSum = protKcal + fatKcal + carbKcal || 1;
-
-        const pPct = (protKcal / macroSum) * 100;
-        const fPct = (fatKcal / macroSum) * 100;
-        const cPct = (carbKcal / macroSum) * 100;
-
-        // Chấm điểm mức độ chuẩn hóa
-        let score = 0;
-
-        // Tiêu chí 1: Năng lượng Kcal nằm trong dải chuẩn hiệu dụng
-        if (totalCal >= effectiveMinKcal && totalCal <= effectiveMaxKcal) {
-          score += 150;
-        } else {
-          const kcalMid = (effectiveMinKcal + effectiveMaxKcal) / 2;
-          const kcalDist = Math.abs(totalCal - kcalMid) / kcalMid;
-          score -= kcalDist * 300;
-        }
-
-        // Tiêu chí 2: Cân đối P:L:G (13–20% P, 25–35% L, 52–60% G)
-        if (pPct >= minProtPct && pPct <= maxProtPct) score += 50;
-        else score -= Math.abs(pPct - (minProtPct + maxProtPct) / 2) * 5;
-
-        if (fPct >= minFatPct && fPct <= maxFatPct) score += 50;
-        else score -= Math.abs(fPct - (minFatPct + maxFatPct) / 2) * 5;
-
-        if (cPct >= minCarbPct && cPct <= maxCarbPct) score += 50;
-        else score -= Math.abs(cPct - (minCarbPct + maxCarbPct) / 2) * 5;
-
-        // Tiêu chí 3: Chống ngán & đa dạng món
-        if (mainDish && !usedDishIdsThisWeek.has(mainDish.id)) score += 40;
-        if (mainDish && !recentDishIds.has(mainDish.id)) score += 30;
-
-        if (score > bestScore) {
-          bestScore = score;
-          bestPlan = {
-            dayOfWeek,
-            dayName,
-            dishes: dayDishes,
-            totalCalories: Math.round(totalCal * 10) / 10,
-            totalProteinG: Math.round(totalProt * 10) / 10,
-            totalFatG: Math.round(totalFat * 10) / 10,
-            totalCarbG: Math.round(totalCarb * 10) / 10,
-            proteinPct: Math.round(pPct * 10) / 10,
-            lipidPct: Math.round(fPct * 10) / 10,
-            glucidPct: Math.round(cPct * 10) / 10,
-            isCompliant:
-              totalCal >= effectiveMinKcal &&
-              totalCal <= effectiveMaxKcal &&
-              pPct >= minProtPct &&
-              pPct <= maxProtPct &&
-              fPct >= minFatPct &&
-              fPct <= maxFatPct &&
-              cPct >= minCarbPct &&
-              cPct <= maxCarbPct,
-            violations: [],
-            standardNote: "",
-          };
-        }
-
-        if (bestPlan?.isCompliant) break;
-      }
-
-      if (bestPlan) {
-        // Kiểm tra dải Kcal
-        if (bestPlan.totalCalories < effectiveMinKcal) {
-          bestPlan.violations.push(
-            `CALORIE_DEFICIT: ${dayName} tổng năng lượng ${bestPlan.totalCalories} Kcal < ${effectiveMinKcal} Kcal (chuẩn tối thiểu cấu hình trường)`,
-          );
-        }
-        if (bestPlan.totalCalories > effectiveMaxKcal) {
-          bestPlan.violations.push(
-            `CALORIE_EXCESS: ${dayName} tổng năng lượng ${bestPlan.totalCalories} Kcal > ${effectiveMaxKcal} Kcal (chuẩn tối đa cấu hình trường)`,
-          );
-        }
-
-        // Kiểm tra tỷ lệ cân đối P:L:G (13–20% P, 25–35% L, 52–60% G)
-        if (
-          bestPlan.proteinPct < minProtPct ||
-          bestPlan.proteinPct > maxProtPct
-        ) {
-          bestPlan.violations.push(
-            `PROTEIN_OUT_OF_RANGE: ${dayName} Protein ${bestPlan.proteinPct}% ngoài dải chuẩn ${minProtPct}–${maxProtPct}%`,
-          );
-        }
-        if (bestPlan.lipidPct < minFatPct || bestPlan.lipidPct > maxFatPct) {
-          bestPlan.violations.push(
-            `FAT_OUT_OF_RANGE: ${dayName} Lipid ${bestPlan.lipidPct}% ngoài dải chuẩn ${minFatPct}–${maxFatPct}%`,
-          );
-        }
-        if (
-          bestPlan.glucidPct < minCarbPct ||
-          bestPlan.glucidPct > maxCarbPct
-        ) {
-          bestPlan.violations.push(
-            `CARB_OUT_OF_RANGE: ${dayName} Glucid ${bestPlan.glucidPct}% ngoài dải chuẩn ${minCarbPct}–${maxCarbPct}%`,
-          );
-        }
-
-        const referenceNames = bestPlan.dishes.filter((dish) =>
-          drinksById.get(Number(dish.dishId))?.nutritionReference,
-        ).map((dish) => dish.dishName);
-        if (referenceNames.length) {
-          bestPlan.violations.push(
-            `REFERENCE_NUTRITION: ${referenceNames.join(", ")} dùng công thức tham khảo; cần xác nhận định lượng của bếp.`,
-          );
-        }
-        if (dishPool.DRINK.length > 0 && new Set(dishPool.DRINK.map((dish) => dish.rotationKey)).size < daysCount) {
-          bestPlan.violations.push("LIMITED_DRINK_VARIETY: Chưa đủ loại thức uống để đổi món mỗi ngày trong tuần.");
-        }
-        bestPlan.isCompliant = bestPlan.violations.length === 0;
-        bestPlan.standardNote = bestPlan.isCompliant
-          ? `✅ ĐẠT CHUẨN Thông tư 28 (${bestPlan.totalCalories} Kcal, P:${bestPlan.proteinPct}% L:${bestPlan.lipidPct}% G:${bestPlan.glucidPct}%)`
-          : `⚠️ CHƯA ĐẠT: ${bestPlan.violations.join("; ")}`;
-
-        // Đánh dấu TẤT CẢ các món đã dùng trong tuần và thiết lập previousDayDishIds để chống trùng lặp tuyệt đối
-        for (const d of bestPlan.dishes) {
-          usedDishIdsThisWeek.add(Number(d.dishId));
-          const drink = drinksById.get(Number(d.dishId));
-          if (drink) drinkUseCounts.set(drink.rotationKey!, (drinkUseCounts.get(drink.rotationKey!) || 0) + 1);
-        }
-        previousDayDishIds = new Set(
-          bestPlan.dishes.map((d) => Number(d.dishId)),
-        );
-
-        dailySummary.push(bestPlan);
-      }
-    }
-
-    // ── Step 5: Quét chu kỳ 4 tuần qua menu_cycles & ghi nhận vi phạm lặp món ──
-    const currentWeekDishCounts = new Map<number, number>();
-    const cycleViolations: string[] = [];
-    const cycleLoggedDishes = new Set<number>();
-
-    for (const day of dailySummary) {
-      for (const d of day.dishes) {
-        const dishId = Number(d.dishId);
-        const prevCount = cycleDishCounts.get(dishId)?.count || 0;
-        const weekCount = (currentWeekDishCounts.get(dishId) || 0) + 1;
-        currentWeekDishCounts.set(dishId, weekCount);
-
-        const totalCycleCount = prevCount + weekCount;
-        const maxLimit = this.getMaxCycleLimit(d.dishType, dynamicLimits);
-
-        if (totalCycleCount > maxLimit && !cycleLoggedDishes.has(dishId)) {
-          cycleLoggedDishes.add(dishId);
-          cycleViolations.push(
-            `CYCLE_REPEAT_EXCEEDED: Món "${d.dishName}" (${d.dishType}) lặp lại ${totalCycleCount} lần trong chu kỳ 4 tuần (vượt quá giới hạn tối đa ${maxLimit} lần)`,
-          );
-        }
-      }
-    }
-
-    // ── Step 6: Tổng hợp số liệu tuần ─────────────────────────────────────────
-    const numDays = dailySummary.length || 1;
-    const avgCal = Math.round(
-      dailySummary.reduce((s, d) => s + d.totalCalories, 0) / numDays,
-    );
-    const avgProt =
-      Math.round(
-        (dailySummary.reduce((s, d) => s + d.totalProteinG, 0) / numDays) * 10,
-      ) / 10;
-    const avgFat =
-      Math.round(
-        (dailySummary.reduce((s, d) => s + d.totalFatG, 0) / numDays) * 10,
-      ) / 10;
-    const avgCarb =
-      Math.round(
-        (dailySummary.reduce((s, d) => s + d.totalCarbG, 0) / numDays) * 10,
-      ) / 10;
-
-    const dayViolations = dailySummary.flatMap((d) => d.violations);
-    const allViolations = [...dayViolations, ...cycleViolations];
-    const compliantDays = dailySummary.filter((d) => d.isCompliant).length;
-    const totalDishesUsed = dailySummary.reduce(
-      (s, d) => s + d.dishes.length,
-      0,
-    );
-    const uniqueDishIds = new Set(
-      dailySummary.flatMap((d) => d.dishes.map((x) => x.dishId)),
-    );
-    const duplicateWithinMenu = totalDishesUsed - uniqueDishIds.size;
-    const overlappedWith14 = [...uniqueDishIds].filter((id) =>
-      recentDishIds.has(Number(id)),
-    ).length;
-
-    const antiFatigueReport = {
-      totalDishesUsed,
-      uniqueDishesUsed: uniqueDishIds.size,
-      duplicateWithinMenuCount: duplicateWithinMenu,
-      overlappedWithPrevious14DaysCount: overlappedWith14,
-      cycleCompliance:
-        cycleViolations.length === 0
-          ? `TUÂN THỦ 100% CHU KỲ ${standardWeeklyCycleLength} TUẦN (${activeCycle ? activeCycle.name : `Chu kỳ chuẩn ${standardWeeklyCycleLength} tuần`}) — Không món nào vượt tần suất`
-          : `CẢNH BÁO: Có ${cycleViolations.length} món vượt tần suất trong chu kỳ ${standardWeeklyCycleLength} tuần`,
-      standardEvaluation: `${compliantDays}/${numDays} ngày ĐẠT CHUẨN Thông tư 28 (TB: ${avgCal} Kcal/ngày, chuẩn ${minKcal}–${maxKcal} Kcal)`,
-      violationCount: allViolations.length,
-      violations: allViolations,
-      cycleViolations,
-    };
-
-    this.logger.log(
-      `📊 Kết quả sinh thực đơn: ${antiFatigueReport.standardEvaluation}, ${antiFatigueReport.cycleCompliance}`,
-    );
-
-    // ── PREVIEW MODE: trả về ngay mà không lưu DB ──────────────────────────────
-    if (dto.previewOnly) {
-      return {
-        previewOnly: true,
-        title,
-        targetAgeGroup: rawAge,
-        ageGroup,
-        startDate: weekStartDate,
-        endDate: weekEndDate,
-        daysCount,
-        dailySummary,
-        averageCalories: avgCal,
-        averageProteinG: avgProt,
-        averageFatG: avgFat,
-        averageCarbG: avgCarb,
-        standardUsed: {
-          name: "Thông tư 28/2016/TT-BGDĐT",
-          mealScope: "DAYBOARDING",
-          ageGroup,
-          minKcal,
-          maxKcal,
-          proteinRange: `${minProtPct}–${maxProtPct}%`,
-          fatRange: `${minFatPct}–${maxFatPct}%`,
-          carbRange: `${minCarbPct}–${maxCarbPct}%`,
-        },
-        antiFatigueReport,
-      };
-    }
-
-    // ── SAVE MODE: Lưu chính xác kế hoạch đã xem trước vào database ────────────
-    const planToSave: DayMealPlan[] =
-      dto.dailyPlan && Array.isArray(dto.dailyPlan) && dto.dailyPlan.length > 0
-        ? dto.dailyPlan
-        : dailySummary;
-
-    const planDayOffset = planToSave.some((day) => day.dayOfWeek === 1) ? 0 : 1;
-    const eligibleDishes = allDishes.filter(
-      (dish) =>
-        hasPlanningNutrition(dish) && Number(dish.nutrition.energyKcal) > 0,
-    );
-    for (let index = 0; index < daysCount; index++) {
-      const dayPlan = planToSave.find(
-        (day) => day.dayOfWeek === index + 1 + planDayOffset,
-      );
-      if (!dayPlan?.dishes)
-        throw new BadRequestException(
-          "Kế hoạch thực đơn chưa đủ các ngày yêu cầu.",
-        );
-      validateLunchRice(
-        dayPlan.dishes,
-        isFriday(weekStartDate, index),
-        eligibleDishes,
-      );
-    }
-
-    const created = await this.create(
-      {
-        title,
-        weekStartDate,
-        weekEndDate,
-        ageGroup,
-        cycleId: activeCycle?.id
-          ? Number(activeCycle.id)
-          : dto.cycleWeekNumber
-            ? Number(dto.cycleWeekNumber)
-            : undefined,
-      },
-      userId,
-      standard?.id ? Number(standard.id) : undefined,
-    );
-
-    const version = await this.versionRepo.findOne({
-      where: { menuId: Number(created.id) },
-      order: { versionNumber: "DESC" },
-    });
-
-    if (version) {
-      const days = await this.dayRepo.find({
-        where: { menuVersionId: version.id },
-        relations: ["meals"],
-        order: { dayOfWeek: "ASC" },
-      });
-
-      for (let i = 0; i < days.length; i++) {
-        const day = days[i];
-        // DB uses 2..6; preview uses 1..5. Select one convention for the entire plan.
-        const dayPlan = planToSave.find(
-          (p) => p.dayOfWeek === day.dayOfWeek - 1 + planDayOffset,
-        );
-
-        if (!dayPlan || !dayPlan.dishes) continue;
-
-        for (const meal of day.meals || []) {
-          const matchingDishes = dayPlan.dishes.filter(
-            (d: any) => d.mealTime === meal.mealType,
-          );
-          for (const md of matchingDishes) {
-            await this.menuDishRepo.save(
-              this.menuDishRepo.create({
-                menuMealId: meal.id,
-                dishId: Number(md.dishId),
-                portionSizeG: md.portionSizeG || 100,
-                displayOrder: md.servingOrder || 1,
-              }),
-            );
-          }
-        }
-      }
-
-      // ── Lưu các vi phạm quy chuẩn vào bảng menu_rule_violations ───────────────
-      if (allViolations.length > 0) {
-        for (const v of allViolations) {
-          const ruleCode = v.split(":")[0]?.trim() || "NUTRITION_VIOLATION";
-          const severity =
-            ruleCode.includes("CALORIE") || ruleCode.includes("CYCLE")
-              ? "ERROR"
-              : "WARNING";
-          await this.violationRepo.save(
-            this.violationRepo.create({
-              menuVersionId: version.id,
-              ruleCode,
-              severity,
-              message: v,
-            }),
-          );
-        }
-        this.logger.warn(
-          `⚠️ Đã ghi ${allViolations.length} vi phạm vào menu_rule_violations cho menu #${created.id}`,
-        );
-      }
-    }
-
-    return this.findOne(Number(created.id));
-  }
-
-  // ── Helper: Giới hạn tối đa số lần xuất hiện trong chu kỳ 4 tuần ───────────
+  // â”€â”€ Helper: Giá»›i háº¡n tá»‘i Ä‘a sá»‘ láº§n xuáº¥t hiá»‡n trong chu ká»³ 4 tuáº§n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private getMaxCycleLimit(
     categoryCode: string,
     dynamicLimits?: Map<string, number>,
@@ -2303,19 +1419,19 @@ export class MenusService implements OnModuleInit {
       case "RICE":
         return 20; // One rice dish per lunch across four school weeks; plain rice may repeat.
       case "MAIN":
-        return 2; // Món mặn tối đa 2 lần trong chu kỳ 4 tuần
+        return 2; // MÃ³n máº·n tá»‘i Ä‘a 2 láº§n trong chu ká»³ 4 tuáº§n
       case "SOUP":
-        return 3; // Món canh tối đa 3 lần trong chu kỳ 4 tuần
+        return 3; // MÃ³n canh tá»‘i Ä‘a 3 láº§n trong chu ká»³ 4 tuáº§n
       case "DESSERT":
-        return 4; // Tráng miệng tối đa 4 lần trong chu kỳ 4 tuần
+        return 4; // TrÃ¡ng miá»‡ng tá»‘i Ä‘a 4 láº§n trong chu ká»³ 4 tuáº§n
       case "SNACK_AFTERNOON":
-        return 3; // Món xế chiều tối đa 3 lần trong chu kỳ 4 tuần
+        return 3; // MÃ³n xáº¿ chiá»u tá»‘i Ä‘a 3 láº§n trong chu ká»³ 4 tuáº§n
       default:
-        return 12; // Món nền tảng (Cơm, Nước uống, Sữa sáng)
+        return 12; // MÃ³n ná»n táº£ng (CÆ¡m, NÆ°á»›c uá»‘ng, Sá»¯a sÃ¡ng)
     }
   }
 
-  // ── Helper: Chọn món tránh trùng lặp tuần & chu kỳ 4 tuần ──────────────────
+  // â”€â”€ Helper: Chá»n mÃ³n trÃ¡nh trÃ¹ng láº·p tuáº§n & chu ká»³ 4 tuáº§n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private pickDish(
     pool: DishWithNutrition[],
     usedThisWeek: Set<number>,
@@ -2326,7 +1442,7 @@ export class MenusService implements OnModuleInit {
   ): DishWithNutrition | null {
     if (pool.length === 0) return null;
 
-    // Lượt 1: Tối ưu chuẩn nhất: Chưa dùng tuần này, không dùng ngày hôm qua, không trùng 14 ngày, không vượt chu kỳ 4 tuần
+    // LÆ°á»£t 1: Tá»‘i Æ°u chuáº©n nháº¥t: ChÆ°a dÃ¹ng tuáº§n nÃ y, khÃ´ng dÃ¹ng ngÃ y hÃ´m qua, khÃ´ng trÃ¹ng 14 ngÃ y, khÃ´ng vÆ°á»£t chu ká»³ 4 tuáº§n
     for (const dish of pool) {
       if (
         !usedThisWeek.has(dish.id) &&
@@ -2338,7 +1454,7 @@ export class MenusService implements OnModuleInit {
       }
     }
 
-    // Lượt 2: Chưa dùng tuần này, không dùng ngày hôm qua, không vượt chu kỳ 4 tuần
+    // LÆ°á»£t 2: ChÆ°a dÃ¹ng tuáº§n nÃ y, khÃ´ng dÃ¹ng ngÃ y hÃ´m qua, khÃ´ng vÆ°á»£t chu ká»³ 4 tuáº§n
     for (const dish of pool) {
       if (
         !usedThisWeek.has(dish.id) &&
@@ -2349,22 +1465,22 @@ export class MenusService implements OnModuleInit {
       }
     }
 
-    // Lượt 3: Chưa dùng tuần này và không dùng ngày hôm qua
+    // LÆ°á»£t 3: ChÆ°a dÃ¹ng tuáº§n nÃ y vÃ  khÃ´ng dÃ¹ng ngÃ y hÃ´m qua
     for (const dish of pool) {
       if (!usedThisWeek.has(dish.id) && !previousDayDishIds.has(dish.id)) {
         return dish;
       }
     }
 
-    // Lượt 4: Nếu danh mục có số lượng món ít hơn số ngày trong tuần (ví dụ Cơm chỉ có 4 món mà tuần có 5 ngày):
-    // Cho phép lặp lại món đã dùng trong tuần, nhưng TUYỆT ĐỐI KHÔNG DÙNG LẠI MÓN CỦA NGÀY HÔM QUA (tránh trùng 2 ngày liên tiếp)
+    // LÆ°á»£t 4: Náº¿u danh má»¥c cÃ³ sá»‘ lÆ°á»£ng mÃ³n Ã­t hÆ¡n sá»‘ ngÃ y trong tuáº§n (vÃ­ dá»¥ CÆ¡m chá»‰ cÃ³ 4 mÃ³n mÃ  tuáº§n cÃ³ 5 ngÃ y):
+    // Cho phÃ©p láº·p láº¡i mÃ³n Ä‘Ã£ dÃ¹ng trong tuáº§n, nhÆ°ng TUYá»†T Äá»I KHÃ”NG DÃ™NG Láº I MÃ“N Cá»¦A NGÃ€Y HÃ”M QUA (trÃ¡nh trÃ¹ng 2 ngÃ y liÃªn tiáº¿p)
     for (const dish of pool) {
       if (!previousDayDishIds.has(dish.id)) {
         return dish;
       }
     }
 
-    // Fallback: nếu danh mục chỉ có 1 món duy nhất trong toàn hệ thống
+    // Fallback: náº¿u danh má»¥c chá»‰ cÃ³ 1 mÃ³n duy nháº¥t trong toÃ n há»‡ thá»‘ng
     return pool[0];
   }
 }

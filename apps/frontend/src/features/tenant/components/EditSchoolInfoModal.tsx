@@ -248,7 +248,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
                 value={form.domain}
                 onChange={(e) => setField("domain", e.target.value)}
                 className={inputCls}
-                placeholder={translateText("VD: saomai.kidsnutri.vn")}
+                placeholder={translateText("VD: saomai.kidmeal.vn")}
               />
             </div>
             <div>

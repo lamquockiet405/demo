@@ -427,9 +427,8 @@ export const FoodGroupRulesPage: React.FC = () => {
               onChange={(e) => setAgeGroupFilter(e.target.value)}
               className="px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
             >
-              <option value="ALL">{translateText("Tất cả lứa tuổi")}</option>
+              <option value="ALL">{translateText("Mẫu giáo (3-6T) - Tất cả")}</option>
               <option value="MAU_GIAO">{translateText("Mẫu giáo (3-6T)")}</option>
-              <option value="NHA_TRE">{translateText("Nhà trẻ (1-3T)")}</option>
             </select>
           </div>
         </div>

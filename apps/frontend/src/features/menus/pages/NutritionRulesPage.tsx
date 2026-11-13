@@ -576,12 +576,8 @@ export const NutritionRulesPage: React.FC = () => {
                 onChange={(e) => setRuleAgeFilter(e.target.value)}
                 className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
               >
-                <option value="">{translateText("Tất cả độ tuổi")}</option>
-                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
-                <option value="NHA_TRE">{translateText("Nhà trẻ (12 - 36 tháng)")}</option>
-                <option value="TODDLER_18_36M">{translateText("Nhà trẻ (18 - 36 tháng)")}</option>
-                <option value="KINDERGARTEN_3_4Y">{translateText("Mẫu giáo (3 - 4 tuổi)")}</option>
-                <option value="ALL_AGES">{translateText("Mọi lứa tuổi")}</option>
+                <option value="">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
+                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi) - Chuẩn chung")}</option>
               </select>
 
               <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">

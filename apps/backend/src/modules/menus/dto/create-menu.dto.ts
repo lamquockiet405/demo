@@ -17,10 +17,10 @@ export class CreateMenuDto {
   @IsString()
   weekEndDate: string;
 
-  @ApiProperty({ example: 'MAU_GIAO', enum: ['NHA_TRE', 'MAU_GIAO'] })
-  @IsNotEmpty()
+  @ApiProperty({ example: 'MAU_GIAO', enum: ['MAU_GIAO'] })
+  @IsOptional()
   @IsString()
-  ageGroup: string;
+  ageGroup?: string;
 
   @ApiPropertyOptional({ example: 1 })
   @IsOptional()

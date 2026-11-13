@@ -23,7 +23,7 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
 }) => {
   useLanguage();
   const [title, setTitle] = useState('');
-  const [targetAgeGroup, setTargetAgeGroup] = useState('ALL_AGES');
+  const [targetAgeGroup, setTargetAgeGroup] = useState('MAU_GIAO');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [cycleWeekNumber, setCycleWeekNumber] = useState(38);
@@ -257,11 +257,7 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
                 onChange={(e) => setTargetAgeGroup(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition bg-white"
               >
-                <option value="ALL_AGES">{translateText("Toàn trường (Khối Mầm - Chồi - Lá)")}</option>
-                <option value="TODDLER_18_36M">{translateText("Nhà trẻ (18 - 36 tháng)")}</option>
-                <option value="KINDERGARTEN_3_4Y">{translateText("Mẫu giáo Bé (3 - 4 tuổi)")}</option>
-                <option value="KINDERGARTEN_4_5Y">{translateText("Mẫu giáo Nhỡ (4 - 5 tuổi)")}</option>
-                <option value="KINDERGARTEN_5_6Y">{translateText("Mẫu giáo Lớn (5 - 6 tuổi)")}</option>
+                <option value="MAU_GIAO">{translateText("Toàn trường – Mẫu giáo (3 - 6 tuổi)")}</option>
               </select>
             </div>
 

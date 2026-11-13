@@ -158,11 +158,6 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
               >
                 <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6T)")}</option>
-                <option value="NHA_TRE">{translateText("Nhà trẻ (1 - 3T)")}</option>
-                <option value="PRIMARY_6_7">{translateText("Tiểu học 6-7 tuổi")}</option>
-                <option value="PRIMARY_8_9">{translateText("Tiểu học 8-9 tuổi")}</option>
-                <option value="SECONDARY_10_11">{translateText("THCS 10-11 tuổi")}</option>
-                <option value="SECONDARY_12_14">{translateText("THCS 12-14 tuổi")}</option>
               </select>
             </div>
 

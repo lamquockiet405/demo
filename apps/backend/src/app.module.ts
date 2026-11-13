@@ -22,7 +22,6 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { GrowthModule } from './modules/growth/growth.module';
 import { ParentEvaluationsModule } from './modules/parent-evaluations/parent-evaluations.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
-import { FinancesModule } from './modules/finances/finances.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 
 @Module({
@@ -50,7 +49,6 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     GrowthModule,
     ParentEvaluationsModule,
     DashboardModule,
-    FinancesModule,
     AuditLogsModule,
   ],
 })

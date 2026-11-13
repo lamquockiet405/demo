@@ -497,45 +497,7 @@ export const weeklyMenusApi = {
     link.remove();
   },
 
-  // 20. Tự động sinh thực đơn (Lưu vào DB)
-  async autoGenerateMenu(payload: AutoGeneratePayload): Promise<WeeklyMenu> {
-    const rawAge = payload.targetAgeGroup || "MAU_GIAO";
-    const ageGroup =
-      rawAge === "TODDLER_18_36M"
-        ? "NHA_TRE"
-        : rawAge === "KINDERGARTEN_3_5Y"
-          ? "MAU_GIAO"
-          : rawAge;
-    const res = await apiClient.post<any>("/menus/auto-generate", {
-      ...payload,
-      ageGroup,
-      weekStartDate: payload.startDate,
-      previewOnly: false,
-    });
-    return res.data?.data || res.data;
-  },
-
-  // 21. Xem trước ma trận thực đơn tự động sinh
-  async previewAutoGenerateMenu(
-    payload: AutoGeneratePayload,
-  ): Promise<AutoGeneratePreviewResponse> {
-    const rawAge = payload.targetAgeGroup || "MAU_GIAO";
-    const ageGroup =
-      rawAge === "TODDLER_18_36M"
-        ? "NHA_TRE"
-        : rawAge === "KINDERGARTEN_3_5Y"
-          ? "MAU_GIAO"
-          : rawAge;
-    const res = await apiClient.post<any>("/menus/auto-generate", {
-      ...payload,
-      ageGroup,
-      weekStartDate: payload.startDate,
-      previewOnly: true,
-    });
-    return res.data?.data || res.data;
-  },
-
-  // 22. Lấy tư vấn cảnh báo Dị ứng học sinh & Cá nhân hóa Dinh dưỡng theo BMI
+  // 20. Lấy tư vấn cảnh báo Dị ứng học sinh & Cá nhân hóa Dinh dưỡng theo BMI
   async getAdvisory(menuId: string): Promise<MenuAdvisoryResponse | null> {
     try {
       const res = await apiClient.get<MenuAdvisoryResponse>(

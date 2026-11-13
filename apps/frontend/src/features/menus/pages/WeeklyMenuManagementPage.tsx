@@ -37,7 +37,6 @@ import { DishAdjustmentDrawer } from "../components/DishAdjustmentDrawer";
 import { ExcelImportModal } from "../components/ExcelImportModal";
 import { ApprovalModal } from "../components/ApprovalModal";
 import { PrintPreviewModal } from "../components/PrintPreviewModal";
-import { AutoGenerateMenuModal } from "../components/AutoGenerateMenuModal";
 import { AllergyAndBmiAdvisorModal } from "../components/AllergyAndBmiAdvisorModal";
 import { RequestEditMenuModal } from "../components/RequestEditMenuModal";
 import { RespondEditRequestModal } from "../components/RespondEditRequestModal";
@@ -84,8 +83,6 @@ export const WeeklyMenuManagementPage: React.FC = () => {
     useState<boolean>(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
   const [printData, setPrintData] = useState<ExportDataResponse | null>(null);
-  const [isAutoGenerateModalOpen, setIsAutoGenerateModalOpen] =
-    useState<boolean>(false);
   const [isRequestEditModalOpen, setIsRequestEditModalOpen] =
     useState<boolean>(false);
   const [isRespondEditModalOpen, setIsRespondEditModalOpen] =
@@ -702,18 +699,6 @@ export const WeeklyMenuManagementPage: React.FC = () => {
 
             {/* Cụm phải: Các nút tạo mới thực đơn */}
             <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-end">
-              {/* Nút Tạo Thực Đơn Tự Động (AI / Smart Menu) */}
-              <button
-                onClick={() => setIsAutoGenerateModalOpen(true)}
-                className="px-4 py-2.5 rounded-2xl bg-emerald-600 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition hover:scale-102 active:scale-98 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-emerald-200 animate-pulse" />
-                <span>{translateText("Tự động tạo thực đơn")}</span>
-                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-white/20 text-white">{translateText("Tạo gợi ý")}</span>
-              </button>
-
-
-
               {/* Nút Import Excel */}
               <button
                 onClick={() => setIsExcelModalOpen(true)}
@@ -1074,22 +1059,6 @@ export const WeeklyMenuManagementPage: React.FC = () => {
         onClose={() => setIsPrintModalOpen(false)}
         data={printData}
         onDownloadCsv={handleDownloadExcel}
-      />
-
-      {/* Modal 6: Tự động tạo thực đơn tuần (AI / Smart Menu Generator) */}
-      <AutoGenerateMenuModal
-        isOpen={isAutoGenerateModalOpen}
-        onClose={() => setIsAutoGenerateModalOpen(false)}
-        onSuccess={async (newMenu) => {
-          showNotify(
-            "success",
-            `Đã tự động tạo thành công thực đơn: ${newMenu.title}`,
-          );
-          await fetchInitialData();
-          await handleSelectMenu(newMenu.id);
-        }}
-        currentMenu={selectedMenu}
-        existingMenus={menus}
       />
 
       {/* Modal 7: Tư vấn Cảnh báo Dị ứng & Đề xuất Cá nhân hóa BMI */}

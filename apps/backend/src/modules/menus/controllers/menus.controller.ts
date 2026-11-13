@@ -19,7 +19,6 @@ import { UpdateMenuDto } from "../dto/update-menu.dto";
 import { AdjustDishDto } from "../dto/adjust-dish.dto";
 import { ApproveMenuDto } from "../dto/approve-menu.dto";
 import { RejectMenuDto } from "../dto/reject-menu.dto";
-import { AutoGenerateMenuDto } from "../dto/auto-generate-menu.dto";
 import { EmergencyRotateDishDto } from "../dto/emergency-rotate-dish.dto";
 import { ApplySubstituteDishDto } from "../dto/apply-substitute-dish.dto";
 import { SubmitMenuDto } from "../dto/submit-menu.dto";
@@ -275,24 +274,6 @@ export class MenusController {
   @ApiOperation({ summary: "Công bố thực đơn tuần cho phụ huynh & giáo viên" })
   async publishMenu(@Param("id", ParseIntPipe) id: number) {
     return this.menusService.publishMenu(id);
-  }
-
-  /**
-   * POST /menus/auto-generate: Tự động tạo thực đơn cân đối dinh dưỡng theo chuẩn Thông tư 28.
-   * @param dto Dữ liệu body JSON, kiểu AutoGenerateMenuDto.
-   * @param userId Trường sub của tài khoản đã xác thực.
-   * Chuyển xử lý sang MenusService.autoGenerate() và trả kết quả cho client.
-   */
-  @Post("auto-generate")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
-  @ApiOperation({
-    summary: "Tự động tạo thực đơn cân đối dinh dưỡng theo chuẩn Thông tư 28",
-  })
-  async autoGenerate(
-    @Body() dto: AutoGenerateMenuDto,
-    @CurrentUser("sub") userId: number,
-  ): Promise<any> {
-    return this.menusService.autoGenerate(dto, userId);
   }
 
   /**

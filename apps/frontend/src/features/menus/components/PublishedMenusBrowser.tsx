@@ -178,9 +178,8 @@ export function PublishedMenusBrowser({
           value={age}
           onChange={(event) => setAge(event.target.value)}
         >
-          <option value="">{translateText("Tất cả khối tuổi")}</option>
-          <option value="NHA_TRE">{translateText("Nhà trẻ")}</option>
-          <option value="MAU_GIAO">{translateText("Mẫu giáo")}</option>
+          <option value="">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
+          <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi) - Chuẩn chung")}</option>
         </select>
         <span>{menus.length}{translateText(" thực đơn")}</span>
       </div>

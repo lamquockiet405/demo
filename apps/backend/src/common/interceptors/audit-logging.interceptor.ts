@@ -199,9 +199,6 @@ export class AuditLoggingInterceptor implements NestInterceptor {
       if (cleanUrl.includes('/adjust')) {
         return { action: 'ADJUST_DISH', targetEntity: 'MENU', isAuditable: true };
       }
-      if (cleanUrl.includes('/auto-generate')) {
-        return { action: 'AUTO_GENERATE_MENU', targetEntity: 'MENU', isAuditable: true };
-      }
       if (cleanUrl.includes('/emergency-rotate')) {
         return { action: 'EMERGENCY_ROTATE_DISH', targetEntity: 'MENU', isAuditable: true };
       }
@@ -292,9 +289,6 @@ export class AuditLoggingInterceptor implements NestInterceptor {
     if (cleanUrl.includes('/payments')) {
       if (method === 'POST') return { action: 'SUBMIT_PAYMENT', targetEntity: 'PAYMENT', isAuditable: true };
       if (method === 'GET') return { action: 'VIEW_PAYMENTS', targetEntity: 'PAYMENT', isAuditable: true };
-    }
-    if (cleanUrl.includes('/finances')) {
-      if (method === 'GET') return { action: 'VIEW_FINANCES', targetEntity: 'FINANCE', isAuditable: true };
     }
 
     // 11. Kho nguyên liệu & Món ăn

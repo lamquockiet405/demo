@@ -451,12 +451,8 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 onChange={(e) => setAgeGroupFilter(e.target.value)}
                 className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
               >
-                <option value="ALL">{translateText("Tất cả nhóm tuổi")}</option>
-                <option value="TODDLER_18_36M">{translateText("Nhà trẻ (18 - 36T)")}</option>
-                <option value="KINDERGARTEN_3_4Y">{translateText("Mầm (3 - 4 tuổi)")}</option>
-                <option value="KINDERGARTEN_4_5Y">{translateText("Chồi (4 - 5 tuổi)")}</option>
-                <option value="KINDERGARTEN_5_6Y">{translateText("Lá (5 - 6 tuổi)")}</option>
-                <option value="ALL_AGES">{translateText("Mẫu giáo chung")}</option>
+                <option value="ALL">{translateText("Mẫu giáo chung (3 - 6 tuổi)")}</option>
+                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
               </select>
             </div>
           </div>

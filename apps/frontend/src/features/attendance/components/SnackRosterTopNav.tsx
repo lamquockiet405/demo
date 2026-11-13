@@ -39,7 +39,7 @@ export const SnackRosterTopNav: React.FC<SnackRosterTopNavProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xl font-black tracking-tight text-slate-900">
-                NutriKid
+                KidMeal
               </span>
               <span className="text-[10px] uppercase font-extrabold tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-md">
                 CATERING PRO

@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_stZELjzdbEnVLdjvsfXgN9Cgatgq",
+  "orgId": "team_Ho1qk8A0HgiWEZERcxIbh64c",
+  "projectName": "kidmeal",
+  "settings": {
+    "createdAt": 1793865794173,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "26.x"
+  }
+}

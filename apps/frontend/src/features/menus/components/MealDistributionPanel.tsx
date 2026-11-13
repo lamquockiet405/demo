@@ -11,7 +11,6 @@ import {
 
 const AGE_GROUPS = [
   { id: 'MAU_GIAO', label: 'Mẫu giáo (3 - 6 tuổi)' },
-  { id: 'NHA_TRE', label: 'Nhà trẻ (12 - 36 tháng)' },
 ] as const;
 
 const MEAL_COLORS: Record<string, { bar: string; dot: string }> = {

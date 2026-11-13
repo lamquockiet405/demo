@@ -371,7 +371,7 @@ export const HomePage: React.FC = () => {
                 <div className="space-y-5">
                   <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">
                     <UtensilsCrossed className="w-3.5 h-3.5" />
-                    Cổng Chuyên Gia Dinh Dưỡng (NutriKid)
+                    Cổng Chuyên Gia Dinh Dưỡng (KidMeal)
                   </div>
                   <h3 className="text-2xl font-black text-slate-900">
                     Lên Thực Đơn Thông Minh & Rule Engine Cân Đối Calo
