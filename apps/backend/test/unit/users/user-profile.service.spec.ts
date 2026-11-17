@@ -28,7 +28,6 @@ describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
         return Promise.resolve(null);
       }),
       save: jest.fn().mockImplementation((u) => Promise.resolve(u)),
-      update: jest.fn().mockResolvedValue({ affected: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -68,7 +67,7 @@ describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
         fullName: 'Nguyễn Thị Hương Lan',
         phone: '0987654321',
       });
-      expect(mockUserRepo.update).toHaveBeenCalled();
+      expect(mockUserRepo.save).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
 
@@ -76,7 +75,7 @@ describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
       const result = await service.updateProfile(1, {
         avatar: 'https://example.com/new-avatar.png',
       });
-      expect(mockUserRepo.update).toHaveBeenCalled();
+      expect(mockUserRepo.save).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
 

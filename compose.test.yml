@@ -1,0 +1,47 @@
+# Update application containers in the existing Docker Desktop project.
+# Database, Redis, MinIO and their volumes remain managed by the existing stack.
+services:
+  backend:
+    image: kidmeal-test-backend:latest
+    build:
+      context: ./Kidmeal
+      dockerfile: apps/backend/Dockerfile
+    env_file:
+      - ./.tmp/docker-test/runtime.env
+    environment:
+      TZ: Asia/Ho_Chi_Minh
+    labels:
+      io.kidmeal.source-branch: test
+      io.kidmeal.source-commit: dcb3749
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/auth/tenants').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 6
+  frontend:
+    image: kidmeal-test-frontend:latest
+    build:
+      context: ./Kidmeal
+      dockerfile: apps/frontend/Dockerfile
+    restart: unless-stopped
+    labels:
+      io.kidmeal.source-branch: test
+      io.kidmeal.source-commit: dcb3749
+    ports:
+      - "127.0.0.1:5174:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+networks:
+  default:
+    external: true
+    name: kidmeal-test_default

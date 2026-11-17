@@ -2,9 +2,9 @@ import { advisorySeverity, getAllergyMatchReasons, matchesDeclaredAllergy } from
 import { MenusService } from '../../../src/modules/menus/services/menus.service';
 
 describe('Declared allergy matching', () => {
-  it('explains seafood matching for pork with shrimp without inventing a beef conflict', () => {
-    const pork = { name: 'Thịt heo ram cà rốt', ingredients: ['Cà rốt (củ đỏ, vàng)', 'Dầu thực vật tinh luyện', 'Thịt lợn nạc (thăn lợn)', 'Tôm thẻ tươi sống'] };
-    expect(getAllergyMatchReasons({ name: 'Hải sản', code: 'SEAFOOD' }, pork)).toEqual(['Nguyên liệu: Tôm thẻ tươi sống']);
+  it('explains seafood matching for pork with anchovy fish sauce without inventing a beef conflict', () => {
+    const pork = { name: 'Thịt heo ram mặn cà rốt', ingredients: ['Cà rốt (củ đỏ, vàng)', 'Dầu thực vật tinh luyện', 'Thịt lợn nạc (thăn lợn)', 'Nước mắm cá cơm truyền thống'] };
+    expect(getAllergyMatchReasons({ name: 'Hải sản', code: 'SEAFOOD' }, pork)).toEqual(['Nguyên liệu: Nước mắm cá cơm truyền thống']);
     expect(matchesDeclaredAllergy({ name: 'thịt bò', code: 'CUSTOM' }, pork)).toBe(false);
     expect(matchesDeclaredAllergy({ name: 'Hải sản', code: 'SEAFOOD' }, { ...pork, ingredients: pork.ingredients.slice(0, 3) })).toBe(false);
   });
@@ -43,11 +43,9 @@ describe('Menu allergy advisory', () => {
     const dishes = { find: jest.fn().mockResolvedValue([{ id: 3, recipes: [{ ingredient: { name: 'Thịt bò nạc' } }], dishAllergens: [] }]) };
     const service = new MenusService({ findOne: async () => ({ title: 'Tuần thử' }) } as any, {} as any, {} as any,
       {} as any, { manager: { query } } as any, {} as any, dishes as any, {} as any, {} as any);
-    jest.spyOn(service, 'findOne').mockResolvedValue({
-      menuDishes: [
-        { id: '8', dishId: '3', dish: { name: 'Súp rau củ', dishType: 'SOUP' }, dayOfWeek: 2, mealTime: 'LUNCH' },
-      ]
-    } as any);
+    jest.spyOn(service, 'findOne').mockResolvedValue({ menuDishes: [
+      { id: '8', dishId: '3', dish: { name: 'Súp rau củ', dishType: 'SOUP' }, dayOfWeek: 2, mealTime: 'LUNCH' },
+    ] } as any);
     const result = await service.getAdvisory(1);
     expect(query.mock.calls[0][0]).toContain('LEFT JOIN allergens');
     expect(query.mock.calls[0][0]).toContain('sa.is_active = TRUE');

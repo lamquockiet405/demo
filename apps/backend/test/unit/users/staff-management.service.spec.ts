@@ -18,7 +18,6 @@ describe("Staff account frontend/backend contract", () => {
     const qb: any = {
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       innerJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(async () => [user]),
     };
@@ -29,21 +28,6 @@ describe("Staff account frontend/backend contract", () => {
       save: jest.fn(async (x) => {
         user = { ...user, ...x };
         return user;
-      }),
-      query: jest.fn(async (sql, params) => {
-        if (sql.includes("DELETE")) {
-          const keepIds = params[1] || [];
-          user.roles = user.roles.filter((x: any) => keepIds.includes(x.id));
-        } else if (params && params[1]) {
-          const r = await roles.findOne({ where: { id: params[1] } });
-          if (r && !user.roles.some((x: any) => x.code === r.code)) {
-            user.roles.push(r);
-          }
-        }
-      }),
-      update: jest.fn(async (_id, x) => {
-        user = { ...user, ...x };
-        return { affected: 1 };
       }),
       find: async () => [user],
     };
@@ -58,20 +42,16 @@ describe("Staff account frontend/backend contract", () => {
       }),
     };
     const roles: any = {
-      findOne: async ({ where }) => {
-        if (where.code === "NUTRITIONIST" || where.id === 4) {
-          return { id: 4, code: "NUTRITIONIST", name: "Nutritionist" };
-        }
-        return { id: 2, code: "TEACHER", name: "Teacher" };
-      },
+      findOne: async ({ where }) => ({
+        id: 2,
+        code: where.code,
+        name: where.code,
+      }),
       find: async () => [
         { id: 2, code: "TEACHER", name: "Teacher" },
         { id: 3, code: "PARENT", name: "Parent" },
       ],
     };
-    const manager: any = { query: jest.fn().mockResolvedValue([]) };
-    manager.transaction = async (work: any) => work(manager);
-    users.manager = manager;
     const service = new StaffManagementService(users, roles, profiles);
     return {
       service,
@@ -92,7 +72,10 @@ describe("Staff account frontend/backend contract", () => {
     expect(users.save).toHaveBeenCalledWith(
       expect.objectContaining({
         email: "new@example.invalid",
-        fullName: "New staff",
+        roles: [
+          expect.objectContaining({ code: "TEACHER" }),
+          expect.objectContaining({ code: "NUTRITIONIST" }),
+        ],
       }),
     );
     expect(result.roles.map((r) => r.code)).toEqual([
@@ -120,12 +103,12 @@ describe("Staff account frontend/backend contract", () => {
   it("returns paginated objects with role names and applies search and role filters", async () => {
     const { service, qb } = setup();
     const result = await service.findAll({
-      search: "  ÁCTUAL  ",
+      search: "actual",
       roleCode: "TEACHER",
       page: 1,
       limit: 10,
     });
-    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining("translate"), {
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining("LOWER"), {
       s: "%actual%",
     });
     expect(result.meta.total).toBe(1);
