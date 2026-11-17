@@ -73,6 +73,8 @@ export interface UpdateParentPayload {
 }
 
 export interface QueryParentParams {
+  allAcademicYears?: boolean;
+  academicYearId?: string;
   search?: string;
   status?: string;
   includeDeleted?: boolean;
@@ -93,8 +95,15 @@ export const parentsApi = {
     return res.data;
   },
 
-  async getStats(): Promise<ParentStats> {
-    const res = await apiClient.get<ParentStats>('/users/parents/stats');
+  async getStats(params?: Pick<QueryParentParams, 'academicYearId' | 'allAcademicYears'>): Promise<ParentStats> {
+    const res = await apiClient.get<ParentStats>('/users/parents/stats', { params });
+    return res.data;
+  },
+
+  async checkEmail(email: string): Promise<{ exists: boolean; message?: string }> {
+    const res = await apiClient.get<{ exists: boolean; message?: string }>('/users/parents/check-email', {
+      params: { email },
+    });
     return res.data;
   },
 

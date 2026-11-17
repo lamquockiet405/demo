@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import {
   Calendar as CalendarIcon,
@@ -40,6 +42,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
   onSyncMorning,
   isSyncing = false,
 }) => {
+  useLanguage();
   // Format date to "Hôm nay, Thứ Sáu 25/10/2024" format
   const formatDisplayDate = (dStr: string) => {
     try {
@@ -83,7 +86,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
           </button>
           <div className="flex items-center gap-2 px-3 text-xs font-bold text-slate-800">
             <CalendarIcon className="w-4 h-4 text-teal-600" />
-            <span>{formatDisplayDate(selectedDate)}</span>
+            <span>{translateText(formatDisplayDate(selectedDate))}</span>
           </div>
           <button
             onClick={handleNextDay}
@@ -101,27 +104,21 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
               ? 'bg-teal-600 text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900'
               }`}
-          >
-            Cả ngày (Trưa + Xế)
-          </button>
+          >{translateText("Cả ngày (Trưa + Xế)")}</button>
           <button
             onClick={() => onMealFilterChange('LUNCH')}
             className={`px-3.5 py-1.5 rounded-xl transition ${mealFilter === 'LUNCH'
               ? 'bg-teal-600 text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900'
               }`}
-          >
-            Chỉ ăn trưa
-          </button>
+          >{translateText("Chỉ ăn trưa")}</button>
           <button
             onClick={() => onMealFilterChange('SNACK')}
             className={`px-3.5 py-1.5 rounded-xl transition ${mealFilter === 'SNACK'
               ? 'bg-teal-600 text-white shadow-sm'
               : 'text-slate-600 hover:text-slate-900'
               }`}
-          >
-            Chỉ ăn xế
-          </button>
+          >{translateText("Chỉ ăn xế")}</button>
         </div>
 
         {/* Class Selector Dropdown */}
@@ -135,8 +132,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
             >
               {classes.map((cls) => (
                 <option key={cls.id} value={cls.id}>
-                  {cls.name} ({(cls.totalStudents || (cls as any).studentCount || 0)} bé)
-                </option>
+                  {cls.name} ({translateText((cls.totalStudents || (cls as any).studentCount || 0))}{translateText(" bé)")}</option>
               ))}
             </select>
           </div>
@@ -152,7 +148,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Tìm tên bé (Bảo An, Khang...) hoặc mã BM-HS..."
+            placeholder={translateText("Tìm tên bé (Bảo An, Khang...) hoặc mã BM-HS...")}
             className="w-full bg-white text-xs pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 shadow-sm transition text-slate-800 placeholder:text-slate-400"
           />
         </div>
@@ -164,7 +160,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
             className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 active:scale-95 text-white rounded-2xl text-xs font-bold shadow-sm transition"
           >
             <Sparkles className="w-4 h-4 text-amber-200" />
-            <span>Điểm danh CÓ ĂN tất cả</span>
+            <span>{translateText("Điểm danh CÓ ĂN tất cả")}</span>
           </button>
 
           <button
@@ -173,7 +169,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
             className="flex items-center gap-1.5 px-4 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-300 rounded-2xl text-xs font-bold shadow-sm transition"
           >
             <RefreshCw className={`w-4 h-4 text-teal-600 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>Lấy từ điểm danh đầu giờ</span>
+            <span>{translateText("Lấy từ điểm danh đầu giờ")}</span>
           </button>
         </div>
       </div>

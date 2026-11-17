@@ -11,6 +11,16 @@ export interface PublishedDish {
   fiberG: number | null;
   calciumMg: number | null;
   source: string;
+  specialDietNotes?: string | null;
+  substitutedFor?: string | null;
+  allergens?: string[];
+  hasChildAllergyConflict?: boolean;
+}
+export interface PublishedMenuDayOptions {
+  audience?: "kitchen" | "parent";
+  childId?: string;
+  childHasAllergy?: boolean;
+  childAllergens?: string[];
 }
 export interface PublishedMeal {
   mealType: string;
@@ -96,13 +106,40 @@ const numberOrNull = (value: unknown) =>
     ? Number(value)
     : null;
 
+const extractReplacedDishName = (notes?: string | null): string => {
+  if (!notes) return "";
+  const match = notes.match(/thay cho:\s*([^->]+?)(?:\s*->|$)/i);
+  return match ? match[1].trim() : "";
+};
+
+const isAllergySubstituteNote = (notes?: string | null): boolean => {
+  if (!notes) return false;
+  return /loại 3|dị ứng/i.test(notes);
+};
+
 export function publishedMenuDay(
   menu: PublishedMenu,
   date: string,
+  options?: PublishedMenuDayOptions,
 ): PublishedMeal[] {
   if (!isPublishedMenu(menu)) return [];
   if (!Array.isArray(menu.days))
     throw new Error("Không đọc được chi tiết thực đơn đã công bố.");
+  const menuDishNotesMap = new Map<string, string>();
+  if (Array.isArray(menu.menuDishes)) {
+    for (const md of menu.menuDishes) {
+      if (md?.id && md?.specialDietNotes) {
+        menuDishNotesMap.set(String(md.id), String(md.specialDietNotes));
+      }
+    }
+  }
+  const audience = options?.audience || "parent";
+  const childId = options?.childId ? String(options.childId) : "";
+  const childHasAllergy = options?.childHasAllergy ?? true;
+  const childAllergensLower = (options?.childAllergens || []).map((a) =>
+    String(a).trim().toLowerCase(),
+  );
+
   const days = menu.days.filter((day: any) => calendarDate(day.date) === date);
   const meals = new Map<string, PublishedMeal>();
   for (const day of days)
@@ -113,14 +150,34 @@ export function publishedMenuDay(
         group = { mealType: type, title: mealTitles[type] || type, dishes: [] };
         meals.set(type, group);
       }
-      for (const dish of Array.isArray(meal.dishes) ? meal.dishes : []) {
+      const rawDishes = (Array.isArray(meal.dishes) ? meal.dishes : []).map(
+        (d: any) => ({
+          ...d,
+          specialDietNotes:
+            d.specialDietNotes ||
+            (d.id ? menuDishNotesMap.get(String(d.id)) : null) ||
+            null,
+        }),
+      );
+
+      const primaryRaw = rawDishes.filter((d: any) => !d.specialDietNotes);
+      const subRaw = rawDishes.filter((d: any) => Boolean(d.specialDietNotes));
+      const usedSubIds = new Set<string>();
+
+      const toPublishedDish = (
+        dish: any,
+        substitutedFor?: string | null,
+        hasChildAllergyConflict?: boolean,
+      ): PublishedDish | null => {
         const name = dish.dishName || dish.name || dish.dish?.name;
-        if (typeof name !== "string" || !name.trim()) continue;
+        if (typeof name !== "string" || !name.trim()) return null;
         const nutrient = (field: string) =>
           dish.nutritionAvailable === false ? null : numberOrNull(dish[field]);
-        const rawCategory = String(dish.categoryName || dish.categoryCode || "Món ăn");
+        const rawCategory = String(
+          dish.categoryName || dish.categoryCode || "Món ăn",
+        );
         const lowerCat = rawCategory.toLowerCase();
-        const category =
+        const baseCategory =
           (type === "BREAKFAST" || type === "MORNING_SNACK") &&
           (lowerCat.includes("xế") ||
             lowerCat.includes("chiều") ||
@@ -128,10 +185,10 @@ export function publishedMenuDay(
             rawCategory === "SNACK_AFTERNOON")
             ? "Món sáng"
             : rawCategory;
-        group.dishes.push({
+        return {
           id: String(dish.dishId ?? dish.dish?.id ?? dish.id ?? name),
           name: name.trim(),
-          category,
+          category: baseCategory,
           portionSizeG: numberOrNull(dish.portionSizeG),
           calories:
             dish.nutritionAvailable === false
@@ -141,11 +198,92 @@ export function publishedMenuDay(
                 ),
           proteinG: nutrient("proteinG"),
           fatG: nutrient("fatG"),
-          carbG: nutrient("carbG"),
+          carbG: nutrient("fatG") !== null ? nutrient("carbG") : numberOrNull(dish.carbG),
           fiberG: nutrient("fiberG"),
           calciumMg: nutrient("calciumMg"),
           source: String(menu.title || "Thực đơn đã công bố"),
+          specialDietNotes: dish.specialDietNotes || null,
+          substitutedFor: substitutedFor || null,
+          allergens: Array.isArray(dish.allergens) ? dish.allergens : [],
+          hasChildAllergyConflict: Boolean(hasChildAllergyConflict),
+        };
+      };
+
+      const isChildAffectedByDish = (dish: any): boolean => {
+        const affectedIds: string[] = Array.isArray(dish.affectedStudentIds)
+          ? dish.affectedStudentIds.map(String)
+          : [];
+        if (childId && affectedIds.length > 0) {
+          return affectedIds.includes(childId);
+        }
+        const dishAllergens: string[] = Array.isArray(dish.allergens)
+          ? dish.allergens.map((a: any) => String(a).trim().toLowerCase())
+          : [];
+        if (childAllergensLower.length > 0 && dishAllergens.length > 0) {
+          return dishAllergens.some((da) =>
+            childAllergensLower.some(
+              (ca) => da.includes(ca) || ca.includes(da),
+            ),
+          );
+        }
+        return childHasAllergy && dishAllergens.length > 0;
+      };
+
+      for (const primary of primaryRaw) {
+        const primaryName = String(
+          primary.dishName || primary.name || primary.dish?.name || "",
+        ).trim();
+        const primaryNameLower = primaryName.toLowerCase();
+
+        const matchingSubs = subRaw.filter((sub: any) => {
+          const replaced = extractReplacedDishName(sub.specialDietNotes).toLowerCase();
+          return (
+            replaced &&
+            (replaced === primaryNameLower ||
+              primaryNameLower.includes(replaced) ||
+              replaced.includes(primaryNameLower))
+          );
         });
+
+        const allergySub =
+          matchingSubs.find((s: any) =>
+            isAllergySubstituteNote(s.specialDietNotes),
+          ) || matchingSubs[0];
+
+        const childAffected = isChildAffectedByDish(primary);
+
+        if (
+          audience === "parent" &&
+          allergySub &&
+          (childAffected ||
+            (childHasAllergy &&
+              isAllergySubstituteNote(allergySub.specialDietNotes)))
+        ) {
+          usedSubIds.add(String(allergySub.id || allergySub.dishId));
+          const mappedSub = toPublishedDish(allergySub, primaryName, false);
+          if (mappedSub) group.dishes.push(mappedSub);
+        } else {
+          const mappedPrimary = toPublishedDish(
+            primary,
+            null,
+            audience === "parent" && childAffected,
+          );
+          if (mappedPrimary) group.dishes.push(mappedPrimary);
+        }
+      }
+
+      if (audience === "kitchen") {
+        for (const sub of subRaw) {
+          const subKey = String(sub.id || sub.dishId);
+          if (usedSubIds.has(subKey)) continue;
+          const replacedName = extractReplacedDishName(sub.specialDietNotes);
+          const mappedSub = toPublishedDish(
+            sub,
+            replacedName || "Suất riêng",
+            false,
+          );
+          if (mappedSub) group.dishes.push(mappedSub);
+        }
       }
     }
   return [...meals.values()]

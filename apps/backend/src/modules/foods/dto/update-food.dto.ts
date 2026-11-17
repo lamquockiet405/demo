@@ -59,10 +59,34 @@ export class UpdateFoodDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  phosphorusMg?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  sodiumMg?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  vitaminAMcg?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  vitaminCMg?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   refuseRatePercent?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  sourceMetadata?: Record<string, any>;
 }

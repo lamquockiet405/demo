@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Search, Calendar, Filter, RotateCcw, ChevronDown } from 'lucide-react';
 
@@ -39,6 +41,7 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
   onApplyFilter,
   onResetFilter,
 }) => {
+  useLanguage();
   // Filter classes based on selected grade level
   const filteredClasses = classes.filter((c) => {
     if (!gradeLevel || gradeLevel === 'ALL') return true;
@@ -49,15 +52,13 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
     <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-12 gap-3 items-end">
         {/* 1. Tìm kiếm học sinh */}
-        <div className="lg:col-span-3">
-          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-            Tìm kiếm học sinh
-          </label>
+        <div className="lg:col-span-4">
+          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">{translateText("Tìm kiếm học sinh")}</label>
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Tìm theo tên hoặc mã học sinh..."
+              placeholder={translateText("Tìm theo tên hoặc mã học sinh...")}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onApplyFilter()}
@@ -66,43 +67,17 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
           </div>
         </div>
 
-        {/* 2. Khối học */}
-        <div className="lg:col-span-2">
-          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-            Khối học
-          </label>
-          <div className="relative">
-            <select
-              value={gradeLevel}
-              onChange={(e) => {
-                onGradeLevelChange(e.target.value);
-                onClassIdChange('ALL');
-              }}
-              className="w-full appearance-none bg-[#f8fafc] focus:bg-white text-xs px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition text-slate-800 font-medium pr-8 cursor-pointer"
-            >
-              <option value="ALL">Tất cả các khối</option>
-              <option value="Khối Nhà trẻ">Khối Nhà trẻ</option>
-              <option value="Khối Mầm">Khối Mầm</option>
-              <option value="Khối Chồi">Khối Chồi</option>
-              <option value="Khối Lá">Khối Lá</option>
-            </select>
-            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* 3. Lớp học */}
-        <div className="lg:col-span-2">
-          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-            Lớp học
-          </label>
+        {/* 2. Lớp học */}
+        <div className="lg:col-span-3">
+          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">{translateText("Lớp học")}</label>
           <div className="relative">
             <select
               value={classId}
               onChange={(e) => onClassIdChange(e.target.value)}
               className="w-full appearance-none bg-[#f8fafc] focus:bg-white text-xs px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition text-slate-800 font-medium pr-8 cursor-pointer"
             >
-              <option value="ALL">Tất cả các lớp</option>
-              {filteredClasses.map((cls) => (
+              <option value="ALL">{translateText("Tất cả các lớp")}</option>
+              {classes.map((cls) => (
                 <option key={cls.id} value={cls.id}>
                   {cls.name}
                 </option>
@@ -114,9 +89,7 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
 
         {/* 4. Ngày phục vụ */}
         <div className="lg:col-span-2">
-          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-            Ngày phục vụ
-          </label>
+          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">{translateText("Ngày phục vụ")}</label>
           <div className="relative">
             <input
               type="date"
@@ -129,18 +102,16 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
 
         {/* 5. Trạng thái phí */}
         <div className="lg:col-span-2">
-          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-            Trạng thái phí
-          </label>
+          <label className="block text-[11px] font-bold text-slate-700 mb-1.5">{translateText("Trạng thái phí")}</label>
           <div className="relative">
             <select
               value={paymentStatus}
               onChange={(e) => onPaymentStatusChange(e.target.value)}
               className="w-full appearance-none bg-[#f8fafc] focus:bg-white text-xs px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition text-slate-800 font-medium pr-8 cursor-pointer"
             >
-              <option value="PAID">Đã hoàn thành</option>
-              <option value="ALL">Tất cả trạng thái</option>
-              <option value="UNPAID">Chưa hoàn thành</option>
+              <option value="PAID">{translateText("Đã hoàn thành")}</option>
+              <option value="ALL">{translateText("Tất cả trạng thái")}</option>
+              <option value="UNPAID">{translateText("Chưa hoàn thành")}</option>
             </select>
             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -152,7 +123,7 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
           <button
             onClick={onApplyFilter}
             className="flex-1 lg:flex-none p-2.5 bg-[#143d2c] hover:bg-[#0e2d20] text-white rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center"
-            title="Áp dụng bộ lọc"
+            title={translateText("Áp dụng bộ lọc")}
           >
             <Filter className="w-4 h-4 fill-white text-white" />
           </button>
@@ -161,7 +132,7 @@ export const SnackRosterFilterBar: React.FC<SnackRosterFilterBarProps> = ({
           <button
             onClick={onResetFilter}
             className="flex-1 lg:flex-none p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl transition active:scale-95 flex items-center justify-center"
-            title="Đặt lại bộ lọc"
+            title={translateText("Đặt lại bộ lọc")}
           >
             <RotateCcw className="w-4 h-4 text-slate-600" />
           </button>

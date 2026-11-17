@@ -36,7 +36,7 @@ export class TenantService {
       {},
     );
     const [counts] = await this.schoolRepo.manager.query(
-      "SELECT (SELECT count(*) FROM classes WHERE school_id=$1) AS classes, (SELECT count(*) FROM students s JOIN classes c ON c.id=s.class_id WHERE c.school_id=$1) AS children, (SELECT count(*) FROM staff_profiles) AS staff",
+      "SELECT (SELECT count(*) FROM classes WHERE school_id=$1 AND academic_year_id IN (SELECT id FROM academic_year WHERE school_id=$1 AND status='ACTIVE')) AS classes, (SELECT count(DISTINCT e.student_id) FROM student_academic_enrollments e JOIN academic_year y ON y.id=e.academic_year_id WHERE y.school_id=$1 AND y.status='ACTIVE' AND e.status='ENROLLED') AS children, (SELECT count(*) FROM staff_profiles) AS staff",
       [schoolId],
     );
     return {

@@ -41,6 +41,12 @@ export class Dish {
   @Column({ length: 20, default: 'ACTIVE' })
   status: string;
 
+  @Column({ name: 'source_metadata', type: 'jsonb', nullable: true })
+  sourceMetadata: Record<string, any> | null;
+
+  @Column({ name: 'nutrition_verified', default: true })
+  nutritionVerified: boolean;
+
   @ManyToOne(() => DishCategory, (cat) => cat.dishes, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'category_id' })
   category: DishCategory;

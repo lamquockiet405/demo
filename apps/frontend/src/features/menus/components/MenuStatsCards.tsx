@@ -16,20 +16,30 @@ import { MenuStatistics } from "../api/weekly-menus.api";
 interface MenuStatsCardsProps {
   stats: MenuStatistics | null;
   loading?: boolean;
+  isPrincipal?: boolean;
 }
 
 export const MenuStatsCards: React.FC<MenuStatsCardsProps> = ({
   stats,
   loading,
+  isPrincipal = false,
 }) => {
   useLanguage();
+  const submittedCount =
+    (stats?.submitted || 0) +
+    (stats?.approved || 0) +
+    (stats?.active || 0) +
+    (stats?.rejected || 0);
+
   const cards = [
     {
-      title: "Tổng thực đơn tuần",
-      value: stats?.total ?? 0,
-      subText: "Chu kỳ năm học 2026-2027",
+      title: isPrincipal ? "Tổng thực đơn tiếp nhận" : "Tổng thực đơn tuần",
+      value: isPrincipal ? submittedCount : (stats?.total ?? 0),
+      subText: isPrincipal
+        ? "Hồ sơ đã gửi lên Ban Giám Hiệu"
+        : stats?.academicYearName ? `Năm học ${stats.academicYearName}` : "Chưa có năm học áp dụng",
       icon: CalendarDays,
-      badge: "Toàn trường",
+      badge: isPrincipal ? "Tiếp nhận" : "Toàn trường",
       badgeColor: "bg-slate-100 text-slate-700",
       bgColor: "bg-white",
       borderColor: "border-slate-200/80",
@@ -61,26 +71,38 @@ export const MenuStatsCards: React.FC<MenuStatsCardsProps> = ({
         : "border-slate-200/80",
       iconBg: "bg-amber-50 text-amber-600",
     },
-    {
-      title: "Bản dự thảo & Tinh chỉnh",
-      value: stats?.draft ?? 0,
-      subText: "Đang soạn thảo / Đổi món",
-      icon: FileEdit,
-      badge: "Đang soạn",
-      badgeColor: "bg-blue-100 text-blue-800",
-      bgColor: "bg-white",
-      borderColor: "border-slate-200/80",
-      iconBg: "bg-blue-50 text-blue-600",
-    },
+    isPrincipal
+      ? {
+          title: "Đã duyệt (Chờ công bố)",
+          value: stats?.approved ?? 0,
+          subText: "Sẵn sàng áp dụng toàn trường",
+          icon: CheckCircle,
+          badge: "Đã duyệt",
+          badgeColor: "bg-blue-100 text-blue-800",
+          bgColor: "bg-white",
+          borderColor: "border-slate-200/80",
+          iconBg: "bg-blue-50 text-blue-600",
+        }
+      : {
+          title: "Bản dự thảo & Tinh chỉnh",
+          value: stats?.draft ?? 0,
+          subText: "Đang soạn thảo / Đổi món",
+          icon: FileEdit,
+          badge: "Đang soạn",
+          badgeColor: "bg-blue-100 text-blue-800",
+          bgColor: "bg-white",
+          borderColor: "border-slate-200/80",
+          iconBg: "bg-blue-50 text-blue-600",
+        },
     {
       title: "Năng lượng TB / Ngày",
       value:
         stats?.avgCalories == null
           ? "—"
           : `${Number(stats.avgCalories).toFixed(1)} Kcal`,
-      subText: "Chuẩn TT 28 (615 - 726 Kcal)",
+      subText: "Chuẩn Chuẩn Dinh Dưỡng (615 - 726 Kcal)",
       icon: Flame,
-      badge: "Chuẩn TT 28",
+      badge: "Chuẩn Chuẩn Dinh Dưỡng",
       badgeColor: "bg-emerald-100 text-emerald-800 font-bold",
       bgColor: "bg-emerald-50/60 bg-gradient-to-br from-emerald-50/60 to-white",
       borderColor: "border-emerald-200",

@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
-import { AlertTriangle, Archive, X } from 'lucide-react';
+import { Trash2, X } from 'lucide-react';
 import { StaffUser } from '../api/staff.api';
 
 interface SoftDeleteConfirmModalProps {
@@ -13,7 +13,7 @@ interface SoftDeleteConfirmModalProps {
 }
 
 /**
- * UC08 - UC11: Modal xác nhận lưu trữ / xóa mềm tài khoản nhân sự
+ * Modal xác nhận xóa tài khoản nhân sự
  */
 export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
   isOpen,
@@ -26,10 +26,10 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
   if (!isOpen || !staff) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4">
       {/* Nền làm mờ backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="fixed !m-0 inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -43,12 +43,12 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
         </button>
 
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
-            <Archive className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+            <Trash2 className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{translateText("Chuyển vào lưu trữ (Xóa mềm)?")}</h3>
-            <p className="text-xs text-slate-500 mt-1">{translateText("Bạn đang yêu cầu chuyển tài khoản nhân sự sang danh mục lưu trữ.")}</p>
+            <h3 className="text-lg font-bold text-slate-900">{translateText("Xác nhận xóa tài khoản?")}</h3>
+            <p className="text-xs text-slate-500 mt-1">{translateText("Bạn có chắc chắn muốn xóa tài khoản nhân sự này khỏi danh sách trường?")}</p>
           </div>
         </div>
 
@@ -63,13 +63,6 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
           </div>
         </div>
 
-        {/* Cảnh báo an toàn dữ liệu */}
-        <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3.5 mb-6 flex gap-2.5">
-          <AlertTriangle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-          <div className="text-xs text-emerald-800 leading-relaxed">
-            <span className="font-bold">{translateText("Bảo toàn dữ liệu: ")}</span>{translateText("Hệ thống áp dụng cơ chế ")}<strong>{translateText("xóa mềm")}</strong>{translateText(". Toàn bộ lịch sử điểm danh học sinh, sổ kiểm thực 3 bước và phân công lớp học của nhân sự này vẫn được lưu giữ nguyên vẹn và có thể khôi phục bất cứ lúc nào.")}</div>
-        </div>
-
         {/* Nút hành động */}
         <div className="flex items-center justify-end gap-3">
           <button
@@ -82,14 +75,14 @@ export const SoftDeleteConfirmModal: React.FC<SoftDeleteConfirmModalProps> = ({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/25 transition flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/25 transition flex items-center gap-2"
           >
             {isLoading ? (
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Archive className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" />
             )}
-            <span>{translateText("Xác nhận xóa mềm")}</span>
+            <span>{translateText("Xác nhận xóa")}</span>
           </button>
         </div>
       </div>

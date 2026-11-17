@@ -76,9 +76,6 @@ export const HomePage: React.FC = () => {
                 <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-600 bg-clip-text text-transparent">
                   KidMeal
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
-                  NutriBud
-                </span>
               </div>
               <p className="text-[11px] font-medium text-slate-500">
                 Hệ Thống Dinh Dưỡng & Suất Ăn Mầm Non
@@ -89,7 +86,7 @@ export const HomePage: React.FC = () => {
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
             <a href="#portals" className="hover:text-emerald-700 transition">5 Phân Hệ</a>
-            <a href="#standards" className="hover:text-emerald-700 transition">Chuẩn BYT & BGDĐT</a>
+            <a href="#standards" className="hover:text-emerald-700 transition">Tiêu Chuẩn Dinh Dưỡng</a>
             <a href="#features" className="hover:text-emerald-700 transition">Tính Năng Nổi Bật</a>
             <a href="#workflow" className="hover:text-emerald-700 transition">Quy Trình Khép Kín</a>
             <a href="#contact" className="hover:text-emerald-700 transition">Liên Hệ</a>
@@ -127,15 +124,9 @@ export const HomePage: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <Link
                   to="/login"
-                  className="px-4 py-2.5 rounded-xl text-slate-700 hover:text-emerald-700 font-bold text-xs hover:bg-slate-100 transition"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition group"
                 >
-                  Đăng Nhập
-                </Link>
-                <Link
-                  to="/login"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition group"
-                >
-                  <span>Dùng Thử Hệ Thống</span>
+                  <span>Đăng Nhập</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
@@ -171,9 +162,9 @@ export const HomePage: React.FC = () => {
             {/* Subtitle */}
             <p className="text-slate-600 text-base sm:text-lg leading-relaxed font-normal">
               Nền tảng hợp nhất số hóa quy trình thực đơn chuẩn{' '}
-              <strong className="text-slate-900 font-semibold">Thông tư 28/2016/TT-BGDĐT</strong>,
+              <strong className="text-slate-900 font-semibold">Dinh dưỡng Mầm non Quốc gia</strong>,
               kiểm thực 3 bước & lưu mẫu 24h chuẩn{' '}
-              <strong className="text-slate-900 font-semibold">Quyết định 1246/QĐ-BYT</strong>,
+              <strong className="text-slate-900 font-semibold">An Toàn Thực Phẩm</strong>,
               theo dõi tăng trưởng <strong className="text-slate-900 font-semibold">WHO Z-Score</strong> và
               thanh toán ăn xế <strong className="text-slate-900 font-semibold">VNPAY</strong>.
             </p>
@@ -199,7 +190,7 @@ export const HomePage: React.FC = () => {
             <div className="pt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
               <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/90 shadow-sm">
                 <div className="text-2xl sm:text-3xl font-black text-emerald-700">100%</div>
-                <div className="text-xs font-semibold text-slate-500 mt-1">Chuẩn TT 28/BGDĐT</div>
+                <div className="text-xs font-semibold text-slate-500 mt-1">Chuẩn Chuẩn Dinh Dưỡng/BGDĐT</div>
               </div>
               <div className="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/90 shadow-sm">
                 <div className="text-2xl sm:text-3xl font-black text-teal-700">24 Giờ</div>
@@ -382,7 +373,7 @@ export const HomePage: React.FC = () => {
                   <ul className="space-y-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      Tự động tính năng lượng calo & tỷ lệ P:L:G chuẩn Thông tư 28
+                      Tự động tính năng lượng calo & tỷ lệ P:L:G chuẩn dinh dưỡng
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -534,7 +525,7 @@ export const HomePage: React.FC = () => {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
-                      Quy trình kiểm thực 3 bước theo Quyết định 1246/QĐ-BYT
+                      Quy trình kiểm thực 3 bước & tủ lưu mẫu 24h
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
@@ -667,7 +658,7 @@ export const HomePage: React.FC = () => {
                 <FileCheck className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-black text-slate-900">
-                Thông Tư 28/2016/TT-BGDĐT
+                Chuẩn Dinh Dưỡng Mầm Non
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Đảm bảo năng lượng cung cấp tại trường mầm non đạt 50-60% nhu cầu khuyến nghị cả ngày. Tỷ lệ cơ cấu năng lượng tối ưu: Đạm (14-16%), Béo (20-30%), Bột đường (55-65%).
@@ -680,7 +671,7 @@ export const HomePage: React.FC = () => {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-black text-slate-900">
-                Quyết Định 1246/QĐ-BYT
+                Kiểm Thực 3 Bước & Lưu Mẫu
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Thực hiện quy trình kiểm thực 3 bước nghiêm ngặt: Kiểm tra trước khi chế biến, trong khi chế biến và trước khi ăn. Tủ lưu mẫu thực phẩm chuẩn 24h ở nhiệt độ 0-5°C có niêm phong.
@@ -693,7 +684,7 @@ export const HomePage: React.FC = () => {
                 <TrendingUp className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-black text-slate-900">
-                Chuẩn Tăng Trưởng WHO 2006
+                Theo Dõi Tăng Trưởng Thể Chất
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Tính toán chỉ số nhân trắc học LMS Z-Score: Cân nặng theo tuổi (WAZ), Chiều cao theo tuổi (HAZ) và BMI theo tuổi (BAZ). Phát hiện sớm suy dinh dưỡng, thấp còi, thừa cân.
@@ -854,7 +845,7 @@ export const HomePage: React.FC = () => {
                 Hệ sinh thái chuyển đổi số quản lý dinh dưỡng, an toàn thực phẩm và thanh toán ăn xế cho các trường mầm non tại Việt Nam.
               </p>
               <div className="text-[11px] text-slate-500">
-                Bản quyền © 2026 KidMeal / NutriBud. Tất cả các quyền được bảo lưu.
+                Bản quyền © 2026 KidMeal. Tất cả các quyền được bảo lưu.
               </div>
             </div>
 
@@ -874,9 +865,9 @@ export const HomePage: React.FC = () => {
             <div className="space-y-3">
               <h4 className="text-sm font-bold text-slate-200">Tiêu Chuẩn Tuân Thủ</h4>
               <ul className="space-y-2 text-xs">
-                <li>• Thông tư 28/2016/TT-BGDĐT Dinh dưỡng mầm non</li>
-                <li>• Quyết định 1246/QĐ-BYT Kiểm thực 3 bước & Lưu mẫu 24h</li>
-                <li>• Chuẩn tăng trưởng nhân trắc học WHO 2006</li>
+                <li>• Quy chuẩn Dinh dưỡng mầm non Quốc gia</li>
+                <li>• Kiểm thực 3 bước & Lưu mẫu an toàn thực phẩm</li>
+                <li>• Chuẩn tăng trưởng nhân trắc học thể chất trẻ em</li>
                 <li>• Cổng thanh toán trực tuyến an toàn VNPAY Sandbox</li>
               </ul>
             </div>

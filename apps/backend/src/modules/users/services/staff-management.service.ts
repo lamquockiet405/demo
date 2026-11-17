@@ -1,3 +1,5 @@
+import { normalizeSearch, searchSql, searchLikeSql } from '../../../common/utils/search';
+import { SerializedWrite } from '../../../common/utils/serialized-write';
 import {
   BadRequestException,
   ConflictException,
@@ -70,18 +72,13 @@ export class StaffManagementService {
     const qb = this.userRepo
       .createQueryBuilder("u")
       .leftJoinAndSelect("u.roles", "r")
-      .innerJoin(StaffProfile, "sp", "sp.user_id=u.id");
+      .innerJoin(StaffProfile, "sp", "sp.user_id=u.id")
+      .where("u.status = :activeStatus", { activeStatus: "ACTIVE" });
     if (query.search)
       qb.andWhere(
-        "(LOWER(u.fullName) LIKE :s OR LOWER(u.email) LIKE :s OR u.phone LIKE :s)",
-        { s: "%" + query.search.toLowerCase() + "%" },
+        `(${searchSql("u.fullName")} LIKE ${searchLikeSql(":s")} OR ${searchSql("u.email")} LIKE ${searchLikeSql(":s")} OR ${searchSql("u.phone")} LIKE ${searchLikeSql(":s")})`,
+        { s: "%" + normalizeSearch(query.search) + "%" },
       );
-    if (query.status)
-      qb.andWhere("u.status=:status", {
-        status: query.status === "DELETED" ? "INACTIVE" : query.status,
-      });
-    else if (!query.includeDeleted)
-      qb.andWhere("u.status!=:status", { status: "INACTIVE" });
     const users = await qb.getMany(),
       profiles = await this.staffRepo.find();
     let items = users.map((u) =>
@@ -124,6 +121,7 @@ export class StaffManagementService {
       throw new NotFoundException("Không tìm thấy nhân viên.");
     return this.map(user, profile);
   }
+  @SerializedWrite('user-accounts', 'userRepo')
   async create(dto: CreateStaffDto) {
     if (
       await this.userRepo.findOne({
@@ -227,7 +225,15 @@ export class StaffManagementService {
   }
   async remove(id: number) {
     await this.update(id, { status: "INACTIVE" });
-    return { success: true, message: "Đã vô hiệu hóa tài khoản nhân viên." };
+    if (typeof this.userRepo.query === "function") {
+      await this.userRepo
+        .query(
+          `UPDATE classes SET homeroom_teacher_id = NULL WHERE homeroom_teacher_id = $1`,
+          [id],
+        )
+        .catch(() => {});
+    }
+    return { success: true, message: "Đã xóa tài khoản nhân viên thành công." };
   }
   async restore(id: number) {
     await this.update(id, { status: "ACTIVE" });
@@ -245,18 +251,20 @@ export class StaffManagementService {
   }
   async getStats() {
     const profiles = await this.staffRepo.find(),
-      users = (await this.userRepo.find({ relations: ["roles"] })).filter((u) =>
-        profiles.some((p) => Number(p.userId) === Number(u.id)),
+      users = (await this.userRepo.find({ relations: ["roles"] })).filter(
+        (u) =>
+          u.status === "ACTIVE" &&
+          profiles.some((p) => Number(p.userId) === Number(u.id)),
       );
     const count = (codes: string[]) =>
       users.filter((u) => u.roles?.some((r) => codes.includes(r.code))).length;
     return {
       totalStaff: users.length,
-      activeStaff: users.filter((u) => u.status === "ACTIVE").length,
+      activeStaff: users.length,
       teachers: count(["TEACHER"]),
       kitchenAndNutrition: count(["KITCHEN_STAFF", "NUTRITIONIST"]),
       medicalStaff: count(["MEDICAL_STAFF"]),
-      inactiveOrDeleted: users.filter((u) => u.status !== "ACTIVE").length,
+      inactiveOrDeleted: 0,
       teachingStaff: count(["TEACHER"]),
       kitchenStaff: count(["KITCHEN_STAFF"]),
       nutritionStaff: count(["NUTRITIONIST"]),

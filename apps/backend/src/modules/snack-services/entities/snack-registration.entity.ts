@@ -31,6 +31,12 @@ export class SnackRegistration {
   @CreateDateColumn({ name: 'registered_at', type: 'timestamptz' })
   registeredAt: Date;
 
+  @Column({ name: 'last_reminded_at', type: 'timestamptz', nullable: true })
+  lastRemindedAt?: Date;
+
+  @Column({ name: 'reminder_count', type: 'int', default: 0 })
+  reminderCount: number;
+
   @ManyToOne(() => SnackServicePeriod, (p) => p.registrations, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'period_id' })
   period: SnackServicePeriod;

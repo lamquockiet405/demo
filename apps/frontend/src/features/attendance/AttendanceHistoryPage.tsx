@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AttendanceTopNav } from './components/AttendanceTopNav';
@@ -17,7 +19,12 @@ import {
 } from './types';
 import { Loader2, AlertCircle, X, ShieldCheck, HeartHandshake, PhoneCall } from 'lucide-react';
 
-export const AttendanceHistoryPage: React.FC = () => {
+interface AttendanceHistoryPageProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ onTabChange }) => {
+  useLanguage();
   const navigate = useNavigate();
 
   // State
@@ -109,10 +116,14 @@ export const AttendanceHistoryPage: React.FC = () => {
 
   // Tab change handler
   const handleTabChange = (tab: string) => {
-    if (tab === 'notes') navigate('/coordination-notes');
-    else if (tab === 'attendance') navigate('/attendance');
-    else if (tab === 'evaluation') navigate('/evaluation');
-    else if (tab === 'history') navigate('/history');
+    if (onTabChange) {
+      onTabChange(tab);
+      return;
+    }
+    if (tab === 'notes') navigate('/tablet?tab=notes');
+    else if (tab === 'attendance') navigate('/tablet');
+    else if (tab === 'evaluation') navigate('/tablet/record');
+    else if (tab === 'history') navigate('/tablet?tab=history');
   };
 
   // Date range navigator handlers
@@ -214,7 +225,7 @@ export const AttendanceHistoryPage: React.FC = () => {
           ) : (
             <ShieldCheck className="w-4 h-4 text-emerald-200" />
           )}
-          <span>{toast.message}</span>
+          <span>{translateText(toast.message)}</span>
           <button onClick={() => setToast(null)} className="ml-2 hover:opacity-80">
             <X className="w-3.5 h-3.5" />
           </button>
@@ -228,7 +239,7 @@ export const AttendanceHistoryPage: React.FC = () => {
       <AttendanceSubTabs activeTab="history" onTabChange={handleTabChange} />
 
       {/* Main Content Container */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-6">
+      <main className="flex-1 w-full px-6 py-6 space-y-6">
         {/* Header & Title */}
         <HistoryHeader
           classNameTitle={selectedClass?.name || historyData?.classInfo.name || 'Lớp Mầm 1 (3-4 tuổi)'}
@@ -276,9 +287,7 @@ export const AttendanceHistoryPage: React.FC = () => {
         {isLoading && !historyData ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3 bg-white rounded-2xl border border-slate-200 shadow-sm">
             <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
-            <p className="text-xs font-bold text-slate-500">
-              Đang truy vấn cơ sở dữ liệu lịch sử điểm danh & sức ăn...
-            </p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Đang truy vấn cơ sở dữ liệu lịch sử điểm danh & sức ăn...")}</p>
           </div>
         ) : (
           <HistoryTable
@@ -321,33 +330,24 @@ export const AttendanceHistoryPage: React.FC = () => {
 
       {/* Global Footer */}
       <footer className="bg-white border-t border-slate-200 mt-auto py-5 px-6">
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex flex-wrap items-center gap-4">
-            <span className="font-extrabold text-slate-700">
-              KidMeal © 2025 Bản quyền thuộc KidMeal Education Tech.
-            </span>
+            <span className="font-extrabold text-slate-700">{translateText("KidMeal © 2025 Bản quyền thuộc KidMeal Education Tech.")}</span>
             <span className="hidden sm:inline text-slate-300">•</span>
             <span className="flex items-center gap-1.5 text-teal-700 font-bold">
-              <ShieldCheck className="w-4 h-4 text-teal-600" />
-              Tiêu chuẩn VSATTP Bộ Giáo dục & Đào tạo
-            </span>
+              <ShieldCheck className="w-4 h-4 text-teal-600" />{translateText("Tiêu chuẩn VSATTP Bộ Giáo dục & Đào tạo")}</span>
             <span className="hidden sm:inline text-slate-300">•</span>
             <span className="flex items-center gap-1.5 text-sky-700 font-bold">
-              <HeartHandshake className="w-4 h-4 text-sky-600" />
-              LiveSync Bếp 1 chiều
-            </span>
+              <HeartHandshake className="w-4 h-4 text-sky-600" />{translateText("LiveSync Bếp 1 chiều")}</span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px] font-bold">
             <span className="flex items-center gap-1 text-amber-700">
-              <PhoneCall className="w-3.5 h-3.5" />
-              Hỗ trợ kỹ thuật: <strong>1900 6868</strong>
+              <PhoneCall className="w-3.5 h-3.5" />{translateText("Hỗ trợ kỹ thuật: ")}<strong>1900 6868</strong>
             </span>
             <span className="text-slate-300">•</span>
             <span className="text-emerald-700 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Hệ thống ổn định 99.9%
-            </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>{translateText("Hệ thống ổn định 99.9%")}</span>
           </div>
         </div>
       </footer>
@@ -366,6 +366,7 @@ export const AttendanceHistoryPage: React.FC = () => {
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         data={historyData}
+        query={{ classId: selectedClassId || undefined, startDate: dateRange.start, endDate: dateRange.end, period: selectedPeriod, status: selectedStatus, search: searchQuery, viewMode }}
       />
 
       {/* Custom Date Range Picker Modal */}

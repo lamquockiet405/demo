@@ -26,7 +26,7 @@ export const SpicesModal: React.FC<SpicesModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden flex flex-col max-h-[85vh]">
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-teal-50 to-white">
@@ -84,7 +84,7 @@ export const SpicesModal: React.FC<SpicesModalProps> = ({
           <div className="p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-teal-900 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-teal-600 shrink-0" />
             <span>
-              Định mức hao phí gia vị và nhiên liệu nấu được thẩm định tự động theo tiêu chuẩn Bộ GD&ĐT Thông tư 28/2016/TT-BGDĐT.
+              Định mức hao phí gia vị và nhiên liệu nấu được thẩm định tự động theo tiêu chuẩn Bộ GD&ĐT.
             </span>
           </div>
         </div>

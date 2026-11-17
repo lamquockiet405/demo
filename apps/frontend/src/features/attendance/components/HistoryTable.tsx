@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import {
   Table2,
@@ -45,6 +47,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
   onPageSizeChange,
   onFilterChild,
 }) => {
+  useLanguage();
   const currentPage = pagination?.currentPage ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
   const totalItems = pagination?.totalItems ?? items.length;
@@ -141,16 +144,16 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-black text-slate-900 tracking-tight">
-              {viewMode === 'table' ? 'Nhật ký Chi tiết Từng Học sinh' : 'Tổng hợp Sức Ăn Theo Từng Bé'}
+              {translateText(viewMode === 'table' ? 'Nhật ký Chi tiết Từng Học sinh' : 'Tổng hợp Sức Ăn Theo Từng Bé')}
             </h2>
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200/70">
-              {viewMode === 'table' ? `${items.length} bản ghi hiển thị` : `${groupedChildren.length} học sinh`}
+              {translateText(viewMode === 'table' ? `${items.length} bản ghi hiển thị` : `${groupedChildren.length} học sinh`)}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            {viewMode === 'table'
+            {translateText(viewMode === 'table'
               ? 'Dữ liệu thời gian thực từ giáo viên chủ nhiệm & nhân viên dinh dưỡng học đường'
-              : 'Tổng quan lịch sử ăn uống, tỷ lệ tiêu thụ và cảnh báo chế độ ăn riêng biệt'}
+              : 'Tổng quan lịch sử ăn uống, tỷ lệ tiêu thụ và cảnh báo chế độ ăn riêng biệt')}
           </p>
         </div>
 
@@ -165,7 +168,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                 }`}
             >
               <Table2 className="w-3.5 h-3.5 text-teal-600" />
-              <span>Dạng bảng</span>
+              <span>{translateText("Dạng bảng")}</span>
             </button>
             <button
               onClick={() => onViewModeChange('by_child')}
@@ -175,7 +178,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                 }`}
             >
               <Users2 className="w-3.5 h-3.5 text-teal-600" />
-              <span>Theo từng bé</span>
+              <span>{translateText("Theo từng bé")}</span>
             </button>
           </div>
         </div>
@@ -212,40 +215,37 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                         {entry.child.studentCode}
                       </span>
                       <span>•</span>
-                      <span>{entry.child.gender}</span>
+                      <span>{translateText(entry.child.gender)}</span>
                     </div>
                   </div>
                 </div>
 
                 {entry.specialDiet && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
-                    Chế độ riêng
-                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">{translateText("Chế độ riêng")}</span>
                 )}
               </div>
 
               {/* Stats Bar */}
               <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center">
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Hết suất</p>
-                  <p className="text-xs font-black text-emerald-600">{entry.ateAllCount} bữa</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">{translateText("Hết suất")}</p>
+                  <p className="text-xs font-black text-emerald-600">{entry.ateAllCount}{translateText(" bữa")}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Ăn 1/2</p>
-                  <p className="text-xs font-black text-amber-600">{entry.ateHalfCount} bữa</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">{translateText("Ăn 1/2")}</p>
+                  <p className="text-xs font-black text-amber-600">{entry.ateHalfCount}{translateText(" bữa")}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Nghỉ/Ăn ít</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">{translateText("Nghỉ/Ăn ít")}</p>
                   <p className="text-xs font-black text-rose-600">
-                    {entry.absentCount + entry.ateLittleCount} bữa
-                  </p>
+                    {entry.absentCount + entry.ateLittleCount}{translateText(" bữa")}</p>
                 </div>
               </div>
 
               {/* Progress */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-slate-600">Mức độ ăn trung bình:</span>
+                  <span className="font-bold text-slate-600">{translateText("Mức độ ăn trung bình:")}</span>
                   <span className="font-extrabold text-teal-700">{entry.averagePercent}%</span>
                 </div>
                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
@@ -263,8 +263,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
 
               {/* Special Diet or Note */}
               {entry.specialDiet && (
-                <div className="text-[11px] font-semibold text-amber-800 bg-amber-50/70 p-2 rounded-xl border border-amber-200/80">
-                  Suất ăn: {entry.specialDiet}
+                <div className="text-[11px] font-semibold text-amber-800 bg-amber-50/70 p-2 rounded-xl border border-amber-200/80">{translateText("Suất ăn: ")}{translateText(entry.specialDiet)}
                 </div>
               )}
 
@@ -277,16 +276,14 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                 }}
                 className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-teal-700 hover:text-white bg-teal-50 hover:bg-teal-600 rounded-xl transition"
               >
-                <span>Xem chi tiết nhật ký bé</span>
+                <span>{translateText("Xem chi tiết nhật ký bé")}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
 
           {groupedChildren.length === 0 && (
-            <div className="col-span-full py-16 text-center text-slate-400 font-medium">
-              Không có học sinh nào phù hợp với bộ lọc hiện tại.
-            </div>
+            <div className="col-span-full py-16 text-center text-slate-400 font-medium">{translateText("Không có học sinh nào phù hợp với bộ lọc hiện tại.")}</div>
           )}
         </div>
       ) : (
@@ -295,14 +292,14 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
           <table className="w-full text-left border-collapse min-w-[1050px]">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                <th className="py-3 px-4 w-[120px]">Ngày & Bữa</th>
-                <th className="py-3 px-4 w-[180px]">Học sinh</th>
-                <th className="py-3 px-4 w-[130px]">Điểm danh ăn</th>
-                <th className="py-3 px-4 w-[210px]">Món ăn phục vụ</th>
-                <th className="py-3 px-4 w-[140px]">Mức độ ăn</th>
-                <th className="py-3 px-4 w-[110px]">Nước / Sữa</th>
-                <th className="py-3 px-4 min-w-[210px]">Ghi chú của cô</th>
-                <th className="py-3 px-4 w-[140px]">Giáo viên & PH</th>
+                <th className="py-3 px-4 w-[120px]">{translateText("Ngày & Bữa")}</th>
+                <th className="py-3 px-4 w-[180px]">{translateText("Học sinh")}</th>
+                <th className="py-3 px-4 w-[130px]">{translateText("Điểm danh ăn")}</th>
+                <th className="py-3 px-4 w-[210px]">{translateText("Món ăn phục vụ")}</th>
+                <th className="py-3 px-4 w-[140px]">{translateText("Mức độ ăn")}</th>
+                <th className="py-3 px-4 w-[110px]">{translateText("Nước / Sữa")}</th>
+                <th className="py-3 px-4 min-w-[210px]">{translateText("Ghi chú của cô")}</th>
+                <th className="py-3 px-4 w-[140px]">{translateText("Giáo viên & PH")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
@@ -320,10 +317,10 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                     {/* Col 1: Date & Session */}
                     <td className="py-3 px-4">
                       <div className="font-extrabold text-slate-900 text-[13px]">
-                        {item.dateFormatted}
+                        {translateText(item.dateFormatted)}
                       </div>
                       <div className="text-[11px] text-slate-400 font-medium">
-                        {item.mealSession}
+                        {translateText(item.mealSession)}
                       </div>
                     </td>
 
@@ -345,14 +342,14 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                           <p
                             onClick={() => onFilterChild?.(item.child.fullName)}
                             className="font-bold text-slate-900 text-xs hover:text-teal-700 cursor-pointer transition"
-                            title="Bấm để lọc riêng bé này"
+                            title={translateText("Bấm để lọc riêng bé này")}
                           >
                             {item.child.fullName}
                           </p>
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
                             <span className="font-mono">{item.child.studentCode}</span>
                             <span>•</span>
-                            <span>{item.child.gender}</span>
+                            <span>{translateText(item.child.gender)}</span>
                           </div>
                         </div>
                       </div>
@@ -363,17 +360,17 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                       {isAbsent ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                           <CalendarX2 className="w-3 h-3 text-rose-500" />
-                          <span>{item.attendanceStatusLabel}</span>
+                          <span>{translateText(item.attendanceStatusLabel)}</span>
                         </span>
                       ) : isLunchOnly ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                           <Clock className="w-3 h-3 text-amber-500" />
-                          <span>{item.attendanceStatusLabel}</span>
+                          <span>{translateText(item.attendanceStatusLabel)}</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          <span>{item.attendanceStatusLabel}</span>
+                          <span>{translateText(item.attendanceStatusLabel)}</span>
                         </span>
                       )}
                     </td>
@@ -389,7 +386,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                               : 'text-slate-800 font-medium'
                               }`}
                           >
-                            {dish}
+                            {translateText(dish)}
                           </p>
                         ))}
 
@@ -402,7 +399,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                                 }`}
                             >
                               <ShieldAlert className="w-3 h-3" />
-                              <span>{item.dietaryBadge.text}</span>
+                              <span>{translateText(item.dietaryBadge.text)}</span>
                             </span>
                           </div>
                         )}
@@ -417,14 +414,14 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-extrabold text-slate-800">
-                              {percentage !== null ? `${percentage}%` : '100%'}
+                              {translateText(percentage !== null ? `${percentage}%` : '100%')}
                             </span>
                             <span className="text-[11px] font-medium text-slate-500">
-                              {percentage === 100
+                              {translateText(percentage === 100
                                 ? 'Hết suất'
                                 : percentage && percentage >= 50
                                   ? 'Ăn 1/2'
-                                  : 'Ăn ít / Bỏ'}
+                                  : 'Ăn ít / Bỏ')}
                             </span>
                           </div>
 
@@ -450,7 +447,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                       ) : (
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
                           <Droplet className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                          <span>{item.waterIntake}</span>
+                          <span>{translateText(item.waterIntake)}</span>
                         </div>
                       )}
                     </td>
@@ -461,12 +458,12 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                         {item.needSpecialAttention && (
                           <div className="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
                             <AlertTriangle className="w-3 h-3 text-rose-500" />
-                            <span>Cần chú ý dinh dưỡng</span>
+                            <span>{translateText("Cần chú ý dinh dưỡng")}</span>
                           </div>
                         )}
                         <p className="text-xs text-slate-700 leading-relaxed font-normal">
                           {item.teacherNote || (
-                            <span className="text-slate-400 italic">Không có ghi chú thêm</span>
+                            <span className="text-slate-400 italic">{translateText("Không có ghi chú thêm")}</span>
                           )}
                         </p>
                       </div>
@@ -495,7 +492,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                           ) : (
                             <Eye className="w-2.5 h-2.5 text-slate-500" />
                           )}
-                          <span>{item.parentStatus.label}</span>
+                          <span>{translateText(item.parentStatus.label)}</span>
                         </div>
                       )}
                     </td>
@@ -510,12 +507,8 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                         <SlidersHorizontal className="w-5 h-5" />
                       </div>
-                      <p className="text-sm font-bold text-slate-700">
-                        Không tìm thấy bản ghi điểm danh & sức ăn nào phù hợp với bộ lọc
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Hãy thử điều chỉnh lại từ khóa tìm kiếm, trạng thái hoặc khoảng thời gian
-                      </p>
+                      <p className="text-sm font-bold text-slate-700">{translateText("Không tìm thấy bản ghi điểm danh & sức ăn nào phù hợp với bộ lọc")}</p>
+                      <p className="text-xs text-slate-400">{translateText("Hãy thử điều chỉnh lại từ khóa tìm kiếm, trạng thái hoặc khoảng thời gian")}</p>
                     </div>
                   </td>
                 </tr>
@@ -529,19 +522,17 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
       <div className="p-4 border-t border-slate-200 bg-white flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         {/* Left: Summary text */}
         <div className="flex items-center gap-2 text-slate-500">
-          <span>Hiển thị</span>
+          <span>{translateText("Hiển thị")}</span>
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
             className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-700 focus:outline-none focus:border-teal-500 cursor-pointer"
           >
-            <option value="6">6 bản ghi</option>
-            <option value="10">10 bản ghi</option>
-            <option value="20">20 bản ghi</option>
+            <option value="6">{translateText("6 bản ghi")}</option>
+            <option value="10">{translateText("10 bản ghi")}</option>
+            <option value="20">{translateText("20 bản ghi")}</option>
           </select>
-          <span>
-            trên tổng số <strong>{totalItems}</strong> bản ghi phù hợp ({totalWeekMeals} suất ăn trong kỳ)
-          </span>
+          <span>{translateText("trên tổng số ")}<strong>{totalItems}</strong>{translateText(" bản ghi phù hợp (")}{totalWeekMeals}{translateText(" suất ăn trong kỳ)")}</span>
         </div>
 
         {/* Right: Page Navigation Buttons */}
@@ -551,7 +542,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
             onClick={() => onPageChange(1)}
             disabled={currentPage <= 1}
             className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition"
-            title="Trang đầu"
+            title={translateText("Trang đầu")}
           >
             <ChevronsLeft className="w-4 h-4" />
           </button>
@@ -561,7 +552,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage <= 1}
             className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition"
-            title="Trang trước"
+            title={translateText("Trang trước")}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -585,7 +576,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                   : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
               >
-                {p}
+                {translateText(p)}
               </button>
             );
           })}
@@ -595,7 +586,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
             className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition"
-            title="Trang sau"
+            title={translateText("Trang sau")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -605,7 +596,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage >= totalPages}
             className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition"
-            title="Trang cuối"
+            title={translateText("Trang cuối")}
           >
             <ChevronsRight className="w-4 h-4" />
           </button>

@@ -299,7 +299,7 @@ export const AuditLogsPage: React.FC = () => {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder={translateText("Tìm theo email, tên, ghi chú, IP...")}
+              placeholder={translateText("Tìm theo email, tên, ghi chú...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-800 placeholder:text-slate-400"
@@ -382,20 +382,19 @@ export const AuditLogsPage: React.FC = () => {
                 <th className="py-3 px-4">{translateText("Tác nhân (Actor)")}</th>
                 <th className="py-3 px-4">{translateText("Hành động")}</th>
                 <th className="py-3 px-4">{translateText("Đối tượng tác động")}</th>
-                <th className="py-3 px-4">{translateText("Địa chỉ IP")}</th>
                 <th className="py-3 px-4 text-right">{translateText("Chi tiết")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={5} className="py-12 text-center text-slate-400">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto text-teal-600 mb-2" />{translateText("Đang tải nhật ký kiểm toán...")}</td>
                 </tr>
               ) : logs.length === 0 ? (
                 /* Ngoại lệ EX-02: Không có dữ liệu phù hợp bộ lọc */
                 <tr>
-                  <td colSpan={6} className="py-14 text-center">
+                  <td colSpan={5} className="py-14 text-center">
                     <div className="max-w-sm mx-auto space-y-3">
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
                         <Search className="w-6 h-6" />
@@ -454,11 +453,6 @@ export const AuditLogsPage: React.FC = () => {
                           #{translateText(log.targetId)}
                         </span>
                       )}
-                    </td>
-
-                    {/* Địa chỉ IP */}
-                    <td className="py-3.5 px-4 font-mono text-slate-600">
-                      {log.ipAddress || '127.0.0.1'}
                     </td>
 
                     {/* Thao tác Xem chi tiết */}

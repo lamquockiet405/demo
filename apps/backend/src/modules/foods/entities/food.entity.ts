@@ -69,6 +69,9 @@ export class Food {
   @Column({ length: 20, default: 'ACTIVE' })
   status: string;
 
+  @Column({ name: 'source_metadata', type: 'jsonb', nullable: true })
+  sourceMetadata: Record<string, any> | null;
+
   @ManyToOne(() => FoodCategory, (cat) => cat.foods, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'category_id' })
   category: FoodCategory;

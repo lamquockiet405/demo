@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -216,12 +217,12 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
     }
 
     if (searchChild.trim()) {
-      const query = searchChild.toLowerCase();
+      const query = normalizeSearch(searchChild);
       list = list.filter((c) => {
-        const matchName = c.childName.toLowerCase().includes(query);
-        const matchClass = c.className.toLowerCase().includes(query);
-        const matchDish = c.dishName.toLowerCase().includes(query);
-        const matchAllergen = c.allergenDetected.toLowerCase().includes(query);
+        const matchName = normalizeSearch(c.childName).includes(query);
+        const matchClass = normalizeSearch(c.className).includes(query);
+        const matchDish = normalizeSearch(c.dishName).includes(query);
+        const matchAllergen = normalizeSearch(c.allergenDetected).includes(query);
         return matchName || matchClass || matchDish || matchAllergen;
       });
     }
@@ -308,7 +309,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
   ) => {
     const isObese = type === 'OBESE';
     const regulationName = isObese
-      ? 'Thông tư 28/2016/TT-BGDĐT'
+      ? 'Quy chuẩn Dinh dưỡng Mầm non'
       : 'Quyết định 1246/QĐ-BYT';
     const sectionTitle = isObese
       ? 'Đề xuất các món ăn thanh đạm cho trẻ thừa cân / béo phì'
@@ -472,7 +473,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
+    <div className="fixed !m-0 inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-6xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col border border-slate-200/90 overflow-hidden">
         {/* MODAL HEADER */}
         <div
@@ -840,7 +841,7 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
                       ? `Loại 2: Ghi chú Giảm Calo Món "${focusedDish.dish?.name}" cho Trẻ Béo phì`
                       : translateText('Loại 2: Phân loại & Ghi chú cho Trẻ Béo phì / Thừa cân')}
                   </h3>
-                  <p className="text-xs text-rose-900/80 leading-relaxed">{translateText("Trẻ bị ")}<strong>{translateText("thừa cân (overweight)")}</strong>{translateText(" hoặc ")}<strong>{translateText("béo phì (obese)")}</strong>: <strong>{translateText("Không cần đổi món ăn khác")}</strong>{translateText(", chỉ cần ghi chú cho nhân viên giảm bớt 20% lượng cơm/tinh bột, bổ sung thêm rau xanh luộc và canh thanh đạm, tránh chan dầu mỡ theo Thông tư 28/2016/TT-BGDĐT.")}</p>
+                  <p className="text-xs text-rose-900/80 leading-relaxed">{translateText("Trẻ bị ")}<strong>{translateText("thừa cân (overweight)")}</strong>{translateText(" hoặc ")}<strong>{translateText("béo phì (obese)")}</strong>: <strong>{translateText("Không cần đổi món ăn khác")}</strong>{translateText(", chỉ cần ghi chú cho nhân viên giảm bớt 20% lượng cơm/tinh bột, bổ sung thêm rau xanh luộc và canh thanh đạm, tránh chan dầu mỡ theo Quy chuẩn Dinh dưỡng Mầm non.")}</p>
                 </div>
               </div>
 

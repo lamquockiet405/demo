@@ -120,26 +120,19 @@ export const QuickMealEvaluationForm: React.FC<QuickMealEvaluationFormProps> = (
               </div>
 
               <div className="space-y-1 text-slate-700 font-medium">
-                <p className="flex items-baseline gap-1">
-                  <span className="text-teal-600 font-bold">•</span>
-                  <span className="font-semibold text-slate-900">Món mặn:</span>
-                  <span>Sườn non ram mặn đậm đà</span>
-                </p>
-                <p className="flex items-baseline gap-1">
-                  <span className="text-teal-600 font-bold">•</span>
-                  <span className="font-semibold text-slate-900">Món canh:</span>
-                  <span>Canh cải ngọt nấu thịt thăn bằm</span>
-                </p>
-                <p className="flex items-baseline gap-1">
-                  <span className="text-teal-600 font-bold">•</span>
-                  <span className="font-semibold text-slate-900">Tinh bột:</span>
-                  <span>Cơm trắng dẻo thơm ST25</span>
-                </p>
-                <p className="flex items-baseline gap-1">
-                  <span className="text-teal-600 font-bold">•</span>
-                  <span className="font-semibold text-slate-900">Tráng miệng:</span>
-                  <span>Chuối tiêu chín tự nhiên</span>
-                </p>
+                {todayMeal?.dishes && todayMeal.dishes.length > 0 ? (
+                  todayMeal.dishes.map((dish: any, idx: number) => (
+                    <p key={dish.id || idx} className="flex items-baseline gap-1">
+                      <span className="text-teal-600 font-bold">•</span>
+                      <span className="font-semibold text-slate-900 min-w-[70px]">
+                        {dish.dishType ? `${dish.dishType}:` : 'Món ăn:'}
+                      </span>
+                      <span>{dish.name}</span>
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-slate-400 italic">Chưa có danh sách món ăn</p>
+                )}
               </div>
 
               {/* Allergy Control Tag */}
@@ -147,7 +140,11 @@ export const QuickMealEvaluationForm: React.FC<QuickMealEvaluationFormProps> = (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-[11px] font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Kiểm soát dị ứng:</span>
-                  <strong className="text-emerald-900">Tem Đỏ (Không tôm cua biển)</strong>
+                  <strong className="text-emerald-900">
+                    {child?.allergyWarning
+                      ? `Lưu ý dị ứng: ${child.allergyWarning}`
+                      : 'An toàn tuyệt đối (Không có dị nguyên)'}
+                  </strong>
                 </span>
               </div>
             </div>

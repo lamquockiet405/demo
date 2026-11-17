@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Search, Filter, Calendar, Users, Utensils, AlertTriangle, CheckCircle, RotateCcw } from 'lucide-react';
 import { CoordinationQueryParams } from '../types';
@@ -20,6 +22,7 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
   onResetFilters,
   availableClasses,
 }) => {
+  useLanguage();
   return (
     <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3.5">
       {/* Top Filter Row: Search & Class Picker */}
@@ -31,7 +34,7 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
             type="text"
             value={filters.search || ''}
             onChange={(e) => onFilterChange({ search: e.target.value })}
-            placeholder="Tìm theo tên bé, mã học sinh, nội dung dặn dò, giáo viên phụ trách..."
+            placeholder={translateText("Tìm theo tên bé, mã học sinh, nội dung dặn dò, giáo viên phụ trách...")}
             className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white transition"
           />
           {filters.search && (
@@ -48,17 +51,16 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
             <Users className="w-4 h-4 text-teal-600 shrink-0" />
-            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">Lớp:</span>
+            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">{translateText("Lớp:")}</span>
             <select
               value={filters.classId || ''}
               onChange={(e) => onFilterChange({ classId: e.target.value || undefined })}
               className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
             >
-              <option value="">Tất cả các lớp</option>
+              <option value="">{translateText("Tất cả các lớp")}</option>
               {availableClasses.map((cls) => (
                 <option key={cls.id} value={cls.id}>
-                  {cls.name} ({cls.totalStudents} trẻ)
-                </option>
+                  {cls.name} ({cls.totalStudents}{translateText(" trẻ)")}</option>
               ))}
             </select>
           </div>
@@ -66,7 +68,7 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           {/* Date Selector */}
           <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
             <Calendar className="w-4 h-4 text-teal-600 shrink-0" />
-            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">Ngày:</span>
+            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">{translateText("Ngày:")}</span>
             <input
               type="date"
               value={filters.date || ''}
@@ -80,8 +82,7 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
       {/* Bottom Filter Row: Session, Priority, Status, Type, and Reset */}
       <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 text-xs">
         <span className="text-slate-500 font-bold flex items-center gap-1">
-          <Filter className="w-3.5 h-3.5 text-slate-400" /> Bộ lọc nhanh:
-        </span>
+          <Filter className="w-3.5 h-3.5 text-slate-400" />{translateText(" Bộ lọc nhanh:")}</span>
 
         {/* Bữa ăn */}
         <select
@@ -89,11 +90,11 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           onChange={(e) => onFilterChange({ mealSession: e.target.value })}
           className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer focus:outline-none"
         >
-          <option value="ALL">Tất cả bữa ăn</option>
-          <option value="BREAKFAST">Bữa sáng</option>
-          <option value="LUNCH">Bữa trưa chính</option>
-          <option value="AFTERNOON_SNACK">Bữa xế chiều</option>
-          <option value="ALL_DAY">Cả ngày</option>
+          <option value="ALL">{translateText("Tất cả bữa ăn")}</option>
+          <option value="BREAKFAST">{translateText("Bữa sáng")}</option>
+          <option value="LUNCH">{translateText("Bữa trưa chính")}</option>
+          <option value="AFTERNOON_SNACK">{translateText("Bữa xế chiều")}</option>
+          <option value="ALL_DAY">{translateText("Cả ngày")}</option>
         </select>
 
         {/* Mức độ ưu tiên */}
@@ -102,10 +103,10 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           onChange={(e) => onFilterChange({ priority: e.target.value })}
           className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer focus:outline-none"
         >
-          <option value="ALL">Tất cả mức ưu tiên</option>
-          <option value="URGENT">🚨 Khẩn cấp</option>
-          <option value="HIGH">⚠️ Quan trọng</option>
-          <option value="NORMAL">ℹ️ Tiêu chuẩn</option>
+          <option value="ALL">{translateText("Tất cả mức ưu tiên")}</option>
+          <option value="URGENT">{translateText("🚨 Khẩn cấp")}</option>
+          <option value="HIGH">{translateText("⚠️ Quan trọng")}</option>
+          <option value="NORMAL">{translateText("ℹ️ Tiêu chuẩn")}</option>
         </select>
 
         {/* Trạng thái xử lý */}
@@ -114,10 +115,10 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           onChange={(e) => onFilterChange({ status: e.target.value })}
           className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer focus:outline-none"
         >
-          <option value="ALL">Tất cả trạng thái</option>
-          <option value="PENDING">⏳ Chờ tiếp nhận</option>
-          <option value="ACKNOWLEDGED">🍳 Bếp đã tiếp nhận</option>
-          <option value="RESOLVED">✅ Đã hoàn thành</option>
+          <option value="ALL">{translateText("Tất cả trạng thái")}</option>
+          <option value="PENDING">{translateText("⏳ Chờ tiếp nhận")}</option>
+          <option value="ACKNOWLEDGED">{translateText("🍳 Bếp đã tiếp nhận")}</option>
+          <option value="RESOLVED">{translateText("✅ Đã hoàn thành")}</option>
         </select>
 
         {/* Phân loại ghi chú */}
@@ -126,12 +127,12 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           onChange={(e) => onFilterChange({ noteType: e.target.value })}
           className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer focus:outline-none"
         >
-          <option value="ALL">Tất cả loại ghi chú</option>
-          <option value="ALLERGY_WARNING">Cảnh báo dị ứng</option>
-          <option value="SPECIAL_DIET">Chế độ ăn riêng (Cháo mềm)</option>
-          <option value="PORTION_ADJUSTMENT">Điều chỉnh / Cắt suất</option>
-          <option value="MEDICATION_FEEDING">Uống thuốc sau ăn</option>
-          <option value="KITCHEN_REQUEST">Yêu cầu nhà bếp</option>
+          <option value="ALL">{translateText("Tất cả loại ghi chú")}</option>
+          <option value="ALLERGY_WARNING">{translateText("Cảnh báo dị ứng")}</option>
+          <option value="SPECIAL_DIET">{translateText("Chế độ ăn riêng (Cháo mềm)")}</option>
+          <option value="PORTION_ADJUSTMENT">{translateText("Điều chỉnh / Cắt suất")}</option>
+          <option value="MEDICATION_FEEDING">{translateText("Uống thuốc sau ăn")}</option>
+          <option value="KITCHEN_REQUEST">{translateText("Yêu cầu nhà bếp")}</option>
         </select>
 
         {/* Reset button */}
@@ -141,7 +142,7 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
             className="ml-auto flex items-center gap-1 px-3 py-1.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg font-bold transition border border-rose-200"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Xóa lọc</span>
+            <span>{translateText("Xóa lọc")}</span>
           </button>
         )}
       </div>

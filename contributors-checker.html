@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KidMeal — GitHub Contributors Checker</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #0f766e;
+      --primary-hover: #0d9488;
+      --primary-soft: #ccfbf1;
+      --green: #16a34a;
+      --red: #dc2626;
+      --amber: #d97706;
+      --radius: 14px;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f382c 0%, #0f766e 100%);
+      color: #fff;
+      border-radius: 18px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.4fr auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    @media (max-width: 900px) {
+      .controls {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    button {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .1s, background .15s, opacity .15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: #1e293b;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 820px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi .title {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .kpi .value {
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .alert.warn {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .alert.info {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: #115e59;
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    tbody tr {
+      transition: background .12s;
+      cursor: pointer;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    tbody tr.active-row {
+      background: #f0fdfa;
+    }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .user-name {
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .user-name:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .user-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .bar-bg {
+      width: 140px;
+      height: 8px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0d9488, #10b981);
+      border-radius: 999px;
+    }
+
+    .plus {
+      color: var(--green);
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+
+    .minus {
+      color: var(--red);
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+    }
+
+    .chart-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chart-item {
+      display: grid;
+      grid-template-columns: 180px 1fr 90px;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .chart-item {
+        grid-template-columns: 120px 1fr 70px;
+      }
+    }
+
+    .chart-track {
+      height: 14px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .chart-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0f766e, #14b8a6);
+      border-radius: 999px;
+    }
+
+    .commit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 460px;
+      overflow-y: auto;
+    }
+
+    .commit-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fff;
+    }
+
+    .commit-msg {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .commit-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--primary-soft);
+      color: #0f766e;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>GitHub Contributors Checker</h1>
+        <p>Kiểm tra đóng góp (commits, +/- dòng code, tỷ lệ đóng góp & lịch sử commit) trực tiếp qua GitHub API</p>
+      </div>
+      <div class="badge" id="rateBadge">GitHub API: Chưa kiểm tra</div>
+    </header>
+
+    <div class="panel">
+      <div class="controls">
+        <div>
+          <label for="repoInput">Repository URL hoặc owner/repo</label>
+          <input id="repoInput" type="text" value="https://github.com/lamquockiet405/KidMeal.git"
+            placeholder="https://github.com/owner/repo.git" />
+        </div>
+        <div>
+          <label for="branchSelect">Nhánh (Branch)</label>
+          <select id="branchSelect">
+            <option value="">Mặc định (All / Default)</option>
+          </select>
+        </div>
+        <div>
+          <label for="tokenInput">GitHub Token (tùy chọn — dùng nếu repo private hoặc hết quota)</label>
+          <input id="tokenInput" type="password" placeholder="ghp_... (chỉ lưu tạm trên trình duyệt)" />
+        </div>
+        <button id="checkBtn" class="btn-primary">Kiểm tra Contributors</button>
+        <button id="exportBtn" class="btn-secondary" disabled>Xuất CSV</button>
+      </div>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="title">Tổng Contributors</div>
+        <div class="value" id="kpiContributors">—</div>
+        <div class="sub" id="kpiRepoVisibility">Chưa tải dữ liệu</div>
+      </div>
+      <div class="kpi">
+        <div class="title">Tổng Commits (Contributors)</div>
+        <div class="value" id="kpiCommits">—</div>
+        <div class="sub" id="kpiDefaultBranch">Nhánh: —</div>
+      </div>
+      <div class="kpi">
+        <div class="title">Tổng dòng thêm / xóa</div>
+        <div class="value" id="kpiLines">—</div>
+        <div class="sub">Từ GitHub Contributor Stats</div>
+      </div>
+      <div class="kpi">
+        <div class="title">Top Contributor</div>
+        <div class="value" id="kpiTop" style="font-size:20px;">—</div>
+        <div class="sub" id="kpiTopShare">—</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head">
+        <h2>Biểu đồ tỷ lệ đóng góp (Commits)</h2>
+        <span class="pill" id="repoSlugBadge">lamquockiet405/KidMeal</span>
+      </div>
+      <div id="chartContainer" class="chart-list">
+        <div class="empty">Nhấn "Kiểm tra Contributors" để tải dữ liệu từ GitHub.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head">
+        <h2>Danh sách Contributors</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input id="searchUser" type="text" placeholder="Lọc theo tên / username..."
+            style="width:220px; padding:7px 10px;" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Contributor</th>
+              <th>Commits</th>
+              <th>Tỷ lệ</th>
+              <th>Additions / Deletions</th>
+              <th>Loại</th>
+            </tr>
+          </thead>
+          <tbody id="contributorsBody">
+            <tr>
+              <td colspan="6" class="empty">Chưa có dữ liệu.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head">
+        <h2 id="commitsTitle">100 Commits gần nhất trên nhánh</h2>
+        <button id="clearFilterBtn" class="btn-secondary" style="display:none; padding:6px 10px; font-size:12px;">Xem
+          tất cả tác giả</button>
+      </div>
+      <div id="commitsContainer" class="commit-list">
+        <div class="empty">Chưa có dữ liệu commit.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const els = {
+      repoInput: document.getElementById('repoInput'),
+      branchSelect: document.getElementById('branchSelect'),
+      tokenInput: document.getElementById('tokenInput'),
+      checkBtn: document.getElementById('checkBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      alertBox: document.getElementById('alertBox'),
+      rateBadge: document.getElementById('rateBadge'),
+      repoSlugBadge: document.getElementById('repoSlugBadge'),
+      kpiContributors: document.getElementById('kpiContributors'),
+      kpiRepoVisibility: document.getElementById('kpiRepoVisibility'),
+      kpiCommits: document.getElementById('kpiCommits'),
+      kpiDefaultBranch: document.getElementById('kpiDefaultBranch'),
+      kpiLines: document.getElementById('kpiLines'),
+      kpiTop: document.getElementById('kpiTop'),
+      kpiTopShare: document.getElementById('kpiTopShare'),
+      chartContainer: document.getElementById('chartContainer'),
+      contributorsBody: document.getElementById('contributorsBody'),
+      searchUser: document.getElementById('searchUser'),
+      commitsTitle: document.getElementById('commitsTitle'),
+      commitsContainer: document.getElementById('commitsContainer'),
+      clearFilterBtn: document.getElementById('clearFilterBtn'),
+    };
+
+    let state = {
+      slug: 'lamquockiet405/KidMeal',
+      contributors: [],
+      commits: [],
+      selectedAuthor: null,
+    };
+
+    function parseRepoSlug(input) {
+      const cleaned = input.trim().replace(/\.git$/i, '').replace(/\/+$/, '');
+      const ghMatch = cleaned.match(/github\.com[:/]([^/]+\/[^/]+)$/i);
+      if (ghMatch) return ghMatch[1];
+      if (/^[^/\s]+\/[^/\s]+$/.test(cleaned)) return cleaned;
+      return null;
+    }
+
+    function showAlert(type, html) {
+      els.alertBox.className = `alert show ${type}`;
+      els.alertBox.innerHTML = html;
+    }
+
+    function hideAlert() {
+      els.alertBox.className = 'alert';
+      els.alertBox.innerHTML = '';
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    async function ghFetch(url) {
+      const headers = { Accept: 'application/vnd.github+json' };
+      const token = els.tokenInput.value.trim();
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(url, { headers });
+      const rem = res.headers.get('X-RateLimit-Remaining');
+      const lim = res.headers.get('X-RateLimit-Limit');
+      if (rem !== null && lim !== null) {
+        els.rateBadge.textContent = `GitHub API Quota: ${rem}/${lim}`;
+      }
+      return res;
+    }
+
+    async function fetchStatsWithRetry(slug, retries = 3) {
+      for (let i = 0; i < retries; i++) {
+        const res = await ghFetch(`https://api.github.com/repos/${slug}/stats/contributors`);
+        if (res.status === 200) return await res.json();
+        if (res.status === 202) {
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+        return [];
+      }
+      return [];
+    }
+
+    function renderAll() {
+      const query = els.searchUser.value.trim().toLowerCase();
+      const totalCommits = state.contributors.reduce((s, c) => s + c.contributions, 0);
+      const totalAdd = state.contributors.reduce((s, c) => s + (c.additions || 0), 0);
+      const totalDel = state.contributors.reduce((s, c) => s + (c.deletions || 0), 0);
+
+      els.kpiContributors.textContent = state.contributors.length;
+      els.kpiCommits.textContent = totalCommits.toLocaleString('vi-VN');
+      els.kpiLines.innerHTML = `<span class="plus">+${totalAdd.toLocaleString('vi-VN')}</span> / <span class="minus">-${totalDel.toLocaleString('vi-VN')}</span>`;
+
+      if (state.contributors.length > 0) {
+        const top = state.contributors[0];
+        const share = totalCommits ? ((top.contributions / totalCommits) * 100).toFixed(1) : '0';
+        els.kpiTop.textContent = top.login;
+        els.kpiTopShare.textContent = `${top.contributions} commits (${share}%)`;
+      } else {
+        els.kpiTop.textContent = '—';
+        els.kpiTopShare.textContent = 'Không có dữ liệu';
+      }
+
+      // Chart
+      if (state.contributors.length === 0) {
+        els.chartContainer.innerHTML = '<div class="empty">Không tìm thấy contributor nào.</div>';
+      } else {
+        const maxCommits = Math.max(...state.contributors.map((c) => c.contributions), 1);
+        els.chartContainer.innerHTML = state.contributors
+          .map((c) => {
+            const pct = ((c.contributions / (totalCommits || 1)) * 100).toFixed(1);
+            const width = ((c.contributions / maxCommits) * 100).toFixed(1);
+            return `
+              <div class="chart-item">
+                <div style="font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(c.login)}</div>
+                <div class="chart-track"><div class="chart-bar" style="width:${width}%"></div></div>
+                <div style="text-align:right; font-weight:700;">${c.contributions} (${pct}%)</div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      // Table
+      const filtered = state.contributors.filter((c) =>
+        c.login.toLowerCase().includes(query) || (c.name || '').toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        els.contributorsBody.innerHTML = '<tr><td colspan="6" class="empty">Không có contributor phù hợp bộ lọc.</td></tr>';
+      } else {
+        els.contributorsBody.innerHTML = filtered
+          .map((c, idx) => {
+            const pct = totalCommits ? ((c.contributions / totalCommits) * 100).toFixed(1) : '0.0';
+            const active = state.selectedAuthor === c.login ? 'active-row' : '';
+            const statsHtml =
+              c.hasStats
+                ? `<span class="plus">+${c.additions.toLocaleString('vi-VN')}</span> / <span class="minus">-${c.deletions.toLocaleString('vi-VN')}</span>`
+                : '<span style="color:#94a3b8; font-size:12px;">Đang tính / N/A</span>';
+            return `
+              <tr class="${active}" data-login="${escapeHtml(c.login)}">
+                <td><strong>#${idx + 1}</strong></td>
+                <td>
+                  <div class="user-cell">
+                    <img class="avatar" src="${escapeHtml(c.avatar_url || '')}" alt="" />
+                    <div>
+                      <a class="user-name" href="${escapeHtml(c.html_url || '#')}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(c.login)}</a>
+                      <div class="user-meta">${escapeHtml(c.email || c.type || 'User')}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>${c.contributions.toLocaleString('vi-VN')}</strong></td>
+                <td>
+                  <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                  <span>${pct}%</span>
+                </td>
+                <td>${statsHtml}</td>
+                <td><span class="pill">${escapeHtml(c.type || 'User')}</span></td>
+              </tr>
+            `;
+          })
+          .join('');
+
+        document.querySelectorAll('#contributorsBody tr[data-login]').forEach((row) => {
+          row.addEventListener('click', () => {
+            const login = row.getAttribute('data-login');
+            state.selectedAuthor = state.selectedAuthor === login ? null : login;
+            renderAll();
+          });
+        });
+      }
+
+      renderCommits();
+    }
+
+    function renderCommits() {
+      const branch = els.branchSelect.value || 'mặc định';
+      let list = state.commits;
+      if (state.selectedAuthor) {
+        list = list.filter((cm) => {
+          const authorLogin = cm.author?.login || cm.commit?.author?.name || '';
+          return authorLogin.toLowerCase() === state.selectedAuthor.toLowerCase();
+        });
+        els.commitsTitle.textContent = `Commits của ${state.selectedAuthor} trên nhánh ${branch} (${list.length})`;
+        els.clearFilterBtn.style.display = 'inline-flex';
+      } else {
+        els.commitsTitle.textContent = `Commits gần nhất trên nhánh ${branch} (${list.length})`;
+        els.clearFilterBtn.style.display = 'none';
+      }
+
+      if (list.length === 0) {
+        els.commitsContainer.innerHTML = '<div class="empty">Không có commit nào khớp bộ lọc trong 100 commit gần nhất.</div>';
+        return;
+      }
+
+      els.commitsContainer.innerHTML = list
+        .map((cm) => {
+          const msg = (cm.commit?.message || '').split('\n')[0];
+          const author = cm.author?.login || cm.commit?.author?.name || 'Unknown';
+          const date = cm.commit?.author?.date
+            ? new Date(cm.commit.author.date).toLocaleString('vi-VN')
+            : '';
+          const sha = (cm.sha || '').slice(0, 7);
+          return `
+            <div class="commit-card">
+              <div>
+                <div class="commit-msg">${escapeHtml(msg)}</div>
+                <div class="commit-sub">
+                  <strong>${escapeHtml(author)}</strong> • ${escapeHtml(date)}
+                </div>
+              </div>
+              <a class="pill mono" href="${escapeHtml(cm.html_url || '#')}" target="_blank" rel="noopener" style="text-decoration:none;">${escapeHtml(sha)}</a>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    async function loadRepo() {
+      hideAlert();
+      const slug = parseRepoSlug(els.repoInput.value);
+      if (!slug) {
+        showAlert('error', 'URL hoặc định dạng repository không hợp lệ. Ví dụ: <code>https://github.com/lamquockiet405/KidMeal.git</code>');
+        return;
+      }
+
+      state.slug = slug;
+      state.selectedAuthor = null;
+      els.repoSlugBadge.textContent = slug;
+      els.checkBtn.disabled = true;
+      els.checkBtn.textContent = 'Đang tải...';
+
+      try {
+        const repoRes = await ghFetch(`https://api.github.com/repos/${slug}`);
+        if (repoRes.status === 404) {
+          showAlert('error', `Không tìm thấy repository <strong>${escapeHtml(slug)}</strong> (hoặc repo đang ở chế độ Private — hãy nhập GitHub Personal Access Token để kiểm tra).`);
+          return;
+        }
+        if (repoRes.status === 403) {
+          showAlert('error', 'GitHub API đã hết hạn mức (60 request/giờ khi chưa đăng nhập). Hãy dán <strong>GitHub Token</strong> vào ô bên trên rồi thử lại.');
+          return;
+        }
+        if (!repoRes.ok) {
+          showAlert('error', `Lỗi GitHub API: HTTP ${repoRes.status}`);
+          return;
+        }
+
+        const repo = await repoRes.json();
+        els.kpiRepoVisibility.textContent = `${repo.private ? 'Private' : 'Public'} • ⭐ ${repo.stargazers_count} • Forks: ${repo.forks_count}`;
+        els.kpiDefaultBranch.textContent = `Nhánh mặc định: ${repo.default_branch}`;
+
+        // Branches
+        const prevBranch = els.branchSelect.value;
+        const brRes = await ghFetch(`https://api.github.com/repos/${slug}/branches?per_page=100`);
+        if (brRes.ok) {
+          const branches = await brRes.json();
+          els.branchSelect.innerHTML = `<option value="">Mặc định (${escapeHtml(repo.default_branch)})</option>` +
+            branches.map((b) => `<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('');
+          if (branches.some((b) => b.name === prevBranch)) {
+            els.branchSelect.value = prevBranch;
+          }
+        }
+
+        const selectedBranch = els.branchSelect.value || repo.default_branch;
+
+        // Contributors + Stats + Commits
+        const [contribRes, statsData, commitsRes] = await Promise.all([
+          ghFetch(`https://api.github.com/repos/${slug}/contributors?per_page=100&anon=1`),
+          fetchStatsWithRetry(slug, 3),
+          ghFetch(`https://api.github.com/repos/${slug}/commits?sha=${encodeURIComponent(selectedBranch)}&per_page=100`),
+        ]);
+
+        const rawContribs = contribRes.ok ? await contribRes.json() : [];
+        const statsMap = new Map();
+        if (Array.isArray(statsData)) {
+          statsData.forEach((item) => {
+            const login = item.author?.login;
+            if (!login) return;
+            const add = (item.weeks || []).reduce((s, w) => s + (w.a || 0), 0);
+            const del = (item.weeks || []).reduce((s, w) => s + (w.d || 0), 0);
+            statsMap.set(login.toLowerCase(), { additions: add, deletions: del, total: item.total || 0 });
+          });
+        }
+
+        state.contributors = (Array.isArray(rawContribs) ? rawContribs : []).map((c) => {
+          const login = c.login || c.name || 'Anonymous';
+          const st = statsMap.get(login.toLowerCase());
+          return {
+            login,
+            name: c.name || '',
+            email: c.email || '',
+            type: c.type || 'User',
+            avatar_url: c.avatar_url || '',
+            html_url: c.html_url || '',
+            contributions: c.contributions || 0,
+            hasStats: Boolean(st),
+            additions: st ? st.additions : 0,
+            deletions: st ? st.deletions : 0,
+          };
+        });
+
+        state.commits = commitsRes.ok ? await commitsRes.json() : [];
+        els.exportBtn.disabled = state.contributors.length === 0;
+
+        if (statsMap.size === 0 && state.contributors.length > 0) {
+          showAlert('warn', 'GitHub đang tính toán thống kê +/- dòng code (202 Accepted) hoặc chưa trả stats. Nhấn <strong>Kiểm tra Contributors</strong> lại sau vài giây để xem đủ Additions/Deletions.');
+        }
+
+        renderAll();
+      } catch (err) {
+        showAlert('error', `Không thể kết nối GitHub API: ${escapeHtml(err.message)}`);
+      } finally {
+        els.checkBtn.disabled = false;
+        els.checkBtn.textContent = 'Kiểm tra Contributors';
+      }
+    }
+
+    function exportCsv() {
+      const total = state.contributors.reduce((s, c) => s + c.contributions, 0) || 1;
+      const rows = [
+        ['Rank', 'Username', 'Type', 'Commits', 'Share(%)', 'Additions', 'Deletions', 'ProfileURL'],
+        ...state.contributors.map((c, i) => [
+          i + 1,
+          c.login,
+          c.type,
+          c.contributions,
+          ((c.contributions / total) * 100).toFixed(2),
+          c.additions,
+          c.deletions,
+          c.html_url,
+        ]),
+      ];
+      const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${state.slug.replace('/', '_')}_contributors.csv`;
+      a.click();
+    }
+
+    els.checkBtn.addEventListener('click', loadRepo);
+    els.branchSelect.addEventListener('change', loadRepo);
+    els.searchUser.addEventListener('input', renderAll);
+    els.exportBtn.addEventListener('click', exportCsv);
+    els.clearFilterBtn.addEventListener('click', () => {
+      state.selectedAuthor = null;
+      renderAll();
+    });
+
+    // Tự động tải ngay khi mở trang
+    loadRepo();
+  </script>
+</body>
+
+</html>

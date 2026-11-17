@@ -97,7 +97,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed !m-0 inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-xl bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-emerald-50/40">
@@ -300,7 +300,7 @@ export const FrequencyRuleDrawer: React.FC<FrequencyRuleDrawerProps> = ({
               rows={2}
               value={form.note || ''}
               onChange={(e) => setForm((prev) => ({ ...prev, note: e.target.value }))}
-              placeholder={translateText("VD: Tuân thủ Thông tư 28 về cân đối đạm động vật và thực vật")}
+              placeholder={translateText("VD: Tuân thủ Quy chuẩn Dinh dưỡng về cân đối đạm động vật và thực vật")}
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>

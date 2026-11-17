@@ -31,6 +31,7 @@ export interface StaffStats {
   kitchenAndNutrition: number;
   medicalStaff: number;
   inactiveOrDeleted: number;
+  managementStaff?: number;
 }
 
 export interface StaffListResponse {

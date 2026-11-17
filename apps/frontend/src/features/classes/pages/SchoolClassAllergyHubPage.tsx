@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Building2, Users, AlertTriangle, ShieldAlert, HeartPulse, Search,
@@ -225,12 +226,12 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
       // Filter by search query
       if (allergySearch.trim()) {
-        const q = allergySearch.toLowerCase();
-        const matchesName = child.fullName.toLowerCase().includes(q) || child.studentCode.toLowerCase().includes(q);
+        const q = normalizeSearch(allergySearch);
+        const matchesName = normalizeSearch(child.fullName).includes(q) || normalizeSearch(child.studentCode).includes(q);
         const matchesAllergen = child.allergies?.some((a) =>
-          (a.allergen?.nameVi && a.allergen.nameVi.toLowerCase().includes(q)) ||
-          (a.customAllergenName && a.customAllergenName.toLowerCase().includes(q)) ||
-          (a.symptoms && a.symptoms.toLowerCase().includes(q))
+          (a.allergen?.nameVi && normalizeSearch(a.allergen.nameVi).includes(q)) ||
+          (a.customAllergenName && normalizeSearch(a.customAllergenName).includes(q)) ||
+          (a.symptoms && normalizeSearch(a.symptoms).includes(q))
         );
         return matchesName || matchesAllergen;
       }
@@ -254,10 +255,10 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
         return false;
       }
       if (classSearch.trim()) {
-        const q = classSearch.toLowerCase();
-        const matchesName = cls.name?.toLowerCase().includes(q) || false;
-        const matchesRoom = cls.roomNumber ? cls.roomNumber.toLowerCase().includes(q) : false;
-        const matchesTeacher = cls.mainTeacher?.fullName ? cls.mainTeacher.fullName.toLowerCase().includes(q) : false;
+        const q = normalizeSearch(classSearch);
+        const matchesName = normalizeSearch(cls.name).includes(q) || false;
+        const matchesRoom = cls.roomNumber ? normalizeSearch(cls.roomNumber).includes(q) : false;
+        const matchesTeacher = cls.mainTeacher?.fullName ? normalizeSearch(cls.mainTeacher.fullName).includes(q) : false;
         return matchesName || matchesRoom || matchesTeacher;
       }
       return true;
@@ -291,9 +292,9 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
         return false;
       }
       if (studentSearch.trim()) {
-        const q = studentSearch.toLowerCase();
-        const matchesName = child.fullName?.toLowerCase().includes(q) || false;
-        const matchesCode = child.studentCode?.toLowerCase().includes(q) || false;
+        const q = normalizeSearch(studentSearch);
+        const matchesName = normalizeSearch(child.fullName).includes(q) || false;
+        const matchesCode = normalizeSearch(child.studentCode).includes(q) || false;
         return matchesName || matchesCode;
       }
       return true;
@@ -1333,7 +1334,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
       {/* ─── 6. MODAL TẠO LỚP HỌC MỚI ─── */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b pb-3.5">
               <div className="flex items-center gap-2.5">
@@ -1468,7 +1469,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
       {/* ─── 7. MODAL CHỈNH SỬA THÔNG TIN LỚP HỌC ─── */}
       {isEditModalOpen && selectedClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b pb-3.5">
               <div className="flex items-center gap-2.5">
@@ -1614,7 +1615,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
       {/* ─── 8. MODAL XÁC NHẬN XÓA LỚP HỌC ─── */}
       {isDeleteModalOpen && selectedClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
@@ -1651,7 +1652,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
       {/* ─── 9. MODAL QUẢN LÝ & GÁN HỌC SINH VÀO LỚP ("APP HỌC SINH VÀO LỚP") ─── */}
       {isStudentModalOpen && selectedClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-3xl rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95">
             {/* Header Modal */}
             <div className="flex items-center justify-between border-b pb-4 shrink-0">
@@ -1966,7 +1967,7 @@ export const SchoolClassAllergyHubPage: React.FC = () => {
 
       {/* ─── 10. MODAL PHÂN CÔNG GVCN ─── */}
       {showAssignModal && targetClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-2.5 border-b pb-3">
               <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">

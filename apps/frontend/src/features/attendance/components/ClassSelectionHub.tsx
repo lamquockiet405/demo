@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState } from 'react';
 import {
   GraduationCap,
@@ -73,12 +74,12 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
 
   const filteredClasses = classes.filter((cls) => {
     if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
+    const q = normalizeSearch(searchQuery);
     return (
-      cls.name.toLowerCase().includes(q) ||
-      (cls.gradeName && cls.gradeName.toLowerCase().includes(q)) ||
-      (cls.homeroomTeacher && cls.homeroomTeacher.toLowerCase().includes(q)) ||
-      (cls.roomNumber && cls.roomNumber.toLowerCase().includes(q))
+      normalizeSearch(cls.name).includes(q) ||
+      (cls.gradeName && normalizeSearch(cls.gradeName).includes(q)) ||
+      (cls.homeroomTeacher && normalizeSearch(cls.homeroomTeacher).includes(q)) ||
+      (cls.roomNumber && normalizeSearch(cls.roomNumber).includes(q))
     );
   });
 

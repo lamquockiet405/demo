@@ -29,8 +29,8 @@ export function calculateSelectedDietNutrition(masterDishes: MenuDishItem[], sel
 
   const actualDishes = [...masters.filter(item => !replaced.has(String(item.id))), ...selected];
   const fields = ['totalCalories', 'totalProteinG', 'totalFatG', 'totalCarbG'] as const;
-  if (actualDishes.some(item => !item.dish || item.nutritionAvailable === false || item.dish.nutritionAvailable === false ||
-    fields.some(field => item.dish![field] == null || !Number.isFinite(Number(item.dish![field])) || Number(item.dish![field]) < 0))) {
+  const hasValidDishes = actualDishes.some(item => item.dish && (item.nutritionAvailable !== false || Number(item.plannedCalories) > 0 || Number(item.dish.totalCalories) > 0));
+  if (!hasValidDishes) {
     return { ...empty, statusText: 'Chưa đủ định lượng', noteText: 'Cần xác nhận công thức món đã chọn' };
   }
 

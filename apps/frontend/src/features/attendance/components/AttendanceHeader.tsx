@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { ChevronRight, FileText, Send, Radio } from 'lucide-react';
 
@@ -16,34 +18,29 @@ export const AttendanceHeader: React.FC<AttendanceHeaderProps> = ({
   onLockAndSendKitchen,
   isLocked = false,
 }) => {
+  useLanguage();
   return (
     <div className="space-y-3">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
         <span className="hover:text-teal-700 cursor-pointer flex items-center gap-1">
-          <span>🏠</span> Trang chủ
-        </span>
+          <span>🏠</span>{translateText(" Trang chủ")}</span>
         <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-        <span className="hover:text-teal-700 cursor-pointer">Bán trú mầm non</span>
+        <span className="hover:text-teal-700 cursor-pointer">{translateText("Bán trú mầm non")}</span>
         <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-        <span className="text-teal-700 font-bold">Điểm danh học sinh ăn bán trú</span>
+        <span className="text-teal-700 font-bold">{translateText("Điểm danh học sinh ăn bán trú")}</span>
       </div>
 
       {/* Main Title & Action Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              Điểm danh suất ăn Bán trú - {classNameTitle}
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{translateText("Điểm danh suất ăn Bán trú - ")}{classNameTitle}
             </h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200/80 text-[11px] font-bold">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-              Thời gian thực (LiveSync Bếp trung tâm)
-            </span>
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>{translateText("Thời gian thực (LiveSync Bếp trung tâm)")}</span>
           </div>
-          <p className="text-xs text-slate-500 font-medium mt-1">
-            Theo dõi sát sao từng khẩu phần ăn, thực đơn dinh dưỡng và dị ứng đặc thù cho trẻ mầm non.
-          </p>
+          <p className="text-xs text-slate-500 font-medium mt-1">{translateText("Theo dõi sát sao từng khẩu phần ăn, thực đơn dinh dưỡng và dị ứng đặc thù cho trẻ mầm non.")}</p>
         </div>
 
         {/* Action Buttons */}
@@ -53,7 +50,7 @@ export const AttendanceHeader: React.FC<AttendanceHeaderProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold shadow-sm transition"
           >
             <FileText className="w-4 h-4 text-slate-500" />
-            <span>Xuất phiếu báo ăn</span>
+            <span>{translateText("Xuất phiếu báo ăn")}</span>
           </button>
 
           <button
@@ -66,7 +63,7 @@ export const AttendanceHeader: React.FC<AttendanceHeaderProps> = ({
             }`}
           >
             <Send className="w-4 h-4" />
-            <span>{isLocked ? 'Đã Chốt & Gửi Bếp' : `Chốt sĩ số & Gửi Bếp (${cutoffTime})`}</span>
+            <span>{translateText(isLocked ? 'Đã Chốt & Gửi Bếp' : `Chốt sĩ số & Gửi Bếp (${cutoffTime})`)}</span>
           </button>
         </div>
       </div>

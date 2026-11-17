@@ -1,8 +1,16 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetChildrenQueryDto {
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  allAcademicYears?: boolean;
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  academicYearId?: number;
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

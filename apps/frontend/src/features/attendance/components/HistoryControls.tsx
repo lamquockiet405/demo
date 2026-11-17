@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import {
   ChevronLeft,
@@ -54,6 +56,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
   totalWeekMeals,
   onResetFilters,
 }) => {
+  useLanguage();
   const currentClass = classes.find((c) => c.id === selectedClassId);
 
   const isFilterActive =
@@ -92,7 +95,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             <button
               onClick={onPrevWeek}
               className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-lg transition"
-              title="Tuần trước"
+              title={translateText("Tuần trước")}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -100,17 +103,17 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             <div className="flex items-center gap-2 px-3 py-1">
               <Calendar className="w-4 h-4 text-teal-600" />
               <span className="text-xs font-black text-slate-800 tracking-tight">
-                {dateRangeText}
+                {translateText(dateRangeText)}
               </span>
               <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-teal-100 text-teal-800 border border-teal-200">
-                {weekLabel}
+                {translateText(weekLabel)}
               </span>
             </div>
 
             <button
               onClick={onNextWeek}
               className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-lg transition"
-              title="Tuần kế tiếp"
+              title={translateText("Tuần kế tiếp")}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -125,9 +128,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
-          >
-            Tuần này
-          </button>
+          >{translateText("Tuần này")}</button>
 
           <button
             onClick={() => onPeriodChange('month')}
@@ -135,9 +136,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
-          >
-            Tháng 09/2026
-          </button>
+          >{translateText("Tháng 09/2026")}</button>
 
           <button
             onClick={() => onPeriodChange('semester')}
@@ -145,9 +144,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
                 ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600/20'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
-          >
-            Học kỳ I
-          </button>
+          >{translateText("Học kỳ I")}</button>
 
           <button
             onClick={() => {
@@ -160,7 +157,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
               }`}
           >
             <CalendarRange className="w-3.5 h-3.5" />
-            <span>Tùy chọn ngày</span>
+            <span>{translateText("Tùy chọn ngày")}</span>
           </button>
         </div>
       </div>
@@ -178,12 +175,10 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs font-bold rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition cursor-pointer appearance-none"
           >
             {classes.map((cls) => (
-              <option key={cls.id} value={cls.id}>
-                Lớp học: {cls.name} • {cls.totalStudents || totalStudents} bé
-              </option>
+              <option key={cls.id} value={cls.id}>{translateText("Lớp học: ")}{cls.name} • {cls.totalStudents || totalStudents}{translateText(" bé")}</option>
             ))}
             {classes.length === 0 && (
-              <option value="">Lớp Mầm 1 (3-4 tuổi) • {totalStudents} bé</option>
+              <option value="">{translateText("Lớp Mầm 1 (3-4 tuổi) • ")}{totalStudents}{translateText(" bé")}</option>
             )}
           </select>
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
@@ -201,14 +196,14 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             onChange={(e) => onStatusChange(e.target.value)}
             className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs font-bold rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition cursor-pointer appearance-none"
           >
-            <option value="ALL">Lọc tình trạng: Tất cả (Cả ngày, nghỉ, suất riêng)</option>
-            <option value="PRESENT">1. Chỉ xem: Có ăn (Cả ngày)</option>
-            <option value="LUNCH_ONLY">2. Chỉ xem: Chỉ ăn trưa</option>
-            <option value="ABSENT">3. Chỉ xem: Nghỉ có phép / Vắng ăn</option>
-            <option value="SPECIAL_NOTE">4. Chỉ xem: Suất dị ứng / Có lưu ý y tế</option>
-            <option value="PORTION_ALL">5. Mức độ ăn: Ăn hết suất (100%)</option>
-            <option value="PORTION_HALF">6. Mức độ ăn: Ăn một nửa (50%)</option>
-            <option value="PORTION_NONE">7. Mức độ ăn: Ăn ít / Bỏ bữa (≤ 20%)</option>
+            <option value="ALL">{translateText("Lọc tình trạng: Tất cả (Cả ngày, nghỉ, suất riêng)")}</option>
+            <option value="PRESENT">{translateText("1. Chỉ xem: Có ăn (Cả ngày)")}</option>
+            <option value="LUNCH_ONLY">{translateText("2. Chỉ xem: Chỉ ăn trưa")}</option>
+            <option value="ABSENT">{translateText("3. Chỉ xem: Nghỉ có phép / Vắng ăn")}</option>
+            <option value="SPECIAL_NOTE">{translateText("4. Chỉ xem: Suất dị ứng / Có lưu ý y tế")}</option>
+            <option value="PORTION_ALL">{translateText("5. Mức độ ăn: Ăn hết suất (100%)")}</option>
+            <option value="PORTION_HALF">{translateText("6. Mức độ ăn: Ăn một nửa (50%)")}</option>
+            <option value="PORTION_NONE">{translateText("7. Mức độ ăn: Ăn ít / Bỏ bữa (≤ 20%)")}</option>
           </select>
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
             ▼
@@ -222,7 +217,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
           </div>
           <input
             type="text"
-            placeholder="Tìm tên bé, mã số, món ăn hoặc ghi chú..."
+            placeholder={translateText("Tìm tên bé, mã số, món ăn hoặc ghi chú...")}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-9 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs font-medium rounded-xl border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition"
@@ -231,7 +226,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             <button
               onClick={() => onSearchChange('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition"
-              title="Xóa tìm kiếm"
+              title={translateText("Xóa tìm kiếm")}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -245,16 +240,16 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-teal-600" />
-              <span>Đang lọc:</span>
+              <span>{translateText("Đang lọc:")}</span>
             </span>
 
             {selectedPeriod !== 'week' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 text-[11px] font-bold">
-                <span>Kỳ: {selectedPeriod === 'month' ? 'Tháng 09/2026' : selectedPeriod === 'semester' ? 'Học kỳ I' : 'Tùy chọn'}</span>
+                <span>{translateText("Kỳ: ")}{translateText(selectedPeriod === 'month' ? 'Tháng 09/2026' : selectedPeriod === 'semester' ? 'Học kỳ I' : 'Tùy chọn')}</span>
                 <button
                   onClick={() => onPeriodChange('week')}
                   className="hover:text-teal-950 p-0.5"
-                  title="Quay lại tuần này"
+                  title={translateText("Quay lại tuần này")}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -263,11 +258,11 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
 
             {selectedStatus !== 'ALL' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-bold">
-                <span>Trạng thái: {getStatusLabel(selectedStatus)}</span>
+                <span>{translateText("Trạng thái: ")}{translateText(getStatusLabel(selectedStatus))}</span>
                 <button
                   onClick={() => onStatusChange('ALL')}
                   className="hover:text-amber-950 p-0.5"
-                  title="Xóa lọc trạng thái"
+                  title={translateText("Xóa lọc trạng thái")}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -276,11 +271,11 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
 
             {searchQuery.trim() !== '' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 text-[11px] font-bold">
-                <span>Từ khóa: "{searchQuery}"</span>
+                <span>{translateText("Từ khóa: \"")}{translateText(searchQuery)}"</span>
                 <button
                   onClick={() => onSearchChange('')}
                   className="hover:text-sky-950 p-0.5"
-                  title="Xóa từ khóa"
+                  title={translateText("Xóa từ khóa")}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -288,9 +283,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             )}
 
             {typeof totalFilteredItems === 'number' && (
-              <span className="text-[11px] text-slate-500 font-medium pl-1">
-                (Tìm thấy <strong>{totalFilteredItems}</strong> bản ghi)
-              </span>
+              <span className="text-[11px] text-slate-500 font-medium pl-1">{translateText("(Tìm thấy ")}<strong>{totalFilteredItems}</strong>{translateText(" bản ghi)")}</span>
             )}
           </div>
 
@@ -299,7 +292,7 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             className="flex items-center gap-1 text-[11px] font-extrabold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded-lg transition"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Xóa tất cả bộ lọc</span>
+            <span>{translateText("Xóa tất cả bộ lọc")}</span>
           </button>
         </div>
       )}

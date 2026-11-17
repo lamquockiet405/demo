@@ -185,6 +185,7 @@ CREATE TABLE food_ingredients (
     vitamin_c_mg        NUMERIC(8,2) NOT NULL DEFAULT 0,
     refuse_rate_percent NUMERIC(5,2) NOT NULL DEFAULT 0
                             CHECK (refuse_rate_percent >= 0 AND refuse_rate_percent <= 100),
+    image_url           VARCHAR(500),
     status              VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
                             CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
@@ -211,6 +212,7 @@ CREATE TABLE dishes (
     name                    VARCHAR(150) NOT NULL,
     description             TEXT,
     standard_serving_size_g NUMERIC(8,2) NOT NULL DEFAULT 100,
+    image_url               VARCHAR(500),
     status                  VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
                                 CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
@@ -434,7 +436,9 @@ CREATE TABLE snack_registrations (
     parent_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status        VARCHAR(20) NOT NULL DEFAULT 'PENDING'
                       CHECK (status IN ('PENDING', 'PAID', 'CANCELLED')),
-    registered_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    registered_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_reminded_at TIMESTAMPTZ,
+    reminder_count INT DEFAULT 0
 );
 
 CREATE INDEX idx_snack_reg_period ON snack_registrations(period_id);
@@ -747,14 +751,17 @@ INSERT INTO roles (code, name) VALUES
 -- ============================================================================
 
 INSERT INTO allergens (code, name, description) VALUES
-    ('MILK',       'Sữa bò',       'Dị ứng protein sữa bò'),
-    ('EGG',        'Trứng',        'Dị ứng trứng gà / vịt'),
-    ('PEANUT',     'Đậu phộng',    'Dị ứng đậu phộng'),
-    ('TREE_NUT',   'Hạt cây',      'Dị ứng hạt cây (hạnh nhân, điều, óc chó…)'),
-    ('SEAFOOD',    'Hải sản',      'Dị ứng tôm, cua, cá…'),
-    ('WHEAT',      'Lúa mì',       'Dị ứng gluten / lúa mì'),
-    ('SOY',        'Đậu nành',     'Dị ứng đậu nành'),
-    ('SESAME',     'Mè (vừng)',    'Dị ứng mè');
+    ('MILK',       'Sữa bò',       'sữa, sữa bò, sữa tươi, yaourt, sữa chua, phô mai, bơ, váng sữa, flan'),
+    ('EGG',        'Trứng',        'trứng, trứng gà, trứng vịt, trứng cút, hột gà, hột vịt'),
+    ('PEANUT',     'Đậu phộng',    'đậu phộng, lạc, bơ đậu phộng'),
+    ('TREE_NUT',   'Hạt cây',      'hạt cây, hạnh nhân, hạt điều, óc chó, hạt dẻ, mắc ca'),
+    ('SEAFOOD',    'Hải sản',      'hải sản, tôm, cua, cá, mực, nghêu, hến, sò, ốc, hàu, ghẹ, tép, chả cá, cá hồi, cá lóc, cá ngừ, cá hú, cá điêu hồng'),
+    ('WHEAT',      'Lúa mì',       'lúa mì, bột mì, bánh mì, bánh bao, mì sợi, hoành thánh, nui'),
+    ('SOY',        'Đậu nành',     'đậu nành, đậu phụ, tàu hũ, đậu hũ, sữa đậu nành'),
+    ('SESAME',     'Mè (vừng)',    'mè, vừng, dầu mè, mè đen, mè trắng'),
+    ('BEEF',       'Thịt bò',      'thịt bò, bò, bắp bò, thăn bò, nạc bò, gầu bò'),
+    ('PORK',       'Thịt heo',     'thịt heo, thịt lợn, heo, lợn, thịt bằm, thịt băm, sườn, ba rọi, chả lụa, xá xíu, lạp xưởng, chà bông'),
+    ('CHICKEN',    'Thịt gà',      'thịt gà, gà, ức gà, đùi gà, cánh gà');
 
 -- ============================================================================
 -- SEED: Default dish categories

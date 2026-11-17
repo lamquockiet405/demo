@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Users,
@@ -418,11 +419,24 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
           ? 1
           : 0;
 
+      const seenCodes = new Set<string>();
       for (let i = startIdx; i < lines.length; i++) {
         const parts = lines[i].split(',').map((s) => s.trim());
         if (parts.length >= 3) {
+          const code = (parts[0] || '').trim();
+          if (!code) {
+            alert(`Dòng ${i + 1}: Mã học sinh không được để trống.`);
+            setImporting(false);
+            return;
+          }
+          if (seenCodes.has(code.toLowerCase())) {
+            alert(`Dòng ${i + 1}: Mã học sinh "${code}" bị trùng lặp trong danh sách.`);
+            setImporting(false);
+            return;
+          }
+          seenCodes.add(code.toLowerCase());
           items.push({
-            studentCode: parts[0] || undefined,
+            studentCode: code,
             lastName: parts[1] || '',
             firstName: parts[2] || '',
             dateOfBirth: parts[3] || '2021-01-01',
@@ -494,8 +508,13 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
 
   const handleCreateChild = async (e: React.FormEvent) => {
     e.preventDefault();
+    const code = (childForm.studentCode || '').trim();
+    if (!code) {
+      alert('Vui lòng nhập Mã học sinh (Mã học sinh không được để trống).');
+      return;
+    }
     try {
-      await childrenApi.createChild(childForm);
+      await childrenApi.createChild({ ...childForm, studentCode: code });
       setIsChildModalOpen(false);
       fetchData();
     } catch (err: any) {
@@ -518,8 +537,8 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
 
   const filteredChildren = children.filter((c) => {
     const matchesSearch =
-      c.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      c.studentCode.toLowerCase().includes(search.toLowerCase());
+      normalizeSearch(c.fullName).includes(normalizeSearch(search)) ||
+      normalizeSearch(c.studentCode).includes(normalizeSearch(search));
     const childClass = (c as any).className || c.class?.name || (classes.find(cls => String(cls.id) === String(c.classId))?.name) || '';
     const matchesClass = selectedClass === 'ALL' || c.class?.id === selectedClass || (c as any).classId === selectedClass || childClass.includes(selectedClass);
     const matchesAllergy =
@@ -924,7 +943,7 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
 
       {/* ─── 5. MODAL DECLARE ALLERGY ─── */}
       {isAllergyModalOpen && targetChild && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed !m-0 inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -1047,7 +1066,7 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
 
       {/* ─── 6. MODAL CREATE CHILD ─── */}
       {isChildModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed !m-0 inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -1197,7 +1216,7 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
 
       {/* ─── MODAL NHẬP DANH SÁCH HỌC SINH TỪ FILE / CSV ─── */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in">
+        <div className="fixed !m-0 inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2.5">

@@ -95,7 +95,29 @@ export class AuthService {
   async login(loginDto: LoginDto, tenantId: number = 1) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
 
-    // Update last login timestamp
+    // Kiểm tra nếu là tài khoản phụ huynh: phải liên kết với ít nhất 1 học sinh mới được đăng nhập
+    const isParent = user.roles?.some(
+      (r) => (r?.code || (r as any)?.name) === 'PARENT'
+    );
+    if (isParent) {
+      const linkedChildren = await this.userRepository.query(
+        `SELECT sp.student_id
+         FROM student_parents sp
+         JOIN students s ON s.id = sp.student_id
+         WHERE sp.parent_id = $1 LIMIT 1`,
+        [user.id]
+      );
+
+      if (!linkedChildren || linkedChildren.length === 0) {
+        throw new UnauthorizedException(
+          'Tài khoản phụ huynh chưa được liên kết với học sinh nào. Vui lòng liên hệ nhà trường để được hỗ trợ liên kết trước khi đăng nhập.'
+        );
+      }
+    }
+
+    const response = await this.generateAuthResponse(user, tenantId);
+
+    // Update last login timestamp only after all login requirements pass.
     user.lastLoginAt = new Date();
     await this.userRepository.update(user.id, { lastLoginAt: user.lastLoginAt });
 
@@ -112,7 +134,7 @@ export class AuthService {
       details: { method: 'PASSWORD_LOGIN', email: user.email },
     }).catch(() => {});
 
-    return this.generateAuthResponse(user, tenantId);
+    return response;
   }
 
   async quickLogin(dto: QuickLoginDto) {
@@ -126,18 +148,26 @@ export class AuthService {
     };
     const dbRoleCode = roleMapping[targetRoleCode] || targetRoleCode;
 
-    const user = await this.userRepository
+    let userQuery = this.userRepository
       .createQueryBuilder('u')
       .innerJoinAndSelect('u.roles', 'r')
       .where('r.code = :code', { code: dbRoleCode })
-      .andWhere("u.status = 'ACTIVE'")
-      .getOne();
+      .andWhere("u.status = 'ACTIVE'");
+
+    if (dbRoleCode === 'PARENT') {
+      userQuery = userQuery.andWhere(
+        "EXISTS (SELECT 1 FROM student_parents sp WHERE sp.parent_id = u.id)"
+      );
+    }
+
+    const user = await userQuery.getOne();
 
     if (!user) {
       throw new NotFoundException(`Không tìm thấy tài khoản mẫu cho vai trò: ${targetRoleCode}`);
     }
 
     const tenantId = Number(dto.tenantId) || 1;
+    const response = await this.generateAuthResponse(user, tenantId, targetRoleCode);
     this.auditLogsService?.logAction({
       tenantId,
       userId: user.id,
@@ -151,10 +181,25 @@ export class AuthService {
       details: { method: 'QUICK_LOGIN', requestedRole: targetRoleCode },
     }).catch(() => {});
 
-    return this.generateAuthResponse(user, tenantId, targetRoleCode);
+    return response;
   }
 
   async generateAuthResponse(user: User, tenantId: number = 1, requestedRoleAlias?: string) {
+    if (user.roles?.some(role => String(role.code || role.name).toUpperCase() === 'TEACHER')) {
+      const assigned = await this.userRepository.query(
+        `SELECT c.id FROM classes c
+         JOIN academic_year y ON y.id = c.academic_year_id AND y.school_id = c.school_id
+         WHERE c.homeroom_teacher_id = $1 AND c.school_id = $2
+           AND c.status = 'ACTIVE' AND y.status = 'ACTIVE'
+         LIMIT 1`,
+        [user.id, tenantId],
+      );
+      if (!assigned?.length) {
+        throw new UnauthorizedException(
+          'Tài khoản giáo viên chưa được phân công lớp đang hoạt động trong năm học hiện tại. Vui lòng liên hệ Ban giám hiệu để được phân công lớp trước khi đăng nhập.',
+        );
+      }
+    }
     let roles = user.roles?.map((r) => r.code) || [];
 
     // Augment with role alias for frontend route mapping
@@ -184,6 +229,18 @@ export class AuthService {
       expiresIn: this.configService.get<string>('jwt.refreshExpiresIn', '7d'),
     });
 
+    let children: any[] = [];
+    if (roles.includes('PARENT')) {
+      children = await this.userRepository.query(
+        `SELECT s.id, s.full_name as "fullName", s.student_code as "studentCode", s.date_of_birth as "dateOfBirth", s.gender, c.name as "className", c.age_group as "ageGroup"
+         FROM student_parents sp
+         JOIN students s ON s.id = sp.student_id
+         LEFT JOIN classes c ON c.id = s.class_id
+         WHERE sp.parent_id = $1`,
+        [user.id]
+      );
+    }
+
     return {
       user: {
         id: String(user.id),
@@ -193,6 +250,7 @@ export class AuthService {
         avatarUrl: user.avatar || null,
         roles,
         tenantId: String(tenantId),
+        children,
       },
       accessToken,
       refreshToken,
@@ -236,6 +294,18 @@ export class AuthService {
       name: r.name,
     })) || [];
 
+    let children: any[] = [];
+    if (roles.some((r) => (r?.code || (r as any)?.name) === 'PARENT')) {
+      children = await this.userRepository.query(
+        `SELECT s.id, s.full_name as "fullName", s.student_code as "studentCode", s.date_of_birth as "dateOfBirth", s.gender, c.name as "className", c.age_group as "ageGroup"
+         FROM student_parents sp
+         JOIN students s ON s.id = sp.student_id
+         LEFT JOIN classes c ON c.id = s.class_id
+         WHERE sp.parent_id = $1`,
+        [user.id]
+      );
+    }
+
     return {
       id: String(user.id),
       email: user.email,
@@ -246,6 +316,7 @@ export class AuthService {
       twoFactorEnabled: false,
       lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
       roles,
+      children,
     };
   }
 

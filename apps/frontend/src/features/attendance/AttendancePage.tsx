@@ -1,5 +1,10 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { AttendanceHistoryPage } from './AttendanceHistoryPage';
+import { MealEvaluationPage } from './MealEvaluationPage';
+import { MealCoordinationNotesPage } from './MealCoordinationNotesPage';
 import { AttendanceTopNav } from './components/AttendanceTopNav';
 import { AttendanceSubTabs } from './components/AttendanceSubTabs';
 import { AttendanceHeader } from './components/AttendanceHeader';
@@ -14,8 +19,20 @@ import { AttendanceResponse, ClassItem, ChildAttendanceItem, MealOption } from '
 import { Loader2, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { getKitchenSocket } from '../../core/socket';
 
-export const AttendancePage: React.FC = () => {
+interface AttendancePageProps {
+  initialActiveTab?: string;
+  onTabChange?: (tab: string) => void;
+  hideTopNav?: boolean;
+}
+
+export const AttendancePage: React.FC<AttendancePageProps> = ({
+  initialActiveTab,
+  onTabChange,
+  hideTopNav = false,
+}) => {
+  useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // State
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -24,7 +41,30 @@ export const AttendancePage: React.FC = () => {
   const [mealFilter, setMealFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<string>('attendance');
+  const [activeTab, setActiveTab] = useState<string>(
+    () => initialActiveTab || searchParams.get('tab') || 'attendance'
+  );
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (t: string) => {
+    setActiveTab(t);
+    onTabChange?.(t);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (t === 'attendance') {
+        next.delete('tab');
+      } else {
+        next.set('tab', t);
+      }
+      return next;
+    });
+  };
 
   // Attendance Data from Real Database
   const [attendanceData, setAttendanceData] = useState<AttendanceResponse | null>(null);
@@ -96,6 +136,9 @@ export const AttendancePage: React.FC = () => {
         limit: 8,
       });
       setAttendanceData(data);
+      if (data?.kitchenConnection?.isLocked !== undefined) {
+        setIsLocked(Boolean(data.kitchenConnection.isLocked));
+      }
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu điểm danh:', err);
       showToast('Không thể kết nối máy chủ dữ liệu điểm danh', 'error');
@@ -201,12 +244,15 @@ export const AttendancePage: React.FC = () => {
     if (!selectedClassId) return;
     setIsLocking(true);
     try {
+      const nextLocked = !isLocked;
       const res = await attendanceApi.lockAndSendToKitchen({
         classId: selectedClassId,
         date: selectedDate,
+        isLocked: nextLocked,
       });
-      setIsLocked(true);
-      showToast(res.message || 'Đã khóa sổ và gửi số lượng suất ăn tới Bếp Trung Tâm');
+      setIsLocked(nextLocked);
+      showToast(res.message || (nextLocked ? 'Đã khóa sổ và gửi số lượng suất ăn tới Bếp Trung Tâm' : 'Đã mở khóa sổ điều chỉnh'));
+      fetchAttendance();
     } catch (err) {
       console.error('Lỗi khi khóa danh sách gửi bếp:', err);
       showToast('Lỗi khi gửi dữ liệu tới bếp', 'error');
@@ -251,6 +297,18 @@ export const AttendancePage: React.FC = () => {
     );
   };
 
+  if (activeTab === 'history') {
+    return <AttendanceHistoryPage onTabChange={handleTabChange} />;
+  }
+  if (activeTab === 'evaluation') {
+    return <MealEvaluationPage onTabChange={handleTabChange} />;
+  }
+    
+
+  if (activeTab === 'notes') {
+    return <MealCoordinationNotesPage onTabChange={handleTabChange} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 flex flex-col font-sans text-slate-800 antialiased selection:bg-teal-500 selection:text-white pb-16">
       {/* Toast Notification */}
@@ -270,7 +328,7 @@ export const AttendancePage: React.FC = () => {
             ) : (
               <CheckCircle2 className="w-4 h-4" />
             )}
-            <span>{toast.message}</span>
+            <span>{translateText(toast.message)}</span>
             <button onClick={() => setToast(null)} className="ml-2 hover:opacity-80">
               <X className="w-4 h-4" />
             </button>
@@ -279,22 +337,16 @@ export const AttendancePage: React.FC = () => {
       )}
 
       {/* 1. Top Navigation Bar */}
-      <AttendanceTopNav onSearch={(q) => setSearchQuery(q)} />
+      {!hideTopNav && <AttendanceTopNav onSearch={(q) => setSearchQuery(q)} />}
 
       {/* 2. Sub Navigation Tabs */}
       <AttendanceSubTabs
         activeTab={activeTab}
-        onTabChange={(t) => {
-          setActiveTab(t);
-          if (t === 'notes') navigate('/coordination-notes');
-          else if (t === 'evaluation') navigate('/evaluation');
-          else if (t === 'attendance') navigate('/attendance');
-          else if (t === 'history') navigate('/history');
-        }}
+        onTabChange={handleTabChange}
       />
 
       {/* 3. Main Content Container */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-6">
+      <main className="flex-1 w-full px-6 py-6 space-y-6">
         {/* Header & Title */}
         <AttendanceHeader
           classNameTitle={attendanceData?.classInfo.name || 'Lớp Mầm 1 (3-4 tuổi)'}
@@ -339,7 +391,7 @@ export const AttendancePage: React.FC = () => {
         {isLoading && !attendanceData ? (
           <div className="bg-white rounded-3xl p-12 border border-slate-200 text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto" />
-            <p className="text-xs font-bold text-slate-500">Đang truy vấn cơ sở dữ liệu bán trú...</p>
+            <p className="text-xs font-bold text-slate-500">{translateText("Đang truy vấn cơ sở dữ liệu bán trú...")}</p>
           </div>
         ) : attendanceData ? (
           <AttendanceTable
@@ -381,14 +433,13 @@ export const AttendancePage: React.FC = () => {
 
       {/* Footer */}
       <footer className="mt-12 border-t border-slate-200 bg-white py-6 px-6 text-xs text-slate-500">
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-medium">
-            <strong className="text-teal-700">KidMeal</strong> © 2025 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.
-          </p>
+            <strong className="text-teal-700">{translateText("KidMeal")}</strong>{translateText(" © 2025 Hệ thống Giám sát & Nuôi dưỡng Bán trú Chuẩn Mầm non.")}</p>
           <div className="flex items-center gap-6 font-semibold">
-            <span className="hover:text-teal-700 cursor-pointer">Quy chuẩn VSATTP Bộ Giáo dục</span>
-            <span className="hover:text-teal-700 cursor-pointer">Đồng bộ LiveSync Bếp 1 chiều</span>
-            <span className="hover:text-teal-700 cursor-pointer">Hỗ trợ kỹ thuật: <strong>1900 6868</strong></span>
+            <span className="hover:text-teal-700 cursor-pointer">{translateText("Quy chuẩn VSATTP Bộ Giáo dục")}</span>
+            <span className="hover:text-teal-700 cursor-pointer">{translateText("Đồng bộ LiveSync Bếp 1 chiều")}</span>
+            <span className="hover:text-teal-700 cursor-pointer">{translateText("Hỗ trợ kỹ thuật: ")}<strong>1900 6868</strong></span>
           </div>
         </div>
       </footer>

@@ -182,7 +182,7 @@ export const NutritionRulesPage: React.FC = () => {
         );
         showToast(
           "success",
-          "Đã tạo mới quy chuẩn dinh dưỡng Thông tư 28 thành công.",
+          "Đã tạo mới quy chuẩn dinh dưỡng Quy chuẩn Dinh dưỡng thành công.",
         );
       }
       setIsRuleDrawerOpen(false);
@@ -263,7 +263,7 @@ export const NutritionRulesPage: React.FC = () => {
       label: "Quy Chuẩn Áp Dụng",
       val: stats?.activeRulesCount ?? 0,
       unit: "chuẩn",
-      sub: "Thông tư 28 & Chuẩn trường",
+      sub: "Quy chuẩn Dinh dưỡng & Chuẩn trường",
       icon: Scale,
       iconCls: "bg-teal-50 text-teal-600",
       valCls: "text-slate-900",
@@ -358,7 +358,7 @@ export const NutritionRulesPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("BAN GIÁM HIỆU & HIỆU TRƯỞNG")}</span>
-            <span className="text-xs text-slate-400">{translateText("• Thông tư 28/2016 & 01/VBHN-BGDĐT")}</span>
+            <span className="text-xs text-slate-400">{translateText("• Quy chuẩn Dinh dưỡng Mầm non")}</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
             {translateText("Tiêu chuẩn dinh dưỡng & Phân bổ bữa ăn")}
@@ -376,7 +376,7 @@ export const NutritionRulesPage: React.FC = () => {
           </button>
 
           {activeTab === "STANDARDS" && (
-            <>
+            rules.length === 0 ? (
               <button
                 onClick={() => {
                   setEditingRule(null);
@@ -386,7 +386,17 @@ export const NutritionRulesPage: React.FC = () => {
               >
                 <Plus className="w-4 h-4" /> <span>{translateText("Thêm Tiêu Chuẩn Mới")}</span>
               </button>
-            </>
+            ) : (
+              <button
+                onClick={() => {
+                  setEditingRule(rules[0]);
+                  setIsRuleDrawerOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
+              >
+                <Edit3 className="w-4 h-4" /> <span>{translateText("Chỉnh Sửa Tiêu Chuẩn")}</span>
+              </button>
+            )
           )}
 
           {activeTab === "ALLERGENS" && (
@@ -475,7 +485,7 @@ export const NutritionRulesPage: React.FC = () => {
               </span>
             </div>
             <p className="text-slate-600 text-xs mt-0.5">
-              {translateText("Định mức Sáng / Trưa / Chiều, năng lượng Calo, đạm P, béo L, đường G và nước uống (ml) theo Thông tư 28 & 01/VBHN-BGDĐT.")}
+              {translateText("Định mức Sáng / Trưa / Chiều, năng lượng Calo, đạm P, béo L, đường G và nước uống (ml) theo Quy chuẩn Dinh dưỡng Mầm non.")}
             </p>
           </div>
         </div>
@@ -494,7 +504,7 @@ export const NutritionRulesPage: React.FC = () => {
         {[
           {
             id: "STANDARDS" as const,
-            label: translateText("Tiêu Chuẩn Dinh Dưỡng (Thông tư 28)"),
+            label: translateText("Tiêu Chuẩn Dinh Dưỡng (Quy chuẩn Dinh dưỡng)"),
             count: rules.length,
             icon: Scale,
             activeCls: "bg-teal-600 text-white shadow-md shadow-teal-600/25",
@@ -579,16 +589,6 @@ export const NutritionRulesPage: React.FC = () => {
                 <option value="">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
                 <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi) - Chuẩn chung")}</option>
               </select>
-
-              <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={includeDeletedRules}
-                  onChange={(e) => setIncludeDeletedRules(e.target.checked)}
-                  className="w-3.5 h-3.5 text-teal-600 rounded-sm"
-                />
-                <span>{translateText("Xem quy chuẩn đã xóa mềm")}</span>
-              </label>
             </div>
           </div>
 
@@ -639,23 +639,19 @@ export const NutritionRulesPage: React.FC = () => {
                               <div>
                                 <span className="font-bold text-slate-900 block">
                                   {item.name ||
-                                    `Quy chuẩn TT 28 (${item.targetAgeGroup})`}
+                                    `Quy chuẩn Chuẩn Dinh Dưỡng (${item.targetAgeGroup})`}
                                 </span>
                                 <span className="text-[11px] text-slate-400">{translateText("Phạm vi:")}{" "}
-                                  {translateText(item.mealScope === "DAYBOARDING"
-                                    ? "Bán trú tại trường (50-70% Calo)"
-                                    : "Cả ngày (100% Calo)")}
+                                  {translateText("Bán trú tại trường (50-70% Calo)")}
                                 </span>
                               </div>
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
                             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
-                              {translateText(isToddler
-                                ? "Nhà trẻ (12-36 tháng)"
-                                : item.targetAgeGroup === "ALL_AGES"
-                                  ? "Mọi lứa tuổi"
-                                  : "Mẫu giáo (3-6 tuổi)")}
+                              {translateText(item.targetAgeGroup === "ALL_AGES"
+                                ? "Mọi lứa tuổi"
+                                : "Mẫu giáo (3-6 tuổi)")}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-bold text-slate-800">
@@ -707,35 +703,17 @@ export const NutritionRulesPage: React.FC = () => {
                           </td>
                           <td className="py-3.5 px-5 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              {isDeleted ? (
-                                <button
-                                  onClick={() => handleRestoreRule(item)}
-                                  className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs flex items-center gap-1"
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />{" "}
-                                  <span>{translateText("Khôi phục")}</span>
-                                </button>
-                              ) : (
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      setEditingRule(item);
-                                      setIsRuleDrawerOpen(true);
-                                    }}
-                                    className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                    title={translateText("Chỉnh sửa quy chuẩn")}
-                                  >
-                                    <Edit3 className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleSoftDeleteRule(item)}
-                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
-                                    title={translateText("Chuyển vào lưu trữ")}
-                                  >
-                                    <Archive className="w-4 h-4" />
-                                  </button>
-                                </>
-                              )}
+                              <button
+                                onClick={() => {
+                                  setEditingRule(item);
+                                  setIsRuleDrawerOpen(true);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs flex items-center gap-1.5 transition"
+                                title={translateText("Chỉnh sửa quy chuẩn")}
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>{translateText("Chỉnh sửa")}</span>
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -869,7 +847,7 @@ export const NutritionRulesPage: React.FC = () => {
               <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <Scale className="w-4 h-4 text-teal-600" />
-                  <span>{translateText("Cơ Cấu Tỷ Lệ Năng Lượng Thực Tế vs Tiêu Chuẩn Thông Tư 28")}</span>
+                  <span>{translateText("Cơ Cấu Tỷ Lệ Năng Lượng Thực Tế vs Tiêu Chuẩn Dinh Dưỡng")}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
@@ -1014,7 +992,7 @@ export const NutritionRulesPage: React.FC = () => {
         onSubmit={handleAllergenSubmit}
       />
 
-      {/* Modal Đồng Bộ Chuẩn Quốc Gia (VN-RDA 2024 & Thông tư 28/51) */}
+      {/* Modal Đồng Bộ Chuẩn Quốc Gia (VN-RDA 2024 & Quy chuẩn Dinh dưỡng) */}
     </div>
   );
 };

@@ -24,6 +24,41 @@ const MEAL_COLORS: Record<string, { bar: string; dot: string }> = {
 const fmtRange = (r: NutrientRange, digits = 1) =>
   r.min === r.max ? r.min.toFixed(digits) : `${r.min.toFixed(digits)} – ${r.max.toFixed(digits)}`;
 
+// Một số bản ghi cũ đã bị giải mã UTF-8 sai trước khi lưu vào database.
+// Chỉ sửa khi nhận diện đúng mẫu mojibake, không đụng vào tiếng Việt hợp lệ.
+const repairMojibake = (value: string) => {
+  const looksBroken = (text: string) => /[ÃÂâÐ�]|á»|Æ°|Å/.test(text);
+  const windows1252Bytes: Record<number, number> = {
+    0x20ac: 0x80, 0x201a: 0x82, 0x192: 0x83, 0x201e: 0x84,
+    0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x2c6: 0x88,
+    0x2030: 0x89, 0x160: 0x8a, 0x2039: 0x8b, 0x152: 0x8c,
+    0x17d: 0x8e, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93,
+    0x201d: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97,
+    0x2dc: 0x98, 0x2122: 0x99, 0x161: 0x9a, 0x203a: 0x9b,
+    0x153: 0x9c, 0x17e: 0x9e, 0x178: 0x9f,
+  };
+  let current = value;
+
+  // Dữ liệu cũ có thể bị encode sai hơn một lần (UTF-8 -> Latin-1 -> UTF-8),
+  // vì vậy cần giải mã lặp, nhưng chỉ khi chuỗi còn dấu hiệu mojibake.
+  for (let attempt = 0; attempt < 3 && looksBroken(current); attempt += 1) {
+    try {
+      const bytes = Uint8Array.from(current, char => {
+        const code = char.charCodeAt(0);
+        return windows1252Bytes[code] ?? code;
+      });
+      const repaired = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      if (repaired.includes('�') || repaired === current) break;
+      current = repaired;
+    } catch {
+      break;
+    }
+  }
+  return current;
+};
+
+const displayText = (value: string) => translateText(repairMojibake(value));
+
 const NutrientCells: React.FC<{ target: MealNutrientTarget; strong?: boolean }> = ({ target, strong }) => (
   <>
     <td className={`py-3 px-3 text-right ${strong ? 'font-black text-slate-900' : 'font-bold text-slate-800'}`}>{fmtRange(target.energyKcal, 0)}</td>
@@ -177,8 +212,8 @@ export const MealDistributionPanel: React.FC<{ canEdit?: boolean }> = ({ canEdit
               {overview.meals.map(m => {
                 const mid = (m.energyPct.min + m.energyPct.max) / 2;
                 return (
-                  <div key={m.id} className={`${MEAL_COLORS[m.mealType]?.bar || 'bg-sky-500'} text-white text-[10px] font-bold flex items-center justify-center truncate`} style={{ width: `${mid}%` }} title={`${m.mealLabel}: ${fmtRange(m.energyPct, 0)}%`}>
-                    {mid >= 6 ? `${translateText(m.mealLabel)} ${fmtRange(m.energyPct, 0)}%` : ''}
+                  <div key={m.id} className={`${MEAL_COLORS[m.mealType]?.bar || 'bg-sky-500'} text-white text-[10px] font-bold flex items-center justify-center truncate`} style={{ width: `${mid}%` }} title={`${displayText(m.mealLabel)}: ${fmtRange(m.energyPct, 0)}%`}>
+                    {mid >= 6 ? `${displayText(m.mealLabel)} ${fmtRange(m.energyPct, 0)}%` : ''}
                   </div>
                 );
               })}
@@ -216,7 +251,7 @@ export const MealDistributionPanel: React.FC<{ canEdit?: boolean }> = ({ canEdit
                       <td className="py-3 px-5 font-bold text-slate-900">
                         <span className="inline-flex items-center gap-2">
                           <span className={`w-2.5 h-2.5 rounded-full ${MEAL_COLORS[m.mealType]?.dot || 'bg-sky-500'}`} />
-                          {translateText(m.mealLabel)}
+                          {displayText(m.mealLabel)}
                         </span>
                       </td>
                       <td className="py-3 px-3 text-slate-500">{m.mealTime || '—'}</td>
@@ -241,7 +276,7 @@ export const MealDistributionPanel: React.FC<{ canEdit?: boolean }> = ({ canEdit
                         )}
                       </td>
                       <NutrientCells target={m} />
-                      <td className="py-3 px-5 text-[11px] text-slate-500 max-w-xs">{translateText(m.note || '')}</td>
+                    <td className="py-3 px-5 text-[11px] text-slate-500 max-w-xs">{displayText(m.note || '')}</td>
                     </tr>
                   ))}
                   <tr className="bg-sky-50/60 border-t-2 border-sky-100">

@@ -1,4 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateChildDto {
@@ -6,6 +7,16 @@ export class UpdateChildDto {
   @IsOptional()
   @IsString()
   fullName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lastName?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -19,6 +30,8 @@ export class UpdateChildDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Mã lớp phải là số' })
   classId?: number;
 
   @ApiPropertyOptional()
@@ -35,4 +48,39 @@ export class UpdateChildDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  emergencyContactName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  emergencyContactPhone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+    @ApiPropertyOptional({ example: 'Nguyễn Gia Bảo' })
+  @IsOptional()
+  @IsString()
+  parentName?: string;
+
+  @ApiPropertyOptional({ example: 'phuhuynh.huy@gmail.com' })
+  @IsOptional()
+  @IsString()
+  parentEmail?: string;
+
+  @ApiPropertyOptional({ example: '0908111222' })
+  @IsOptional()
+  @IsString()
+  parentPhone?: string;
+
+  @ApiPropertyOptional({ example: 'FATHER', enum: ['FATHER', 'MOTHER', 'GUARDIAN'] })
+  @IsOptional()
+  @IsString()
+  parentRelationship?: string;
+
+  medicalNotes?: string;
 }

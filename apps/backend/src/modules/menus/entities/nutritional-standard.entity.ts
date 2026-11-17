@@ -12,6 +12,15 @@ export class NutritionalStandard {
   @Column({ name: 'meal_scope', length: 20 })
   mealScope: string;
 
+  @Column({ name: 'protein_factor_code', length: 20, default: 'PROTEIN' })
+  proteinFactorCode: string;
+
+  @Column({ name: 'fat_factor_code', length: 20, default: 'FAT' })
+  fatFactorCode: string;
+
+  @Column({ name: 'carb_factor_code', length: 20, default: 'CARB' })
+  carbFactorCode: string;
+
   @Column({ name: 'min_energy_kcal', type: 'numeric', precision: 6, scale: 1, transformer: NumericTransformer })
   minEnergyKcal: number;
 

@@ -107,6 +107,7 @@ export interface TodayMealData {
   dateLabel: string;
   timeLabel: string;
   session: string;
+  calories?: string;
   dishes: MealDishItem[];
   allergyControl: string;
   nutritionStandard: {
@@ -135,6 +136,7 @@ export interface ParentHistoryItem {
   content: string;
   category: string;
   date: string;
+  feedbackDate?: string;
   status: string;
   statusLabel: string;
   responseContent?: string;
@@ -151,6 +153,20 @@ export interface ParentPortalData {
   todayMeal: TodayMealData;
   stats: PortalStatsData;
   history: ParentHistoryItem[];
+  feedbackDate?: string;
+  mealType?: string;
+  currentEvaluation?: SavedMealEvaluation | null;
+}
+
+export interface SavedMealEvaluation {
+  id: string;
+  childId: string;
+  feedbackDate: string;
+  mealType: string;
+  rating: number;
+  content: string;
+  isDrafting: boolean;
+  attributes?: SubmitEvaluationPayload['attributes'];
 }
 
 export interface SubmitEvaluationPayload {
@@ -174,6 +190,8 @@ export interface SubmitEvaluationPayload {
     taste?: string;
     allergy?: string;
     portion?: string;
+    appetite?: string;
+    tags?: string | string[];
   };
   photos?: string[];
 }
@@ -187,6 +205,8 @@ export interface DayTabItem {
 }
 
 export interface MealSessionRecord {
+  evaluationId?: string | null;
+  hasEvaluated?: boolean;
   attendanceId: string;
   mealType: string;
   mealSession: string;

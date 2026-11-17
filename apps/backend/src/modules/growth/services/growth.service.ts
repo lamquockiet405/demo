@@ -1,3 +1,5 @@
+import { searchSql, searchLikeSql } from '../../../common/utils/search';
+import { currentStudent, currentStudentIdsSql, currentYearDateSql } from '../../academic-years/current-year-scope';
 import { Injectable, Optional, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -129,6 +131,8 @@ export class GrowthService {
       .leftJoinAndSelect('record.student', 'student')
       .leftJoinAndSelect('student.class', 'class')
       .leftJoinAndSelect('record.zscore', 'zscore');
+    qb.andWhere(`record.student_id IN (${currentStudentIdsSql(schoolId || 1)})`);
+    qb.andWhere(currentYearDateSql('record.measured_date', schoolId || 1));
 
     if (query.childId || query.studentId) {
       const cId = Number(query.childId || query.studentId);
@@ -146,7 +150,7 @@ export class GrowthService {
 
     if (query.search) {
       qb.andWhere(
-        '(student.fullName ILIKE :search OR student.studentCode ILIKE :search)',
+        `(${searchSql("student.fullName")} LIKE ${searchLikeSql(":search")} OR ${searchSql("student.studentCode")} LIKE ${searchLikeSql(":search")})`,
         { search: `%${query.search}%` },
       );
     }
@@ -208,7 +212,7 @@ export class GrowthService {
 
   async getClassOverview(classId: number) {
     const students = await this.childRepo.find({
-      where: { classId },
+      where: { classId, id: currentStudent() },
       relations: ['class'],
     });
 
@@ -233,6 +237,7 @@ export class GrowthService {
       .createQueryBuilder('record')
       .leftJoinAndSelect('record.zscore', 'zscore')
       .where('record.student_id IN (:...studentIds)', { studentIds })
+      .andWhere(currentYearDateSql('record.measured_date'))
       .orderBy('record.measured_date', 'DESC')
       .getMany();
 
@@ -331,6 +336,9 @@ export class GrowthService {
       zscore.haz = growth.haz;
       zscore.baz = growth.baz;
       zscore.classification = growth.classification;
+      zscore.wazStandardId = growth.wazStandardId;
+      zscore.hazStandardId = growth.hazStandardId;
+      zscore.bazStandardId = growth.bazStandardId;
       await this.zscoreRepo.save(zscore);
     } else {
       zscore = this.zscoreRepo.create({
@@ -339,6 +347,9 @@ export class GrowthService {
         haz: growth.haz,
         baz: growth.baz,
         classification: growth.classification,
+        wazStandardId: growth.wazStandardId,
+        hazStandardId: growth.hazStandardId,
+        bazStandardId: growth.bazStandardId,
       });
       await this.zscoreRepo.save(zscore);
     }
@@ -382,6 +393,9 @@ export class GrowthService {
       zscore.haz = growth.haz;
       zscore.baz = growth.baz;
       zscore.classification = growth.classification;
+      zscore.wazStandardId = growth.wazStandardId;
+      zscore.hazStandardId = growth.hazStandardId;
+      zscore.bazStandardId = growth.bazStandardId;
       await this.zscoreRepo.save(zscore);
       record.zscore = zscore;
     }

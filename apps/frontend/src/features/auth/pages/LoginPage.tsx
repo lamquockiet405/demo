@@ -174,16 +174,14 @@ export const LoginPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-6 text-xs text-slate-500">
           <LanguageSwitcher />
-          <div className="hidden md:flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{translateText("Máy chủ vận hành ổn định")}</span>
-          </div>
-          <div className="hidden lg:flex items-center gap-1.5">
-            <Phone className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="font-semibold text-slate-700">
-              {schoolBranding.phone ? `Hotline: ${schoolBranding.phone}` : translateText("Hotline: 1900 6826")}
-            </span>
-          </div>
+          {schoolBranding.phone && (
+            <div className="hidden lg:flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="font-semibold text-slate-700">
+                Hotline: {schoolBranding.phone}
+              </span>
+            </div>
+          )}
         </div>
       </header>
 
@@ -340,12 +338,6 @@ export const LoginPage: React.FC = () => {
                 )}
               </button>
             </form>
-
-            {/* Security badge */}
-            <div className="mt-8 text-center">
-              <p className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
-                <Shield className="w-3 h-3 text-emerald-500" />{translateText("Bảo mật mã hóa SSL 256-bit • Dành riêng cho cán bộ, giáo viên & phụ huynh mầm non")}</p>
-            </div>
           </div>
         </div>
       </main>

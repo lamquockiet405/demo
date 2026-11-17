@@ -25,8 +25,8 @@ export default () => ({
   },
 
   vnpay: {
-    tmnCode: process.env.VNPAY_TMN_CODE || 'SANDBOX01TMN',
-    hashSecret: process.env.VNPAY_HASH_SECRET || 'SECRETSECRETSECRETSECRETSECRET123',
+    tmnCode: process.env.VNPAY_TMN_CODE || '6JM89YDG',
+    hashSecret: process.env.VNPAY_HASH_SECRET || 'JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL',
     url: process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
     returnUrl: process.env.VNPAY_RETURN_URL || 'http://localhost:5173/payments/vnpay-return',
   },

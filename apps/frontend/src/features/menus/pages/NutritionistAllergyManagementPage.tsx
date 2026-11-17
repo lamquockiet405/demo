@@ -1,3 +1,5 @@
+import { normalizeSearch } from '../../../core/utils/search';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useMemo } from "react";
@@ -24,6 +26,7 @@ import {
   Archive,
 } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
+import { useAuthStore } from '../../../core/stores/auth.store';
 import {
   nutritionEngineApi,
   AllergenCatalog,
@@ -99,9 +102,13 @@ export const NutritionistAllergyManagementPage: React.FC<
   NutritionistAllergyManagementPageProps
 > = ({ embedded = false, onCatalogChange }) => {
   useLanguage();
-  const [activeTab, setActiveTab] = useState<"DIRECTORY" | "CATALOG">(
-    "DIRECTORY",
+  const user = useAuthStore(state => state.user);
+  const canManage = (user?.roles || []).some((role: any) =>
+    ['SCHOOL_MANAGER', 'SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN'].includes(
+      String(typeof role === 'string' ? role : role.code).toUpperCase(),
+    ),
   );
+
   const [isLoading, setIsLoading] = useState(true);
   const [allChildren, setAllChildren] = useState<ChildWithAllergy[]>([]);
   const [allergensList, setAllergensList] = useState<AllergenStandard[]>([]);
@@ -111,6 +118,8 @@ export const NutritionistAllergyManagementPage: React.FC<
   const [selectedClassId, setSelectedClassId] = useState("ALL");
   const [selectedAllergenCode, setSelectedAllergenCode] = useState("ALL");
   const [selectedSeverity, setSelectedSeverity] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [catalogSearch, setCatalogSearch] = useState("");
   const [includeDeletedCatalog, setIncludeDeletedCatalog] = useState(false);
 
@@ -196,16 +205,16 @@ export const NutritionistAllergyManagementPage: React.FC<
   );
 
   const filteredAllergicChildren = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = normalizeSearch(searchQuery.trim());
     return allergicChildren.filter((c) => {
       const matchQ =
         !q ||
-        c.fullName.toLowerCase().includes(q) ||
-        c.studentCode.toLowerCase().includes(q) ||
+        normalizeSearch(c.fullName).includes(q) ||
+        normalizeSearch(c.studentCode).includes(q) ||
         c.allergies.some(
           (a) =>
-            a.allergenName.toLowerCase().includes(q) ||
-            (a.note || "").toLowerCase().includes(q),
+            normalizeSearch(a.allergenName).includes(q) ||
+            normalizeSearch((a.note || "")).includes(q),
         );
       const matchCls =
         selectedClassId === "ALL" ||
@@ -230,6 +239,18 @@ export const NutritionistAllergyManagementPage: React.FC<
     selectedAllergenCode,
     selectedSeverity,
   ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedClassId, selectedAllergenCode, selectedSeverity]);
+
+  const totalItems = filteredAllergicChildren.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedChildren = useMemo(() => {
+    return filteredAllergicChildren.slice(startIndex, endIndex);
+  }, [filteredAllergicChildren, startIndex, endIndex]);
 
   const stats = useMemo(() => {
     const totalAllergic = allergicChildren.length;
@@ -429,39 +450,13 @@ export const NutritionistAllergyManagementPage: React.FC<
     }
   };
 
-  const handleExportCSV = () => {
-    if (allergicChildren.length === 0)
-      return showToast("Chưa có dữ liệu học sinh dị ứng để xuất file", "error");
-    const headers = [
-      "Mã Học Sinh",
-      "Họ Và Tên",
-      "Lớp Học",
-      "Chất Dị Ứng",
-      "Mức Độ Nguy Cơ",
-      "Triệu Chứng & Ghi Chú Cách Ly",
-      "Ngày Khai Báo",
-    ];
-    const rows = allergicChildren.flatMap((c) =>
-      c.allergies.map((a) => [
-        `"${c.studentCode}"`,
-        `"${c.fullName}"`,
-        `"${c.className || "Chưa phân lớp"}"`,
-        `"${a.allergenName}"`,
-        `"${a.severity === "HIGH" ? "Nguy cơ cao" : a.severity === "MEDIUM" ? "Trung bình" : "Nhẹ"}"`,
-        `"${(a.note || "").replace(/"/g, '""')}"`,
-        `"${a.declaredAt ? new Date(a.declaredAt).toLocaleDateString(getLocale()) : ""}"`,
-      ]),
-    );
-    const csvContent =
-      "\uFEFF" +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `KidMeal_Danh_Sach_Tre_Di_Ung_${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    showToast("Đã xuất file báo cáo dị ứng thành công");
+  const handleExportExcel = async () => {
+    if (!allergicChildren.length) return showToast('Chưa có dữ liệu học sinh dị ứng để xuất file', 'error');
+    const ok = await downloadExcel(`Danh_Sach_Tre_Di_Ung_${new Date().toISOString().slice(0, 10)}.xlsx`, [
+      ['Mã học sinh', 'Họ và tên', 'Lớp học', 'Chất dị ứng', 'Mức độ nguy cơ', 'Triệu chứng và ghi chú', 'Ngày khai báo'],
+      ...allergicChildren.flatMap(c => c.allergies.map(a => [c.studentCode, c.fullName, c.className || 'Chưa phân lớp', a.allergenName, a.severity === 'HIGH' ? 'Nguy cơ cao' : a.severity === 'MEDIUM' ? 'Trung bình' : 'Nhẹ', a.note, a.declaredAt?.slice(0, 10)])),
+    ], 'Danh sách học sinh dị ứng');
+    if (ok) showToast('Đã xuất file Excel báo cáo dị ứng thành công');
   };
 
   return (
@@ -493,20 +488,20 @@ export const NutritionistAllergyManagementPage: React.FC<
       <div className="bg-gradient-to-r from-[#0d3429] via-[#114b3b] to-[#1c382f] rounded-3xl p-6 text-white shadow-xl border border-emerald-800/40 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-1.5 max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />{translateText("Quy Tắc An Toàn Thực Phẩm Codex CXC 80-2020 & Bộ Y Tế")}</div>
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />{translateText("Quy Tắc An Toàn Thực Phẩm & Kiểm Soát Dị Ứng")}</div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">{translateText("Cấu Hình Quy Tắc Dị Ứng & Hồ Sơ Cách Ly Khẩu Phần Mầm Non")}</h2>
-          <p className="text-emerald-100 text-xs leading-relaxed">{translateText("Quản trị danh mục dị nguyên chuẩn Codex, phân tầng 3 mức độ phản vệ (Nhẹ • Trung bình • Phản vệ cấp tính), chống nhiễm chéo dụng cụ nấu và in thẻ cảnh báo bàn ăn.")}</p>
+          <p className="text-emerald-100 text-xs leading-relaxed">{translateText("Quản trị danh mục dị ứng chuẩn, phân tầng 3 mức độ phản vệ (Nhẹ • Trung bình • Phản vệ cấp tính), chống nhiễm chéo dụng cụ nấu và in thẻ cảnh báo bàn ăn.")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
-            onClick={handleExportCSV}
+            onClick={handleExportExcel}
             className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
-            <span>{translateText("Xuất Excel/CSV")}</span>
+            <span>{translateText("Xuất Excel")}</span>
           </button>
-          <button
+          {canManage && (<button
             onClick={() => {
               setEditingCatalogItem(null);
               setIsAllergenDrawerOpen(true);
@@ -515,14 +510,14 @@ export const NutritionistAllergyManagementPage: React.FC<
           >
             <Plus className="w-4 h-4" />
             <span>{translateText("Thêm Nhóm Dị Ứng")}</span>
-          </button>
-          <button
+          </button>)}
+          {canManage && (<button
             onClick={() => setIsDeclareModalOpen(true)}
             className="px-4 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-black text-xs shadow-lg transition flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>{translateText("Khai Báo Hồ Sơ Trẻ")}</span>
-          </button>
+          </button>)}
         </div>
       </div>
 
@@ -610,46 +605,8 @@ export const NutritionistAllergyManagementPage: React.FC<
         </div>
       )}
 
-      {/* Sub-navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-        <button
-          onClick={() => setActiveTab("DIRECTORY")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            activeTab === "DIRECTORY"
-              ? "bg-rose-600 text-white shadow-md shadow-rose-600/25"
-              : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <ShieldAlert className="w-4 h-4" />
-          <span>{translateText("Danh Sách Học Sinh Dị Ứng")}</span>
-          <span
-            className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === "DIRECTORY" ? "bg-rose-700 text-rose-100" : "bg-slate-200 text-slate-700"}`}
-          >
-            {allergicChildren.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("CATALOG")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-            activeTab === "CATALOG"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
-              : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          <span>{translateText("Danh Mục Dị Ứng Codex & Quy Tắc Xử Trí (UC43)")}</span>
-          <span
-            className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === "CATALOG" ? "bg-indigo-700 text-indigo-100" : "bg-slate-200 text-slate-700"}`}
-          >
-            {allergensList.length}
-          </span>
-        </button>
-      </div>
-
-      {/* TAB 1: DIRECTORY */}
-      {activeTab === "DIRECTORY" && (
-        <div className="space-y-4">
+      {/* DIRECTORY: Danh Sách Học Sinh Dị Ứng */}
+      <div className="space-y-4">
           <div className="bg-white border border-slate-200/80 rounded-3xl p-4 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -707,6 +664,8 @@ export const NutritionistAllergyManagementPage: React.FC<
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
+
+
             </div>
           </div>
 
@@ -745,7 +704,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                       </td>
                     </tr>
                   ) : (
-                    filteredAllergicChildren.map((child) => (
+                    paginatedChildren.map((child) => (
                       <tr
                         key={child.id}
                         className="hover:bg-slate-50/70 transition-colors"
@@ -815,7 +774,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                             >
                               <Printer className="w-4 h-4" />
                             </button>
-                            {child.allergies[0] && (
+                            {canManage && child.allergies[0] && (
                               <>
                                 <button
                                   onClick={() => {
@@ -858,183 +817,78 @@ export const NutritionistAllergyManagementPage: React.FC<
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* TAB 2: CATALOG & ALLERGY RULES (UC43) */}
-      {activeTab === "CATALOG" && (
-        <div className="space-y-5">
-          {/* Toolbar Tìm kiếm & Thêm mới Danh mục Dị ứng */}
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={catalogSearch}
-                onChange={(e) => setCatalogSearch(e.target.value)}
-                placeholder={translateText("Tìm mã dị nguyên (MILK, PEANUT...) hoặc thực phẩm cảnh báo...")}
-                className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={includeDeletedCatalog}
-                  onChange={(e) => setIncludeDeletedCatalog(e.target.checked)}
-                  className="w-3.5 h-3.5 text-indigo-600 rounded-sm"
-                />
-                <span>{translateText("Hiện nhóm đã lưu trữ")}</span>
-              </label>
-              <button
-                onClick={() => {
-                  setEditingCatalogItem(null);
-                  setIsAllergenDrawerOpen(true);
-                }}
-                className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{translateText("Thêm Dị Nguyên Mới")}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 3-Tier Allergy Rule Protocol Banner (Codex CXC 80-2020) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                level: translateText("MỨC 1: NHẸ / BẤT DUNG NẠP (LOW)"),
-                color: "border-blue-200 bg-blue-50/60 text-blue-900",
-                rule: translateText("Ghi chú chia phần hạn chế dị nguyên; thay thế tinh bột/sữa không chứa lactose hoặc gluten tương đương."),
-              },
-              {
-                level: translateText("MỨC 2: TRUNG BÌNH (MEDIUM)"),
-                color: "border-amber-200 bg-amber-50/60 text-amber-900",
-                rule: translateText("Rule Engine cảnh báo vàng; bắt buộc tách khẩu phần hoặc đổi sang nguyên liệu đạm an toàn tương đương Calo."),
-              },
-              {
-                level: translateText("MỨC 3: NGUY CƠ PHẢN VỆ (HIGH / CRITICAL)"),
-                color: "border-red-200 bg-red-50/60 text-red-900",
-                rule: translateText("Rule Engine chặn cảnh báo đỏ; nấu nồi/dụng cụ riêng chống nhiễm chéo (CXC 80-2020), dán thẻ đỏ khay ăn & sẵn sàng phác đồ cấp cứu."),
-              },
-            ].map((p) => (
-              <div
-                key={p.level}
-                className={`p-4 rounded-2xl border space-y-1.5 ${p.color}`}
-              >
-                <span className="text-[11px] font-black uppercase tracking-wider block">
-                  {translateText(p.level)}
+            {/* Pagination Controls */}
+            <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <span>
+                  {totalItems > 0
+                    ? `Hiển thị ${startIndex + 1} - ${endIndex} trên tổng số ${totalItems} học sinh dị ứng`
+                    : translateText("Không có học sinh dị ứng phù hợp")}
                 </span>
-                <p className="text-xs leading-relaxed opacity-90">{translateText(p.rule)}</p>
               </div>
-            ))}
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {allergensList.map((item) => (
-              <div
-                key={item.id}
-                className={`bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between ${
-                  item.isDeleted ? "opacity-60 bg-slate-50" : ""
-                }`}
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black text-sm">
-                      <ShieldAlert className="w-5 h-5" />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
-                        {translateText(item.code)}
-                      </span>
-                      {item.isDeleted ? (
-                        <button
-                          onClick={() => handleRestoreCatalog(item)}
-                          className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg"
-                          title={translateText("Khôi phục")}
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => {
-                              setEditingCatalogItem(item as any);
-                              setIsAllergenDrawerOpen(true);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                            title={translateText("Chỉnh sửa quy tắc dị nguyên")}
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          {!item.isSystemStandard && (
-                            <button
-                              onClick={() => handleSoftDeleteCatalog(item)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                              title={translateText("Lưu trữ (Xóa mềm)")}
-                            >
-                              <Archive className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <h3 className="text-sm font-bold text-slate-900 mt-3">
-                    {item.nameVi || item.name}
-                  </h3>
-                  {item.nameEn && (
-                    <p className="text-[11px] text-slate-400 italic">
-                      {translateText(item.nameEn)}
-                    </p>
-                  )}
-
-                  <div className="mt-3 p-2.5 bg-slate-50 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("Thực phẩm & Quy tắc cảnh báo:")}</span>
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      {translateText(item.commonFoods || item.description || "Chưa cập nhật")}
-                    </p>
-                  </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-500 font-medium">{translateText("Số lượng/trang:")}</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="px-2.5 py-1 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                  <span
-                    className={`font-semibold px-2 py-0.5 rounded-full ${item.isSystemStandard ? "text-amber-700 bg-amber-50" : "text-indigo-700 bg-indigo-50"}`}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="p-1.5 px-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed font-bold transition"
+                    title={translateText("Trang trước")}
                   >
-                    {translateText(item.isSystemStandard
-                      ? "Chuẩn Codex / BYT"
-                      : "Quy tắc Trường")}
+                    ‹
+                  </button>
+                  <span className="px-2 font-bold text-slate-700">
+                    {`Trang ${currentPage} / ${totalPages}`}
                   </span>
-                  <span
-                    className={
-                      item.isDeleted
-                        ? "text-slate-400 font-bold"
-                        : "text-emerald-700 font-bold"
-                    }
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="p-1.5 px-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed font-bold transition"
+                    title={translateText("Trang sau")}
                   >
-                    {translateText(item.isDeleted ? "Đã lưu trữ" : "✓ Đang kích hoạt")}
-                  </span>
+                    ›
+                  </button>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      )}
+
+      {/* TAB 2: CATALOG & ALLERGY RULES */}
+
 
       {/* Drawer Thêm/Sửa Nhóm Dị Ứng */}
-      <AllergenDrawer
+      {canManage && (<AllergenDrawer
         isOpen={isAllergenDrawerOpen}
         allergen={editingCatalogItem}
         isLoading={isSubmitting}
         onClose={() => setIsAllergenDrawerOpen(false)}
         onSubmit={handleCatalogSubmit}
-      />
+      />)}
 
       {/* MODAL 1: KHAI BÁO DỊ ỨNG HỌC SINH */}
-      {isDeclareModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      {canManage && isDeclareModalOpen && (
+        <div className="fixed !m-0 inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
@@ -1088,7 +942,7 @@ export const NutritionistAllergyManagementPage: React.FC<
                   required
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 font-semibold bg-white"
                 >
-                  <option value="">{translateText("-- Chọn nhóm chất dị ứng (Codex/BYT) --")}</option>
+                  <option value="">{translateText("-- Chọn nhóm chất dị ứng chuẩn --")}</option>
                   {allergensList.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.nameVi || a.name} ({translateText(a.code)})
@@ -1164,8 +1018,8 @@ export const NutritionistAllergyManagementPage: React.FC<
       )}
 
       {/* MODAL 2: CẬP NHẬT GHI CHÚ DỊ ỨNG */}
-      {isEditModalOpen && editingAllergy && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      {canManage && isEditModalOpen && editingAllergy && (
+        <div className="fixed !m-0 inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
@@ -1256,7 +1110,7 @@ export const NutritionistAllergyManagementPage: React.FC<
 
       {/* MODAL 3: IN THẺ NHẬN DIỆN BÀN ĂN DỊ ỨNG */}
       {isCardModalOpen && selectedChildForCard && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed !m-0 inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">

@@ -100,7 +100,7 @@ export const PortionPlanSection: React.FC<PortionPlanSectionProps> = ({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base md:text-lg font-black text-slate-800 tracking-tight">
-                Kế hoạch Định lượng Suất ăn Nhà bếp & Dự trù Kho (UC56)
+                Kế hoạch Định lượng Suất ăn Nhà bếp & Dự trù Kho
               </h2>
               <span className="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-sky-200">
                 Tự động tính: {portionPlan.studentCount} suất bán trú thực tế

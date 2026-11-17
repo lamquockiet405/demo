@@ -1,3 +1,4 @@
+import { downloadReportExcel } from '../../core/utils/excel-export';
 import React, { useState, useEffect, useCallback } from 'react';
 import { MealPortionPlanResponse } from './types';
 import { mealPortionsApi } from './api/mealPortionsApi';
@@ -107,16 +108,10 @@ export const MealPortionsPage: React.FC = () => {
   };
 
   // Export Excel CSV
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!data) return;
-    const url = mealPortionsApi.getExportExcelUrl(data.id);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `phieu-du-tru-xuat-kho-tuan-${weekNumber}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('Đã xuất dữ liệu phiếu xuất kho Excel (CSV) từ hệ thống cơ sở dữ liệu!', 'success');
+    const ok = await downloadReportExcel(`phieu-suat-an-tuan-${weekNumber}.xlsx`, 'Kế hoạch suất ăn và nguyên liệu', data);
+    if (ok) showToast('Đã xuất file Excel kế hoạch suất ăn.', 'success');
   };
 
   // Print A4
@@ -156,7 +151,7 @@ export const MealPortionsPage: React.FC = () => {
             <div className="min-h-[500px] flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
               <p className="text-xs font-bold text-slate-500">
-                Đang truy xuất dữ liệu thực tế từ Database PostgreSQL...
+                Đang tải dữ liệu khẩu phần ăn...
               </p>
             </div>
           )}

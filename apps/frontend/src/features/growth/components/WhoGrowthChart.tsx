@@ -1,3 +1,5 @@
+import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from 'react';
 import {
   LineChart,
@@ -36,6 +38,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
   onEditRecord,
   className = '',
 }) => {
+  useLanguage();
   const [metric, setMetric] = useState<'BMI' | 'WEIGHT' | 'HEIGHT'>(defaultMetric);
 
   const gender = (child?.gender?.toUpperCase() === 'FEMALE' ? 'FEMALE' : 'MALE') as 'MALE' | 'FEMALE';
@@ -49,6 +52,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
   const maxBmi = Math.max(0, ...history.map((h) => Number(h.bmi) || 0));
 
   const CustomGrowthTooltip = ({ active, payload, label }: any) => {
+  useLanguage();
     if (!active || !payload || !payload.length) return null;
 
     const currentData = chartData.find((d) => d.month === label);
@@ -91,10 +95,8 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
     return (
       <div className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-slate-200 text-xs min-w-[270px] max-w-xs space-y-2.5">
         <div className="border-b border-slate-100 pb-1.5 flex items-center justify-between">
-          <span className="font-extrabold text-slate-900 text-sm">📅 Mốc: {label}</span>
-          <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
-            Chuẩn WHO 2006 (LMS)
-          </span>
+          <span className="font-extrabold text-slate-900 text-sm">{translateText("📅 Mốc: ")}{translateText(label)}</span>
+          <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">{translateText("Chuẩn khuyến nghị")}</span>
         </div>
 
         {/* Child actual data line */}
@@ -102,7 +104,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
           <div className="flex items-center justify-between gap-1.5">
             <div className="flex items-center gap-1.5 font-bold text-teal-950 truncate">
               <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shrink-0" />
-              <span className="truncate">Bé: {child?.fullName || 'Học sinh'}</span>
+              <span className="truncate">{translateText("Bé: ")}{child?.fullName || translateText('Học sinh')}</span>
             </div>
             {recordAtMonth && (
               <span
@@ -120,14 +122,14 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                     : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                 }`}
               >
-                {recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('béo phì') ||
+                {translateText(recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('béo phì') ||
                 recordAtMonth.bmiClassification === 'OBESE'
                   ? 'Béo phì'
                   : recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('thừa cân')
                   ? 'Thừa cân'
                   : recordAtMonth.overallNutritionalStatus?.toLowerCase().includes('thấp còi')
                   ? 'Thấp còi'
-                  : 'Bình thường'}
+                  : 'Bình thường')}
               </span>
             )}
           </div>
@@ -135,10 +137,10 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
           {recordAtMonth ? (
             <div className="mt-1.5 flex items-baseline justify-between">
               <div>
-                <span className="text-[11px] text-teal-700 font-semibold">{metricTitle}: </span>
+                <span className="text-[11px] text-teal-700 font-semibold">{translateText(metricTitle)}: </span>
                 <span className="text-base font-black text-teal-950">
                   {actualVal}
-                  {unit}
+                  {translateText(unit)}
                 </span>
               </div>
               {diffFromMedian && (
@@ -147,24 +149,21 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                     Number(diffFromMedian) > 0 ? 'text-amber-700' : 'text-slate-600'
                   }`}
                 >
-                  {Number(diffFromMedian) > 0 ? `+${diffFromMedian}` : diffFromMedian}
-                  {unit} vs Median
-                </span>
+                  {translateText(Number(diffFromMedian) > 0 ? `+${diffFromMedian}` : diffFromMedian)}
+                  {translateText(unit)}{translateText(" vs Median")}</span>
               )}
             </div>
           ) : (
             <div className="mt-1 space-y-0.5 text-slate-500">
               <div className="text-[11px] font-semibold text-amber-700 flex items-center gap-1">
-                <span>⚠️ Chưa ghi nhận lần đo tại mốc {label}</span>
+                <span>{translateText("⚠️ Chưa ghi nhận lần đo tại mốc ")}{translateText(label)}</span>
               </div>
               {latestRecord && (
-                <div className="text-[10px] text-slate-600">
-                  Lần đo gần nhất:{' '}
+                <div className="text-[10px] text-slate-600">{translateText("Lần đo gần nhất:")}{' '}
                   <strong className="text-teal-900 font-bold">
                     {latestVal}
-                    {unit}
-                  </strong>{' '}
-                  (lúc {latestRecord.ageInMonths} thg • {new Date(latestRecord.measurementDate).toLocaleDateString('vi-VN')})
+                    {translateText(unit)}
+                  </strong>{' '}{translateText("(lúc ")}{latestRecord.ageInMonths}{translateText(" thg • ")}{translateText(new Date(latestRecord.measurementDate).toLocaleDateString(getLocale()))})
                 </div>
               )}
             </div>
@@ -173,9 +172,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
 
         {/* WHO Reference Thresholds */}
         <div className="space-y-1.5 pt-0.5 text-[11px]">
-          <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-            Các ngưỡng quy chuẩn WHO:
-          </div>
+          <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{translateText("Các ngưỡng chuẩn khuyến nghị:")}</div>
           {payload.map((entry: any, index: number) => {
             if (entry.dataKey.startsWith('actual')) return null;
             return (
@@ -188,8 +185,8 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                   <span className="truncate">{entry.name}:</span>
                 </div>
                 <span className="font-bold text-slate-800 ml-2 shrink-0">
-                  {entry.value}
-                  {unit}
+                  {translateText(entry.value)}
+                  {translateText(unit)}
                 </span>
               </div>
             );
@@ -205,16 +202,13 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
           <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-teal-600" />
-            Biểu Đồ Đường Cong Tăng Trưởng WHO (UC-78)
-          </h3>
+            <TrendingUp className="w-5 h-5 text-teal-600" />{translateText("Biểu Đồ Tăng Trưởng Của Bé")}</h3>
           <p className="text-xs text-slate-500">
             {child ? (
-              <span>
-                Học sinh: <strong className="text-slate-800">{child.fullName}</strong> ({gender === 'FEMALE' ? 'Bé gái 👧' : 'Bé trai 👦'} • {child.studentCode} • {child.class?.name || 'Mầm non'})
+              <span>{translateText("Học sinh: ")}<strong className="text-slate-800">{child.fullName}</strong> ({translateText(gender === 'FEMALE' ? 'Bé gái 👧' : 'Bé trai 👦')} • {child.studentCode} • {child.class?.name || translateText('Mầm non')})
               </span>
             ) : (
-              'Chọn học sinh trong danh sách để xem biểu đồ chi tiết'
+              translateText('Chọn học sinh trong danh sách để xem biểu đồ chi tiết')
             )}
           </p>
         </div>
@@ -230,9 +224,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                   ? 'bg-white text-rose-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-            >
-              📊 Chỉ Số BMI (kg/m²)
-            </button>
+            >{translateText("📊 Chỉ Số BMI (kg/m²)")}</button>
             <button
               type="button"
               onClick={() => setMetric('WEIGHT')}
@@ -241,9 +233,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                   ? 'bg-white text-teal-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-            >
-              ⚖️ Cân Nặng (kg)
-            </button>
+            >{translateText("⚖️ Cân Nặng (kg)")}</button>
             <button
               type="button"
               onClick={() => setMetric('HEIGHT')}
@@ -252,27 +242,30 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                   ? 'bg-white text-sky-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-            >
-              📏 Chiều Cao (cm)
-            </button>
+            >{translateText("📏 Chiều Cao (cm)")}</button>
           </div>
 
           {latestRecord && (
             <div className="flex items-center gap-2">
-              <div className="text-xs font-bold bg-teal-50 text-teal-800 px-3 py-1.5 rounded-2xl border border-teal-200">
-                Lần đo gần nhất: {latestRecord.weightKg} kg • {latestRecord.heightCm} cm • BMI: {latestRecord.bmi}
+              <div className="text-xs font-bold bg-teal-50 text-teal-800 px-3 py-1.5 rounded-2xl border border-teal-200">{translateText("Lần đo gần nhất: ")}{latestRecord.weightKg}{translateText(" kg • ")}{latestRecord.heightCm}{translateText(" cm • BMI: ")}{latestRecord.bmi}
               </div>
               {onEditRecord && (
                 <button
                   type="button"
                   onClick={() => onEditRecord(latestRecord)}
                   className="px-3 py-1.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
-                  title="Sửa số liệu đo lần gần nhất (UC-74)"
+                  title={translateText("Sửa số liệu đo lần gần nhất")}
                 >
                   <Edit3 className="w-3.5 h-3.5" />
-                  <span>Sửa số liệu đo</span>
+                  <span>{translateText("Sửa số liệu đo")}</span>
                 </button>
               )}
+            </div>
+          )}
+
+          {!latestRecord && child && (
+            <div className="text-xs font-semibold bg-amber-50 text-amber-800 px-3 py-1.5 rounded-2xl border border-amber-200">
+              {translateText("Chưa có số liệu cân đo thực tế cho bé này")}
             </div>
           )}
         </div>
@@ -286,7 +279,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+            <XAxis tickFormatter={value => translateText(String(value))} dataKey="month" tick={{ fontSize: 12 }} />
 
             {metric === 'BMI' && (
               <YAxis
@@ -311,7 +304,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
             )}
 
             <Tooltip content={<CustomGrowthTooltip />} />
-            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+            <Legend formatter={value => translateText(String(value))} wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
 
             {/* ReferenceLine horizontal positioning at latest measured point */}
             {latestRecord && (
@@ -344,31 +337,31 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
 
             {metric === 'BMI' && (
               <>
-                <Line type="monotone" dataKey="plus3SdBmi" name="+3 SD (Béo phì nặng)" stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="plus2SdBmi" name="+2 SD (Nguy cơ thừa cân)" stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="medianBmi" name="Chuẩn Trung vị WHO (Median)" stroke="#10b981" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="minus2SdBmi" name="-2 SD (Nguy cơ gầy còm)" stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="actualBmi" name="Chỉ số BMI thực tế của bé (kg/m²)" stroke="#e11d48" strokeWidth={3.5} dot={{ r: 6, fill: '#e11d48', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
+                <Line type="monotone" dataKey="plus3SdBmi" name={translateText("Ngưỡng béo phì")} stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="plus2SdBmi" name={translateText("Nguy cơ thừa cân")} stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="medianBmi" name={translateText("Chuẩn khuyến nghị (Trung bình)")} stroke="#10b981" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="minus2SdBmi" name={translateText("Nguy cơ gầy còm")} stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="actualBmi" name={translateText("Chỉ số BMI thực tế của bé (kg/m²)")} stroke="#e11d48" strokeWidth={3.5} dot={{ r: 6, fill: '#e11d48', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
               </>
             )}
 
             {metric === 'WEIGHT' && (
               <>
-                <Line type="monotone" dataKey="plus3SdWeight" name="+3 SD (Thừa cân nặng)" stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={1.5} />
-                <Line type="monotone" dataKey="plus2SdWeight" name="+2 SD (Nguy cơ thừa cân)" stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="medianWeight" name="Chuẩn Trung vị WHO (Median)" stroke="#10b981" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="minus2SdWeight" name="-2 SD (Nguy cơ nhẹ cân)" stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="actualWeight" name="Cân nặng thực tế của bé (kg)" stroke="#0d9488" strokeWidth={3.5} dot={{ r: 6, fill: '#0d9488', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
+                <Line type="monotone" dataKey="plus3SdWeight" name={translateText("Ngưỡng thừa cân")} stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={1.5} />
+                <Line type="monotone" dataKey="plus2SdWeight" name={translateText("Nguy cơ thừa cân")} stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="medianWeight" name={translateText("Chuẩn khuyến nghị (Trung bình)")} stroke="#10b981" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="minus2SdWeight" name={translateText("Nguy cơ nhẹ cân")} stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="actualWeight" name={translateText("Cân nặng thực tế của bé (kg)")} stroke="#0d9488" strokeWidth={3.5} dot={{ r: 6, fill: '#0d9488', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
               </>
             )}
 
             {metric === 'HEIGHT' && (
               <>
-                <Line type="monotone" dataKey="plus3SdHeight" name="+3 SD (Chiều cao rất vượt trội)" stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={1.5} />
-                <Line type="monotone" dataKey="plus2SdHeight" name="+2 SD (Chiều cao vượt trội)" stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="medianHeight" name="Chuẩn Chiều cao WHO (Median)" stroke="#10b981" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="minus2SdHeight" name="-2 SD (Nguy cơ thấp còi)" stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="actualHeight" name="Chiều cao thực tế của bé (cm)" stroke="#0284c7" strokeWidth={3.5} dot={{ r: 6, fill: '#0284c7', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
+                <Line type="monotone" dataKey="plus3SdHeight" name={translateText("Chiều cao rất vượt trội")} stroke="#dc2626" strokeDasharray="4 4" dot={false} strokeWidth={1.5} />
+                <Line type="monotone" dataKey="plus2SdHeight" name={translateText("Chiều cao vượt trội")} stroke="#f59e0b" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="medianHeight" name={translateText("Chuẩn khuyến nghị (Trung bình)")} stroke="#10b981" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="minus2SdHeight" name={translateText("Nguy cơ thấp còi")} stroke="#ef4444" strokeDasharray="4 4" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="actualHeight" name={translateText("Chiều cao thực tế của bé (cm)")} stroke="#0284c7" strokeWidth={3.5} dot={{ r: 6, fill: '#0284c7', stroke: '#fff', strokeWidth: 2 }} activeDot={{ r: 8 }} connectNulls={true} />
               </>
             )}
           </LineChart>

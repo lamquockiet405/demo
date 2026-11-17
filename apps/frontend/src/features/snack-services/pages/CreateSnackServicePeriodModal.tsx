@@ -34,7 +34,7 @@ const generatePeriodCode = () => {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
-  return `XGC-${year}-T${month}`;
+  return `XGC-${year}-T${month}-Tuan`;
 };
 
 const getAvailableMonths = () => {
@@ -62,7 +62,8 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
   const [isWholeSchool, setIsWholeSchool] = useState(false);
   const [registrationStart, setRegistrationStart] = useState('');
   const [registrationEnd, setRegistrationEnd] = useState('');
-  const [serviceMonths, setServiceMonths] = useState<string[]>([]);
+  const [serviceStartDate, setServiceStartDate] = useState('');
+  const [serviceEndDate, setServiceEndDate] = useState('');
   const [pricePerDay, setPricePerDay] = useState<number>(0);
   const [autoRefund, setAutoRefund] = useState(false);
 
@@ -76,8 +77,6 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
 
   // Form state - Section 3
   const [nutritionNotes, setNutritionNotes] = useState('');
-
-  const availableMonths = getAvailableMonths();
 
   useEffect(() => {
     if (isOpen) {
@@ -115,12 +114,6 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
     );
   };
 
-  const toggleMonth = (month: string) => {
-    setServiceMonths(prev =>
-      prev.includes(month) ? prev.filter(m => m !== month) : [...prev, month]
-    );
-  };
-
   const handleWholeSchool = (checked: boolean) => {
     setIsWholeSchool(checked);
     if (checked) {
@@ -145,7 +138,7 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
       setSubmitMessage({ type: 'error', text: 'Vui lòng chọn thời gian nhận đơn.' });
       return;
     }
-    if (serviceMonths.length === 0) {
+    if (!serviceStartDate || !serviceEndDate) {
       setSubmitMessage({ type: 'error', text: 'Vui lòng chọn ít nhất 1 tháng phục vụ.' });
       return;
     }
@@ -161,7 +154,8 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
         isWholeSchool,
         registrationStart,
         registrationEnd,
-        serviceMonths,
+        startDate: serviceStartDate,
+        endDate: serviceEndDate,
         pricePerUnitPerDay: pricePerDay,
         autoRefundEnabled: autoRefund,
         capacityMode,
@@ -195,9 +189,9 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
   const selectedService = servicesList.find(s => s.id === selectedServiceId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-end">
+    <div className="fixed !m-0 inset-0 z-50 flex items-stretch justify-end">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed !m-0 inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal - Right Panel */}
       <div className="relative w-full max-w-2xl bg-white shadow-2xl border-l border-slate-200 flex flex-col overflow-hidden" style={{ animation: 'slideInRight 0.3s ease-out' }}>
@@ -297,7 +291,7 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
               </div>
             </div>
 
-            {/* Thời gian nhận đơn & tháng phục vụ */}
+            {/* Thời gian nhận đơn & tuần phục vụ */}
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Bắt đầu nhận đơn</label>
@@ -318,22 +312,10 @@ export const CreateSnackServicePeriodModal: React.FC<Props> = ({ isOpen, onClose
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Tháng phục vụ bữa xế</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1.5">Tuần phục vụ bữa xế</label>
                 <div className="flex flex-wrap gap-1.5">
-                  {availableMonths.slice(0, 3).map(m => (
-                    <button
-                      key={m.value}
-                      type="button"
-                      onClick={() => toggleMonth(m.value)}
-                      className={`px-2 py-1 rounded-md text-[10px] font-bold border transition ${
-                        serviceMonths.includes(m.value)
-                          ? 'bg-teal-500 text-white border-teal-500'
-                          : 'bg-white text-slate-500 border-slate-200 hover:border-teal-300'
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
+                  <input type="date" value={serviceStartDate} onChange={(e) => setServiceStartDate(e.target.value)} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium" />
+                  <input type="date" value={serviceEndDate} min={serviceStartDate || undefined} onChange={(e) => setServiceEndDate(e.target.value)} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium" />
                 </div>
               </div>
             </div>

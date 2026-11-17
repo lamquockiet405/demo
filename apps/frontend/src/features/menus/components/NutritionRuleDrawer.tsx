@@ -131,8 +131,8 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
   const setNum = (key: keyof typeof DEFAULT_FORM, val: string) =>
     setForm((prev) => ({ ...prev, [key]: val.trim() ? Number(val) : "" }));
 
-  const applyPreset = (age: string, scope = form.mealScope) =>
-    setForm((prev) => ({ ...prev, targetAgeGroup: age, mealScope: scope }));
+  const applyPreset = (age: string) =>
+    setForm((prev) => ({ ...prev, targetAgeGroup: age, mealScope: "DAYBOARDING" }));
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -199,9 +199,9 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed !m-0 inset-0 z-50 overflow-hidden">
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="fixed !m-0 inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 max-w-lg w-full bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-right">
@@ -216,7 +216,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                   ? "Chỉnh Sửa Tiêu Chuẩn Dinh Dưỡng"
                   : "Thêm Tiêu Chuẩn Dinh Dưỡng Mới")}
               </h2>
-              <p className="text-xs text-slate-400 font-medium">{translateText("Cấu hình năng lượng Calo và tỷ lệ P-L-G chuẩn Thông tư 28")}</p>
+              <p className="text-xs text-slate-400 font-medium">{translateText("Cấu hình năng lượng Calo và tỷ lệ P-L-G chuẩn Quy chuẩn Dinh dưỡng")}</p>
             </div>
           </div>
           <button
@@ -258,20 +258,14 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 <label className="font-bold text-slate-700">{translateText("Nhóm lứa tuổi học sinh ")}<span className="text-red-500">*</span>
                 </label>
                 <span className="text-[11px] text-teal-600 font-semibold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />{translateText(" Gợi ý chuẩn TT 28")}</span>
+                  <Sparkles className="w-3 h-3" />{translateText(" Gợi ý chuẩn Chuẩn Dinh Dưỡng")}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {[
                   {
-                    id: "NHA_TRE",
-                    title: translateText("Nhà trẻ (12 - 36 tháng)"),
-                    desc: "600 - 651 Kcal (60-70%) • P:13-20% L:30-40% G:47-50%",
-                    match: ["TODDLER_18_36M", "NHA_TRE"],
-                  },
-                  {
                     id: "MAU_GIAO",
-                    title: translateText("Mẫu giáo (3 - 6 tuổi)"),
-                    desc: "615 - 726 Kcal (50-55%) • P:13-20% L:25-35% G:52-60%",
+                    title: translateText("Mẫu giáo (3 - 6 tuổi) - Tiêu chuẩn bán trú"),
+                    desc: "615 - 726 Kcal (50-55% cả ngày) • P:13-20% L:25-35% G:52-60%",
                     match: [
                       "KINDERGARTEN_3_4Y",
                       "KINDERGARTEN_4_5Y",
@@ -284,14 +278,10 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                     key={p.id}
                     type="button"
                     onClick={() => applyPreset(p.id)}
-                    className={`py-2 px-3 rounded-xl border text-left font-semibold transition ${
-                      p.match.includes(form.targetAgeGroup)
-                        ? "border-teal-500 bg-teal-50 text-teal-800"
-                        : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                    }`}
+                    className="py-2.5 px-4 rounded-xl border border-teal-500 bg-teal-50 text-teal-800 text-left font-semibold transition"
                   >
                     <p className="font-bold">{translateText(p.title)}</p>
-                    <p className="text-[10px] text-slate-500 font-normal">
+                    <p className="text-[11px] text-teal-600 font-normal">
                       {translateText(p.desc)}
                     </p>
                   </button>
@@ -300,17 +290,11 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1.5">{translateText("Phạm vi bữa ăn áp dụng (Theo Thông tư 28/51)")}</label>
-              <select
-                value={form.mealScope}
-                onChange={(e) =>
-                  applyPreset(form.targetAgeGroup, e.target.value)
-                }
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-semibold text-slate-700 bg-white"
-              >
-                <option value="DAYBOARDING">{translateText("Bán trú tại trường (Nhà trẻ: 2 chính + 1 phụ [60-70%] • Mẫu giáo: 1 chính + 1 phụ [50-55%])")}</option>
-                <option value="FULL_DAY">{translateText("Cả ngày (100% nhu cầu khuyến nghị VN-RDA)")}</option>
-              </select>
+              <label className="block font-bold text-slate-700 mb-1.5">{translateText("Phạm vi bữa ăn áp dụng")}</label>
+              <div className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700 bg-slate-50 flex items-center justify-between">
+                <span>{translateText("Bán trú tại trường (1 bữa trưa chính + 1 bữa phụ xế [50-55% Calo])")}</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 font-bold">{translateText("Mặc định")}</span>
+              </div>
             </div>
           </div>
 
@@ -462,7 +446,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
               </div>
             </div>
             <p className="text-[11px] text-slate-400 italic">
-              {translateText("Theo 01/VBHN-BGDĐT: Mẫu giáo bán trú 800–1.100 ml (cả ngày 1.600–2.000 ml); Nhà trẻ bán trú 500–700 ml (cả ngày 800–1.000 ml).")}
+              {translateText("Nhu cầu khuyến nghị: Mẫu giáo bán trú 800–1.100 ml nước/ngày.")}
             </p>
           </div>
         </form>

@@ -97,10 +97,10 @@ export const RecipeInspectionModal: React.FC<RecipeInspectionModalProps> = ({
   const gPct = sumEnergyCal > 0 ? 100 - pPct - lPct : 0;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed !m-0 inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="fixed !m-0 inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
         onClick={onClose}
       />
 

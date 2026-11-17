@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 
 interface AttendanceSubTabsProps {
@@ -9,6 +11,7 @@ export const AttendanceSubTabs: React.FC<AttendanceSubTabsProps> = ({
   activeTab = 'attendance',
   onTabChange,
 }) => {
+  useLanguage();
   const tabs = [
     { id: 'notes', label: 'Gửi & Xem ghi chú điều phối suất ăn nhanh' },
     { id: 'attendance', label: 'Điểm danh học sinh ăn bán trú' },
@@ -18,7 +21,7 @@ export const AttendanceSubTabs: React.FC<AttendanceSubTabsProps> = ({
 
   return (
     <div className="bg-white border-b border-slate-200 px-6 py-2">
-      <div className="max-w-[1440px] mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="w-full flex items-center gap-2 overflow-x-auto no-scrollbar">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
           return (
@@ -31,7 +34,7 @@ export const AttendanceSubTabs: React.FC<AttendanceSubTabsProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
               }`}
             >
-              {tab.label}
+              {translateText(tab.label)}
             </button>
           );
         })}

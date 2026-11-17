@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../common/utils/search';
 import {
   Injectable,
   NotFoundException,
@@ -62,9 +63,8 @@ export class AllergenRulesService {
             query.includeDeleted === "true" ||
             !a.isDeleted) &&
           (!query.search ||
-            (a.name + " " + a.code + " " + a.description)
-              .toLocaleLowerCase("vi")
-              .includes(query.search.toLocaleLowerCase("vi"))),
+            normalizeSearch((a.name + " " + a.code + " " + a.description))
+              .includes(normalizeSearch(query.search))),
       );
   }
 

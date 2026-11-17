@@ -1,3 +1,6 @@
+import { normalizeSearch } from '../../../core/utils/search';
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { X, ShieldCheck, AlertTriangle, Plus, Trash2, RefreshCw, Search, ChevronDown } from 'lucide-react';
 import { apiClient } from '@/core/api/axios';
@@ -25,6 +28,7 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
   onChange,
   disabled,
 }) => {
+  useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -53,7 +57,7 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
     if (!query || (selectedFood && query === selectedFood.name)) {
       return foods;
     }
-    const qRaw = query.toLowerCase().trim();
+    const qRaw = normalizeSearch(query).trim();
     const qNoTone = removeVietnameseTones(query.trim());
     return foods.filter((f) => {
       const name = (f.name || '').toLowerCase();
@@ -63,7 +67,7 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
   }, [foods, query, selectedFood]);
 
   if (disabled) {
-    return <span className="font-bold text-slate-700">{selectedFood?.name || 'Nguyên liệu'}</span>;
+    return <span className="font-bold text-slate-700">{selectedFood?.name || translateText('Nguyên liệu')}</span>;
   }
 
   return (
@@ -77,7 +81,7 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
             if (!isOpen) setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Nhập chữ tìm hoặc kéo chọn..."
+          placeholder={translateText("Nhập chữ tìm hoặc kéo chọn...")}
           className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-lg pl-2.5 pr-14 py-1.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition"
         />
         <div className="absolute right-1.5 flex items-center gap-0.5 text-slate-400">
@@ -91,7 +95,7 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
                 setIsOpen(true);
               }}
               className="hover:text-slate-600 p-0.5"
-              title="Xóa lựa chọn"
+              title={translateText("Xóa lựa chọn")}
             >
               <X className="w-3 h-3" />
             </button>
@@ -111,12 +115,11 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
       {isOpen && (
         <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100">
           <div className="p-1.5 text-[10px] font-bold text-slate-400 bg-slate-50 uppercase tracking-wider flex justify-between sticky top-0 z-10 border-b border-slate-100">
-            <span>Danh sách nguyên liệu ({filteredFoods.length})</span>
-            <span className="text-emerald-600 font-normal">Kéo cuộn để xem thêm ↓</span>
+            <span>{translateText("Danh sách nguyên liệu (")}{filteredFoods.length})</span>
+            <span className="text-emerald-600 font-normal">{translateText("Kéo cuộn để xem thêm ↓")}</span>
           </div>
           {filteredFoods.length === 0 ? (
-            <div className="p-3 text-center text-xs text-slate-400 italic">
-              Không tìm thấy nguyên liệu nào khớp với "{query}"
+            <div className="p-3 text-center text-xs text-slate-400 italic">{translateText("Không tìm thấy nguyên liệu nào khớp với \"")}{translateText(query)}"
             </div>
           ) : (
             filteredFoods.map((f) => {
@@ -137,13 +140,11 @@ const SearchableFoodSelect: React.FC<SearchableFoodSelectProps> = ({
                   <div className="flex flex-col text-left">
                     <span className="font-semibold text-slate-800">{f.name}</span>
                     <span className="text-[10px] text-slate-400">
-                      {kcal > 0 ? `${kcal} Kcal/100g` : ''} {f.unit ? `• Đơn vị: ${f.unit}` : ''}
+                      {translateText(kcal > 0 ? `${kcal} Kcal/100g` : '')} {translateText(f.unit ? `• Đơn vị: ${f.unit}` : '')}
                     </span>
                   </div>
                   {f.allergens && (Array.isArray(f.allergens) ? f.allergens.length > 0 : Boolean(f.allergens)) && (
-                    <span className="text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold border border-rose-100 whitespace-nowrap ml-2">
-                      Dị ứng
-                    </span>
+                    <span className="text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-bold border border-rose-100 whitespace-nowrap ml-2">{translateText("Dị ứng")}</span>
                   )}
                 </div>
               );
@@ -164,10 +165,12 @@ interface DishModalProps {
 }
 
 export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onClose, onSuccess }) => {
+  useLanguage();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [foods, setFoods] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [recipeStatus, setRecipeStatus] = useState('MISSING');
   const [foodSearches, setFoodSearches] = useState<Record<number, string>>({}); // search text per row
 
   const [formData, setFormData] = useState({
@@ -187,6 +190,11 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
     const n = Number(val);
     if (isNaN(n)) return '0';
     return String(Math.round(n * 100) / 100);
+  };
+
+  const nutrientValue = (food: any, key: string): number => {
+    const value = key === 'energyKcal100g' ? food?.energyKcal100g ?? food?.energyKcal : food?.[key];
+    return Number(value ?? food?.referenceValues?.[key] ?? 0);
   };
 
   const [nutritionTotals, setNutritionTotals] = useState({
@@ -214,14 +222,14 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       const food = item.food || foods.find(f => String(f.id) === String(item.foodId));
       if (food) {
         const ratio = (Number(item.netWeightPerPortionG) || 0) / 100;
-        calories += (Number(food.energyKcal || food.energyKcal100g) || 0) * ratio;
-        protein += (Number(food.proteinG) || 0) * ratio;
-        fat += (Number(food.fatG) || 0) * ratio;
-        carb += (Number(food.carbG) || 0) * ratio;
-        fiber += (Number(food.fiberG) || 0) * ratio;
-        calcium += (Number(food.calciumMg) || 0) * ratio;
-        iron += (Number(food.ironMg) || 0) * ratio;
-        zinc += (Number(food.zincMg) || 0) * ratio;
+        calories += nutrientValue(food, 'energyKcal100g') * ratio;
+        protein += nutrientValue(food, 'proteinG') * ratio;
+        fat += nutrientValue(food, 'fatG') * ratio;
+        carb += nutrientValue(food, 'carbG') * ratio;
+        fiber += nutrientValue(food, 'fiberG') * ratio;
+        calcium += nutrientValue(food, 'calciumMg') * ratio;
+        iron += nutrientValue(food, 'ironMg') * ratio;
+        zinc += nutrientValue(food, 'zincMg') * ratio;
       }
     });
 
@@ -251,6 +259,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       fetchCategories();
       fetchFoods();
       if (mode === 'create') {
+        setRecipeStatus('MISSING');
         setFormData({
           name: '',
           categoryId: '',
@@ -290,6 +299,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       setLoading(true);
       const res = await apiClient.get(`/dishes/${dishId}`);
       const data = res.data;
+      setRecipeStatus(data.nutritionStatus || 'MISSING');
 
       const items =
         data.recipeItems && data.recipeItems.length > 0
@@ -399,7 +409,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       onClose();
     } catch (error) {
       console.error(error);
-      alert('Có lỗi xảy ra!');
+      alert(translateText('Có lỗi xảy ra!'));
     } finally {
       setSaving(false);
     }
@@ -421,7 +431,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
       setFormData(prev => ({ ...prev, photoUrl: res.data.imageUrl }));
     } catch (error) {
       console.error(error);
-      alert('Tải ảnh lên thất bại!');
+      alert(translateText('Tải ảnh lên thất bại!'));
     } finally {
       setUploadingImage(false);
     }
@@ -430,14 +440,15 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-sm">
+    <div className="fixed !m-0 inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-sm">
       <div className="w-[800px] bg-white h-full shadow-2xl flex flex-col animate-slide-in-right">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div>
             <h2 className="text-lg font-bold text-slate-800">
-              {mode === 'view' ? 'Chi tiết món ăn' : mode === 'edit' ? 'Chỉnh sửa món ăn & Công thức' : 'Thêm mới món ăn'}
+              {translateText(mode === 'view' ? 'Chi tiết món ăn' : mode === 'edit' ? 'Chỉnh sửa món ăn & Công thức' : 'Thêm mới món ăn')}
             </h2>
+
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
             <X className="w-5 h-5" />
@@ -447,7 +458,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/50">
           {loading ? (
-            <div className="text-center py-10">Đang tải...</div>
+            <div className="text-center py-10">{translateText("Đang tải...")}</div>
           ) : (
             <form id="dish-form" onSubmit={handleSubmit} className="space-y-8">
               
@@ -455,23 +466,23 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center text-xs">01</div>
-                  <h3 className="font-bold text-slate-800">Thông tin món ăn</h3>
+                  <h3 className="font-bold text-slate-800">{translateText("Thông tin món ăn")}</h3>
                 </div>
                 
                 <div className="grid grid-cols-1 gap-5">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Tên món ăn học đường *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{translateText("Tên món ăn học đường *")}</label>
                     <input 
                       required disabled={mode === 'view'}
                       type="text" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm font-medium"
-                      placeholder="VD: Cháo thịt bò rau củ"
+                      placeholder={translateText("VD: Cháo thịt bò rau củ")}
                     />
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Loại bữa ăn (Danh mục chuẩn) *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{translateText("Loại bữa ăn (Danh mục chuẩn) *")}</label>
                       <select 
                         disabled={mode === 'view'} 
                         value={formData.categoryId || categories.find(c => c.code === formData.dishType)?.id || ''} 
@@ -486,7 +497,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                         }}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm font-semibold bg-white disabled:bg-slate-50 disabled:text-slate-700"
                       >
-                        <option value="">-- Chọn loại bữa ăn --</option>
+                        <option value="">{translateText("-- Chọn loại bữa ăn --")}</option>
                         {categories.map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.name}
@@ -496,7 +507,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Trạng thái hoạt động *</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{translateText("Trạng thái hoạt động *")}</label>
                       <select 
                         disabled={mode === 'view'} 
                         value={formData.isActive ? 'ACTIVE' : 'INACTIVE'} 
@@ -508,14 +519,14 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                         }}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-1 focus:ring-emerald-500 outline-none text-sm font-semibold bg-white disabled:bg-slate-50 disabled:text-slate-700"
                       >
-                        <option value="ACTIVE">Đang phục vụ</option>
-                        <option value="INACTIVE">Tạm ngưng</option>
+                        <option value="ACTIVE">{translateText("Đang phục vụ")}</option>
+                        <option value="INACTIVE">{translateText("Tạm ngưng")}</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả cảm quan & dinh dưỡng</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{translateText("Mô tả cảm quan & dinh dưỡng")}</label>
                     <textarea 
                       disabled={mode === 'view'} value={formData.presentationNotes} onChange={e => setFormData(prev => ({ ...prev, presentationNotes: e.target.value }))}
                       rows={2}
@@ -528,62 +539,59 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
               {/* Chỉ số dinh dưỡng (Preview) */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
                 <div className="absolute top-4 right-5 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                  <RefreshCw className="w-3 h-3" /> Tự động tính toán
-                </div>
+                  <RefreshCw className="w-3 h-3" />{translateText(" Tự động tính toán")}</div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center text-xs">02</div>
-                  <h3 className="font-bold text-slate-800">Tổng giá trị dinh dưỡng (1 suất ăn chuẩn)</h3>
+                  <h3 className="font-bold text-slate-800">{translateText("Tổng giá trị dinh dưỡng (1 suất ăn chuẩn)")}</h3>
                 </div>
                 
                 <div className="grid grid-cols-4 gap-3">
                   <div className="bg-[#fff9ea] rounded-xl p-3 border border-[#fdebb4] text-center">
-                    <div className="text-[10px] font-bold text-[#b58013] mb-1">NĂNG LƯỢNG</div>
-                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalCalories)}</div>
-                    <div className="text-[10px] text-[#b58013]">kcal / suất</div>
+                    <div className="text-[10px] font-bold text-[#b58013] mb-1">{translateText("NĂNG LƯỢNG")}</div>
+                    <div className="text-xl font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalCalories))}</div>
+                    <div className="text-[10px] text-[#b58013]">{translateText("kcal / suất")}</div>
                   </div>
                   <div className="bg-[#f0f7ff] rounded-xl p-3 border border-[#cbe1ff] text-center">
-                    <div className="text-[10px] font-bold text-[#2a68c0] mb-1">ĐẠM / PROTEIN</div>
-                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalProteinG)}</div>
-                    <div className="text-[10px] text-[#2a68c0]">gam ({nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalProteinG) * 4 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
+                    <div className="text-[10px] font-bold text-[#2a68c0] mb-1">{translateText("ĐẠM / PROTEIN")}</div>
+                    <div className="text-xl font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalProteinG))}</div>
+                    <div className="text-[10px] text-[#2a68c0]">{translateText("gam (")}{nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalProteinG) * 4 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
                   </div>
                   <div className="bg-[#fff0f3] rounded-xl p-3 border border-[#ffcfd8] text-center">
-                    <div className="text-[10px] font-bold text-[#c93051] mb-1">BÉO / LIPID</div>
-                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalFatG)}</div>
-                    <div className="text-[10px] text-[#c93051]">gam ({nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalFatG) * 9 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
+                    <div className="text-[10px] font-bold text-[#c93051] mb-1">{translateText("BÉO / LIPID")}</div>
+                    <div className="text-xl font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalFatG))}</div>
+                    <div className="text-[10px] text-[#c93051]">{translateText("gam (")}{nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalFatG) * 9 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
                   </div>
                   <div className="bg-[#f2fcf7] rounded-xl p-3 border border-[#c4ebd6] text-center">
-                    <div className="text-[10px] font-bold text-[#1e814a] mb-1">BỘT / CARB</div>
-                    <div className="text-xl font-black text-slate-800">{formatExact(nutritionTotals.totalCarbG)}</div>
-                    <div className="text-[10px] text-[#1e814a]">gam ({nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalCarbG) * 4 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
+                    <div className="text-[10px] font-bold text-[#1e814a] mb-1">{translateText("BỘT / CARB")}</div>
+                    <div className="text-xl font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalCarbG))}</div>
+                    <div className="text-[10px] text-[#1e814a]">{translateText("gam (")}{nutritionTotals.totalCalories ? Math.round((Number(nutritionTotals.totalCarbG) * 4 / Number(nutritionTotals.totalCalories)) * 100) : 0}%)</div>
                   </div>
                 </div>
 
                 {/* Vi chất dinh dưỡng từ Database */}
                 <div className="grid grid-cols-4 gap-3 mt-3">
                   <div className="bg-emerald-50/70 rounded-xl p-2.5 border border-emerald-100 text-center">
-                    <div className="text-[9.5px] font-bold text-emerald-800 mb-0.5">CHẤT XƠ (Fiber)</div>
-                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalFiberG)}</div>
-                    <div className="text-[9.5px] text-emerald-600">gam / suất</div>
+                    <div className="text-[9.5px] font-bold text-emerald-800 mb-0.5">{translateText("CHẤT XƠ (Fiber)")}</div>
+                    <div className="text-base font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalFiberG))}</div>
+                    <div className="text-[9.5px] text-emerald-600">{translateText("gam / suất")}</div>
                   </div>
                   <div className="bg-sky-50/70 rounded-xl p-2.5 border border-sky-100 text-center">
-                    <div className="text-[9.5px] font-bold text-sky-800 mb-0.5">CANXI (Calcium)</div>
-                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalCalciumMg)}</div>
-                    <div className="text-[9.5px] text-sky-600">mg / suất</div>
+                    <div className="text-[9.5px] font-bold text-sky-800 mb-0.5">{translateText("CANXI (Calcium)")}</div>
+                    <div className="text-base font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalCalciumMg))}</div>
+                    <div className="text-[9.5px] text-sky-600">{translateText("mg / suất")}</div>
                   </div>
                   <div className="bg-amber-50/70 rounded-xl p-2.5 border border-amber-100 text-center">
-                    <div className="text-[9.5px] font-bold text-amber-800 mb-0.5">SẮT (Iron)</div>
-                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalIronMg)}</div>
-                    <div className="text-[9.5px] text-amber-600">mg / suất</div>
+                    <div className="text-[9.5px] font-bold text-amber-800 mb-0.5">{translateText("SẮT (Iron)")}</div>
+                    <div className="text-base font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalIronMg))}</div>
+                    <div className="text-[9.5px] text-amber-600">{translateText("mg / suất")}</div>
                   </div>
                   <div className="bg-purple-50/70 rounded-xl p-2.5 border border-purple-100 text-center">
-                    <div className="text-[9.5px] font-bold text-purple-800 mb-0.5">KẼM (Zinc)</div>
-                    <div className="text-base font-black text-slate-800">{formatExact(nutritionTotals.totalZincMg)}</div>
-                    <div className="text-[9.5px] text-purple-600">mg / suất</div>
+                    <div className="text-[9.5px] font-bold text-purple-800 mb-0.5">{translateText("KẼM (Zinc)")}</div>
+                    <div className="text-base font-black text-slate-800">{translateText(formatExact(nutritionTotals.totalZincMg))}</div>
+                    <div className="text-[9.5px] text-purple-600">{translateText("mg / suất")}</div>
                   </div>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-3 italic text-center">
-                  * Định lượng tính trên 1 suất ăn chuẩn trẻ mẫu giáo theo tiêu chuẩn Viện Dinh Dưỡng Quốc Gia (Tỷ lệ P:L:C cân đối: 15-20% : 25-30% : 50-60%)
-                </p>
+                <p className="text-[10px] text-slate-400 mt-3 italic text-center">{translateText("* Định lượng tính trên 1 suất ăn chuẩn trẻ mẫu giáo theo tiêu chuẩn Viện Dinh Dưỡng Quốc Gia (Tỷ lệ P:L:C cân đối: 15-20% : 25-30% : 50-60%)")}</p>
               </div>
 
               {/* Công thức & Nguyên liệu */}
@@ -591,22 +599,22 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center text-xs">03</div>
-                    <h3 className="font-bold text-slate-800">Công thức & Định lượng nguyên liệu</h3>
+                    <h3 className="font-bold text-slate-800">{translateText("Công thức & Định lượng nguyên liệu")}</h3>
                   </div>
-                  <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">{formData.recipeItems.length} nguyên liệu</span>
+                  <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">{formData.recipeItems.length}{translateText(" nguyên liệu")}</span>
                 </div>
 
                 <div className="border border-slate-200 rounded-xl overflow-visible">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase">
                       <tr>
-                        <th className="px-3 py-2 w-72">Nguyên liệu</th>
-                        <th className="px-3 py-2 text-center w-28">Định lượng (g)</th>
-                        <th className="px-2 py-2 text-center">Kcal</th>
-                        <th className="px-2 py-2 text-center">Protein</th>
-                        <th className="px-2 py-2 text-center">Lipid</th>
-                        <th className="px-2 py-2 text-center">Carb</th>
-                        <th className="px-2 py-2 text-center">Dị ứng</th>
+                        <th className="px-3 py-2 w-72">{translateText("Nguyên liệu")}</th>
+                        <th className="px-3 py-2 text-center w-28">{translateText("Định lượng (g)")}</th>
+                        <th className="px-2 py-2 text-center">{translateText("Kcal")}</th>
+                        <th className="px-2 py-2 text-center">{translateText("Protein")}</th>
+                        <th className="px-2 py-2 text-center">{translateText("Lipid")}</th>
+                        <th className="px-2 py-2 text-center">{translateText("Carb")}</th>
+                        <th className="px-2 py-2 text-center">{translateText("Dị ứng")}</th>
                         {mode !== 'view' && <th className="px-2 py-2 text-center w-10"></th>}
                       </tr>
                     </thead>
@@ -626,7 +634,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                             </td>
                             <td className="px-3 py-2 text-center">
                               {mode === 'view' ? (
-                                <span className="font-bold">{item.netWeightPerPortionG} g</span>
+                                <span className="font-bold">{translateText(item.netWeightPerPortionG)}{translateText(" g")}</span>
                               ) : (
                                 <div className="flex items-center gap-1">
                                   <input 
@@ -634,19 +642,19 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                                     onChange={e => handleRecipeItemChange(idx, 'netWeightPerPortionG', Number(e.target.value))}
                                     className="w-16 bg-slate-100 border border-slate-200 rounded px-1 py-1 text-center font-bold outline-none focus:ring-1 focus:ring-emerald-500"
                                   />
-                                  <span className="text-slate-400">g</span>
+                                  <span className="text-slate-400">{translateText("g")}</span>
                                 </div>
                               )}
                             </td>
-                            <td className="px-2 py-2 text-center text-slate-500 font-semibold">{food ? formatExact((Number(food.energyKcal || food.energyKcal100g) || 0) * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.proteinG) || 0) * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.fatG) || 0) * ratio) : '-'}</td>
-                            <td className="px-2 py-2 text-center text-slate-500">{food ? formatExact((Number(food.carbG) || 0) * ratio) : '-'}</td>
+                            <td className="px-2 py-2 text-center text-slate-500 font-semibold">{translateText(food ? formatExact(nutrientValue(food, 'energyKcal100g') * ratio) : '-')}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{translateText(food ? formatExact(nutrientValue(food, 'proteinG') * ratio) : '-')}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{translateText(food ? formatExact(nutrientValue(food, 'fatG') * ratio) : '-')}</td>
+                            <td className="px-2 py-2 text-center text-slate-500">{translateText(food ? formatExact(nutrientValue(food, 'carbG') * ratio) : '-')}</td>
                             <td className="px-2 py-2 text-center">
                                {food?.allergens?.length > 0 ? (
-                                 <span className="text-[9px] bg-red-50 text-red-600 border border-red-100 px-1 py-0.5 rounded">Có</span>
+                                 <span className="text-[9px] bg-red-50 text-red-600 border border-red-100 px-1 py-0.5 rounded">{translateText("Có")}</span>
                                ) : (
-                                 <span className="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-1 py-0.5 rounded">An toàn</span>
+                                 <span className="text-[9px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-1 py-0.5 rounded">{translateText("An toàn")}</span>
                                )}
                             </td>
                             {mode !== 'view' && (
@@ -661,9 +669,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                       })}
                       {formData.recipeItems.length === 0 && (
                         <tr>
-                          <td colSpan={8} className="px-3 py-6 text-center text-slate-400 italic">
-                            Chưa có nguyên liệu nào.
-                          </td>
+                          <td colSpan={8} className="px-3 py-6 text-center text-slate-400 italic">{translateText("Chưa có nguyên liệu nào.")}</td>
                         </tr>
                       )}
                     </tbody>
@@ -675,8 +681,7 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
                       onClick={addRecipeItem}
                       className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-emerald-600 flex items-center justify-center gap-1 transition"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Thêm nguyên liệu từ kho chuẩn
-                    </button>
+                      <Plus className="w-3.5 h-3.5" />{translateText(" Thêm nguyên liệu từ kho chuẩn")}</button>
                   )}
                 </div>
               </div>
@@ -689,17 +694,17 @@ export const DishModal: React.FC<DishModalProps> = ({ isOpen, mode, dishId, onCl
         <div className="border-t border-slate-200 px-6 py-4 bg-white flex justify-end gap-3">
           {mode === 'view' ? (
             <>
-              <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">Đóng</button>
+              <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">{translateText("Đóng")}</button>
               {/* Note: User must change mode to 'edit' from the list, or we could add a button here */}
             </>
           ) : (
             <>
-              <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">Hủy bỏ</button>
+              <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">{translateText("Hủy bỏ")}</button>
               <button 
                 type="submit" form="dish-form" disabled={saving}
                 className="px-8 py-2 rounded-xl text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 shadow-md transition disabled:opacity-50"
               >
-                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                {translateText(saving ? 'Đang lưu...' : 'Lưu thay đổi')}
               </button>
             </>
           )}

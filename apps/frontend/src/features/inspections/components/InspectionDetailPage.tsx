@@ -261,7 +261,7 @@ export const InspectionDetailPage: React.FC = () => {
             onClick={() => handleOpenSampleLabel()}
             className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs shadow-md transition active:scale-95"
           >
-            <Printer className="w-4 h-4" /> In tem lưu mẫu / Xuất PDF
+            <Printer className="w-4 h-4" /> In tem lưu mẫu
           </button>
         </div>
       </div>
@@ -755,7 +755,7 @@ export const InspectionDetailPage: React.FC = () => {
 
       {/* ─── MODAL: IN TEM NIÊM PHONG LƯU MẪU ─── */}
       {isLabelModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed !m-0 inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 border border-slate-200 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -848,7 +848,7 @@ export const InspectionDetailPage: React.FC = () => {
 
       {/* ─── MODAL: YÊU CẦU CHỤP LẠI MINH CHỨNG ─── */}
       {isRejectModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed !m-0 inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -907,7 +907,7 @@ export const InspectionDetailPage: React.FC = () => {
       {/* ─── MODAL: LIGHTBOX PHÓNG TO HÌNH ẢNH ─── */}
       {previewImage && (
         <div
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
+          className="fixed !m-0 inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4"
           onClick={() => setPreviewImage(null)}
         >
           <div

@@ -1,3 +1,5 @@
+import { t as translateText } from '../../core/i18n/language';
+import { useLanguage } from '../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AttendanceTopNav } from './components/AttendanceTopNav';
@@ -18,7 +20,12 @@ import {
 } from './types';
 import { Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react';
 
-export const MealEvaluationPage: React.FC = () => {
+interface MealEvaluationPageProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabChange }) => {
+  useLanguage();
   const navigate = useNavigate();
 
   // State
@@ -93,16 +100,14 @@ export const MealEvaluationPage: React.FC = () => {
 
   // Handle Tab Change
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-    if (tabId === 'notes') {
-      navigate('/coordination-notes');
-    } else if (tabId === 'attendance') {
-      navigate('/attendance');
-    } else if (tabId === 'evaluation') {
-      navigate('/evaluation');
-    } else if (tabId === 'history') {
-      navigate('/history');
+    if (onTabChange) {
+      onTabChange(tabId);
+      return;
     }
+    if (tabId === 'notes') navigate('/tablet?tab=notes');
+    else if (tabId === 'attendance') navigate('/tablet');
+    else if (tabId === 'evaluation') navigate('/tablet/record');
+    else if (tabId === 'history') navigate('/tablet?tab=history');
   };
 
   // Handle Single Child Portion Update
@@ -115,8 +120,10 @@ export const MealEvaluationPage: React.FC = () => {
       const updatedChildren = prev.children.map((c) => {
         if (c.id === childId) {
           let percentage = 100;
-          if (portion === 'HALF') percentage = 50;
-          else if (portion === 'NONE') percentage = 20;
+          if (portion === 'MOST') percentage = 75;
+          else if (portion === 'HALF') percentage = 50;
+          else if (portion === 'LITTLE') percentage = 25;
+          else if (portion === 'NONE') percentage = 0;
 
           return {
             ...c,
@@ -337,7 +344,7 @@ export const MealEvaluationPage: React.FC = () => {
           ) : (
             <CheckCircle2 className="w-4 h-4 text-emerald-200" />
           )}
-          <span>{toast.message}</span>
+          <span>{translateText(toast.message)}</span>
           <button onClick={() => setToast(null)} className="ml-2 hover:opacity-80">
             <X className="w-3.5 h-3.5" />
           </button>
@@ -391,7 +398,7 @@ export const MealEvaluationPage: React.FC = () => {
       {isLoading && !evaluationData ? (
         <div className="flex-1 flex flex-col items-center justify-center py-24">
           <Loader2 className="w-10 h-10 text-teal-600 animate-spin mb-3" />
-          <p className="text-sm font-bold text-slate-600">Đang tải dữ liệu đánh giá từ máy chủ...</p>
+          <p className="text-sm font-bold text-slate-600">{translateText("Đang tải dữ liệu đánh giá từ máy chủ...")}</p>
         </div>
       ) : evaluationData ? (
         <main className="flex-1 space-y-4 pb-12">
@@ -420,7 +427,7 @@ export const MealEvaluationPage: React.FC = () => {
         </main>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-sm font-bold text-slate-600">Không tìm thấy dữ liệu đánh giá</p>
+          <p className="text-sm font-bold text-slate-600">{translateText("Không tìm thấy dữ liệu đánh giá")}</p>
         </div>
       )}
 

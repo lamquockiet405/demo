@@ -26,7 +26,7 @@ interface SubmitMenuModalProps {
 const COMMITMENT_ITEMS = [
   {
     code: 'COMMIT_TT28_NUTRITION',
-    title: 'Định mức dinh dưỡng theo Thông tư 28/2016/TT-BGDĐT',
+    title: 'Định mức dinh dưỡng theo Quy chuẩn Dinh dưỡng Mầm non',
     desc: 'Cam kết năng lượng trung bình ngày (Kcal) và tỷ lệ cân đối P:L:G đáp ứng đúng khuyến nghị theo nhóm tuổi học sinh.',
   },
   {
@@ -121,7 +121,7 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
         commitmentSigned: true,
         commitmentItems: selectedCommitments,
         commitmentText:
-          'Tôi cam kết thực đơn tuân thủ đầy đủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn vệ sinh thực phẩm theo Quyết định 1246/QĐ-BYT.',
+          'Tôi cam kết thực đơn tuân thủ đầy đủ định mức Quy chuẩn Dinh dưỡng Mầm non và an toàn vệ sinh thực phẩm theo Quyết định 1246/QĐ-BYT.',
         overrideJustification: overrideJustification.trim() || undefined,
         violationsSnapshot: warnings,
       };
@@ -138,10 +138,10 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed !m-0 inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4">
       {/* Nền mờ Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
         onClick={onClose}
       />
@@ -156,7 +156,7 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
             <div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">{translateText("Gửi Duyệt Thực Đơn Kèm Cam Kết Chuyên Môn")}</h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                {menu.title} • {translateText(menu.targetAgeGroup === 'NHA_TRE' ? 'Nhóm Nhà trẻ (18-36T)' : 'Nhóm Mẫu giáo (3-5T)')}
+                {menu.title} • {translateText("Nhóm Mẫu giáo (3-6T)")}
               </p>
             </div>
           </div>
@@ -181,7 +181,7 @@ export const SubmitMenuModal: React.FC<SubmitMenuModalProps> = ({
           <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2 text-xs">
             <div className="flex items-center justify-between font-bold text-slate-800">
               <span className="flex items-center gap-1.5 text-slate-900">
-                <Activity className="w-4 h-4 text-teal-600" />{translateText("Đối soát tiền kiểm định mức (TT 28/2016/TT-BGDĐT)")}</span>
+                <Activity className="w-4 h-4 text-teal-600" />{translateText("Đối soát tiền kiểm định mức (Chuẩn Dinh Dưỡng/TT-BGDĐT)")}</span>
               <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">{translateText("Sẵn sàng gửi BGH")}</span>
             </div>
 

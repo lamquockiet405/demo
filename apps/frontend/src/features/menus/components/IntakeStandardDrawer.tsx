@@ -92,7 +92,7 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed !m-0 inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-xl bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-purple-50/40">
@@ -231,7 +231,7 @@ export const IntakeStandardDrawer: React.FC<IntakeStandardDrawerProps> = ({
 
           {/* Cân đối P:L:G (%) */}
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-            <span className="text-xs font-bold text-slate-800 block">{translateText("🥗 Tỷ lệ năng lượng P : L : G (%) theo Thông tư 28")}</span>
+            <span className="text-xs font-bold text-slate-800 block">{translateText("🥗 Tỷ lệ năng lượng P : L : G (%) theo Quy chuẩn Dinh dưỡng")}</span>
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="block text-[10px] text-slate-600 font-medium">{translateText("Đạm (Protein: 13-20%)")}</label>

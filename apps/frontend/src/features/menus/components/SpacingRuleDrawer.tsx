@@ -77,7 +77,7 @@ export const SpacingRuleDrawer: React.FC<SpacingRuleDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed !m-0 inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-xl bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-blue-50/40">

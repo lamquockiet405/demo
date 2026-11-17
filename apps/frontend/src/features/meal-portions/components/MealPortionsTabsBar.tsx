@@ -16,7 +16,7 @@ export const MealPortionsTabsBar: React.FC<MealPortionsTabsBarProps> = ({
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1 border-b border-slate-200 pb-3">
       {/* Left Segmented Tabs */}
       <div className="flex items-center gap-2 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/60 w-fit">
-        {/* Tab 1: UC46 Lịch Thực Đơn Tuần */}
+        {/* Tab 1: Lịch Thực Đơn Tuần */}
         <button
           onClick={() => onTabChange('menu')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -27,10 +27,10 @@ export const MealPortionsTabsBar: React.FC<MealPortionsTabsBarProps> = ({
         >
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
           <Calendar className="w-4 h-4 text-teal-600" />
-          <span>Lịch Thực Đơn Tuần (UC46)</span>
+          <span>Lịch Thực Đơn Tuần</span>
         </button>
 
-        {/* Tab 2: UC56 Kế hoạch Định lượng Suất ăn Nhà bếp */}
+        {/* Tab 2: Kế hoạch Định lượng Suất ăn Nhà bếp */}
         <button
           onClick={() => onTabChange('portion')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -40,7 +40,7 @@ export const MealPortionsTabsBar: React.FC<MealPortionsTabsBarProps> = ({
           }`}
         >
           <Scale className="w-4 h-4 text-emerald-500" />
-          <span>Kế hoạch Định lượng Suất ăn Nhà bếp (UC56)</span>
+          <span>Kế hoạch Định lượng Suất ăn Nhà bếp</span>
           <span className="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-sky-200">
             Tự động x {studentCount} suất
           </span>

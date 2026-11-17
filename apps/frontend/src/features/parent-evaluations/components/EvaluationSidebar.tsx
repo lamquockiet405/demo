@@ -133,14 +133,14 @@ export const EvaluationSidebar: React.FC = () => {
           <div className="relative">
             <img
               src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&auto=format&fit=crop&q=80"
-              alt="Nguyễn Thu Thủy"
+              alt="Ban Giám Hiệu"
               className="w-9 h-9 rounded-full object-cover border-2 border-teal-500/20"
             />
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-bold text-slate-800 truncate">Nguyễn Thu Thủy</p>
-            <p className="text-[11px] text-slate-400 truncate">Hiệu trưởng cơ sở</p>
+            <p className="text-xs font-bold text-slate-800 truncate">{localStorage.getItem('user_name') || 'Ban Giám Hiệu'}</p>
+            <p className="text-[11px] text-slate-400 truncate">Ban Giám Hiệu</p>
           </div>
         </div>
       </div>

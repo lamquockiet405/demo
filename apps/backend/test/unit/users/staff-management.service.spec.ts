@@ -18,6 +18,7 @@ describe("Staff account frontend/backend contract", () => {
     const qb: any = {
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(async () => [user]),
     };
@@ -68,6 +69,9 @@ describe("Staff account frontend/backend contract", () => {
         { id: 3, code: "PARENT", name: "Parent" },
       ],
     };
+    const manager: any = { query: jest.fn().mockResolvedValue([]) };
+    manager.transaction = async (work: any) => work(manager);
+    users.manager = manager;
     const service = new StaffManagementService(users, roles, profiles);
     return {
       service,
@@ -116,12 +120,12 @@ describe("Staff account frontend/backend contract", () => {
   it("returns paginated objects with role names and applies search and role filters", async () => {
     const { service, qb } = setup();
     const result = await service.findAll({
-      search: "actual",
+      search: "  ÁCTUAL  ",
       roleCode: "TEACHER",
       page: 1,
       limit: 10,
     });
-    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining("LOWER"), {
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining("translate"), {
       s: "%actual%",
     });
     expect(result.meta.total).toBe(1);

@@ -57,10 +57,10 @@ export const RequestEditMenuModal: React.FC<RequestEditMenuModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+    <div className="fixed !m-0 inset-0 z-[10000] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
         onClick={onClose}
       />

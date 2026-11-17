@@ -7,12 +7,18 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test:excel": "node --test tests/excel-export.test.cjs",
+    "test:search": "node --test tests/global-search.test.cjs tests/student-search.test.cjs",
+    "test:i18n": "node --test tests/i18n.test.cjs",
+    "test:kitchen": "node --test tests/kds-data.test.cjs tests/kitchen-operations.test.cjs tests/inspection-menu.test.cjs tests/published-menus.test.cjs",
+    "test:published-menus": "node --test tests/published-menus.test.cjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.28.14",
     "axios": "^1.6.8",
     "clsx": "^2.1.0",
+    "exceljs": "^4.4.0",
     "lucide-react": "^0.363.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -72,8 +72,8 @@ export const AllergenDrawer: React.FC<AllergenDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+    <div className="fixed !m-0 inset-0 z-50 overflow-hidden">
+      <div className="fixed !m-0 inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       <div className="fixed inset-y-0 right-0 max-w-lg w-full bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-right">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3">

@@ -110,9 +110,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await forgotPasswordApi({ email: cleanEmail });
-      setOtpValues(['', '', '', '', '', '']);
-      setInfoMessage(res.message || 'Mã xác thực OTP đã được gửi đến email của bạn.');
+      const res: any = await forgotPasswordApi({ email: cleanEmail });
+      if (res?.otp && typeof res.otp === 'string' && res.otp.length === 6) {
+        setOtpValues(res.otp.split(''));
+      } else {
+        setOtpValues(['', '', '', '', '', '']);
+      }
+      setInfoMessage(res?.message || 'Mã xác thực OTP đã được gửi đến email của bạn.');
       setStep('OTP');
       setCountdown(60);
       setCanResend(false);
@@ -247,7 +251,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
         {/* Top Header Background */}
         <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 px-6 pt-6 pb-5 text-white relative">

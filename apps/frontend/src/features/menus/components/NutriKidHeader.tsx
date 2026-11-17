@@ -205,12 +205,6 @@ export const NutriKidHeader: React.FC<NutriKidHeaderProps> = ({
               <span>›</span>
               <span className="text-slate-900 font-bold">{breadcrumbTitle}</span>
             </div>
-
-            {/* Badge bên phải: Chuẩn VN-RDA 2024 (Viện Dinh Dưỡng Quốc Gia) */}
-            <div className="flex items-center gap-1.5 bg-[#4eed9c]/20 border border-emerald-500/40 text-emerald-900 font-bold text-xs px-3.5 py-1 rounded-full shadow-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Chuẩn VN-RDA 2024 (Viện Dinh Dưỡng Quốc Gia)</span>
-            </div>
           </div>
         </div>
       </header>

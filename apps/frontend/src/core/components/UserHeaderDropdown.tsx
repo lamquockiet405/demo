@@ -102,25 +102,25 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
       roleList.includes("SCHOOL_MANAGEMENT")
     ) {
       return {
-        roleBadge: "Role: PRINCIPAL",
+        roleBadge: "Ban Giám Hiệu",
         subtitle: customSubtitle || "Ban Giám Hiệu",
       };
     }
     if (roleList.includes("NUTRITIONIST")) {
       return {
-        roleBadge: "Role: NUTRITIONIST",
+        roleBadge: "Chuyên viên Dinh dưỡng",
         subtitle: customSubtitle || "Chuyên viên dinh dưỡng",
       };
     }
     if (roleList.includes("PARENT")) {
       return {
-        roleBadge: "Role: PARENT",
+        roleBadge: "Phụ huynh",
         subtitle: customSubtitle || "Phụ huynh",
       };
     }
     if (roleList.includes("TEACHER")) {
       return {
-        roleBadge: "Role: TEACHER",
+        roleBadge: "Giáo viên",
         subtitle: customSubtitle || "Giáo viên",
       };
     }
@@ -129,19 +129,19 @@ export const UserHeaderDropdown: React.FC<UserHeaderDropdownProps> = ({
       roleList.includes("KITCHEN_MANAGER")
     ) {
       return {
-        roleBadge: "Role: KITCHEN",
+        roleBadge: "Nhân viên Bếp",
         subtitle: customSubtitle || "Nhân viên bếp",
       };
     }
     if (roleList.includes("SUPER_ADMIN")) {
       return {
-        roleBadge: "Role: SUPER_ADMIN",
+        roleBadge: "Quản trị viên",
         subtitle: customSubtitle || "Quản trị viên",
       };
     }
 
     return {
-      roleBadge: "Role: USER",
+      roleBadge: "Người dùng",
       subtitle: customSubtitle || "Người dùng",
     };
   };

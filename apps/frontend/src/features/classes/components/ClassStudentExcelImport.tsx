@@ -1,3 +1,4 @@
+import { downloadExcelSheets, studentHeaderRow } from '../../../core/utils/excel-export';
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import {
@@ -23,7 +24,6 @@ export interface ParsedStudentRow {
   dateOfBirth: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
-  medicalNotes?: string;
   isValid: boolean;
   validationError?: string;
 }
@@ -53,41 +53,22 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
   const handleDownloadTemplate = () => {
     const headers = [
       'STT',
-      'Mã học sinh (Tùy chọn)',
       'Họ và tên (*)',
       'Giới tính (Nam/Nữ) (*)',
       'Ngày sinh (YYYY-MM-DD hoặc DD/MM/YYYY) (*)',
-      'Họ tên phụ huynh',
-      'Số điện thoại phụ huynh',
-      'Ghi chú y tế / Dị ứng',
     ];
 
     const sampleData = [
-      [1, 'BM-HS51', 'Nguyễn Hoàng Khang', 'Nam', '2021-04-12', 'Nguyễn Văn Tuấn', '0901234567', 'Dị ứng sữa bò'],
-      [2, 'BM-HS52', 'Trần Thảo Linh', 'Nữ', '2021-08-20', 'Trần Thị Thu', '0912345678', 'Bình thường'],
-      [3, '', 'Lê Minh Quân', 'Nam', '2021-02-15', 'Lê Quốc Việt', '0987654321', 'Kiêng đậu phộng'],
-      [4, '', 'Vũ Khánh An', 'Nữ', '2021-11-05', 'Vũ Văn Hùng', '0933221100', ''],
+      [1, 'Nguyễn Hoàng Khang', 'Nam', '2021-04-12'],
+      [2, 'Trần Thảo Linh', 'Nữ', '2021-08-20'],
+      [3, 'Lê Minh Quân', 'Nam', '2021-02-15'],
+      [4, 'Vũ Khánh An', 'Nữ', '2021-11-05'],
     ];
-
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
-
-    // Căn chỉnh độ rộng các cột
-    ws['!cols'] = [
-      { wch: 6 },  // STT
-      { wch: 22 }, // Mã HS
-      { wch: 25 }, // Họ tên
-      { wch: 20 }, // Giới tính
-      { wch: 30 }, // Ngày sinh
-      { wch: 25 }, // Phụ huynh
-      { wch: 22 }, // SĐT
-      { wch: 28 }, // Ghi chú
-    ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Danh_Sach_Hoc_Sinh');
 
     const cleanClassName = className.replace(/[^a-zA-Z0-9_\u00C0-\u024F\u1EA0-\u1EF9]/g, '_');
-    XLSX.writeFile(wb, `Mau_Nhap_Hoc_Sinh_${cleanClassName}.xlsx`);
+    void downloadExcelSheets(`Mau_Nhap_Hoc_Sinh_${cleanClassName}.xlsx`, 'Mẫu nhập danh sách học sinh', [
+      { name: 'Danh_Sach_Hoc_Sinh', translateHeaders: false, rows: [headers, ...sampleData] },
+    ], className);
   };
 
   // 2. Phân tích nội dung file Excel khi người dùng chọn
@@ -118,19 +99,8 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
       }
 
       // Tìm dòng tiêu đề (Header row)
-      let headerRowIndex = 0;
-      for (let i = 0; i < Math.min(5, data.length); i++) {
-        const rowText = (data[i] || []).join(' ').toLowerCase();
-        if (
-          rowText.includes('tên') ||
-          rowText.includes('name') ||
-          rowText.includes('học sinh') ||
-          rowText.includes('họ')
-        ) {
-          headerRowIndex = i;
-          break;
-        }
-      }
+      const headerRowIndex = studentHeaderRow(data);
+      if (headerRowIndex < 0) throw new Error('Không tìm thấy dòng tiêu đề họ tên và ngày sinh học sinh.');
 
       const headers = (data[headerRowIndex] || []).map((h: any) =>
         String(h || '').trim().toLowerCase(),
@@ -146,14 +116,13 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
         dob: headers.findIndex((h) => h.includes('sinh') || h.includes('dob') || h.includes('birth')),
         parent: headers.findIndex((h) => h.includes('phụ huynh') || h.includes('giám hộ') || h.includes('parent')),
         phone: headers.findIndex((h) => h.includes('sđt') || h.includes('thoại') || h.includes('phone')),
-        notes: headers.findIndex((h) => h.includes('ghi chú') || h.includes('dị ứng') || h.includes('note')),
       };
 
       if (colIndex.name === -1) {
         throw new Error('Không tìm thấy cột Họ và tên học sinh trong file. Vui lòng kiểm tra lại file mẫu.');
       }
-
       const rows: ParsedStudentRow[] = [];
+      const seenCodes = new Set<string>();
 
       for (let i = headerRowIndex + 1; i < data.length; i++) {
         const row = data[i];
@@ -163,11 +132,17 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
         if (!rawName) continue; // Bỏ qua dòng trống tên
 
         const rawCode = colIndex.code !== -1 ? String(row[colIndex.code] || '').trim() : '';
+        if (rawCode) {
+          const normCode = rawCode.toLowerCase();
+          if (seenCodes.has(normCode)) {
+            throw new Error(`Dòng ${i + 1}: Mã học sinh "${rawCode}" bị trùng lặp trong file.`);
+          }
+          seenCodes.add(normCode);
+        }
         const rawGender = colIndex.gender !== -1 ? String(row[colIndex.gender] || '').trim().toLowerCase() : '';
         const rawDob = colIndex.dob !== -1 ? String(row[colIndex.dob] || '').trim() : '';
         const rawParent = colIndex.parent !== -1 ? String(row[colIndex.parent] || '').trim() : '';
         const rawPhone = colIndex.phone !== -1 ? String(row[colIndex.phone] || '').trim() : '';
-        const rawNotes = colIndex.notes !== -1 ? String(row[colIndex.notes] || '').trim() : '';
 
         // Chuẩn hóa Giới tính
         let gender: 'MALE' | 'FEMALE' = 'MALE';
@@ -206,7 +181,6 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
           dateOfBirth,
           emergencyContactName: rawParent || 'Phụ huynh',
           emergencyContactPhone: rawPhone || '0901234567',
-          medicalNotes: rawNotes || undefined,
           isValid: true,
         });
       }
@@ -230,16 +204,16 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
     setErrorMessage(null);
     setSuccessResult(null);
     setParsedRows([
-      { studentCode: 'BM-HS101', fullName: 'Nguyễn Hoàng Khang', gender: 'MALE', dateOfBirth: '2021-04-12', emergencyContactName: 'Nguyễn Văn Tuấn', emergencyContactPhone: '0901234567', medicalNotes: 'Dị ứng đạm sữa bò (CMPA)', isValid: true },
-      { studentCode: 'BM-HS102', fullName: 'Trần Thảo Linh', gender: 'FEMALE', dateOfBirth: '2021-08-20', emergencyContactName: 'Trần Thị Thu', emergencyContactPhone: '0912345678', medicalNotes: 'Bình thường', isValid: true },
-      { studentCode: 'BM-HS103', fullName: 'Lê Minh Quân', gender: 'MALE', dateOfBirth: '2021-02-15', emergencyContactName: 'Lê Quốc Việt', emergencyContactPhone: '0987654321', medicalNotes: 'Dị ứng hải sản giáp xác (Tôm, Cua)', isValid: true },
-      { studentCode: 'BM-HS104', fullName: 'Vũ Khánh An', gender: 'FEMALE', dateOfBirth: '2021-11-05', emergencyContactName: 'Vũ Văn Hùng', emergencyContactPhone: '0933221100', medicalNotes: 'Bình thường', isValid: true },
-      { studentCode: 'BM-HS105', fullName: 'Phạm Gia Huy', gender: 'MALE', dateOfBirth: '2021-06-18', emergencyContactName: 'Phạm Văn Nam', emergencyContactPhone: '0908889999', medicalNotes: 'Kiêng đậu phộng', isValid: true },
-      { studentCode: undefined, fullName: 'Đặng Ngọc Mai', gender: 'FEMALE', dateOfBirth: '2021-09-30', emergencyContactName: 'Đặng Thị Lan', emergencyContactPhone: '0919998888', medicalNotes: 'Bình thường (Hệ thống tự cấp mã)', isValid: true },
-      { studentCode: undefined, fullName: 'Bùi Quốc Bảo', gender: 'MALE', dateOfBirth: '2021-03-25', emergencyContactName: 'Bùi Văn Hậu', emergencyContactPhone: '0922334455', medicalNotes: 'Dị ứng trứng gà', isValid: true },
-      { studentCode: 'BM-HS108', fullName: 'Hoàng Yến Nhi', gender: 'FEMALE', dateOfBirth: '2021-05-14', emergencyContactName: 'Hoàng Minh Trí', emergencyContactPhone: '0944556677', medicalNotes: 'Bình thường', isValid: true },
-      { studentCode: 'BM-HS109', fullName: 'Đỗ Tuấn Kiệt', gender: 'MALE', dateOfBirth: '2021-10-08', emergencyContactName: 'Đỗ Quang Dũng', emergencyContactPhone: '0977889900', medicalNotes: 'Không dung nạp Lactose', isValid: true },
-      { studentCode: undefined, fullName: 'Lý Thiên Ân', gender: 'MALE', dateOfBirth: '2021-12-24', emergencyContactName: 'Lý Văn Hải', emergencyContactPhone: '0966778899', medicalNotes: 'Bình thường', isValid: true },
+      { studentCode: 'BM-HS101', fullName: 'Nguyễn Hoàng Khang', gender: 'MALE', dateOfBirth: '2021-04-12', emergencyContactName: 'Nguyễn Văn Tuấn', emergencyContactPhone: '0901234567', isValid: true },
+      { studentCode: 'BM-HS102', fullName: 'Trần Thảo Linh', gender: 'FEMALE', dateOfBirth: '2021-08-20', emergencyContactName: 'Trần Thị Thu', emergencyContactPhone: '0912345678', isValid: true },
+      { studentCode: 'BM-HS103', fullName: 'Lê Minh Quân', gender: 'MALE', dateOfBirth: '2021-02-15', emergencyContactName: 'Lê Quốc Việt', emergencyContactPhone: '0987654321', isValid: true },
+      { studentCode: 'BM-HS104', fullName: 'Vũ Khánh An', gender: 'FEMALE', dateOfBirth: '2021-11-05', emergencyContactName: 'Vũ Văn Hùng', emergencyContactPhone: '0933221100', isValid: true },
+      { studentCode: 'BM-HS105', fullName: 'Phạm Gia Huy', gender: 'MALE', dateOfBirth: '2021-06-18', emergencyContactName: 'Phạm Văn Nam', emergencyContactPhone: '0908889999', isValid: true },
+      { studentCode: 'BM-HS106', fullName: 'Đặng Ngọc Mai', gender: 'FEMALE', dateOfBirth: '2021-09-30', emergencyContactName: 'Đặng Thị Lan', emergencyContactPhone: '0919998888', isValid: true },
+      { studentCode: 'BM-HS107', fullName: 'Bùi Quốc Bảo', gender: 'MALE', dateOfBirth: '2021-03-25', emergencyContactName: 'Bùi Văn Hậu', emergencyContactPhone: '0922334455', isValid: true },
+      { studentCode: 'BM-HS108', fullName: 'Hoàng Yến Nhi', gender: 'FEMALE', dateOfBirth: '2021-05-14', emergencyContactName: 'Hoàng Minh Trí', emergencyContactPhone: '0944556677', isValid: true },
+      { studentCode: 'BM-HS109', fullName: 'Đỗ Tuấn Kiệt', gender: 'MALE', dateOfBirth: '2021-10-08', emergencyContactName: 'Đỗ Quang Dũng', emergencyContactPhone: '0977889900', isValid: true },
+      { studentCode: 'BM-HS110', fullName: 'Lý Thiên Ân', gender: 'MALE', dateOfBirth: '2021-12-24', emergencyContactName: 'Lý Văn Hải', emergencyContactPhone: '0966778899', isValid: true },
     ]);
   };
 
@@ -268,18 +242,21 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
         classId, // Gán trực tiếp vào lớp học hiện tại
         emergencyContactName: r.emergencyContactName,
         emergencyContactPhone: r.emergencyContactPhone,
-        medicalNotes: r.medicalNotes,
       }));
 
       const res = await childrenApi.importChildren(itemsToImport);
 
+      if (res && res.errors && res.errors.length > 0 && (res.importedCount || 0) === 0) {
+        throw new Error(res.errors.join(' | '));
+      }
       if (res && res.success) {
-        setSuccessResult(`✓ Đã nhập thành công ${res.importedCount} học sinh vào lớp ${className}!`);
+        const errNote = res.errors && res.errors.length > 0 ? ` (Bỏ qua: ${res.errors.join('; ')})` : '';
+        setSuccessResult(`✓ Đã nhập thành công ${res.importedCount} học sinh vào lớp ${className}!${errNote}`);
         setTimeout(() => {
           onImportSuccess(res.importedCount);
         }, 1200);
       } else {
-        throw new Error(res?.message || 'Có lỗi xảy ra khi nhập dữ liệu.');
+        throw new Error(res?.errors?.join(' | ') || res?.message || 'Có lỗi xảy ra khi nhập dữ liệu.');
       }
     } catch (err: any) {
       console.error('Lỗi khi import học sinh:', err);

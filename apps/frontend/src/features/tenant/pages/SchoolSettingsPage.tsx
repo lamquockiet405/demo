@@ -7,7 +7,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  Globe,
   Edit3,
   AlertTriangle,
   RotateCw,
@@ -24,8 +23,6 @@ import {
   Save,
   Image as ImageIcon,
   Calendar,
-  Smartphone,
-  RefreshCw,
 } from "lucide-react";
 import {
   tenantApi,
@@ -68,39 +65,6 @@ function formatDateVi(dateStr?: string | null): string {
         month: "2-digit",
         year: "numeric",
       });
-}
-
-function getLicenseStatus(number?: string, expiryDate?: string) {
-  if (!number && !expiryDate) {
-    return {
-      label: "Chưa khai báo",
-      className: "bg-slate-100 text-slate-600 border-slate-200",
-    };
-  }
-  const exp = expiryDate ? new Date(expiryDate) : null;
-  if (!exp || Number.isNaN(exp.getTime())) {
-    return {
-      label: "Đã khai báo",
-      className: "bg-teal-50 text-teal-700 border-teal-200",
-    };
-  }
-  const diffDays = Math.ceil((exp.getTime() - Date.now()) / 86400000);
-  if (diffDays < 0) {
-    return {
-      label: "Đã hết hạn",
-      className: "bg-red-50 text-red-700 border-red-200",
-    };
-  }
-  if (diffDays <= 30) {
-    return {
-      label: `Sắp hết hạn (còn ${diffDays} ngày)`,
-      className: "bg-amber-50 text-amber-700 border-amber-200",
-    };
-  }
-  return {
-    label: "Còn hiệu lực",
-    className: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  };
 }
 
 export const SchoolSettingsPage: React.FC = () => {
@@ -383,10 +347,6 @@ export const SchoolSettingsPage: React.FC = () => {
     );
   }
 
-  const licenseStatus = getLicenseStatus(
-    profile.foodSafetyLicense?.number,
-    profile.foodSafetyLicense?.expiryDate,
-  );
   const hasRealLogo = Boolean(profile.branding?.logoUrl?.trim());
   const kpiCards = [
     {
@@ -435,10 +395,6 @@ export const SchoolSettingsPage: React.FC = () => {
             </span>
             <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">{translateText("Mã trường: ")}{translateText(profile.code)}
             </span>
-            {profile.isEducationDbSynced && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="w-3 h-3" />{translateText(" Đã đồng bộ CSDL Bộ GD&ĐT")}</span>
-            )}
             {profile.updatedAt && (
               <span className="text-[11px] text-slate-400">{translateText("Cập nhật: ")}{translateText(formatDateVi(profile.updatedAt))}
               </span>
@@ -447,22 +403,10 @@ export const SchoolSettingsPage: React.FC = () => {
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
             {profile.name}
           </h1>
-          <p className="text-xs text-slate-500 mt-1">{translateText("Cấu hình thông tin pháp lý nhà trường, giấy phép An toàn thực phẩm (ATTP), logo nhận diện và thông số vận hành bán trú.")}</p>
+          <p className="text-xs text-slate-500 mt-1">{translateText("Cấu hình thông tin pháp lý nhà trường, logo nhận diện và thông số vận hành bán trú.")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={handleSyncEducationDb}
-            disabled={syncingDb}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 text-teal-600 ${syncingDb ? "animate-spin" : ""}`}
-            />
-            <span>{translateText("Đồng bộ CSDL Ngành")}</span>
-          </button>
-
           <button
             type="button"
             onClick={() => setIsEditModalOpen(true)}
@@ -517,7 +461,7 @@ export const SchoolSettingsPage: React.FC = () => {
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">{translateText("Hồ sơ cơ sở giáo dục & Pháp lý ATTP")}</h2>
+                  <h2 className="text-base font-bold text-slate-900">{translateText("Hồ sơ cơ sở giáo dục")}</h2>
                   <p className="text-xs text-slate-500">{translateText("Thông tin chính thức hiển thị trên thực đơn tuần, sổ kiểm thực 3 bước và báo cáo dinh dưỡng")}</p>
                 </div>
               </div>
@@ -556,7 +500,7 @@ export const SchoolSettingsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Số điện thoại / Hotline")}</label>
                 <div className="relative">
@@ -573,75 +517,6 @@ export const SchoolSettingsPage: React.FC = () => {
                     {profile.contactEmail || translateText("Chưa cập nhật")}
                   </div>
                   <Mail className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Website / Tên miền")}</label>
-                <div className="relative">
-                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
-                    {translateText(profile.domain || "Chưa thiết lập")}
-                  </div>
-                  <Globe className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Mã Phòng / Sở GD&ĐT")}</label>
-                <div className="w-full text-xs font-mono px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
-                  {profile.educationDepartmentCode || translateText("Chưa khai báo")}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Mã định danh CSDL Ngành (Bộ GD&ĐT)")}</label>
-                <div className="w-full text-xs font-mono px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
-                  {translateText(profile.schoolIdentifierSgd || "Chưa khai báo")}
-                </div>
-              </div>
-            </div>
-
-            {/* ATTP Block */}
-            <div className="rounded-2xl border border-sky-200/90 bg-sky-50/50 p-4 space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-sky-700" />
-                  <h3 className="text-xs font-bold text-sky-950">{translateText("Giấy chứng nhận Cơ sở đủ điều kiện An toàn thực phẩm (ATTP)")}</h3>
-                </div>
-                <span
-                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${licenseStatus.className}`}
-                >
-                  {translateText(licenseStatus.label)}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
-                  <span className="text-[10px] text-slate-400 font-semibold block">{translateText("Số giấy chứng nhận")}</span>
-                  <span className="text-xs font-bold text-slate-900 mt-0.5 block">
-                    {translateText(profile.foodSafetyLicense?.number || "Chưa cập nhật")}
-                  </span>
-                </div>
-                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
-                  <span className="text-[10px] text-slate-400 font-semibold block">{translateText("Cơ quan cấp")}</span>
-                  <span className="text-xs font-semibold text-slate-800 mt-0.5 block truncate">
-                    {translateText(profile.foodSafetyLicense?.issuingAuthority ||
-                      "Chưa cập nhật")}
-                  </span>
-                </div>
-                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
-                  <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-sky-600" />{translateText(" Ngày cấp")}</span>
-                  <span className="text-xs font-mono font-semibold text-slate-800 mt-0.5 block">
-                    {translateText(formatDateVi(profile.foodSafetyLicense?.issueDate))}
-                  </span>
-                </div>
-                <div className="bg-white/90 rounded-xl p-2.5 border border-sky-100">
-                  <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-sky-600" />{translateText(" Ngày hết hạn")}</span>
-                  <span className="text-xs font-mono font-bold text-slate-900 mt-0.5 block">
-                    {translateText(formatDateVi(profile.foodSafetyLicense?.expiryDate))}
-                  </span>
                 </div>
               </div>
             </div>
@@ -728,17 +603,12 @@ export const SchoolSettingsPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-800 truncate">
                       {translateText(hasRealLogo
-                        ? profile.branding.logoName || "Logo trường học"
+                        ? "Logo trường học"
                         : "Chưa tải lên logo trường")}
                     </span>
-                    {hasRealLogo && (
-                      <span className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-teal-200 shrink-0">{translateText("Đã lưu CSDL")}</span>
-                    )}
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                    {translateText(hasRealLogo
-                      ? profile.branding.logoSize || "Đang sử dụng"
-                      : "Hỗ trợ PNG, JPG, WEBP, SVG (≤ 2MB)")}
+                    {translateText("Hỗ trợ PNG, JPG, WEBP, SVG (≤ 2MB)")}
                   </p>
                 </div>
               </div>
@@ -768,32 +638,6 @@ export const SchoolSettingsPage: React.FC = () => {
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* Primary Color Selector */}
-            <div className="pt-1 flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-slate-600">{translateText("Màu nhận diện App Phụ Huynh:")}</span>
-              <div className="flex items-center gap-1.5">
-                {COLOR_OPTIONS.map((c) => {
-                  const active =
-                    (profile.branding?.primaryColor || "TEAL") === c.code;
-                  return (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => handleColorChange(c.code)}
-                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 border transition ${
-                        active
-                          ? "bg-slate-900 text-white border-slate-900"
-                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      <span className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
-                      <span>{translateText(c.label)}</span>
-                    </button>
-                  );
-                })}
               </div>
             </div>
           </div>
@@ -902,25 +746,6 @@ export const SchoolSettingsPage: React.FC = () => {
                 </select>
               </div>
             </div>
-
-            <label className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer">
-              <div className="pr-3">
-                <span className="text-xs font-bold text-slate-800 block">{translateText("Tự động phân loại dinh dưỡng theo chuẩn WHO Z-Score")}</span>
-                <span className="text-[11px] text-slate-500">{translateText("Tự động tính WAZ, HAZ, BAZ khi giáo viên nhập cân nặng và chiều cao định kỳ")}</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={operational.whoZscoreAutoCalc}
-                onChange={(e) => {
-                  setOperationalFeedback(null);
-                  setOperational((p) => ({
-                    ...p,
-                    whoZscoreAutoCalc: e.target.checked,
-                  }));
-                }}
-                className="w-4 h-4 accent-teal-600 rounded cursor-pointer shrink-0"
-              />
-            </label>
 
             <div className="pt-2 flex justify-end">
               <button

@@ -842,7 +842,7 @@ export const FoodSafetyInspectionTab: React.FC<FoodSafetyInspectionTabProps> = (
 
       {/* ─── MODAL: BẾP TẢI ẢNH MINH CHỨNG & GỬI DUYỆT ─── */}
       {isSubmitModalOpen && submittingSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
           <div
             className={`w-full max-w-2xl rounded-3xl shadow-2xl p-6 border max-h-[92vh] overflow-y-auto ${
               isDarkMode
@@ -1135,7 +1135,7 @@ export const FoodSafetyInspectionTab: React.FC<FoodSafetyInspectionTabProps> = (
 
       {/* Modal Quick Step Recording */}
       {activeStepModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
           <div
             className={`w-full max-w-lg rounded-3xl shadow-2xl p-6 border ${
               isDarkMode

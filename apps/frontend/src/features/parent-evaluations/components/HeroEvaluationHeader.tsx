@@ -37,7 +37,7 @@ export const HeroEvaluationHeader: React.FC<HeroEvaluationHeaderProps> = ({ stat
                 Mọi ý kiến đóng góp của Ba Mẹ đều là động lực quý giá để KidMeal không ngừng hoàn thiện từng bữa cơm dinh dưỡng, an toàn và ngập tràn niềm vui cho các thiên thần nhỏ.
               </p>
               <p className="text-xs font-bold text-teal-800">
-                Cô Nguyễn Thu Thủy <span className="font-normal text-slate-500">• Hiệu trưởng & Ban Điều hành Tổ Dinh dưỡng</span>
+                Ban Giám Hiệu <span className="font-normal text-slate-500">• Ban Điều hành Bán trú & Tổ Dinh dưỡng</span>
               </p>
             </div>
           </div>

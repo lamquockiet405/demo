@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Users, CheckCircle2, XCircle, AlertTriangle, Utensils,
@@ -248,9 +249,9 @@ export const TeacherTabletPage: React.FC = () => {
     return attendanceData.children.filter((c) => {
       // Filter by search
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = c.fullName.toLowerCase().includes(q);
-        const matchesCode = c.studentCode.toLowerCase().includes(q);
+        const q = normalizeSearch(searchQuery);
+        const matchesName = normalizeSearch(c.fullName).includes(q);
+        const matchesCode = normalizeSearch(c.studentCode).includes(q);
         if (!matchesName && !matchesCode) return false;
       }
       // Filter by status mode

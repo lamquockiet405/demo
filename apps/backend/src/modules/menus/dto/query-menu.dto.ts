@@ -32,6 +32,10 @@ export class QueryMenuDto {
   @IsOptional()
   includeDeleted?: boolean;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  submittedOnly?: boolean;
+
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()
   @Type(() => Number)

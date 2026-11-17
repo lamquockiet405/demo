@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState, useEffect } from 'react';
 import {
   Scale,
@@ -16,6 +17,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { weeklyMenusApi, WeeklyMenu } from '../api/weekly-menus.api';
+import { downloadExcel } from '../../../core/utils/excel-export';
 
 interface IngredientSummary {
   id: string;
@@ -202,7 +204,7 @@ export const GrossWeightPurchasingPage: React.FC = () => {
     // Search filter
     if (searchQuery.trim()) {
       result = result.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        normalizeSearch(item.name).includes(normalizeSearch(searchQuery))
       );
     }
 
@@ -220,10 +222,12 @@ export const GrossWeightPurchasingPage: React.FC = () => {
 
   const categories = Array.from(new Set(ingredientsList.map((i) => i.category)));
 
-  // Mock export action
-  const handleExport = (format: 'Excel' | 'PDF') => {
-    setExportSuccess(`Đã xuất bảng dự trù mua hàng thành công (${format})! Đang tải file...`);
-    setTimeout(() => setExportSuccess(null), 4000);
+  const handleExport = async () => {
+    const ok = await downloadExcel(`Du_tru_nguyen_lieu_${startDate}_${endDate}.xlsx`, [
+      ['Nguyên liệu', 'Nhóm', 'Đơn vị', 'Hao hụt (%)', 'Khối lượng tinh (g)', 'Khối lượng thô (g)', 'Đề xuất mua (kg)', 'Món sử dụng'],
+      ...ingredientsList.map(item => [item.name, item.category, item.unit, item.refuseRate, item.netTotalG, item.grossTotalG, item.grossTotalKg, item.dishesUsed.join('\n')]),
+    ], 'Dự trù nguyên liệu mua hàng');
+    if (ok) setExportSuccess('Đã xuất file Excel dự trù mua hàng.');
   };
 
   return (
@@ -232,9 +236,6 @@ export const GrossWeightPurchasingPage: React.FC = () => {
       <div className="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2.5 mb-2">
-            <span className="bg-emerald-400/25 border border-emerald-400/40 text-emerald-300 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              UC-92 • ITERATION 5
-            </span>
             <span className="text-emerald-200 text-xs font-medium">BGH & Chuyên gia Dinh dưỡng</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -247,14 +248,14 @@ export const GrossWeightPurchasingPage: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => handleExport('Excel')}
+            onClick={() => void handleExport()}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-emerald-900 font-bold text-sm shadow hover:bg-emerald-50 transition active:scale-95"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
             Xuất Excel đi chợ
           </button>
           <button
-            onClick={() => handleExport('PDF')}
+            onClick={() => window.print()}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-700/60 hover:bg-emerald-700 text-white font-bold text-sm border border-emerald-500/40 transition active:scale-95"
           >
             <Printer className="w-4 h-4" />
@@ -380,7 +381,7 @@ export const GrossWeightPurchasingPage: React.FC = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-medium text-slate-700 focus:outline-none"
             >
-              <option value="ALL">Tất cả nhóm ({ingredientsList.length})</option>
+              <option value="ALL">Tất cả nhóm</option>
               {categories.map((c) => (
                 <option key={c} value={c}>
                   {c}

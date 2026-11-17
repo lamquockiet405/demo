@@ -489,8 +489,6 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
     return computeDayData(selectedDay);
   }, [selectedDay, menu, configuredMealSlots]);
 
-  if (!isOpen || typeof document === 'undefined') return null;
-
   const totalAtSchoolCalo = currentData.totalDay.calo;
   // % Calo các bữa tại trường so với nhu cầu CẢ NGÀY của trẻ
   const atSchoolPctOfAllDay =
@@ -540,6 +538,10 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
     };
   }, [distributionOverview, allDayStandard, totalAtSchoolWater]);
 
+  // Keep all hooks above this guard so opening/closing the modal never changes
+  // the number or order of hooks invoked by this component.
+  if (!isOpen || typeof document === 'undefined') return null;
+
   // Tính tỷ lệ P:L:G thực tế đạt được của toàn ngày tại trường
   const macroCalo =
     currentData.totalDay.p * 4 +
@@ -556,10 +558,10 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
   const gPct = macroCalo > 0 ? Math.max(0, 100 - pPct - lPct) : 0;
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div className="fixed !m-0 inset-0 z-[10000] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 

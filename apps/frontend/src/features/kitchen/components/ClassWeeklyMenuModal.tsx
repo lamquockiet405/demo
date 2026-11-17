@@ -302,7 +302,7 @@ export const ClassWeeklyMenuModal: React.FC<ClassWeeklyMenuModalProps> = ({
   if (!isOpen || !classItem) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-md animate-fadeIn overflow-y-auto">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-md animate-fadeIn overflow-y-auto">
       <div
         className={`w-full max-w-6xl my-auto rounded-3xl shadow-2xl border flex flex-col max-h-[92vh] overflow-hidden transition-all duration-300 ${
           isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
@@ -620,7 +620,7 @@ export const ClassWeeklyMenuModal: React.FC<ClassWeeklyMenuModalProps> = ({
                   <HeartPulse className="w-5 h-5 text-rose-500" />
                   <div>
                     <h5 className="font-black text-xs text-slate-800 dark:text-white">
-                      CÂN ĐỐI DINH DƯỠNG TUẦN (CHUẨN THÔNG TƯ 28/2016/TT-BGDĐT)
+                      CÂN ĐỐI DINH DƯỠNG TUẦN (CHUẨN BỘ GD&ĐT)
                     </h5>
                     <p className="text-[11px] text-slate-400">
                       Năng lượng tại trường đáp ứng 50 - 55% nhu cầu cả ngày của trẻ

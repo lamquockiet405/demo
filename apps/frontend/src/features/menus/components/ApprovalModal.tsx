@@ -54,10 +54,10 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+    <div className="fixed !m-0 inset-0 z-[10000] flex items-center justify-center p-4">
       {/* Nền mờ Backdrop Blur */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
         style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
         onClick={onClose}
       />
@@ -142,7 +142,7 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <div className="flex justify-between">
               <span className="text-slate-500">{translateText("Năng lượng trung bình:")}</span>
               <span className="font-bold text-emerald-700">
-                {translateText(menu.dailyAverageCalories ? `${menu.dailyAverageCalories} Kcal / ngày (Chuẩn VN-RDA)` : 'Chưa có định lượng Kcal')}
+                {translateText(menu.dailyAverageCalories ? `${menu.dailyAverageCalories} Kcal / ngày` : 'Chưa có định lượng Kcal')}
               </span>
             </div>
             <div className="flex justify-between">
@@ -152,22 +152,6 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
               </span>
             </div>
           </div>
-
-          {/* Bản cam kết chuyên môn của Nutritionist */}
-          {menu.commitmentSigned ? (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-950">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <div className="flex-1 space-y-0.5">
-                <div className="font-bold flex items-center justify-between">
-                  <span>{translateText("Bản cam kết chuyên môn dinh dưỡng đã ký số")}</span>
-                  <span className="text-[10px] text-emerald-700 font-semibold">
-                    {translateText(menu.submittedAt ? new Date(menu.submittedAt).toLocaleDateString(getLocale()) : 'Đã xác nhận')}
-                  </span>
-                </div>
-                <p className="text-[11px] text-emerald-800 leading-normal">{translateText("Chuyên viên đã cam kết tuân thủ Thông tư 28/2016/TT-BGDĐT, an toàn VSTP theo Quyết định 1246/QĐ-BYT và rà soát dị ứng học sinh.")}</p>
-              </div>
-            </div>
-          ) : null}
 
           {/* Giải trình can thiệp / vượt ngưỡng của Nutritionist */}
           {menu.overrideJustification ? (

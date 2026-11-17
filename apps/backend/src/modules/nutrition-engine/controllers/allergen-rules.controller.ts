@@ -60,7 +60,7 @@ export class AllergenRulesController {
    * Chuyển xử lý sang AllergenRulesService.create() và trả kết quả cho client.
    */
   @Post()
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGER", "PRINCIPAL")
   @ApiOperation({ summary: "Thêm mới loại dị ứng" })
   async create(@Body() dto: CreateAllergenDto) {
     return this.allergenService.create(dto);
@@ -73,7 +73,7 @@ export class AllergenRulesController {
    * Chuyển xử lý sang AllergenRulesService.update() và trả kết quả cho client.
    */
   @Put(":id")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGER", "PRINCIPAL")
   @ApiOperation({ summary: "Cập nhật loại dị ứng" })
   async update(
     @Param("id", ParseIntPipe) id: number,
@@ -89,7 +89,7 @@ export class AllergenRulesController {
    * Đọc bản ghi hiện tại rồi truyền isActive đảo ngược sang service.update.
    */
   @Patch(":id/status")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGER", "PRINCIPAL")
   @ApiOperation({ summary: "Bật/tắt trạng thái loại dị ứng" })
   async toggleStatus(@Param("id", ParseIntPipe) id: number) {
     const current = await this.allergenService.findOne(id);
@@ -102,7 +102,7 @@ export class AllergenRulesController {
    * Chuyển xử lý sang AllergenRulesService.restore() và trả kết quả cho client.
    */
   @Patch(":id/restore")
-  @Roles("NUTRITIONIST", "PRINCIPAL", "SCHOOL_MANAGER", "SUPER_ADMIN")
+  @Roles("PRINCIPAL", "SCHOOL_MANAGER", "SUPER_ADMIN")
   async restore(@Param("id", ParseIntPipe) id: number) {
     return this.allergenService.restore(id);
   }
@@ -113,7 +113,7 @@ export class AllergenRulesController {
    * Chuyển xử lý sang AllergenRulesService.remove() và trả kết quả cho client.
    */
   @Delete(":id")
-  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL")
+  @Roles("SCHOOL_MANAGER", "PRINCIPAL")
   @ApiOperation({ summary: "Xóa loại dị ứng" })
   async remove(@Param("id", ParseIntPipe) id: number) {
     return this.allergenService.remove(id);

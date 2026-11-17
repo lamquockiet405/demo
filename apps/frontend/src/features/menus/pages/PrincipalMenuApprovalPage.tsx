@@ -17,7 +17,6 @@ import {
   Layers,
   Search,
   Filter,
-  Flame,
   ShieldCheck,
   RotateCcw,
   Eye,
@@ -86,12 +85,16 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
           status: statusFilter,
           targetAgeGroup: ageGroupFilter,
           includeDeleted: false,
+          submittedOnly: true,
         }),
       ]);
 
-      const menusList = Array.isArray(menusRes)
+      const menusListRaw = Array.isArray(menusRes)
         ? menusRes
         : (menusRes as any)?.items || (menusRes as any)?.data || [];
+      const menusList = menusListRaw.filter(
+        (m: WeeklyMenu) => m.status !== "DRAFT" && Boolean(m.submittedAt),
+      );
       setStats(statsRes);
       setMenus(menusList);
 
@@ -211,7 +214,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
       showNotify(
         "error",
         err?.response?.data?.message ||
-          "Không thể chấp thuận yêu cầu chỉnh sửa.",
+        "Không thể chấp thuận yêu cầu chỉnh sửa.",
       );
     } finally {
       setActionLoading(false);
@@ -287,7 +290,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
     try {
       await weeklyMenusApi.downloadExcel(
         target.id,
-        `Thuc_don_${target.title.replace(/\s+/g, "_")}.csv`,
+        `Thuc_don_${target.title.replace(/\s+/g, "_")}.xlsx`,
       );
       showNotify("success", "Đã tải xuống file Excel thực đơn tuần.");
     } catch (err) {
@@ -356,11 +359,10 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
       {notification && (
         <div className="fixed top-20 right-6 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
           <div
-            className={`px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2.5 text-xs font-bold ${
-              notification.type === "success"
-                ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-600/30"
-                : "bg-rose-600 text-white border-rose-500 shadow-rose-600/30"
-            }`}
+            className={`px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2.5 text-xs font-bold ${notification.type === "success"
+              ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-600/30"
+              : "bg-rose-600 text-white border-rose-500 shadow-rose-600/30"
+              }`}
           >
             {notification.type === "success" ? (
               <CheckCircle2 className="w-4 h-4" />
@@ -402,7 +404,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
       </div>
 
       {/* ─── 2. CÁC Ô THỐNG KÊ (5 KPI CARDS ĐẦU GIAO DIỆN) ─── */}
-      <MenuStatsCards stats={stats} loading={loading} />
+      <MenuStatsCards stats={stats} loading={loading} isPrincipal={true} />
 
       {/* ─── 3. BẢNG DANH SÁCH CÁC THỰC ĐƠN TUẦN ─── */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
@@ -438,23 +440,9 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 </option>
                 <option value="REJECTED">{translateText("Bị từ chối (")}{stats?.rejected || 0})
                 </option>
-                <option value="ALL">{translateText("Tất cả (gồm cả Dự thảo)")}</option>
-                <option value="DRAFT">{translateText("Bản dự thảo (")}{stats?.draft || 0})</option>
               </select>
             </div>
 
-            {/* Lọc Nhóm tuổi */}
-            <div className="flex items-center gap-1.5">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{translateText("Nhóm tuổi:")}</label>
-              <select
-                value={ageGroupFilter}
-                onChange={(e) => setAgeGroupFilter(e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-              >
-                <option value="ALL">{translateText("Mẫu giáo chung (3 - 6 tuổi)")}</option>
-                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
-              </select>
-            </div>
           </div>
 
           <div className="text-xs font-semibold text-slate-500">{translateText("Hiển thị ")}<strong className="text-slate-800">{menus.length}</strong>{" "}{translateText("thực đơn tuần")}</div>
@@ -468,8 +456,6 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                 <th className="py-3.5 px-4 w-12 text-center">{translateText("STT")}</th>
                 <th className="py-3.5 px-4">{translateText("Tên thực đơn tuần")}</th>
                 <th className="py-3.5 px-4">{translateText("Thời gian áp dụng")}</th>
-                <th className="py-3.5 px-4">{translateText("Nhóm tuổi")}</th>
-                <th className="py-3.5 px-4 text-center">{translateText("Năng lượng TB")}</th>
                 <th className="py-3.5 px-4">{translateText("Người lập hồ sơ")}</th>
                 <th className="py-3.5 px-4 text-center">{translateText("Thời gian gửi")}</th>
                 <th className="py-3.5 px-4 text-center">{translateText("Trạng thái")}</th>
@@ -479,7 +465,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
             <tbody className="divide-y divide-slate-100 text-xs font-medium">
               {menus.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-50" />
                     <p className="font-bold text-slate-700">{translateText("Không tìm thấy thực đơn nào!")}</p>
                     <p className="text-xs mt-0.5">{translateText("Vui lòng điều chỉnh lại bộ lọc hoặc từ khóa tìm kiếm.")}</p>
@@ -497,13 +483,12 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                     <tr
                       key={menu.id}
                       onClick={() => handleSelectMenu(menu.id, false)}
-                      className={`transition-colors cursor-pointer group ${
-                        isSelected
-                          ? "bg-teal-50/70 border-l-4 border-l-teal-600 font-semibold"
-                          : isPending
-                            ? "bg-amber-50/30 hover:bg-amber-50/60"
-                            : "hover:bg-slate-50/80"
-                      }`}
+                      className={`transition-colors cursor-pointer group ${isSelected
+                        ? "bg-teal-50/70 border-l-4 border-l-teal-600 font-semibold"
+                        : isPending
+                          ? "bg-amber-50/30 hover:bg-amber-50/60"
+                          : "hover:bg-slate-50/80"
+                        }`}
                     >
                       {/* STT */}
                       <td className="py-3.5 px-4 text-center text-slate-400 font-mono text-xs">
@@ -540,29 +525,6 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                             {translateText(menu.startDate?.split("T")[0])} →{" "}
                             {translateText(menu.endDate?.split("T")[0])}
                           </span>
-                        </div>
-                      </td>
-
-                      {/* Nhóm tuổi */}
-                      <td className="py-3.5 px-4">
-                        <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-[11px] font-bold">
-                          {translateText(getAgeGroupLabel(menu.targetAgeGroup))}
-                        </span>
-                      </td>
-
-                      {/* Năng lượng TB & Dinh dưỡng */}
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="font-black text-amber-700 text-xs inline-flex items-center gap-1">
-                          <Flame className="w-3 h-3 text-amber-500" />
-                          {translateText(Number(menu.dailyAverageCalories || 0).toFixed(
-                            1,
-                          ))}{" "}{translateText("Kcal")}</span>
-                        <div className="flex items-center justify-center gap-1 mt-0.5 text-[10px] font-semibold">
-                          <span className="text-blue-700">{translateText("P:")}{translateText(Number(menu.dailyAverageProteinG || 0).toFixed(0))}{translateText("g")}</span>
-                          <span className="text-slate-300">•</span>
-                          <span className="text-amber-700">{translateText("L:")}{translateText(Number(menu.dailyAverageFatG || 0).toFixed(0))}{translateText("g")}</span>
-                          <span className="text-slate-300">•</span>
-                          <span className="text-emerald-700">{translateText("G:")}{translateText(Number(menu.dailyAverageCarbG || 0).toFixed(0))}{translateText("g")}</span>
                         </div>
                       </td>
 
@@ -752,8 +714,8 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                         <p className="text-[11px] text-amber-700 mt-0.5">{translateText("Gửi lúc:")}{" "}
                           {translateText(selectedMenu.editRequestAt
                             ? new Date(
-                                selectedMenu.editRequestAt,
-                              ).toLocaleString(getLocale())
+                              selectedMenu.editRequestAt,
+                            ).toLocaleString(getLocale())
                             : "Mới đây")}
                         </p>
                       </div>
@@ -826,14 +788,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                   const selGPct = Math.max(0, 100 - selPPct - selLPct);
 
                   return (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="bg-amber-50/80 border border-amber-200/80 p-3.5 rounded-2xl text-center shadow-2xs">
-                        <span className="text-[10px] uppercase font-bold text-amber-800 block">{translateText("Năng lượng TB/ngày")}</span>
-                        <span className="text-lg font-black text-amber-950 mt-0.5 block">
-                          {translateText(selCal.toFixed(1))}{translateText(" Kcal")}</span>
-                        <span className="text-[10px] text-amber-700 font-medium">{translateText("Chuẩn TT 28 (615 - 726 Kcal)")}</span>
-                      </div>
-
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="bg-emerald-50/80 border border-emerald-200/80 p-3.5 rounded-2xl text-center shadow-2xs">
                         <span className="text-[10px] uppercase font-bold text-emerald-800 block">{translateText("Cơ cấu P : L : G")}</span>
                         <span className="text-lg font-black text-emerald-950 mt-0.5 block">
@@ -842,32 +797,23 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                         <span className="text-[10px] text-emerald-700 font-medium">{translateText("P: ")}{translateText(selP.toFixed(1))}{translateText("g | L: ")}{translateText(selL.toFixed(1))}{translateText("g | G:")}{" "}
                           {translateText(selG.toFixed(1))}{translateText("g")}</span>
                       </div>
+
+                      <div className="bg-purple-50/80 border border-purple-200/80 p-3.5 rounded-2xl text-center shadow-2xs">
+                        <span className="text-[10px] uppercase font-bold text-purple-800 block">{translateText("Người gửi hồ sơ")}</span>
+                        <span className="text-sm font-black text-purple-950 mt-1 block truncate">
+                          {translateText(selectedMenu.submittedByName ||
+                            selectedMenu.createdByName ||
+                            "BS. Hoàng Mai Trang")}
+                        </span>
+                        <span className="text-[10px] text-purple-700 font-medium">
+                          {translateText(selectedMenu.submittedAt
+                            ? `Gửi lúc: ${new Date(selectedMenu.submittedAt).toLocaleTimeString(getLocale(), { hour: "2-digit", minute: "2-digit" })} • ${new Date(selectedMenu.submittedAt).toLocaleDateString(getLocale())}`
+                            : "Chuyên viên Dinh dưỡng")}
+                        </span>
+                      </div>
                     </div>
                   );
                 })()}
-                <div className="grid grid-cols-2 gap-3 -mt-3">
-                  <div className="bg-blue-50/80 border border-blue-200/80 p-3.5 rounded-2xl text-center">
-                    <span className="text-[10px] uppercase font-bold text-blue-800 block">{translateText("Nhóm tuổi phục vụ")}</span>
-                    <span className="text-sm font-black text-blue-950 mt-1 block truncate">
-                      {translateText(getAgeGroupLabel(selectedMenu.targetAgeGroup))}
-                    </span>
-                    <span className="text-[10px] text-blue-700 font-medium">{translateText("Tiêu chuẩn độ tuổi")}</span>
-                  </div>
-
-                  <div className="bg-purple-50/80 border border-purple-200/80 p-3.5 rounded-2xl text-center">
-                    <span className="text-[10px] uppercase font-bold text-purple-800 block">{translateText("Người gửi hồ sơ")}</span>
-                    <span className="text-sm font-black text-purple-950 mt-1 block truncate">
-                      {translateText(selectedMenu.submittedByName ||
-                        selectedMenu.createdByName ||
-                        "BS. Hoàng Mai Trang")}
-                    </span>
-                    <span className="text-[10px] text-purple-700 font-medium">
-                      {translateText(selectedMenu.submittedAt
-                        ? `Gửi lúc: ${new Date(selectedMenu.submittedAt).toLocaleTimeString(getLocale(), { hour: "2-digit", minute: "2-digit" })} • ${new Date(selectedMenu.submittedAt).toLocaleDateString(getLocale())}`
-                        : "Chuyên viên Dinh dưỡng")}
-                    </span>
-                  </div>
-                </div>
 
                 {/* Thanh Quyết Định Của Hiệu Trưởng Trong Drawer */}
                 <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3">
@@ -879,14 +825,14 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     {(selectedMenu.status === "SUBMITTED_FOR_REVIEW" ||
                       selectedMenu.status === "PENDING") && (
-                      <button
-                        onClick={() => setIsApprovalModalOpen(true)}
-                        className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>{translateText("Phê duyệt / Từ chối")}</span>
-                      </button>
-                    )}
+                        <button
+                          onClick={() => setIsApprovalModalOpen(true)}
+                          className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{translateText("Phê duyệt / Từ chối")}</span>
+                        </button>
+                      )}
 
                     {selectedMenu.status === "APPROVED" && (
                       <button
@@ -926,8 +872,8 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
                     <WeeklyGridTable
                       menu={selectedMenu}
                       readOnly={true}
-                      onOpenDishDrawer={() => {}}
-                      onRemoveDish={async () => {}}
+                      onOpenDishDrawer={() => { }}
+                      onRemoveDish={async () => { }}
                     />
                   </div>
                 </div>
@@ -969,7 +915,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         data={printData}
-        onDownloadCsv={handleDownloadExcel}
+        onDownloadExcel={handleDownloadExcel}
       />
     </div>
   );

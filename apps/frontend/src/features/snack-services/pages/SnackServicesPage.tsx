@@ -1,3 +1,5 @@
+import { normalizeSearch } from '../../../core/utils/search';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Search,
@@ -147,22 +149,11 @@ export const SnackServicesPage: React.FC = () => {
   };
 
   const handleExportRoster = () => {
-    if (!rosterData?.items || rosterData.items.length === 0) {
-      alert('Không có học sinh trong danh sách xuất Excel.');
-      return;
-    }
-    const headers = ['Mã học sinh,Họ và tên,Lớp,Khẩu phần,Ghi chú bếp,Trạng thái phí,SĐT Phụ huynh\n'];
-    const rows = rosterData.items.map(
-      (it) =>
-        `"${it.studentCode}","${it.fullName}","${it.className}","${it.snackDietBadgeText}","${it.kitchenNotes || ''}","${it.paymentStatusLabel}","${it.emergencyContactPhone || ''}"\n`
-    );
-    const blob = new Blob(['\uFEFF' + headers.concat(rows).join('')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `danh_sach_suat_an_xe_17h_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!rosterData?.items?.length) { alert('Không có học sinh trong danh sách xuất Excel.'); return; }
+    void downloadExcel(`Danh_Sach_Dang_Ky_Dich_Vu_${new Date().toISOString().slice(0, 10)}.xlsx`, [
+      ['Mã học sinh', 'Họ và tên', 'Lớp', 'Khẩu phần', 'Ghi chú bếp', 'Trạng thái phí', 'SĐT phụ huynh'],
+      ...rosterData.items.map(it => [it.studentCode, it.fullName, it.className, it.snackDietBadgeText, it.kitchenNotes, it.paymentStatusLabel, it.emergencyContactPhone]),
+    ], 'Danh sách đăng ký dịch vụ ăn phụ');
   };
 
   const handleSendReminder = (orderCode: string, parentName: string) => {
@@ -172,9 +163,9 @@ export const SnackServicesPage: React.FC = () => {
   // Filtered invoices
   const filteredInvoices = (Array.isArray(invoices) ? invoices : []).filter((inv) => {
     const matchSearch =
-      inv.childName?.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
-      inv.orderCode?.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
-      inv.className?.toLowerCase().includes(invoiceSearch.toLowerCase());
+      normalizeSearch(inv.childName).includes(normalizeSearch(invoiceSearch)) ||
+      normalizeSearch(inv.orderCode).includes(normalizeSearch(invoiceSearch)) ||
+      normalizeSearch(inv.className).includes(normalizeSearch(invoiceSearch));
     const matchStatus =
       invoiceStatus === 'ALL' ||
       (invoiceStatus === 'PAID' && (inv.status === 'PAID' || inv.status === 'SUCCESS')) ||
@@ -224,7 +215,7 @@ export const SnackServicesPage: React.FC = () => {
               className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Xuất Danh Sách Suất Ăn (CSV)
+              Xuất danh sách suất ăn (Excel)
             </button>
           ) : (
             <button
@@ -553,7 +544,7 @@ export const SnackServicesPage: React.FC = () => {
                     {/* Top status line */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[11px] font-bold text-slate-400">
-                        {item.appliedMonth}
+                        {item.weekNumber ? `Tuần ${item.weekNumber}` : `${item.startDate} → ${item.endDate}`}
                       </span>
                       <span
                         className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
@@ -627,7 +618,7 @@ export const SnackServicesPage: React.FC = () => {
                       </span>
                       <span className="text-[10px] text-slate-500 font-medium"> / suất ngày</span>
                       <div className="text-[10px] text-slate-400">
-                        ~ {formatVND(item.monthlyEstimatedPrice)} / tháng (22 ngày)
+                        {formatVND(item.feeAmount ?? item.weeklyPrice ?? 0)} / tuần
                       </div>
                     </div>
 
@@ -668,7 +659,7 @@ export const SnackServicesPage: React.FC = () => {
                 Danh Sách Suất Ăn Xế Chiều 17h00 (Kitchen Roster)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Dữ liệu đồng bộ trực tiếp từ Database PostgreSQL để Bếp trưởng phân chia khẩu phần tiêu chuẩn và khẩu phần đặc biệt cho trẻ dị ứng
+                Dữ liệu đồng bộ trực tiếp để Bếp trưởng phân chia khẩu phần tiêu chuẩn và khẩu phần đặc biệt cho trẻ dị ứng
               </p>
             </div>
 

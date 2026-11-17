@@ -27,7 +27,7 @@ export const NutritionBar: React.FC<NutritionBarProps> = ({
           </div>
         </div>
         <span className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-bold border border-emerald-200">
-          Đạt chuẩn TT 28/2016/TT-BGDĐT
+          Đạt chuẩn dinh dưỡng Bộ GD&ĐT
         </span>
       </div>
 

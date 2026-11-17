@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
 import { X, FileSpreadsheet, Upload, CheckCircle2, AlertCircle, FileText, Sparkles } from 'lucide-react';
 import { ImportExcelPayload } from '../api/weekly-menus.api';
@@ -14,6 +16,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   onClose,
   onImport,
 }) => {
+  useLanguage();
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(() => {
@@ -121,10 +124,10 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4">
       {/* Nền mờ Backdrop Blur */}
       <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
@@ -135,8 +138,8 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Import thực đơn tuần từ file Excel</h3>
-              <p className="text-xs text-slate-500">Tự động nhận diện cấu trúc ngày và bữa ăn trong tuần</p>
+              <h3 className="text-base font-bold text-slate-900">{translateText("Import thực đơn tuần từ file Excel")}</h3>
+              <p className="text-xs text-slate-500">{translateText("Tự động nhận diện cấu trúc ngày và bữa ăn trong tuần")}</p>
             </div>
           </div>
           <button
@@ -151,16 +154,14 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2 text-xs text-rose-700">
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
-              <span>{error}</span>
+              <span>{translateText(error)}</span>
             </div>
           )}
 
           {/* Thiết lập thông tin thực đơn */}
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Tên thực đơn tuần
-              </label>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">{translateText("Tên thực đơn tuần")}</label>
               <input
                 type="text"
                 value={title}
@@ -170,9 +171,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Từ ngày (Thứ 2)
-              </label>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">{translateText("Từ ngày (Thứ 2)")}</label>
               <input
                 type="date"
                 value={startDate}
@@ -182,9 +181,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Đến ngày (Thứ 6)
-              </label>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">{translateText("Đến ngày (Thứ 6)")}</label>
               <input
                 type="date"
                 value={endDate}
@@ -209,11 +206,9 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                 <Upload className="w-6 h-6" />
               </div>
               <p className="text-xs sm:text-sm font-bold text-slate-800">
-                {fileName ? fileName : 'Bấm để chọn file Excel (.xlsx / .csv) hoặc kéo thả vào đây'}
+                {translateText(fileName ? fileName : 'Bấm để chọn file Excel (.xlsx / .csv) hoặc kéo thả vào đây')}
               </p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Hỗ trợ định dạng biểu mẫu Excel/CSV thực đơn bán trú 5 ngày theo Thông tư 28
-              </p>
+              <p className="text-[11px] text-slate-400 mt-1">{translateText("Hỗ trợ định dạng biểu mẫu Excel/CSV thực đơn bán trú 5 ngày theo Quy chuẩn Dinh dưỡng")}</p>
             </label>
 
             {!fileName && (
@@ -223,9 +218,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   onClick={handleLoadDishesFromDatabase}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-3 py-1.5 rounded-full transition"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Nạp từ kho món ăn trong Cơ sở dữ liệu
-                </button>
+                  <Sparkles className="w-3.5 h-3.5" />{translateText("Nạp từ kho món ăn trong Cơ sở dữ liệu")}</button>
               </div>
             )}
           </div>
@@ -235,26 +228,19 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             <div className="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl">
               <div className="flex items-center justify-between text-xs font-bold text-emerald-900 mb-2">
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Đã nhận diện thành công {parsedItems.length} món ăn trong tuần:
-                </span>
-                <span className="text-[11px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
-                  Sẵn sàng lưu
-                </span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />{translateText("Đã nhận diện thành công ")}{parsedItems.length}{translateText(" món ăn trong tuần:")}</span>
+                <span className="text-[11px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-bold">{translateText("Sẵn sàng lưu")}</span>
               </div>
               <div className="max-h-32 overflow-y-auto space-y-1 text-xs text-slate-600">
                 {parsedItems.slice(0, 5).map((item, idx) => (
                   <div key={idx} className="flex justify-between py-0.5 border-b border-emerald-100/80">
-                    <span className="font-medium text-slate-800">
-                      T{item.dayOfWeek + 1}: {item.dishName} ({item.mealTime})
+                    <span className="font-medium text-slate-800">{translateText("T")}{translateText(item.dayOfWeek + 1)}: {item.dishName} ({translateText(item.mealTime)})
                     </span>
-                    <span className="text-slate-500 font-semibold">{item.calories} Kcal</span>
+                    <span className="text-slate-500 font-semibold">{translateText(item.calories)}{translateText(" Kcal")}</span>
                   </div>
                 ))}
                 {parsedItems.length > 5 && (
-                  <p className="text-[11px] text-slate-400 italic pt-1 text-center">
-                    ... và {parsedItems.length - 5} món ăn khác cho các bữa ăn trong tuần.
-                  </p>
+                  <p className="text-[11px] text-slate-400 italic pt-1 text-center">{translateText("... và ")}{parsedItems.length - 5}{translateText(" món ăn khác cho các bữa ăn trong tuần.")}</p>
                 )}
               </div>
             </div>
@@ -267,9 +253,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               onClick={onClose}
               disabled={isSubmitting}
               className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition"
-            >
-              Hủy
-            </button>
+            >{translateText("Hủy")}</button>
             <button
               type="submit"
               disabled={isSubmitting || parsedItems.length === 0}
@@ -278,12 +262,12 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               {isSubmitting ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  <span>Đang xử lý...</span>
+                  <span>{translateText("Đang xử lý...")}</span>
                 </>
               ) : (
                 <>
                   <FileSpreadsheet className="w-3.5 h-3.5" />
-                  <span>Xác nhận Import thực đơn</span>
+                  <span>{translateText("Xác nhận Import thực đơn")}</span>
                 </>
               )}
             </button>

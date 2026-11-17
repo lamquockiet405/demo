@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from 'react';
 import {
   Utensils,
@@ -36,6 +38,7 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
   onUpdateSensory,
   onLockAndComplete,
 }) => {
+  useLanguage();
   const [softness, setSoftness] = useState(sensory?.softnessScore ?? 5);
   const [temperature, setTemperature] = useState(sensory?.temperatureScore ?? 4);
   const [excitement, setExcitement] = useState(sensory?.excitementScore ?? 5);
@@ -113,7 +116,7 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-6 py-4 max-w-[1440px] mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-6 py-4 w-full">
       {/* Left Card: Cảm quan món ăn hôm nay của trẻ */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
         <div>
@@ -121,34 +124,24 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
             <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600">
               <Utensils className="w-4 h-4" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">
-              Cảm quan món ăn hôm nay của trẻ
-            </h3>
+            <h3 className="font-bold text-slate-900 text-sm">{translateText("Cảm quan món ăn hôm nay của trẻ")}</h3>
           </div>
-          <p className="text-xs text-slate-500 font-medium mb-4">
-            Cô giáo đánh giá nhanh để Nhà bếp điều chỉnh độ mặn, mềm và nhiệt độ cho các bữa kế tiếp.
-          </p>
+          <p className="text-xs text-slate-500 font-medium mb-4">{translateText("Cô giáo đánh giá nhanh để Nhà bếp điều chỉnh độ mặn, mềm và nhiệt độ cho các bữa kế tiếp.")}</p>
 
           {/* Rating Rows */}
           <div className="space-y-3 bg-slate-50/60 p-4 rounded-xl border border-slate-100">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">
-                Độ mềm & Kích thước thức ăn:
-              </span>
+              <span className="text-xs font-semibold text-slate-700">{translateText("Độ mềm & Kích thước thức ăn:")}</span>
               {renderStars(softness, 'softness')}
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">
-                Nhiệt độ khi chia phần (Ấm vừa):
-              </span>
+              <span className="text-xs font-semibold text-slate-700">{translateText("Nhiệt độ khi chia phần (Ấm vừa):")}</span>
               {renderStars(temperature, 'temperature')}
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">
-                Độ hào hứng của trẻ với món:
-              </span>
+              <span className="text-xs font-semibold text-slate-700">{translateText("Độ hào hứng của trẻ với món:")}</span>
               {renderStars(excitement, 'excitement')}
             </div>
           </div>
@@ -157,7 +150,7 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
         {/* Footer Note */}
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-xs font-bold text-teal-700">
           <ShieldCheck className="w-4 h-4 text-teal-600" />
-          <span>Đã kiểm thực 3 bước theo quy chuẩn VSATTP mầm non</span>
+          <span>{translateText("Đã kiểm thực 3 bước theo quy chuẩn VSATTP mầm non")}</span>
         </div>
       </div>
 
@@ -169,12 +162,9 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
               <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600">
                 <MessageSquare className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-slate-900 text-sm">
-                Góp ý trực tiếp gửi Bếp trưởng
-              </h3>
+              <h3 className="font-bold text-slate-900 text-sm">{translateText("Góp ý trực tiếp gửi Bếp trưởng")}</h3>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200">
-              Bếp trưởng: {sensory.headChefName || 'Cô Phạm Lan'}
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200">{translateText("Bếp trưởng: ")}{sensory.headChefName || translateText('Cô Phạm Lan')}
             </span>
           </div>
 
@@ -186,7 +176,7 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
               onBlur={handleFeedbackBlur}
               disabled={sensory.isLocked}
               rows={3}
-              placeholder="Nhập nhận xét về món ăn hôm nay của các con..."
+              placeholder={translateText("Nhập nhận xét về món ăn hôm nay của các con...")}
               className="w-full text-xs font-medium p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition resize-none bg-slate-50/50 disabled:bg-slate-100 disabled:text-slate-500"
             />
           </div>
@@ -196,25 +186,25 @@ export const EvaluationSensorySection: React.FC<EvaluationSensorySectionProps> =
         <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
             <Lock className="w-3.5 h-3.5 text-slate-400" />
-            <span>Khóa đánh giá lúc 12:00 để chuyển giao ca Bếp dọn dẹp</span>
+            <span>{translateText("Khóa đánh giá lúc 12:00 để chuyển giao ca Bếp dọn dẹp")}</span>
           </div>
 
           <button
             onClick={handleLockClick}
-            disabled={sensory.isLocked || isLocking}
+            disabled={isLocking}
             className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition shadow-xs ${
               sensory.isLocked
-                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-700/20 cursor-pointer'
                 : 'bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white shadow-teal-700/20'
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>
-              {sensory.isLocked
-                ? 'Đã khóa đánh giá bữa trưa'
+              {translateText(sensory.isLocked
+                ? 'Đã gửi Bếp (Bấm để Mở khóa sửa)'
                 : isLocking
-                ? 'Đang khóa...'
-                : 'Hoàn thành & Khóa đánh giá bữa trưa'}
+                ? 'Đang gửi...'
+                : 'Hoàn thành & Gửi đánh giá cho Bếp')}
             </span>
           </button>
         </div>

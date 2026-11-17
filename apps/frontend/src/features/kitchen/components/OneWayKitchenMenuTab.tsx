@@ -84,7 +84,7 @@ export const OneWayKitchenMenuTab: React.FC<OneWayKitchenMenuTabProps> = ({
               </h3>
             </div>
             <p className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Tuyệt đối không chồng chéo giữa luồng thực phẩm sống và thực phẩm chín • Tuân thủ Thông tư 28/2016/TT-BGDĐT
+              Tuyệt đối không chồng chéo giữa luồng thực phẩm sống và thực phẩm chín • Tuân thủ an toàn vệ sinh học đường
             </p>
           </div>
 

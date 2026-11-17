@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../common/utils/search';
 import {
   Injectable,
   NotFoundException,
@@ -77,9 +78,9 @@ export class NutritionRulesService {
     next.ageGroup = dto.ageGroup || dto.targetAgeGroup || current.ageGroup;
     if (next.ageGroup?.includes("TODDLER")) next.ageGroup = "NHA_TRE";
     if (next.ageGroup?.includes("KINDERGARTEN")) next.ageGroup = "MAU_GIAO";
-    next.mealScope = dto.mealScope || current.mealScope;
-    if (!next.ageGroup || !next.mealScope)
-      throw new BadRequestException("Chọn nhóm tuổi và phạm vi bữa ăn.");
+    next.mealScope = "DAYBOARDING";
+    if (!next.ageGroup)
+      throw new BadRequestException("Chọn nhóm tuổi cho quy chuẩn.");
     next.ruleName = dto.name ?? current.ruleName ?? null;
     for (const key of ["minCalciumMg", "minIronMg", "minZincMg", "maxSodiumMg"])
       next[key] = dto[key] ?? current[key] ?? 0;
@@ -125,9 +126,8 @@ export class NutritionRulesService {
       .filter(
         (r) =>
           !query.search ||
-          (r.name + " " + r.ageGroup)
-            .toLocaleLowerCase("vi")
-            .includes(query.search.toLocaleLowerCase("vi")),
+          normalizeSearch((r.name + " " + r.ageGroup))
+            .includes(normalizeSearch(query.search)),
       );
   }
 
@@ -159,6 +159,14 @@ export class NutritionRulesService {
   }
 
   async create(dto: CreateNutritionRuleDto) {
+    const existingCount = await this.ruleRepo.count({
+      where: { status: "ACTIVE" },
+    });
+    if (existingCount >= 1) {
+      throw new BadRequestException(
+        "Hệ thống chỉ cho phép duy nhất một cấu hình tiêu chuẩn dinh dưỡng. Vui lòng chỉnh sửa cấu hình hiện có.",
+      );
+    }
     const payload = this.applyInput(dto);
     const saved = await this.ruleRepo.save(this.ruleRepo.create(payload));
     return this.serializeRule(saved);

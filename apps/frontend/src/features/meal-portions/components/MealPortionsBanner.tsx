@@ -50,7 +50,7 @@ export const MealPortionsBanner: React.FC<MealPortionsBannerProps> = ({
           title="Xuất định dạng A4 chuẩn báo cáo cơ quan y tế"
         >
           <Printer className="w-3.5 h-3.5 text-white" />
-          <span>Xuất PDF / In thực đơn A4</span>
+          <span>In thực đơn A4</span>
         </button>
       </div>
     </div>

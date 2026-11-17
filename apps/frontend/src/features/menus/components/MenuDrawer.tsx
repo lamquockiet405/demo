@@ -192,10 +192,10 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed !m-0 inset-0 z-50 overflow-hidden">
       {/* Nền làm mờ phần còn lại của màn hình (Backdrop Blur) */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
@@ -329,7 +329,7 @@ export const MenuDrawer: React.FC<MenuDrawerProps> = ({
             <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div className="text-xs text-emerald-900">
-                <p className="font-bold">{translateText("Tiêu chuẩn dinh dưỡng Thông tư 28/2016/TT-BGDĐT")}</p>
+                <p className="font-bold">{translateText("Tiêu chuẩn dinh dưỡng Quy chuẩn Dinh dưỡng Mầm non")}</p>
                 <p className="text-emerald-700 mt-0.5 leading-relaxed">{translateText("Hệ thống tự động kích hoạt Rule Engine kiểm tra calo (600 - 882 Kcal), tỷ lệ P:L:G (13-20% : 25-35% : 52-60%) và quét dị ứng cho từng trẻ.")}</p>
               </div>
             </div>

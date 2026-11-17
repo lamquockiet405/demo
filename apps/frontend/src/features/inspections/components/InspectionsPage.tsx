@@ -1,3 +1,5 @@
+import { normalizeSearch } from '../../../core/utils/search';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/core/stores/auth.store';
@@ -362,43 +364,12 @@ export const InspectionsPage: React.FC = () => {
   };
 
   // Helper to export CSV for Decision 1246/QĐ-BYT
-  const handleExportCSV = () => {
-    const headers = [
-      'STT',
-      'Mã biên bản',
-      'Ngày kiểm thực',
-      'Ca ăn',
-      'Người thực hiện',
-      'B1: Trước chế biến',
-      'B2: Trong chế biến',
-      'B3: Trước khi ăn & Lưu mẫu',
-      'Nhiệt độ tủ lưu mẫu (°C)',
-      'Trạng thái',
-    ];
-
-    const rows = filteredRecords.map((r, i) => [
-      i + 1,
-      `"${r.code || ''}"`,
-      `"${formatDisplayDate(r.mealDate)}"`,
-      `"${r.mealTime || ''}"`,
-      `"${r.performerName || ''}"`,
-      `"${r.step1Status || 'Đạt chuẩn'}"`,
-      `"${r.step2Status || 'Đạt chuẩn'}"`,
-      `"${r.step3Status || 'Đạt chuẩn'}"`,
-      `"${r.storageTemp ?? 3.8}"`,
-      `"${r.status || 'Hoàn tất'}"`,
-    ]);
-
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((row) => row.join(','))].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `So_Kiem_Thuc_Ba_Buoc_QD1246_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setIsExportModalOpen(false);
+  const handleExportExcel = async () => {
+    const ok = await downloadExcel(`So_Kiem_Thuc_Ba_Buoc_${new Date().toISOString().slice(0, 10)}.xlsx`, [
+      ['STT', 'Mã biên bản', 'Ngày kiểm thực', 'Ca ăn', 'Người thực hiện', 'Bước 1', 'Bước 2', 'Bước 3', 'Nhiệt độ tủ lưu mẫu (°C)', 'Trạng thái'],
+      ...filteredRecords.map((r, i) => [i + 1, r.code, r.mealDate, r.mealTime, r.performerName, r.step1Status, r.step2Status, r.step3Status, r.storageTemp, r.status]),
+    ], 'Sổ kiểm thực ba bước');
+    if (ok) setIsExportModalOpen(false);
   };
 
   // Helper to Print formal Decision 1246 log book
@@ -413,9 +384,9 @@ export const InspectionsPage: React.FC = () => {
   const filteredRecords = records.filter((r) => {
     const matchesSearch =
       !search ||
-      r.code?.toLowerCase().includes(search.toLowerCase()) ||
-      r.performerName?.toLowerCase().includes(search.toLowerCase()) ||
-      r.mealTime?.toLowerCase().includes(search.toLowerCase()) ||
+      normalizeSearch(r.code).includes(normalizeSearch(search)) ||
+      normalizeSearch(r.performerName).includes(normalizeSearch(search)) ||
+      normalizeSearch(r.mealTime).includes(normalizeSearch(search)) ||
       r.mealDate?.includes(search);
 
     const matchesStatus =
@@ -469,7 +440,7 @@ export const InspectionsPage: React.FC = () => {
             onClick={() => setIsExportModalOpen(true)}
             className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-100 font-bold text-xs shadow-sm transition active:scale-95"
           >
-            <FileText className="w-4 h-4 text-slate-500" /> Xuất sổ (PDF/Excel)
+            <FileText className="w-4 h-4 text-slate-500" /> Xuất sổ Excel
           </button>
           {!isReadOnly && (
             <button
@@ -755,7 +726,7 @@ export const InspectionsPage: React.FC = () => {
 
       {/* ─── MODAL: LẬP BIÊN BẢN KIỂM THỰC 3 BƯỚC ─── */}
       {isModalVisible && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed !m-0 inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 shrink-0">
@@ -1326,7 +1297,7 @@ export const InspectionsPage: React.FC = () => {
 
       {/* ─── MODAL: XUẤT SỔ (PDF / EXCEL CHUẨN QĐ 1246) ─── */}
       {isExportModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="fixed !m-0 inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl p-6 border border-slate-200 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1347,12 +1318,12 @@ export const InspectionsPage: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed">
-              Bạn có thể xuất toàn bộ danh sách <strong>{filteredRecords.length} biên bản</strong> hiện có ra file Excel (CSV có dấu UTF-8) hoặc in bản trình duyệt định dạng chuẩn thanh tra an toàn thực phẩm.
+              Xuất danh sách <strong>{filteredRecords.length} biên bản</strong> hiện có ra file Excel (.xlsx) có logo trường, hoặc in sổ kiểm thực.
             </p>
 
             <div className="space-y-3">
               <button
-                onClick={handleExportCSV}
+                onClick={handleExportExcel}
                 className="w-full flex items-center justify-between p-3.5 bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition group"
               >
                 <div className="flex items-center gap-3">
@@ -1361,7 +1332,7 @@ export const InspectionsPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-800">
-                      Tải file Excel / CSV
+                      Tải file Excel (.xlsx)
                     </p>
                     <p className="text-[11px] text-slate-500 font-medium">
                       Bảng tính chi tiết 3 bước & nhiệt độ lưu mẫu
@@ -1381,7 +1352,7 @@ export const InspectionsPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 group-hover:text-slate-800">
-                      In sổ kiểm thực (PDF)
+                      In sổ kiểm thực
                     </p>
                     <p className="text-[11px] text-slate-500 font-medium">
                       Biểu mẫu hành chính trình đoàn kiểm tra ATTP

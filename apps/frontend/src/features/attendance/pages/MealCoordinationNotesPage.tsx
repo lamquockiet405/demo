@@ -213,7 +213,7 @@ export const MealCoordinationNotesPage: React.FC = () => {
               Quản lý Ghi chú Điều phối Bữa ăn Bán trú
             </h1>
             <p className="text-xs text-slate-500 font-medium max-w-2xl">
-              Cầu nối dặn dò trực tiếp giữa Giáo viên chủ nhiệm trên lớp, Bếp bán trú, Cán bộ Dinh dưỡng &amp; Y tế học đường theo tiêu chuẩn Thông tư 28/2016/TT-BGDĐT.
+              Cầu nối dặn dò trực tiếp giữa Giáo viên chủ nhiệm trên lớp, Bếp bán trú, Cán bộ Dinh dưỡng &amp; Y tế học đường theo tiêu chuẩn dinh dưỡng Bộ GD&ĐT.
             </p>
           </div>
 

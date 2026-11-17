@@ -106,7 +106,7 @@ export const ExecutiveDashboardPage: React.FC = () => {
               Hệ Thống Quản Lý Dinh Dưỡng & Bán Trú Mầm Non
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Tích hợp Thông tư 28/2016/TT-BGDĐT, Kiểm thực 3 bước QĐ 1246/QĐ-BYT, Chuẩn tăng trưởng thể lực WHO & Thanh toán VNPAY Dịch vụ ăn xế.
+              Tích hợp Chuẩn Dinh Dưỡng Bộ GD&ĐT, Kiểm thực 3 bước chuẩn Bộ Y Tế, Chuẩn tăng trưởng thể lực WHO & Thanh toán VNPAY Dịch vụ ăn xế.
             </p>
           </div>
 
@@ -509,7 +509,7 @@ export const ExecutiveDashboardPage: React.FC = () => {
             {/* P:L:G Breakdown Meters */}
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                <span>Cân đối cơ cấu năng lượng (Thông tư 28/2016/TT-BGDĐT)</span>
+                <span>Cân đối cơ cấu năng lượng (Chuẩn Dinh Dưỡng Học Đường)</span>
                 <span className="text-emerald-600">Đạt chuẩn 100%</span>
               </div>
               <div className="grid grid-cols-3 gap-3">

@@ -11,19 +11,6 @@ export const SnackRosterFooter: React.FC = () => {
             Hệ thống KidMeal • Quản trị dinh dưỡng khẩu phần học đường tiêu chuẩn Mầm Non
           </span>
         </div>
-
-        {/* Right Badges / Standards */}
-        <div className="flex flex-wrap items-center gap-4 text-[11px] font-semibold text-slate-700">
-          <span className="px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200">
-            Bộ GD&ĐT Chuẩn hóa
-          </span>
-          <span className="px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200">
-            Thông tư 28/2016/TT-BGDĐT
-          </span>
-          <span className="px-2.5 py-1 bg-slate-100 rounded-md border border-slate-200">
-            ATVSTP & Tiêu chuẩn HACCP
-          </span>
-        </div>
       </div>
 
       <div className="mt-4 text-center text-[11px] text-slate-400">

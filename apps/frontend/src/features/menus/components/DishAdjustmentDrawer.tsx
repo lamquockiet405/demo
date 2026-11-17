@@ -15,6 +15,7 @@ import {
   Baby,
   ChefHat,
   Users,
+  Search,
 } from "lucide-react";
 import {
   DishItem,
@@ -110,6 +111,7 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
     "STANDARD" | "ALLERGIES" | "OBESE" | "STUNTED" | "COMMON"
   >("STANDARD");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+  const [dishSearch, setDishSearch] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -207,7 +209,7 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
         targetChildType === "OBESE" &&
         !finalNotes.includes("Loại 2")
       ) {
-        finalNotes = `[Loại 2: Béo phì] ${finalNotes || "Món thay thế giảm béo TT 28/2016"}`;
+        finalNotes = `[Loại 2: Béo phì] ${finalNotes || "Món thay thế giảm béo Chuẩn Dinh Dưỡng"}`;
       } else if (
         targetChildType === "STUNTED" &&
         !finalNotes.includes("Loại 1")
@@ -217,7 +219,7 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
         targetChildType === "COMMON" &&
         !finalNotes.includes("Món Chung")
       ) {
-        finalNotes = `[Món Chung] ${finalNotes || "Món thay thế chung toàn năng cả 3 nhóm"}`;
+        finalNotes = `[Món Chung] ${finalNotes || "Món thay thế phù hợp chung các nhóm"}`;
       }
 
       await onSubmit({
@@ -249,10 +251,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed !m-0 inset-0 z-50 overflow-hidden">
       {/* Nền mờ Backdrop Blur */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
       />
 
@@ -409,7 +411,7 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                 }`}
               >
                 <ChefHat className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{translateText("⭐ Món thay thế chung toàn năng cho Bếp (Cả 3 nhóm bé)")}</span>
+                <span>{translateText("⭐ Món thay thế phù hợp chung cho Bếp")}</span>
               </button>
             </div>
 
@@ -446,6 +448,18 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                 ))}
               </div>
 
+              {/* Search input món ăn */}
+              <div className="relative mb-2">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder={translateText("Tìm tên món ăn...")}
+                  value={dishSearch}
+                  onChange={(e) => setDishSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-slate-50"
+                />
+              </div>
+
               <select
                 value={selectedDishId}
                 onChange={(e) => {
@@ -459,6 +473,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                 <option value="">{translateText("-- Chọn món ăn --")}</option>
                 {dishes
                   .filter((dish) => {
+                    if (dishSearch.trim()) {
+                      const query = dishSearch.trim().toLowerCase();
+                      if (!(dish.name || "").toLowerCase().includes(query)) return false;
+                    }
                     if (categoryFilter === "ALL") return true;
                     return (
                       detectCategory(dish.name, dish.dishType) ===

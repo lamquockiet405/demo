@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
 import { TodayMealData } from '../types';
@@ -11,6 +13,7 @@ export const NutritionStandardBanner: React.FC<NutritionStandardBannerProps> = (
   todayMeal,
   onViewDetails,
 }) => {
+  useLanguage();
   const nutrition = todayMeal.nutritionStandard || {
     title: 'Dinh dưỡng chuẩn viện dinh dưỡng quốc gia',
     subtitle: 'Tổng năng lượng bữa trưa đạt 580 kcal • Protein: 22g • Canxi: 210mg • Chất xơ: 6.5g',
@@ -25,14 +28,12 @@ export const NutritionStandardBanner: React.FC<NutritionStandardBannerProps> = (
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-              {nutrition.title}
+              {translateText(nutrition.title)}
             </h3>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
-              Chuẩn BYT
-            </span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">{translateText("Chuẩn BYT")}</span>
           </div>
           <p className="text-xs text-slate-600 mt-0.5 font-medium">
-            {nutrition.subtitle}
+            {translateText(nutrition.subtitle)}
           </p>
         </div>
       </div>
@@ -42,7 +43,7 @@ export const NutritionStandardBanner: React.FC<NutritionStandardBannerProps> = (
         onClick={onViewDetails}
         className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-teal-300 text-slate-700 hover:text-teal-700 rounded-xl text-xs font-bold transition shadow-2xs flex items-center gap-1.5 shrink-0 cursor-pointer"
       >
-        <span>Chi tiết</span>
+        <span>{translateText("Chi tiết")}</span>
         <ArrowRight className="w-3.5 h-3.5" />
       </button>
     </div>

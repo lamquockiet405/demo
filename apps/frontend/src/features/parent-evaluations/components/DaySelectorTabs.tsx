@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { DayTabItem } from '../types';
@@ -13,6 +15,7 @@ export const DaySelectorTabs: React.FC<DaySelectorTabsProps> = ({
   selectedDate,
   onSelectDate,
 }) => {
+  useLanguage();
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -22,12 +25,8 @@ export const DaySelectorTabs: React.FC<DaySelectorTabsProps> = ({
             <Calendar className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-slate-800 tracking-tight">
-              Thực đơn & Sức ăn Tuần 9 (Tháng 10/2024)
-            </h3>
-            <p className="text-[11px] text-slate-500">
-              Chọn ngày trong tuần để xem chi tiết từng bữa ăn của con
-            </p>
+            <h3 className="text-xs font-bold text-slate-800 tracking-tight">{translateText("Thực đơn & Sức ăn theo ngày")}</h3>
+            <p className="text-[11px] text-slate-500">{translateText("Chọn ngày trong tuần để xem chi tiết từng bữa ăn của con")}</p>
           </div>
         </div>
 
@@ -48,7 +47,7 @@ export const DaySelectorTabs: React.FC<DaySelectorTabsProps> = ({
               >
                 <span>{day.dayName}</span>
                 <span className={isSelected ? 'text-teal-200 text-[11px]' : 'text-slate-400 text-[11px]'}>
-                  {day.dateFormatted}
+                  {translateText(day.dateFormatted)}
                 </span>
                 {day.isCompleted && (
                   <Check className={`w-3 h-3 ${isSelected ? 'text-white' : 'text-emerald-500'}`} />

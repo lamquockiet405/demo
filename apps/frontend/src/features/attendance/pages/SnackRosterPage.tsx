@@ -1,9 +1,9 @@
+import { downloadExcel } from '../../../core/utils/excel-export';
 import React, { useState, useEffect, useCallback } from 'react';
 import { SnackRosterTopNav } from '../components/SnackRosterTopNav';
 import { SnackRosterHeader } from '../components/SnackRosterHeader';
 import { SnackRosterSummaryCards } from '../components/SnackRosterSummaryCards';
 import { SnackRosterFilterBar } from '../components/SnackRosterFilterBar';
-import { SnackRosterNoticeBanner } from '../components/SnackRosterNoticeBanner';
 import { SnackRosterTable } from '../components/SnackRosterTable';
 import { SnackRosterFooter } from '../components/SnackRosterFooter';
 import { SnackRosterDetailModal } from '../components/SnackRosterDetailModal';
@@ -81,40 +81,11 @@ export const SnackRosterPage: React.FC = () => {
 
   // Export to CSV
   const handleExport = () => {
-    if (!rosterData?.items || rosterData.items.length === 0) return;
-    const headers = [
-      'Mã học sinh',
-      'Họ và tên',
-      'Ngày sinh',
-      'Lớp',
-      'Khối',
-      'Trạng thái phí',
-      'Suất ăn xế',
-      'Ghi chú nhà bếp',
-    ];
-
-    const rows = rosterData.items.map((it) => [
-      `"${it.studentCode}"`,
-      `"${it.fullName}"`,
-      `"${it.formattedDob}"`,
-      `"${it.className}"`,
-      `"${it.blockName}"`,
-      `"${it.paymentStatusLabel}"`,
-      `"${it.snackDietBadgeText}"`,
-      `"${it.kitchenNotes.replace(/"/g, '""')}"`,
-    ]);
-
-    const csvContent =
-      'data:text/csv;charset=utf-8,\uFEFF' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Danh_sach_hoc_sinh_an_xe_${date}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!rosterData?.items?.length) return;
+    void downloadExcel(`Danh_sach_hoc_sinh_an_xe_${date}.xlsx`, [
+      ['Mã học sinh', 'Họ và tên', 'Ngày sinh', 'Lớp', 'Khối', 'Trạng thái phí', 'Khẩu phần', 'Ghi chú nhà bếp'],
+      ...rosterData.items.map(it => [it.studentCode, it.fullName, it.formattedDob, it.className, it.blockName, it.paymentStatusLabel, it.snackDietBadgeText, it.kitchenNotes]),
+    ], 'Danh sách học sinh đăng ký ăn xế');
   };
 
   // Print Roster
@@ -168,12 +139,6 @@ export const SnackRosterPage: React.FC = () => {
           }}
           onApplyFilter={handleApplyFilter}
           onResetFilter={handleResetFilter}
-        />
-
-        {/* Yellow Notice Banner for Afternoon Shift */}
-        <SnackRosterNoticeBanner
-          timeWindow={rosterData?.bannerNotice?.timeWindow || '14:15 - 14:45'}
-          specialCount={rosterData?.stats?.specialDietPortions ?? 8}
         />
 
         {/* Main Service Roster Table */}

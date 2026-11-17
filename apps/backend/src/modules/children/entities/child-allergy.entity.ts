@@ -19,17 +19,35 @@ export class ChildAllergy {
   @Column({ name: 'student_id', type: 'bigint', transformer: BigIntTransformer })
   studentId: number;
 
-  @Column({ name: 'allergen_id', type: 'bigint', transformer: BigIntTransformer })
-  allergenId: number;
+  @Column({ name: 'allergen_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  allergenId: number | null;
+
+  @Column({ name: 'custom_allergen_name', type: 'varchar', length: 150, nullable: true })
+  customAllergenName: string | null;
+
+  @Column({ name: 'allergy_type', type: 'varchar', length: 50, default: 'ALLERGY', nullable: true })
+  allergyType: string | null;
 
   @Column({ length: 20, default: 'MEDIUM' })
   severity: string;
 
   @Column({ type: 'text', nullable: true })
-  note: string;
+  symptoms: string | null;
+
+  @Column({ name: 'reaction_treatment', type: 'text', nullable: true })
+  reactionTreatment: string | null;
+
+  @Column({ name: 'diagnosed_date', type: 'date', nullable: true })
+  diagnosedDate: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  note: string | null;
+
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  isActive: boolean;
 
   @Column({ name: 'declared_by', type: 'bigint', transformer: BigIntTransformer, nullable: true })
-  declaredBy: number;
+  declaredBy: number | null;
 
   @CreateDateColumn({ name: 'declared_at', type: 'timestamptz' })
   declaredAt: Date;
@@ -38,11 +56,11 @@ export class ChildAllergy {
   @JoinColumn({ name: 'student_id' })
   child: Child;
 
-  @ManyToOne(() => AllergenCatalog, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => AllergenCatalog, { eager: true, nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'allergen_id' })
-  allergen: AllergenCatalog;
+  allergen: AllergenCatalog | null;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'declared_by' })
-  declarer: User;
+  declarer: User | null;
 }

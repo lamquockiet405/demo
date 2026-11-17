@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState, useEffect } from 'react';
 import {
   Thermometer,
@@ -94,9 +95,9 @@ export const SampleRetentionFridgeTab: React.FC<SampleRetentionFridgeTabProps> =
   const filteredSamples = samples.filter((s) => {
     const matchStatus = filterStatus === 'ALL' || s.status === filterStatus;
     const matchSearch =
-      s.dishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.collectorName.toLowerCase().includes(searchQuery.toLowerCase());
+      normalizeSearch(s.dishName).includes(normalizeSearch(searchQuery)) ||
+      normalizeSearch(s.code).includes(normalizeSearch(searchQuery)) ||
+      normalizeSearch(s.collectorName).includes(normalizeSearch(searchQuery));
     return matchStatus && matchSearch;
   });
 

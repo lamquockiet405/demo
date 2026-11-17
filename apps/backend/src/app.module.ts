@@ -15,6 +15,7 @@ import { NutritionEngineModule } from './modules/nutrition-engine/nutrition-engi
 import { MenusModule } from './modules/menus/menus.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { MealPortionsModule } from './modules/meal-portions/meal-portions.module';
+import { MealOperationsModule } from './modules/meal-operations/meal-operations.module';
 import { InspectionsModule } from './modules/inspections/inspections.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';
 import { SnackServicesModule } from './modules/snack-services/snack-services.module';
@@ -23,6 +24,10 @@ import { GrowthModule } from './modules/growth/growth.module';
 import { ParentEvaluationsModule } from './modules/parent-evaluations/parent-evaluations.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { ChildAlertsModule } from './modules/child-alerts/child-alerts.module';
+import { TeacherModule } from './modules/teacher/teacher.module';
+import { AcademicYearsModule } from './modules/academic-years/academic-years.module';
+import { FoodSafetyModule } from './modules/food-safety/food-safety.module';
 
 @Module({
   imports: [
@@ -42,6 +47,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     MenusModule,
     AttendanceModule,
     MealPortionsModule,
+    MealOperationsModule,
     InspectionsModule,
     WebsocketModule,
     SnackServicesModule,
@@ -50,6 +56,10 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     ParentEvaluationsModule,
     DashboardModule,
     AuditLogsModule,
+    ChildAlertsModule,
+    TeacherModule,
+    AcademicYearsModule,
+    FoodSafetyModule,
   ],
 })
 export class AppModule implements NestModule {

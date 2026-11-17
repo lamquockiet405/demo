@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from 'react';
@@ -196,26 +197,26 @@ export const FoodGroupRulesPage: React.FC = () => {
     (r) =>
       r.targetType === 'DISH_CATEGORY' &&
       (ageGroupFilter === 'ALL' || r.ageGroup === ageGroupFilter || r.ageGroup === 'ALL') &&
-      (!searchQuery || r.ruleName.toLowerCase().includes(searchQuery.toLowerCase()) || r.targetName.toLowerCase().includes(searchQuery.toLowerCase()))
+      (!searchQuery || normalizeSearch(r.ruleName).includes(normalizeSearch(searchQuery)) || normalizeSearch(r.targetName).includes(normalizeSearch(searchQuery)))
   );
 
   const foodGroupRules = frequencyRules.filter(
     (r) =>
       r.targetType === 'FOOD_GROUP' &&
       (ageGroupFilter === 'ALL' || r.ageGroup === ageGroupFilter || r.ageGroup === 'ALL') &&
-      (!searchQuery || r.ruleName.toLowerCase().includes(searchQuery.toLowerCase()) || r.targetName.toLowerCase().includes(searchQuery.toLowerCase()))
+      (!searchQuery || normalizeSearch(r.ruleName).includes(normalizeSearch(searchQuery)) || normalizeSearch(r.targetName).includes(normalizeSearch(searchQuery)))
   );
 
   const filteredSpacingRules = spacingRules.filter(
     (r) =>
       (ageGroupFilter === 'ALL' || r.ageGroup === ageGroupFilter || r.ageGroup === 'ALL') &&
-      (!searchQuery || r.ruleName.toLowerCase().includes(searchQuery.toLowerCase()) || (r.targetName && r.targetName.toLowerCase().includes(searchQuery.toLowerCase())))
+      (!searchQuery || normalizeSearch(r.ruleName).includes(normalizeSearch(searchQuery)) || (r.targetName && normalizeSearch(r.targetName).includes(normalizeSearch(searchQuery))))
   );
 
   const filteredIntakeStandards = intakeStandards.filter(
     (s) =>
       (ageGroupFilter === 'ALL' || s.ageGroup === ageGroupFilter) &&
-      (!searchQuery || s.standardName.toLowerCase().includes(searchQuery.toLowerCase()))
+      (!searchQuery || normalizeSearch(s.standardName).includes(normalizeSearch(searchQuery)))
   );
 
   return (
@@ -513,7 +514,7 @@ export const FoodGroupRulesPage: React.FC = () => {
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
-                              {translateText(rule.isActive ? 'Đang áp dụng' : 'Tạm dừng')}
+                              {translateText(rule.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng')}
                             </button>
                           </td>
                           <td className="py-3 px-4 text-right">
@@ -601,7 +602,7 @@ export const FoodGroupRulesPage: React.FC = () => {
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
-                              {translateText(rule.isActive ? 'Đang áp dụng' : 'Tạm dừng')}
+                              {translateText(rule.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng')}
                             </button>
                           </td>
                           <td className="py-3 px-4 text-right">
@@ -692,7 +693,7 @@ export const FoodGroupRulesPage: React.FC = () => {
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
-                              {translateText(rule.isActive ? 'Đang áp dụng' : 'Tạm dừng')}
+                              {translateText(rule.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng')}
                             </button>
                           </td>
                           <td className="py-3 px-4 text-right">
@@ -727,7 +728,7 @@ export const FoodGroupRulesPage: React.FC = () => {
           {activeTab === 'INTAKE_STANDARDS' && (
             <div className="space-y-4">
               <div className="p-3 bg-purple-50/50 border border-purple-200/70 rounded-xl text-xs text-purple-900">
-                <strong>{translateText("Phụ lục 1 → 6 (Thông tư 28 / Bộ GDĐT)")}</strong>{translateText(": Định mức năng lượng Kcal, Tỷ lệ P:L:G (13-20% : 25-35% : 52-60%), Chất xơ, Sắt (10%/15%), Kẽm (3 mức), Canxi, Vitamin A RAE.")}</div>
+                <strong>{translateText("Phụ lục 1 → 6 (Chuẩn Dinh dưỡng Mầm non)")}</strong>{translateText(": Định mức năng lượng Kcal, Tỷ lệ P:L:G (13-20% : 25-35% : 52-60%), Chất xơ, Sắt (10%/15%), Kẽm (3 mức), Canxi, Vitamin A RAE.")}</div>
 
               <div className="overflow-x-auto rounded-xl border border-slate-100">
                 <table className="w-full text-left border-collapse text-xs">
@@ -781,7 +782,7 @@ export const FoodGroupRulesPage: React.FC = () => {
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
-                              {translateText(std.isActive ? 'Đang áp dụng' : 'Tạm dừng')}
+                              {translateText(std.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng')}
                             </button>
                           </td>
                           <td className="py-3 px-4 text-right">

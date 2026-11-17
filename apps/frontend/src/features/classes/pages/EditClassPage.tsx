@@ -22,7 +22,7 @@ export const EditClassPage = () => {
       <ClassesPage />
 
       {/* Drawer Overlay */}
-      <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="fixed !m-0 inset-0 z-50 flex justify-end">
         <div 
           className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
           onClick={() => navigate('/classes')}

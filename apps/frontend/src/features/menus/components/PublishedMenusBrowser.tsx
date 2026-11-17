@@ -19,6 +19,7 @@ import {
   schoolDate,
 } from "../utils/published-menus";
 import { DishDetailModal } from "../../dishes/components/DishDetailModal";
+import { childrenApi, ChildItem } from "../../children/api/children.api";
 import "../published-menus.css";
 
 const dateLabel = (date: string) =>
@@ -38,10 +39,16 @@ export function PublishedMenusBrowser({
   audience,
   embedded = false,
   syncDate = false,
+  childId,
+  childHasAllergy,
+  childAllergens,
 }: {
   audience: "kitchen" | "parent";
   embedded?: boolean;
   syncDate?: boolean;
+  childId?: string;
+  childHasAllergy?: boolean;
+  childAllergens?: string[];
 }) {
   useLanguage();
   const index = usePublishedMenus();
@@ -49,6 +56,41 @@ export function PublishedMenusBrowser({
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState("ALL");
   const [age, setAge] = useState("");
+  const [autoChild, setAutoChild] = useState<ChildItem | null>(null);
+
+  useEffect(() => {
+    if (audience !== "parent" || childId) return;
+    let active = true;
+    childrenApi
+      .getChildren({ limit: 10 })
+      .then((res) => {
+        if (!active) return;
+        const list = Array.isArray(res) ? res : res?.items || [];
+        if (list.length > 0) setAutoChild(list[0]);
+      })
+      .catch(() => {
+        /* ignore */
+      });
+    return () => {
+      active = false;
+    };
+  }, [audience, childId]);
+
+  const effectiveChildId =
+    childId || params.get("childId") || (autoChild ? String(autoChild.id) : "");
+  const effectiveAllergens =
+    childAllergens && childAllergens.length > 0
+      ? childAllergens
+      : (autoChild?.allergies || [])
+        .filter((a: any) => a?.isActive !== false)
+        .map((a: any) => a?.allergenName || a?.customAllergenName || "")
+        .filter(Boolean);
+  const effectiveHasAllergy =
+    childHasAllergy !== undefined
+      ? childHasAllergy
+      : autoChild
+        ? Boolean((autoChild as any).hasAllergy || effectiveAllergens.length > 0)
+        : true;
   const today = schoolDate();
   const normalized = (value: string) =>
     value
@@ -91,11 +133,19 @@ export function PublishedMenusBrowser({
   const date = syncDate && requestedDate && !params.get("menuId")
     ? requestedDate
     : dates.includes(requestedDate)
-    ? requestedDate
-    : dates.includes(today)
-      ? today
-      : dates[0] || "";
-  const meals = detail.data && date ? publishedMenuDay(detail.data, date) : [];
+      ? requestedDate
+      : dates.includes(today)
+        ? today
+        : dates[0] || "";
+  const meals =
+    detail.data && date
+      ? publishedMenuDay(detail.data, date, {
+        audience,
+        childId: effectiveChildId,
+        childHasAllergy: effectiveHasAllergy,
+        childAllergens: effectiveAllergens,
+      })
+      : [];
   const selectMenu = (id: string) =>
     setParams((previous) => {
       const next = new URLSearchParams(previous);
@@ -331,7 +381,7 @@ export function PublishedMenusBrowser({
                                       calories: dish.calories,
                                     })
                                   }
-                                  title={translateText(`Bấm để xem chi tiết món ăn "${dish.name}" (UC41)`)}
+                                  title={translateText(`Bấm để xem chi tiết món ăn "${dish.name}"`)}
                                   role="button"
                                   tabIndex={0}
                                   onKeyDown={(e) => {
@@ -348,6 +398,18 @@ export function PublishedMenusBrowser({
                                   <div>
                                     <strong>{dish.name}</strong>
                                     <small>{translateText(dish.category)}</small>
+                                    {dish.substitutedFor && (
+                                      <small className="block mt-1 text-emerald-700 font-semibold">
+                                        {audience === "kitchen"
+                                          ? `🍱 ${translateText("Suất riêng")} (${translateText("Thay cho: ")}${dish.substitutedFor})`
+                                          : translateText("✓ Đã đổi suất riêng cho bé (Thay cho: ") + dish.substitutedFor + ")"}
+                                      </small>
+                                    )}
+                                    {!dish.substitutedFor && dish.hasChildAllergyConflict && dish.allergens && dish.allergens.length > 0 && (
+                                      <small className="block mt-1 text-rose-600 font-semibold">
+                                        {translateText("⚠ Lưu ý dị ứng của bé: ")}{dish.allergens.join(", ")}
+                                      </small>
+                                    )}
                                   </div>
                                   <span>
                                     {translateText(dish.portionSizeG === null

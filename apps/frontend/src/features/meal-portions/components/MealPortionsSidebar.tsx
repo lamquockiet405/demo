@@ -108,10 +108,10 @@ export const MealPortionsSidebar: React.FC = () => {
             </div>
             <div className="leading-tight">
               <p className="text-xs font-bold text-slate-800 truncate max-w-[110px]">
-                Nguyễn Thu Thủy
+                {localStorage.getItem('user_name') || 'Ban Giám Hiệu'}
               </p>
               <p className="text-[10px] text-slate-400 font-medium truncate">
-                Hiệu trưởng • BGH
+                Ban Giám Hiệu
               </p>
             </div>
           </div>

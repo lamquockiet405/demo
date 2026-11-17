@@ -37,6 +37,7 @@ import { DishAdjustmentDrawer } from "../components/DishAdjustmentDrawer";
 import { ExcelImportModal } from "../components/ExcelImportModal";
 import { ApprovalModal } from "../components/ApprovalModal";
 import { PrintPreviewModal } from "../components/PrintPreviewModal";
+import { AutoGenerateMenuModal } from "../components/AutoGenerateMenuModal";
 import { AllergyAndBmiAdvisorModal } from "../components/AllergyAndBmiAdvisorModal";
 import { RequestEditMenuModal } from "../components/RequestEditMenuModal";
 import { RespondEditRequestModal } from "../components/RespondEditRequestModal";
@@ -83,6 +84,8 @@ export const WeeklyMenuManagementPage: React.FC = () => {
     useState<boolean>(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
   const [printData, setPrintData] = useState<ExportDataResponse | null>(null);
+  const [isAutoGenerateModalOpen, setIsAutoGenerateModalOpen] =
+    useState<boolean>(false);
   const [isRequestEditModalOpen, setIsRequestEditModalOpen] =
     useState<boolean>(false);
   const [isRespondEditModalOpen, setIsRespondEditModalOpen] =
@@ -568,13 +571,13 @@ export const WeeklyMenuManagementPage: React.FC = () => {
     }
   };
 
-  // 14. Tải Excel/CSV
+  // 14. Tải Excel
   const handleDownloadExcel = async () => {
     if (!selectedMenu) return;
     try {
       await weeklyMenusApi.downloadExcel(
         selectedMenu.id,
-        `Thuc_don_${selectedMenu.title.replace(/\s+/g, "_")}.csv`,
+        `Thuc_don_${selectedMenu.title.replace(/\s+/g, "_")}.xlsx`,
       );
       showNotify("success", "Đã tải xuống file Excel thực đơn tuần.");
     } catch (err) {
@@ -656,24 +659,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 </select>
               </div>
 
-              {/* Thùng rác */}
-              <div>
-                <label className="text-[11px] font-bold text-transparent block mb-1 select-none">{translateText("Thao tác")}</label>
-                <button
-                  onClick={() => setShowDeleted(!showDeleted)}
-                  className={`px-3 py-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
-                    showDeleted
-                      ? "bg-rose-50 border-rose-300 text-rose-700"
-                      : "border-slate-300 text-slate-600 hover:bg-slate-50"
-                  }`}
-                  title={translateText("Xem các thực đơn đã xóa mềm trong thùng rác")}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>
-                    {translateText(showDeleted ? "Thùng rác (Đang xem)" : "Thùng rác")}
-                  </span>
-                </button>
-              </div>
+
 
               {/* Lọc Phiên bản nếu có nhiều version */}
               {Array.isArray(menuVersions) && menuVersions.length > 1 && (
@@ -699,13 +685,28 @@ export const WeeklyMenuManagementPage: React.FC = () => {
 
             {/* Cụm phải: Các nút tạo mới thực đơn */}
             <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-end">
-              {/* Nút Import Excel */}
+              {/* Nút Tạo Thực Đơn Tự Động (AI / Smart Menu) */}
               <button
-                onClick={() => setIsExcelModalOpen(true)}
-                className="px-3.5 py-2.5 rounded-2xl border border-slate-200 hover:border-emerald-300 bg-white text-slate-700 hover:text-emerald-700 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs hover:bg-emerald-50/50 cursor-pointer"
+                type="button"
+                onClick={() => setIsAutoGenerateModalOpen(true)}
+                className="px-4 py-2.5 rounded-2xl bg-emerald-600 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition hover:scale-102 active:scale-98 cursor-pointer"
               >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                <span>{translateText("Import Excel")}</span>
+                <Sparkles className="w-4 h-4 text-emerald-200 animate-pulse" />
+                <span>{translateText("Tự động tạo thực đơn")}</span>
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-white/20 text-white">{translateText("Tạo gợi ý")}</span>
+              </button>
+
+              {/* Nút Tạo thực đơn tuần */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuDrawerMode("create");
+                  setIsMenuDrawerOpen(true);
+                }}
+                className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm shadow-emerald-600/20 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{translateText("Tạo thực đơn tuần")}</span>
               </button>
             </div>
           </div>
@@ -771,18 +772,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
 
             {/* Bên Phải: Workflow & Tiện ích của Thực đơn đang chọn */}
             <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-              {/* Nút Tạo Phiên Bản Mới (Clone Version) */}
-              {selectedMenu && (
-                <button
-                  onClick={handleCreateVersion}
-                  disabled={actionLoading}
-                  title={translateText("Nhân bản thực đơn hiện tại thành phiên bản mới để điều chỉnh mà không mất bản cũ")}
-                  className="px-3.5 py-2.5 rounded-2xl border border-slate-200 hover:border-blue-300 bg-white text-slate-700 hover:text-blue-700 text-xs font-bold flex items-center gap-1.5 transition shadow-2xs disabled:opacity-50"
-                >
-                  <Copy className="w-4 h-4 text-blue-600" />
-                  <span>{translateText("Tạo bản v")}{selectedMenu.version + 1}.0</span>
-                </button>
-              )}
+
 
               {/* Nút Gửi Duyệt (DÀNH RIÊNG CHO CHUYÊN VIÊN DINH DƯỠNG khi ở DRAFT hoặc REJECTED) */}
               {selectedMenu &&
@@ -1058,7 +1048,23 @@ export const WeeklyMenuManagementPage: React.FC = () => {
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
         data={printData}
-        onDownloadCsv={handleDownloadExcel}
+        onDownloadExcel={handleDownloadExcel}
+      />
+
+      {/* Modal 6: Tự động tạo thực đơn tuần (AI / Smart Menu Generator) */}
+      <AutoGenerateMenuModal
+        isOpen={isAutoGenerateModalOpen}
+        onClose={() => setIsAutoGenerateModalOpen(false)}
+        onSuccess={async (newMenu) => {
+          showNotify(
+            "success",
+            `Đã tự động tạo thành công thực đơn: ${newMenu.title}`,
+          );
+          await fetchInitialData();
+          await handleSelectMenu(newMenu.id);
+        }}
+        currentMenu={selectedMenu}
+        existingMenus={menus}
       />
 
       {/* Modal 7: Tư vấn Cảnh báo Dị ứng & Đề xuất Cá nhân hóa BMI */}

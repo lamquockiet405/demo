@@ -1,17 +1,12 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   X,
   ShieldAlert,
   Clock,
   User,
-  Globe,
-  FileText,
-  Copy,
-  Check,
   Tag,
-  Laptop,
 } from 'lucide-react';
 import { AuditLogItem } from '../types/audit-log.types';
 
@@ -27,15 +22,8 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
   onClose,
 }) => {
   useLanguage();
-  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !log) return null;
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(log, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const formatTimestamp = (dateString: string) => {
     try {
@@ -69,50 +57,64 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed !m-0 inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white rounded-3xl shadow-2xl max-w-lg w-full border border-slate-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 shadow-xs">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">{translateText("Chi tiết Nhật ký Kiểm toán")}<span className="text-xs px-2 py-0.5 rounded-md font-mono bg-slate-200/80 text-slate-700">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                {translateText("Chi tiết Nhật ký Kiểm toán")}
+                <span className="text-xs px-2 py-0.5 rounded-md font-mono bg-slate-200/80 text-slate-700">
                   #{translateText(log.id)}
                 </span>
               </h3>
-              <p className="text-xs text-slate-500">{translateText("Lịch sử truy vết thao tác & dữ liệu nhạy cảm theo tiêu chuẩn an toàn")}</p>
+              <p className="text-xs text-slate-500">
+                {translateText("Lịch sử truy vết thao tác an toàn hệ thống")}
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition"
             title={translateText("Đóng")}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-5 text-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+        <div className="p-6 space-y-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Tác nhân */}
+            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                <User className="w-3.5 h-3.5 text-slate-400" />{translateText(" Tác nhân thực hiện")}</div>
-              <div className="font-semibold text-slate-800">{log.userName || translateText('Tài khoản hệ thống')}</div>
-              <div className="text-xs text-slate-500 font-mono">{log.userEmail || translateText('N/A')}</div>
+                <User className="w-3.5 h-3.5 text-slate-400" />
+                {translateText("Tác nhân thực hiện")}
+              </div>
+              <div className="font-semibold text-slate-800">
+                {log.userName || translateText('Tài khoản hệ thống')}
+              </div>
+              <div className="text-xs text-slate-500 font-mono">
+                {log.userEmail || translateText('N/A')}
+              </div>
               {log.userRole && (
-                <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-semibold bg-slate-200 text-slate-700">
+                <span className="inline-block mt-1.5 text-[11px] px-2 py-0.5 rounded-full font-semibold bg-slate-200/80 text-slate-700">
                   {translateText(log.userRole)}
                 </span>
               )}
             </div>
 
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            {/* Hành động & Đối tượng */}
+            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                <Tag className="w-3.5 h-3.5 text-slate-400" />{translateText(" Hành động & Đối tượng")}</div>
+                <Tag className="w-3.5 h-3.5 text-slate-400" />
+                {translateText("Hành động & Đối tượng")}
+              </div>
               <div>
                 <span
                   className={`inline-block px-2.5 py-1 text-xs font-bold rounded-lg border ${getActionBadgeColor(
@@ -122,82 +124,45 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
                   {translateText(log.action)}
                 </span>
               </div>
-              <div className="mt-1.5 text-xs text-slate-600">{translateText("Thực thể:")}{' '}
+              <div className="mt-2 text-xs text-slate-600">
+                {translateText("Thực thể:")}{' '}
                 <span className="font-semibold text-slate-800 font-mono">
                   {translateText(log.targetEntity || 'HỆ THỐNG')}
                 </span>
                 {log.targetId && (
-                  <span className="ml-1 text-slate-500 font-mono">{translateText("(ID: #")}{translateText(log.targetId)})
+                  <span className="ml-1 text-slate-500 font-mono">
+                    (ID: #{translateText(log.targetId)})
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            {/* Thời gian ghi nhận */}
+            <div className="sm:col-span-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />{translateText(" Thời gian ghi nhận")}</div>
-              <div className="font-semibold text-slate-800 font-mono">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                {translateText("Thời gian ghi nhận")}
+              </div>
+              <div className="font-semibold text-slate-800 font-mono text-xs">
                 {translateText(formatTimestamp(log.createdAt))}
               </div>
-              <div className="text-xs text-slate-400 font-mono">
+              <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                 {translateText(log.createdAt)}
               </div>
             </div>
-
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                <Globe className="w-3.5 h-3.5 text-slate-400" />{translateText(" Địa chỉ mạng & Thiết bị")}</div>
-              <div className="font-semibold text-slate-800 font-mono">{translateText("IP: ")}{log.ipAddress || translateText('127.0.0.1 (Local)')}
-              </div>
-              {log.userAgent && (
-                <div
-                  className="text-xs text-slate-500 truncate mt-0.5 flex items-center gap-1"
-                  title={translateText(log.userAgent)}
-                >
-                  <Laptop className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{translateText(log.userAgent)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-teal-600" />{translateText(" Dữ liệu Chi tiết & Dấu vết thay đổi (Audit Details)")}</label>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />{translateText(" Đã sao chép")}</>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-slate-500" />{translateText(" Sao chép JSON")}</>
-                )}
-              </button>
-            </div>
-
-            <div className="relative rounded-xl border border-slate-200 bg-slate-900 text-slate-100 p-4 font-mono text-xs overflow-x-auto shadow-inner max-h-64">
-              <pre className="whitespace-pre-wrap break-all leading-relaxed">
-                {translateText(JSON.stringify(log.details, null, 2))}
-              </pre>
-            </div>
-            <p className="text-[11px] text-slate-400 italic">{translateText("* Dữ liệu nhạy cảm (mật khẩu, secret token, mã OTP) đã được hệ thống tự động kiểm tra và che mờ (Data Masking) tuân thủ quy định CR-05.")}</p>
           </div>
         </div>
 
-        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <div className="px-6 py-4 bg-slate-50/60 border-t border-slate-100 flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-semibold rounded-xl bg-slate-800 text-white hover:bg-slate-900 transition shadow-xs"
-          >{translateText("Đóng cửa sổ")}</button>
+            className="px-5 py-2.5 text-xs font-bold rounded-2xl bg-slate-800 text-white hover:bg-slate-900 transition shadow-sm"
+          >
+            {translateText("Đóng cửa sổ")}
+          </button>
         </div>
       </div>
     </div>
   );
 };
-

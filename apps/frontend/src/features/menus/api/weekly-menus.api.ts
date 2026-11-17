@@ -1,3 +1,4 @@
+import { downloadExcelSheets } from '../../../core/utils/excel-export';
 import { apiClient } from "../../../core/api/axios";
 import { notifyMenuPublished } from "./published-menus.api";
 
@@ -115,6 +116,7 @@ export interface WeeklyMenu {
 }
 
 export interface MenuStatistics {
+  academicYearName?: string | null;
   total: number;
   active: number;
   submitted: number;
@@ -148,6 +150,19 @@ export interface CreateMenuPayload {
     portionSizeG?: number;
     substituteDishId?: string;
   }>;
+}
+
+// The form uses startDate/endDate; the backend DTO uses weekStartDate/weekEndDate.
+function menuWritePayload(payload: Partial<CreateMenuPayload>) {
+  const { startDate, endDate, targetAgeGroup, ...fields } = payload;
+  return {
+    ...fields,
+    ...(startDate !== undefined ? { weekStartDate: startDate } : {}),
+    ...(endDate !== undefined ? { weekEndDate: endDate } : {}),
+    ...(targetAgeGroup !== undefined
+      ? { ageGroup: targetAgeGroup === 'TODDLER_18_36M' || targetAgeGroup === 'NHA_TRE' ? 'NHA_TRE' : 'MAU_GIAO' }
+      : {}),
+  };
 }
 
 export interface AdjustDishPayload {
@@ -271,6 +286,9 @@ export interface ExportDataResponse {
 }
 
 export const weeklyMenusApi = {
+  async getAcademicYearContext(): Promise<{ name: string; startDate: string; endDate: string; status: string } | null> {
+    return (await apiClient.get('/menus/academic-year-context')).data;
+  },
   // 1. Lấy danh sách thực đơn
   async getMenus(params?: {
     search?: string;
@@ -278,6 +296,7 @@ export const weeklyMenusApi = {
     targetAgeGroup?: string;
     version?: number;
     includeDeleted?: boolean;
+    submittedOnly?: boolean;
   }): Promise<WeeklyMenu[]> {
     const cleanParams: any = { ...params };
     if (cleanParams.status === "ALL") delete cleanParams.status;
@@ -352,14 +371,14 @@ export const weeklyMenusApi = {
    * - Nhiệm vụ: Gửi yêu cầu HTTP POST đến API Backend.
    *   + `apiClient` (`apps/frontend/src/core/api/axios.ts`) tự động đính kèm Token xác thực:
    *     Header `Authorization: Bearer <jwt_access_token>`.
-   *   + Payload gửi đi tuân thủ interface `CreateMenuPayload` (khớp với `CreateMenuDto` ở Backend).
+   *   + Chuyển tên trường của biểu mẫu sang CreateMenuDto trước khi gửi.
    * - GỌI FILE TIẾP THEO: Endpoint `@Post()` trong File:
    *   -> `apps/backend/src/modules/menus/controllers/menus.controller.ts` (BƯỚC 4).
    * =========================================================================================
    */
   async createMenu(payload: CreateMenuPayload): Promise<WeeklyMenu> {
     // GỬI HTTP POST SANG BACKEND: apps/backend/src/modules/menus/controllers/menus.controller.ts
-    const res = await apiClient.post("/menus", payload);
+    const res = await apiClient.post("/menus", menuWritePayload(payload));
     return res.data;
   },
 
@@ -380,7 +399,7 @@ export const weeklyMenusApi = {
     id: string,
     payload: Partial<CreateMenuPayload>,
   ): Promise<WeeklyMenu> {
-    const res = await apiClient.put(`/menus/${id}`, payload);
+    const res = await apiClient.put(`/menus/${id}`, menuWritePayload(payload));
     return res.data;
   },
 
@@ -426,7 +445,7 @@ export const weeklyMenusApi = {
           "COMMIT_PROFESSIONAL_RESP",
         ],
         commitmentText:
-          "Cam kết thực đơn tuân thủ định mức Thông tư 28/2016/TT-BGDĐT và an toàn thực phẩm Quyết định 1246/QĐ-BYT",
+          "Cam kết thực đơn tuân thủ định mức Quy chuẩn Dinh dưỡng Mầm non và an toàn thực phẩm Quyết định 1246/QĐ-BYT",
       },
     );
     return res.data;
@@ -479,25 +498,70 @@ export const weeklyMenusApi = {
 
   // 18. Lấy dữ liệu in ấn A4
   async getExportData(id: string): Promise<ExportDataResponse> {
-    const res = await apiClient.get(`/menus/${id}/export/data`);
-    return res.data;
+    const res = await apiClient.get<any>(`/menus/${id}/export/data`);
+    const payload = res.data?.data || res.data;
+    return payload;
   },
 
-  // 19. Tải file Excel/CSV
+  // 19. Xuất thực đơn Excel có định dạng và logo trường.
   async downloadExcel(id: string, fileName?: string): Promise<void> {
-    const res = await apiClient.get(`/menus/${id}/export/excel`, {
-      responseType: "blob",
-    });
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", fileName || `Thuc_don_tuan_${id}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const data = await this.getExportData(id);
+    const rows = data.rows || [];
+    const ok = await downloadExcelSheets(fileName || `Thuc_don_tuan_${id}.xlsx`, data.title || "THỰC ĐƠN TUẦN", [
+      { name: 'Thực đơn tuần', rows: [
+        ['Bữa ăn', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu'],
+        ...rows.map((row: any) => [row.mealTimeVi, row.mondayDishes, row.tuesdayDishes, row.wednesdayDishes, row.thursdayDishes, row.fridayDishes]),
+      ] },
+      { name: 'Dinh dưỡng và phê duyệt', rows: [
+        ['Thông tin', 'Giá trị'], ['Nhóm tuổi', data.targetAgeGroupVi || 'Mẫu giáo (3-6 tuổi)'], ['Trạng thái', data.statusVi || 'Đã duyệt'],
+        ['Năng lượng trung bình (kcal)', data.dailyAverageCalories || '—'], ['Protein (g)', data.dailyAverageProteinG || '—'],
+        ['Chất béo (g)', data.dailyAverageFatG || '—'], ['Carbohydrate (g)', data.dailyAverageCarbG || '—'],
+        ['Tỷ lệ P:L:G', data.plgRatio || '—'], ['Đáp ứng tiêu chuẩn', data.standardCompliance || 'Đạt'],
+        ['Người lập', data.preparedBy || '—'], ['Người duyệt', data.approvedBy || '—'], ['Ngày duyệt', data.approvedDate || '—'],
+      ] },
+    ], `${data.dateRange || ''} · ${data.version || ''}`);
+    if (!ok) throw new Error('Chưa xuất được file Excel thực đơn.');
   },
 
-  // 20. Lấy tư vấn cảnh báo Dị ứng học sinh & Cá nhân hóa Dinh dưỡng theo BMI
+  // 20. Tự động sinh thực đơn (Lưu vào DB)
+  async autoGenerateMenu(payload: AutoGeneratePayload): Promise<WeeklyMenu> {
+    const rawAge = payload.targetAgeGroup || "MAU_GIAO";
+    const ageGroup =
+      rawAge === "TODDLER_18_36M"
+        ? "NHA_TRE"
+        : rawAge === "KINDERGARTEN_3_5Y"
+          ? "MAU_GIAO"
+          : rawAge;
+    const res = await apiClient.post<any>("/menus/auto-generate", {
+      ...payload,
+      ageGroup,
+      weekStartDate: payload.startDate,
+      previewOnly: false,
+    });
+    return res.data?.data || res.data;
+  },
+
+  // 21. Xem trước ma trận thực đơn tự động sinh
+  async previewAutoGenerateMenu(
+    payload: AutoGeneratePayload,
+  ): Promise<AutoGeneratePreviewResponse> {
+    const rawAge = payload.targetAgeGroup || "MAU_GIAO";
+    const ageGroup =
+      rawAge === "TODDLER_18_36M"
+        ? "NHA_TRE"
+        : rawAge === "KINDERGARTEN_3_5Y"
+          ? "MAU_GIAO"
+          : rawAge;
+    const res = await apiClient.post<any>("/menus/auto-generate", {
+      ...payload,
+      ageGroup,
+      weekStartDate: payload.startDate,
+      previewOnly: true,
+    });
+    return res.data?.data || res.data;
+  },
+
+  // 22. Lấy tư vấn cảnh báo Dị ứng học sinh & Cá nhân hóa Dinh dưỡng theo BMI
   async getAdvisory(menuId: string): Promise<MenuAdvisoryResponse | null> {
     try {
       const res = await apiClient.get<MenuAdvisoryResponse>(

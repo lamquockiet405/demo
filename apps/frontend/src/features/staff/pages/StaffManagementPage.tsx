@@ -3,18 +3,13 @@ import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Users,
-  UserCheck,
   UserX,
   UserPlus,
   GraduationCap,
   ChefHat,
   Search,
   RefreshCw,
-  Archive,
-  RotateCcw,
   Edit3,
-  Lock,
-  Unlock,
   CheckCircle2,
   AlertCircle,
   Phone,
@@ -22,6 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
 import {
   staffApi,
@@ -51,8 +48,6 @@ export const StaffManagementPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [includeDeleted, setIncludeDeleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -119,14 +114,18 @@ export const StaffManagementPage: React.FC = () => {
         limit: pageSize,
         search: debouncedSearch || undefined,
         roleCode: selectedRole || undefined,
-        status: selectedStatus || undefined,
-        includeDeleted: includeDeleted || selectedStatus === "DELETED",
+        status: "ACTIVE",
+        includeDeleted: false,
         sortBy: "createdAt",
         sortOrder: "DESC",
       });
-      setStaffList(res.data);
-      setTotalCount(res.meta.total);
-      setTotalPages(res.meta.totalPages || 1);
+      // Filter out any inactive or soft-deleted staff
+      const activeList = (res.data || []).filter(
+        (s) => !s.isDeleted && s.status === "ACTIVE",
+      );
+      setStaffList(activeList);
+      setTotalCount(res.meta?.total ?? activeList.length);
+      setTotalPages(res.meta?.totalPages || 1);
     } catch {
       showToast(
         "error",
@@ -139,8 +138,6 @@ export const StaffManagementPage: React.FC = () => {
     currentPage,
     debouncedSearch,
     selectedRole,
-    selectedStatus,
-    includeDeleted,
     showToast,
   ]);
 
@@ -148,44 +145,34 @@ export const StaffManagementPage: React.FC = () => {
     loadStaffList();
   }, [loadStaffList]);
 
-  const handleOpenDrawer = async (
+  const handleOpenDrawer = (
     mode: "create" | "edit" | "view",
-    staff: StaffUser | null = null,
+    staff?: StaffUser,
   ) => {
     setDrawerMode(mode);
-    setEditingStaff(staff);
+    setEditingStaff(staff || null);
     setIsDrawerOpen(true);
-    if (staff && mode === "view") {
-      try {
-        const fresh = await staffApi.getStaffById(staff.id);
-        setEditingStaff(fresh);
-      } catch {}
-    }
   };
 
   const handleDrawerSubmit = async (
     payload: CreateStaffPayload | UpdateStaffPayload,
-    staffId?: string,
   ) => {
     setIsDrawerSubmitting(true);
     try {
-      if (staffId) {
-        const updated = await staffApi.updateStaff(
-          staffId,
+      if (drawerMode === "create") {
+        const res = await staffApi.createStaff(payload as CreateStaffPayload);
+        showToast("success", `Đã tạo tài khoản cho ${res.fullName}`);
+        if (res.initialPassword) {
+          navigator.clipboard?.writeText(
+            `Email: ${res.email} - Mật khẩu: ${res.initialPassword}`,
+          );
+        }
+      } else if (drawerMode === "edit" && editingStaff) {
+        await staffApi.updateStaff(
+          editingStaff.id,
           payload as UpdateStaffPayload,
         );
-        showToast(
-          "success",
-          `Đã cập nhật thông tin nhân sự "${updated.fullName}" thành công.`,
-        );
-      } else {
-        const created = await staffApi.createStaff(
-          payload as CreateStaffPayload,
-        );
-        showToast(
-          "success",
-          `Đã tạo tài khoản "${created.fullName}".${created.initialPassword ? ` Mật khẩu khởi tạo: ${created.initialPassword}` : ""}`,
-        );
+        showToast("success", "Cập nhật hồ sơ nhân sự thành công.");
       }
       setIsDrawerOpen(false);
       await Promise.all([loadStaffList(), loadStats()]);
@@ -194,56 +181,18 @@ export const StaffManagementPage: React.FC = () => {
     }
   };
 
-  const handleToggleStatus = async (staff: StaffUser) => {
-    if (staff.id === currentUser?.id) {
-      return showToast(
-        "error",
-        "Bạn không thể tự khóa tài khoản của chính mình.",
-      );
-    }
-    setIsActionSubmitting(true);
-    try {
-      const res = await staffApi.toggleStaffStatus(staff.id);
-      showToast("success", res.message);
-      await Promise.all([loadStaffList(), loadStats()]);
-    } catch (err: any) {
-      showToast(
-        "error",
-        err.response?.data?.message || "Không thể đổi trạng thái tài khoản.",
-      );
-    } finally {
-      setIsActionSubmitting(false);
-    }
-  };
-
   const handleConfirmSoftDelete = async () => {
     if (!deletingStaff) return;
     setIsActionSubmitting(true);
     try {
       const res = await staffApi.softDeleteStaff(deletingStaff.id);
-      showToast("success", res.message);
+      showToast("success", res.message || "Đã xóa tài khoản nhân sự thành công.");
       setDeletingStaff(null);
       await Promise.all([loadStaffList(), loadStats()]);
     } catch (err: any) {
       showToast(
         "error",
-        err.response?.data?.message || "Không thể xóa mềm tài khoản này.",
-      );
-    } finally {
-      setIsActionSubmitting(false);
-    }
-  };
-
-  const handleRestoreStaff = async (staff: StaffUser) => {
-    setIsActionSubmitting(true);
-    try {
-      const res = await staffApi.restoreStaff(staff.id);
-      showToast("success", res.message);
-      await Promise.all([loadStaffList(), loadStats()]);
-    } catch (err: any) {
-      showToast(
-        "error",
-        err.response?.data?.message || "Không thể khôi phục tài khoản này.",
+        err.response?.data?.message || "Không thể xóa tài khoản này.",
       );
     } finally {
       setIsActionSubmitting(false);
@@ -256,7 +205,7 @@ export const StaffManagementPage: React.FC = () => {
     return (
       <span
         key={roleCode}
-        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${
           meta?.pill || "bg-slate-100 text-slate-700 border-slate-200"
         }`}
       >
@@ -270,32 +219,14 @@ export const StaffManagementPage: React.FC = () => {
     {
       label: "Tổng Nhân Sự",
       value: stats?.totalStaff ?? 0,
-      unit: "người",
-      sub: "Toàn bộ cán bộ & nhân viên",
+      unit: "tài khoản",
+      sub: "Đang hoạt động trong trường",
       icon: Users,
       iconCls: "bg-teal-50 text-teal-600",
       valCls: "text-slate-900",
       subCls: "text-teal-700",
       onClick: () => {
         setSelectedRole("");
-        setSelectedStatus("");
-        setIncludeDeleted(false);
-        setCurrentPage(1);
-      },
-    },
-    {
-      label: "Đang Hoạt Động",
-      value: stats?.activeStaff ?? 0,
-      unit: "tài khoản",
-      sub: "Sẵn sàng vận hành",
-      icon: UserCheck,
-      iconCls: "bg-emerald-50 text-emerald-600",
-      valCls: "text-emerald-600",
-      subCls: "text-emerald-700",
-      onClick: () => {
-        setSelectedRole("");
-        setSelectedStatus("ACTIVE");
-        setIncludeDeleted(false);
         setCurrentPage(1);
       },
     },
@@ -303,15 +234,13 @@ export const StaffManagementPage: React.FC = () => {
       label: "Giáo Viên Chủ Nhiệm",
       value: stats?.teachers ?? 0,
       unit: "cô",
-      sub: "Điểm danh & đánh giá bữa ăn",
+      sub: "Điểm danh & chăm sóc học sinh",
       icon: GraduationCap,
       iconCls: "bg-blue-50 text-blue-600",
       valCls: "text-blue-600",
       subCls: "text-blue-700",
       onClick: () => {
         setSelectedRole("TEACHER");
-        setSelectedStatus("ACTIVE");
-        setIncludeDeleted(false);
         setCurrentPage(1);
       },
     },
@@ -326,24 +255,20 @@ export const StaffManagementPage: React.FC = () => {
       subCls: "text-orange-700",
       onClick: () => {
         setSelectedRole("NUTRITIONIST");
-        setSelectedStatus("");
-        setIncludeDeleted(false);
         setCurrentPage(1);
       },
     },
     {
-      label: "Tạm Khóa / Lưu Trữ",
-      value: stats?.inactiveOrDeleted ?? 0,
-      unit: "hồ sơ",
-      sub: "Bảo toàn lịch sử dữ liệu",
-      icon: Archive,
-      iconCls: "bg-amber-50 text-amber-600",
-      valCls: "text-slate-700",
-      subCls: "text-amber-700",
+      label: "Cán Bộ Quản Lý & Khác",
+      value: (stats?.managementStaff ?? 0) + (stats?.medicalStaff ?? 0),
+      unit: "nhân sự",
+      sub: "Ban giám hiệu & chuyên trách",
+      icon: ShieldCheck,
+      iconCls: "bg-purple-50 text-purple-600",
+      valCls: "text-purple-600",
+      subCls: "text-purple-700",
       onClick: () => {
-        setSelectedRole("");
-        setSelectedStatus("INACTIVE");
-        setIncludeDeleted(true);
+        setSelectedRole("PRINCIPAL");
         setCurrentPage(1);
       },
     },
@@ -376,7 +301,7 @@ export const StaffManagementPage: React.FC = () => {
             <span className="text-xs text-slate-400">• {schoolName}</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{translateText("Quản Lý Nhân Sự & Đội Ngũ Bếp")}</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{translateText("Quản trị tài khoản, phân công vai trò, tra cứu và bảo vệ dữ liệu với quy chuẩn xóa mềm (UC08 – UC11).")}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{translateText("Quản trị danh sách nhân sự, phân công vai trò chuyên môn và tra cứu thông tin nhà trường.")}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -401,7 +326,7 @@ export const StaffManagementPage: React.FC = () => {
       </div>
 
       {/* 1. KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiCards.map((c, idx) => {
           const Icon = c.icon;
           return (
@@ -475,33 +400,6 @@ export const StaffManagementPage: React.FC = () => {
               </option>
             ))}
           </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-          >
-            <option value="">{translateText("Tất cả trạng thái")}</option>
-            <option value="ACTIVE">{translateText("Đang hoạt động")}</option>
-            <option value="INACTIVE">{translateText("Tạm khóa")}</option>
-            <option value="DELETED">{translateText("Đã xóa mềm (Lưu trữ)")}</option>
-          </select>
-
-          <label className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700 transition">
-            <input
-              type="checkbox"
-              checked={includeDeleted}
-              onChange={(e) => {
-                setIncludeDeleted(e.target.checked);
-                setCurrentPage(1);
-              }}
-              className="w-3.5 h-3.5 text-teal-600 rounded-sm focus:ring-teal-500"
-            />
-            <span>{translateText("Xem cả tài khoản xóa mềm")}</span>
-          </label>
         </div>
       </div>
 
@@ -538,14 +436,11 @@ export const StaffManagementPage: React.FC = () => {
               ) : (
                 staffList.map((staff) => {
                   const isCurrent = staff.id === currentUser?.id;
-                  const isSoftDeleted = staff.isDeleted;
 
                   return (
                     <tr
                       key={staff.id}
-                      className={`hover:bg-slate-50/70 transition-colors ${
-                        isSoftDeleted ? "bg-slate-50/50 opacity-75" : ""
-                      }`}
+                      className="hover:bg-slate-50/70 transition-colors"
                     >
                       <td className="py-3.5 px-5">
                         <div
@@ -553,11 +448,7 @@ export const StaffManagementPage: React.FC = () => {
                           className="flex items-center gap-3 cursor-pointer group"
                         >
                           <div
-                            className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
-                              isSoftDeleted
-                                ? "bg-slate-200 text-slate-600"
-                                : "bg-teal-600 text-white"
-                            }`}
+                            className="w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs bg-teal-600 text-white"
                           >
                             {staff.fullName.charAt(0).toUpperCase()}
                           </div>
@@ -601,16 +492,10 @@ export const StaffManagementPage: React.FC = () => {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        {isSoftDeleted ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                            <Archive className="w-3 h-3 text-slate-500" />{translateText("Đã xóa mềm (Lưu trữ)")}</span>
-                        ) : staff.status === "ACTIVE" ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{translateText("Hoạt động")}</span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />{translateText("Tạm khóa")}</span>
-                        )}
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          {translateText("Hoạt động")}
+                        </span>
                       </td>
 
                       <td className="py-3.5 px-4 text-slate-500 text-[11px]">
@@ -626,64 +511,29 @@ export const StaffManagementPage: React.FC = () => {
 
                       <td className="py-3.5 px-5 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {isSoftDeleted ? (
+                          <button
+                            onClick={() => handleOpenDrawer("view", staff)}
+                            className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
+                            title={translateText("Xem chi tiết nhân sự")}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleOpenDrawer("edit", staff)}
+                            className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
+                            title={translateText("Chỉnh sửa nhân sự")}
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          {!isCurrent && (
                             <button
-                              onClick={() => handleRestoreStaff(staff)}
+                              onClick={() => setDeletingStaff(staff)}
                               disabled={isActionSubmitting}
-                              className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs flex items-center gap-1 transition"
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                              title={translateText("Xóa tài khoản nhân sự")}
                             >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                              <span>{translateText("Khôi phục")}</span>
+                              <Trash2 className="w-4 h-4" />
                             </button>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => handleOpenDrawer("view", staff)}
-                                className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                title={translateText("Xem chi tiết nhân sự (UC08)")}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleOpenDrawer("edit", staff)}
-                                className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition"
-                                title={translateText("Chỉnh sửa nhân sự (UC10)")}
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              {!isCurrent && (
-                                <button
-                                  onClick={() => handleToggleStatus(staff)}
-                                  disabled={isActionSubmitting}
-                                  className={`p-2 rounded-xl transition ${
-                                    staff.status === "ACTIVE"
-                                      ? "text-slate-500 hover:text-amber-600 hover:bg-amber-50"
-                                      : "text-amber-600 hover:text-emerald-600 hover:bg-emerald-50"
-                                  }`}
-                                  title={
-                                    translateText(staff.status === "ACTIVE"
-                                      ? "Tạm khóa tài khoản"
-                                      : "Mở khóa tài khoản")
-                                  }
-                                >
-                                  {staff.status === "ACTIVE" ? (
-                                    <Lock className="w-4 h-4" />
-                                  ) : (
-                                    <Unlock className="w-4 h-4" />
-                                  )}
-                                </button>
-                              )}
-                              {!isCurrent && (
-                                <button
-                                  onClick={() => setDeletingStaff(staff)}
-                                  disabled={isActionSubmitting}
-                                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
-                                  title={translateText("Chuyển vào lưu trữ (Xóa mềm)")}
-                                >
-                                  <Archive className="w-4 h-4" />
-                                </button>
-                              )}
-                            </>
                           )}
                         </div>
                       </td>

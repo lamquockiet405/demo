@@ -183,7 +183,7 @@ export class MenuScannerService {
           .find({ where: { isActive: true } })
       ).filter((r) => r.ageGroup === "ALL" || r.ageGroup === ageGroup);
       const declarations = await this.versionRepo.manager.query(
-        "SELECT sa.student_id,s.full_name,a.name,a.code,sa.allergen_id,sa.custom_allergen_name FROM student_allergies sa JOIN students s ON s.id=sa.student_id LEFT JOIN allergens a ON a.id=sa.allergen_id WHERE sa.is_active=true",
+        `SELECT sa.student_id,s.full_name,a.name,a.code,sa.allergen_id,sa.custom_allergen_name FROM student_allergies sa JOIN students s ON s.id=sa.student_id LEFT JOIN allergens a ON a.id=sa.allergen_id WHERE sa.is_active=true AND s.id IN (${currentStudentIdsSql()})`,
       );
       conflicts = [];
       for (const declaration of declarations)
@@ -307,3 +307,4 @@ export class MenuScannerService {
     };
   }
 }
+import { currentStudentIdsSql } from '../../academic-years/current-year-scope';

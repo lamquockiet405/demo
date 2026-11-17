@@ -25,6 +25,15 @@ export class DailyMealPortion {
   @Column({ type: 'text', nullable: true })
   note: string;
 
+  @Column({ name: 'attendance_submitted_at', type: 'timestamptz', nullable: true })
+  attendanceSubmittedAt: Date | null;
+
+  @Column({ name: 'attendance_submitted_by', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  attendanceSubmittedBy: number | null;
+
+  @Column({ name: 'attendance_snapshot', type: 'jsonb', nullable: true })
+  attendanceSnapshot: { studentId: string; fullName: string; isAttended: boolean; note: string }[] | null;
+
   @ManyToOne(() => ClassEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'class_id' })
   class: ClassEntity;

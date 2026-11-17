@@ -23,6 +23,9 @@ out/
 coverage/
 *.lcov
 .nyc_output
+__pycache__/
+*.pyc
+
 
 # Temporary files & Caches
 .cache/
@@ -45,4 +48,29 @@ tmp/
 *.sw?
 .DS_Store
 Thumbs.db
+
+.docker-test/
+.vercel/
+database/backups/
+docs/database-snapshot/
+*-test-results*.json
+*-test-results.json
+api-test-results*.json
+unit-test-results*.json
+TEST-REPORT.md
+Report5_*.xlsx
+apps/extracted_images_nghiep_vu/
+extracted_nghiep_vu.txt
+apps/dump_parsed.py
+apps/read_doc.py
+docs/*.zip
+
+
+
+# Local secrets and database backup archive
+.env.*
+!.env.example
+nginx/ssl/*.pem
+/database.zip
+
 

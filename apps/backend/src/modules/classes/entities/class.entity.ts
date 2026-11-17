@@ -26,6 +26,9 @@ export class ClassEntity {
   @Column({ name: 'school_year', length: 20 })
   schoolYear: string;
 
+  @Column({ name: 'academic_year_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
+  academicYearId: number | null;
+
   @Column({ name: 'homeroom_teacher_id', type: 'bigint', transformer: BigIntTransformer, nullable: true })
   homeroomTeacherId: number;
 

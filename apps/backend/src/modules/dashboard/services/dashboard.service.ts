@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { currentStudent, currentStudentIdsSql, currentYearDate, currentYearDateSql } from '../../academic-years/current-year-scope';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Child } from '../../children/entities/child.entity';
@@ -40,23 +41,24 @@ export class DashboardService {
     const today = new Date().toISOString().split('T')[0];
 
     // 1. Attendance
-    const totalStudents = await this.childRepo.count();
+    const totalStudents = await this.childRepo.count({ where: { id: currentStudent(schoolId || 1) } });
     const lunchAttendances = await this.attendanceRepo.find({
-      where: { date: today, mealType: 'TRUA', isAttended: true },
+      where: { studentId: currentStudent(schoolId || 1), date: today, mealType: 'LUNCH', isAttended: true },
     });
     const snackAttendances = await this.attendanceRepo.find({
-      where: { date: today, mealType: 'XE', isAttended: true },
+      where: { studentId: currentStudent(schoolId || 1), date: today, mealType: 'AFTERNOON_SNACK', isAttended: true },
     });
-    const presentLunch = lunchAttendances.length || Math.min(totalStudents, 142);
-    const presentSnack = snackAttendances.length || Math.min(totalStudents, 128);
+    const presentLunch = lunchAttendances.length;
+    const presentSnack = snackAttendances.length;
     const absentCount = Math.max(0, totalStudents - presentLunch);
 
     // Allergy children count
     const allergicChildren = await this.allergyRepo
       .createQueryBuilder('a')
       .select('COUNT(DISTINCT a.student_id)', 'cnt')
+      .where(`a.student_id IN (${currentStudentIdsSql(schoolId || 1)}) AND a.is_active=true`)
       .getRawOne();
-    const allergicCount = allergicChildren?.cnt ? Number(allergicChildren.cnt) : 3;
+    const allergicCount = Number(allergicChildren?.cnt) || 0;
 
     // 2. Menu
     const activeMenus = await this.menuRepo.find({
@@ -89,16 +91,17 @@ export class DashboardService {
         };
 
     // 3. Growth
-    const evaluatedTotal = await this.growthRepo
-      .createQueryBuilder('g')
-      .select('COUNT(DISTINCT g.student_id)', 'cnt')
-      .getRawOne();
-    const totalEvaluated = evaluatedTotal?.cnt ? Number(evaluatedTotal.cnt) : 150;
-
-    const normalCount = await this.zscoreRepo.count({ where: { classification: 'NORMAL' } }) || 135;
-    const stuntedCount = await this.zscoreRepo.count({ where: { classification: 'STUNTED' } }) || 4;
-    const underweightCount = await this.zscoreRepo.count({ where: { classification: 'UNDERWEIGHT' } }) || 5;
-    const overweightCount = await this.zscoreRepo.count({ where: { classification: 'OVERWEIGHT' } }) || 6;
+    const latestGrowth = await this.growthRepo.query(`
+      SELECT DISTINCT ON (g.student_id) g.student_id,z.classification
+      FROM physical_measurements g JOIN growth_zscores z ON z.measurement_id=g.id
+      WHERE g.student_id IN (${currentStudentIdsSql(schoolId || 1)})
+        AND ${currentYearDateSql('g.measured_date', schoolId || 1)}
+      ORDER BY g.student_id,g.measured_date DESC,g.id DESC,z.id DESC`);
+    const totalEvaluated = latestGrowth.length;
+    const normalCount = latestGrowth.filter(r => r.classification === 'NORMAL').length;
+    const stuntedCount = latestGrowth.filter(r => ['STUNTED', 'SEVERELY_STUNTED'].includes(r.classification)).length;
+    const underweightCount = latestGrowth.filter(r => ['UNDERWEIGHT', 'SEVERELY_UNDERWEIGHT', 'WASTED'].includes(r.classification)).length;
+    const overweightCount = latestGrowth.filter(r => ['OVERWEIGHT', 'OBESE'].includes(r.classification)).length;
 
     const evalBase = Math.max(1, totalEvaluated);
     const normalPercent = Math.round((normalCount / evalBase) * 100);
@@ -108,32 +111,15 @@ export class DashboardService {
 
     // 4. Allergen Alerts
     const openConflictsCount = allergicCount;
-    const recentAlerts = [
-      {
-        id: '1',
-        childName: 'Nguyễn Minh Khang',
-        className: 'Mầm 1',
-        dishName: 'Trứng cuộn phô mai',
-        allergen: 'Sữa bò (Lactose)',
-        severity: 'HIGH',
-      },
-      {
-        id: '2',
-        childName: 'Lê Hoàng Nam',
-        className: 'Chồi 2',
-        dishName: 'Tôm rim thịt',
-        allergen: 'Hải sản',
-        severity: 'CRITICAL',
-      },
-    ];
+    const recentAlerts = [];
 
     // 5. Snack Service Revenue
-    const totalRegistrations = await this.snackRegRepo.count({ where: { status: 'ACTIVE' } }) || 68;
+    const totalRegistrations = await this.snackRegRepo.count({ where: { studentId: currentStudent(schoolId || 1), period: { startDate: currentYearDate(schoolId || 1) }, status: 'PAID' } });
     const successfulPayments = await this.paymentRepo.find({
-      where: { status: 'SUCCESS' },
+      where: { status: 'SUCCESS', registration: { studentId: currentStudent(schoolId || 1), period: { startDate: currentYearDate(schoolId || 1) } } },
     });
-    const totalRevenueVnd = successfulPayments.reduce((acc, p) => acc + Number(p.amount), 0) || (totalRegistrations * 350000);
-    const vnpaySuccessfulTransactions = successfulPayments.length || totalRegistrations;
+    const totalRevenueVnd = successfulPayments.reduce((acc, p) => acc + Number(p.amount), 0);
+    const vnpaySuccessfulTransactions = successfulPayments.length;
 
     // 6. Food Safety Status (3 steps + 24h retention)
     const todayInspections = await this.inspectionRepo.find({
@@ -147,7 +133,7 @@ export class DashboardService {
 
     return {
       todayAttendance: {
-        totalStudents: totalStudents || 150,
+        totalStudents,
         presentLunch,
         presentSnack,
         absentCount,
@@ -155,11 +141,11 @@ export class DashboardService {
       },
       currentMenu: menuInfo,
       growthStatistics: {
-        totalEvaluated: totalEvaluated || 150,
-        normalPercent: normalPercent || 90,
-        stuntedPercent: stuntedPercent || 3,
-        underweightPercent: underweightPercent || 3,
-        overweightPercent: overweightPercent || 4,
+        totalEvaluated,
+        normalPercent,
+        stuntedPercent,
+        underweightPercent,
+        overweightPercent,
       },
       allergenAlerts: {
         allergicChildrenCount: allergicCount,

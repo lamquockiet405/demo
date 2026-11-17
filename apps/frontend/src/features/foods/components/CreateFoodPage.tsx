@@ -218,7 +218,7 @@ export const CreateFoodPage: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm font-medium text-slate-800"
                 >
-                  <option value="">-- Chọn nhóm thực phẩm ({categories.length} nhóm) --</option>
+                  <option value="">-- Chọn nhóm thực phẩm --</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}

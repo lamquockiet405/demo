@@ -38,7 +38,7 @@ export const ParentAppPreviewModal: React.FC<ParentAppPreviewModalProps> = ({
   const logoSrc = branding?.logoUrl?.trim() || 'https://api.iconify.design/lucide:baby.svg';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-slate-900 rounded-3xl shadow-2xl p-6 border border-slate-700 flex flex-col items-center max-w-sm w-full relative animate-in fade-in zoom-in-95 duration-150">
         <button
           onClick={onClose}

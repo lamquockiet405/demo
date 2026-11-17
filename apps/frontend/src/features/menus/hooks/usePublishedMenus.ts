@@ -9,6 +9,7 @@ import {
 import {
   PublishedMeal,
   PublishedMenu,
+  PublishedMenuDayOptions,
   publishedMenuDay,
   publishedMenusForDate,
 } from "../utils/published-menus";
@@ -109,10 +110,15 @@ export function usePublishedMenus() {
   return { ...resource, tenant };
 }
 
-export function usePublishedDay(date: string, ageGroup?: string) {
+export function usePublishedDay(
+  date: string,
+  ageGroup?: string,
+  options?: PublishedMenuDayOptions,
+) {
   const index = usePublishedMenus();
   const candidates = publishedMenusForDate(index.data || [], date, ageGroup);
-  const key = `published-day:${index.tenant}:${date}:${ageGroup || "ALL"}:${index.revision}:${candidates.map((menu) => menu.id).join(",")}`;
+  const childKey = `${options?.audience || "parent"}:${options?.childId || ""}:${options?.childHasAllergy ?? true}:${(options?.childAllergens || []).join(",")}`;
+  const key = `published-day:${index.tenant}:${date}:${ageGroup || "ALL"}:${childKey}:${index.revision}:${candidates.map((menu) => menu.id).join(",")}`;
   const detail = useMenuResource(
     key,
     async () => {
@@ -124,7 +130,7 @@ export function usePublishedDay(date: string, ageGroup?: string) {
       for (const result of results) {
         if (result.status === "rejected") throw result.reason;
         menus.push(result.value);
-        meals.push(...publishedMenuDay(result.value, date));
+        meals.push(...publishedMenuDay(result.value, date, options));
       }
       return { menus, meals };
     },

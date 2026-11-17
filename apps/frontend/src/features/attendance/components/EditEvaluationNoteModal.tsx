@@ -1,3 +1,5 @@
+import { t as translateText } from '../../../core/i18n/language';
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect } from 'react';
 import { X, Save, MessageSquare, GlassWater, AlertCircle } from 'lucide-react';
 import { MealEvaluationItem } from '../types';
@@ -15,6 +17,7 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
   onClose,
   onSave,
 }) => {
+  useLanguage();
   const [waterIntake, setWaterIntake] = useState('');
   const [notes, setNotes] = useState('');
   const [syncStatus, setSyncStatus] = useState('SENT');
@@ -52,18 +55,18 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed !m-0 inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-800 font-bold flex items-center justify-center text-sm border border-teal-200">
-              {child.avatarLetter}
+              {translateText(child.avatarLetter)}
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-800">{child.fullName}</h3>
               <p className="text-xs text-slate-500 font-medium">
-                {child.studentCode} • {child.genderAgeText}
+                {child.studentCode} • {translateText(child.genderAgeText)}
               </p>
             </div>
           </div>
@@ -80,14 +83,12 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
           {/* Water/Milk Option */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <GlassWater className="w-4 h-4 text-teal-600" />
-              Nước / Sữa uống thêm sau bữa
-            </label>
+              <GlassWater className="w-4 h-4 text-teal-600" />{translateText("Nước / Sữa uống thêm sau bữa")}</label>
             <input
               type="text"
               value={waterIntake}
               onChange={(e) => setWaterIntake(e.target.value)}
-              placeholder="Ví dụ: 200ml Nước ấm"
+              placeholder={translateText("Ví dụ: 200ml Nước ấm")}
               className="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition"
             />
             {/* Quick choices */}
@@ -102,7 +103,7 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
                     : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                     }`}
                 >
-                  {opt}
+                  {translateText(opt)}
                 </button>
               ))}
             </div>
@@ -111,14 +112,12 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
           {/* Teacher Note */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <MessageSquare className="w-4 h-4 text-teal-600" />
-              Ghi chú của cô giáo
-            </label>
+              <MessageSquare className="w-4 h-4 text-teal-600" />{translateText("Ghi chú của cô giáo")}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Ghi nhận sức ăn, biểu hiện của trẻ hoặc yêu cầu dặn dò..."
+              placeholder={translateText("Ghi nhận sức ăn, biểu hiện của trẻ hoặc yêu cầu dặn dò...")}
               className="w-full text-xs font-medium p-3 rounded-xl border border-slate-300 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition resize-none"
             />
           </div>
@@ -126,9 +125,7 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
           {/* Sync Status Flag */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4 text-amber-500" />
-              Trạng thái gửi phụ huynh & bếp
-            </label>
+              <AlertCircle className="w-4 h-4 text-amber-500" />{translateText("Trạng thái gửi phụ huynh & bếp")}</label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
@@ -137,9 +134,7 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
                   ? 'bg-teal-50 border-teal-500 text-teal-700 ring-2 ring-teal-500/20'
                   : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
-              >
-                Đã gửi bình thường
-              </button>
+              >{translateText("Đã gửi bình thường")}</button>
               <button
                 type="button"
                 onClick={() => setSyncStatus('PENDING')}
@@ -147,9 +142,7 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
                   ? 'bg-amber-50 border-amber-500 text-amber-700 ring-2 ring-amber-500/20'
                   : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
-              >
-                Chờ gửi duyệt
-              </button>
+              >{translateText("Chờ gửi duyệt")}</button>
               <button
                 type="button"
                 onClick={() => setSyncStatus('URGENT_PARENT')}
@@ -157,9 +150,7 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
                   ? 'bg-rose-50 border-rose-500 text-rose-700 ring-2 ring-rose-500/20'
                   : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
-              >
-                Báo phụ huynh gấp
-              </button>
+              >{translateText("Báo phụ huynh gấp")}</button>
             </div>
           </div>
         </div>
@@ -169,16 +160,14 @@ export const EditEvaluationNoteModal: React.FC<EditEvaluationNoteModalProps> = (
           <button
             onClick={onClose}
             className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition"
-          >
-            Hủy
-          </button>
+          >{translateText("Hủy")}</button>
           <button
             onClick={handleSave}
             disabled={isSaving}
             className="flex items-center gap-1.5 px-5 py-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white text-xs font-bold rounded-xl shadow-sm transition disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
-            <span>{isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
+            <span>{translateText(isSaving ? 'Đang lưu...' : 'Lưu thay đổi')}</span>
           </button>
         </div>
       </div>

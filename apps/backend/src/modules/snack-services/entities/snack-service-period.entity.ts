@@ -33,7 +33,13 @@ export class SnackServicePeriod {
   @Column({ length: 20, default: 'OPEN' })
   status: string;
 
-  @OneToMany(() => SnackRegistration, (reg) => reg.period)
+  @Column({ name: 'week_number', type: 'int', nullable: true })
+  weekNumber?: number;
+
+  @Column({ name: 'is_payment_locked', type: 'boolean', default: false })
+  isPaymentLocked: boolean;
+
+  @OneToMany(() => SnackRegistration, (reg) => reg.period, { cascade: false })
   registrations: SnackRegistration[];
 }
 

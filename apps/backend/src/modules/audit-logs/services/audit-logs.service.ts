@@ -1,3 +1,4 @@
+import { normalizeSearch, searchSql, searchLikeSql } from '../../../common/utils/search';
 import { Injectable, BadRequestException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -147,9 +148,9 @@ export class AuditLogsService implements OnModuleInit {
 
     // 3. Tìm kiếm theo từ khóa (Action, Email, Tên người dùng, Entity, IP, JSON details)
     if (query?.search && query.search.trim()) {
-      const searchParam = `%${query.search.trim().toLowerCase()}%`;
+      const searchParam = `%${normalizeSearch(query.search.trim())}%`;
       qb.andWhere(
-        '(LOWER(log.action) LIKE :search OR LOWER(log.user_email) LIKE :search OR LOWER(log.user_name) LIKE :search OR LOWER(log.target_entity) LIKE :search OR log.ip_address LIKE :search OR CAST(log.details AS text) ILIKE :search)',
+        `(${searchSql("log.action")} LIKE ${searchLikeSql(":search")} OR ${searchSql("log.user_email")} LIKE ${searchLikeSql(":search")} OR ${searchSql("log.user_name")} LIKE ${searchLikeSql(":search")} OR ${searchSql("log.target_entity")} LIKE ${searchLikeSql(":search")} OR ${searchSql("log.ip_address")} LIKE ${searchLikeSql(":search")} OR ${searchSql("log.details")} LIKE ${searchLikeSql(":search")})`,
         { search: searchParam },
       );
     }

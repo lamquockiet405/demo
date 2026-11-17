@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useState, useEffect } from 'react';
 import {
   CreditCard,
@@ -100,8 +101,8 @@ export const SnackBillingPaymentPage: React.FC = () => {
 
   const filteredInvoices = invoices.filter((inv) => {
     const matchesSearch =
-      inv.childName?.toLowerCase().includes(search.toLowerCase()) ||
-      inv.orderCode?.toLowerCase().includes(search.toLowerCase());
+      normalizeSearch(inv.childName).includes(normalizeSearch(search)) ||
+      normalizeSearch(inv.orderCode).includes(normalizeSearch(search));
     const matchesStatus =
       statusFilter === 'ALL' ||
       (statusFilter === 'PAID' && (inv.status === 'PAID' || inv.status === 'SUCCESS')) ||
@@ -371,7 +372,7 @@ export const SnackBillingPaymentPage: React.FC = () => {
 
       {/* ─── 6. MODAL CREATE INVOICE ─── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed !m-0 inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">

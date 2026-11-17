@@ -158,15 +158,8 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
 
   const handleToggleRole = (code: string) => {
     if (isViewMode) return;
-    if (selectedRoleCodes.includes(code)) {
-      if (selectedRoleCodes.length === 1) {
-        setErrorMessage("Nhân sự phải có ít nhất 1 vai trò chuyên môn.");
-        return;
-      }
-      setSelectedRoleCodes(selectedRoleCodes.filter((c) => c !== code));
-    } else {
-      setSelectedRoleCodes([...selectedRoleCodes, code]);
-    }
+    // Limit to exactly 1 role per account
+    setSelectedRoleCodes([code]);
     setErrorMessage(null);
   };
 
@@ -180,14 +173,21 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
     if (!isEditMode && !email.trim())
       return setErrorMessage("Vui lòng nhập địa chỉ email công việc.");
     if (!selectedRoleCodes.length)
-      return setErrorMessage("Vui lòng chọn ít nhất một vai trò chuyên môn.");
+      return setErrorMessage("Vui lòng chọn 1 vai trò chuyên môn cho tài khoản.");
+
+    const trimmedPhone = phone.trim();
+    if (trimmedPhone) {
+      if (!/^0\d{9,10}$/.test(trimmedPhone)) {
+        return setErrorMessage("Số điện thoại không hợp lệ (phải gồm 10 hoặc 11 chữ số, bắt đầu bằng số 0, không chứa chữ hay ký tự đặc biệt).");
+      }
+    }
 
     try {
       if (isEditMode && staff) {
         await onSubmit(
           {
             fullName: fullName.trim(),
-            phone: phone.trim() || undefined,
+            phone: trimmedPhone || undefined,
             roleCodes: selectedRoleCodes,
             status,
             newPassword: password.trim() || undefined,
@@ -198,7 +198,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
         await onSubmit({
           fullName: fullName.trim(),
           email: email.trim().toLowerCase(),
-          phone: phone.trim() || undefined,
+          phone: trimmedPhone || undefined,
           roleCodes: selectedRoleCodes,
           status,
           password: password.trim() || undefined,
@@ -214,9 +214,9 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed !m-0 inset-0 z-50 overflow-hidden">
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="fixed !m-0 inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -243,10 +243,10 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
               </h2>
               <p className="text-xs text-slate-400 font-medium">
                 {translateText(isViewMode
-                  ? "Thông tin định danh, quyền hạn và lịch sử hoạt động (UC08)"
+                  ? "Thông tin định danh, quyền hạn và lịch sử hoạt động"
                   : isEditMode
-                    ? "Cập nhật vai trò chuyên môn và quyền hạn nhân viên (UC10)"
-                    : "Tạo tài khoản và phân quyền chức năng trong trường (UC09)")}
+                    ? "Cập nhật vai trò chuyên môn và quyền hạn nhân viên"
+                    : "Tạo tài khoản và phân quyền chức năng trong trường")}
               </p>
             </div>
           </div>
@@ -336,7 +336,11 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                   type="tel"
                   disabled={isViewMode}
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    if (val.length <= 11) setPhone(val);
+                  }}
+                  maxLength={11}
                   placeholder={translateText("Ví dụ: 0903111222")}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
@@ -348,7 +352,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{translateText("Vai Trò & Chức Năng")}</h3>
-              <span className="text-[11px] text-teal-600 font-semibold">{translateText("Đã chọn: ")}{selectedRoleCodes.length}{translateText(" vai trò")}</span>
+              <span className="text-[11px] text-teal-600 font-semibold">{translateText("Chọn 1 vai trò chuyên môn")}</span>
             </div>
 
             <div className="space-y-2">
@@ -440,13 +444,11 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
               })}
             </div>
 
-            {!isViewMode && (
+            {!isViewMode && !isEditMode && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-bold text-slate-700">
-                    {translateText(isEditMode
-                      ? "Đặt lại mật khẩu mới (Tùy chọn)"
-                      : "Mật khẩu khởi tạo")}
+                    {translateText("Mật khẩu khởi tạo")}
                   </label>
                   <button
                     type="button"
@@ -465,11 +467,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                     type="text"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={
-                      translateText(isEditMode
-                        ? "Để trống nếu không đổi mật khẩu"
-                        : "Nhập mật khẩu...")
-                    }
+                    placeholder={translateText("Nhập mật khẩu khởi tạo...")}
                     className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   {password && (

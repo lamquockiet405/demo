@@ -83,7 +83,7 @@ export const AdminDashboardLayout: React.FC = () => {
   return (
     <div className="flex h-screen bg-[#f8fafc] font-sans antialiased text-slate-800">
       {/* 1. Sidebar Trái */}
-      {sidebarOpen && <button type="button" aria-label={translateText("Đóng menu quản trị")} className="fixed inset-0 bg-slate-900/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && <button type="button" aria-label={translateText("Đóng menu quản trị")} className="fixed !m-0 inset-0 bg-slate-900/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
       <aside id="admin-sidebar" className={`${sidebarOpen ? 'flex' : 'hidden'} fixed inset-y-0 left-0 lg:static lg:flex w-64 shrink-0 bg-white border-r border-slate-200/80 flex-col justify-between shadow-xs z-40`}>
         <div className="flex-1 min-h-0 overflow-y-auto">
           {/* Header Sidebar: KidMeal BGH & Tên trường thực tế */}

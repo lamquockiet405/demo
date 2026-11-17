@@ -1,3 +1,4 @@
+import { normalizeSearch } from '../../../core/utils/search';
 import React, { useMemo, useState } from 'react';
 import {
   ChefHat,
@@ -112,9 +113,9 @@ export const KdsLivePortionsTab: React.FC<KdsLivePortionsTabProps> = ({
   const filteredClasses = useMemo(() => {
     return classes.filter((c) => {
       const matchSearch =
-        c.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.teacherName.toLowerCase().includes(searchQuery.toLowerCase());
+        normalizeSearch(c.className).includes(normalizeSearch(searchQuery)) ||
+        normalizeSearch(c.roomNumber).includes(normalizeSearch(searchQuery)) ||
+        normalizeSearch(c.teacherName).includes(normalizeSearch(searchQuery));
 
       const matchGrade =
         selectedGrade === 'ALL' ||

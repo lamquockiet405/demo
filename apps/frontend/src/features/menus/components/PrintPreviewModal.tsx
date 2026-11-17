@@ -9,14 +9,14 @@ interface PrintPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: ExportDataResponse | null;
-  onDownloadCsv: () => void;
+  onDownloadExcel: () => void;
 }
 
 export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   isOpen,
   onClose,
   data,
-  onDownloadCsv,
+  onDownloadExcel,
 }) => {
   useLanguage();
   if (!isOpen || !data || typeof document === "undefined") return null;
@@ -26,10 +26,10 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div className="fixed !m-0 inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       {/* Nền mờ Backdrop Blur */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
+        className="fixed !m-0 inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200"
         style={{
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
@@ -49,18 +49,18 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={onDownloadCsv}
+              onClick={onDownloadExcel}
               className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 flex items-center gap-1.5 transition"
             >
               <Download className="w-4 h-4 text-emerald-600" />
-              <span>{translateText("Tải file Excel (.csv)")}</span>
+              <span>{translateText("Tải file Excel (.xlsx)")}</span>
             </button>
             <button
               onClick={handlePrint}
               className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/25 flex items-center gap-1.5 transition"
             >
               <Printer className="w-4 h-4" />
-              <span>{translateText("In thực đơn (PDF / Máy in)")}</span>
+              <span>{translateText("In thực đơn")}</span>
             </button>
             <button
               onClick={onClose}

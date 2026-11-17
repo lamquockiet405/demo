@@ -19,6 +19,7 @@ import { UpdateMenuDto } from "../dto/update-menu.dto";
 import { AdjustDishDto } from "../dto/adjust-dish.dto";
 import { ApproveMenuDto } from "../dto/approve-menu.dto";
 import { RejectMenuDto } from "../dto/reject-menu.dto";
+import { AutoGenerateMenuDto } from "../dto/auto-generate-menu.dto";
 import { EmergencyRotateDishDto } from "../dto/emergency-rotate-dish.dto";
 import { ApplySubstituteDishDto } from "../dto/apply-substitute-dish.dto";
 import { SubmitMenuDto } from "../dto/submit-menu.dto";
@@ -65,14 +66,19 @@ export class MenusController {
   @ApiOperation({
     summary: "Thống kê tổng số thực đơn theo trạng thái phê duyệt",
   })
-  async getStatistics() {
-    return this.menusService.getStatistics();
+  async getStatistics(@CurrentTenant() schoolId: number) {
+    return this.menusService.getStatistics(schoolId);
   }
 
   /**
    * GET /menus/available-dishes: Lấy danh sách các món ăn khả dụng để xếp thực đơn.
    * Chuyển xử lý sang MenusService.getAvailableDishes() và trả kết quả cho client.
    */
+  @Get("academic-year-context")
+  async academicYearContext(@CurrentTenant() schoolId: number) {
+    return this.menusService.getAcademicYearContext(schoolId);
+  }
+
   @Get("available-dishes")
   @ApiOperation({
     summary: "Lấy danh sách các món ăn khả dụng để xếp thực đơn",
@@ -122,8 +128,8 @@ export class MenusController {
   @ApiOperation({
     summary: "Lấy tư vấn Dị ứng học sinh & cá nhân hóa dinh dưỡng BMI",
   })
-  async getAdvisory(@Param("id", ParseIntPipe) id: number) {
-    return this.menusService.getAdvisory(id);
+  async getAdvisory(@Param("id", ParseIntPipe) id: number, @CurrentTenant() schoolId: number) {
+    return this.menusService.getAdvisory(id, schoolId);
   }
 
   /**
@@ -274,6 +280,24 @@ export class MenusController {
   @ApiOperation({ summary: "Công bố thực đơn tuần cho phụ huynh & giáo viên" })
   async publishMenu(@Param("id", ParseIntPipe) id: number) {
     return this.menusService.publishMenu(id);
+  }
+
+  /**
+   * POST /menus/auto-generate: Tự động tạo thực đơn cân đối dinh dưỡng theo chuẩn Thông tư 28.
+   * @param dto Dữ liệu body JSON, kiểu AutoGenerateMenuDto.
+   * @param userId Trường sub của tài khoản đã xác thực.
+   * Chuyển xử lý sang MenusService.autoGenerate() và trả kết quả cho client.
+   */
+  @Post("auto-generate")
+  @Roles("NUTRITIONIST", "SCHOOL_MANAGER", "PRINCIPAL", "SUPER_ADMIN")
+  @ApiOperation({
+    summary: "Tự động tạo thực đơn cân đối dinh dưỡng theo chuẩn Thông tư 28",
+  })
+  async autoGenerate(
+    @Body() dto: AutoGenerateMenuDto,
+    @CurrentUser("sub") userId: number,
+  ): Promise<any> {
+    return this.menusService.autoGenerate(dto, userId);
   }
 
   /**

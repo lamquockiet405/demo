@@ -32,6 +32,9 @@ export class RecipeItem {
   @Column({ type: 'text', nullable: true })
   note: string;
 
+  @Column({ name: 'source_metadata', type: 'jsonb', nullable: true })
+  sourceMetadata: Record<string, any> | null;
+
   @ManyToOne(() => Dish, (d) => d.recipes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'dish_id' })
   dish: Dish;

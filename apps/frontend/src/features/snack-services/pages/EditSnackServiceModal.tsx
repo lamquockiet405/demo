@@ -34,7 +34,6 @@ const SERVICE_TYPE_OPTIONS = [
 const BILLING_CYCLE_OPTIONS = [
   { value: 'PER_MEAL', label: 'Theo bữa ăn (Theo ngày)' },
   { value: 'WEEKLY', label: 'Theo tuần' },
-  { value: 'MONTHLY', label: 'Theo tháng' },
   { value: 'SEMESTER', label: 'Theo học kỳ' },
 ];
 
@@ -52,7 +51,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [serviceType, setServiceType] = useState('AFTER_SCHOOL_SNACK');
-  const [billingCycle, setBillingCycle] = useState('PER_MEAL');
+  const [billingCycle, setBillingCycle] = useState('WEEKLY');
   const [pricePerUnit, setPricePerUnit] = useState<number>(0);
   const [isActive, setIsActive] = useState(true);
   const [availableFrom, setAvailableFrom] = useState('');
@@ -74,7 +73,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
         setName(data.name || '');
         setDescription(data.description || '');
         setServiceType(data.serviceType || 'AFTER_SCHOOL_SNACK');
-        setBillingCycle(data.billingCycle || 'PER_MEAL');
+        setBillingCycle('WEEKLY');
         setPricePerUnit(Number(data.pricePerUnit) || 0);
         setIsActive(data.isActive ?? true);
         setAvailableFrom(data.availableFrom ? data.availableFrom.substring(0, 10) : '');
@@ -139,9 +138,9 @@ export const EditSnackServiceModal: React.FC<Props> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-end">
+    <div className="fixed !m-0 inset-0 z-50 flex items-stretch justify-end">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="fixed !m-0 inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
       {/* Slide-in Right Panel */}
       <div
@@ -160,7 +159,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
               Chỉnh Sửa Cấu Hình Gói Dịch Vụ
             </h2>
             <p className="text-[11px] text-slate-500 mt-1 ml-10">
-              UC57 • Cập nhật thông tin gói ăn xế, đơn giá và thời gian áp dụng trực tiếp trong PostgreSQL DB
+              Cập nhật thông tin gói ăn xế, đơn giá và thời gian áp dụng trực tiếp trong hệ thống
             </p>
           </div>
           <button
@@ -189,7 +188,7 @@ export const EditSnackServiceModal: React.FC<Props> = ({
                   <Tag className="w-3.5 h-3.5" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-800">Thông tin gói dịch vụ</h3>
-                <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold ml-auto">UC57 Config</span>
+                <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold ml-auto">Cấu hình</span>
               </div>
 
               {/* Tên gói */}

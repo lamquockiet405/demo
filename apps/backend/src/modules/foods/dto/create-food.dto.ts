@@ -59,10 +59,34 @@ export class CreateFoodDto {
   @ApiPropertyOptional({ example: 0 })
   @IsOptional()
   @IsNumber()
+  phosphorusMg?: number;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  sodiumMg?: number;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  vitaminAMcg?: number;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  vitaminCMg?: number;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
   refuseRatePercent?: number;
 
   @ApiPropertyOptional({ default: 'ACTIVE' })
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  sourceMetadata?: Record<string, any>;
 }
