@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   vnpayApi,
   SnackInvoiceItem,
@@ -47,6 +48,16 @@ const toBreakfastText = (text?: string) => {
 };
 
 export const ParentSnackPaymentPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Tự động chuyển tiếp sang trang xử lý kết quả VNPAY nếu URL chứa tham số callback từ cổng thanh toán
+  useEffect(() => {
+    if (searchParams.has('vnp_ResponseCode') || searchParams.has('vnp_TxnRef')) {
+      navigate(`/payments/vnpay-return?${searchParams.toString()}`, { replace: true });
+    }
+  }, [searchParams, navigate]);
+
   const [invoices, setInvoices] = useState<SnackInvoiceItem[]>([]);
   const [overview, setOverview] = useState<ParentSnackOverviewResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);

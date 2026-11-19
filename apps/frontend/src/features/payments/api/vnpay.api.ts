@@ -73,8 +73,12 @@ export const vnpayApi = {
     return [];
   },
 
-  createPaymentUrl: async (payload: { registrationId: number; orderInfo?: string }) => {
-    const res = await apiClient.post<any>('/payments/create-url', payload);
+  createPaymentUrl: async (payload: { registrationId: number; orderInfo?: string; returnUrl?: string }) => {
+    const finalPayload = {
+      returnUrl: typeof window !== 'undefined' ? `${window.location.origin}/payments/vnpay-return` : undefined,
+      ...payload,
+    };
+    const res = await apiClient.post<any>('/payments/create-url', finalPayload);
     const raw = res.data;
     if (raw && typeof raw === 'object' && 'paymentUrl' in raw) return raw;
     if (raw?.data && typeof raw.data === 'object' && 'paymentUrl' in raw.data) return raw.data;

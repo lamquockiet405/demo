@@ -1,4 +1,5 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
+import { formatDateDMY } from '../../../core/components/DateInput';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from 'react';
 import {
@@ -163,7 +164,7 @@ export const WhoGrowthChart: React.FC<WhoGrowthChartProps> = ({
                   <strong className="text-teal-900 font-bold">
                     {latestVal}
                     {translateText(unit)}
-                  </strong>{' '}{translateText("(lúc ")}{latestRecord.ageInMonths}{translateText(" thg • ")}{translateText(new Date(latestRecord.measurementDate).toLocaleDateString(getLocale()))})
+                  </strong>{' '}{translateText("(lúc ")}{latestRecord.ageInMonths}{translateText(" thg • ")}{formatDateDMY(latestRecord.measurementDate)})
                 </div>
               )}
             </div>

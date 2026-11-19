@@ -68,6 +68,7 @@ export class PaymentsController {
       orderInfo: body.orderInfo,
       ipAddr,
       parentId: user?.roles?.includes("PARENT") ? Number(user.sub ?? user.id) : undefined,
+      returnUrl: body.returnUrl,
     });
   }
 

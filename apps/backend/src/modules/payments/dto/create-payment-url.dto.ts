@@ -36,5 +36,13 @@ export class CreatePaymentUrlDto {
   @IsOptional()
   @IsString()
   orderInfo?: string;
+
+  @ApiPropertyOptional({
+    example: 'https://strategies-craig-value-utility.trycloudflare.com/payments/vnpay-return',
+    description: 'URL quay về sau khi hoàn tất giao dịch VNPAY',
+  })
+  @IsOptional()
+  @IsString()
+  returnUrl?: string;
 }
 

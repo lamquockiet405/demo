@@ -18,6 +18,7 @@ import { ParentPortalTopNav } from "../../parent-evaluations/components/ParentPo
 import { WhoGrowthChart } from "../components/WhoGrowthChart";
 import { growthApi, GrowthRecordItem } from "../api/growth.api";
 import { childrenApi, ChildItem } from "../../children/api/children.api";
+import { formatDateDMY } from "../../../core/components/DateInput";
 
 export const ParentGrowthMonitoringPage: React.FC = () => {
   useLanguage();
@@ -208,7 +209,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="rounded-full bg-rose-100 px-3 py-0.5 text-xs font-black uppercase tracking-wider text-rose-800">{translateText("Cảnh báo nguy cơ tăng trưởng")}</span>
-                  <span className="text-xs font-bold text-slate-500">{translateText("Kỳ đo ngày: ")}{translateText(growthRiskAlert.latestRecord.measurementDate)}
+                  <span className="text-xs font-bold text-slate-500">{translateText("Kỳ đo ngày: ")}{formatDateDMY(growthRiskAlert.latestRecord.measurementDate)}
                   </span>
                 </div>
                 <h3 className="text-lg font-black text-slate-900">
@@ -316,7 +317,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 block mt-2">
               {translateText(latestRecord?.measurementDate
-                ? `Đo ngày ${latestRecord.measurementDate}`
+                ? `Đo ngày ${formatDateDMY(latestRecord.measurementDate)}`
                 : "Chưa có kỳ cân đo")}
             </span>
           </div>
@@ -412,7 +413,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
                     {history.map((row) => (
                       <tr key={row.id} className="hover:bg-slate-50/50">
                         <td className="py-3 px-4 font-bold text-slate-900">
-                          {translateText(row.measurementDate)}
+                          {formatDateDMY(row.measurementDate)}
                         </td>
                         <td className="py-3 px-4 text-slate-600">{row.ageInMonths}{translateText(" tháng")}</td>
                         <td className="py-3 px-4 font-bold text-teal-800">{row.weightKg}{translateText(" kg")}</td>

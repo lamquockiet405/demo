@@ -37,6 +37,7 @@ import {
   CreateGrowthDto,
 } from "../api/growth.api";
 import { apiClient } from "../../../core/api/axios";
+import { DateInput, formatDateDMY } from "../../../core/components/DateInput";
 
 export const ChildGrowthMonitoringPage: React.FC = () => {
   useLanguage();
@@ -1046,11 +1047,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
                                     {translateText("Chưa đo")}
                                   </span>
                                 ) : (
-                                  translateText(
-                                    new Date(
-                                      r.measurementDate,
-                                    ).toLocaleDateString(getLocale()),
-                                  )
+                                  formatDateDMY(r.measurementDate)
                                 )}
                               </td>
                               <td className="py-3.5 px-3 font-semibold text-slate-700">
@@ -1275,14 +1272,13 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">{translateText("Ngày Đo *")}</label>
-                <input
-                  type="date"
+                <DateInput
                   required
                   value={formData.measurementDate}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      measurementDate: e.target.value,
+                      measurementDate: e,
                     })
                   }
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
@@ -1485,16 +1481,15 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
                   {/* Ngày đo */}
                   <div>
                     <label className="block text-slate-700 font-bold mb-1">{translateText("Ngày Đo Mới *")}{" "}
-                      <span className="text-[11px] font-normal text-slate-400">{translateText("(YYYY-MM-DD)")}</span>
+                      <span className="text-[11px] font-normal text-slate-400">{translateText("(DD/MM/YYYY)")}</span>
                     </label>
-                    <input
-                      type="date"
+                    <DateInput
                       required
                       value={editFormData.measurementDate}
                       onChange={(e) =>
                         setEditFormData({
                           ...editFormData,
-                          measurementDate: e.target.value,
+                          measurementDate: e,
                         })
                       }
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 bg-white font-medium"

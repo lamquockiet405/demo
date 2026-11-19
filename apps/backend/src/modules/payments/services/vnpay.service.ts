@@ -132,6 +132,7 @@ export class VnpayService {
     orderInfo?: string;
     ipAddr?: string;
     parentId?: number;
+    returnUrl?: string;
   }) {
     // 1. Kiểm tra điều kiện tiên quyết (Pre-conditions):
     const reg = await this.regRepo.findOne({
@@ -186,10 +187,11 @@ export class VnpayService {
       this.configService.get<string>("vnpay.url") ||
       "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     ).trim();
-    const returnUrl = (
+    const configReturnUrl = (
       this.configService.get<string>("vnpay.returnUrl") ||
       "http://localhost:5173/payments/vnpay-return"
     ).trim();
+    const returnUrl = (params.returnUrl || configReturnUrl).trim();
 
     const now = new Date();
     const expireDateObj = new Date(now.getTime() + 15 * 60 * 1000);
