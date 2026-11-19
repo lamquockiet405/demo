@@ -44,7 +44,7 @@ export default () => ({
     port: parseInt(process.env.MAIL_PORT, 10) || 587,
     secure: process.env.MAIL_SECURE === 'true',
     user: process.env.MAIL_USER || 'lamquockiet240321@gmail.com',
-    pass: process.env.MAIL_PASS || 'luvzjmhyvuohzjb',
+    pass: process.env.MAIL_PASS || 'twtyxprdxlkrjpye',
     from: process.env.MAIL_FROM || 'KidMeal <lamquockiet240321@gmail.com>',
   },
 });

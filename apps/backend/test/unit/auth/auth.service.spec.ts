@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { AuthService } from '../../../src/modules/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -24,6 +25,7 @@ describe('AuthService', () => {
     mockUserRepo = {
       findOne: jest.fn().mockResolvedValue(mockUser),
       save: jest.fn(),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
       createQueryBuilder: jest.fn().mockReturnValue({
         innerJoinAndSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
@@ -60,5 +62,49 @@ describe('AuthService', () => {
     expect(result).toHaveProperty('accessToken');
     expect(result).toHaveProperty('user');
     expect(result.user.roles).toContain('SCHOOL_MANAGER');
+  });
+
+  describe('changePassword', () => {
+    it('should change password successfully when current password matches', async () => {
+      mockUserRepo.findOne.mockResolvedValueOnce({
+        id: 1,
+        passwordHash: '$2b$10$abcdefghijklmnopqrstuu',
+      });
+      const result = await service.changePassword(1, {
+        currentPassword: '123456',
+        newPassword: 'NewSecurePassword@2026',
+      });
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Đổi mật khẩu thành công');
+      expect(mockUserRepo.update).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({
+          passwordHash: expect.any(String),
+        }),
+      );
+    });
+
+    it('should throw BadRequestException when current password is incorrect', async () => {
+      mockUserRepo.findOne.mockResolvedValueOnce({
+        id: 1,
+        passwordHash: '$2b$10$abcdefghijklmnopqrstuu',
+      });
+      await expect(
+        service.changePassword(1, {
+          currentPassword: 'WrongPassword@123',
+          newPassword: 'NewSecurePassword@2026',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      mockUserRepo.findOne.mockResolvedValueOnce(null);
+      await expect(
+        service.changePassword(999, {
+          currentPassword: '123456',
+          newPassword: 'NewSecurePassword@2026',
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
   });
 });

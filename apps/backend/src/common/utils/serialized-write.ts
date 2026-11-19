@@ -7,6 +7,9 @@ export function SerializedWrite(scope: string, repositoryKey: string): MethodDec
     descriptor.value = async function (...args: unknown[]) {
       const owner = this as Record<string, any>;
       const repository: Repository<any> = owner[repositoryKey];
+      if (!repository?.manager?.transaction) {
+        return original.apply(this, args);
+      }
       return repository.manager.transaction(async (manager) => {
         await manager.query('SELECT pg_advisory_xact_lock(hashtext($1))', [scope]);
         const context = Object.assign(Object.create(Object.getPrototypeOf(owner)), owner);

@@ -1,8 +1,4 @@
-import { downloadExcel } from '../../../core/utils/excel-export';
-import { t as translateText } from '../../../core/i18n/language';
-import { useLanguage } from '../../../core/i18n/useLanguage';
-import { schoolDate } from "../../menus/utils/published-menus";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   UtensilsCrossed,
   ChefHat,
@@ -22,9 +18,9 @@ import {
   ShieldCheck,
   X,
   Loader2,
-} from "lucide-react";
-import { attendanceApi } from "../api/attendanceApi";
-import { AttendanceResponse, ChildAttendanceItem } from "../types";
+} from 'lucide-react';
+import { attendanceApi } from '../api/attendanceApi';
+import { AttendanceResponse, ChildAttendanceItem } from '../types';
 
 interface ClassSummaryItem {
   id: string;
@@ -62,29 +58,24 @@ interface SchoolSummaryData {
 }
 
 export const BghMealPortionsOverviewPage: React.FC = () => {
-  useLanguage();
-  const [selectedDate, setSelectedDate] = useState<string>(schoolDate);
+  const [selectedDate, setSelectedDate] = useState<string>('2026-09-25');
   const [data, setData] = useState<SchoolSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Detail Modal States
-  const [selectedClass, setSelectedClass] = useState<ClassSummaryItem | null>(
-    null,
-  );
-  const [classDetailData, setClassDetailData] =
-    useState<AttendanceResponse | null>(null);
+  const [selectedClass, setSelectedClass] = useState<ClassSummaryItem | null>(null);
+  const [classDetailData, setClassDetailData] = useState<AttendanceResponse | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState<boolean>(false);
 
   // Load summary data from PostgreSQL
   const loadSummary = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res: any =
-        await attendanceApi.getSchoolHeadcountSummary(selectedDate);
+      const res: any = await attendanceApi.getSchoolHeadcountSummary(selectedDate);
       setData(res?.data || res);
     } catch (err) {
-      console.error("Lỗi khi tải tổng hợp suất ăn toàn trường:", err);
+      console.error('Lỗi khi tải tổng hợp suất ăn toàn trường:', err);
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +96,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
       });
       setClassDetailData(detail);
     } catch (err) {
-      console.error("Lỗi khi xem chi tiết lớp:", err);
+      console.error('Lỗi khi xem chi tiết lớp:', err);
     } finally {
       setIsDetailLoading(false);
     }
@@ -120,39 +111,73 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
         date: selectedDate,
         isLocked: nextLocked,
         notes: nextLocked
-          ? "Ban Giám Hiệu xác nhận chốt số suất ăn gửi Bếp"
-          : "Ban Giám Hiệu mở khóa cho giáo viên điều chỉnh số liệu",
+          ? 'Ban Giám Hiệu xác nhận chốt số suất ăn gửi Bếp'
+          : 'Ban Giám Hiệu mở khóa cho giáo viên điều chỉnh số liệu',
       });
 
       setToastMessage(
         nextLocked
           ? `Đã khóa sổ ${cls.name} gửi sang Bếp thành công!`
-          : `Đã mở khóa ${cls.name} cho giáo viên điều chỉnh!`,
+          : `Đã mở khóa ${cls.name} cho giáo viên điều chỉnh!`
       );
       setTimeout(() => setToastMessage(null), 3500);
       loadSummary();
     } catch (err) {
-      console.error("Lỗi khi đổi trạng thái khóa:", err);
-      alert(translateText("Không thể cập nhật trạng thái khóa. Vui lòng thử lại!"));
+      console.error('Lỗi khi đổi trạng thái khóa:', err);
+      alert('Không thể cập nhật trạng thái khóa. Vui lòng thử lại!');
     }
   };
 
   // Export to CSV for kitchen warehouse
-  const handleExportExcel = () => {
-    if (!data?.classes?.length) return;
-    void downloadExcel(`Ke_Hoach_Suat_An_Toan_Truong_${selectedDate}.xlsx`, [
-      ['STT', 'Lớp học', 'Khối', 'Giáo viên phụ trách', 'Sĩ số', 'Đăng ký ăn trưa', 'Suất trưa chuẩn', 'Khay dị ứng', 'Suất ăn xế', 'Học sinh nghỉ', 'Trạng thái gửi bếp'],
-      ...data.classes.map((c, i) => [i + 1, c.name, c.gradeName, c.homeroomTeacher, c.enrolled, c.lunchCount, c.standardPortions, c.allergicCount, c.snackCount, c.absentToday, c.isKitchenLocked ? 'Đã khóa gửi bếp' : 'Chưa khóa']),
-    ], 'Kế hoạch suất ăn toàn trường');
+  const handleExportCsv = () => {
+    if (!data?.classes || data.classes.length === 0) return;
+    const headers = [
+      'STT',
+      'Lớp học',
+      'Khối',
+      'Giáo viên phụ trách',
+      'Sĩ số',
+      'Đăng ký ăn trưa',
+      'Suất trưa chuẩn',
+      'Khay dị ứng',
+      'Suất ăn xế',
+      'Học sinh nghỉ',
+      'Trạng thái gửi Bếp',
+    ];
+
+    const rows = data.classes.map((c, idx) => [
+      idx + 1,
+      `"${c.name}"`,
+      `"${c.gradeName}"`,
+      `"${c.homeroomTeacher}"`,
+      c.enrolled,
+      c.lunchCount,
+      c.standardPortions,
+      c.allergicCount,
+      c.snackCount,
+      c.absentToday,
+      c.isKitchenLocked ? '"Đã khóa gửi Bếp"' : '"Chưa khóa"',
+    ]);
+
+    const csvContent =
+      '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Ke_Hoach_Suat_An_Toan_Truong_${selectedDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="space-y-6 w-full pb-12 font-sans antialiased text-slate-800">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans antialiased text-slate-800">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-xs border border-emerald-500">
           <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-          <span>{translateText(toastMessage)}</span>
+          <span>{toastMessage}</span>
         </div>
       )}
 
@@ -161,11 +186,17 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-              <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />{translateText("CỔNG BAN GIÁM HIỆU • ĐIỀU HÀNH BÁN TRÚ")}</span>
-            <span className="text-xs text-slate-500 font-medium">{translateText("Hạn chốt gửi Bếp: 08:45 hàng ngày")}</span>
+              <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />
+              CỔNG BAN GIÁM HIỆU • ĐIỀU HÀNH BÁN TRÚ
+            </span>
+            <span className="text-xs text-slate-500 font-medium">Hạn chốt gửi Bếp: 08:45 hàng ngày</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">{translateText("Kế hoạch Định lượng Suất ăn Bán trú Toàn trường")}</h1>
-          <p className="text-xs text-slate-500 mt-1">{translateText("Tổng hợp dữ liệu báo suất ăn từ Giáo viên các lớp gửi xuống Bếp trung tâm • Giám sát tiến độ chốt sổ chuẩn ATTP.")}</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            Kế hoạch Định lượng Suất ăn Bán trú Toàn trường
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Tổng hợp dữ liệu báo suất ăn từ Giáo viên các lớp gửi xuống Bếp trung tâm • Giám sát tiến độ chốt sổ chuẩn ATTP.
+          </p>
         </div>
 
         {/* Date Selector & Actions */}
@@ -184,20 +215,18 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             onClick={loadSummary}
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
-            title={translateText("Làm mới dữ liệu từ cơ sở dữ liệu")}
+            title="Làm mới dữ liệu từ cơ sở dữ liệu"
           >
-            <RotateCcw
-              className={`w-3.5 h-3.5 text-teal-600 ${isLoading ? "animate-spin" : ""}`}
-            />
-            <span>{translateText("Làm mới")}</span>
+            <RotateCcw className={`w-3.5 h-3.5 text-teal-600 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Làm mới</span>
           </button>
 
           <button
-            onClick={handleExportExcel}
+            onClick={handleExportCsv}
             className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/25 transition"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>{translateText("Xuất báo cáo Bếp")}</span>
+            <span>Xuất báo cáo Bếp</span>
           </button>
         </div>
       </div>
@@ -207,7 +236,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
         {/* Card 1: Tổng Suất Trưa Chuẩn */}
         <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-            <span>{translateText("SUẤT TRƯA CHUẨN")}</span>
+            <span>SUẤT TRƯA CHUẨN</span>
             <span className="p-1.5 bg-teal-50 text-teal-700 rounded-xl">
               <UtensilsCrossed className="w-4 h-4" />
             </span>
@@ -216,15 +245,17 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             <span className="text-3xl font-black text-teal-700">
               {data?.standardPortions ?? 0}
             </span>
-            <span className="text-xs font-bold text-slate-400">{translateText("suất nấu")}</span>
+            <span className="text-xs font-bold text-slate-400">suất nấu</span>
           </div>
-          <p className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">{translateText("Tổng đăng ký trưa: ")}<strong>{data?.totalLunch ?? 0}</strong>{translateText(" trẻ")}</p>
+          <p className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+            Tổng đăng ký trưa: <strong>{data?.totalLunch ?? 0}</strong> trẻ
+          </p>
         </div>
 
         {/* Card 2: Tổng Suất Ăn Xế */}
         <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-            <span>{translateText("SUẤT ĂN XẾ CHIỀU")}</span>
+            <span>SUẤT ĂN XẾ CHIỀU</span>
             <span className="p-1.5 bg-amber-50 text-amber-700 rounded-xl">
               <ChefHat className="w-4 h-4" />
             </span>
@@ -233,16 +264,17 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             <span className="text-3xl font-black text-amber-600">
               {data?.totalSnack ?? 0}
             </span>
-            <span className="text-xs font-bold text-slate-400">{translateText("suất xế")}</span>
+            <span className="text-xs font-bold text-slate-400">suất xế</span>
           </div>
-          <p className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">{translateText("Phục vụ vào lúc ")}<strong>14:30</strong>
+          <p className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+            Phục vụ vào lúc <strong>14:30</strong>
           </p>
         </div>
 
         {/* Card 3: Khay Dị Ứng Riêng Biệt */}
         <div className="bg-white rounded-2xl p-4 border border-red-200 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-red-600 text-[11px] font-bold uppercase tracking-wider">
-            <span>{translateText("KHAY DỊ ỨNG RIÊNG")}</span>
+            <span>KHAY DỊ ỨNG RIÊNG</span>
             <span className="p-1.5 bg-red-50 text-red-600 rounded-xl">
               <AlertTriangle className="w-4 h-4" />
             </span>
@@ -251,15 +283,17 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             <span className="text-3xl font-black text-red-600">
               {data?.totalAllergic ?? 0}
             </span>
-            <span className="text-xs font-bold text-slate-400">{translateText("khay riêng")}</span>
+            <span className="text-xs font-bold text-slate-400">khay riêng</span>
           </div>
-          <p className="mt-2 pt-2 border-t border-red-100 text-[11px] text-red-600 font-semibold">{translateText("Bếp dán nhãn nhận diện riêng")}</p>
+          <p className="mt-2 pt-2 border-t border-red-100 text-[11px] text-red-600 font-semibold">
+            Bếp dán nhãn nhận diện riêng
+          </p>
         </div>
 
         {/* Card 4: Học Sinh Nghỉ Hôm Nay */}
         <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-            <span>{translateText("HỌC SINH NGHỈ HÔM NAY")}</span>
+            <span>HỌC SINH NGHỈ HÔM NAY</span>
             <span className="p-1.5 bg-rose-50 text-rose-600 rounded-xl">
               <Users className="w-4 h-4" />
             </span>
@@ -268,15 +302,17 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             <span className="text-3xl font-black text-rose-600">
               {data?.totalAbsent ?? 0}
             </span>
-            <span className="text-xs font-bold text-slate-400">{translateText("bé vắng")}</span>
+            <span className="text-xs font-bold text-slate-400">bé vắng</span>
           </div>
-          <p className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-emerald-600 font-semibold">{translateText("✓ Đã trừ khỏi định lượng kho")}</p>
+          <p className="mt-2 pt-2 border-t border-slate-100 text-[11px] text-emerald-600 font-semibold">
+            ✓ Đã trừ khỏi định lượng kho
+          </p>
         </div>
 
         {/* Card 5: Tiến Độ Khóa Sổ Báo Bếp */}
         <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-            <span>{translateText("TIẾN ĐỘ BÁO BẾP")}</span>
+            <span>TIẾN ĐỘ BÁO BẾP</span>
             <span className="p-1.5 bg-teal-50 text-teal-700 rounded-xl">
               <CheckCircle2 className="w-4 h-4" />
             </span>
@@ -285,7 +321,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
             <span className="text-3xl font-black text-slate-900">
               {data?.lockedClassesCount ?? 0}/{data?.totalClassesCount ?? 6}
             </span>
-            <span className="text-xs font-bold text-slate-400">{translateText("lớp đã khóa")}</span>
+            <span className="text-xs font-bold text-slate-400">lớp đã khóa</span>
           </div>
           <div className="mt-2 pt-2 border-t border-slate-100">
             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -302,32 +338,38 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-black text-slate-900">{translateText("Bảng Tổng Hợp Kế Hoạch Suất Ăn Theo Lớp")}</h2>
-            <p className="text-xs text-slate-500 mt-0.5">{translateText("Theo dõi dữ liệu thực tế từ cơ sở dữ liệu PostgreSQL • Bấm nút thao tác để xem chi tiết học sinh hoặc mở khóa điều chỉnh.")}</p>
+            <h2 className="text-base font-black text-slate-900">
+              Bảng Tổng Hợp Kế Hoạch Suất Ăn Theo Lớp
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Theo dõi dữ liệu thực tế từ cơ sở dữ liệu PostgreSQL • Bấm nút thao tác để xem chi tiết học sinh hoặc mở khóa điều chỉnh.
+            </p>
           </div>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">{translateText("Tổng cộng: ")}{data?.classes?.length ?? 6}{translateText(" lớp học")}</span>
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+            Tổng cộng: {data?.classes?.length ?? 6} lớp học
+          </span>
         </div>
 
         {isLoading ? (
           <div className="p-16 text-center space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto" />
-            <p className="text-xs font-bold text-slate-500">{translateText("Đang tải dữ liệu suất ăn từ cơ sở dữ liệu...")}</p>
+            <p className="text-xs font-bold text-slate-500">Đang tải dữ liệu suất ăn từ cơ sở dữ liệu...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                  <th className="py-3.5 px-4">{translateText("Lớp Học")}</th>
-                  <th className="py-3.5 px-4">{translateText("Giáo Viên Phụ Trách")}</th>
-                  <th className="py-3.5 px-3 text-center">{translateText("Sĩ Số")}</th>
-                  <th className="py-3.5 px-3 text-center">{translateText("Đăng Ký Ăn")}</th>
-                  <th className="py-3.5 px-3 text-center text-teal-700">{translateText("Suất Chuẩn")}</th>
-                  <th className="py-3.5 px-3 text-center text-red-600">{translateText("Khay Dị Ứng")}</th>
-                  <th className="py-3.5 px-3 text-center text-amber-700">{translateText("Suất Xế")}</th>
-                  <th className="py-3.5 px-3 text-center text-rose-600">{translateText("Nghỉ Học")}</th>
-                  <th className="py-3.5 px-4 text-center">{translateText("Trạng Thái Bếp")}</th>
-                  <th className="py-3.5 px-4 text-center">{translateText("Thao Tác BGH")}</th>
+                  <th className="py-3.5 px-4">Lớp Học</th>
+                  <th className="py-3.5 px-4">Giáo Viên Phụ Trách</th>
+                  <th className="py-3.5 px-3 text-center">Sĩ Số</th>
+                  <th className="py-3.5 px-3 text-center">Đăng Ký Ăn</th>
+                  <th className="py-3.5 px-3 text-center text-teal-700">Suất Chuẩn</th>
+                  <th className="py-3.5 px-3 text-center text-red-600">Khay Dị Ứng</th>
+                  <th className="py-3.5 px-3 text-center text-amber-700">Suất Xế</th>
+                  <th className="py-3.5 px-3 text-center text-rose-600">Nghỉ Học</th>
+                  <th className="py-3.5 px-4 text-center">Trạng Thái Bếp</th>
+                  <th className="py-3.5 px-4 text-center">Thao Tác BGH</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -349,7 +391,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                               {cls.name}
                             </span>
                             <span className="text-[10px] text-slate-400 font-medium">
-                              {cls.gradeName} • {translateText(cls.roomNumber)}
+                              {cls.gradeName} • {cls.roomNumber}
                             </span>
                           </div>
                         </div>
@@ -358,7 +400,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                       {/* Giáo Viên Phụ Trách */}
                       <td className="py-3.5 px-4">
                         <span className="font-semibold text-slate-700">
-                          {translateText(cls.homeroomTeacher)}
+                          {cls.homeroomTeacher}
                         </span>
                       </td>
 
@@ -384,11 +426,10 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                         {cls.allergicCount > 0 ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-black bg-red-50 text-red-600 border border-red-200">
                             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                            {cls.allergicCount}{translateText(" khay")}</span>
-                        ) : (
-                          <span className="text-slate-400 text-xs font-medium">
-                            0
+                            {cls.allergicCount} khay
                           </span>
+                        ) : (
+                          <span className="text-slate-400 text-xs font-medium">0</span>
                         )}
                       </td>
 
@@ -404,9 +445,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                             {cls.absentToday}
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-xs font-medium">
-                            0
-                          </span>
+                          <span className="text-slate-400 text-xs font-medium">0</span>
                         )}
                       </td>
 
@@ -415,12 +454,12 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                         {isLocked ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>{translateText("Đã khóa gửi Bếp")}</span>
+                            <span>Đã khóa gửi Bếp</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                             <Clock className="w-3.5 h-3.5 text-amber-600" />
-                            <span>{translateText("Đang điểm danh")}</span>
+                            <span>Đang điểm danh</span>
                           </span>
                         )}
                       </td>
@@ -431,34 +470,34 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                           <button
                             onClick={() => handleOpenClassDetail(cls)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-700 border border-slate-200 transition"
-                            title={translateText("Xem danh sách chi tiết học sinh lớp này")}
+                            title="Xem danh sách chi tiết học sinh lớp này"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                            <span>{translateText("Xem chi tiết")}</span>
+                            <span>Xem chi tiết</span>
                           </button>
 
                           <button
                             onClick={() => handleToggleClassLock(cls)}
                             className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition border ${
                               isLocked
-                                ? "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200"
-                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200"
+                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200'
+                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
                             }`}
                             title={
-                              translateText(isLocked
-                                ? "Mở khóa cho giáo viên điều chỉnh bổ sung"
-                                : "Đặc cách khóa sổ suất ăn gửi Bếp")
+                              isLocked
+                                ? 'Mở khóa cho giáo viên điều chỉnh bổ sung'
+                                : 'Đặc cách khóa sổ suất ăn gửi Bếp'
                             }
                           >
                             {isLocked ? (
                               <>
                                 <Unlock className="w-3.5 h-3.5" />
-                                <span>{translateText("Mở khóa")}</span>
+                                <span>Mở khóa</span>
                               </>
                             ) : (
                               <>
                                 <Lock className="w-3.5 h-3.5" />
-                                <span>{translateText("Khóa gửi Bếp")}</span>
+                                <span>Khóa gửi Bếp</span>
                               </>
                             )}
                           </button>
@@ -475,7 +514,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
 
       {/* 4. Drill-Down Modal: Danh sách học sinh chi tiết của lớp */}
       {selectedClass && (
-        <div className="fixed !m-0 inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -484,11 +523,11 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                   {selectedClass.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{translateText("Danh Sách Báo Suất Ăn: ")}{selectedClass.name}
+                  <h3 className="text-lg font-black text-slate-900">
+                    Danh Sách Báo Suất Ăn: {selectedClass.name}
                   </h3>
-                  <p className="text-xs text-slate-500">{translateText("Giáo viên phụ trách:")}{" "}
-                    <strong>{translateText(selectedClass.homeroomTeacher)}</strong>{translateText(" • Ngày:")}{" "}
-                    {translateText(selectedDate)}
+                  <p className="text-xs text-slate-500">
+                    Giáo viên phụ trách: <strong>{selectedClass.homeroomTeacher}</strong> • Ngày: {selectedDate}
                   </p>
                 </div>
               </div>
@@ -506,62 +545,57 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
               {isDetailLoading ? (
                 <div className="p-12 text-center space-y-2">
                   <Loader2 className="w-6 h-6 animate-spin text-teal-600 mx-auto" />
-                  <p className="text-xs font-medium text-slate-500">{translateText("Đang tải danh sách học sinh của lớp...")}</p>
+                  <p className="text-xs font-medium text-slate-500">Đang tải danh sách học sinh của lớp...</p>
                 </div>
-              ) : classDetailData?.children &&
-                classDetailData.children.length > 0 ? (
+              ) : classDetailData?.children && classDetailData.children.length > 0 ? (
                 <div className="overflow-x-auto border border-slate-200 rounded-2xl">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
-                        <th className="py-2.5 px-3">{translateText("STT")}</th>
-                        <th className="py-2.5 px-3">{translateText("Họ và Tên Bé")}</th>
-                        <th className="py-2.5 px-3 text-center">{translateText("Đăng Ký Ăn")}</th>
-                        <th className="py-2.5 px-3">{translateText("Cảnh Báo Dị Ứng")}</th>
-                        <th className="py-2.5 px-3">{translateText("Ghi Chú Phụ Huynh / Cô")}</th>
+                        <th className="py-2.5 px-3">STT</th>
+                        <th className="py-2.5 px-3">Họ và Tên Bé</th>
+                        <th className="py-2.5 px-3 text-center">Đăng Ký Ăn</th>
+                        <th className="py-2.5 px-3">Cảnh Báo Dị Ứng</th>
+                        <th className="py-2.5 px-3">Ghi Chú Phụ Huynh / Cô</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {classDetailData.children.map((child, idx) => (
                         <tr key={child.id} className="hover:bg-slate-50/60">
-                          <td className="py-2.5 px-3 font-semibold text-slate-400">
-                            {idx + 1}
-                          </td>
-                          <td className="py-2.5 px-3 font-bold text-slate-900">
-                            {child.fullName}
-                          </td>
+                          <td className="py-2.5 px-3 font-semibold text-slate-400">{idx + 1}</td>
+                          <td className="py-2.5 px-3 font-bold text-slate-900">{child.fullName}</td>
                           <td className="py-2.5 px-3 text-center">
                             <span
                               className={`inline-flex px-2 py-0.5 rounded-lg text-[11px] font-bold ${
-                                child.mealOption === "ALL_DAY"
-                                  ? "bg-teal-50 text-teal-800"
-                                  : child.mealOption === "LUNCH_ONLY"
-                                    ? "bg-sky-50 text-sky-800"
-                                    : child.mealOption === "SNACK_ONLY"
-                                      ? "bg-amber-50 text-amber-800"
-                                      : "bg-rose-50 text-rose-700"
+                                child.mealOption === 'ALL_DAY'
+                                  ? 'bg-teal-50 text-teal-800'
+                                  : child.mealOption === 'LUNCH_ONLY'
+                                  ? 'bg-sky-50 text-sky-800'
+                                  : child.mealOption === 'SNACK_ONLY'
+                                  ? 'bg-amber-50 text-amber-800'
+                                  : 'bg-rose-50 text-rose-700'
                               }`}
                             >
-                              {translateText(child.mealOption === "ALL_DAY"
-                                ? "Cả ngày (Trưa + Xế)"
-                                : child.mealOption === "LUNCH_ONLY"
-                                  ? "Chỉ ăn trưa"
-                                  : child.mealOption === "SNACK_ONLY"
-                                    ? "Chỉ ăn xế"
-                                    : "Nghỉ học")}
+                              {child.mealOption === 'ALL_DAY'
+                                ? 'Cả ngày (Trưa + Xế)'
+                                : child.mealOption === 'LUNCH_ONLY'
+                                ? 'Chỉ ăn trưa'
+                                : child.mealOption === 'SNACK_ONLY'
+                                ? 'Chỉ ăn xế'
+                                : 'Nghỉ học'}
                             </span>
                           </td>
                           <td className="py-2.5 px-3">
-                            {child.dietBadge?.type === "ALLERGY" ? (
+                            {child.dietBadge?.type === 'ALLERGY' ? (
                               <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-700 border border-red-200">
-                                ⚠ {translateText(child.dietBadge.title || "Có dị ứng")}
+                                ⚠ {child.dietBadge.title || 'Có dị ứng'}
                               </span>
                             ) : (
-                              <span className="text-slate-400 text-[11px]">{translateText("Bình thường")}</span>
+                              <span className="text-slate-400 text-[11px]">Bình thường</span>
                             )}
                           </td>
                           <td className="py-2.5 px-3 text-slate-500 italic">
-                            {child.parentNote || translateText("Không có ghi chú")}
+                            {child.parentNote || 'Không có ghi chú'}
                           </td>
                         </tr>
                       ))}
@@ -569,23 +603,23 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
                   </table>
                 </div>
               ) : (
-                <div className="p-8 text-center text-xs text-slate-400">{translateText("Lớp này chưa có dữ liệu học sinh điểm danh trong ngày đã chọn.")}</div>
+                <div className="p-8 text-center text-xs text-slate-400">
+                  Lớp này chưa có dữ liệu học sinh điểm danh trong ngày đã chọn.
+                </div>
               )}
             </div>
 
             {/* Modal Footer */}
             <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/60 text-xs">
-              <span className="text-slate-500 font-medium">{translateText("Trạng thái:")}{" "}
-                <strong>
-                  {translateText(selectedClass.isKitchenLocked
-                    ? "Đã khóa gửi Bếp"
-                    : "Chưa khóa")}
-                </strong>
+              <span className="text-slate-500 font-medium">
+                Trạng thái: <strong>{selectedClass.isKitchenLocked ? 'Đã khóa gửi Bếp' : 'Chưa khóa'}</strong>
               </span>
               <button
                 onClick={() => setSelectedClass(null)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition"
-              >{translateText("Đóng")}</button>
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>

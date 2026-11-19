@@ -67,7 +67,18 @@ docs/*.zip
 
 
 
+# Exclude documentation, tooling scripts and database references
+docs/
+scripts/
+database/migrations/
+database/generated/
+database/reference/
+contributors-checker.html
+populate_missing_nutrition.sql
+populate_nutrition.py
+
 # Local secrets and database backup archive
+
 .env.*
 !.env.example
 nginx/ssl/*.pem

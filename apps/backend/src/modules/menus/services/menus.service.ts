@@ -2530,6 +2530,14 @@ export class MenusService implements OnModuleInit {
       );
     }
 
+    const planDayOffset = planToSave.some(day => day.dayOfWeek === 1) ? 0 : 1;
+    const eligibleDishes = allDishes.filter(dish => hasVerifiedNutrition(dish) && Number(dish.nutrition.energyKcal) > 0);
+    for (let index = 0; index < daysCount; index++) {
+      const dayPlan = planToSave.find(day => day.dayOfWeek === index + 1 + planDayOffset);
+      if (!dayPlan?.dishes) throw new BadRequestException('Kế hoạch thực đơn chưa đủ các ngày yêu cầu.');
+      validateLunchRice(dayPlan.dishes, isFriday(weekStartDate, index), eligibleDishes);
+    }
+
     const created = await this.create(
       {
         title,

@@ -16,12 +16,6 @@ import { ChildAlertsService } from '../services/child-alerts.service';
 import { QueryChildAlertsDto } from '../dto/query-child-alerts.dto';
 import { ResolveAlertDto } from '../dto/resolve-alert.dto';
 
-/**
- * Cung cấp cảnh báo của trẻ theo phạm vi vai trò và tiếp nhận xác nhận hoặc xử lý cảnh báo.
- * Các đường dẫn bên dưới được ghép với tiền tố toàn cục /api/v1.
- * JwtAuthGuard xác thực tài khoản; RolesGuard kiểm tra quyền tại controller hoặc từng endpoint.
- * Constructor nhận service qua Dependency Injection; các hàm chuyển dữ liệu request sang service.
- */
 @ApiTags('UC93: Role-Specific Child Alerts Summary')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -29,12 +23,6 @@ import { ResolveAlertDto } from '../dto/resolve-alert.dto';
 export class ChildAlertsController {
   constructor(private readonly alertsService: ChildAlertsService) {}
 
-  /**
-   * GET /child-alerts/summary: Xem tổng hợp cảnh báo trẻ em tự động phân tầng theo Role (UC93 Core Endpoint).
-   * @param user Thông tin tài khoản đã xác thực.
-   * @param query Bộ lọc trong query string.
-   * Chuyển xử lý sang ChildAlertsService.getRoleScopedAlertsSummary() và trả kết quả cho client.
-   */
   @Get('summary')
   @ApiOperation({
     summary: 'Xem tổng hợp cảnh báo trẻ em tự động phân tầng theo Role (UC93 Core Endpoint)',
@@ -48,12 +36,6 @@ export class ChildAlertsController {
     return this.alertsService.getRoleScopedAlertsSummary(user, query);
   }
 
-  /**
-   * GET /child-alerts/school-manager: Cảnh báo cấp trường dành cho Ban Giám Hiệu (School Manager Scope).
-   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
-   * @param query Bộ lọc trong query string (tùy chọn).
-   * Chuyển xử lý sang ChildAlertsService.getSchoolManagerAlerts() và trả kết quả cho client.
-   */
   @Get('school-manager')
   @ApiOperation({
     summary: 'Cảnh báo cấp trường dành cho Ban Giám Hiệu (School Manager Scope)',
@@ -67,16 +49,10 @@ export class ChildAlertsController {
     return this.alertsService.getSchoolManagerAlerts(schoolId, query);
   }
 
-  /**
-   * GET /child-alerts/nutritionist: Cảnh báo an toàn thực phẩm & lâm sàng cho Chuyên viên Dinh dưỡng (Nutritionist Scope).
-   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
-   * @param query Bộ lọc trong query string (tùy chọn).
-   * Chuyển xử lý sang ChildAlertsService.getNutritionistAlerts() và trả kết quả cho client.
-   */
   @Get('nutritionist')
   @ApiOperation({
     summary: 'Cảnh báo an toàn thực phẩm & lâm sàng cho Chuyên viên Dinh dưỡng (Nutritionist Scope)',
-    description: 'Bao gồm: Trùng lặp chất dị ứng thực đơn ngày mai, trẻ sụt cân liên tiếp 2 kỳ (Z < -2 SD), thiếu hụt vi chất Quy chuẩn Dinh dưỡng.',
+    description: 'Bao gồm: Trùng lặp chất dị ứng thực đơn ngày mai, trẻ sụt cân liên tiếp 2 kỳ (Z < -2 SD), thiếu hụt vi chất Thông tư 28.',
   })
   @Roles('NUTRITIONIST', 'SCHOOL_MANAGEMENT', 'SCHOOL_MANAGER', 'PRINCIPAL', 'SUPER_ADMIN')
   async getNutritionistAlerts(
@@ -86,13 +62,6 @@ export class ChildAlertsController {
     return this.alertsService.getNutritionistAlerts(schoolId, query);
   }
 
-  /**
-   * GET /child-alerts/teacher: Cảnh báo điều hành lớp học & chăm sóc trực tiếp cho Giáo viên (Teacher Scope).
-   * @param teacherUserId Trường id của tài khoản đã xác thực (tùy chọn).
-   * @param classId Tham số classId trong query string (tùy chọn).
-   * @param query Bộ lọc trong query string (tùy chọn).
-   * Chuyển xử lý sang ChildAlertsService.getTeacherAlerts() và trả kết quả cho client.
-   */
   @Get('teacher')
   @ApiOperation({
     summary: 'Cảnh báo điều hành lớp học & chăm sóc trực tiếp cho Giáo viên (Teacher Scope)',
@@ -108,13 +77,6 @@ export class ChildAlertsController {
     return this.alertsService.getTeacherAlerts(teacherUserId, classId, query);
   }
 
-  /**
-   * GET /child-alerts/parent: Thông báo & cảnh báo cá nhân hóa cho con dành cho Phụ huynh (Parent Scope).
-   * @param parentUserId Trường id của tài khoản đã xác thực (tùy chọn).
-   * @param studentId Tham số studentId trong query string (tùy chọn).
-   * @param query Bộ lọc trong query string (tùy chọn).
-   * Chuyển xử lý sang ChildAlertsService.getParentAlerts() và trả kết quả cho client.
-   */
   @Get('parent')
   @ApiOperation({
     summary: 'Thông báo & cảnh báo cá nhân hóa cho con dành cho Phụ huynh (Parent Scope)',
@@ -130,12 +92,6 @@ export class ChildAlertsController {
     return this.alertsService.getParentAlerts(parentUserId, studentId, query);
   }
 
-  /**
-   * POST /child-alerts/resolve: Xác nhận xử lý / đóng cảnh báo (Acknowledge / Resolve Alert).
-   * @param dto Dữ liệu body JSON, kiểu ResolveAlertDto.
-   * @param userId Trường id của tài khoản đã xác thực (tùy chọn).
-   * Chuyển xử lý sang ChildAlertsService.resolveOrAcknowledgeAlert() và trả kết quả cho client.
-   */
   @Post('resolve')
   @ApiOperation({
     summary: 'Xác nhận xử lý / đóng cảnh báo (Acknowledge / Resolve Alert)',

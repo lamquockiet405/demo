@@ -132,8 +132,8 @@ export const NutriKidHeader: React.FC<NutriKidHeaderProps> = ({
                 {isUserDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
                     <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-xs font-bold text-slate-900">{user?.fullName || 'BS. Hoàng Mai Trang'}</p>
-                      <p className="text-[11px] text-slate-500 truncate">{user?.email || 'dinhduong@hoamai.edu.vn'}</p>
+                      <p className="text-xs font-bold text-slate-900">{user?.fullName || 'Lê Hoài Nam'}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{user?.email || 'dinhduong@huongduong.edu.vn'}</p>
                     </div>
                     <button
                       onClick={() => {

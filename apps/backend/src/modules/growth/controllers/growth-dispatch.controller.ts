@@ -8,108 +8,63 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
-} from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../../../common/guards/roles.guard";
-import { Roles } from "../../../common/decorators/roles.decorator";
-import { CurrentUser } from "../../../common/decorators/current-user.decorator";
-import { CurrentTenant } from "../../../common/decorators/current-tenant.decorator";
-import { GrowthDispatchService } from "../services/growth-dispatch.service";
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
+import { Roles } from '../../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { CurrentTenant } from '../../../common/decorators/current-tenant.decorator';
+import { GrowthDispatchService } from '../services/growth-dispatch.service';
 import {
   QueryGrowthNotificationsDto,
   GrowthNotificationItem,
   ExecutiveGrowthHealthSummary,
-} from "../dto/query-growth-notifications.dto";
+} from '../dto/query-growth-notifications.dto';
 import {
   AcknowledgeNotificationDto,
   AssignInterventionDietDto,
   RequestConsultationDto,
   ApproveInterventionBudgetDto,
-} from "../dto/growth-notification-actions.dto";
+} from '../dto/growth-notification-actions.dto';
 
-/**
- * Điều phối cảnh báo tăng trưởng và các yêu cầu can thiệp, tư vấn, duyệt ngân sách.
- * Các đường dẫn bên dưới được ghép với tiền tố toàn cục /api/v1.
- * JwtAuthGuard xác thực tài khoản; RolesGuard kiểm tra quyền tại controller hoặc từng endpoint.
- * Constructor nhận service qua Dependency Injection; các hàm chuyển dữ liệu request sang service.
- */
-@ApiTags("Growth & Health Notifications Dispatch (UC85)")
+@ApiTags('Growth & Health Notifications Dispatch (UC85)')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller("growth-notifications")
+@Controller('growth-notifications')
 export class GrowthDispatchController {
   constructor(private readonly growthDispatchService: GrowthDispatchService) {}
 
-  /**
-   * POST /growth-notifications/scan-dispatch: Quét nhân trắc học tự động & Điều phối thông báo bất thường theo vai trò (UC85).
-   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
-   * Chuyển xử lý sang GrowthDispatchService.scanAndDispatchNotifications() và trả kết quả cho client.
-   */
-  @Post("scan-dispatch")
+  @Post('scan-dispatch')
   @ApiOperation({
     summary:
-      "Quét nhân trắc học tự động & Điều phối thông báo bất thường theo vai trò (UC85)",
+      'Quét nhân trắc học tự động & Điều phối thông báo bất thường theo vai trò (UC85)',
   })
-  @Roles("SCHOOL_MANAGEMENT", "PRINCIPAL", "SUPER_ADMIN", "NUTRITIONIST")
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN', 'NUTRITIONIST')
   async scanAndDispatch(@CurrentTenant() schoolId?: number) {
-    return this.growthDispatchService.scanAndDispatchNotifications(
-      schoolId || 1,
-    );
+    return this.growthDispatchService.scanAndDispatchNotifications(schoolId || 1);
   }
 
-  /**
-   * GET /growth-notifications: Lấy danh sách thông báo bất thường thể trạng theo phân quyền Scoping của 4 Role.
-   * @param query Bộ lọc trong query string.
-   * @param user Thông tin tài khoản đã xác thực.
-   * Chuyển xử lý sang GrowthDispatchService.getNotificationsByRole() và trả kết quả cho client.
-   * Chuẩn hóa vai trò theo thứ tự quản lý trường, dinh dưỡng, giáo viên, phụ huynh.
-   * Trả danh sách kèm tổng số phần tử và roleScope được xác định.
-   */
   @Get()
   @ApiOperation({
     summary:
-      "Lấy danh sách thông báo bất thường thể trạng theo phân quyền Scoping của 4 Role",
+      'Lấy danh sách thông báo bất thường thể trạng theo phân quyền Scoping của 4 Role',
   })
   @Roles(
-    "SCHOOL_MANAGEMENT",
-    "PRINCIPAL",
-    "SUPER_ADMIN",
-    "NUTRITIONIST",
-    "TEACHER",
-    "PARENT",
+    'SCHOOL_MANAGEMENT',
+    'PRINCIPAL',
+    'SUPER_ADMIN',
+    'NUTRITIONIST',
+    'TEACHER',
+    'PARENT',
   )
   async getNotifications(
     @Query() query: QueryGrowthNotificationsDto,
     @CurrentUser() user: any,
-  ): Promise<{
-    data: GrowthNotificationItem[];
-    total: number;
-    roleScope: string;
-  }> {
-    const roles = (user?.roles || []).map((r: any) =>
-      typeof r === "string" ? r : r.code,
-    );
-    const role = roles.some((r: string) =>
-      [
-        "PRINCIPAL",
-        "SCHOOL_MANAGER",
-        "SCHOOL_MANAGEMENT",
-        "SUPER_ADMIN",
-      ].includes(r),
-    )
-      ? "SCHOOL_MANAGER"
-      : roles.includes("NUTRITIONIST")
-        ? "NUTRITIONIST"
-        : roles.includes("TEACHER")
-          ? "TEACHER"
-          : "PARENT";
-    const userId = Number(user?.sub || user?.id);
-    const items = await this.growthDispatchService.getNotificationsByRole(
-      role,
-      userId,
-      query,
-    );
+  ): Promise<{ data: GrowthNotificationItem[]; total: number; roleScope: string }> {
+    const role = query.role || user?.role || 'SCHOOL_MANAGEMENT';
+    const userId = user?.id || 1;
+    const items = await this.growthDispatchService.getNotificationsByRole(role, userId, query);
     return {
       data: items,
       total: items.length,
@@ -117,52 +72,37 @@ export class GrowthDispatchController {
     };
   }
 
-  /**
-   * GET /growth-notifications/executive-summary: Báo cáo tổng quan KPI thể chất & ca cảnh báo toàn trường dành cho Ban Giám Hiệu.
-   * @param schoolId ID trường từ ngữ cảnh request/header qua CurrentTenant (tùy chọn).
-   * Chuyển xử lý sang GrowthDispatchService.getExecutiveGrowthHealthSummary() và trả kết quả cho client.
-   */
-  @Get("executive-summary")
+  @Get('executive-summary')
   @ApiOperation({
     summary:
-      "Báo cáo tổng quan KPI thể chất & ca cảnh báo toàn trường dành cho Ban Giám Hiệu",
+      'Báo cáo tổng quan KPI thể chất & ca cảnh báo toàn trường dành cho Ban Giám Hiệu',
   })
-  @Roles("SCHOOL_MANAGEMENT", "PRINCIPAL", "SUPER_ADMIN")
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async getExecutiveSummary(
     @CurrentTenant() schoolId?: number,
   ): Promise<ExecutiveGrowthHealthSummary> {
-    return this.growthDispatchService.getExecutiveGrowthHealthSummary(
-      schoolId || 1,
-    );
+    return this.growthDispatchService.getExecutiveGrowthHealthSummary(schoolId || 1);
   }
 
-  /**
-   * PUT /growth-notifications/:id/acknowledge: Giáo viên hoặc Chuyên viên Dinh dưỡng xác nhận đã tiếp nhận chăm sóc học sinh (Acknowledge).
-   * @param id Giá trị id trên URL, được ParseIntPipe kiểm tra và chuyển thành số nguyên.
-   * @param dto Dữ liệu body JSON, kiểu AcknowledgeNotificationDto.
-   * @param user Thông tin tài khoản đã xác thực.
-   * Chuyển xử lý sang GrowthDispatchService.acknowledgeNotification() và trả kết quả cho client.
-   * Lấy ID từ user.sub hoặc user.id; role dùng user.role, mặc định TEACHER.
-   */
-  @Put(":id/acknowledge")
+  @Put(':id/acknowledge')
   @ApiOperation({
     summary:
-      "Giáo viên hoặc Chuyên viên Dinh dưỡng xác nhận đã tiếp nhận chăm sóc học sinh (Acknowledge)",
+      'Giáo viên hoặc Chuyên viên Dinh dưỡng xác nhận đã tiếp nhận chăm sóc học sinh (Acknowledge)',
   })
   @Roles(
-    "TEACHER",
-    "NUTRITIONIST",
-    "SCHOOL_MANAGEMENT",
-    "PRINCIPAL",
-    "SUPER_ADMIN",
+    'TEACHER',
+    'NUTRITIONIST',
+    'SCHOOL_MANAGEMENT',
+    'PRINCIPAL',
+    'SUPER_ADMIN',
   )
   async acknowledgeNotification(
-    @Param("id", ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: AcknowledgeNotificationDto,
     @CurrentUser() user: any,
   ): Promise<GrowthNotificationItem> {
-    const userId = Number(user?.sub || user?.id);
-    const role = user?.role || "TEACHER";
+    const userId = user?.id || 1;
+    const role = user?.role || 'TEACHER';
     return this.growthDispatchService.acknowledgeNotification(
       id,
       userId,
@@ -171,63 +111,44 @@ export class GrowthDispatchController {
     );
   }
 
-  /**
-   * POST /growth-notifications/assign-intervention: Chuyên viên Dinh dưỡng lập Thực đơn can thiệp cá nhân hóa (Personalized Diet Plan).
-   * @param dto Dữ liệu body JSON, kiểu AssignInterventionDietDto.
-   * @param user Thông tin tài khoản đã xác thực.
-   * Chuyển xử lý sang GrowthDispatchService.assignInterventionDiet() và trả kết quả cho client.
-   */
-  @Post("assign-intervention")
+  @Post('assign-intervention')
   @ApiOperation({
     summary:
-      "Chuyên viên Dinh dưỡng lập Thực đơn can thiệp cá nhân hóa (Personalized Diet Plan)",
+      'Chuyên viên Dinh dưỡng lập Thực đơn can thiệp cá nhân hóa (Personalized Diet Plan)',
   })
-  @Roles("NUTRITIONIST", "SUPER_ADMIN")
+  @Roles('NUTRITIONIST', 'SUPER_ADMIN')
   async assignIntervention(
     @Body() dto: AssignInterventionDietDto,
     @CurrentUser() user: any,
   ): Promise<GrowthNotificationItem> {
-    const userId = Number(user?.sub || user?.id);
+    const userId = user?.id || 1;
     return this.growthDispatchService.assignInterventionDiet(dto, userId);
   }
 
-  /**
-   * POST /growth-notifications/request-consultation: Phụ huynh đặt lịch hẹn tư vấn dinh dưỡng 1-1 với Chuyên viên Dinh dưỡng.
-   * @param dto Dữ liệu body JSON, kiểu RequestConsultationDto.
-   * @param user Thông tin tài khoản đã xác thực.
-   * Chuyển xử lý sang GrowthDispatchService.requestConsultation() và trả kết quả cho client.
-   */
-  @Post("request-consultation")
+  @Post('request-consultation')
   @ApiOperation({
-    summary:
-      "Phụ huynh đặt lịch hẹn tư vấn dinh dưỡng 1-1 với Chuyên viên Dinh dưỡng",
+    summary: 'Phụ huynh đặt lịch hẹn tư vấn dinh dưỡng 1-1 với Chuyên viên Dinh dưỡng',
   })
-  @Roles("PARENT", "SUPER_ADMIN")
+  @Roles('PARENT', 'SUPER_ADMIN')
   async requestConsultation(
     @Body() dto: RequestConsultationDto,
     @CurrentUser() user: any,
   ) {
-    const userId = Number(user?.sub || user?.id);
+    const userId = user?.id || 1;
     return this.growthDispatchService.requestConsultation(dto, userId);
   }
 
-  /**
-   * POST /growth-notifications/approve-budget: Ban Giám Hiệu phê duyệt ngân sách tài trợ dinh dưỡng can thiệp cho học sinh.
-   * @param dto Dữ liệu body JSON, kiểu ApproveInterventionBudgetDto.
-   * @param user Thông tin tài khoản đã xác thực.
-   * Chuyển xử lý sang GrowthDispatchService.approveInterventionBudget() và trả kết quả cho client.
-   */
-  @Post("approve-budget")
+  @Post('approve-budget')
   @ApiOperation({
     summary:
-      "Ban Giám Hiệu phê duyệt ngân sách tài trợ dinh dưỡng can thiệp cho học sinh",
+      'Ban Giám Hiệu phê duyệt ngân sách tài trợ dinh dưỡng can thiệp cho học sinh',
   })
-  @Roles("SCHOOL_MANAGEMENT", "PRINCIPAL", "SUPER_ADMIN")
+  @Roles('SCHOOL_MANAGEMENT', 'PRINCIPAL', 'SUPER_ADMIN')
   async approveBudget(
     @Body() dto: ApproveInterventionBudgetDto,
     @CurrentUser() user: any,
   ) {
-    const userId = Number(user?.sub || user?.id);
+    const userId = user?.id || 1;
     return this.growthDispatchService.approveInterventionBudget(dto, userId);
   }
 }

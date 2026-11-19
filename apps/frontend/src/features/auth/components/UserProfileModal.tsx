@@ -1,3 +1,6 @@
+/**
+ * UC05 & UC06: Modal xem hồ sơ cá nhân và cập nhật thông tin người dùng (View & Edit Profile).
+ */
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useRef, useState } from "react";

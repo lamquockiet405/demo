@@ -36,19 +36,10 @@ export class AuthService {
   ) {}
 
   /**
-   * Resolve email aliases for smooth demo usage across domains
+   * Chuẩn hóa email đăng nhập (cắt khoảng trắng, chuyển chữ thường)
    */
   private resolveEmail(rawEmail: string): string {
-    const email = rawEmail.trim().toLowerCase();
-    const aliasMap: Record<string, string> = {
-      'bep@hoamai.edu.vn': 'bep@huongduong.edu.vn',
-      'cogaomam1@hoamai.edu.vn': 'giaovien.mam1@huongduong.edu.vn',
-      'dinhduong@hoamai.edu.vn': 'dinhduong@huongduong.edu.vn',
-      'hieutruong@hoamai.edu.vn': 'hieutruong@huongduong.edu.vn',
-      'phuhuynh.phong@gmail.com': 'phuhuynh.huy@gmail.com',
-      'superadmin@nutribud.vn': 'hieutruong@huongduong.edu.vn',
-    };
-    return aliasMap[email] || email;
+    return rawEmail.trim().toLowerCase();
   }
 
   async validateUser(email: string, pass: string): Promise<User> {

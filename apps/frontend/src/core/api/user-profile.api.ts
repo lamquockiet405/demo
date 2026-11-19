@@ -1,3 +1,6 @@
+/**
+ * UC05 & UC06: User Profile API client (View Profile, Edit Profile, Change Password).
+ */
 import { apiClient } from "./axios";
 
 export interface UserRoleInfo {

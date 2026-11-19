@@ -56,7 +56,7 @@ export class PasswordResetService {
 
     // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresInSeconds = 300; // 5 mins
+    const expiresInSeconds = 60; // 60s
     this.otpStore.set(user.email.toLowerCase(), {
       otp,
       expiresAt: Date.now() + expiresInSeconds * 1000,
@@ -79,7 +79,7 @@ export class PasswordResetService {
               <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #059669; padding: 15px 0;">
                 ${otp}
               </div>
-              <p>Mã này có hiệu lực trong vòng 5 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.</p>
+              <p>Mã này có hiệu lực trong vòng 60 giây. Vui lòng không chia sẻ mã này cho bất kỳ ai.</p>
             </div>
           `,
         });
@@ -108,7 +108,7 @@ export class PasswordResetService {
 
     // Allow dev universal OTP '123456' only outside production, or valid matched OTP
     const isDevMode = this.configService.get<string>('nodeEnv') !== 'production';
-    const isDevMatch = normalizedOtp === '123456';
+    const isDevMatch = isDevMode && normalizedOtp === '123456';
     const isRealMatch = entry && entry.otp === normalizedOtp && entry.expiresAt > Date.now();
 
     if (!isDevMatch && !isRealMatch) {
@@ -149,8 +149,8 @@ export class PasswordResetService {
     }
 
     const salt = await bcrypt.genSalt(10);
-    user.passwordHash = await bcrypt.hash(newPassword, salt);
-    await this.userRepository.save(user);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+    await this.userRepository.update(user.id, { passwordHash });
 
     return {
       success: true,

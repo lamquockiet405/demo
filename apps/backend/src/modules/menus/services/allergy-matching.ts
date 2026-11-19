@@ -97,21 +97,12 @@ export function getAllergyMatchReasons(
   const isBeefOnly =
     (declaration.code === 'BEEF' || name === 'thịt bò' || name === 'bò') &&
     !name.includes('sữa');
-  const isFishSauceDeclaration = name.includes('mắm') || name.includes('nắm');
 
   const matches = (text: string) => {
     let target = normalize(text);
     // Khai báo dị ứng thịt bò không áp dụng cho sữa bò
     if (isBeefOnly) {
       target = target.replace(/sữa bò/g, '');
-    }
-    // Không tính nước mắm (VD: "Nước mắm cá cơm truyền thống") vào dị ứng hải sản / cá
-    if (!isFishSauceDeclaration) {
-      if (target.startsWith('nước mắm') || target.startsWith('nước nắm')) {
-        return false;
-      }
-      target = target.replace(/nước\s+(mắm|nắm)(\s+cá(\s+cơm)?)?/g, '').trim();
-      if (!target) return false;
     }
     return phrases.some((phrase) => contains(target, phrase));
   };

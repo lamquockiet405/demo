@@ -11,9 +11,21 @@ function serviceFor(dishes = catalog) {
   const qb: any = {};
   for (const key of ['innerJoin', 'select', 'addSelect', 'where', 'andWhere', 'groupBy', 'addGroupBy']) qb[key] = jest.fn().mockReturnValue(qb);
   qb.getRawMany = jest.fn().mockResolvedValue([]);
+  const mockStandard = {
+    ageGroup: 'MAU_GIAO',
+    minEnergyKcal: 1,
+    maxEnergyKcal: 2000,
+    minProteinPct: 0,
+    maxProteinPct: 100,
+    minFatPct: 0,
+    maxFatPct: 100,
+    minCarbPct: 0,
+    maxCarbPct: 100,
+    status: 'ACTIVE',
+  };
   return new MenusService({} as any, {} as any, {} as any, {} as any,
     { createQueryBuilder: () => qb } as any, { findOne: async () => null } as any,
-    { find: async () => dishes } as any, { findOne: async () => null } as any, {} as any);
+    { find: async () => dishes } as any, { findOne: async () => mockStandard } as any, {} as any);
 }
 
 describe('Required weekday lunch rice', () => {

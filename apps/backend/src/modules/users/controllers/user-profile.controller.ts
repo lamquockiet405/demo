@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 
 /**
+ * UC05 & UC06: View Profile and Edit Profile Controller.
  * Cho người dùng xem và cập nhật hồ sơ cá nhân của tài khoản đang đăng nhập.
  * Các đường dẫn bên dưới được ghép với tiền tố toàn cục /api/v1.
  * JwtAuthGuard xác thực tài khoản trước khi thực thi các endpoint.

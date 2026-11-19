@@ -4,6 +4,9 @@ import { Repository } from "typeorm";
 import { User } from "../../auth/entities/user.entity";
 import { UpdateProfileDto } from "../dto/update-profile.dto";
 
+/**
+ * UC05 & UC06: View Profile and Edit Profile Service.
+ */
 @Injectable()
 export class UserProfileService {
   constructor(

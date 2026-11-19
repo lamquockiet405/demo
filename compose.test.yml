@@ -1,47 +1,100 @@
-# Update application containers in the existing Docker Desktop project.
-# Database, Redis, MinIO and their volumes remain managed by the existing stack.
+name: kidmeal-test
+
 services:
-  backend:
-    image: kidmeal-test-backend:latest
+  postgres:
+    image: kidmeal-test-postgres:20261103
     build:
-      context: ./Kidmeal
-      dockerfile: apps/backend/Dockerfile
-    env_file:
-      - ./.tmp/docker-test/runtime.env
+      context: .
+      dockerfile: database/Dockerfile
     environment:
-      TZ: Asia/Ho_Chi_Minh
-    labels:
-      io.kidmeal.source-branch: test
-      io.kidmeal.source-commit: dcb3749
+      POSTGRES_DB: ${TEST_POSTGRES_DB:-kidmeal_test}
+      POSTGRES_USER: kidmeal_test
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD:?Run scripts/prepare-docker-test.cjs first}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - test_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kidmeal_test -d ${TEST_POSTGRES_DB:-kidmeal_test}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "${TEST_REDIS_PASSWORD:?Run scripts/prepare-docker-test.cjs first}"]
+    restart: unless-stopped
+
+  minio:
+    image: elestio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: kidmeal_test
+      MINIO_ROOT_PASSWORD: ${TEST_MINIO_PASSWORD:?Run scripts/prepare-docker-test.cjs first}
+    ports:
+      - "127.0.0.1:19000:9000"
+      - "127.0.0.1:19001:9001"
+    volumes:
+      - test_minio:/data
+    restart: unless-stopped
+
+  backend:
+    image: kidmeal-test-backend:1792b0c-local
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: Asia/Ho_Chi_Minh
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${TEST_POSTGRES_DB:-kidmeal_test}
+      POSTGRES_USER: kidmeal_test
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${TEST_REDIS_PASSWORD}
+      JWT_SECRET: ${TEST_JWT_SECRET}
+      JWT_REFRESH_SECRET: ${TEST_JWT_REFRESH_SECRET}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: kidmeal_test
+      MINIO_SECRET_KEY: ${TEST_MINIO_PASSWORD}
+      MAIL_HOST: 127.0.0.1
+      MAIL_PORT: 1025
+      MAIL_USER: local-test-disabled
+      MAIL_PASS: local-test-disabled
     ports:
       - "127.0.0.1:3001:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/auth/tenants').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s
       timeout: 5s
+      retries: 12
       start_period: 30s
-      retries: 6
-  frontend:
-    image: kidmeal-test-frontend:latest
-    build:
-      context: ./Kidmeal
-      dockerfile: apps/frontend/Dockerfile
     restart: unless-stopped
-    labels:
-      io.kidmeal.source-branch: test
-      io.kidmeal.source-commit: dcb3749
+
+  frontend:
+    image: kidmeal-test-frontend:1792b0c-local
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
     ports:
       - "127.0.0.1:5174:80"
     depends_on:
       backend:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-networks:
-  default:
-    external: true
-    name: kidmeal-test_default
+    restart: unless-stopped
+
+volumes:
+  test_pgdata:
+  test_minio:

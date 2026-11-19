@@ -6,21 +6,19 @@ describe('StaffManagementController', () => {
   let controller: StaffManagementController;
   let serviceMock: any;
 
-  const mockTenantId = 'tenant-uuid-1';
-  const mockUserId = 'user-uuid-1';
-  const mockTargetId = 'user-uuid-2';
+  const mockTargetId = 2;
 
   beforeEach(async () => {
     serviceMock = {
-      getStaffList: jest.fn().mockResolvedValue({ data: [], meta: { total: 0 } }),
-      getStaffStats: jest.fn().mockResolvedValue({ totalStaff: 5, activeStaff: 5 }),
-      getAvailableStaffRoles: jest.fn().mockResolvedValue([{ code: 'TEACHER', name: 'Giáo Viên' }]),
-      getStaffById: jest.fn().mockResolvedValue({ id: mockTargetId, fullName: 'Cô Lan' }),
-      createStaff: jest.fn().mockResolvedValue({ id: 'new-id', email: 'test@saomai.edu.vn' }),
-      updateStaff: jest.fn().mockResolvedValue({ id: mockTargetId, fullName: 'Cô Lan Cập Nhật' }),
-      softDeleteStaff: jest.fn().mockResolvedValue({ success: true }),
-      restoreStaff: jest.fn().mockResolvedValue({ success: true }),
-      toggleStaffStatus: jest.fn().mockResolvedValue({ success: true, status: 'INACTIVE' }),
+      findAll: jest.fn().mockResolvedValue({ data: [], meta: { total: 0 } }),
+      getStats: jest.fn().mockResolvedValue({ totalStaff: 5, activeStaff: 5 }),
+      getRoles: jest.fn().mockResolvedValue([{ code: 'TEACHER', name: 'Giáo Viên' }]),
+      findOne: jest.fn().mockResolvedValue({ id: mockTargetId, fullName: 'Cô Lan' }),
+      create: jest.fn().mockResolvedValue({ id: 3, email: 'test@saomai.edu.vn' }),
+      update: jest.fn().mockResolvedValue({ id: mockTargetId, fullName: 'Cô Lan Cập Nhật' }),
+      restore: jest.fn().mockResolvedValue({ success: true }),
+      toggleStatus: jest.fn().mockResolvedValue({ success: true, status: 'INACTIVE' }),
+      remove: jest.fn().mockResolvedValue({ success: true }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -33,50 +31,55 @@ describe('StaffManagementController', () => {
     controller = module.get<StaffManagementController>(StaffManagementController);
   });
 
-  it('phải gọi getStaffList từ service', async () => {
-    const query = { page: 1, limit: 10 };
-    await controller.getStaffList(mockTenantId, query);
-    expect(serviceMock.getStaffList).toHaveBeenCalledWith(mockTenantId, query);
+  it('phải gọi findAll từ service', async () => {
+    const query = { page: 1, limit: 10 } as any;
+    await controller.findAll(query);
+    expect(serviceMock.findAll).toHaveBeenCalledWith(query);
   });
 
-  it('phải gọi getStaffStats từ service', async () => {
-    await controller.getStaffStats(mockTenantId);
-    expect(serviceMock.getStaffStats).toHaveBeenCalledWith(mockTenantId);
+  it('phải gọi getStats từ service', async () => {
+    await controller.getStats();
+    expect(serviceMock.getStats).toHaveBeenCalled();
   });
 
-  it('phải gọi getAvailableStaffRoles từ service', async () => {
-    await controller.getAvailableStaffRoles();
-    expect(serviceMock.getAvailableStaffRoles).toHaveBeenCalled();
+  it('phải gọi getRoles từ service', async () => {
+    await controller.getRoles();
+    expect(serviceMock.getRoles).toHaveBeenCalled();
   });
 
-  it('phải gọi createStaff từ service', async () => {
+  it('phải gọi findOne từ service', async () => {
+    await controller.findOne(mockTargetId);
+    expect(serviceMock.findOne).toHaveBeenCalledWith(mockTargetId);
+  });
+
+  it('phải gọi create từ service', async () => {
     const dto = {
       email: 'teacher@saomai.edu.vn',
       fullName: 'Cô Mai',
-      roleCodes: ['TEACHER'],
-    };
-    await controller.createStaff(mockTenantId, dto);
-    expect(serviceMock.createStaff).toHaveBeenCalledWith(mockTenantId, dto);
+      roles: ['TEACHER'],
+    } as any;
+    await controller.create(dto);
+    expect(serviceMock.create).toHaveBeenCalledWith(dto);
   });
 
-  it('phải gọi updateStaff từ service', async () => {
-    const dto = { fullName: 'Cô Mai Cập Nhật' };
-    await controller.updateStaff(mockTenantId, mockTargetId, dto);
-    expect(serviceMock.updateStaff).toHaveBeenCalledWith(mockTenantId, mockTargetId, dto);
+  it('phải gọi update từ service', async () => {
+    const dto = { fullName: 'Cô Mai Cập Nhật' } as any;
+    await controller.update(mockTargetId, dto);
+    expect(serviceMock.update).toHaveBeenCalledWith(mockTargetId, dto);
   });
 
-  it('phải gọi softDeleteStaff từ service', async () => {
-    await controller.softDeleteStaff(mockTenantId, mockUserId, mockTargetId);
-    expect(serviceMock.softDeleteStaff).toHaveBeenCalledWith(mockTenantId, mockUserId, mockTargetId);
+  it('phải gọi restore từ service', async () => {
+    await controller.restore(mockTargetId);
+    expect(serviceMock.restore).toHaveBeenCalledWith(mockTargetId);
   });
 
-  it('phải gọi restoreStaff từ service', async () => {
-    await controller.restoreStaff(mockTenantId, mockTargetId);
-    expect(serviceMock.restoreStaff).toHaveBeenCalledWith(mockTenantId, mockTargetId);
+  it('phải gọi toggleStatus từ service', async () => {
+    await controller.toggleStatus(mockTargetId);
+    expect(serviceMock.toggleStatus).toHaveBeenCalledWith(mockTargetId);
   });
 
-  it('phải gọi toggleStaffStatus từ service', async () => {
-    await controller.toggleStaffStatus(mockTenantId, mockUserId, mockTargetId);
-    expect(serviceMock.toggleStaffStatus).toHaveBeenCalledWith(mockTenantId, mockUserId, mockTargetId);
+  it('phải gọi remove từ service', async () => {
+    await controller.remove(mockTargetId);
+    expect(serviceMock.remove).toHaveBeenCalledWith(mockTargetId);
   });
 });

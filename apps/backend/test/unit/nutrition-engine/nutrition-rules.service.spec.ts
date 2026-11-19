@@ -113,10 +113,12 @@ describe("UC42 & UC43: NutritionRulesService & AllergenRulesService", () => {
   });
 
   it("UC42: should create a nutritional standard and reject invalid min > max ranges", async () => {
+    mockRuleRepo.count.mockResolvedValueOnce(0);
     await expect(
       rulesService.create({ minCaloriesKcal: 800, maxCaloriesKcal: 600 }),
     ).rejects.toThrow(BadRequestException);
 
+    mockRuleRepo.count.mockResolvedValueOnce(0);
     const created = await rulesService.create({
       targetAgeGroup: "NHA_TRE",
       mealScope: "DAYBOARDING",
@@ -131,6 +133,13 @@ describe("UC42 & UC43: NutritionRulesService & AllergenRulesService", () => {
     });
     expect(created.minCaloriesKcal).toBe(600);
     expect(created.maxCaloriesKcal).toBe(651);
+
+    mockRuleRepo.count.mockResolvedValueOnce(1);
+    await expect(
+      rulesService.create({
+        targetAgeGroup: "MAU_GIAO",
+      }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it("UC42: should update, soft-delete, restore, and batch sync VN-RDA 2024 standards", async () => {

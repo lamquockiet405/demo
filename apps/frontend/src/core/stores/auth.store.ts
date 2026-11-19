@@ -109,6 +109,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  refreshProfile: async () => {
+    const startedForUser = get().user;
+    if (!startedForUser || !get().accessToken) return;
+    try {
+      const profile = await fetchCurrentUser();
+      const current = get().user;
+      if (!current || current.id !== startedForUser.id || String(profile.id) !== current.id) return;
+      const updated = { ...current, fullName: profile.fullName, phone: profile.phone, avatarUrl: profile.avatarUrl };
+      localStorage.setItem('auth_user', JSON.stringify(updated));
+      set({ user: updated });
+    } catch {
+      // Keep the existing session when a profile refresh is temporarily unavailable.
+    }
+  },
+
   setAuth: (user, accessToken, refreshToken) => {
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);

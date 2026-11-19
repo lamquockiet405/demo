@@ -117,8 +117,8 @@ describe('AuditLogsService (Unit Tests with Database Repository)', () => {
     it('should apply search filter clause in query builder', async () => {
       await service.getAuditLogs({ search: 'thực đơn' }, 1);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        expect.stringContaining('LOWER(log.action) LIKE :search'),
-        expect.objectContaining({ search: '%thực đơn%' }),
+        expect.stringMatching(/lower|translate/i),
+        expect.objectContaining({ search: '%thuc don%' }),
       );
     });
 

@@ -103,19 +103,34 @@ export const ForgotPasswordPage: React.FC = () => {
 
   // ─── Step 2: Verify OTP ─────────────────────────────────────────────────────
   const handleOtpChange = (index: number, value: string) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
+    const rawDigits = value.replace(/\D/g, '');
+    if (!rawDigits) {
+      const newOtp = [...otpValues];
+      newOtp[index] = '';
+      setOtpValues(newOtp);
+      return;
+    }
+    const digit = rawDigits.slice(-1);
     const newOtp = [...otpValues];
     newOtp[index] = digit;
     setOtpValues(newOtp);
 
     if (digit && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
+      otpInputRefs.current[index + 1]?.select();
     }
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
+    if (e.key === 'Backspace') {
+      if (otpValues[index]) {
+        const newOtp = [...otpValues];
+        newOtp[index] = '';
+        setOtpValues(newOtp);
+      } else if (index > 0) {
+        otpInputRefs.current[index - 1]?.focus();
+        otpInputRefs.current[index - 1]?.select();
+      }
     }
   };
 
@@ -369,8 +384,9 @@ export const ForgotPasswordPage: React.FC = () => {
                       ref={(el) => (otpInputRefs.current[index] = el)}
                       type="text"
                       inputMode="numeric"
-                      maxLength={1}
+                      maxLength={2}
                       value={digit}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(index, e)}
                       className="w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl font-black text-slate-900 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100 outline-none transition"

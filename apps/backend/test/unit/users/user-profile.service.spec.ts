@@ -4,6 +4,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../../../src/modules/auth/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
 
+/**
+ * Unit Test Suite for UserProfileService (UC05 & UC06).
+ */
 describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
   let service: UserProfileService;
   let mockUserRepo: any;
@@ -28,6 +31,7 @@ describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
         return Promise.resolve(null);
       }),
       save: jest.fn().mockImplementation((u) => Promise.resolve(u)),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -67,7 +71,7 @@ describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
         fullName: 'Nguyễn Thị Hương Lan',
         phone: '0987654321',
       });
-      expect(mockUserRepo.save).toHaveBeenCalled();
+      expect(mockUserRepo.update).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
 
@@ -75,7 +79,7 @@ describe('UserProfileService (UC05: View Profile, UC06: Edit Profile)', () => {
       const result = await service.updateProfile(1, {
         avatar: 'https://example.com/new-avatar.png',
       });
-      expect(mockUserRepo.save).toHaveBeenCalled();
+      expect(mockUserRepo.update).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
 

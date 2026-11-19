@@ -11,22 +11,35 @@ export function hasReferenceNutrition(dish?: Dish): boolean {
 // Explicitly enabled reference recipes may be used in drafts, but are still
 // unverified for nutrition scanning and approval.
 export function hasPlanningNutrition(dish?: Dish): boolean {
-  if (!dish) return false;
-  if (dish.nutrition && Number(dish.nutrition.energyKcal) > 0) {
-    return true;
-  }
-  return hasVerifiedNutrition(dish) || Boolean(
-    dish?.nutrition && dish.sourceMetadata?.recipeStatus === 'APPROVED_REFERENCE' &&
-    dish.sourceMetadata?.menuPlanningEnabled === true &&
-    dish.nutrition.sourceMetadata?.status === 'APPROVED_REFERENCE',
+  if (!dish?.nutrition) return false;
+  return (
+    hasVerifiedNutrition(dish) ||
+    Boolean(
+      dish.nutritionVerified === false &&
+        dish.sourceMetadata?.recipeStatus === 'APPROVED_REFERENCE' &&
+        dish.sourceMetadata?.menuPlanningEnabled === true &&
+        dish.nutrition.sourceMetadata?.status === 'APPROVED_REFERENCE',
+    )
   );
 }
 
 // dish_nutrition is cached per standard serving, not per 100 g of cooked dish.
 export function getPortionNutrition(dish?: Dish, portionSizeG?: number | null) {
-  const standardSize = Number(dish?.standardServingSizeG) || 100;
+  if (!dish || !hasPlanningNutrition(dish)) {
+    return {
+      energyKcal: 0,
+      proteinG: 0,
+      fatG: 0,
+      carbG: 0,
+      fiberG: 0,
+      calciumMg: 0,
+      ironMg: 0,
+      zincMg: 0,
+    };
+  }
+  const standardSize = Number(dish.standardServingSizeG) || 100;
   const factor = portionSizeG == null ? 1 : Number(portionSizeG) / standardSize;
-  const nutrition = dish?.nutrition || null;
+  const nutrition = dish.nutrition || null;
   return {
     energyKcal: Number(nutrition?.energyKcal ?? 0) * factor,
     proteinG: Number(nutrition?.proteinG ?? 0) * factor,

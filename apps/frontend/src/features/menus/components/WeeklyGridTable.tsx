@@ -1162,7 +1162,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           return (
                             <div
                               key={md.id}
-                              className="rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border bg-white border-slate-200/80 hover:border-emerald-300"
+                              className={`rounded-xl p-2 shadow-2xs hover:shadow-xs transition group/item border ${hasAllergyConflict ? 'bg-rose-50/40 border-rose-300' : 'bg-white border-slate-200/80 hover:border-emerald-300'}`}
                             >
                               <div className="flex items-start justify-between gap-1">
                                 <span

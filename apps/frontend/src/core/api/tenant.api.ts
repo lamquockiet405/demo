@@ -1,3 +1,6 @@
+/**
+ * UC07: Tenant / School Information API Client (Configure School Information).
+ */
 import { apiClient } from './axios';
 
 export interface FoodSafetyLicense {

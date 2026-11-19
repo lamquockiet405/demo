@@ -61,7 +61,7 @@ export class PurchasingService {
         count(s.id)::int as student_count 
       FROM classes c 
       LEFT JOIN students s ON s.class_id = c.id AND s.status = 'ACTIVE' 
-      WHERE c.status = 'ACTIVE' AND c.academic_year_id IN (SELECT id FROM academic_year WHERE status='ACTIVE')
+      WHERE c.status = 'ACTIVE' 
       GROUP BY c.id, c.name, c.age_group 
       ORDER BY c.id
     `);

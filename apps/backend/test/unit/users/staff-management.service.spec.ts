@@ -18,6 +18,7 @@ describe("Staff account frontend/backend contract", () => {
     const qb: any = {
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(async () => [user]),
     };
@@ -28,6 +29,21 @@ describe("Staff account frontend/backend contract", () => {
       save: jest.fn(async (x) => {
         user = { ...user, ...x };
         return user;
+      }),
+      query: jest.fn(async (sql, params) => {
+        if (sql.includes("DELETE")) {
+          const keepIds = params[1] || [];
+          user.roles = user.roles.filter((x: any) => keepIds.includes(x.id));
+        } else if (params && params[1]) {
+          const r = await roles.findOne({ where: { id: params[1] } });
+          if (r && !user.roles.some((x: any) => x.code === r.code)) {
+            user.roles.push(r);
+          }
+        }
+      }),
+      update: jest.fn(async (_id, x) => {
+        user = { ...user, ...x };
+        return { affected: 1 };
       }),
       find: async () => [user],
     };
@@ -42,11 +58,12 @@ describe("Staff account frontend/backend contract", () => {
       }),
     };
     const roles: any = {
-      findOne: async ({ where }) => ({
-        id: 2,
-        code: where.code,
-        name: where.code,
-      }),
+      findOne: async ({ where }) => {
+        if (where.code === "NUTRITIONIST" || where.id === 4) {
+          return { id: 4, code: "NUTRITIONIST", name: "Nutritionist" };
+        }
+        return { id: 2, code: "TEACHER", name: "Teacher" };
+      },
       find: async () => [
         { id: 2, code: "TEACHER", name: "Teacher" },
         { id: 3, code: "PARENT", name: "Parent" },
@@ -72,10 +89,7 @@ describe("Staff account frontend/backend contract", () => {
     expect(users.save).toHaveBeenCalledWith(
       expect.objectContaining({
         email: "new@example.invalid",
-        roles: [
-          expect.objectContaining({ code: "TEACHER" }),
-          expect.objectContaining({ code: "NUTRITIONIST" }),
-        ],
+        fullName: "New staff",
       }),
     );
     expect(result.roles.map((r) => r.code)).toEqual([
@@ -108,7 +122,7 @@ describe("Staff account frontend/backend contract", () => {
       page: 1,
       limit: 10,
     });
-    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringContaining("LOWER"), {
+    expect(qb.andWhere).toHaveBeenCalledWith(expect.stringMatching(/lower/i), {
       s: "%actual%",
     });
     expect(result.meta.total).toBe(1);

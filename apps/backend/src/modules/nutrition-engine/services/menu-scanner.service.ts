@@ -2,6 +2,7 @@ import { configuredMenuCriteria, MenuSlot } from "./menu-criteria";
 import { DishFrequencyRule } from "../entities/dish-frequency-rule.entity";
 import { DishSpacingRule } from "../entities/dish-spacing-rule.entity";
 import { matchesDeclaredAllergy } from "../../menus/services/allergy-matching";
+import { currentStudentIdsSql } from '../../academic-years/current-year-scope';
 import {
   BadRequestException,
   Injectable,
@@ -307,4 +308,3 @@ export class MenuScannerService {
     };
   }
 }
-import { currentStudentIdsSql } from '../../academic-years/current-year-scope';

@@ -10,19 +10,14 @@ export interface SnackInvoiceItem {
   parentName: string;
   parentPhone: string;
   periodName: string;
-  periodId?: number;
-  servingDays: number | null;
-  pricePerDay: number | null;
-  amount: number | null;
+  servingDays: number;
+  pricePerDay: number;
+  amount: number;
   status: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
   statusLabel: string;
   registeredAt: string;
   dueDate: string;
   isOverdue: boolean;
-  periodStatus?: string;
-  isPaymentLocked?: boolean;
-  lastRemindedAt?: string | null;
-  reminderCount?: number;
 }
 
 export interface ElectronicReceiptData {
