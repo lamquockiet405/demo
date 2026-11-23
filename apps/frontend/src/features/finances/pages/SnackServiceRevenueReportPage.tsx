@@ -123,89 +123,7 @@ export const SnackServiceRevenueReportPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-6 lg:p-8 space-y-6">
-      {/* Top Banner */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 rounded-full flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5" /> UC96 • Bảo Mật Tài Chính BGH
-              </span>
-              <span className="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full">
-                Dịch Vụ Tự Nguyện Ngoài Giờ 17h00
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-2">
-              Báo Cáo Doanh Thu Dịch Vụ Ăn Xế
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Quyết toán dòng tiền ròng, tiến độ thu phí (KPI ≥ 95%), cấn trừ hoàn phí điểm danh & đối soát VNPAY.
-            </p>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Month & Year Select */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-xl border border-slate-200 dark:border-slate-600 text-xs font-semibold">
-              <Calendar className="w-4 h-4 text-slate-500 ml-1" />
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="bg-transparent text-slate-800 dark:text-slate-200 border-none focus:outline-none cursor-pointer"
-              >
-                {[...Array(12)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    Tháng {i + 1}
-                  </option>
-                ))}
-              </select>
-              <span>/</span>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="bg-transparent text-slate-800 dark:text-slate-200 border-none focus:outline-none cursor-pointer"
-              >
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-                <option value={2027}>2027</option>
-              </select>
-            </div>
-
-            {/* Service Package Filter */}
-            <select
-              value={selectedServiceType}
-              onChange={(e) => setSelectedServiceType(e.target.value)}
-              className="px-3 py-2 bg-slate-100 dark:bg-slate-700/60 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-600 focus:outline-none"
-            >
-              <option value="ALL">Tất cả gói dịch vụ</option>
-              <option value="FULL_MONTH">Gói ăn cả tháng (22 buổi)</option>
-              <option value="FLEXIBLE_3_DAYS">Gói linh hoạt (3 buổi/tuần)</option>
-            </select>
-
-            <button
-              onClick={fetchReport}
-              title="Làm mới dữ liệu"
-              className="p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl transition"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition"
-            >
-              <Printer className="w-4 h-4" /> Xuất Báo Cáo Quyết Toán
-            </button>
-          </div>
-        </div>
-
-        {/* Security Notice */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/80 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
-          <span>
-            <strong>Phạm vi truy cập giới hạn:</strong> Dữ liệu chứa thông tin tài chính nhạy cảm (biên lợi nhuận ròng, thù lao giáo viên ngoài giờ sau 16h30, hoa hồng cổng VNPAY). Chỉ Ban Giám Hiệu & Kế toán trưởng có thẩm quyền.
-          </span>
-        </div>
-      </div>
 
       {reminderSuccessMsg && (
         <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 text-sm flex items-center gap-2">
@@ -283,6 +201,66 @@ export const SnackServiceRevenueReportPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Action Toolbar */}
+      <div className="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Month & Year Select */}
+          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/60 p-1.5 rounded-xl border border-slate-200 dark:border-slate-600 text-xs font-semibold">
+            <Calendar className="w-4 h-4 text-slate-500 ml-1" />
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="bg-transparent text-slate-800 dark:text-slate-200 border-none focus:outline-none cursor-pointer"
+            >
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Tháng {i + 1}
+                </option>
+              ))}
+            </select>
+            <span>/</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-transparent text-slate-800 dark:text-slate-200 border-none focus:outline-none cursor-pointer"
+            >
+              <option value={2025}>2025</option>
+              <option value={2026}>2026</option>
+              <option value={2027}>2027</option>
+            </select>
+          </div>
+
+          {/* Service Package Filter */}
+          <select
+            value={selectedServiceType}
+            onChange={(e) => setSelectedServiceType(e.target.value)}
+            className="px-3 py-2 bg-slate-50 dark:bg-slate-700/60 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-600 focus:outline-none"
+          >
+            <option value="ALL">Tất cả gói dịch vụ</option>
+            <option value="FULL_MONTH">Gói ăn cả tháng (22 buổi)</option>
+            <option value="FLEXIBLE_3_DAYS">Gói linh hoạt (3 buổi/tuần)</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchReport}
+            title="Làm mới dữ liệu"
+            className="px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl transition text-xs font-bold flex items-center gap-1.5 border border-slate-200 dark:border-slate-600 shadow-2xs cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Làm mới</span>
+          </button>
+
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
+          >
+            <Printer className="w-3.5 h-3.5" /> Xuất Báo Cáo Quyết Toán
+          </button>
+        </div>
+      </div>
 
       {/* Main Tabs */}
       <div className="flex border-b border-slate-200 dark:border-slate-700 gap-2">

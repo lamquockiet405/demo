@@ -31,8 +31,6 @@ export interface SchoolManagerKpiSummary {
   overweightObeseRate: number;
   overweightObeseTarget: number;
   overweightObeseStatus: 'PASS' | 'WARNING' | 'ALERT';
-  menuComplianceRate: number;
-  menuComplianceStatus: string;
 }
 
 export interface GradeBreakdownItem {
@@ -240,8 +238,6 @@ export class NutritionPhysicalDashboardService {
       overweightObeseRate,
       overweightObeseTarget: 5.0,
       overweightObeseStatus: overweightObeseRate <= 5.0 ? 'PASS' : 'ALERT',
-      menuComplianceRate: 96.5,
-      menuComplianceStatus: 'Đạt chuẩn Thông tư 28/2016/TT-BGDĐT',
     };
 
     // Tổng hợp từng khối lớp

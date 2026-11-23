@@ -1,5 +1,6 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { apiClient } from "@/core/api/axios";
@@ -307,44 +308,31 @@ export const FoodIngredientsPage: React.FC = () => {
 
   const totalPages = Math.ceil(total / limit) || 1;
 
+  const handleExportExcel = async () => {
+    if (!foods.length) return alert(translateText("Chưa có dữ liệu nguyên liệu để xuất Excel."));
+    await downloadExcel(
+      `Danh_muc_nguyen_lieu_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [
+        ["STT", "Tên nguyên liệu", "Mã", "Phân nhóm", "Năng lượng (Kcal)", "Đạm (g)", "Béo (g)", "Carb (g)", "Đơn vị"],
+        ...foods.map((f, idx) => [
+          idx + 1,
+          f.name,
+          f.code || "",
+          typeof f.category === "object" ? f.category?.name : f.category || "",
+          f.energyKcal || 0,
+          f.proteinG || 0,
+          f.fatG || 0,
+          f.carbG || 0,
+          f.unit || "g",
+        ]),
+      ],
+      "Danh mục nguyên liệu"
+    );
+  };
+
   return (
     <div className="bg-slate-50/70 min-h-screen pb-12 font-sans">
-      {/* Top Header */}
-      <div className="bg-white border-b border-slate-200/80 px-6 sm:px-8 py-5 shadow-2xs">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{translateText("Danh Mục Nguyên Liệu Thực Phẩm")}</h1>
-              <span className="bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide uppercase">{translateText("Dinh dưỡng Mầm non")}</span>
-            </div>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1 leading-relaxed max-w-3xl">{translateText("Tra cứu giá trị năng lượng Kcal, Đạm, Béo, Đường và vi chất trên 100g ăn được; giám sát dị nguyên và quản lý định mức công thức chế biến.")}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
-            {isReadOnly ? (
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>{translateText("Quyền Ban Giám Hiệu: Giám sát kho & dinh dưỡng (Chỉ xem)")}</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedFoodId(null);
-                  setModalMode("create");
-                  setIsModalOpen(true);
-                }}
-                className="flex items-center gap-2 bg-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-emerald-600/25 transition active:scale-95 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{translateText("Thêm nguyên liệu mới")}</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 sm:px-6 lg:px-8 mt-6 w-full space-y-6">
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 w-full space-y-6">
         {/* Stats KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Tổng nguyên liệu */}
@@ -514,6 +502,31 @@ export const FoodIngredientsPage: React.FC = () => {
                 className="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-600 transition whitespace-nowrap self-end md:self-auto cursor-pointer"
               >{translateText("⟳ Xóa lọc")}</button>
             )}
+
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer whitespace-nowrap self-end md:self-auto"
+              title={translateText("Xuất danh mục nguyên liệu ra Excel")}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>{translateText("Xuất Excel")}</span>
+            </button>
+
+            {!isReadOnly && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedFoodId(null);
+                  setModalMode("create");
+                  setIsModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer whitespace-nowrap self-end md:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{translateText("Thêm nguyên liệu mới")}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -524,22 +537,29 @@ export const FoodIngredientsPage: React.FC = () => {
               <ListOrdered className="w-4 h-4 text-emerald-600" />
               <span>{translateText("Bảng Thành Phần Dinh Dưỡng Thực Phẩm (Tính trên 100g ăn được)")}</span>
             </div>
+
+            {isReadOnly && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>{translateText("Quyền Ban Giám Hiệu: Giám sát kho (Chỉ xem)")}</span>
+              </div>
+            )}
           </div>
 
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
-                  <th className="py-3 px-3 w-12 text-center">{translateText("STT")}</th>
-                  <th className="py-3 px-4 min-w-[200px]">{translateText("Tên nguyên liệu")}</th>
-                  <th className="py-3 px-3 text-center">{translateText("Phân nhóm")}</th>
-                  <th className="py-3 px-3 text-center">{translateText("Năng lượng")}</th>
-                  <th className="py-3 px-3 text-center">{translateText("Đạm (P)")}</th>
-                  <th className="py-3 px-3 text-center">{translateText("Béo (L)")}</th>
-                  <th className="py-3 px-3 text-center">{translateText("Carb (G)")}</th>
-                  <th className="py-3 px-4 text-center">{translateText("Kiểm soát dị nguyên")}</th>
-                  <th className="py-3 px-3 text-center">{translateText("Đơn vị")}</th>
-                  <th className="py-3 px-4 text-right">{translateText("Thao tác")}</th>
+              <thead className="bg-lime-600 text-white">
+                <tr className="bg-lime-600 text-white font-bold uppercase tracking-wider border-b border-lime-700/60">
+                  <th className="py-3 px-3 w-12 text-center text-white">{translateText("STT")}</th>
+                  <th className="py-3 px-4 min-w-[200px] text-white">{translateText("Tên nguyên liệu")}</th>
+                  <th className="py-3 px-3 text-center text-white">{translateText("Phân nhóm")}</th>
+                  <th className="py-3 px-3 text-center text-white">{translateText("Năng lượng")}</th>
+                  <th className="py-3 px-3 text-center text-white">{translateText("Đạm (P)")}</th>
+                  <th className="py-3 px-3 text-center text-white">{translateText("Béo (L)")}</th>
+                  <th className="py-3 px-3 text-center text-white">{translateText("Carb (G)")}</th>
+                  <th className="py-3 px-4 text-center text-white">{translateText("Kiểm soát dị nguyên")}</th>
+                  <th className="py-3 px-3 text-center text-white">{translateText("Đơn vị")}</th>
+                  <th className="py-3 px-4 text-right text-white">{translateText("Thao tác")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-800">

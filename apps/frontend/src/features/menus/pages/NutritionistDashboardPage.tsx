@@ -6,7 +6,6 @@ import {
   ShieldAlert,
   Flame,
   Scale,
-  Sparkles,
   ArrowRight,
   Plus,
   CheckCircle2,
@@ -38,46 +37,7 @@ export const NutritionistDashboardPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 sm:pt-2 pb-6 space-y-6">
-      {/* Banner chào mừng & Thông điệp chuyên môn */}
-      <div 
-        style={{ backgroundColor: '#064e3b' }}
-        className="bg-emerald-950 bg-gradient-to-r from-emerald-950 via-emerald-850 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden"
-      >
-        <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            Cổng Chuyên môn Dinh dưỡng Mầm non
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Kiểm soát Thực đơn & Dinh dưỡng Chuẩn Bộ GD&ĐT
-          </h1>
-          <p className="text-emerald-100 text-xs sm:text-sm mt-2 leading-relaxed">
-            Hệ thống Rule Engine tự động giám sát năng lượng calo bán trú, cân đối tỷ lệ Đạm - Béo - Tinh bột và quét cảnh báo xung đột thực phẩm gây dị ứng cho từng trẻ.
-          </p>
-
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <Link
-              to="/nutritionist/menus"
-              className="px-5 py-2.5 rounded-2xl bg-[#4eed9c] hover:bg-[#43dc8e] text-emerald-950 font-bold text-xs shadow-md transition flex items-center gap-2"
-            >
-              <CalendarDays className="w-4 h-4" />
-              <span>Quản lý Thực đơn tuần</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <Link
-              to="/nutritionist/rules"
-              className="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-            >
-              <Scale className="w-4 h-4" />
-              <span>Tiêu chuẩn & Dị ứng</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
+    <div className="w-full pt-1 sm:pt-2 pb-6 space-y-6">
       {/* 5 Thẻ Thống kê KPI */}
       <MenuStatsCards stats={stats} loading={loading} />
 

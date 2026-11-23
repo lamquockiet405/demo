@@ -27,6 +27,7 @@ const {
   publishedMenuDates,
   publishedDayNutrition,
   publishedMenuOrder,
+  publishedMenusForExport,
   normalizeMenuAgeGroup,
 } = moduleValue.exports;
 const menu = {
@@ -180,4 +181,50 @@ test('nutrition follows the selected published dishes and missing values stay un
     null,
   );
   assert.equal(publishedDayNutrition([]).calories, null);
+});
+
+test('parent menu shows the substitute only for the affected child', () => {
+  const personalizedMenu = {
+    ...menu,
+    days: [{
+      date: '2026-11-04',
+      meals: [{
+        mealType: 'LUNCH',
+        dishes: [
+          { id: 'base', dishName: 'Gà', affectedStudentIds: ['huy'], allergens: ['Tôm'], energyKcal: 100 },
+          { id: 'sub', dishName: 'Thịt heo', specialDietNotes: 'Loại 3 dị ứng; thay cho: Gà -> Thịt heo', affectedStudentIds: [], energyKcal: 80 },
+          { id: 'veg', dishName: 'Rau', affectedStudentIds: [], energyKcal: 20 },
+        ],
+      }],
+    }],
+  };
+  const forChild = (childId, childAllergens) => publishedMenuDay(personalizedMenu, '2026-11-04', {
+    audience: 'parent', childId, childHasAllergy: true, childAllergens,
+  });
+  assert.deepEqual(forChild('huy', ['Tôm'])[0].dishes.map((dish) => dish.name), ['Thịt heo', 'Rau']);
+  assert.deepEqual(forChild('lan', ['Cá'])[0].dishes.map((dish) => dish.name), ['Gà', 'Rau']);
+  assert.deepEqual(forChild('minh', [])[0].dishes.map((dish) => dish.name), ['Gà', 'Rau']);
+  assert.equal(publishedDayNutrition(forChild('huy', ['Tôm'])).calories, 100);
+  assert.equal(publishedDayNutrition(forChild('lan', ['Cá'])).calories, 120);
+});
+
+test('globally replaced dish remains visible when the original was removed', () => {
+  const replacedMenu = {
+    ...menu,
+    days: [{ date: '2026-11-04', meals: [{ mealType: 'LUNCH', dishes: [
+      { id: 'sub', dishName: 'Thịt heo', specialDietNotes: 'thay cho: Gà -> Thịt heo', affectedStudentIds: [], energyKcal: 80 },
+    ] }] }],
+  };
+  assert.deepEqual(
+    publishedMenuDay(replacedMenu, '2026-11-04', { audience: 'parent', childId: 'huy' })[0].dishes.map((dish) => dish.name),
+    ['Thịt heo'],
+  );
+});
+
+test('parent export contains exactly the selected menu, including an older week', () => {
+  const older = { ...menu, id: 'older', startDate: '2026-10-19', endDate: '2026-10-23' };
+  const newer = { ...menu, id: 'newer', startDate: '2026-11-09', endDate: '2026-11-13' };
+  assert.deepEqual(publishedMenusForExport([older, menu, newer], older, 'parent').map((item) => item.id), ['older']);
+  assert.deepEqual(publishedMenusForExport([older, menu, newer], undefined, 'parent'), []);
+  assert.deepEqual(publishedMenusForExport([older, menu, newer], older, 'kitchen').map((item) => item.id), ['newer', '1', 'older']);
 });

@@ -189,7 +189,7 @@ export class VnpayService {
     ).trim();
     const configReturnUrl = (
       this.configService.get<string>("vnpay.returnUrl") ||
-      "http://localhost:5173/payments/vnpay-return"
+      "https://campaign-pants-villas-jerry.trycloudflare.com/payments/vnpay-return"
     ).trim();
     const returnUrl = (params.returnUrl || configReturnUrl).trim();
 
@@ -546,6 +546,16 @@ export class VnpayService {
     const amount = this.packageAmount(reg);
     const receiptNum = `BL-2026-${String(reg.id).padStart(5, "0")}`;
 
+    let weeks = 1;
+    if (reg.period?.startDate && reg.period?.endDate) {
+      const diffMs =
+        new Date(reg.period.endDate).getTime() -
+        new Date(reg.period.startDate).getTime();
+      const diffDays = Math.round(diffMs / (24 * 3600 * 1000));
+      weeks = Math.max(1, Math.round(diffDays / 7) || 1);
+    }
+    const unitPricePerWeek = Math.round(amount / weeks);
+
     return {
       receiptNumber: receiptNum,
       invoiceCode: `INV-2026-${String(reg.id).padStart(4, "0")}`,
@@ -568,10 +578,12 @@ export class VnpayService {
       },
       serviceDetails: {
         periodName:
-          reg.period?.name || "Gói Năng Lượng Chiều 17h (Tháng 11/2026)",
+          reg.period?.name || "Gói Dịch Vụ Ăn Xế Tuần (Chiều 17h00)",
         serviceName: "Dịch vụ suất ăn xế dinh dưỡng bán trú ngoài giờ",
-        servingDays: 22,
-        unitPricePerDay: 20000,
+        servingWeeks: weeks,
+        unitPricePerWeek,
+        servingDays: weeks * 5,
+        unitPricePerDay: Math.round(amount / (weeks * 5)),
         totalAmount: amount,
         amountInWords: numberToVietnameseWords(amount),
       },
@@ -625,6 +637,37 @@ export class VnpayService {
         (p) => Number(p.registrationId) === Number(r.id),
       );
       return this.mapRegistrationToInvoice(r, matchedPayment);
+    });
+  }
+
+  @SerializedWrite('snack-registration', 'regRepo')
+  async registerAndPay(data: {
+    periodId: number;
+    studentId?: number;
+    parentId: number;
+    ipAddr?: string;
+    returnUrl?: string;
+  }) {
+    let resolvedStudentId = data.studentId;
+    if (!resolvedStudentId && data.parentId) {
+      const rows = await this.childRepo.manager.query(
+        "SELECT student_id FROM student_parents WHERE parent_id = $1 ORDER BY student_id ASC LIMIT 1",
+        [data.parentId],
+      );
+      if (rows?.length) {
+        resolvedStudentId = Number(rows[0].student_id);
+      }
+    }
+    const created = await this.createInvoice({
+      periodId: Number(data.periodId),
+      studentId: Number(resolvedStudentId),
+      parentId: Number(data.parentId),
+    });
+    return this.createPaymentUrl({
+      registrationId: Number(created.registrationId),
+      parentId: Number(data.parentId),
+      ipAddr: data.ipAddr,
+      returnUrl: data.returnUrl,
     });
   }
 

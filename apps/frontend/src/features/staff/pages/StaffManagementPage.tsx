@@ -1,5 +1,6 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { formatDateDMY } from '../../../core/utils/date';
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Users,
@@ -19,7 +20,9 @@ import {
   Eye,
   Trash2,
   ShieldCheck,
+  FileSpreadsheet,
 } from "lucide-react";
+import { downloadExcel } from "../../../core/utils/excel-export";
 import {
   staffApi,
   StaffUser,
@@ -215,6 +218,35 @@ export const StaffManagementPage: React.FC = () => {
     );
   };
 
+  const handleExportExcel = async () => {
+    if (!staffList.length) {
+      showToast("error", "Chưa có dữ liệu nhân sự để xuất báo cáo.");
+      return;
+    }
+    const headers = [
+      "Họ và tên",
+      "Email",
+      "Số điện thoại",
+      "Vai trò",
+      "Trạng thái",
+      "Ngày tham gia",
+    ];
+    const rows = staffList.map((s) => [
+      s.fullName,
+      s.email,
+      s.phone || "Chưa cập nhật",
+      s.roles?.map((r) => r.name || r.code).join(", ") || "Chưa phân vai trò",
+      s.status === "ACTIVE" ? "Đang hoạt động" : "Tạm khóa",
+      s.createdAt ? formatDateDMY(s.createdAt) : "",
+    ]);
+    const ok = await downloadExcel(
+      `Danh_sach_nhan_su_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [headers, ...rows],
+      "Danh sách nhân sự mầm non"
+    );
+    if (ok) showToast("success", "Đã xuất file Excel danh sách nhân sự thành công!");
+  };
+
   const kpiCards = [
     {
       label: "Tổng Nhân Sự",
@@ -278,52 +310,20 @@ export const StaffManagementPage: React.FC = () => {
     <div className="w-full space-y-6">
       {toastMessage && (
         <div
-          className={`fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 max-w-md ${
+          className={`fixed top-6 right-6 z-[9999] px-4.5 py-3.5 rounded-2xl shadow-2xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 max-w-md ${
             toastMessage.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-red-50 border-red-200 text-red-800"
+              ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-900/30"
+              : "bg-rose-600 text-white border-rose-500 shadow-rose-900/40"
           }`}
         >
           {toastMessage.type === "success" ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-white shrink-0" />
           )}
-          <span className="text-xs font-semibold">{translateText(toastMessage.text)}</span>
+          <span className="text-xs font-semibold leading-relaxed">{translateText(toastMessage.text)}</span>
         </div>
       )}
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("CỔNG BAN GIÁM HIỆU")}</span>
-            <span className="text-xs text-slate-400">• {schoolName}</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{translateText("Quản Lý Nhân Sự & Đội Ngũ Bếp")}</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{translateText("Quản trị danh sách nhân sự, phân công vai trò chuyên môn và tra cứu thông tin nhà trường.")}</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => Promise.all([loadStaffList(), loadStats()])}
-            disabled={isListLoading}
-            className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition"
-            title={translateText("Làm mới dữ liệu")}
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${isListLoading ? "animate-spin text-teal-600" : ""}`}
-            />
-          </button>
-          <button
-            onClick={() => handleOpenDrawer("create")}
-            className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>{translateText("Thêm Nhân Sự Mới")}</span>
-          </button>
-        </div>
-      </div>
 
       {/* 1. KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -400,6 +400,32 @@ export const StaffManagementPage: React.FC = () => {
               </option>
             ))}
           </select>
+
+          <button
+            onClick={() => Promise.all([loadStaffList(), loadStats()])}
+            disabled={isListLoading}
+            className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition cursor-pointer"
+            title={translateText("Làm mới dữ liệu")}
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${isListLoading ? "animate-spin text-teal-600" : ""}`}
+            />
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-2xl shadow-2xs transition cursor-pointer"
+            title={translateText("Xuất danh sách nhân sự ra file Excel")}
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{translateText("Xuất Excel")}</span>
+          </button>
+          <button
+            onClick={() => handleOpenDrawer("create")}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-xs transition cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>{translateText("Thêm Nhân Sự")}</span>
+          </button>
         </div>
       </div>
 
@@ -407,14 +433,14 @@ export const StaffManagementPage: React.FC = () => {
       <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3.5 px-5">{translateText("Nhân Sự & Email")}</th>
-                <th className="py-3.5 px-4">{translateText("Số Điện Thoại")}</th>
-                <th className="py-3.5 px-4">{translateText("Vai Trò Chuyên Môn")}</th>
-                <th className="py-3.5 px-4">{translateText("Trạng Thái")}</th>
-                <th className="py-3.5 px-4">{translateText("Tham Gia")}</th>
-                <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
+            <thead className="bg-teal-600 text-white">
+              <tr className="border-b border-teal-700/60 text-[11px] font-bold text-white uppercase tracking-wider">
+                <th className="py-3.5 px-5 text-white">{translateText("Nhân Sự & Email")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Số Điện Thoại")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Vai Trò Chuyên Môn")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Trạng Thái")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Tham Gia")}</th>
+                <th className="py-3.5 px-5 text-right text-white">{translateText("Thao Tác")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -502,9 +528,7 @@ export const StaffManagementPage: React.FC = () => {
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-slate-400" />
                           <span>
-                            {translateText(new Date(staff.createdAt).toLocaleDateString(
-                              getLocale(),
-                            ))}
+                            {translateText(formatDateDMY(staff.createdAt))}
                           </span>
                         </div>
                       </td>

@@ -4,10 +4,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 export const COORDINATION_MEAL_LABELS: Record<string, string> = {
-  BREAKFAST: 'Bữa sáng',
-  MORNING_SNACK: 'Phụ sáng',
+  BREAKFAST: 'Buổi sáng',
+  MORNING_SNACK: 'Buổi sáng',
   LUNCH: 'Bữa trưa chính',
-  AFTERNOON_SNACK: 'Bữa xế chiều',
+  AFTERNOON_SNACK: 'Buổi phụ',
+  LATE_SNACK: 'Buổi xế chiều',
 };
 const NOTE_TYPE_LABELS: Record<string, string> = {
   ALLERGY_WARNING: 'Cảnh báo dị ứng khẩn cấp',

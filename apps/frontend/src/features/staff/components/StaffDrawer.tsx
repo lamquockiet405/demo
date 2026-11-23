@@ -1,5 +1,6 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { formatDateDMY, formatDateTimeDMY } from '../../../core/utils/date';
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -277,7 +278,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                 <span className="text-slate-400 block text-[11px]">{translateText("Ngày tham gia")}</span>
                 <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
                   <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                  {translateText(new Date(staff.createdAt).toLocaleDateString(getLocale()))}
+                  {translateText(formatDateDMY(staff.createdAt))}
                 </span>
               </div>
               <div>
@@ -285,7 +286,7 @@ export const StaffDrawer: React.FC<StaffDrawerProps> = ({
                 <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
                   <Clock className="w-3.5 h-3.5 text-teal-600" />
                   {translateText(staff.lastLoginAt
-                    ? new Date(staff.lastLoginAt).toLocaleString(getLocale())
+                    ? formatDateTimeDMY(staff.lastLoginAt)
                     : "Chưa đăng nhập")}
                 </span>
               </div>

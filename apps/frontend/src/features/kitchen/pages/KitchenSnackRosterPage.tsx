@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from "react";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Users, CircleCheck, UtensilsCrossed, ShieldCheck } from "lucide-react";
 import { attendanceApi } from "../../attendance/api/attendanceApi";
 import { SnackRosterDetailModal } from "../../attendance/components/SnackRosterDetailModal";
 import { SnackRosterItem } from "../../attendance/types";
@@ -13,6 +13,7 @@ import {
   useKitchenResource,
 } from "../components/KitchenUI";
 import { downloadExcel, formatNumber } from "../utils/kitchen-operations";
+import { KitchenSummaryCards } from "../components/KitchenSummaryCards";
 import { getSchoolDate } from "../utils/kds-data";
 
 export function KitchenSnackRosterPage() {
@@ -38,50 +39,14 @@ export function KitchenSnackRosterPage() {
   const stats = resource.data?.stats;
   return (
     <>
-      <PageTitle
-        title={translateText("Danh sách học sinh ăn xế")}
-        description={translateText("Tra cứu đăng ký, tình trạng phí và yêu cầu ăn xế để chuẩn bị suất theo từng lớp.")}
-      >
-        <ReloadButton loading={resource.loading} reload={resource.reload} />
-        <button
-          className="kp-button"
-          disabled={!resource.data?.items?.length}
-          onClick={() =>
-            downloadExcel(`an-xe-${date}-trang-${page}.xlsx`, [
-              [
-                "Học sinh",
-                "Mã",
-                "Lớp",
-                "Tình trạng phí",
-                "Chế độ ăn",
-                "Ghi chú",
-              ],
-              ...resource.data.items.map((r: any) => [
-                r.fullName,
-                r.studentCode,
-                r.className,
-                r.paymentStatusLabel,
-                r.snackDietBadgeText,
-                r.kitchenNotes,
-              ]),
-            ])
-          }
-        >
-          <Download size={15} />{translateText("Xuất trang hiện tại")}</button>
-      </PageTitle>
-      <div className="kp-stats">
-        {[
-          [translateText("Đã đăng ký"), stats?.totalRegistered],
-          [translateText("Đủ điều kiện"), stats?.totalEligible],
-          [translateText("Suất hôm nay"), stats?.todayTotalPortions],
-          [translateText("Suất ăn riêng"), stats?.specialDietPortions],
-        ].map(([label, value]) => (
-          <div className="kp-stat" key={String(label)}>
-            <span>{translateText(label)}</span>
-            <strong>{translateText(formatNumber(value, 0))}</strong>
-          </div>
-        ))}
-      </div>
+      {stats && !resource.error && (
+        <KitchenSummaryCards metrics={[
+          { label: 'Đã đăng ký', value: Number(stats.totalRegistered || 0), icon: Users },
+          { label: 'Đủ điều kiện', value: Number(stats.totalEligible || 0), icon: CircleCheck, tone: 'success' },
+          { label: 'Suất hôm nay', value: Number(stats.todayTotalPortions || 0), icon: UtensilsCrossed },
+          { label: 'Suất ăn riêng', value: Number(stats.specialDietPortions || 0), icon: ShieldCheck, tone: 'warning' },
+        ]} />
+      )}
       <div className="kp-filters">
         <label>{translateText("Ngày")}<input
             type="date"
@@ -116,7 +81,7 @@ export function KitchenSnackRosterPage() {
           <option value="">{translateText("Tất cả lớp")}</option>
           {resource.data?.classes?.map((c: any) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {String(c.name || "").replace(/\s*\([^)]*\)/g, "").trim()}
             </option>
           ))}
         </select>
@@ -130,7 +95,7 @@ export function KitchenSnackRosterPage() {
         >
           <option value="">{translateText("Tất cả tình trạng phí")}</option>
           <option value="PAID">{translateText("Đã thanh toán")}</option>
-          <option value="UNPAID">{translateText("Chưa thanh toán")}</option>
+          <option value="PENDING">{translateText("Chưa thanh toán")}</option>
         </select>
         <button
           className="kp-button"
@@ -141,6 +106,32 @@ export function KitchenSnackRosterPage() {
             setPage(1);
           }}
         >{translateText("Xóa bộ lọc")}</button>
+        <ReloadButton loading={resource.loading} reload={resource.reload} />
+        <button
+          className="kp-button"
+          disabled={!resource.data?.items?.length}
+          onClick={() =>
+            downloadExcel(`an-xe-${date}-trang-${page}.xlsx`, [
+              [
+                "Học sinh",
+                "Mã",
+                "Lớp",
+                "Tình trạng phí",
+                "Chế độ ăn",
+                "Ghi chú",
+              ],
+              ...resource.data.items.map((r: any) => [
+                r.fullName,
+                r.studentCode,
+                r.className,
+                r.paymentStatusLabel,
+                r.snackDietBadgeText,
+                r.kitchenNotes,
+              ]),
+            ])
+          }
+        >
+          <Download size={15} />{translateText("Xuất trang hiện tại")}</button>
       </div>
       <ResourceState
         resource={resource}

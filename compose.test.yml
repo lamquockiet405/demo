@@ -66,6 +66,7 @@ services:
       MAIL_PORT: 1025
       MAIL_USER: local-test-disabled
       MAIL_PASS: local-test-disabled
+      VNPAY_RETURN_URL: ${VNPAY_RETURN_URL:-https://step-clerk-departure-chance.trycloudflare.com/payments/vnpay-return}
     ports:
       - "127.0.0.1:3001:3000"
     depends_on:

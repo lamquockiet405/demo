@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState } from 'react';
-import { Plus, MessageSquare, CheckCircle, Clock, Trash2, Edit } from 'lucide-react';
+import { Plus, MessageSquare, CheckCircle, Clock, Trash2, Edit, ClipboardList } from 'lucide-react';
 import { apiClient } from '../../../core/api/axios';
 import { useAuthStore } from '../../../core/stores/auth.store';
 import {
@@ -15,6 +15,7 @@ import {
 } from '../components/KitchenUI';
 import { getSchoolDate } from '../utils/kds-data';
 import { formatDateTime } from '../utils/kitchen-operations';
+import { KitchenSummaryCards } from '../components/KitchenSummaryCards';
 import { normalizeSearch } from '../../../core/utils/search';
 
 const coordinationApi = {
@@ -126,18 +127,15 @@ export function KitchenNotesPage() {
 
   return (
     <>
-      <PageTitle
-        title={translateText('Ghi chú phối hợp bữa ăn')}
-        description={translateText('Tiếp nhận yêu cầu từ giáo viên, phản hồi và theo dõi quá trình xử lý của bếp.')}
-      >
-        <ReloadButton loading={resource.loading} reload={resource.reload} />
-        <button className="kp-button primary" onClick={() => openForm('new')}>
-          <Plus size={16} />
-          {translateText('Tạo ghi chú')}
-        </button>
-      </PageTitle>
-
       <Notice error={action.error} message={action.message} />
+      {resource.data && !resource.error && (
+        <KitchenSummaryCards metrics={[
+          { label: 'Tổng ghi chú', value: notesList.length, icon: ClipboardList },
+          { label: 'Chờ xử lý', value: notesList.filter((note: any) => note.status === 'PENDING').length, icon: Clock, tone: 'warning' },
+          { label: 'Đang tiếp nhận', value: notesList.filter((note: any) => ['ACKNOWLEDGED', 'PROCESSING'].includes(note.status)).length, icon: MessageSquare },
+          { label: 'Đã xử lý', value: notesList.filter((note: any) => note.status === 'RESOLVED').length, icon: CheckCircle, tone: 'success' },
+        ]} />
+      )}
 
       <div className="kp-filters">
         <label>
@@ -167,6 +165,11 @@ export function KitchenNotesPage() {
           <option value="PROCESSING">{translateText('Đang xử lý')}</option>
           <option value="RESOLVED">{translateText('Đã xử lý')}</option>
         </select>
+        <ReloadButton loading={resource.loading} reload={resource.reload} />
+        <button className="kp-button primary" onClick={() => openForm('new')}>
+          <Plus size={16} />
+          {translateText('Tạo ghi chú')}
+        </button>
       </div>
 
       <ResourceState resource={resource} empty={!notesList.length} />

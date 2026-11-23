@@ -1,5 +1,6 @@
 import { normalizeSearch } from '../../../core/utils/search';
 import { downloadExcel } from '../../../core/utils/excel-export';
+import { formatDateRangeDMY } from '../../../core/utils/date';
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Search,
@@ -12,7 +13,6 @@ import {
   Calendar,
   Users,
   DollarSign,
-  Star,
   ChevronLeft,
   ChevronRight,
   MessageSquare,
@@ -183,75 +183,15 @@ export const SnackServicesPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans text-slate-800">
-      {/* 1. Header & Breadcrumbs Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mb-1">
-            <span className="text-teal-600 font-semibold">Đơn vị KidMeal</span>
-            <span>›</span>
-            <span>Dịch vụ bán trú</span>
-            <span>›</span>
-            <span className="text-slate-700 font-bold">Cấu hình gói ăn xế</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
-              <UtensilsCrossed className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Quản lý Gói Ăn Xế Chiều 17h & Dịch vụ Bán Trú
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5 max-w-3xl">
-                Tạo và vận hành các gói dinh dưỡng ăn xế chiều tự nguyện, theo dõi chỉ tiêu đăng ký, quản lý danh sách chia suất nhà bếp và thu phí trực tuyến qua cổng VNPAY Sandbox.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {activeTab === 'roster' ? (
-            <button
-              onClick={handleExportRoster}
-              className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Xuất danh sách suất ăn (Excel)
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setActiveTab('roster');
-                loadRosterData();
-              }}
-              className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
-            >
-              <Download className="w-4 h-4 text-slate-500" />
-              Xem Danh Sách Đăng Ký
-            </button>
-          )}
-
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            Tạo Đợt Đăng Ký
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Top 4 Stat Cards */}
+      {/* Số liệu từ các đợt đăng ký */}
       {summary && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Card 1 */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
             <div className="flex items-center justify-between mb-2">
               <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                 <Calendar className="w-4 h-4" />
               </div>
-              <span className="text-[11px] font-bold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full">
-                Đợt tháng 11 - 12
-              </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">Tổng số đợt vận hành</p>
             <p className="text-2xl font-black text-slate-900 mt-1">
@@ -293,49 +233,21 @@ export const SnackServicesPage: React.FC = () => {
               <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <DollarSign className="w-4 h-4" />
               </div>
-              <span className="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full">
-                {summary.revenue.collectedPercentage}% hoàn tất
-              </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">Doanh thu ăn xế dự kiến</p>
+            <p className="text-xs text-slate-500 font-medium">Đã thu tiền ăn xế</p>
             <p className="text-2xl font-black text-slate-900 mt-1">
-              {formatVND(summary.revenue.expectedMonthly)}
+              {formatVND(summary.revenue.collected)}
             </p>
-            <p className="text-[11px] text-slate-500 mt-2 font-medium">
-              Đã thu qua VNPAY:{' '}
-              <strong className="text-emerald-600">{formatVND(summary.revenue.collected)}</strong>
-            </p>
-          </div>
-
-          {/* Card 4 */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              </div>
-              <span className="text-[11px] font-bold bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full">
-                Rất tốt
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 font-medium">Tỷ lệ hài lòng phụ huynh</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">
-              {summary.satisfaction.ratePercent}%{' '}
-              <span className="text-xs font-bold text-slate-400">({summary.satisfaction.totalReviews} đánh giá)</span>
-            </p>
-            <div className="flex items-center gap-1 text-amber-400 mt-2">
-              {'★'.repeat(5)}
-              <span className="text-xs font-bold text-slate-700 ml-1">{summary.satisfaction.ratingScore} / 5.0</span>
-            </div>
           </div>
         </div>
       )}
 
-      {/* 3. Navigation Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
-        <div className="flex items-center gap-2">
+      {/* 3. Navigation Tabs & Actions */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-slate-200/80 pb-2 gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab('packages')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'packages'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-600/30'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -354,7 +266,7 @@ export const SnackServicesPage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('roster')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'roster'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-600/30'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -373,7 +285,7 @@ export const SnackServicesPage: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('billing')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'billing'
                 ? 'bg-teal-600 text-white shadow-sm shadow-teal-600/30'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -391,13 +303,36 @@ export const SnackServicesPage: React.FC = () => {
           </button>
         </div>
 
-        <Link
-          to="/services"
-          className="hidden md:flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:text-teal-700 hover:underline"
-        >
-          <span>Sang phân hệ Quản lý Bán Trú Toàn Diện</span>
-          <ChevronRight className="w-4 h-4" />
-        </Link>
+        <div className="flex items-center gap-2.5">
+          {activeTab === 'roster' ? (
+            <button
+              onClick={handleExportRoster}
+              className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>Xuất danh sách Excel</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setActiveTab('roster');
+                loadRosterData();
+              }}
+              className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-slate-500" />
+              <span>Xem DS Đăng Ký</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="px-4 py-2 bg-teal-600 hover:bg-teal-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Tạo Đợt Đăng Ký</span>
+          </button>
+        </div>
       </div>
 
       {/* 4. TAB 1: CẤU HÌNH GÓI & ĐỢT ĐĂNG KÝ */}
@@ -544,7 +479,7 @@ export const SnackServicesPage: React.FC = () => {
                     {/* Top status line */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[11px] font-bold text-slate-400">
-                        {item.weekNumber ? `Tuần ${item.weekNumber}` : `${item.startDate} → ${item.endDate}`}
+                        {item.weekNumber ? `Tuần ${item.weekNumber}` : formatDateRangeDMY(item.startDate, item.endDate, ' → ')}
                       </span>
                       <span
                         className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
@@ -562,52 +497,9 @@ export const SnackServicesPage: React.FC = () => {
                     <h3 className="text-base font-extrabold text-slate-900 tracking-tight leading-snug">
                       {item.name}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                      {item.description}
+                    <p className="mt-3 text-xs text-slate-600">
+                      {item.registeredCount} học sinh đăng ký · {item.paidCount ?? 0} đã thanh toán
                     </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-semibold rounded-md">
-                        {item.appliedGrade}
-                      </span>
-                      {item.badges.map((b, i) => (
-                        <span
-                          key={i}
-                          className="px-2 py-0.5 bg-teal-50 text-teal-700 border border-teal-200 text-[10px] font-bold rounded-md"
-                        >
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="text-slate-500 font-medium">Chỉ tiêu đợt</span>
-                        <span className="font-extrabold text-slate-900">
-                          {item.registeredCount}{' '}
-                          <span className="text-slate-400 font-normal">/ {item.targetCount} suất</span>
-                        </span>
-                      </div>
-
-                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                        <div
-                          className={`h-2 rounded-full transition-all duration-500 ${
-                            item.percentage >= 90
-                              ? 'bg-emerald-500'
-                              : item.percentage >= 60
-                              ? 'bg-teal-500'
-                              : 'bg-amber-500'
-                          }`}
-                          style={{ width: `${Math.min(100, item.percentage)}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1.5">
-                        <span>{item.progressNote}</span>
-                        <span className="font-bold text-slate-700">{item.percentage}%</span>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Price & Actions */}

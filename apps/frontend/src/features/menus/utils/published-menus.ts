@@ -25,6 +25,7 @@ export interface PublishedMenuDayOptions {
 export interface PublishedMeal {
   mealType: string;
   title: string;
+  time?: string;
   dishes: PublishedDish[];
 }
 export const calendarDate = (value: unknown): string =>
@@ -70,6 +71,17 @@ export function publishedMenuOrder(a: PublishedMenu, b: PublishedMenu): number {
     String(b.id).localeCompare(String(a.id), undefined, { numeric: true })
   );
 }
+export function publishedMenusForExport(
+  menus: PublishedMenu[],
+  selected: PublishedMenu | undefined,
+  audience: 'kitchen' | 'parent',
+  limit = 3,
+): PublishedMenu[] {
+  if (audience === 'parent') return selected ? [selected] : [];
+  return [...menus]
+    .sort((a, b) => menuPeriod(b).start.localeCompare(menuPeriod(a).start))
+    .slice(0, limit);
+}
 export function publishedMenusForDate(
   menus: PublishedMenu[],
   date: string,
@@ -86,12 +98,20 @@ export function publishedMenusForDate(
   }
   return [...selected.values()];
 }
-const mealTitles: Record<string, string> = {
-  BREAKFAST: "Buổi sáng (09:00)",
-  MORNING_SNACK: "Buổi sáng (09:00)",
-  LUNCH: "Bữa trưa chính (11:15)",
-  AFTERNOON_SNACK: "Bữa phụ xế (14:30)",
-  LATE_SNACK: "Bữa phụ chiều (17:00)",
+export const mealTitles: Record<string, string> = {
+  BREAKFAST: "Buổi sáng",
+  MORNING_SNACK: "Buổi sáng",
+  LUNCH: "Bữa trưa chính",
+  AFTERNOON_SNACK: "Buổi phụ",
+  LATE_SNACK: "Buổi chiều xế",
+};
+
+export const mealTimes: Record<string, string> = {
+  BREAKFAST: "09:00",
+  MORNING_SNACK: "09:00",
+  LUNCH: "11:00",
+  AFTERNOON_SNACK: "14:30",
+  LATE_SNACK: "17:00",
 };
 
 const mealSortOrder: Record<string, number> = {
@@ -135,7 +155,7 @@ export function publishedMenuDay(
   }
   const audience = options?.audience || "parent";
   const childId = options?.childId ? String(options.childId) : "";
-  const childHasAllergy = options?.childHasAllergy ?? true;
+  const childHasAllergy = options?.childHasAllergy ?? false;
   const childAllergensLower = (options?.childAllergens || []).map((a) =>
     String(a).trim().toLowerCase(),
   );
@@ -147,7 +167,12 @@ export function publishedMenuDay(
       const type = String(meal.mealType || "OTHER");
       let group = meals.get(type);
       if (!group) {
-        group = { mealType: type, title: mealTitles[type] || type, dishes: [] };
+        group = {
+          mealType: type,
+          title: mealTitles[type] || type,
+          time: mealTimes[type] || "",
+          dishes: [],
+        };
         meals.set(type, group);
       }
       const rawDishes = (Array.isArray(meal.dishes) ? meal.dishes : []).map(
@@ -177,14 +202,32 @@ export function publishedMenuDay(
           dish.categoryName || dish.categoryCode || "Món ăn",
         );
         const lowerCat = rawCategory.toLowerCase();
-        const baseCategory =
+        let baseCategory = rawCategory;
+        if (
           (type === "BREAKFAST" || type === "MORNING_SNACK") &&
           (lowerCat.includes("xế") ||
             lowerCat.includes("chiều") ||
             lowerCat.includes("phụ") ||
             rawCategory === "SNACK_AFTERNOON")
-            ? "Món sáng"
-            : rawCategory;
+        ) {
+          baseCategory = "Món sáng";
+        } else if (
+          type === "LATE_SNACK" ||
+          lowerCat.includes("mã³n") ||
+          lowerCat.includes("chiá»u") ||
+          lowerCat.includes("phÃ¡") ||
+          lowerCat.includes("chiều")
+        ) {
+          baseCategory = "Món ăn chiều";
+        } else if (
+          type === "AFTERNOON_SNACK" &&
+          (rawCategory === "DRINK" ||
+            lowerCat.includes("thức uống") ||
+            lowerCat.includes("trái cây") ||
+            lowerCat.includes("uống"))
+        ) {
+          baseCategory = "Thức uống xế";
+        }
         return {
           id: String(dish.dishId ?? dish.dish?.id ?? dish.id ?? name),
           name: name.trim(),
@@ -226,7 +269,7 @@ export function publishedMenuDay(
             ),
           );
         }
-        return childHasAllergy && dishAllergens.length > 0;
+        return false;
       };
 
       for (const primary of primaryRaw) {
@@ -245,19 +288,28 @@ export function publishedMenuDay(
           );
         });
 
+        const safeSubs = matchingSubs.filter((sub: any) => !isChildAffectedByDish(sub));
         const allergySub =
-          matchingSubs.find((s: any) =>
-            isAllergySubstituteNote(s.specialDietNotes),
-          ) || matchingSubs[0];
+          safeSubs.find((sub: any) => isAllergySubstituteNote(sub.specialDietNotes)) ||
+          safeSubs[0];
 
-        const childAffected = isChildAffectedByDish(primary);
+        const primaryHasExplicitAllergy =
+          (Array.isArray(primary.allergens) && primary.allergens.length > 0) ||
+          (Array.isArray(primary.affectedStudentIds) && primary.affectedStudentIds.length > 0);
+
+        const childAffected =
+          isChildAffectedByDish(primary) ||
+          Boolean(
+            childHasAllergy &&
+            !primaryHasExplicitAllergy &&
+            allergySub &&
+            isAllergySubstituteNote(allergySub.specialDietNotes),
+          );
 
         if (
           audience === "parent" &&
           allergySub &&
-          (childAffected ||
-            (childHasAllergy &&
-              isAllergySubstituteNote(allergySub.specialDietNotes)))
+          childAffected
         ) {
           usedSubIds.add(String(allergySub.id || allergySub.dishId));
           const mappedSub = toPublishedDish(allergySub, primaryName, false);
@@ -269,6 +321,23 @@ export function publishedMenuDay(
             audience === "parent" && childAffected,
           );
           if (mappedPrimary) group.dishes.push(mappedPrimary);
+        }
+      }
+
+      if (audience === "parent") {
+        for (const sub of subRaw) {
+          const replacedName = extractReplacedDishName(sub.specialDietNotes);
+          if (!replacedName || isChildAffectedByDish(sub)) continue;
+          const originalStillPresent = primaryRaw.some((primary: any) => {
+            const name = String(primary.dishName || primary.name || primary.dish?.name || "")
+              .trim().toLowerCase();
+            const replaced = replacedName.toLowerCase();
+            return Boolean(name) && (name === replaced || name.includes(replaced) || replaced.includes(name));
+          });
+          if (!originalStillPresent) {
+            const mappedSub = toPublishedDish(sub, replacedName, false);
+            if (mappedSub) group.dishes.push(mappedSub);
+          }
         }
       }
 

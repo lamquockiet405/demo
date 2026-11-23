@@ -105,10 +105,7 @@ export const SnackRosterPage: React.FC = () => {
       />
 
       {/* 2. Main Content Container */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 py-6 space-y-5">
-        {/* Page Title & Breadcrumb */}
-        <SnackRosterHeader onExport={handleExport} onPrint={handlePrint} />
-
+      <main className="flex-1 w-full px-6 py-6 space-y-5">
         {/* 4 Summary Cards */}
         <SnackRosterSummaryCards
           stats={rosterData?.stats}
@@ -117,6 +114,8 @@ export const SnackRosterPage: React.FC = () => {
 
         {/* Filter Controls Bar */}
         <SnackRosterFilterBar
+          onExport={handleExport}
+          onPrint={handlePrint}
           search={search}
           onSearchChange={setSearch}
           gradeLevel={gradeLevel}

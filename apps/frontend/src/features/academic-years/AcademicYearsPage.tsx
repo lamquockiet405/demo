@@ -126,13 +126,7 @@ export const AcademicYearsPage = () => {
   const sourceName = years.find(y => String(y.id) === String(detail?.sourceYearId))?.name;
   const formError = modalError && <p role="alert" className="p-3 rounded-xl bg-rose-50 text-rose-800 text-sm">{modalError}</p>;
 
-  return <div className="max-w-7xl mx-auto p-5 md:p-8 space-y-5 pb-20">
-    <div className="flex items-start justify-between gap-4 flex-wrap">
-      <div><p className="text-xs uppercase tracking-wider text-teal-700 font-bold flex items-center gap-2"><CalendarRange className="w-4 h-4" /> Cổng Hiệu trưởng</p>
-        <h1 className="text-2xl font-extrabold text-slate-900 mt-2">Quản lý năm học</h1>
-        <p className="text-sm text-slate-500 mt-2">Kế thừa dữ liệu năm trước, sắp xếp lớp và cập nhật hồ sơ cho từng năm học.</p></div>
-      <button className={primary} onClick={() => createYear()} disabled={loading || saving}><Plus className="w-4 h-4" /> Tạo năm học</button>
-    </div>
+  return <div className="w-full space-y-5 pb-20">
     {notice && <p role="status" className="bg-teal-50 border border-teal-200 rounded-xl p-3 text-teal-900 text-sm">{notice}</p>}
     {error && <div role="alert" className="bg-rose-50 rounded-xl p-4 text-rose-800">{error} <button className={button} onClick={() => setRevision(v => v + 1)}>Thử lại</button></div>}
     <div className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-wrap items-end justify-between gap-4">
@@ -142,12 +136,15 @@ export const AcademicYearsPage = () => {
           {years.map(year => <option key={year.id} value={year.id}>{year.name} · {labels[year.status]}</option>)}
         </select>
       </label>
-      {detail && <div className="flex flex-wrap gap-2">
-        <button className={button} onClick={() => { setModalError(''); setYearForm({ id: detail.id, name: detail.name, startDate: detail.startDate, endDate: detail.endDate, sourceYearId: detail.sourceYearId || '', notes: detail.notes }); }}><Pencil className="w-4 h-4" /> Cấu hình năm học</button>
-        {detail.status === 'DRAFT' && <button className={primary} onClick={() => { setModalError(''); setConfirmAction('activate'); }}>Áp dụng năm học</button>}
-        {detail.status === 'ACTIVE' && <button className={button} onClick={() => { setModalError(''); setConfirmAction('complete'); }}>Kết thúc năm học</button>}
-        {detail.status === 'COMPLETED' && <button className={primary} onClick={() => createYear(detail.id)}><Copy className="w-4 h-4" /> Kế thừa sang năm mới</button>}
-      </div>}
+      <div className="flex flex-wrap gap-2">
+        <button className={primary} onClick={() => createYear()} disabled={loading || saving}><Plus className="w-4 h-4" /> Tạo năm học</button>
+        {detail && <>
+          <button className={button} onClick={() => { setModalError(''); setYearForm({ id: detail.id, name: detail.name, startDate: detail.startDate, endDate: detail.endDate, sourceYearId: detail.sourceYearId || '', notes: detail.notes }); }}><Pencil className="w-4 h-4" /> Cấu hình năm học</button>
+          {detail.status === 'DRAFT' && <button className={primary} onClick={() => { setModalError(''); setConfirmAction('activate'); }}>Áp dụng năm học</button>}
+          {detail.status === 'ACTIVE' && <button className={button} onClick={() => { setModalError(''); setConfirmAction('complete'); }}>Kết thúc năm học</button>}
+          {detail.status === 'COMPLETED' && <button className={primary} onClick={() => createYear(detail.id)}><Copy className="w-4 h-4" /> Kế thừa sang năm mới</button>}
+        </>}
+      </div>
     </div>
     {loading && <p className="py-10 text-center text-slate-500" role="status">Đang tải dữ liệu năm học…</p>}
     {!loading && !years.length && !error && <div className="border border-dashed rounded-2xl bg-white p-10 text-center"><CalendarRange className="mx-auto w-10 h-10 text-teal-600" /><p className="mt-3">Chưa có năm học. Tạo năm học đầu tiên để sắp xếp lớp và học sinh.</p></div>}
@@ -180,14 +177,14 @@ export const AcademicYearsPage = () => {
           {tab === 'students' && <button className={button} onClick={openAdd}><Plus className="w-4 h-4" /> Thêm học sinh</button>}
         </div>
         <div className="bg-white border rounded-2xl overflow-x-auto">
-          {tab === 'students' ? <table className="w-full text-sm text-left"><thead className="bg-slate-50 text-slate-600"><tr>{['Học sinh', 'Lớp', 'Trạng thái', 'Liên hệ phụ huynh', ''].map((h, i) => <th key={i} className="px-4 py-3">{h}</th>)}</tr></thead>
+          {tab === 'students' ? <table className="w-full text-sm text-left"><thead className="bg-teal-600 text-white font-bold"><tr>{['Học sinh', 'Lớp', 'Trạng thái', 'Liên hệ phụ huynh', ''].map((h, i) => <th key={i} className="px-4 py-3 text-white">{h}</th>)}</tr></thead>
             <tbody>{visibleEnrollments.map(enrollment => <tr key={enrollment.id} className="border-t">
               <td className="px-4 py-4"><p className="font-bold">{enrollment.studentSnapshot.fullName}</p><p className="text-xs text-slate-500 mt-1">{enrollment.studentSnapshot.studentCode} · {dateText(enrollment.studentSnapshot.dateOfBirth)}</p></td>
               <td className="px-4 py-4">{enrollment.className}</td><td className="px-4 py-4">{labels[enrollment.status]}</td>
               <td className="px-4 py-4">{enrollment.parentContacts.length ? enrollment.parentContacts.map((parent, i) => <p key={i}>{parent.fullName} · {parent.phone || 'Chưa có số điện thoại'}{parent.isPrimary ? ' (chính)' : ''}</p>) : <span className="text-slate-400">Chưa có liên hệ</span>}</td>
               <td className="px-4 py-4"><div className="flex items-center gap-2"><Link to={`/children?search=${encodeURIComponent(enrollment.studentSnapshot.studentCode)}`} className="text-teal-700 font-semibold hover:underline">Hồ sơ học sinh</Link><span className="text-slate-300">·</span><button className="text-slate-500 hover:text-slate-700 font-semibold" onClick={() => editStudent(enrollment)}>Chỉnh sửa</button></div></td>
             </tr>)}{!visibleEnrollments.length && <tr><td colSpan={5} className="p-8 text-center text-slate-500">Chưa có học sinh phù hợp.</td></tr>}</tbody></table>
-          : <table className="w-full text-sm text-left"><thead className="bg-slate-50 text-slate-600"><tr>{['Phụ huynh', 'Liên hệ', 'Học sinh / Lớp', ''].map((h, i) => <th key={i} className="px-4 py-3">{h}</th>)}</tr></thead><tbody>
+          : <table className="w-full text-sm text-left"><thead className="bg-teal-600 text-white font-bold"><tr>{['Phụ huynh', 'Liên hệ', 'Học sinh / Lớp', ''].map((h, i) => <th key={i} className="px-4 py-3 text-white">{h}</th>)}</tr></thead><tbody>
             {parents.map(({ enrollment, parent, index }) => <tr key={`${enrollment.id}-${index}`} className="border-t"><td className="px-4 py-4"><p className="font-bold">{parent.fullName}</p><p className="text-xs text-slate-500">{relation[parent.relationship]}{parent.isPrimary ? ' · Liên hệ chính' : ''}</p></td>
               <td className="px-4 py-4">{parent.phone || 'Chưa có số điện thoại'}{parent.email && <p className="text-xs text-slate-500">{parent.email}</p>}</td>
               <td className="px-4 py-4">{enrollment.studentSnapshot.fullName}<p className="text-xs text-slate-500">{enrollment.className}</p></td><td className="px-4 py-4"><button className="text-teal-700 font-semibold" onClick={() => editStudent(enrollment)}>Chỉnh sửa</button></td></tr>)}

@@ -15,26 +15,18 @@ export interface SnackMenuDayItem {
 export interface SnackServiceItem {
   id: string;
   name: string;
-  description: string;
   serviceType: string;
   billingCycle: string;
   pricePerUnit: number;
   weeklyPrice?: number;
   feeAmount?: number;
-  monthlyEstimatedPrice?: number;
   weekNumber?: number | null;
   startDate?: string;
   endDate?: string;
-  appliedGrade: string;
   registrationPeriod: string;
-  appliedMonth?: string;
   registeredCount: number;
-  targetCount: number;
-  percentage: number;
-  progressNote: string;
   status: 'OPEN' | 'UPCOMING' | 'CLOSED';
   statusLabel: string;
-  badges: string[];
   isActive: boolean;
   paidCount?: number;
   totalRevenue?: number;
@@ -88,14 +80,7 @@ export interface SnackServicesSummary {
     remaining: number;
   };
   revenue: {
-    expectedMonthly: number;
     collected: number;
-    collectedPercentage: number;
-  };
-  satisfaction: {
-    ratePercent: number;
-    ratingScore: number;
-    totalReviews: number;
   };
 }
 

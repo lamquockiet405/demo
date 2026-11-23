@@ -57,6 +57,8 @@ export interface ChildItem {
 
 export interface ChildrenStats {
   totalChildren: number;
+  linkedParentCount: number;
+  unlinkedParentCount: number;
   allergicCount: number;
   severeCount: number;
   allergyRate: number;
@@ -114,8 +116,13 @@ export const childrenApi = {
     return { items, total: Number(raw?.total ?? raw?.meta?.total ?? items.length) };
   },
 
-  getStats: async (): Promise<ChildrenStats> => {
-    const res = await apiClient.get<ChildrenStats>('/children/stats');
+  getStats: async (params?: {
+    academicYearId?: string;
+    allAcademicYears?: boolean;
+    classId?: string;
+    search?: string;
+  }): Promise<ChildrenStats> => {
+    const res = await apiClient.get<ChildrenStats>('/children/stats', { params });
     return res.data;
   },
 

@@ -49,9 +49,17 @@ export const ExportHistoryReportModal: React.FC<ExportHistoryReportModalProps> =
       }
       const ok = await downloadExcel(`Lich_su_diem_danh_${data.period.startDate}_${data.period.endDate}.xlsx`, [
         ['Ngày', 'Mã học sinh', 'Họ và tên', 'Bữa ăn', 'Điểm danh', 'Mức ăn', 'Món ăn', ...(includeWater ? ['Lượng nước uống'] : []), ...(includeNotes ? ['Ghi chú giáo viên'] : [])],
-        ...items.map(item => [item.date, item.child.studentCode, item.child.fullName, item.mealSession, item.attendanceStatusLabel,
-          ({ ALL: 'Ăn hết', HALF: 'Ăn một nửa', NONE: 'Không ăn', ABSENT: 'Vắng' } as Record<string, string>)[item.portionConsumed] || item.portionConsumed,
-          item.dishesServed.join('\n'), ...(includeWater ? [item.waterIntake] : []), ...(includeNotes ? [item.teacherNote] : [])]),
+        ...items.map(item => [
+          item.date || '',
+          item.child?.studentCode || '',
+          item.child?.fullName || '',
+          item.mealSession || '',
+          item.attendanceStatusLabel || '',
+          ({ ALL: 'Ăn hết', HALF: 'Ăn một nửa', NONE: 'Không ăn', ABSENT: 'Vắng' } as Record<string, string>)[item.portionConsumed] || item.portionConsumed || '',
+          Array.isArray(item.dishesServed) ? item.dishesServed.join(', ') : (item.dishesServed || ''),
+          ...(includeWater ? [item.waterIntake || ''] : []),
+          ...(includeNotes ? [item.teacherNote || ''] : []),
+        ]),
       ], `Lịch sử điểm danh và sức ăn - ${data.classInfo.name}`);
       setExportedSuccess(ok);
     } catch (error: any) {

@@ -88,6 +88,7 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
     'BREAKFAST',
     'LUNCH',
     'AFTERNOON_SNACK',
+    'LATE_SNACK',
   ];
   const [selectedDay, setSelectedDay] = useState<number | 'AVG'>(initialDay);
   const [distributionOverview, setDistributionOverview] =
@@ -135,8 +136,12 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
         waterMin,
         waterMax,
         waterAvg,
-        atSchoolMinPct: std.atSchoolPct.min,
-        atSchoolMaxPct: std.atSchoolPct.max,
+        atSchoolMinPct:
+          distributionOverview.totals?.atSchool?.energyPct?.min ??
+          std.atSchoolPct.min,
+        atSchoolMaxPct:
+          distributionOverview.totals?.atSchool?.energyPct?.max ??
+          std.atSchoolPct.max,
         atSchoolWaterMinPct: std.atSchoolWaterPct?.min ?? (isToddler ? 60 : 50),
         atSchoolWaterMaxPct: std.atSchoolWaterPct?.max ?? (isToddler ? 70 : 55),
         standardName: std.standardName,
@@ -236,13 +241,24 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
             {
               key: 'AFTERNOON_SNACK',
               aliases: ['AFTERNOON_SNACK'],
-              name: 'Bữa chiều',
+              name: 'Buổi phụ',
               time: '14:30',
               displayOrder: 3,
-              stdRange: { min: 25, max: 30 },
-              waterMl: { min: 150, max: 250 },
-              waterPct: { min: 20, max: 25 },
+              stdRange: { min: 20, max: 25 },
+              waterMl: { min: 100, max: 150 },
+              waterPct: { min: 15, max: 20 },
               ...MEAL_STYLE_MAP.AFTERNOON_SNACK,
+            },
+            {
+              key: 'LATE_SNACK',
+              aliases: ['LATE_SNACK'],
+              name: 'Buổi chiều xế',
+              time: '17:00',
+              displayOrder: 4,
+              stdRange: { min: 5, max: 10 },
+              waterMl: { min: 50, max: 100 },
+              waterPct: { min: 5, max: 10 },
+              ...MEAL_STYLE_MAP.LATE_SNACK,
             },
           ]
         : [
@@ -271,23 +287,35 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
             {
               key: 'AFTERNOON_SNACK',
               aliases: ['AFTERNOON_SNACK'],
-              name: 'Bữa phụ chiều',
+              name: 'Buổi phụ',
               time: '14:30',
               displayOrder: 3,
               stdRange: { min: 10, max: 15 },
-              waterMl: { min: 250, max: 350 },
-              waterPct: { min: 15, max: 20 },
+              waterMl: { min: 150, max: 200 },
+              waterPct: { min: 10, max: 15 },
               ...MEAL_STYLE_MAP.AFTERNOON_SNACK,
+            },
+            {
+              key: 'LATE_SNACK',
+              aliases: ['LATE_SNACK'],
+              name: 'Buổi chiều xế',
+              time: '17:00',
+              displayOrder: 4,
+              stdRange: { min: 5, max: 10 },
+              waterMl: { min: 100, max: 150 },
+              waterPct: { min: 5, max: 10 },
+              ...MEAL_STYLE_MAP.LATE_SNACK,
             },
           ];
     }
 
     return rawSlots.filter(
       (slot) =>
-        schoolMealTimes.includes(slot.key) ||
-        menu?.menuDishes?.some(
-          (d) => !d.deletedAt && slot.aliases.includes(d.mealTime),
-        ),
+        Number(slot.stdRange.max) > 0 &&
+        (schoolMealTimes.includes(slot.key) ||
+          menu?.menuDishes?.some(
+            (d) => !d.deletedAt && slot.aliases.includes(d.mealTime),
+          )),
     );
   }, [distributionOverview, isToddler, schoolMealTimes, menu]);
 
@@ -542,20 +570,61 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
   // the number or order of hooks invoked by this component.
   if (!isOpen || typeof document === 'undefined') return null;
 
+  // Phân tách số liệu theo 2 Quy định: QĐ 1 (không ăn xế) vs QĐ 2 (có ăn xế)
+  const lateSnackMeal = currentData.meals.find(
+    (m) => m.key === 'LATE_SNACK' || m.key === 'AFTERNOON_MAIN',
+  );
+  const hasLateSnack = Boolean(lateSnackMeal && lateSnackMeal.calories > 0);
+
+  const qd1Meals = currentData.meals.filter(
+    (m) => m.key !== 'LATE_SNACK' && m.key !== 'AFTERNOON_MAIN',
+  );
+  const qd1Calo =
+    Math.round(qd1Meals.reduce((s, m) => s + m.calories, 0) * 10) / 10;
+  const qd1P =
+    Math.round(qd1Meals.reduce((s, m) => s + m.proteinG, 0) * 10) / 10;
+  const qd1L =
+    Math.round(qd1Meals.reduce((s, m) => s + m.fatG, 0) * 10) / 10;
+  const qd1G =
+    Math.round(qd1Meals.reduce((s, m) => s + m.carbG, 0) * 10) / 10;
+  const qd1MacroCalo = qd1P * 4 + qd1L * 9 + qd1G * 4 || qd1Calo || 1;
+  const qd1PPct = Math.round(((qd1P * 4) / qd1MacroCalo) * 100);
+  const qd1LPct = Math.round(((qd1L * 9) / qd1MacroCalo) * 100);
+  const qd1GPct = Math.max(0, 100 - qd1PPct - qd1LPct);
+  const qd1PctOfAllDay =
+    allDayStandard.avg > 0
+      ? Math.round((qd1Calo / allDayStandard.avg) * 1000) / 10
+      : 0;
+
+  let qd1WaterMin = 0;
+  let qd1WaterMax = 0;
+  for (const m of qd1Meals) {
+    if (m.waterMl) {
+      qd1WaterMin += Number(m.waterMl.min) || 0;
+      qd1WaterMax += Number(m.waterMl.max) || 0;
+    }
+  }
+  if (qd1WaterMin === 0 && totalAtSchoolWater.min > 0) {
+    qd1WaterMin = Math.round(totalAtSchoolWater.min * 0.75);
+    qd1WaterMax = Math.round(totalAtSchoolWater.max * 0.75);
+  }
+
+  // QĐ 2 (có ăn xế)
+  const qd2Calo = currentData.totalDay.calo;
+  const qd2P = currentData.totalDay.p;
+  const qd2L = currentData.totalDay.l;
+  const qd2G = currentData.totalDay.g;
+  const qd2MacroCalo = qd2P * 4 + qd2L * 9 + qd2G * 4 || qd2Calo || 1;
+  const qd2PPct = Math.round(((qd2P * 4) / qd2MacroCalo) * 100);
+  const qd2LPct = Math.round(((qd2L * 9) / qd2MacroCalo) * 100);
+  const qd2GPct = Math.max(0, 100 - qd2PPct - qd2LPct);
+  const qd2PctOfAllDay = atSchoolPctOfAllDay;
+
   // Tính tỷ lệ P:L:G thực tế đạt được của toàn ngày tại trường
-  const macroCalo =
-    currentData.totalDay.p * 4 +
-    currentData.totalDay.l * 9 +
-    currentData.totalDay.g * 4;
-  const pPct =
-    macroCalo > 0
-      ? Math.round(((currentData.totalDay.p * 4) / macroCalo) * 100)
-      : 0;
-  const lPct =
-    macroCalo > 0
-      ? Math.round(((currentData.totalDay.l * 9) / macroCalo) * 100)
-      : 0;
-  const gPct = macroCalo > 0 ? Math.max(0, 100 - pPct - lPct) : 0;
+  const macroCalo = qd2MacroCalo;
+  const pPct = qd2PPct;
+  const lPct = qd2LPct;
+  const gPct = qd2GPct;
 
   return createPortal(
     <div className="fixed !m-0 inset-0 z-[10000] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
@@ -685,18 +754,28 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
                   'Cơ cấu phân bổ % Calo các bữa so với nhu cầu cả ngày (100%):',
                 )}
               </span>
-              <div className="flex flex-wrap items-center gap-2.5 text-[11px] font-semibold text-slate-500">
-                <span>
-                  {translateText('Tại trường:')}{' '}
-                  <strong className="text-sky-700">
-                    {atSchoolPctOfAllDay}%
-                  </strong>{' '}
-                  ({translateText('Chuẩn')} {allDayStandard.atSchoolMinPct}–{allDayStandard.atSchoolMaxPct}%)
-                </span>
-                <span className="text-slate-300">•</span>
-                <span className="inline-flex items-center gap-1 font-bold text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded-lg">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500">
+                {hasLateSnack ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-900 border border-teal-200 px-2 py-0.5 rounded-lg text-[10.5px]">
+                      <strong className="font-black">QĐ 1:</strong> {qd1Calo} Kcal ({qd1PctOfAllDay}%) • P:L:G {qd1PPct}:{qd1LPct}:{qd1GPct}%
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-lg text-[10.5px]">
+                      <strong className="font-black">QĐ 2 (+xế):</strong> {qd2Calo} Kcal ({qd2PctOfAllDay}%) • P:L:G {qd2PPct}:{qd2LPct}:{qd2GPct}%
+                    </span>
+                  </>
+                ) : (
+                  <span>
+                    {translateText('Tại trường:')}{' '}
+                    <strong className="text-sky-700">
+                      {atSchoolPctOfAllDay}%
+                    </strong>{' '}
+                    ({translateText('Chuẩn')} {allDayStandard.atSchoolMinPct}–{allDayStandard.atSchoolMaxPct}%)
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1 font-bold text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded-lg text-[10.5px]">
                   <Droplets className="w-3 h-3 text-cyan-600" />
-                  {translateText('Nước tại trường:')} {totalAtSchoolWater.min} – {totalAtSchoolWater.max} ml
+                  {translateText('Nước:')} {totalAtSchoolWater.min}–{totalAtSchoolWater.max} ml
                 </span>
               </div>
             </div>
@@ -921,69 +1000,180 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
                   })
                 )}
 
-                {/* HÀNG TỔNG CỘNG TẠI TRƯỜNG */}
-                <tr className="bg-sky-50/80 border-t-2 border-sky-200 text-xs font-bold">
-                  <td
-                    colSpan={3}
-                    className="py-3 px-4 font-black text-sky-950"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Utensils className="w-4 h-4 text-sky-700" />
-                      <span>
-                        {translateText('TỔNG CỘNG CÁC BỮA TẠI TRƯỜNG')}
+                {/* HÀNG TỔNG CỘNG TẠI TRƯỜNG THEO 2 QUY ĐỊNH */}
+                {hasLateSnack ? (
+                  <>
+                    {/* HÀNG TỔNG CỘNG QUY ĐỊNH 1: BÁN TRÚ TIÊU CHUẨN (KHÔNG ĂN XẾ) */}
+                    <tr className="bg-teal-50/80 border-t-2 border-teal-300 text-xs font-bold">
+                      <td colSpan={3} className="py-3 px-4 font-black text-teal-950">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-teal-600 shrink-0"></span>
+                          <span className="text-teal-900 font-black">
+                            {translateText('QĐ 1: BÁN TRÚ TIÊU CHUẨN (Sáng, Trưa, Phụ - Không ăn xế)')}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-teal-950 text-sm">
+                        {qd1Calo}{' '}
+                        <span className="text-[10px] font-normal">Kcal</span>
+                      </td>
+                      <td className="py-3 px-3 text-center font-black text-teal-950 text-sm">
+                        {qd1PctOfAllDay}%
+                      </td>
+                      <td className="py-3 px-3 text-center text-teal-800 font-bold">
+                        50% – 58%
+                        <span className="block text-[9.5px] font-normal text-teal-700">
+                          (615–726 Kcal)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-cyan-950 text-xs">
+                        {qd1WaterMin} – {qd1WaterMax} ml
+                        <span className="block text-[10px] font-semibold text-cyan-800">
+                          (~50–60%)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        {(isToddler ? (qd1Calo >= 465 && qd1Calo <= 560) : (qd1Calo >= 615 && qd1Calo <= 726)) ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            <CheckCircle2 className="w-3 h-3" />{' '}
+                            {translateText('Cân đối')}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                            <AlertTriangle className="w-3 h-3" />{' '}
+                            {translateText('Chênh lệch')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-blue-950">
+                        {qd1P}g{' '}
+                        <span className="text-[10px] text-blue-700 font-normal">
+                          ({qd1PPct}%)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-amber-950">
+                        {qd1L}g{' '}
+                        <span className="text-[10px] text-amber-700 font-normal">
+                          ({qd1LPct}%)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-emerald-950">
+                        {qd1G}g{' '}
+                        <span className="text-[10px] text-emerald-700 font-normal">
+                          ({qd1GPct}%)
+                        </span>
+                      </td>
+                    </tr>
+
+                    {/* HÀNG TỔNG CỘNG QUY ĐỊNH 2: BÁN TRÚ TOÀN DIỆN (CÓ ĂN XẾ) */}
+                    <tr className="bg-amber-50/80 border-t border-amber-300 text-xs font-bold">
+                      <td colSpan={3} className="py-3 px-4 font-black text-amber-950">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-600 shrink-0"></span>
+                          <span className="text-amber-900 font-black">
+                            {translateText('QĐ 2: BÁN TRÚ TOÀN DIỆN (Cộng suất ăn xế chiều 17:00)')}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-amber-950 text-sm">
+                        {qd2Calo}{' '}
+                        <span className="text-[10px] font-normal">Kcal</span>
+                      </td>
+                      <td className="py-3 px-3 text-center font-black text-amber-950 text-sm">
+                        {qd2PctOfAllDay}%
+                      </td>
+                      <td className="py-3 px-3 text-center text-amber-800 font-bold">
+                        62% – 73%
+                        <span className="block text-[9.5px] font-normal text-amber-700">
+                          (765–926 Kcal)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-cyan-950 text-xs">
+                        {totalAtSchoolWater.min} – {totalAtSchoolWater.max} ml
+                        <span className="block text-[10px] font-semibold text-cyan-800">
+                          (~{allDayStandard.atSchoolWaterMinPct}–{allDayStandard.atSchoolWaterMaxPct}%)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        {(isToddler ? (qd2Calo >= 580 && qd2Calo <= 720) : (qd2Calo >= 762 && qd2Calo <= 963)) ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            <CheckCircle2 className="w-3 h-3" />{' '}
+                            {translateText('Cân đối')}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                            <AlertTriangle className="w-3 h-3" />{' '}
+                            {translateText('Chênh lệch')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-blue-950">
+                        {qd2P}g{' '}
+                        <span className="text-[10px] text-blue-700 font-normal">
+                          ({qd2PPct}%)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-amber-950">
+                        {qd2L}g{' '}
+                        <span className="text-[10px] text-amber-700 font-normal">
+                          ({qd2LPct}%)
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-emerald-950">
+                        {qd2G}g{' '}
+                        <span className="text-[10px] text-emerald-700 font-normal">
+                          ({qd2GPct}%)
+                        </span>
+                      </td>
+                    </tr>
+                  </>
+                ) : (
+                  /* HÀNG TỔNG CỘNG TẠI TRƯỜNG ĐƠN */
+                  <tr className="bg-sky-50/80 border-t-2 border-sky-200 text-xs font-bold">
+                    <td colSpan={3} className="py-3 px-4 font-black text-sky-950">
+                      <div className="flex items-center gap-2">
+                        <Utensils className="w-4 h-4 text-sky-700" />
+                        <span>{translateText('TỔNG CỘNG CÁC BỮA TẠI TRƯỜNG')}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-sky-950 text-sm">
+                      {totalAtSchoolCalo} <span className="text-[10px] font-normal">Kcal</span>
+                    </td>
+                    <td className="py-3 px-3 text-center font-black text-sky-950 text-sm">
+                      {atSchoolPctOfAllDay}%
+                    </td>
+                    <td className="py-3 px-3 text-center text-sky-800 font-bold">
+                      {allDayStandard.atSchoolMinPct}% – {allDayStandard.atSchoolMaxPct}%
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-cyan-950 text-xs">
+                      {totalAtSchoolWater.min} – {totalAtSchoolWater.max} ml
+                      <span className="block text-[10px] font-semibold text-cyan-800">
+                        (~{allDayStandard.atSchoolWaterMinPct}–{allDayStandard.atSchoolWaterMaxPct}%)
                       </span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-3 text-right font-black text-sky-950 text-sm">
-                    {totalAtSchoolCalo}{' '}
-                    <span className="text-[10px] font-normal">Kcal</span>
-                  </td>
-                  <td className="py-3 px-3 text-center font-black text-sky-950 text-sm">
-                    {atSchoolPctOfAllDay}%
-                  </td>
-                  <td className="py-3 px-3 text-center text-sky-800 font-bold">
-                    {allDayStandard.atSchoolMinPct}% –{' '}
-                    {allDayStandard.atSchoolMaxPct}%
-                  </td>
-                  <td className="py-3 px-3 text-right font-black text-cyan-950 text-xs">
-                    {totalAtSchoolWater.min} – {totalAtSchoolWater.max} ml
-                    <span className="block text-[10px] font-semibold text-cyan-800">
-                      (~{allDayStandard.atSchoolWaterMinPct}–{allDayStandard.atSchoolWaterMaxPct}%)
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    {atSchoolPctOfAllDay >= allDayStandard.atSchoolMinPct &&
-                    atSchoolPctOfAllDay <= allDayStandard.atSchoolMaxPct ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                        <CheckCircle2 className="w-3 h-3" />{' '}
-                        {translateText('Cân đối')}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                        <AlertTriangle className="w-3 h-3" />{' '}
-                        {translateText('Chênh lệch')}
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3 px-3 text-right font-black text-blue-950">
-                    {currentData.totalDay.p}g{' '}
-                    <span className="text-[10px] text-blue-700 font-normal">
-                      ({pPct}%)
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right font-black text-amber-950">
-                    {currentData.totalDay.l}g{' '}
-                    <span className="text-[10px] text-amber-700 font-normal">
-                      ({lPct}%)
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right font-black text-emerald-950">
-                    {currentData.totalDay.g}g{' '}
-                    <span className="text-[10px] text-emerald-700 font-normal">
-                      ({gPct}%)
-                    </span>
-                  </td>
-                </tr>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      {atSchoolPctOfAllDay >= allDayStandard.atSchoolMinPct &&
+                      atSchoolPctOfAllDay <= allDayStandard.atSchoolMaxPct ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          <CheckCircle2 className="w-3 h-3" /> {translateText('Cân đối')}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                          <AlertTriangle className="w-3 h-3" /> {translateText('Chênh lệch')}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-blue-950">
+                      {currentData.totalDay.p}g <span className="text-[10px] text-blue-700 font-normal">({pPct}%)</span>
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-amber-950">
+                      {currentData.totalDay.l}g <span className="text-[10px] text-amber-700 font-normal">({lPct}%)</span>
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-emerald-950">
+                      {currentData.totalDay.g}g <span className="text-[10px] text-emerald-700 font-normal">({gPct}%)</span>
+                    </td>
+                  </tr>
+                )}
 
                 {/* HÀNG NHU CẦU Ở NHÀ BỔ SUNG */}
                 <tr className="bg-slate-50/70 border-t border-slate-200 text-xs text-slate-600">

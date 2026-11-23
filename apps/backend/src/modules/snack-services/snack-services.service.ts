@@ -191,7 +191,68 @@ export class SnackServicesService implements OnModuleInit {
   }
 
   getDefaultSnackMenuSchedule(periodName?: string): SnackMenuDayItem[] {
-    return [];
+    return [
+      {
+        dayOfWeek: 2,
+        dayLabel: "Thứ Hai",
+        servingTime: "16:30 - 17:00",
+        mainDish: "Cháo cá, bí đỏ",
+        drinkItem: "Nước chanh dây, hạt chia, mật ong",
+        fruitOrSide: "Chuối Laba chín cây",
+        caloriesKcal: 125,
+        proteinG: 5.8,
+        calciumMg: 45,
+        allergenTags: ["Hải sản"],
+      },
+      {
+        dayOfWeek: 3,
+        dayLabel: "Thứ Ba",
+        servingTime: "16:30 - 17:00",
+        mainDish: "Hủ tiếu nam vang (mực, tim, gan, tôm)- cần tây",
+        drinkItem: "Sâm bí đao, hạt chia, đường phèn",
+        fruitOrSide: "Dưa hấu cắt lát",
+        caloriesKcal: 135,
+        proteinG: 6.2,
+        calciumMg: 50,
+        allergenTags: ["Hải sản"],
+      },
+      {
+        dayOfWeek: 4,
+        dayLabel: "Thứ Tư",
+        servingTime: "16:30 - 17:00",
+        mainDish: "Miến gà cần tây, cà rốt",
+        drinkItem: "Nước ép cam",
+        fruitOrSide: "Thanh long ruột đỏ",
+        caloriesKcal: 128,
+        proteinG: 5.5,
+        calciumMg: 48,
+        allergenTags: [],
+      },
+      {
+        dayOfWeek: 5,
+        dayLabel: "Thứ Năm",
+        servingTime: "16:30 - 17:00",
+        mainDish: "Bánh mexico thịt",
+        drinkItem: "Sữa trái cây",
+        fruitOrSide: "Táo Envy cắt lát",
+        caloriesKcal: 145,
+        proteinG: 6.5,
+        calciumMg: 85,
+        allergenTags: ["Gluten", "Sữa"],
+      },
+      {
+        dayOfWeek: 6,
+        dayLabel: "Thứ Sáu",
+        servingTime: "16:30 - 17:00",
+        mainDish: "Bánh bao xá xíu",
+        drinkItem: "Sữa đậu xanh",
+        fruitOrSide: "Đu đủ chín đỏ",
+        caloriesKcal: 145,
+        proteinG: 6.8,
+        calciumMg: 80,
+        allergenTags: ["Gluten"],
+      },
+    ];
   }
 
   async getMenuScheduleForPeriod(
@@ -221,11 +282,11 @@ export class SnackServicesService implements OnModuleInit {
        LEFT JOIN dish_nutrition dn ON dn.dish_id = d.id
        WHERE m.week_start_date = $1
          AND m.week_end_date = $2
-         AND m.status IN ('PUBLISHED', 'ACTIVE', 'APPROVED')
+         AND m.status IN ('PUBLISHED', 'ACTIVE', 'APPROVED', 'DRAFT')
          AND mv.version_number = (
            SELECT MAX(mv2.version_number) FROM menu_versions mv2 WHERE mv2.menu_id = m.id
          )
-         AND mm.meal_type = 'AFTERNOON_SNACK'
+         AND mm.meal_type IN ('AFTERNOON_SNACK', 'LATE_SNACK')
        ORDER BY md.day_of_week ASC, mds.display_order ASC, mds.id ASC`,
       [period.startDate, period.endDate],
     );
@@ -241,16 +302,30 @@ export class SnackServicesService implements OnModuleInit {
       const dayLabels = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
       return [...byDay.entries()].map(([dayOfWeek, dishes]) => {
         const names = dishes.map((dish) => String(dish.dishName));
-        const drink = dishes.find((dish) => dish.categoryCode === "DRINK");
+        const drink = dishes.find(
+          (dish) =>
+            dish.categoryCode === "DRINK" ||
+            String(dish.dishName).toLowerCase().startsWith("nước ") ||
+            String(dish.dishName).toLowerCase().startsWith("sâm ") ||
+            String(dish.dishName).toLowerCase().startsWith("sữa "),
+        );
         const side = dishes.find((dish) => ["DESSERT", "FRUIT"].includes(dish.categoryCode));
-        const main = dishes.find((dish) => dish !== drink && dish !== side) || dishes[0];
+        const main =
+          dishes.find(
+            (dish) =>
+              dish.categoryCode === "SNACK_AFTERNOON" ||
+              (!["DRINK", "DESSERT", "FRUIT"].includes(dish.categoryCode) &&
+                !String(dish.dishName).toLowerCase().startsWith("nước ") &&
+                !String(dish.dishName).toLowerCase().startsWith("sâm ") &&
+                !String(dish.dishName).toLowerCase().startsWith("sữa ")),
+          ) || dishes[0];
         return {
           dayOfWeek,
           dayLabel: dayLabels[dayOfWeek - 2] || `Ngày ${dayOfWeek}`,
           servingTime: "16:30 - 17:00",
           mainDish: main?.dishName || names[0] || "",
-          drinkItem: drink?.dishName || "",
-          fruitOrSide: side?.dishName || dishes.find((dish) => dish !== main && dish !== drink)?.dishName || "",
+          drinkItem: "",
+          fruitOrSide: side?.dishName || "",
           caloriesKcal: Math.round(dishes.reduce((sum, dish) => sum + Number(dish.caloriesKcal || 0), 0)),
           proteinG: Math.round(dishes.reduce((sum, dish) => sum + Number(dish.proteinG || 0), 0) * 10) / 10,
           calciumMg: Math.round(dishes.reduce((sum, dish) => sum + Number(dish.calciumMg || 0), 0) * 10) / 10,
@@ -260,7 +335,10 @@ export class SnackServicesService implements OnModuleInit {
       });
     }
 
-    return (await this.options(Number(periodId))).menuSchedule || [];
+    const savedSchedule = (await this.options(Number(periodId))).menuSchedule;
+    return savedSchedule && savedSchedule.length > 0
+      ? savedSchedule
+      : this.getDefaultSnackMenuSchedule(periodName);
   }
 
   async findAll(
@@ -284,12 +362,13 @@ export class SnackServicesService implements OnModuleInit {
     const whereClause: any = {};
     if (academicYearId) {
       const [year] = await this.periodRepo.manager.query(
-        `SELECT start_date, end_date FROM academic_year WHERE id = $1`,
+        `SELECT start_date::text AS start_date, end_date::text AS end_date FROM academic_year WHERE id = $1`,
         [academicYearId],
       );
       if (year) {
         whereClause.startDate = Raw(
-          (alias) => `${alias} >= '${year.start_date}' AND ${alias} <= '${year.end_date}'`,
+          (alias) => `${alias} >= :yearStartDate AND ${alias} <= :yearEndDate`,
+          { yearStartDate: year.start_date, yearEndDate: year.end_date },
         );
       }
     } else if (academicYearId === null) {
@@ -1081,14 +1160,20 @@ export class SnackServicesService implements OnModuleInit {
   /**
    * Dành cho Phụ huynh: Xem các gói ăn xế đang mở công bố và Lịch Ăn Xế (chỉ hiển thị khi đã đóng tiền PAID)
    */
-  async getParentSnackOverview(parentId: number) {
+  async getParentSnackOverview(parentId: number, studentId?: number) {
     const allPeriods = await this.periodRepo.find({
       order: { id: "DESC" },
     });
 
     let child: Child | null = null;
     try {
-      if (typeof (this.childRepo as any).query === "function") {
+      if (studentId) {
+        child = await this.childRepo.findOne({
+          where: { id: studentId },
+          relations: ["class"],
+        });
+      }
+      if (!child && typeof (this.childRepo as any).query === "function") {
         const rows = await this.childRepo.query(
           `SELECT student_id FROM student_parents WHERE parent_id = $1 LIMIT 1`,
           [parentId],
@@ -1105,25 +1190,28 @@ export class SnackServicesService implements OnModuleInit {
     }
 
     if (!child) {
+      const defaultPreviewSchedule = allPeriods.length > 0
+        ? await this.getMenuScheduleForPeriod(Number(allPeriods[0].id), allPeriods[0].name)
+        : [];
       return {
         hasPaidAnyPackage: false,
         student: null,
         paidPackageName: null,
-        publishedPackages: allPeriods
+        publishedPackages: await Promise.all(allPeriods
           .filter((p) => p.status === "OPEN")
-          .map((p) => ({
+          .map(async (p) => ({
             periodId: Number(p.id),
-            periodName: p.name,
+            periodName: this.normalizeBreakfastText(p.name),
             periodStatus: p.status,
             startDate: p.startDate,
             endDate: p.endDate,
             feeAmount: Number(p.feeAmount) || 0,
             description: (p as any).description || "",
             isPaid: false,
-            canViewSchedule: false,
-            menuSchedule: [],
-          })),
-        activeSchedule: [],
+            canViewSchedule: true,
+            menuSchedule: await this.getMenuScheduleForPeriod(Number(p.id), p.name),
+          }))),
+        activeSchedule: defaultPreviewSchedule,
       };
     }
 
@@ -1171,14 +1259,17 @@ export class SnackServicesService implements OnModuleInit {
             registrationId: reg ? Number(reg.id) : null,
             paymentStatus: reg ? reg.status : "NOT_REGISTERED",
             isPaid,
-            canViewSchedule: isPaid,
-            // Ràng buộc nghiệp vụ: Phụ huynh khi đóng tiền sẽ thấy được lịch ăn sáng, không đóng là không thấy
-            menuSchedule: isPaid
-              ? await this.getMenuScheduleForPeriod(Number(p.id), p.name)
-              : [],
+            canViewSchedule: true,
+            // Cho phép phụ huynh xem trước thực đơn suất ăn xế của gói
+            menuSchedule: await this.getMenuScheduleForPeriod(Number(p.id), p.name),
           };
         }),
     );
+
+    const defaultPreviewSchedule =
+      allPeriods.length > 0
+        ? await this.getMenuScheduleForPeriod(Number(allPeriods[0].id), allPeriods[0].name)
+        : [];
 
     return {
       success: true,
@@ -1196,7 +1287,7 @@ export class SnackServicesService implements OnModuleInit {
           Number(paidRegistrations[0].periodId),
           paidRegistrations[0].period?.name,
         )
-        : [],
+        : defaultPreviewSchedule,
       paidPackageName: hasPaidAnyPackage
         ? this.normalizeBreakfastText(paidRegistrations[0].period?.name)
         : null,

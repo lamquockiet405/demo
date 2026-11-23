@@ -103,47 +103,39 @@ export const ParentChildAlertsPage: React.FC = () => {
         }
       />
 
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 space-y-6 flex-1">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link to="/child-menu-consumption" className="hover:text-teal-700">{translateText("Cổng phụ huynh")}</Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="font-semibold text-slate-700">{translateText("Tổng hợp Cảnh báo của con")}</span>
-        </div>
-
-        {/* Hero banner */}
-        <div className="rounded-3xl bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Giám sát an toàn trẻ em")}</span>
-              <span className="text-xs text-teal-200">{translateText("Bảo mật thông tin & cá nhân hóa")}</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-              <Bell className="w-8 h-8 text-amber-300" />{translateText("Tổng Hợp Cảnh Báo An Toàn & Sức Khỏe Của Bé")}</h1>
-            <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Kiểm tra mức độ an toàn của thực đơn hôm nay theo hồ sơ dị ứng, báo cáo tiêu thụ lượng ăn của cô giáo, tình trạng phát triển thể chất và hướng dẫn dinh dưỡng.")}</p>
+      <main className="w-full px-4 sm:px-6 lg:px-8 py-7 space-y-6 flex-1">
+        {/* Action Toolbar */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            {children.length > 1 && (
+              <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-2xs">
+                <Baby className="w-4 h-4 text-teal-600" />
+                <select
+                  aria-label={translateText("Chọn học sinh")}
+                  value={selectedChildId}
+                  onChange={(e) => setSelectedChildId(e.target.value)}
+                  className="text-xs font-bold text-slate-800 bg-transparent outline-none cursor-pointer"
+                >
+                  {children.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.fullName} ({c.className || c.class?.name || translateText("Lớp mầm non")})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
-          {/* Child Selector */}
-          {children.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-white min-w-[260px]">
-              <label htmlFor="alert-child-select" className="text-xs font-bold text-teal-100 block mb-1">{translateText("Chọn bé theo dõi:")}</label>
-              <select
-                id="alert-child-select"
-                aria-label={translateText("Chọn học sinh theo dõi")}
-                value={selectedChildId}
-                onChange={(e) => setSelectedChildId(e.target.value)}
-                className="w-full bg-white text-slate-900 font-bold rounded-xl px-3 py-2 text-sm outline-none cursor-pointer"
-              >
-                {children.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName} ({c.className || c.class?.name || translateText("Lớp mầm non")})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => void loadAlerts()}
+            disabled={loading}
+            className="px-3.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
+            <span>{translateText("Làm mới")}</span>
+          </button>
         </div>
-
         {/* Loading state */}
         {loading && (
           <div className="flex min-h-[250px] flex-col items-center justify-center gap-3 text-slate-500">
@@ -221,9 +213,9 @@ export const ParentChildAlertsPage: React.FC = () => {
                     <Utensils className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-black uppercase text-teal-700 block">{translateText("An toàn thực đơn hôm nay")}</span>
+                    <span className="text-[11px] font-black uppercase text-teal-700 block">{translateText("Hồ sơ dị ứng")}</span>
                     <h3 className="text-base font-black text-slate-900">
-                      {translateText(activeAlertDetail.menuSafetyAlert?.title || "Thực đơn an toàn")}
+                      {translateText(activeAlertDetail.menuSafetyAlert?.title || "Chưa có dữ liệu đối chiếu")}
                     </h3>
                   </div>
                 </div>
@@ -231,10 +223,10 @@ export const ParentChildAlertsPage: React.FC = () => {
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-black ${activeAlertDetail.menuSafetyAlert?.isSafe
                       ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                      : "bg-rose-100 text-rose-800 border border-rose-300"
+                      : "bg-slate-100 text-slate-700 border border-slate-200"
                     }`}
                 >
-                  {translateText(activeAlertDetail.menuSafetyAlert?.isSafe ? "Đạt an toàn" : "Cần lưu ý")}
+                  {translateText(activeAlertDetail.menuSafetyAlert?.isSafe ? "Đã đối chiếu" : "Chưa đối chiếu")}
                 </span>
               </div>
 
@@ -268,7 +260,6 @@ export const ParentChildAlertsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">{translateText("Giáo viên ghi nhận")}</span>
               </div>
 
               <div className="space-y-2 text-xs">
@@ -284,7 +275,7 @@ export const ParentChildAlertsPage: React.FC = () => {
                     {translateText(activeAlertDetail.dailyIntakeReport?.snackStatus)}
                   </strong>
                 </div>
-                {activeAlertDetail.dailyIntakeReport?.teacherNote && (
+                {activeAlertDetail.dailyIntakeReport?.teacherNote && activeAlertDetail.dailyIntakeReport.teacherNote !== 'Chưa có nhận xét của giáo viên' && (
                   <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 text-emerald-950">
                     <span className="font-bold block mb-0.5">{translateText("Lời nhắn của cô giáo:")}</span>
                     <span>{translateText(activeAlertDetail.dailyIntakeReport.teacherNote)}</span>
@@ -332,10 +323,6 @@ export const ParentChildAlertsPage: React.FC = () => {
                     {activeAlertDetail.healthReminder?.nextMeasurementDate ? translateText(activeAlertDetail.healthReminder.nextMeasurementDate) : translateText("Chưa có lịch cân đo")}
                   </strong>
                 </div>
-                <div className="bg-teal-50/70 p-3 rounded-xl border border-teal-200 text-teal-950">
-                  <span className="font-bold block mb-0.5">{translateText("Lời khuyên của chuyên gia dinh dưỡng:")}</span>
-                  <span>{activeAlertDetail.healthReminder?.nutritionistAdvice}</span>
-                </div>
               </div>
 
               <div className="pt-2 flex justify-end text-xs">
@@ -366,7 +353,7 @@ export const ParentChildAlertsPage: React.FC = () => {
                       : "bg-emerald-100 text-emerald-800"
                     }`}
                 >
-                  {translateText(pickyAdvice ? "Có tư vấn mới" : "Bé ăn ngoan")}
+                  {translateText(pickyAdvice ? "Có tư vấn mới" : "Chưa có tư vấn")}
                 </span>
               </div>
 
@@ -393,7 +380,7 @@ export const ParentChildAlertsPage: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center text-xs text-slate-500">{translateText("Bé có sức ăn tốt, hiện không có cảnh báo kén ăn hay biếng ăn cần tư vấn can thiệp.")}</div>
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center text-xs text-slate-500">{translateText("Chưa có tư vấn dinh dưỡng cho bé.")}</div>
               )}
 
               <div className="pt-2 flex justify-end text-xs">

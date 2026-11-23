@@ -37,7 +37,7 @@ export const GrossWeightPurchasingPage: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState('2026-W42');
   const [startDate, setStartDate] = useState('2026-10-19');
   const [endDate, setEndDate] = useState('2026-10-23');
-  const [mealFilter, setMealFilter] = useState<'ALL' | 'LUNCH' | 'AFTERNOON_SNACK' | 'BREAKFAST'>('ALL');
+  const [mealFilter, setMealFilter] = useState<'ALL' | 'LUNCH' | 'AFTERNOON_SNACK' | 'LATE_SNACK' | 'BREAKFAST'>('ALL');
   const [portionsCount, setPortionsCount] = useState<number>(180);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
@@ -231,39 +231,7 @@ export const GrossWeightPurchasingPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 font-sans">
-      {/* ─── HEADER UC-92 ─── */}
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2.5 mb-2">
-            <span className="text-emerald-200 text-xs font-medium">BGH & Chuyên gia Dinh dưỡng</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Dự Trù Mua Hàng & Khối Lượng Thô (Gross Weight)
-          </h1>
-          <p className="text-sm text-emerald-100/90 mt-1 max-w-2xl">
-            Tự động quy đổi từ định lượng tịnh (Net Weight) sang khối lượng đi chợ nguyên trạng (Gross Weight) dựa trên thực đơn đã duyệt và tỷ lệ thải bỏ sơ chế.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => void handleExport()}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-emerald-900 font-bold text-sm shadow hover:bg-emerald-50 transition active:scale-95"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-            Xuất Excel đi chợ
-          </button>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-700/60 hover:bg-emerald-700 text-white font-bold text-sm border border-emerald-500/40 transition active:scale-95"
-          >
-            <Printer className="w-4 h-4" />
-            In phiếu dự trù
-          </button>
-        </div>
-      </div>
-
+    <div className="w-full space-y-6 font-sans">
       {/* ─── THÔNG BÁO XUẤT FILE ─── */}
       {exportSuccess && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl flex items-center gap-3 shadow-xs animate-in fade-in duration-300">
@@ -323,9 +291,10 @@ export const GrossWeightPurchasingPage: React.FC = () => {
                 className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               >
                 <option value="ALL">Tất cả các bữa trong ngày</option>
-                <option value="LUNCH">Bữa trưa chính (10h30)</option>
-                <option value="AFTERNOON_SNACK">Bữa xế chiều (14h30)</option>
-                <option value="BREAKFAST">Bữa sáng (7h00)</option>
+                <option value="BREAKFAST">Buổi sáng (09:00)</option>
+                <option value="LUNCH">Bữa trưa chính (11:00)</option>
+                <option value="AFTERNOON_SNACK">Buổi phụ (14:30)</option>
+                <option value="LATE_SNACK">Buổi xế chiều (17:00)</option>
               </select>
             </div>
 
@@ -374,7 +343,7 @@ export const GrossWeightPurchasingPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-slate-500 font-medium">Nhóm:</span>
             <select
               value={categoryFilter}
@@ -388,6 +357,21 @@ export const GrossWeightPurchasingPage: React.FC = () => {
                 </option>
               ))}
             </select>
+
+            <button
+              onClick={() => void handleExport()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-slate-700 font-bold text-xs border border-slate-200 hover:bg-slate-50 transition shadow-2xs cursor-pointer ml-1"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Xuất Excel đi chợ</span>
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>In phiếu dự trù</span>
+            </button>
           </div>
         </div>
       </div>
@@ -405,17 +389,17 @@ export const GrossWeightPurchasingPage: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 w-12 text-center">STT</th>
-                  <th className="py-3.5 px-4">Tên thực phẩm / Nguyên liệu</th>
-                  <th className="py-3.5 px-4">Nhóm nguyên liệu</th>
-                  <th className="py-3.5 px-4 text-right">Khối lượng Tịnh (Net)</th>
-                  <th className="py-3.5 px-4 text-center">Tỷ lệ thải bỏ sơ chế</th>
-                  <th className="py-3.5 px-4 text-right font-black text-emerald-800">
+              <thead className="bg-lime-600 text-white">
+                <tr className="bg-lime-600 border-b border-lime-700/60 text-[11px] font-black text-white uppercase tracking-wider">
+                  <th className="py-3.5 px-4 w-12 text-center text-white">STT</th>
+                  <th className="py-3.5 px-4 text-white">Tên thực phẩm / Nguyên liệu</th>
+                  <th className="py-3.5 px-4 text-white">Nhóm nguyên liệu</th>
+                  <th className="py-3.5 px-4 text-right text-white">Khối lượng Tịnh (Net)</th>
+                  <th className="py-3.5 px-4 text-center text-white">Tỷ lệ thải bỏ sơ chế</th>
+                  <th className="py-3.5 px-4 text-right font-black text-white">
                     Khối lượng Thô cần mua (Gross)
                   </th>
-                  <th className="py-3.5 px-4">Món ăn sử dụng</th>
+                  <th className="py-3.5 px-4 text-white">Món ăn sử dụng</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">

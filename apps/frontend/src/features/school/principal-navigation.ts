@@ -61,10 +61,9 @@ export const principalNavigation = [
   },
   {
     group: "Quản trị trường",
-    label: "Nhật ký dữ liệu nhạy cảm",
+    label: "Nhật ký hệ thống",
     path: "/audit-logs",
     icon: ShieldAlert,
-    functions: "22",
   },
   {
     group: "Quản trị trường",
@@ -124,30 +123,20 @@ export const principalNavigation = [
   },
   {
     group: "Dinh dưỡng & bữa ăn",
-    label: "Kiểm thực 3 bước & An toàn thực phẩm",
+    label: "Kiểm thực 3 bước",
     path: "/inspection-approval",
     icon: ShieldCheck,
-    functions: "Kiểm thực & ATTP",
   },
   {
     group: "Thể chất & phản hồi",
     label: "Dữ liệu thể chất học sinh",
     path: "/growth",
     icon: HeartPulse,
-    functions: "81–82, 86",
   },
   {
     group: "Thể chất & phản hồi",
-    label: "Đánh giá & phản hồi phụ huynh",
+    label: "Ý kiến & phản hồi phụ huynh",
     path: "/services",
     icon: MessageSquareText,
-    functions: "89–91",
-  },
-  {
-    group: "Báo cáo",
-    label: "Tổng hợp đánh giá phụ huynh",
-    path: "/parent-evaluation-report",
-    icon: MessageSquareText,
-    functions: "97",
   },
 ];

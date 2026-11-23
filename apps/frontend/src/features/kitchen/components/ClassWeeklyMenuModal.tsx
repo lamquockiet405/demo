@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { formatDateRangeDMY } from '../../../core/utils/date';
 import {
   X,
   Calendar,
@@ -403,14 +404,13 @@ export const ClassWeeklyMenuModal: React.FC<ClassWeeklyMenuModalProps> = ({
               >
                 {availableMenus.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.title} ({m.startDate} - {m.endDate})
+                    {m.title} ({formatDateRangeDMY(m.startDate, m.endDate, ' - ')})
                   </option>
                 ))}
               </select>
             ) : (
               <span className="font-black text-amber-800 dark:text-amber-300">
-                {selectedMenu?.title || 'Thực đơn Bán trú Tiêu chuẩn'} ({selectedMenu?.startDate || 'Tuần này'} -{' '}
-                {selectedMenu?.endDate || 'Cuối tuần'})
+                {selectedMenu?.title || 'Thực đơn Bán trú Tiêu chuẩn'} ({formatDateRangeDMY(selectedMenu?.startDate, selectedMenu?.endDate, ' - ') || 'Tuần này'})
               </span>
             )}
 

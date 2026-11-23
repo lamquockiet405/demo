@@ -124,7 +124,7 @@ export function TeacherPortalLayout() {
   }, []);
 
   return (
-    <div className="kitchen-portal">
+    <div className="kitchen-portal teacher-portal">
       {open && (
         <button
           className="kp-sidebar-backdrop"
@@ -140,7 +140,7 @@ export function TeacherPortalLayout() {
         id="teacher-sidebar"
       >
         <NavLink to="/teacher/classes" className="kp-logo">
-          <span className="overflow-hidden flex items-center justify-center w-8 h-8 rounded-xl bg-teal-500/10 shrink-0">
+          <span className="overflow-hidden flex items-center justify-center w-8 h-8 rounded-xl bg-sky-500/15 shrink-0">
             {schoolBranding.logoUrl ? (
               <img
                 src={schoolBranding.logoUrl}
@@ -151,7 +151,7 @@ export function TeacherPortalLayout() {
                 }}
               />
             ) : (
-              <GraduationCap size={24} className="text-teal-600" />
+              <GraduationCap size={24} className="text-sky-700" />
             )}
           </span>
           <div className="overflow-hidden">
@@ -189,13 +189,6 @@ export function TeacherPortalLayout() {
             </div>
           ))}
         </nav>
-
-        <div className="kp-sidebar-footer">
-          <ShieldCheck size={18} />
-          <span>{translateText("Đồng hành cùng trẻ")}<br />
-            <b>{translateText("Bữa ăn học đường an toàn")}</b>
-          </span>
-        </div>
       </aside>
 
       {/* Main Workspace matching Kitchen Portal */}

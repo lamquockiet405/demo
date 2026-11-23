@@ -22,7 +22,6 @@ import { readState, writeState } from "../../../common/utils/persisted-state";
 import { randomUUID } from "node:crypto";
 import { resolveListYear } from '../../academic-years/resolve-list-year';
 import { syncCurrentEnrollment } from '../../academic-years/sync-current-enrollment';
-import { currentStudent, currentStudentIdsSql } from '../../academic-years/current-year-scope';
 
 export interface ChildAccessActor {
   sub: number;
@@ -316,33 +315,52 @@ export class ChildrenService {
     return { items: mapped, total, page, limit };
   }
 
-  async getStats(schoolId = 1) {
-    const total = await this.childRepo.count({ where: { id: currentStudent(schoolId) } });
-    const allergicCount = await this.childRepo
-      .createQueryBuilder("c")
-      .innerJoin("c.allergies", "a", "a.isActive = true")
-      .andWhere(`c.id IN (${currentStudentIdsSql(schoolId)})`)
-      .select("COUNT(DISTINCT c.id)", "cnt")
+  async getStats(schoolId = 1, query: GetChildrenQueryDto = {}) {
+    const academicYearId = await resolveListYear(this.childRepo, schoolId, query);
+    const qb = this.childRepo.createQueryBuilder('c')
+      .leftJoin('c.allergies', 'a', 'a.isActive = true')
+      .leftJoin('student_parents', 'sp', 'sp.student_id = c.id');
+
+    if (academicYearId === null) qb.andWhere('1=0');
+    if (academicYearId) {
+      qb.innerJoin('student_academic_enrollments', 'year_enrollment',
+        'year_enrollment.student_id = c.id AND year_enrollment.academic_year_id = :academicYearId AND year_enrollment.status = :enrolledStatus',
+        { academicYearId, enrolledStatus: 'ENROLLED' });
+    } else if (query.allAcademicYears) {
+      qb.innerJoin('student_academic_enrollments', 'year_enrollment',
+        'year_enrollment.student_id = c.id AND year_enrollment.status = :enrolledStatus',
+        { enrolledStatus: 'ENROLLED' })
+        .innerJoin('academic_year', 'year_scope',
+          'year_scope.id = year_enrollment.academic_year_id AND year_scope.school_id = :schoolId',
+          { schoolId });
+    }
+    if (query.classId) {
+      qb.andWhere(academicYearId || query.allAcademicYears
+        ? 'year_enrollment.class_id = :classId' : 'c.classId = :classId',
+        { classId: query.classId });
+    }
+    if (query.search) {
+      qb.andWhere(
+        `(${searchSql('c.fullName')} LIKE ${searchLikeSql(':search')} OR ${searchSql('c.studentCode')} LIKE ${searchLikeSql(':search')})`,
+        { search: `%${normalizeSearch(query.search)}%` },
+      );
+    }
+    const result = await qb
+      .select('COUNT(DISTINCT c.id)', 'total')
+      .addSelect('COUNT(DISTINCT CASE WHEN sp.student_id IS NOT NULL THEN c.id END)', 'linked')
+      .addSelect('COUNT(DISTINCT CASE WHEN a.id IS NOT NULL THEN c.id END)', 'allergic')
+      .addSelect("COUNT(DISTINCT CASE WHEN a.severity IN ('HIGH', 'SEVERE', 'ANAPHYLACTIC') THEN c.id END)", 'severe')
       .getRawOne();
-
-    const severeCount = await this.childRepo
-      .createQueryBuilder("c")
-      .innerJoin("c.allergies", "a", "a.isActive = true")
-      .where("a.severity IN ('HIGH', 'SEVERE', 'ANAPHYLACTIC')")
-      .andWhere(`c.id IN (${currentStudentIdsSql(schoolId)})`)
-      .select("COUNT(DISTINCT c.id)", "cnt")
-      .getRawOne();
-
-    const allergic = parseInt(allergicCount?.cnt || "0", 10);
-    const severe = parseInt(severeCount?.cnt || "0", 10);
-    const rate =
-      total > 0 ? parseFloat(((allergic / total) * 100).toFixed(1)) : 0;
-
+    const total = Number(result?.total || 0);
+    const linked = Number(result?.linked || 0);
+    const allergic = Number(result?.allergic || 0);
     return {
       totalChildren: total,
+      linkedParentCount: linked,
+      unlinkedParentCount: total - linked,
       allergicCount: allergic,
-      severeCount: severe,
-      allergyRate: rate,
+      severeCount: Number(result?.severe || 0),
+      allergyRate: total ? Number(((allergic / total) * 100).toFixed(1)) : 0,
     };
   }
 

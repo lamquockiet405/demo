@@ -143,35 +143,7 @@ export function PrincipalGrowthPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* ─── 1. Header Banner ─── */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Ban Giám Hiệu • Y Tế & Thể Chất")}</span>
-            <span className="text-xs text-teal-200">{translateText("Chuẩn WHO LMS Growth Curves")}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <HeartPulse className="w-8 h-8 text-amber-300" />{translateText("Dữ Liệu Thể Chất Học Sinh & Biểu Đồ Tăng Trưởng WHO")}</h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Theo dõi kết quả cân đo định kỳ, phân loại thể trạng theo chuẩn WHO và bấm ")}<strong>{translateText("\"Xem biểu đồ\"")}</strong>{translateText(" để kiểm tra đường cong tăng trưởng chi tiết từng học sinh.")}</p>
-        </div>
-
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <button
-            onClick={() => void resource.reload()}
-            disabled={resource.loading}
-            className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
-          <button
-            onClick={() => void exportReport()}
-            disabled={action.busy}
-            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />{translateText("Xuất Báo Cáo")}</button>
-        </div>
-      </div>
-
+    <div className="space-y-6 w-full pb-12">
       <Feedback error={action.error || classes.error} message={action.message} />
 
       {/* ─── 2. KPI Summary Cards ─── */}
@@ -272,6 +244,23 @@ export function PrincipalGrowthPage() {
             <option value="SEVERELY_UNDERWEIGHT">{translateText("Nhẹ cân nặng (SEVERELY_UNDERWEIGHT)")}</option>
             <option value="SEVERELY_STUNTED">{translateText("Thấp còi nặng (SEVERELY_STUNTED)")}</option>
           </select>
+
+          <button
+            onClick={() => void resource.reload()}
+            disabled={resource.loading}
+            className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+            title={translateText("Làm mới")}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? "animate-spin" : "text-slate-500"}`} />
+          </button>
+          <button
+            onClick={() => void exportReport()}
+            disabled={action.busy}
+            className="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>{translateText("Xuất Báo Cáo")}</span>
+          </button>
         </div>
       </div>
 

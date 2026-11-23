@@ -190,10 +190,10 @@ export const SnackRosterTable: React.FC<SnackRosterTableProps> = ({
   };
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden">
+    <div className="min-w-0 max-w-full bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden">
       {/* Table Header Controls */}
       <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
-        <div className="flex items-center gap-3">
+        <div className="min-w-0 flex flex-wrap items-center gap-3">
           <h2 className="text-base font-black text-slate-900 tracking-tight">{translateText("Danh sách phục vụ bữa xế")}</h2>
           <span className="px-3 py-1 rounded-full text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200/70">{translateText("Hiển thị ")}{items.length}{translateText(" trong tổng số ")}{totalItems}{translateText(" học sinh")}</span>
         </div>
@@ -205,8 +205,8 @@ export const SnackRosterTable: React.FC<SnackRosterTableProps> = ({
       </div>
 
       {/* Main Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="max-w-full overflow-x-auto">
+        <table className="w-full min-w-[1100px] text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-200 bg-[#f8fafc]/80 text-[11px] font-bold uppercase tracking-wider text-slate-700">
               <th className="py-3.5 px-6 whitespace-nowrap">{translateText("MÃ HỌC SINH")}</th>

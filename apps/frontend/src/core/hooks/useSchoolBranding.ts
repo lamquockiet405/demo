@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { tenantApi, TenantProfile } from '../api/tenant.api';
 
-export const DEFAULT_SCHOOL_NAME = 'Trường Mẫu Giáo Hướng Dương';
+export const DEFAULT_SCHOOL_NAME = 'KidMeal';
 export const DEFAULT_HOTLINE = '028 3930 1888';
 
 export interface SchoolBrandingInfo {
@@ -60,7 +60,11 @@ const syncFaviconAndTitle = (name?: string, logoUrl?: string | null) => {
 export const useSchoolBranding = (): SchoolBrandingInfo => {
     const [branding, setBranding] = useState<SchoolBrandingInfo>(() => {
         const storedLogo = localStorage.getItem('school_logo');
-        const storedName = localStorage.getItem('school_name') || DEFAULT_SCHOOL_NAME;
+        let storedName = localStorage.getItem('school_name');
+        if (!storedName || storedName.includes('Hướng Dương') || storedName.includes('Trường Mẫu')) {
+            storedName = DEFAULT_SCHOOL_NAME;
+            localStorage.setItem('school_name', DEFAULT_SCHOOL_NAME);
+        }
         const storedColor = (localStorage.getItem('school_primary_color') as any) || 'TEAL';
         syncFaviconAndTitle(storedName, storedLogo);
         return {

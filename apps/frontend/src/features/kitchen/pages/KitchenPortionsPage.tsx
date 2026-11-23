@@ -1,10 +1,11 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
-import { Download, Save, StickyNote } from "lucide-react";
+import { Download, Save, StickyNote, School, UtensilsCrossed, CircleCheck, Clock3 } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
 import { getSchoolDate, normalizeSearch } from "../utils/kds-data";
 import { downloadExcel, formatDateTime, formatNumber, rowsOf } from "../utils/kitchen-operations";
+import { KitchenSummaryCards } from "../components/KitchenSummaryCards";
 import {
   Modal,
   Notice,
@@ -37,17 +38,28 @@ export function KitchenPortionsPage() {
     document.addEventListener('visibilitychange', refresh);
     return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
   }, [resource.reload, action.busy]);
-  const mealLabels: Record<string, string> = { BREAKFAST: 'Buổi sáng (09:00)', MORNING_SNACK: 'Buổi sáng (09:00)', LUNCH: 'Bữa trưa', AFTERNOON_SNACK: 'Ăn phụ chiều' };
+  const mealLabels: Record<string, string> = {
+    BREAKFAST: 'Buổi sáng (09:00)',
+    MORNING_SNACK: 'Buổi sáng (09:00)',
+    LUNCH: 'Bữa trưa chính (11:00)',
+    AFTERNOON_SNACK: 'Buổi phụ (14:30)',
+    LATE_SNACK: 'Buổi chiều xế (17:00)',
+  };
   const field =
     meal === "BREAKFAST"
       ? "breakfast"
-      : meal === "MORNING_SNACK" ? "morningSnack"
-      : meal === "LUNCH"
-        ? "lunch"
-        : "afternoonSnack";
+      : meal === "MORNING_SNACK"
+        ? "morningSnack"
+        : meal === "LUNCH"
+          ? "lunch"
+          : meal === "LATE_SNACK"
+            ? "lateSnack"
+            : "afternoonSnack";
   const items = (resource.data || []).filter((r) =>
     normalizeSearch(r.className || "").includes(normalizeSearch(search)),
   );
+  const plannedPortions = items.reduce((sum, row) => sum + (Number(row[field]?.planned) || 0), 0);
+  const issuedPortions = items.reduce((sum, row) => sum + (Number(row[field]?.actual) || 0), 0);
   const allNotes = (resource.data || []).flatMap((row) =>
     (Array.isArray(row[field]?.notes) ? row[field].notes : [])
       .filter((entry: any) => typeof entry.note === "string" && entry.note.trim())
@@ -84,10 +96,64 @@ export function KitchenPortionsPage() {
   };
   return (
     <>
-      <PageTitle
-        title={translateText("Kế hoạch suất ăn hằng ngày")}
-        description={translateText("Nhận số suất giáo viên chốt theo lớp, ngày và bữa ăn; xuất món theo số suất yêu cầu. Tự làm mới mỗi 30 giây.")}
-      >
+      {showNotes && (
+        <Modal title="Tất cả ghi chú" onClose={() => setShowNotes(false)}>
+          <p className="mb-4 text-sm text-slate-500">{date} · {translateText(mealLabels[meal])} · {allNotes.length} {translateText("ghi chú")}</p>
+          <p className="mb-4 text-xs text-slate-500">{translateText("Ghi chú của tất cả các lớp theo ngày và bữa ăn đang chọn.")}</p>
+          {allNotes.length ? (
+            <div className="kp-table-wrap">
+              <table className="kp-table">
+                <thead><tr><th>{translateText("Lớp")}</th><th>{translateText("Họ tên bé")}</th><th>{translateText("Ghi chú")}</th></tr></thead>
+                <tbody>{allNotes.map((entry, index) => (
+                  <tr key={`${entry.classId}-${index}`}>
+                    <td><strong>{entry.className}</strong></td>
+                    <td>{entry.fullName || "—"}</td>
+                    <td className="whitespace-pre-wrap break-words">{entry.note}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          ) : <p className="py-6 text-center text-slate-500">{translateText("Chưa có ghi chú cho ngày và bữa ăn này.")}</p>}
+        </Modal>
+      )}
+      <Notice error={action.error} message={action.message} />
+      {resource.data && !resource.error && (
+        <KitchenSummaryCards metrics={[
+          { label: 'Lớp trong kế hoạch', value: items.length, icon: School },
+          { label: 'Suất theo kế hoạch', value: plannedPortions, icon: UtensilsCrossed },
+          { label: 'Suất đã xuất', value: issuedPortions, icon: CircleCheck, tone: 'success' },
+          { label: 'Lớp chờ xuất', value: items.filter((row) => row[field]?.planned != null && row[field]?.actual == null).length, icon: Clock3, tone: 'warning' },
+        ]} />
+      )}
+      <div className="kp-filters">
+        <label>{translateText("Ngày phục vụ")}<input
+            type="date"
+            aria-label={translateText("Ngày kế hoạch")}
+            disabled={action.busy}
+            value={date}
+            onChange={(e) => {
+              if (e.target.value) setDate(e.target.value);
+            }}
+          />
+        </label>
+        <select
+          aria-label={translateText("Bữa lập kế hoạch")}
+          disabled={action.busy}
+          value={meal}
+          onChange={(e) => setMeal(e.target.value)}
+        >
+          <option value="BREAKFAST">{translateText("Buổi sáng (09:00)")}</option>
+          <option value="LUNCH">{translateText("Bữa trưa chính (11:00)")}</option>
+          <option value="AFTERNOON_SNACK">{translateText("Buổi phụ (14:30)")}</option>
+          <option value="LATE_SNACK">{translateText("Buổi chiều xế (17:00)")}</option>
+        </select>
+        <input
+          type="search"
+          aria-label={translateText("Tìm lớp lập kế hoạch")}
+          placeholder={translateText("Tìm tên lớp…")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button className="kp-button" disabled={resource.loading || !!resource.error}
           onClick={() => setShowNotes(true)}>
@@ -111,56 +177,6 @@ export function KitchenPortionsPage() {
           }
         >
           <Download size={15} />{translateText("Xuất kế hoạch")}</button>
-      </PageTitle>
-      {showNotes && (
-        <Modal title="Tất cả ghi chú" onClose={() => setShowNotes(false)}>
-          <p className="mb-4 text-sm text-slate-500">{date} · {translateText(mealLabels[meal])} · {allNotes.length} {translateText("ghi chú")}</p>
-          <p className="mb-4 text-xs text-slate-500">{translateText("Ghi chú của tất cả các lớp theo ngày và bữa ăn đang chọn.")}</p>
-          {allNotes.length ? (
-            <div className="kp-table-wrap">
-              <table className="kp-table">
-                <thead><tr><th>{translateText("Lớp")}</th><th>{translateText("Họ tên bé")}</th><th>{translateText("Ghi chú")}</th></tr></thead>
-                <tbody>{allNotes.map((entry, index) => (
-                  <tr key={`${entry.classId}-${index}`}>
-                    <td><strong>{entry.className}</strong></td>
-                    <td>{entry.fullName || "—"}</td>
-                    <td className="whitespace-pre-wrap break-words">{entry.note}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </div>
-          ) : <p className="py-6 text-center text-slate-500">{translateText("Chưa có ghi chú cho ngày và bữa ăn này.")}</p>}
-        </Modal>
-      )}
-      <Notice error={action.error} message={action.message} />
-      <div className="kp-filters">
-        <label>{translateText("Ngày phục vụ")}<input
-            type="date"
-            aria-label={translateText("Ngày kế hoạch")}
-            disabled={action.busy}
-            value={date}
-            onChange={(e) => {
-              if (e.target.value) setDate(e.target.value);
-            }}
-          />
-        </label>
-        <select
-          aria-label={translateText("Bữa lập kế hoạch")}
-          disabled={action.busy}
-          value={meal}
-          onChange={(e) => setMeal(e.target.value)}
-        >
-          <option value="BREAKFAST">{translateText("Buổi sáng (09:00)")}</option>
-          <option value="LUNCH">{translateText("Bữa trưa chính")}</option>
-          <option value="AFTERNOON_SNACK">{translateText("Bữa phụ xế")}</option>
-        </select>
-        <input
-          type="search"
-          aria-label={translateText("Tìm lớp lập kế hoạch")}
-          placeholder={translateText("Tìm tên lớp…")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
       </div>
       <ResourceState resource={resource} empty={!items.length} />
       {resource.data && (

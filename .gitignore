@@ -83,5 +83,16 @@ populate_nutrition.py
 !.env.example
 nginx/ssl/*.pem
 /database.zip
+/database*.zip
+/kidmeal_full_*.sql
+/dishes_*.csv
+/dishes_*.tsv
+/check_fail.py
+/scratch_check.py
+/test_find_menu.py
+/test_logic.py
+/scratch/
+apps/backend/test.zip
+.agents/
 
 

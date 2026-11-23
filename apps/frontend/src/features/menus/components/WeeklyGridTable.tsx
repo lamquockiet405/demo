@@ -32,6 +32,7 @@ import {
   PieChart,
 } from 'lucide-react';
 import { WeeklyMenu, MenuDishItem, MenuAdvisoryResponse, DishItem, weeklyMenusApi } from '../api/weekly-menus.api';
+import { nutritionEngineApi, MealDistributionOverview } from '../api/nutrition-rule-engine.api';
 import { useSchoolBranding } from '../../../core/hooks/useSchoolBranding';
 import { RecipeInspectionModal } from './RecipeInspectionModal';
 import { DailyMealBreakdownModal } from './DailyMealBreakdownModal';
@@ -255,10 +256,10 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   ];
 
   const allMealSlots = [
-    { key: 'BREAKFAST', name: 'Buổi sáng', time: '09:00', iconColor: 'text-amber-600', bgColor: 'bg-amber-50/60' },
+    { key: 'BREAKFAST', name: 'Buổi sáng (Món nước)', time: '09:00', iconColor: 'text-amber-600', bgColor: 'bg-amber-50/60' },
     { key: 'LUNCH', name: 'Bữa trưa chính', time: '11:00', iconColor: 'text-emerald-700', bgColor: 'bg-emerald-50/60' },
-    { key: 'AFTERNOON_SNACK', name: 'Phụ chiều / Xế', time: '14:30', iconColor: 'text-purple-600', bgColor: 'bg-purple-50/60' },
-    { key: 'LATE_SNACK', name: 'Ăn xế 17h (DV)', time: '17:00', iconColor: 'text-orange-600', bgColor: 'bg-orange-50/60' },
+    { key: 'AFTERNOON_SNACK', name: 'Buổi phụ', time: '14:30', iconColor: 'text-purple-600', bgColor: 'bg-purple-50/60' },
+    { key: 'LATE_SNACK', name: 'Buổi chiều xế (Món nước)', time: '17:00', iconColor: 'text-orange-600', bgColor: 'bg-orange-50/60' },
   ];
 
   // Helper: Nhận diện món ăn suất riêng / món thay thế (Loại 1, Loại 2, Loại 3, Suất riêng)
@@ -285,12 +286,34 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   // LẤY CÁC MÓN ĂN CHO TỪNG Ô BỮA ĂN THEO CHẾ ĐỘ LỌC CỦA NGƯỜI DÙNG
   const getDishesInSlot = (day: number, slotKey: string): MenuDishItem[] => {
     if (!menu?.menuDishes) return [];
-    const allDishesInSlot = menu.menuDishes.filter(
-      (md) =>
+    const allDishesInSlot = menu.menuDishes.filter((md) => {
+      const dayMatches =
         (md.dayOfWeek === day || (!hasDayOne && md.dayOfWeek === day + 1)) &&
-        (md.mealTime === slotKey || (slotKey === 'BREAKFAST' && md.mealTime === 'MORNING_SNACK')) &&
-        !md.deletedAt,
-    );
+        !md.deletedAt;
+      if (!dayMatches) return false;
+
+      // Buổi sáng: BREAKFAST hoặc MORNING_SNACK
+      if (slotKey === 'BREAKFAST') {
+        return md.mealTime === 'BREAKFAST' || md.mealTime === 'MORNING_SNACK';
+      }
+
+      // Bữa trưa chính: LUNCH
+      if (slotKey === 'LUNCH') {
+        return md.mealTime === 'LUNCH';
+      }
+
+      // Buổi phụ (14:30): Bánh, Trái cây, Sữa / Thức uống dinh dưỡng
+      if (slotKey === 'AFTERNOON_SNACK') {
+        return md.mealTime === 'AFTERNOON_SNACK';
+      }
+
+      // Buổi chiều xế (17:00): Món nước ăn xế (Cháo, Súp, Bún, Miến, Hủ tiếu, Bánh canh, Nui...)
+      if (slotKey === 'LATE_SNACK') {
+        return md.mealTime === 'LATE_SNACK';
+      }
+
+      return md.mealTime === slotKey;
+    });
 
     if (activeChildTypeFilter === 'MASTER') {
       // Chỉ hiện Thực đơn tổng (Suất chung)
@@ -330,21 +353,88 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
     'BREAKFAST',
     'LUNCH',
     'AFTERNOON_SNACK',
+    'LATE_SNACK',
   ];
 
-  // Chỉ hiển thị các bữa ăn đã được trường bật trong Cấu hình trường (/settings)
-  // HOẶC bữa ăn đã có sẵn món trong thực đơn hiện tại (tránh làm mất hiển thị dữ liệu lịch sử)
-  const activeMealSlots = allMealSlots.filter(
-    (slot) =>
+  const isToddlerMenu =
+    menu?.targetAgeGroup === 'NHA_TRE' ||
+    menu?.targetAgeGroup === 'TODDLER_18_36M' ||
+    (menu as any)?.ageGroup === 'NHA_TRE';
+  const menuAgeGroup = isToddlerMenu ? 'NHA_TRE' : 'MAU_GIAO';
+
+  const [mealDistributionOverview, setMealDistributionOverview] =
+    useState<MealDistributionOverview | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    nutritionEngineApi
+      .getMealDistributionOverview(menuAgeGroup)
+      .then((data) => {
+        if (!cancelled) setMealDistributionOverview(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMealDistributionOverview(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [menuAgeGroup, menu?.id, menu?.version]);
+
+  const isSlotEnabledByDistribution = (slotKey: string): boolean => {
+    if (!mealDistributionOverview?.meals?.length) return true;
+    const dist = mealDistributionOverview.meals.find((m) => m.mealType === slotKey);
+    if (!dist) return true;
+    return Number(dist.energyPct.max) > 0;
+  };
+
+  const resolveDishSlotKey = (md: MenuDishItem): string => {
+    if (md.mealTime === 'BREAKFAST' || md.mealTime === 'MORNING_SNACK') return 'BREAKFAST';
+    if (md.mealTime === 'LUNCH') return 'LUNCH';
+    if (md.mealTime === 'AFTERNOON_SNACK') return 'AFTERNOON_SNACK';
+    if (md.mealTime === 'LATE_SNACK') return 'LATE_SNACK';
+    return md.mealTime;
+  };
+
+  // Chỉ hiển thị các bữa ăn có % năng lượng > 0 trong bảng Phân bổ năng lượng theo bữa
+  // và được trường bật hoặc có món ăn thực tế
+  const activeMealSlots = allMealSlots.filter((slot) => {
+    if (!isSlotEnabledByDistribution(slot.key)) return false;
+    return (
       configuredMealTimes.includes(slot.key) ||
-      allDays.some((day) => getDishesInSlot(day.dayOfWeek, slot.key).length > 0),
-  );
+      allDays.some((day) => getDishesInSlot(day.dayOfWeek, slot.key).length > 0)
+    );
+  });
+
+  const activeMealSlotKeys = new Set(activeMealSlots.map((s) => s.key));
 
   const days = showEmptySlots ? allDays : hasMenuDishes
     ? allDays.filter(day => activeMealSlots.some(slot => getDishesInSlot(day.dayOfWeek, slot.key).length > 0))
     : allDays.filter(day => !day.isWeekend);
   const mealSlots = showEmptySlots || !hasMenuDishes ? activeMealSlots
     : activeMealSlots.filter(slot => days.some(day => getDishesInSlot(day.dayOfWeek, slot.key).length > 0));
+
+  const minKcalStandard =
+    mealDistributionOverview?.totals?.atSchool?.energyKcal?.min != null
+      ? Math.round(mealDistributionOverview.totals.atSchool.energyKcal.min)
+      : isToddlerMenu
+        ? 600
+        : 615;
+  const maxKcalStandard =
+    mealDistributionOverview?.totals?.atSchool?.energyKcal?.max != null
+      ? Math.round(mealDistributionOverview.totals.atSchool.energyKcal.max)
+      : isToddlerMenu
+        ? 750
+        : 770;
+  const minPPctStandard = mealDistributionOverview?.dailyStandard?.protein?.min ?? 13;
+  const maxPPctStandard = mealDistributionOverview?.dailyStandard?.protein?.max ?? 20;
+  const minLPctStandard =
+    mealDistributionOverview?.dailyStandard?.lipid?.min ?? (isToddlerMenu ? 30 : 25);
+  const maxLPctStandard =
+    mealDistributionOverview?.dailyStandard?.lipid?.max ?? (isToddlerMenu ? 40 : 35);
+  const minGPctStandard =
+    mealDistributionOverview?.dailyStandard?.carbohydrate?.min ?? (isToddlerMenu ? 47 : 52);
+  const maxGPctStandard =
+    mealDistributionOverview?.dailyStandard?.carbohydrate?.max ?? (isToddlerMenu ? 50 : 60);
 
   // Tính toán dinh dưỡng chi tiết & chuẩn xác cho từng ngày cho CẢ 4 NHÓM:
   // 1. Thực đơn tổng (Trẻ bình thường • Chuẩn Chuẩn Dinh Dưỡng)
@@ -376,18 +466,22 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
       };
     }
 
-    // Lấy các món ăn thuộc Thực đơn tổng của ngày
+    // Lấy các món ăn thuộc Thực đơn tổng của ngày (chỉ tính các bữa đang bật > 0%)
     const dayMasterDishes = menu.menuDishes.filter(
       (md) =>
         (md.dayOfWeek === day || (!hasDayOne && md.dayOfWeek === day + 1)) &&
         !md.deletedAt &&
-        !isDietSubstitute(md),
+        !isDietSubstitute(md) &&
+        activeMealSlotKeys.has(resolveDishSlotKey(md)),
     );
 
     const selectedNutrition = (targetType: 'STUNTED' | 'OBESE' | 'ALLERGIES') =>
       calculateSelectedDietNutrition(dayMasterDishes, (menu.menuDishes || []).filter(md =>
         (md.dayOfWeek === day || (!hasDayOne && md.dayOfWeek === day + 1)) &&
-        !md.deletedAt && isDietSubstitute(md) && resolveSubstituteInfo(md, advisory).type === targetType,
+        !md.deletedAt &&
+        isDietSubstitute(md) &&
+        activeMealSlotKeys.has(resolveDishSlotKey(md)) &&
+        resolveSubstituteInfo(md, advisory).type === targetType,
       ));
     const type1 = selectedNutrition('STUNTED');
     const type2 = selectedNutrition('OBESE');
@@ -445,27 +539,29 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
     const lPct = macroCalo > 0 ? Math.round((caloL / macroCalo) * 100) : 0;
     const gPct = macroCalo > 0 ? Math.max(0, 100 - pPct - lPct) : 0;
 
-    const isToddler = menu?.targetAgeGroup === 'NHA_TRE' || (menu as any)?.ageGroup === 'NHA_TRE';
-    const minKcalStandard = isToddler ? 600 : 615;
-    const maxKcalStandard = isToddler ? 750 : 770;
     const isCaloStandard = totalCalo >= minKcalStandard && totalCalo <= maxKcalStandard;
-    const isPOptimal = pPct >= 13 && pPct <= 20;
-    const isLOptimal = lPct >= 25 && lPct <= 35;
+    const isPOptimal = pPct >= minPPctStandard && pPct <= maxPPctStandard;
+    const isLOptimal = lPct >= minLPctStandard && lPct <= maxLPctStandard;
 
-    let masterStatusText = 'Đạt chuẩn Chuẩn Dinh Dưỡng';
+    let masterStatusText = 'Đạt chuẩn Dinh dưỡng';
     let masterStatusType: 'optimal' | 'warning' | 'alert' | 'empty' = 'optimal';
 
     if (totalCalo < minKcalStandard) {
-      masterStatusText = `Thiếu calo (< ${minKcalStandard})`;
+      masterStatusText = `Thiếu calo · dưới ${minKcalStandard}`;
       masterStatusType = 'warning';
     } else if (totalCalo > maxKcalStandard) {
-      masterStatusText = `Vượt calo (> ${maxKcalStandard})`;
+      masterStatusText = `Vượt calo · trên ${maxKcalStandard}`;
       masterStatusType = 'alert';
     } else if (!isPOptimal || !isLOptimal) {
-      masterStatusText = `Cân đối (${pPct}% P : ${lPct}% L)`;
+      const reason = !isLOptimal && lPct < minLPctStandard
+        ? `Thiếu béo · ${lPct}% L (cần ${minLPctStandard}%)`
+        : !isPOptimal && pPct > maxPPctStandard
+          ? `Dư đạm · ${pPct}% P`
+          : `Chưa cân đối · ${pPct}% P : ${lPct}% L`;
+      masterStatusText = reason;
       masterStatusType = 'warning';
     } else {
-      masterStatusText = 'Đạt chuẩn Chuẩn Dinh Dưỡng';
+      masterStatusText = 'Đạt chuẩn Dinh dưỡng';
       masterStatusType = 'optimal';
     }
 
@@ -520,14 +616,14 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
             </span>
             <span
               className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${menu?.status === 'ACTIVE'
-                  ? 'bg-emerald-500 text-white'
-                  : menu?.status === 'APPROVED'
-                    ? 'bg-blue-100 text-blue-800'
-                    : menu?.status === 'SUBMITTED_FOR_REVIEW'
-                      ? 'bg-amber-100 text-amber-800'
-                      : menu?.status === 'REJECTED'
-                        ? 'bg-rose-100 text-rose-800'
-                        : 'bg-slate-100 text-slate-700'
+                ? 'bg-emerald-500 text-white'
+                : menu?.status === 'APPROVED'
+                  ? 'bg-blue-100 text-blue-800'
+                  : menu?.status === 'SUBMITTED_FOR_REVIEW'
+                    ? 'bg-amber-100 text-amber-800'
+                    : menu?.status === 'REJECTED'
+                      ? 'bg-rose-100 text-rose-800'
+                      : 'bg-slate-100 text-slate-700'
                 }`}
             >
               {translateText(menu?.status === 'ACTIVE'
@@ -578,61 +674,10 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               {translateText(avgG.toFixed(1))}{translateText("g ")}<span className="text-[10px] text-teal-700 font-semibold">({avgGPct}%)</span>
             </span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setBreakdownDay('AVG');
-              setIsDailyBreakdownOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-md shadow-sky-600/20 transition cursor-pointer shrink-0"
-            title={translateText("Xem bảng thành phần ăn trong ngày (% calo & dinh dưỡng từng bữa)")}
-          >
-            <PieChart className="w-4 h-4 text-sky-200" />
-            <span className="hidden sm:inline">{translateText("Bảng % calo theo bữa")}</span>
-          </button>
         </div>
       </div>
 
-      {/* Banner Tổng Hợp Cảnh Báo Dị Ứng Học Sinh & Đề Xuất BMI */}
-      {advisory && (advisory.allergySummary.totalConflicts > 0 || (advisory.bmiSummary.overweightObeseCount + advisory.bmiSummary.wastedUnderweightCount > 0)) && (
-        <div className="mx-5 my-3 p-4 bg-gradient-to-r from-rose-50 via-amber-50/40 to-white border border-rose-200/90 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-              <ShieldAlert className="w-5 h-5 text-rose-600 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-rose-950 uppercase tracking-wide">{translateText("Cảnh báo Dinh dưỡng Học đường & An toàn Dị ứng")}</span>
-                {advisory.allergySummary.criticalCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white uppercase tracking-wider animate-pulse">{translateText("Nguy kịch: ")}{advisory.allergySummary.criticalCount}{translateText(" bé")}</span>
-                )}
-              </div>
-              <p className="text-xs text-rose-800 mt-0.5 leading-relaxed">
-                {advisory.allergySummary.totalConflicts > 0 ? (
-                  <span>{translateText("Phát hiện ")}<strong>{advisory.allergySummary.totalConflicts}{translateText(" xung đột dị ứng")}</strong>{translateText(" với phụ huynh (")}{advisory.allergySummary.affectedChildrenCount}{translateText(" bé, ")}{advisory.allergySummary.affectedDishesCount}{translateText(" món).")}</span>
-                ) : (
-                  <span>{translateText("Thực đơn không có xung đột dị ứng học sinh.")}</span>
-                )}
-                {(advisory.bmiSummary.overweightObeseCount + advisory.bmiSummary.wastedUnderweightCount) > 0 && (
-                  <span className="ml-1 text-amber-900 font-medium">{translateText("Có ")}<strong>{advisory.bmiSummary.overweightObeseCount}{translateText(" bé thừa cân/béo phì")}</strong>{translateText(" và ")}<strong>{advisory.bmiSummary.wastedUnderweightCount}{translateText(" bé gầy còm/suy dinh dưỡng")}</strong>{translateText(" cần cá nhân hóa món ăn & khẩu phần theo Chuẩn Dinh Dưỡng.")}</span>
-                )}
-              </p>
-            </div>
-          </div>
 
-          {onOpenAdvisoryModal && (
-            <button
-              type="button"
-              onClick={onOpenAdvisoryModal}
-              className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 flex items-center gap-1.5 transition shrink-0 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-rose-200" />
-              <span>{translateText("Phân loại Dinh dưỡng & Ghi chú (Dị ứng • Thấp còi • Béo phì)")}</span>
-            </button>
-          )}
-        </div>
-      )}
 
       {/* ══════════════════════════════════════════════════════════════════════════════════════ */}
       {/* ══════════════════════════════════════════════════════════════════════════════════════ */}
@@ -661,8 +706,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               type="button"
               onClick={() => setActiveChildTypeFilter('ALL')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${activeChildTypeFilter === 'ALL'
-                  ? 'bg-slate-900 text-white shadow-md ring-2 ring-slate-900'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                ? 'bg-slate-900 text-white shadow-md ring-2 ring-slate-900'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               title={translateText("Hiển thị đầy đủ cả Thực đơn tổng và các suất riêng của cả 3 loại")}
             >
@@ -675,8 +720,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               type="button"
               onClick={() => setActiveChildTypeFilter((prev) => (prev === 'MASTER' ? 'ALL' : 'MASTER'))}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${activeChildTypeFilter === 'MASTER'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-600'
-                  : 'bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-600'
+                : 'bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100'
                 }`}
               title={translateText("Chỉ hiển thị các món thuộc Thực đơn tổng (Suất chung toàn trường)")}
             >
@@ -689,8 +734,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               type="button"
               onClick={() => setActiveChildTypeFilter((prev) => (prev === 'STUNTED' ? 'ALL' : 'STUNTED'))}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${activeChildTypeFilter === 'STUNTED'
-                  ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-600'
-                  : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
+                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-600'
+                : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
                 }`}
               title={translateText("Ấn vào để lọc và xem danh sách trẻ & suất riêng Loại 1 (Thấp còi / SDD)")}
             >
@@ -708,8 +753,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               type="button"
               onClick={() => setActiveChildTypeFilter((prev) => (prev === 'OBESE' ? 'ALL' : 'OBESE'))}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${activeChildTypeFilter === 'OBESE'
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-600'
-                  : 'bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100'
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-600'
+                : 'bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100'
                 }`}
               title={translateText("Ấn vào để lọc và xem danh sách trẻ & suất riêng Loại 2 (Béo phì / Thừa cân)")}
             >
@@ -727,8 +772,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               type="button"
               onClick={() => setActiveChildTypeFilter((prev) => (prev === 'ALLERGIES' ? 'ALL' : 'ALLERGIES'))}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${activeChildTypeFilter === 'ALLERGIES'
-                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-600'
-                  : 'bg-rose-50 text-rose-900 border border-rose-200 hover:bg-rose-100'
+                ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-600'
+                : 'bg-rose-50 text-rose-900 border border-rose-200 hover:bg-rose-100'
                 }`}
               title={translateText("Ấn vào để lọc và xem danh sách trẻ & suất riêng Loại 3 (Dị ứng thực phẩm)")}
             >
@@ -746,8 +791,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
               type="button"
               onClick={() => setActiveChildTypeFilter((prev) => (prev === 'COMMON' ? 'ALL' : 'COMMON'))}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${activeChildTypeFilter === 'COMMON'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-600'
-                  : 'bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-600'
+                : 'bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100'
                 }`}
               title={translateText("Đề xuất món thay thế chung phục vụ cả 3 nhóm trẻ")}
             >
@@ -1534,8 +1579,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       type="button"
                       onClick={() => setFooterNutritionTab('ALL')}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer ${footerNutritionTab === 'ALL'
-                          ? 'bg-slate-900 text-white shadow-xs'
-                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                         }`}
                     >
                       <Users className="w-3 h-3" />
@@ -1545,8 +1590,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       type="button"
                       onClick={() => setFooterNutritionTab('MASTER')}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer ${footerNutritionTab === 'MASTER'
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
                         }`}
                     >
                       <span>{translateText("🌟 Thực đơn tổng")}</span>
@@ -1556,8 +1601,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       onClick={() => setFooterNutritionTab('STUNTED')}
                       style={!hasWastedChildren ? { display: 'none' } : undefined}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer ${footerNutritionTab === 'STUNTED'
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'bg-white text-amber-800 border border-amber-200 hover:bg-amber-50'
+                        ? 'bg-amber-600 text-white shadow-xs'
+                        : 'bg-white text-amber-800 border border-amber-200 hover:bg-amber-50'
                         }`}
                     >
                       <Baby className="w-3 h-3" />
@@ -1568,8 +1613,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       onClick={() => setFooterNutritionTab('OBESE')}
                       style={!hasOverweightChildren ? { display: 'none' } : undefined}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer ${footerNutritionTab === 'OBESE'
-                          ? 'bg-purple-600 text-white shadow-xs'
-                          : 'bg-white text-purple-800 border border-purple-200 hover:bg-purple-50'
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : 'bg-white text-purple-800 border border-purple-200 hover:bg-purple-50'
                         }`}
                     >
                       <Scale className="w-3 h-3" />
@@ -1580,8 +1625,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       onClick={() => setFooterNutritionTab('ALLERGIES')}
                       style={!hasAllergicChildren ? { display: 'none' } : undefined}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer ${footerNutritionTab === 'ALLERGIES'
-                          ? 'bg-rose-600 text-white shadow-xs'
-                          : 'bg-white text-rose-800 border border-rose-200 hover:bg-rose-50'
+                        ? 'bg-rose-600 text-white shadow-xs'
+                        : 'bg-white text-rose-800 border border-rose-200 hover:bg-rose-50'
                         }`}
                     >
                       <ShieldAlert className="w-3 h-3" />
@@ -1617,9 +1662,13 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                         <span className="flex items-center gap-1.5">
                           <ChefHat className="w-3.5 h-3.5 text-emerald-700" />
-                          <span>{translateText("Suất chung · 615–770 kcal")}</span>
+                          <span>
+                            {translateText('Suất chung')} · {minKcalStandard}–{maxKcalStandard} kcal
+                          </span>
                         </span>
-                        <span className="text-[10px] font-bold text-emerald-800">{translateText("P: 13–20% · L: 25–35% · G: 52–60%")}</span>
+                        <span className="text-[10px] font-bold text-emerald-800">
+                          P: {minPPctStandard}–{maxPPctStandard}% · L: {minLPctStandard}–{maxLPctStandard}% · G: {minGPctStandard}–{maxGPctStandard}%
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -1642,10 +1691,10 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                         </span>
                         <span
                           className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${nutri.statusType === 'optimal'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs'
-                              : nutri.statusType === 'empty'
-                                ? 'bg-slate-200 text-slate-500'
-                                : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs'
+                            : nutri.statusType === 'empty'
+                              ? 'bg-slate-200 text-slate-500'
+                              : 'bg-amber-100 text-amber-800 border border-amber-300'
                             }`}
                         >
                           {translateText(nutri.statusText)}
@@ -1727,8 +1776,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                         </span>
                         <span
                           className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${nutri.statusType !== 'empty'
-                              ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs'
-                              : 'bg-slate-200 text-slate-500'
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs'
+                            : 'bg-slate-200 text-slate-500'
                             }`}
                         >
                           {translateText(nutri.statusText)}
@@ -1810,8 +1859,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                         </span>
                         <span
                           className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${nutri.statusType !== 'empty'
-                              ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-2xs'
-                              : 'bg-slate-200 text-slate-500'
+                            ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-2xs'
+                            : 'bg-slate-200 text-slate-500'
                             }`}
                         >
                           {translateText(nutri.statusText)}
@@ -1893,8 +1942,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                         </span>
                         <span
                           className={`text-[9.5px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${nutri.statusType !== 'empty'
-                              ? 'bg-rose-100 text-rose-900 border border-rose-300 shadow-2xs'
-                              : 'bg-slate-200 text-slate-500'
+                            ? 'bg-rose-100 text-rose-900 border border-rose-300 shadow-2xs'
+                            : 'bg-slate-200 text-slate-500'
                             }`}
                         >
                           {translateText(nutri.statusText)}
@@ -2012,12 +2061,12 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
           try {
             setIsApplyingSub(true);
             const generatedNote = `[${lockedType === 'ALLERGIES'
-                ? translateText('Loại 3: Dị ứng')
-                : lockedType === 'OBESE'
-                  ? translateText('Loại 2: Béo phì')
-                  : lockedType === 'STUNTED'
-                    ? translateText('Loại 1: SDD')
-                    : translateText('Món Chung')
+              ? translateText('Loại 3: Dị ứng')
+              : lockedType === 'OBESE'
+                ? translateText('Loại 2: Béo phì')
+                : lockedType === 'STUNTED'
+                  ? translateText('Loại 1: SDD')
+                  : translateText('Món Chung')
               }] Thay cho: ${universalModalDish.menuDish.dish?.name || translateText('Món gốc')} -> Đổi sang: ${activeSub.name} (${activeSub.calories} Kcal). ${substituteStaffNote || translateText('Nấu suất riêng theo chuẩn dinh dưỡng.')}`;
 
             const targetDishId = Number(activeSub.id);
@@ -2097,7 +2146,6 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       <Baby className="w-4 h-4" />
                       <span>{translateText("Loại 1: Thấp Còi / Suy Dinh Dưỡng (")}{wastedChildren.length}{translateText(" bé)")}</span>
                     </span>
-                    <span className="text-xs text-amber-900 font-bold bg-amber-100/90 px-2.5 py-1 rounded-lg">{translateText("⚡ Chuẩn QĐ 1246/QĐ-BYT: Tăng +15% đến +35% Calo & đạm sinh học")}</span>
                   </div>
                 )}
 
@@ -2107,7 +2155,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                       <Scale className="w-4 h-4" />
                       <span>{translateText("Loại 2: Thừa Cân / Béo Phì (")}{overweightChildren.length}{translateText(" bé)")}</span>
                     </span>
-                    <span className="text-xs text-purple-900 font-bold bg-purple-100/90 px-2.5 py-1 rounded-lg">{translateText("🥗 Chuẩn Chuẩn Dinh Dưỡng: Giảm 50% chất béo & tiết chế calo")}</span>
+                    <span className="text-xs text-purple-900 font-bold bg-purple-100/90 px-2.5 py-1 rounded-lg">{translateText("🥗 Giảm 50% chất béo & tiết chế calo")}</span>
                   </div>
                 )}
 
@@ -2162,7 +2210,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-black text-purple-950 text-xs uppercase tracking-wide">
                         <Scale className="w-4 h-4 text-purple-600" />
-                        <span>{translateText("Trẻ em Thừa cân / Béo phì cần kiểm soát calo (Chuẩn Dinh Dưỡng):")}</span>
+                        <span>{translateText("Trẻ em Thừa cân / Béo phì cần kiểm soát calo:")}</span>
                       </div>
                       <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
                         {overweightChildren.length}{translateText(" bé")}</span>
@@ -2174,10 +2222,9 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           <div>
                             <span className="font-bold text-purple-950">{c.childName}</span>
                             <span className="text-purple-700 ml-1.5 font-medium">({c.className})</span>
-                            <span className="text-purple-600 ml-2 italic text-[11px]">{translateText("- Cần giảm 10-15% béo/calo, hạn chế chiên rán")}</span>
                           </div>
                           <span className="text-[10px] font-black text-purple-800 bg-purple-100 px-2 py-0.5 rounded">
-                            {translateText(c.weightKg)}{translateText(" kg • BAZ: +")}{translateText(c.baz || 2.3)}
+                            {translateText(c.weightKg)}{translateText(" kg")}
                           </span>
                         </div>
                       ))}
@@ -2190,7 +2237,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 font-black text-amber-950 text-xs uppercase tracking-wide">
                         <Baby className="w-4 h-4 text-amber-600" />
-                        <span>{translateText("Trẻ em Còi xương / Thấp còi cần bổ sung đạm (QĐ 1246/BYT):")}</span>
+                        <span>{translateText("Trẻ em Còi xương / Thấp còi cần bổ sung đạm:")}</span>
                       </div>
                       <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
                         {wastedChildren.length}{translateText(" bé")}</span>
@@ -2202,7 +2249,6 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           <div>
                             <span className="font-bold text-amber-950">{c.childName}</span>
                             <span className="text-amber-700 ml-1.5 font-medium">({c.className})</span>
-                            <span className="text-amber-600 ml-2 italic text-[11px]">{translateText("- Cần tăng 15-20% đạm sinh học cao & thêm bữa phụ")}</span>
                           </div>
                           <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
                             {translateText(c.weightKg)}{translateText(" kg • ")}{translateText(c.heightCm)}{translateText(" cm (Thấp còi)")}</span>
@@ -2269,8 +2315,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                     <div
                       onClick={() => setReplaceMode('REPLACE_ALL')}
                       className={`p-2.5 rounded-xl border transition cursor-pointer flex items-start gap-2.5 ${replaceMode === 'REPLACE_ALL'
-                          ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/30 shadow-xs'
-                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                        ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/30 shadow-xs'
+                        : 'bg-white border-slate-200 hover:bg-slate-50'
                         }`}
                     >
                       <input
@@ -2288,8 +2334,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                     <div
                       onClick={() => setReplaceMode('SPECIAL_DIET')}
                       className={`p-2.5 rounded-xl border transition cursor-pointer flex items-start gap-2.5 ${replaceMode === 'SPECIAL_DIET'
-                          ? 'bg-rose-50 border-rose-500 ring-2 ring-rose-500/30 shadow-xs'
-                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                        ? 'bg-rose-50 border-rose-500 ring-2 ring-rose-500/30 shadow-xs'
+                        : 'bg-white border-slate-200 hover:bg-slate-50'
                         }`}
                     >
                       <input
@@ -2321,8 +2367,8 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                           key={dish.id}
                           onClick={() => setSelectedSubDish(dish)}
                           className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${isSelected
-                              ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500 shadow-xs'
-                              : 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-slate-50'
+                            ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500 shadow-xs'
+                            : 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-slate-50'
                             }`}
                         >
                           <div className="flex items-center gap-3">

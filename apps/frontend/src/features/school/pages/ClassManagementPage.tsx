@@ -17,7 +17,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Phone,
+  FileSpreadsheet,
 } from "lucide-react";
+import { downloadExcel } from "../../../core/utils/excel-export";
 import { apiClient } from "../../../core/api/axios";
 import { fetchKitchenCollection } from "../../kitchen/api/kitchen.api";
 import { rowsOf } from "../../kitchen/utils/kitchen-operations";
@@ -49,7 +51,7 @@ interface TeacherOption {
 export function ClassManagementPage() {
   useLanguage();
   const [schoolName, setSchoolName] = useState(
-    () => localStorage.getItem("school_name") || "Trường Mẫu Giáo Hướng Dương"
+    () => localStorage.getItem("school_name") || "KidMeal"
   );
 
   const [search, setSearch] = useState("");
@@ -228,66 +230,55 @@ export function ClassManagementPage() {
     }, "Đã lưu lớp học.");
   };
 
+  const handleExportExcel = async () => {
+    if (!rows.length) return;
+    const headers = [
+      'STT',
+      'Tên lớp',
+      'Độ tuổi',
+      'Năm học',
+      'Giáo viên chủ nhiệm',
+      'Số điện thoại GVCN',
+      'Sĩ số học sinh',
+      'Trạng thái',
+    ];
+    const dataRows = rows.map((r, idx) => [
+      idx + 1,
+      r.name,
+      r.ageGroup ? `${r.ageGroup} tuổi` : '',
+      r.schoolYear || '',
+      r.homeroomTeacher?.fullName || 'Chưa phân công',
+      r.homeroomTeacher?.phone || '',
+      r.studentCount ?? 0,
+      r.status === 'ACTIVE' ? 'Hoạt động' : 'Ngừng hoạt động',
+    ]);
+    await downloadExcel(
+      `Danh_sach_lop_hoc_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [headers, ...dataRows],
+      'Danh sách lớp học'
+    );
+  };
+
   return (
     <div className="w-full space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
         <div
-          className={`fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 max-w-md ${
+          className={`fixed top-6 right-6 z-[9999] px-4.5 py-3.5 rounded-2xl shadow-2xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 max-w-md ${
             toastMessage.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-red-50 border-red-200 text-red-800"
+              ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-900/30"
+              : "bg-rose-600 text-white border-rose-500 shadow-rose-900/40"
           }`}
         >
           {toastMessage.type === "success" ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-white shrink-0" />
           )}
-          <span className="text-xs font-semibold">{translateText(toastMessage.text)}</span>
+          <span className="text-xs font-semibold leading-relaxed">{translateText(toastMessage.text)}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-              {translateText("CỔNG BAN GIÁM HIỆU")}
-            </span>
-            <span className="text-xs text-slate-400">• {schoolName}</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
-            {translateText("Quản Lý Lớp Học")}
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {translateText(
-              "Xem, tìm kiếm, tạo và phân công giáo viên chủ nhiệm, quản lý sĩ số học sinh."
-            )}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => resource.reload()}
-            disabled={resource.loading}
-            className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition"
-            title={translateText("Làm mới dữ liệu")}
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${resource.loading ? "animate-spin text-teal-600" : ""}`}
-            />
-          </button>
-          <button
-            onClick={() => openForm()}
-            disabled={academicYears.loading || !academicYears.data?.length}
-            className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{translateText("Tạo Lớp Học Mới")}</span>
-          </button>
-        </div>
-      </div>
       {!academicYears.loading && !academicYears.data?.length && (
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
           Chưa có năm học. Hãy tạo hoặc chọn năm học trong <Link className="font-bold underline" to="/academic-years">Quản lý năm học</Link> trước khi thêm lớp.
@@ -372,6 +363,34 @@ export function ClassManagementPage() {
             <option value="ACTIVE">{translateText("Hoạt động")}</option>
             <option value="INACTIVE">{translateText("Ngừng hoạt động")}</option>
           </select>
+
+          <button
+            onClick={() => resource.reload()}
+            disabled={resource.loading}
+            className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition cursor-pointer"
+            title={translateText("Làm mới dữ liệu")}
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${resource.loading ? "animate-spin text-teal-600" : ""}`}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-2xl shadow-2xs transition cursor-pointer"
+            title={translateText("Xuất danh sách lớp học ra file Excel")}
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{translateText("Xuất Excel")}</span>
+          </button>
+          <button
+            onClick={() => openForm()}
+            disabled={academicYears.loading || !academicYears.data?.length}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-2xl shadow-xs transition cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{translateText("Tạo Lớp Mới")}</span>
+          </button>
         </div>
       </div>
 
@@ -379,15 +398,15 @@ export function ClassManagementPage() {
       <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3.5 px-5">{translateText("Lớp Học")}</th>
-                <th className="py-3.5 px-4">{translateText("Nhóm Tuổi")}</th>
-                <th className="py-3.5 px-4">{translateText("Năm Học")}</th>
-                <th className="py-3.5 px-4">{translateText("Giáo Viên Chủ Nhiệm")}</th>
-                <th className="py-3.5 px-4">{translateText("Sĩ Số")}</th>
-                <th className="py-3.5 px-4">{translateText("Trạng Thái")}</th>
-                <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
+            <thead className="bg-teal-600 text-white">
+              <tr className="border-b border-teal-700/60 text-[11px] font-bold text-white uppercase tracking-wider">
+                <th className="py-3.5 px-5 text-white">{translateText("Lớp Học")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Nhóm Tuổi")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Năm Học")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Giáo Viên Chủ Nhiệm")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Sĩ Số")}</th>
+                <th className="py-3.5 px-4 text-white">{translateText("Trạng Thái")}</th>
+                <th className="py-3.5 px-5 text-right text-white">{translateText("Thao Tác")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">

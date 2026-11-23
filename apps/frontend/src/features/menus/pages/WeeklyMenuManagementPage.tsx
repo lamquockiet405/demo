@@ -620,11 +620,10 @@ export const WeeklyMenuManagementPage: React.FC = () => {
         {/* 2. CÁC Ô THỐNG KÊ Ở ĐẦU GIAO DIỆN (5 KPI CARDS) */}
         <MenuStatsCards stats={stats} loading={loading} />
 
-        {/* 3. THANH ĐIỀU HƯỚNG & CÔNG CỤ QUẢN LÝ THỰC ĐƠN (BỐ CỤC CÂN ĐỐI 2 HÀNG) */}
-        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-xs space-y-4">
-          {/* HÀNG 1: BỘ CHỌN THỰC ĐƠN, BỘ LỌC & CÁC NÚT TẠO MỚI */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            {/* Cụm trái: Chọn thực đơn + Lọc trạng thái + Thùng rác + Phiên bản */}
+        {/* 3. THANH ĐIỀU HƯỚNG & CÔNG CỤ QUẢN LÝ THỰC ĐƠN */}
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-xs">
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            {/* Cụm trái: Chọn thực đơn + Lọc trạng thái + Phiên bản */}
             <div className="flex flex-wrap items-center gap-3">
               {/* Chọn Thực đơn đang xem */}
               <div className="min-w-[260px] sm:min-w-[320px]">
@@ -659,8 +658,6 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 </select>
               </div>
 
-
-
               {/* Lọc Phiên bản nếu có nhiều version */}
               {Array.isArray(menuVersions) && menuVersions.length > 1 && (
                 <div>
@@ -683,8 +680,197 @@ export const WeeklyMenuManagementPage: React.FC = () => {
               )}
             </div>
 
-            {/* Cụm phải: Các nút tạo mới thực đơn */}
-            <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-end">
+            {/* Cụm phải: Thao tác thực đơn đang chọn & Các nút tạo mới */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 self-start xl:self-center">
+              {/* Thao tác trên Thực đơn đang chọn (Workflow, In, Xóa) */}
+              {selectedMenu && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Nút Gửi Duyệt (DÀNH RIÊNG CHO CHUYÊN VIÊN DINH DƯỠNG khi ở DRAFT hoặc REJECTED) */}
+                  {(selectedMenu.status === "DRAFT" ||
+                    selectedMenu.status === "REJECTED") &&
+                    !isPrincipal && (
+                      <button
+                        onClick={handleSubmitForReview}
+                        disabled={actionLoading}
+                        className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/25 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                      >
+                        <Send className="w-4 h-4" />
+                        <span>{translateText("Gửi Hiệu trưởng duyệt")}</span>
+                      </button>
+                    )}
+
+                  {/* Nút CẬP NHẬT & GỬI LẠI DUYỆT cho Chuyên gia Dinh dưỡng khi thực đơn đang SUBMITTED_FOR_REVIEW */}
+                  {(selectedMenu.status === "SUBMITTED_FOR_REVIEW" ||
+                    selectedMenu.status === "PENDING") &&
+                    !isPrincipal && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleSubmitForReview}
+                          disabled={actionLoading}
+                          className="px-4 py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                          title={translateText("Thực đơn đang chờ duyệt, bạn có thể chỉnh sửa các món ăn và bấm nút này để gửi lại bản mới nhất cho Hiệu trưởng")}
+                        >
+                          <Send className="w-4 h-4" />
+                          <span>{translateText("Cập nhật & Gửi lại Hiệu trưởng duyệt")}</span>
+                        </button>
+                        <div className="px-3 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                          <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
+                          <span>{translateText("Đang chờ duyệt (Có thể sửa)")}</span>
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Nút XIN PHÉP HIỆU TRƯỞNG CHỈNH SỬA (Dành cho CV Dinh dưỡng khi menu đã APPROVED hoặc ACTIVE) */}
+                  {(selectedMenu.status === "APPROVED" ||
+                    selectedMenu.status === "ACTIVE" ||
+                    selectedMenu.status === "PUBLISHED") &&
+                    !isPrincipal && (
+                      <>
+                        {selectedMenu.editRequestStatus === "PENDING" ? (
+                          <div className="flex items-center gap-2">
+                            <div className="px-3.5 py-2 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                              <Clock className="w-4 h-4 text-purple-600 animate-spin" />
+                              <span>{translateText("Đang chờ Hiệu trưởng cấp quyền sửa")}</span>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleCancelEditRequest(selectedMenu.id)
+                              }
+                              disabled={actionLoading}
+                              className="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold transition cursor-pointer"
+                              title={translateText("Hủy yêu cầu xin phép chỉnh sửa")}
+                            >{translateText("Hủy xin sửa")}</button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setIsRequestEditModalOpen(true)}
+                            disabled={actionLoading}
+                            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-purple-600/25 flex items-center gap-1.5 transition cursor-pointer hover:scale-102 active:scale-98"
+                            title={translateText("Thực đơn đã duyệt/công bố. Gửi yêu cầu kèm lý do lên Hiệu trưởng để được mở khóa chỉnh sửa.")}
+                          >
+                            <ShieldAlert className="w-4 h-4 text-purple-200" />
+                            <span>{translateText("Xin phép Hiệu trưởng chỉnh sửa")}</span>
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                  {/* Nút cho HIỆU TRƯỞNG khi CV Dinh dưỡng gửi Yêu cầu xin phép chỉnh sửa thực đơn */}
+                  {(selectedMenu.status === "APPROVED" ||
+                    selectedMenu.status === "ACTIVE" ||
+                    selectedMenu.status === "PUBLISHED") &&
+                    isPrincipal &&
+                    selectedMenu.editRequestStatus === "PENDING" && (
+                      <button
+                        onClick={() => setIsRespondEditModalOpen(true)}
+                        className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-purple-600 hover:from-amber-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition animate-pulse cursor-pointer"
+                        title={translateText("Chuyên viên Dinh dưỡng vừa gửi yêu cầu xin phép chỉnh sửa thực đơn đã duyệt này")}
+                      >
+                        <AlertCircle className="w-4 h-4 text-amber-200" />
+                        <span>{translateText("Hiệu trưởng: Duyệt yêu cầu xin sửa")}</span>
+                      </button>
+                    )}
+
+                  {/* Badge cho HIỆU TRƯỞNG khi menu đang là DRAFT */}
+                  {selectedMenu.status === "DRAFT" && isPrincipal && (
+                    <div className="px-3.5 py-2 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                      <Clock className="w-4 h-4 text-slate-500" />
+                      <span>{translateText("Bản dự thảo (Chờ CV Dinh dưỡng gửi duyệt)")}</span>
+                    </div>
+                  )}
+
+                  {/* Badge cho HIỆU TRƯỞNG khi menu đang REJECTED */}
+                  {selectedMenu.status === "REJECTED" && isPrincipal && (
+                    <div className="px-3.5 py-2 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                      <AlertCircle className="w-4 h-4 text-rose-600" />
+                      <span>{translateText("Đã từ chối (Chờ CV Dinh dưỡng sửa lại)")}</span>
+                    </div>
+                  )}
+
+                  {/* Nút Duyệt / Từ chối (CHỈ DÀNH CHO HIỆU TRƯỞNG / BGH khi SUBMITTED_FOR_REVIEW) */}
+                  {(selectedMenu.status === "SUBMITTED_FOR_REVIEW" ||
+                    selectedMenu.status === "PENDING") &&
+                    isPrincipal && (
+                      <button
+                        onClick={() => setIsApprovalModalOpen(true)}
+                        className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>{translateText("Hiệu trưởng: Phê duyệt / Từ chối")}</span>
+                      </button>
+                    )}
+
+                  {/* Trạng thái ĐÃ DUYỆT cho Chuyên gia Dinh dưỡng */}
+                  {selectedMenu.status === "APPROVED" &&
+                    !isPrincipal &&
+                    selectedMenu.editRequestStatus !== "PENDING" && (
+                      <div className="px-3.5 py-2 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                        <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                        <span>{translateText("Đã được Hiệu trưởng duyệt")}</span>
+                      </div>
+                    )}
+
+                  {/* Nút Khóa & Công Bố (CHỈ DÀNH CHO HIỆU TRƯỞNG / BGH sau khi đã duyệt) */}
+                  {selectedMenu.status === "APPROVED" && isPrincipal && (
+                    <button
+                      onClick={handlePublish}
+                      disabled={actionLoading}
+                      className="px-4 py-2.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md shadow-emerald-700/25 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                    >
+                      <Lock className="w-4 h-4" />
+                      <span>{translateText("Hiệu trưởng: Khóa & Công bố")}</span>
+                    </button>
+                  )}
+
+                  {/* Badge ĐÃ KHÓA & CÔNG BỐ TOÀN TRƯỜNG */}
+                  {(selectedMenu.status === "ACTIVE" ||
+                    selectedMenu.status === "PUBLISHED") && (
+                    <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                      <Lock className="w-4 h-4 text-emerald-700" />
+                      <span>{translateText("Đã khóa & Công bố toàn trường")}</span>
+                    </div>
+                  )}
+
+                  <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+
+                  {/* Nút In / Xuất PDF */}
+                  <button
+                    onClick={handleOpenPrintPreview}
+                    className="p-2.5 rounded-2xl border border-slate-200 hover:bg-slate-100 text-slate-700 transition cursor-pointer"
+                    title={translateText("Xem trước và In thực đơn (PDF A4)")}
+                  >
+                    <Printer className="w-4 h-4" />
+                  </button>
+
+                  {/* Nút Xóa Mềm */}
+                  {!showDeleted && selectedMenu.status !== "ACTIVE" && (
+                    <button
+                      onClick={handleSoftDelete}
+                      className="p-2.5 rounded-2xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                      title={translateText("Xóa mềm thực đơn vào thùng rác")}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* Nút Khôi phục nếu đang ở Thùng rác */}
+                  {showDeleted && (
+                    <button
+                      onClick={() => handleRestore(selectedMenu.id)}
+                      className="px-3 py-2 rounded-2xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>{translateText("Khôi phục bản này")}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Ngăn cách giữa Thao tác thực đơn và Tạo mới */}
+              {selectedMenu && (
+                <div className="h-6 w-[1px] bg-slate-200 mx-1 hidden xl:block" />
+              )}
+
               {/* Nút Tạo Thực Đơn Tự Động (AI / Smart Menu) */}
               <button
                 type="button"
@@ -708,267 +894,6 @@ export const WeeklyMenuManagementPage: React.FC = () => {
                 <Plus className="w-4 h-4" />
                 <span>{translateText("Tạo thực đơn tuần")}</span>
               </button>
-            </div>
-          </div>
-
-          {/* HÀNG 2: THAO TÁC TRÊN THỰC ĐƠN ĐANG CHỌN (CONTEXTUAL ACTIONS) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            {/* Bên Trái: Nút Phân Loại Dinh Dưỡng & Khẩu Phần (Dị ứng, BMI) */}
-            {selectedMenu && (
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAdvisorFocusDishId(null);
-                    setIsAdvisorModalOpen(true);
-                  }}
-                  className={`px-4 py-2 rounded-2xl border text-xs font-bold flex items-center gap-2.5 transition shadow-xs cursor-pointer ${
-                    advisory &&
-                    (advisory.allergySummary.totalConflicts > 0 ||
-                      advisory.bmiSummary.overweightObeseCount +
-                        advisory.bmiSummary.wastedUnderweightCount >
-                        0)
-                      ? "bg-rose-50/90 border-rose-300 text-rose-900 hover:bg-rose-100 hover:border-rose-400"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                  }`}
-                  title={translateText("Phân loại dinh dưỡng 3 nhóm học sinh: Dị ứng, Thấp còi (thêm lượng ăn), Béo phì (giảm calo)")}
-                >
-                  <div className="relative">
-                    <AlertCircle
-                      className={`w-4 h-4 ${
-                        advisory && advisory.allergySummary.totalConflicts > 0
-                          ? "text-rose-600 animate-pulse"
-                          : "text-amber-500"
-                      }`}
-                    />
-                    {advisory && advisory.allergySummary.criticalCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-600 rounded-full animate-ping" />
-                    )}
-                  </div>
-                  <span>{translateText("Phân loại Dinh dưỡng (3 nhóm học sinh)")}</span>
-                  {advisory && (
-                    <div className="flex items-center gap-1.5 font-black">
-                      {advisory.allergySummary.totalConflicts > 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-600 text-white shadow-2xs">
-                          {advisory.allergySummary.totalConflicts}{translateText(" Dị ứng")}</span>
-                      )}
-                      {advisory.bmiSummary.overweightObeseCount +
-                        advisory.bmiSummary.wastedUnderweightCount >
-                        0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500 text-white shadow-2xs">
-                          {advisory.bmiSummary.overweightObeseCount +
-                            advisory.bmiSummary.wastedUnderweightCount}{" "}{translateText("BMI")}</span>
-                      )}
-                    </div>
-                  )}
-                </button>
-
-                <span className="text-xs text-slate-400 font-medium hidden md:inline">{translateText("• Tuần ")}{selectedMenu.cycleWeekNumber || 1} (
-                  {translateText(selectedMenu.startDate?.split("T")[0])} -{" "}
-                  {translateText(selectedMenu.endDate?.split("T")[0])})
-                </span>
-              </div>
-            )}
-
-            {/* Bên Phải: Workflow & Tiện ích của Thực đơn đang chọn */}
-            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-
-
-              {/* Nút Gửi Duyệt (DÀNH RIÊNG CHO CHUYÊN VIÊN DINH DƯỠNG khi ở DRAFT hoặc REJECTED) */}
-              {selectedMenu &&
-                (selectedMenu.status === "DRAFT" ||
-                  selectedMenu.status === "REJECTED") &&
-                !isPrincipal && (
-                  <button
-                    onClick={handleSubmitForReview}
-                    disabled={actionLoading}
-                    className="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/25 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>{translateText("Gửi Hiệu trưởng duyệt")}</span>
-                  </button>
-                )}
-
-              {/* Nút CẬP NHẬT & GỬI LẠI DUYỆT cho Chuyên gia Dinh dưỡng khi thực đơn đang SUBMITTED_FOR_REVIEW */}
-              {selectedMenu &&
-                (selectedMenu.status === "SUBMITTED_FOR_REVIEW" ||
-                  selectedMenu.status === "PENDING") &&
-                !isPrincipal && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleSubmitForReview}
-                      disabled={actionLoading}
-                      className="px-4 py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
-                      title={translateText("Thực đơn đang chờ duyệt, bạn có thể chỉnh sửa các món ăn và bấm nút này để gửi lại bản mới nhất cho Hiệu trưởng")}
-                    >
-                      <Send className="w-4 h-4" />
-                      <span>{translateText("Cập nhật & Gửi lại Hiệu trưởng duyệt")}</span>
-                    </button>
-                    <div className="px-3 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                      <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
-                      <span>{translateText("Đang chờ duyệt (Có thể sửa)")}</span>
-                    </div>
-                  </div>
-                )}
-
-              {/* Nút XIN PHÉP HIỆU TRƯỞNG CHỈNH SỬA (Dành cho CV Dinh dưỡng khi menu đã APPROVED hoặc ACTIVE) */}
-              {selectedMenu &&
-                (selectedMenu.status === "APPROVED" ||
-                  selectedMenu.status === "ACTIVE" ||
-                  selectedMenu.status === "PUBLISHED") &&
-                !isPrincipal && (
-                  <>
-                    {selectedMenu.editRequestStatus === "PENDING" ? (
-                      <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-2 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                          <Clock className="w-4 h-4 text-purple-600 animate-spin" />
-                          <span>{translateText("Đang chờ Hiệu trưởng cấp quyền sửa")}</span>
-                        </div>
-                        <button
-                          onClick={() =>
-                            handleCancelEditRequest(selectedMenu.id)
-                          }
-                          disabled={actionLoading}
-                          className="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold transition cursor-pointer"
-                          title={translateText("Hủy yêu cầu xin phép chỉnh sửa")}
-                        >{translateText("Hủy xin sửa")}</button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setIsRequestEditModalOpen(true)}
-                        disabled={actionLoading}
-                        className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-purple-600/25 flex items-center gap-1.5 transition cursor-pointer hover:scale-102 active:scale-98"
-                        title={translateText("Thực đơn đã duyệt/công bố. Gửi yêu cầu kèm lý do lên Hiệu trưởng để được mở khóa chỉnh sửa.")}
-                      >
-                        <ShieldAlert className="w-4 h-4 text-purple-200" />
-                        <span>{translateText("Xin phép Hiệu trưởng chỉnh sửa")}</span>
-                      </button>
-                    )}
-                  </>
-                )}
-
-              {/* Nút cho HIỆU TRƯỞNG khi CV Dinh dưỡng gửi Yêu cầu xin phép chỉnh sửa thực đơn */}
-              {selectedMenu &&
-                (selectedMenu.status === "APPROVED" ||
-                  selectedMenu.status === "ACTIVE" ||
-                  selectedMenu.status === "PUBLISHED") &&
-                isPrincipal &&
-                selectedMenu.editRequestStatus === "PENDING" && (
-                  <button
-                    onClick={() => setIsRespondEditModalOpen(true)}
-                    className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-purple-600 hover:from-amber-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-amber-600/30 flex items-center gap-1.5 transition animate-pulse cursor-pointer"
-                    title={translateText("Chuyên viên Dinh dưỡng vừa gửi yêu cầu xin phép chỉnh sửa thực đơn đã duyệt này")}
-                  >
-                    <AlertCircle className="w-4 h-4 text-amber-200" />
-                    <span>{translateText("Hiệu trưởng: Duyệt yêu cầu xin sửa")}</span>
-                  </button>
-                )}
-
-              {/* Badge cho HIỆU TRƯỞNG khi menu đang là DRAFT (CV Dinh dưỡng chưa gửi duyệt) */}
-              {selectedMenu &&
-                selectedMenu.status === "DRAFT" &&
-                isPrincipal && (
-                  <div className="px-3.5 py-2 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                    <Clock className="w-4 h-4 text-slate-500" />
-                    <span>{translateText("Bản dự thảo (Chờ CV Dinh dưỡng gửi duyệt)")}</span>
-                  </div>
-                )}
-
-              {/* Badge cho HIỆU TRƯỞNG khi menu đang REJECTED (Chờ CV Dinh dưỡng sửa lại) */}
-              {selectedMenu &&
-                selectedMenu.status === "REJECTED" &&
-                isPrincipal && (
-                  <div className="px-3.5 py-2 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                    <AlertCircle className="w-4 h-4 text-rose-600" />
-                    <span>{translateText("Đã từ chối (Chờ CV Dinh dưỡng sửa lại)")}</span>
-                  </div>
-                )}
-
-              {/* Nút Duyệt / Từ chối (CHỈ DÀNH CHO HIỆU TRƯỞNG / BGH khi SUBMITTED_FOR_REVIEW) */}
-              {selectedMenu &&
-                (selectedMenu.status === "SUBMITTED_FOR_REVIEW" ||
-                  selectedMenu.status === "PENDING") &&
-                isPrincipal && (
-                  <button
-                    onClick={() => setIsApprovalModalOpen(true)}
-                    className="px-4 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/25 flex items-center gap-1.5 transition cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>{translateText("Hiệu trưởng: Phê duyệt / Từ chối")}</span>
-                  </button>
-                )}
-
-              {/* Trạng thái ĐÃ DUYỆT cho Chuyên gia Dinh dưỡng */}
-              {selectedMenu &&
-                selectedMenu.status === "APPROVED" &&
-                !isPrincipal &&
-                selectedMenu.editRequestStatus !== "PENDING" && (
-                  <div className="px-3.5 py-2 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                    <span>{translateText("Đã được Hiệu trưởng duyệt")}</span>
-                  </div>
-                )}
-
-              {/* Nút Khóa & Công Bố (CHỈ DÀNH CHO HIỆU TRƯỞNG / BGH sau khi đã duyệt) */}
-              {selectedMenu &&
-                selectedMenu.status === "APPROVED" &&
-                isPrincipal && (
-                  <button
-                    onClick={handlePublish}
-                    disabled={actionLoading}
-                    className="px-4 py-2.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-md shadow-emerald-700/25 flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
-                  >
-                    <Lock className="w-4 h-4" />
-                    <span>{translateText("Hiệu trưởng: Khóa & Công bố")}</span>
-                  </button>
-                )}
-
-              {/* Badge ĐÃ KHÓA & CÔNG BỐ TOÀN TRƯỜNG */}
-              {selectedMenu &&
-                (selectedMenu.status === "ACTIVE" ||
-                  selectedMenu.status === "PUBLISHED") && (
-                  <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-1.5 shadow-2xs">
-                    <Lock className="w-4 h-4 text-emerald-700" />
-                    <span>{translateText("Đã khóa & Công bố toàn trường")}</span>
-                  </div>
-                )}
-
-              <div className="h-5 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
-
-              {/* Nút In / Xuất PDF */}
-              {selectedMenu && (
-                <button
-                  onClick={handleOpenPrintPreview}
-                  className="p-2.5 rounded-2xl border border-slate-200 hover:bg-slate-100 text-slate-700 transition cursor-pointer"
-                  title={translateText("Xem trước và In thực đơn (PDF A4)")}
-                >
-                  <Printer className="w-4 h-4" />
-                </button>
-              )}
-
-              {/* Nút Xóa Mềm */}
-              {selectedMenu &&
-                !showDeleted &&
-                selectedMenu.status !== "ACTIVE" && (
-                  <button
-                    onClick={handleSoftDelete}
-                    className="p-2.5 rounded-2xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                    title={translateText("Xóa mềm thực đơn vào thùng rác")}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-
-              {/* Nút Khôi phục nếu đang ở Thùng rác */}
-              {selectedMenu && showDeleted && (
-                <button
-                  onClick={() => handleRestore(selectedMenu.id)}
-                  className="px-3 py-2 rounded-2xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>{translateText("Khôi phục bản này")}</span>
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -1025,6 +950,7 @@ export const WeeklyMenuManagementPage: React.FC = () => {
         onSubmit={handleAdjustDish}
         dishes={availableDishes}
         initialSlot={activeSlot}
+        advisory={advisory}
       />
 
       {/* Modal 3: Import Excel */}

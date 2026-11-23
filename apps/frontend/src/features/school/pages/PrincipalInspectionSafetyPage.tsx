@@ -39,7 +39,7 @@ export function PrincipalInspectionSafetyPage() {
   const schoolBranding = useSchoolBranding();
   const retentionHours = schoolBranding.operationalSettings?.foodRetentionHours || 24;
   const [schoolName] = useState(
-    () => localStorage.getItem("school_name") || "Trường Mẫu Giáo Hướng Dương"
+    () => localStorage.getItem("school_name") || "KidMeal"
   );
 
   const [activeTab, setActiveTab] = useState<"inspections" | "safety">("inspections");
@@ -180,63 +180,6 @@ export function PrincipalInspectionSafetyPage() {
 
   return (
     <div className="w-full space-y-6">
-      {/* ─── 1. Header Đồng Bộ Chuẩn Ban Giám Hiệu ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-              {translateText("CỔNG BAN GIÁM HIỆU")}
-            </span>
-            <span className="text-xs text-slate-400">• {schoolName}</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
-            {translateText("Kiểm Thực 3 Bước & An Toàn Thực Phẩm")}
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {translateText(
-              `Hợp nhất quy trình phê duyệt minh chứng kiểm thực bếp (trước, trong chế biến, trước ăn) và tra cứu hồ sơ tuân thủ an toàn thực phẩm, mẫu lưu ${retentionHours}h.`
-            )}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-              void inspectionsResource.reload();
-              void safetyResource.reload();
-            }}
-            disabled={inspectionsResource.loading || safetyResource.loading}
-            className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition cursor-pointer"
-            title={translateText("Làm mới dữ liệu")}
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${
-                inspectionsResource.loading || safetyResource.loading ? "animate-spin text-teal-600" : ""
-              }`}
-            />
-          </button>
-          {activeTab === "inspections" ? (
-            <button
-              onClick={exportInspectionsExcel}
-              disabled={!filteredInspections.length}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-2xl border border-slate-200 shadow-xs transition cursor-pointer"
-            >
-              <Download className="w-4 h-4 text-slate-600" />
-              <span>{translateText("Xuất Nhật Ký Kiểm Thực")}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => void exportSafetyDossier()}
-              disabled={action.busy || !safetyReport}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-2xl border border-slate-200 shadow-xs transition cursor-pointer"
-            >
-              <Download className="w-4 h-4 text-slate-600" />
-              <span>{translateText("Xuất Báo Cáo ATTP")}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       <Feedback error={action.error} message={action.message} />
 
       {/* ─── 2. Top KPI Summary Cards ─── */}
@@ -377,6 +320,31 @@ export function PrincipalInspectionSafetyPage() {
                 <option value="DA_DUYET">{translateText("Đã duyệt (Approved)")}</option>
                 <option value="YEU_CAU_CHUP_LAI">{translateText("Yêu cầu bổ sung")}</option>
               </select>
+
+              <button
+                onClick={() => {
+                  void inspectionsResource.reload();
+                  void safetyResource.reload();
+                }}
+                disabled={inspectionsResource.loading || safetyResource.loading}
+                className="p-2 text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                title={translateText("Làm mới dữ liệu")}
+              >
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${
+                    inspectionsResource.loading || safetyResource.loading ? "animate-spin text-teal-600" : ""
+                  }`}
+                />
+              </button>
+
+              <button
+                onClick={exportInspectionsExcel}
+                disabled={!filteredInspections.length}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-2xs transition cursor-pointer disabled:opacity-40"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-600" />
+                <span>{translateText("Xuất Nhật Ký")}</span>
+              </button>
 
               {(search || date || status) && (
                 <button

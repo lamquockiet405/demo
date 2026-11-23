@@ -344,7 +344,7 @@ export class AuthService {
           {
             id: '1',
             code: 'MG_HUONGDUONG',
-            name: 'Trường Mẫu Giáo Hướng Dương',
+            name: 'KidMeal',
             status: 'ACTIVE',
             logoUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80',
           },

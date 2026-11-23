@@ -35,8 +35,16 @@ export const ExportReportModal: React.FC<ExportReportModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => void downloadExcel(`Phieu_bao_suat_an_${selectedDate}.xlsx`, [
-                ['Mã học sinh', 'Họ và tên', 'Lớp', 'Đăng ký bữa ăn', 'Vắng', 'Chế độ ăn', 'Ghi chú'],
-                ...data.children.map(child => [child.studentCode, child.fullName, data.classInfo.name, child.mealOption, child.isAbsent ? 'Vắng' : 'Có mặt', child.dietBadge.title, child.parentNote]),
+                ['Mã học sinh', 'Họ và tên', 'Lớp', 'Đăng ký bữa ăn', 'Trạng thái', 'Chế độ ăn', 'Ghi chú'],
+                ...(data.children || []).map(child => [
+                  child.studentCode || '',
+                  child.fullName || '',
+                  data.classInfo?.name || '',
+                  child.mealOption || 'Chính',
+                  child.isAbsent ? 'Vắng' : 'Có mặt',
+                  child.dietBadge?.title || 'Tiêu chuẩn',
+                  child.parentNote || '',
+                ]),
               ], 'Phiếu báo suất ăn bán trú')}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-700 text-white rounded-xl text-xs font-bold"
             >

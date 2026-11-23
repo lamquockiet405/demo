@@ -137,7 +137,7 @@ export const RoleSpecificChildAlertsPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+    <div className="w-full space-y-8 font-sans">
       {/* Toast Alert */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold animate-fadeIn">
@@ -146,74 +146,57 @@ export const RoleSpecificChildAlertsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header Banner & Scoping Rule */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Header & Scoping Switcher */}
+      <div className="flex justify-end pb-3 border-b border-slate-200">
+        {/* 4-ROLE SCOPE SWITCHER */}
+        <div className="bg-slate-100 p-1 rounded-2xl border border-slate-200 flex flex-wrap gap-1 self-start md:self-auto shrink-0">
+          <button
+            onClick={() => setActiveRole('SCHOOL_MANAGER')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeRole === 'SCHOOL_MANAGER'
+                ? 'bg-white text-indigo-800 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Ban Giám Hiệu</span>
+          </button>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 bg-indigo-400/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              <span>UC93 – Phân Tầng Dữ Liệu Cảnh Báo Trẻ Em (Role-Specific Visibility Scoping)</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Role-Specific Child Alerts Summary Center
-            </h1>
-            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
-              Nguyên tắc nghiệp vụ cốt lõi: Bảo mật sức khỏe & quyền riêng tư của trẻ (**Data Privacy & Child Safety**). Mỗi vai trò chỉ tiếp cận những cảnh báo thuộc đúng trách nhiệm và thẩm quyền giải quyết.
-            </p>
-          </div>
+          <button
+            onClick={() => setActiveRole('NUTRITIONIST')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeRole === 'NUTRITIONIST'
+                ? 'bg-white text-indigo-800 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
+          >
+            <UtensilsCrossed className="w-3.5 h-3.5" />
+            <span>Dinh Dưỡng</span>
+          </button>
 
-          {/* 4-ROLE SCOPE SWITCHER */}
-          <div className="bg-slate-800/90 p-1.5 rounded-2xl border border-slate-700 flex flex-wrap gap-1 self-start md:self-auto shrink-0 shadow-inner">
-            <button
-              onClick={() => setActiveRole('SCHOOL_MANAGER')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeRole === 'SCHOOL_MANAGER'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Ban Giám Hiệu</span>
-            </button>
+          <button
+            onClick={() => setActiveRole('TEACHER')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeRole === 'TEACHER'
+                ? 'bg-white text-indigo-800 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Giáo Viên</span>
+          </button>
 
-            <button
-              onClick={() => setActiveRole('NUTRITIONIST')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeRole === 'NUTRITIONIST'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <UtensilsCrossed className="w-3.5 h-3.5" />
-              <span>Dinh Dưỡng</span>
-            </button>
-
-            <button
-              onClick={() => setActiveRole('TEACHER')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeRole === 'TEACHER'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Giáo Viên</span>
-            </button>
-
-            <button
-              onClick={() => setActiveRole('PARENT')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeRole === 'PARENT'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Phụ Huynh</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveRole('PARENT')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeRole === 'PARENT'
+                ? 'bg-white text-indigo-800 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Phụ Huynh</span>
+          </button>
         </div>
       </div>
 
@@ -506,7 +489,7 @@ export const RoleSpecificChildAlertsPage: React.FC = () => {
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
               <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
                 <HeartPulse className="w-4 h-4 text-amber-600" />
-                <span>Cảnh Báo Thể Trạng Suy Giảm (Growth Risk Alert - Sụt Cân Liên Tiếp 2 Kỳ)</span>
+                <span>Chỉ số tăng trưởng dưới ngưỡng theo dõi</span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {nutData.categories.growthRiskAlerts.map((g) => (
@@ -517,7 +500,7 @@ export const RoleSpecificChildAlertsPage: React.FC = () => {
                         <span className="text-slate-500 ml-2">({g.className})</span>
                       </div>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-800">
-                        WAZ: {g.currentWaz} SD
+                        {g.currentWaz == null ? 'WAZ: chưa có dữ liệu' : `WAZ: ${g.currentWaz} SD`}
                       </span>
                     </div>
                     <p className="text-slate-700">{g.diagnosis}</p>

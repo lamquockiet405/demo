@@ -164,15 +164,6 @@ export function TeacherClassesPage() {
 
   return (
     <div className="teacher-classes-page w-full space-y-6">
-      {/* ─── 1. Page Title matching Kitchen UI ─── */}
-      <PageTitle
-        eyebrow={translateText("GIÁO VIÊN MẦM NON (3-6 TUỔI)")}
-        title={translateText("Lớp phụ trách")}
-        description={translateText("Xem, tìm kiếm và cập nhật lớp được phân công. Theo dõi sĩ số học sinh và kiểm soát nguy cơ dị ứng bữa ăn.")}
-      >
-        <ReloadButton loading={resource.loading} reload={resource.reload} />
-      </PageTitle>
-
       <Notice error={action.error} message={action.message} />
       {resource.error && <Notice error={resource.error} />}
 
@@ -357,6 +348,7 @@ export function TeacherClassesPage() {
           >
             <X size={14} />{translateText("Đặt lại")}</button>
         )}
+        <ReloadButton loading={resource.loading} reload={resource.reload} />
       </div>
 
       {/* ─── 5. Modern Data Table matching Kitchen UI (.kp-table-wrap & .kp-table) ─── */}

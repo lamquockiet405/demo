@@ -1,17 +1,23 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
-import { Utensils, Droplets, ShieldCheck, CheckCircle2, TrendingUp } from 'lucide-react';
+import { Utensils, ShieldCheck, Flame } from 'lucide-react';
 import { ChildMenuConsumptionData } from '../types';
 
 interface ConsumptionKPIStripProps {
   metrics: ChildMenuConsumptionData['metrics'];
+  totalMenuCalories?: number;
+  totalEatenCalories?: number;
 }
 
-export const ConsumptionKPIStrip: React.FC<ConsumptionKPIStripProps> = ({ metrics }) => {
+export const ConsumptionKPIStrip: React.FC<ConsumptionKPIStripProps> = ({
+  metrics,
+  totalMenuCalories = 0,
+  totalEatenCalories = 0,
+}) => {
   useLanguage();
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
       {/* KPI 1: Tỷ lệ ăn hết suất */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between mb-2">
@@ -23,7 +29,6 @@ export const ConsumptionKPIStrip: React.FC<ConsumptionKPIStripProps> = ({ metric
         <div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-black text-slate-900">{metrics.consumptionRate}%</span>
-            <span className="text-xs font-bold text-emerald-600">{translateText("Đạt chuẩn")}</span>
           </div>
           <p className="text-[11px] font-semibold text-slate-500 mt-0.5">
             {translateText(metrics.consumptionStatusLabel)}
@@ -38,26 +43,30 @@ export const ConsumptionKPIStrip: React.FC<ConsumptionKPIStripProps> = ({ metric
         </div>
       </div>
 
-      {/* KPI 2: Lượng nước uống */}
+      {/* KPI 2: Năng lượng (Calo) bé ăn hôm nay */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-slate-700">{translateText("Lượng nước uống")}</span>
-          <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center">
-            <Droplets className="w-4 h-4" />
+          <span className="text-xs font-bold text-slate-700">{translateText("Calo bé ăn hôm nay")}</span>
+          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center">
+            <Flame className="w-4 h-4" />
           </div>
         </div>
         <div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-black text-slate-900">{translateText(metrics.waterIntakeToday)}</span>
+            <span className="text-2xl font-black text-slate-900">
+              {Math.round(totalEatenCalories).toLocaleString('vi-VN')}
+            </span>
+            <span className="text-xs font-bold text-slate-500">
+              {totalMenuCalories > 0
+                ? `/ ${Math.round(totalMenuCalories).toLocaleString('vi-VN')} kcal`
+                : 'kcal'}
+            </span>
           </div>
-          <p className="text-[11px] font-semibold text-sky-700 mt-0.5">{translateText("Đạt ")}{metrics.waterPercentage}{translateText("% tiêu chuẩn Viện Dinh Dưỡng")}</p>
-        </div>
-        {/* Progress mini bar */}
-        <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2.5 overflow-hidden">
-          <div
-            className="bg-sky-500 h-1.5 rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(100, metrics.waterPercentage)}%` }}
-          ></div>
+          <p className="text-[11px] font-semibold text-slate-500 mt-0.5">
+            {totalMenuCalories > 0
+              ? translateText(`Đạt ${Math.round((totalEatenCalories / totalMenuCalories) * 100)}% năng lượng thực đơn`)
+              : translateText("Chưa có dữ liệu định lượng calo thực đơn")}
+          </p>
         </div>
       </div>
 
@@ -70,36 +79,9 @@ export const ConsumptionKPIStrip: React.FC<ConsumptionKPIStripProps> = ({ metric
           </div>
         </div>
         <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-black text-emerald-700">100%</span>
-            <span className="text-xs font-bold text-slate-700">{translateText("Cách ly")}</span>
-          </div>
           <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
             {translateText(metrics.allergyStatusText)}
           </p>
-        </div>
-        <div className="w-full bg-emerald-100 rounded-full h-1.5 mt-2.5 overflow-hidden">
-          <div className="bg-emerald-600 h-1.5 rounded-full w-full"></div>
-        </div>
-      </div>
-
-      {/* KPI 4: Trạng thái đồng bộ từ lớp */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-slate-700">{translateText("Nhật ký từ Lớp học")}</span>
-          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
-        </div>
-        <div>
-          <span className="text-sm font-black text-slate-800 block">{translateText("Đã ghi nhận đủ 3 bữa")}</span>
-          <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-            {translateText(metrics.syncStatusText)}
-          </p>
-        </div>
-        <div className="pt-2 flex items-center gap-1 text-[11px] font-bold text-teal-700">
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span>{translateText("Theo dõi trực tiếp từ giáo viên")}</span>
         </div>
       </div>
     </div>

@@ -67,3 +67,69 @@ body {
 @media (max-width: 640px) {
   .login-emoji { display: none; }
 }
+
+/* ─── Role-based Table Header Synchronized with Sidebar ─────────────────── */
+
+/* 1. Ban Giám Hiệu / Quản trị trường (Principal/Admin) - Đồng bộ màu Xanh Ngọc Teal */
+.role-principal thead tr,
+.role-principal table thead tr {
+  background-color: #0d9488 !important;
+  color: #ffffff !important;
+}
+.role-principal thead th,
+.role-principal table thead th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* 2. Giáo Viên Mầm Non (Teacher Portal) - Đồng bộ màu Xanh Da Trời Sky Blue */
+.kitchen-portal.teacher-portal thead tr,
+.teacher-portal thead tr {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+.kitchen-portal.teacher-portal thead th,
+.teacher-portal thead th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* 3. Bếp Bán Trú (Kitchen Portal) - Đồng bộ màu Hổ Phách / Cam Vàng Warm Amber */
+.kitchen-portal.kitchen-role thead tr,
+.kitchen-portal:not(.teacher-portal) thead tr {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+}
+.kitchen-portal.kitchen-role thead th,
+.kitchen-portal:not(.teacher-portal) thead th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* 4. Chuyên Gia Dinh Dưỡng (Nutritionist Portal) - Đồng bộ màu Xanh Tươi Lime Green */
+.role-nutritionist thead tr,
+.role-nutritionist table thead tr {
+  background-color: #65a30d !important;
+  color: #ffffff !important;
+}
+.role-nutritionist thead th,
+.role-nutritionist table thead th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* 5. Cổng Phụ Huynh (Parent Portal) - Đồng bộ màu Xanh Lá Đậm Dark Emerald */
+.parent-portal thead tr,
+.parent-view thead tr,
+#parent-content thead tr,
+table.parent-table thead tr {
+  background-color: #065f46 !important;
+  color: #ffffff !important;
+}
+.parent-portal thead th,
+.parent-view thead th,
+#parent-content thead th,
+table.parent-table thead th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}

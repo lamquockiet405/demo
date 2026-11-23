@@ -357,17 +357,12 @@ export const MealEvaluationPage: React.FC<MealEvaluationPageProps> = ({ onTabCha
       {/* Sub Tabs */}
       <AttendanceSubTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
-      {/* Header */}
-      <EvaluationHeader
-        classNameTitle={selectedClass?.name || 'Lớp Mầm 1 (3-4 tuổi)'}
+      {/* Controls & Filter Bar */}
+      <EvaluationControls
         isSavingDraft={isSavingDraft}
         isSubmitting={isSubmitting}
         onSaveDraft={handleSaveDraft}
         onSubmitReport={handleSubmitReport}
-      />
-
-      {/* Controls & Filter Bar */}
-      <EvaluationControls
         selectedDate={selectedDate}
         onDateChange={(d) => {
           setSelectedDate(d);

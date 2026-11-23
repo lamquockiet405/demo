@@ -107,13 +107,6 @@ export const parentsApi = {
     return res.data;
   },
 
-  async checkEmail(email: string): Promise<{ exists: boolean; message?: string }> {
-    const res = await apiClient.get<{ exists: boolean; message?: string }>('/users/parents/check-email', {
-      params: { email },
-    });
-    return res.data;
-  },
-
   async createParent(payload: CreateParentPayload) {
     const res = await apiClient.post('/users/parents', payload);
     return res.data;

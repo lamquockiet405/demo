@@ -9,10 +9,10 @@ import { Menu } from "../entities/menu.entity";
 import { MenusService } from "./menus.service";
 
 const meals: Record<string, string> = {
-  BREAKFAST: "Bữa sáng",
-  MORNING_SNACK: "Phụ sáng",
-  LUNCH: "Bữa trưa",
-  AFTERNOON_SNACK: "Ăn phụ chiều",
+  BREAKFAST: "Buổi sáng",
+  LUNCH: "Bữa trưa chính",
+  AFTERNOON_SNACK: "Buổi phụ",
+  LATE_SNACK: "Buổi xế chiều",
 };
 const csvCell = (value: unknown) => {
   let s = String(value ?? "");

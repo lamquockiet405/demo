@@ -95,9 +95,9 @@ export interface GrowthRiskItem {
   studentId: string;
   studentName: string;
   className: string;
-  currentWaz: number;
-  currentHaz: number;
-  currentBaz: number;
+  currentWaz: number | null;
+  currentHaz: number | null;
+  currentBaz: number | null;
   previousStatus: string;
   consecutiveDropPeriods: number;
   severity: 'HIGH';
@@ -202,9 +202,17 @@ export interface ChildAlertDetail {
   healthReminder: {
     title: string;
     nextMeasurementDate: string;
-    latestWaz: number;
+    latestWaz: number | null;
     statusLabel: string;
     nutritionistAdvice: string;
+  };
+  feeReminder?: {
+    hasPending: boolean;
+    title: string;
+    content: string;
+    feeAmount: number;
+    deadline?: string;
+    lastRemindedAt?: string;
   };
 }
 

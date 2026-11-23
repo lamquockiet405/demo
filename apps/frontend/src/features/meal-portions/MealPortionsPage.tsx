@@ -135,7 +135,7 @@ export const MealPortionsPage: React.FC = () => {
         />
 
         {/* Page Inner Container */}
-        <main className="flex-1 p-5 md:p-6 lg:p-7 space-y-5 max-w-[1600px] w-full mx-auto">
+        <main className="flex-1 p-5 md:p-6 lg:p-7 space-y-5 w-full">
           {/* Toast Notification */}
           {toastMessage && (
             <div className="fixed top-16 right-8 z-50 animate-bounce">

@@ -105,7 +105,7 @@ export const EvaluationSidebar: React.FC = () => {
 
           {/* ACTIVE ITEM: Ý kiến & Đánh giá */}
           <Link
-            to="/parent-evaluations"
+            to="/services"
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-teal-600 text-white font-bold shadow-sm shadow-teal-600/30 transition text-left"
           >
             <MessageSquareText className="w-4 h-4 text-white" />

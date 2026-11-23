@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ShieldAlert,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ParentPortalTopNav } from "../../parent-evaluations/components/ParentPortalTopNav";
@@ -152,46 +153,7 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
         }
       />
 
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-7 space-y-6 flex-1">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link to="/child-menu-consumption" className="hover:text-teal-700">{translateText("Cổng phụ huynh")}</Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="font-semibold text-slate-700">{translateText("Theo dõi thể chất của bé")}</span>
-        </div>
-
-        {/* Page Hero */}
-        <div className="rounded-3xl bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Theo dõi thể chất định kỳ")}</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-              <Activity className="w-8 h-8 text-emerald-300" />{translateText("Theo Dõi Thể Chất Của Bé")}</h1>
-            <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Xem lịch sử cân đo, chỉ số phát triển chiều cao, cân nặng, BMI và nhận cảnh báo thể trạng sớm của bé.")}</p>
-          </div>
-
-          {/* Child Selector */}
-          {children.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-white min-w-[260px]">
-              <label htmlFor="child-select" className="text-xs font-bold text-teal-100 block mb-1">{translateText("Chọn bé theo dõi:")}</label>
-              <select
-                id="child-select"
-                aria-label={translateText("Chọn học sinh theo dõi")}
-                value={selectedChildId}
-                onChange={(e) => setSelectedChildId(e.target.value)}
-                className="w-full bg-white text-slate-900 font-bold rounded-xl px-3 py-2 text-sm outline-none cursor-pointer"
-              >
-                {children.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName} ({c.className || c.class?.name || translateText("Lớp mầm non")})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-
+      <main className="w-full px-4 sm:px-6 lg:px-8 py-7 space-y-6 flex-1">
         {/* Error message */}
         {error && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
@@ -324,28 +286,58 @@ export const ParentGrowthMonitoringPage: React.FC = () => {
         </div>
 
         {/* ─── TABS ĐIỀU HƯỚNG ─── */}
-        <div className="flex border-b border-slate-200 gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab("chart")}
-            className={`px-5 py-3 text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
-              activeTab === "chart"
-                ? "border-teal-600 text-teal-800"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <TrendingUp className="h-4 w-4" />{translateText(" Biểu đồ tăng trưởng")}</button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("history")}
-            className={`px-5 py-3 text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
-              activeTab === "history"
-                ? "border-teal-600 text-teal-800"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <Calendar className="h-4 w-4" />{translateText(" Lịch sử cân đo")}</button>
+        <div className="flex items-center justify-between border-b border-slate-200 gap-2 flex-wrap">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab("chart")}
+              className={`px-5 py-3 text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
+                activeTab === "chart"
+                  ? "border-teal-600 text-teal-800"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <TrendingUp className="h-4 w-4" />{translateText(" Biểu đồ tăng trưởng")}</button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("history")}
+              className={`px-5 py-3 text-sm font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
+                activeTab === "history"
+                  ? "border-teal-600 text-teal-800"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <Calendar className="h-4 w-4" />{translateText(" Lịch sử cân đo")}</button>
+          </div>
 
+          <div className="flex items-center gap-2 pb-2 sm:pb-0">
+            {children.length > 1 && (
+              <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs">
+                <Baby className="w-3.5 h-3.5 text-teal-600" />
+                <select
+                  aria-label={translateText("Chọn học sinh")}
+                  value={selectedChildId}
+                  onChange={(e) => setSelectedChildId(e.target.value)}
+                  className="text-xs font-bold text-slate-800 bg-transparent outline-none cursor-pointer"
+                >
+                  {children.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.fullName} ({c.className || c.class?.name || translateText("Lớp mầm non")})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => { if (selectedChildId) void loadChildGrowthData(selectedChildId); }}
+              disabled={loading}
+              className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
+              <span>{translateText("Làm mới")}</span>
+            </button>
+          </div>
         </div>
 
         {/* ─── NỘI DUNG TAB 1: BIỂU ĐỒ TĂNG TRƯỞNG ─── */}

@@ -85,62 +85,10 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 1. Header & Breadcrumb */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-          <span className="hover:text-teal-700 cursor-pointer flex items-center gap-1">
-            <span>🏠</span> Trang chủ
-          </span>
-          <ChevronRightIcon className="w-3.5 h-3.5 text-slate-400" />
-          <span className="hover:text-teal-700 cursor-pointer">Bán trú mầm non</span>
-          <ChevronRightIcon className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-teal-700 font-bold">Danh sách lớp học điểm danh</span>
-        </div>
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Điểm danh suất ăn Bán trú - Chọn Lớp Quản lý
-              </h1>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50 text-teal-800 rounded-full border border-teal-200/80 text-[11px] font-bold">
-                <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
-                Chọn lớp để vào điểm danh
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Giáo viên chọn lớp mình phụ trách để tiến hành điểm danh học sinh có mặt/vắng, ghi chú dặn dò phụ huynh và chốt suất ăn gửi xuống Bếp trung tâm.
-            </p>
-          </div>
-
-          {/* Date Selector */}
-          <div className="flex items-center bg-white border border-slate-200 rounded-2xl p-1 shadow-xs shrink-0">
-            <button
-              onClick={handlePrevDay}
-              className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-500 hover:text-slate-900 transition"
-              title="Ngày trước"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <div className="flex items-center gap-2 px-3 text-xs font-bold text-slate-800">
-              <CalendarIcon className="w-4 h-4 text-teal-600" />
-              <span>{formatDisplayDate(selectedDate)}</span>
-            </div>
-            <button
-              onClick={handleNextDay}
-              className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-500 hover:text-slate-900 transition"
-              title="Ngày kế tiếp"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Overview KPI Cards */}
+      {/* 1. Overview KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Số lớp học */}
-        <div className="bg-white p-4.5 rounded-3xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Lớp học bán trú</p>
             <div className="flex items-baseline gap-1.5 mt-1">
@@ -155,7 +103,7 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
         </div>
 
         {/* Card 2: Tổng sĩ số học sinh */}
-        <div className="bg-white p-4.5 rounded-3xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tổng học sinh</p>
             <div className="flex items-baseline gap-1.5 mt-1">
@@ -172,7 +120,7 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
         </div>
 
         {/* Card 3: Có mặt ăn hôm nay */}
-        <div className="bg-white p-4.5 rounded-3xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Đăng ký ăn hôm nay</p>
             <div className="flex items-baseline gap-1.5 mt-1">
@@ -189,9 +137,9 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
         </div>
 
         {/* Card 4: Tiến độ gửi Bếp */}
-        <div className="bg-white p-4.5 rounded-3xl border border-slate-200/90 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tiến độ gửi Bếp (08:45)</p>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tiến độ gửi Bếp</p>
             <div className="flex items-baseline gap-1.5 mt-1">
               <span className="text-2xl font-black text-amber-700">{overview?.classesLockedCount || 0}</span>
               <span className="text-xs font-bold text-slate-500">/ {overview?.totalClasses || classes.length} lớp</span>
@@ -208,9 +156,9 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
         </div>
       </div>
 
-      {/* 3. Search & Filter Bar */}
+      {/* 2. Search & Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div className="flex-1 min-w-[260px] max-w-md relative">
+        <div className="flex-1 min-w-[240px] max-w-md relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -220,8 +168,33 @@ export const ClassSelectionHub: React.FC<ClassSelectionHubProps> = ({
             className="w-full bg-slate-50 text-xs pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500 focus:bg-white shadow-xs transition text-slate-800 placeholder:text-slate-400"
           />
         </div>
-        <div className="text-xs text-slate-500 font-medium">
-          Hiển thị <strong>{filteredClasses.length}</strong> lớp mầm non
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="text-xs text-slate-500 font-medium">
+            Hiển thị <strong>{filteredClasses.length}</strong> lớp mầm non
+          </div>
+
+          {/* Date Selector */}
+          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 shadow-2xs shrink-0">
+            <button
+              onClick={handlePrevDay}
+              className="p-1.5 hover:bg-slate-200/60 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              title="Ngày trước"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-2 px-3 text-xs font-bold text-slate-800">
+              <CalendarIcon className="w-4 h-4 text-teal-600" />
+              <span>{formatDisplayDate(selectedDate)}</span>
+            </div>
+            <button
+              onClick={handleNextDay}
+              className="p-1.5 hover:bg-slate-200/60 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              title="Ngày kế tiếp"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

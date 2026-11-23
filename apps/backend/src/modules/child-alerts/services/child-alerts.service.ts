@@ -64,29 +64,8 @@ export class ChildAlertsService {
   async getSchoolManagerAlerts(schoolId?: number, query?: QueryChildAlertsDto) {
     const today = query?.date || new Date().toISOString().split('T')[0];
 
-    // 1. Cảnh báo xung đột dị ứng chưa xử lý
-    const severeAllergies = await this.allergyRepo
-      .createQueryBuilder('a')
-      .leftJoinAndSelect('a.child', 'child')
-      .leftJoinAndSelect('child.class', 'class')
-      .leftJoinAndSelect('a.allergen', 'allergen')
-      .where('a.severity IN (:...sevs)', { sevs: ['HIGH', 'CRITICAL', 'SEVERE'] })
-      .getMany();
-
-    const unresolvedAllergenConflicts = severeAllergies.slice(0, 2).map((a, idx) => ({
-      id: `ALT-SM-ALG-${a.id || idx + 1}`,
-      type: 'UNRESOLVED_ALLERGEN_CONFLICT',
-      studentId: String(a.studentId),
-      studentName: a.child?.fullName || 'Học sinh có dị ứng nặng',
-      className: a.child?.class?.name || 'Mầm 1',
-      allergen: a.allergen?.name || 'Sữa bò / Hải sản',
-      dishToday: 'Trứng cuộn phô mai & Súp hải sản',
-      timeLimit: '09:00',
-      severity: 'CRITICAL' as const,
-      status: 'UNRESOLVED' as const,
-      message: `Học sinh ${a.child?.fullName || ''} có hồ sơ dị ứng nặng nhưng Bếp/Chuyên viên dinh dưỡng chưa xác nhận món thay thế trước 09h00 sáng.`,
-      recommendedAction: 'Chỉ đạo Bếp xác nhận khay ăn an toàn dán nhãn xanh khẩn cấp.',
-    }));
+    // Chỉ báo xung đột dị ứng khi có kết quả đối chiếu thực đơn thực tế.
+    const unresolvedAllergenConflicts: any[] = [];
 
     // 2. Cảnh báo bất thường diện rộng (>30% bỏ ăn hoặc báo đau bụng)
     const classes = await this.classRepo.find({ order: { name: 'ASC' } });
@@ -122,29 +101,11 @@ export class ChildAlertsService {
           classSize: totalStudents,
           percentage: pct,
           severity: 'CRITICAL' as const,
-          symptoms: ['Bỏ ăn trưa', 'Đau bụng nhẹ', 'Mệt mỏi'],
-          message: `Lớp ${c.name} có ${pct}% (${notEatingCount}/${totalStudents}) học sinh bỏ ăn hoặc báo đau bụng (Dấu hiệu ngộ độc thực phẩm hoặc dịch tễ đường ruột).`,
-          recommendedAction: 'Kích hoạt ngay quy trình kiểm tra mẫu lưu thực phẩm 24h và cử nhân viên Y tế xuống lớp.',
+          symptoms: ['Không ăn trưa hoặc có ghi chú đau bụng'],
+          message: `Lớp ${c.name} có ${notEatingCount}/${totalStudents} học sinh không ăn trưa hoặc được ghi chú đau bụng trong ngày.`,
+          recommendedAction: 'Kiểm tra nhật ký điểm danh và xác minh tình trạng từng học sinh với giáo viên.',
         });
       }
-    }
-
-    // Fallback mẫu bất thường diện rộng nếu cơ sở dữ liệu chưa có dữ liệu điểm danh hôm nay
-    if (broadAnomalies.length === 0 && classes.length > 0) {
-      const demoClass = classes[0];
-      broadAnomalies.push({
-        id: `ALT-SM-OUTBREAK-${demoClass.id}`,
-        type: 'BROAD_ANOMALY',
-        classId: String(demoClass.id),
-        className: demoClass.name,
-        affectedCount: 6,
-        classSize: 18,
-        percentage: 33.3,
-        severity: 'CRITICAL' as const,
-        symptoms: ['Bỏ bữa trưa', 'Dấu hiệu uể oải'],
-        message: `Lớp ${demoClass.name} có 33.3% (6/18) học sinh bỏ ăn trưa hoặc mệt mỏi cần nhà trường theo dõi.`,
-        recommendedAction: 'Cử nhân viên Y tế học đường xuống kiểm tra thể trạng và đối chiếu sổ kiểm thực 3 bước.',
-      });
     }
 
     // 3. Cảnh báo nợ phí dịch vụ bán trú/ăn xế
@@ -157,15 +118,17 @@ export class ChildAlertsService {
       .take(5)
       .getMany();
 
-    const overduePayments = pendingSnackRegs.map((sr, idx) => ({
+    const overduePayments = pendingSnackRegs
+      .filter((sr) => sr.period?.registrationDeadline && sr.period.registrationDeadline < today)
+      .map((sr, idx) => ({
       id: `ALT-SM-PAY-${sr.id || idx + 1}`,
       type: 'OVERDUE_PAYMENT',
       studentId: String(sr.studentId),
       studentName: sr.student?.fullName || 'Học sinh',
       className: sr.student?.class?.name || 'N/A',
-      periodName: sr.period?.name || 'Đợt dịch vụ ăn xế tháng 11/2026',
-      amountVnd: Number(sr.period?.feeAmount || 350000),
-      overdueDays: 4,
+      periodName: sr.period?.name || '',
+      amountVnd: Number(sr.period?.feeAmount || 0),
+      overdueDays: Math.max(0, Math.floor((Date.parse(today) - Date.parse(sr.period!.registrationDeadline)) / 86400000)),
       severity: 'WARNING' as const,
       message: `Tài khoản học sinh ${sr.student?.fullName || ''} quá hạn thanh toán phí dịch vụ ăn xế.`,
       recommendedAction: 'Chỉ đạo phòng Tài vụ gửi tin nhắn đôn đốc phụ huynh qua cổng thanh toán VNPAY.',
@@ -190,7 +153,7 @@ export class ChildAlertsService {
       studentName: ev.student?.fullName || 'Phụ huynh học sinh',
       className: ev.student?.class?.name || 'Chưa phân lớp',
       rating: ev.rating,
-      comment: ev.comment || 'Khẩu phần ăn hôm nay hơi ít so với nhu cầu phát triển của bé.',
+      comment: ev.comment || '',
       createdAt: ev.createdAt,
       status: 'UNRESOLVED' as const,
       severity: 'WARNING' as const,
@@ -224,28 +187,7 @@ export class ChildAlertsService {
    * - Thiếu hụt vi chất Thông tư 28
    */
   async getNutritionistAlerts(schoolId?: number, query?: QueryChildAlertsDto) {
-    // 1. Cảnh báo xung đột chất dị ứng (Allergen Cross-Matching Alert)
-    const allergies = await this.allergyRepo
-      .createQueryBuilder('a')
-      .leftJoinAndSelect('a.child', 'child')
-      .leftJoinAndSelect('child.class', 'class')
-      .leftJoinAndSelect('a.allergen', 'allergen')
-      .getMany();
-
-    const allergenCrossMatchingAlerts = allergies.slice(0, 3).map((a, idx) => ({
-      id: `ALT-NUT-ALG-${a.id || idx + 1}`,
-      type: 'ALLERGEN_CROSS_MATCHING',
-      studentId: String(a.studentId),
-      studentName: a.child?.fullName || 'Bé Nguyễn Minh Khang',
-      className: a.child?.class?.name || 'Mầm 1',
-      allergenName: a.allergen?.name || 'Tôm / Hải sản',
-      menuDishName: 'Tôm rim thịt nạc & Canh bí đỏ tôm khô',
-      proposedSubstitute: 'Thịt heo rim ngũ vị & Canh bí đỏ thịt bằm',
-      scheduledMealDate: 'Ngày mai (03/11/2026)',
-      severity: 'CRITICAL' as const,
-      status: 'REQUIRES_SUBSTITUTE' as const,
-      message: `Hệ thống phát hiện thực đơn ngày mai có chứa ${a.allergen?.name || 'chất dị ứng'} trong khi trường có trẻ đăng ký dị ứng -> Cảnh báo đỏ yêu cầu tạo món thay thế an toàn.`,
-    }));
+    const allergenCrossMatchingAlerts: any[] = [];
 
     // 2. Cảnh báo thể trạng suy giảm (Growth Risk Alert)
     const zscores = await this.zscoreRepo
@@ -262,44 +204,19 @@ export class ChildAlertsService {
       id: `ALT-NUT-GROWTH-${z.id || idx + 1}`,
       type: 'GROWTH_RISK',
       studentId: String(z.measurement?.studentId),
-      studentName: z.measurement?.student?.fullName || 'Lê Bảo Nam',
-      className: z.measurement?.student?.class?.name || 'Nhà trẻ 1',
-      currentWaz: Number(z.waz) || -2.3,
-      currentHaz: Number(z.haz) || -2.1,
-      currentBaz: Number(z.baz) || -1.2,
-      previousStatus: 'Bình thường (0.1 SD)',
-      consecutiveDropPeriods: 2,
+      studentName: z.measurement?.student?.fullName || 'Học sinh',
+      className: z.measurement?.student?.class?.name || 'Chưa phân lớp',
+      currentWaz: z.waz == null ? null : Number(z.waz),
+      currentHaz: z.haz == null ? null : Number(z.haz),
+      currentBaz: z.baz == null ? null : Number(z.baz),
+      previousStatus: 'Chưa có dữ liệu kỳ trước',
+      consecutiveDropPeriods: 0,
       severity: 'HIGH' as const,
-      diagnosis: 'Trẻ bị tụt từ cân nặng bình thường xuống ngưỡng Z-score nguy cơ (-2 SD) qua 2 kỳ cân liên tiếp.',
-      recommendedAction: 'Lập Thực đơn can thiệp cá nhân hóa tăng 20% đạm và bổ sung sữa cao năng lượng.',
+      diagnosis: 'Có chỉ số Z-score dưới ngưỡng -2 SD trong lần đo gần nhất.',
+      recommendedAction: 'Kiểm tra hồ sơ tăng trưởng trước khi lập kế hoạch can thiệp.',
     }));
 
-    // 3. Cảnh báo thiếu hụt vi chất dài hạn
-    const micronutrientDeficitAlerts = [
-      {
-        id: 'ALT-NUT-MICRO-01',
-        type: 'MICRONUTRIENT_DEFICIT',
-        ruleCode: 'CALCIUM_DEFICIT',
-        nutrientName: 'Canxi (Ca)',
-        actualValue: 260,
-        standardValue: '280 - 350 mg/ngày',
-        menuPeriod: 'Thực đơn Tuần 11 - Khối Mẫu Giáo',
-        severity: 'WARNING' as const,
-        message: 'Thực đơn tuần có nguy cơ thiếu hụt Canxi (260mg so với mức chuẩn 280-350mg theo Thông tư 28).',
-        recommendedAction: 'Tăng cường món từ tôm tép nhỏ, đậu phụ hoặc bổ sung 1 hộp sữa chua sau bữa trưa.',
-      },
-      {
-        id: 'ALT-NUT-MICRO-02',
-        type: 'LIPID_RATIO_LOW',
-        nutrientName: 'Chất béo (Lipid / L%)',
-        actualValue: 23.5,
-        standardValue: '25% - 35% tổng năng lượng',
-        menuPeriod: 'Thực đơn Tuần 11 - Khối Nhà Trẻ',
-        severity: 'WARNING' as const,
-        message: 'Tỷ lệ chất béo trong khẩu phần bữa ăn chưa đạt mức tối thiểu 25% tổng năng lượng.',
-        recommendedAction: 'Tăng định lượng dầu mè, mỡ thực vật trong chế biến món canh và món xào.',
-      },
-    ];
+    const micronutrientDeficitAlerts: any[] = [];
 
     return {
       role: 'NUTRITIONIST',
@@ -335,74 +252,17 @@ export class ChildAlertsService {
       }
     }
 
-    // Fallback lớp đầu tiên nếu giáo viên chưa được gán
     if (!targetClassId) {
-      const firstClass = await this.classRepo.findOne({ order: { id: 'ASC' } });
-      targetClassId = firstClass ? firstClass.id : 1;
+      return {
+        role: 'TEACHER', scope: 'UNASSIGNED', classId: '', className: '',
+        totalAlerts: 0, trayFlaggingAlerts: [], poorConsumptionAlerts: [], medicalMedicationRequests: [],
+      };
     }
 
     const currentClass = await this.classRepo.findOne({ where: { id: targetClassId } });
-    const students = await this.childRepo.find({ where: { classId: targetClassId } });
-    const studentIds = students.map((s) => s.id);
-
-    // 1. Cảnh báo dị ứng tại bàn ăn (Meal Tray Flagging)
-    const allergiesInClass = studentIds.length > 0
-      ? await this.allergyRepo
-          .createQueryBuilder('a')
-          .leftJoinAndSelect('a.child', 'child')
-          .leftJoinAndSelect('a.allergen', 'allergen')
-          .where('a.student_id IN (:...studentIds)', { studentIds })
-          .getMany()
-      : [];
-
-    const trayFlaggingAlerts = allergiesInClass.map((a, idx) => ({
-      id: `ALT-TCH-TRAY-${a.id || idx + 1}`,
-      studentId: String(a.studentId),
-      studentName: a.child?.fullName || 'Học sinh',
-      tableNumber: `Bàn ${idx + 1}`,
-      allergen: a.allergen?.name || 'Phô mai, Trứng gà',
-      originalDish: 'Trứng cuộn phô mai xúc xích',
-      substituteDish: 'Chả lụa thịt heo hấp hạt sen',
-      labelTag: 'KHAY_AN_RIENG_DANG_NHAN_XANH',
-      labelColor: '#059669', // Emerald
-      severity: 'CRITICAL' as const,
-      isVerifiedByTeacher: false,
-      message: `Bé ${a.child?.fullName} - Bàn ${idx + 1}: Dị ứng ${a.allergen?.name || 'thực phẩm'} -> Khay ăn riêng dán nhãn xanh.`,
-    }));
-
-    // 2. Cảnh báo ăn uống kém (Poor Consumption Alert: ăn dưới 30% liên tục 2 ngày)
-    const today = query?.date || new Date().toISOString().split('T')[0];
+    const trayFlaggingAlerts: any[] = [];
     const poorConsumptionAlerts: any[] = [];
-
-    if (students.length > 0) {
-      const candidateStudent = students[students.length - 1]; // Demo candidate
-      poorConsumptionAlerts.push({
-        id: `ALT-TCH-POOR-${candidateStudent.id}`,
-        studentId: String(candidateStudent.id),
-        studentName: candidateStudent.fullName,
-        className: currentClass?.name || 'Mầm 1',
-        consecutiveDays: 2,
-        averageIntake: 'Dưới 30% khẩu phần',
-        severity: 'WARNING' as const,
-        message: `Học sinh ${candidateStudent.fullName} trong lớp ăn dưới 30% khẩu phần liên tục 2 ngày.`,
-        recommendedAction: 'Nhắc giáo viên quan sát tâm lý của trẻ hoặc liên hệ phụ huynh hỏi thăm chế độ ăn tại nhà.',
-      });
-    }
-
-    // 3. Cảnh báo thuốc men & Dặn dò y tế từ phụ huynh
-    const medicalMedicationRequests = [
-      {
-        id: `ALT-TCH-MED-01`,
-        studentId: String(students[0]?.id || 1),
-        studentName: students[0]?.fullName || 'Phạm Quỳnh Anh',
-        className: currentClass?.name || 'Mầm 1',
-        parentName: 'Nguyễn Thị Mai (Mẹ)',
-        medicationNote: 'Hôm nay bé ho, xin cô không cho uống sữa lạnh, cho ăn cháo loãng và uống 5ml siro ho sau bữa trưa.',
-        severity: 'INFO' as const,
-        isAcknowledged: false,
-        submittedAt: `${today} 07:45`,
-      },
-    ];
+    const medicalMedicationRequests: any[] = [];
 
     return {
       role: 'TEACHER',
@@ -440,16 +300,14 @@ export class ChildAlertsService {
     // Nếu truyền studentIdQuery, kiểm tra thẩm quyền hoặc dùng làm lọc
     if (studentIdQuery) {
       const qId = parseInt(studentIdQuery, 10);
-      if (studentIds.length > 0 && !studentIds.includes(qId)) {
+      if (!studentIds.includes(qId)) {
         throw new ForbiddenException('Bạn không có quyền truy cập cảnh báo của học sinh này.');
       }
       studentIds = [qId];
     }
 
-    // Fallback học sinh đầu tiên nếu chưa gắn phụ huynh trong DB
     if (studentIds.length === 0) {
-      const firstChild = await this.childRepo.findOne({ order: { id: 'ASC' } });
-      if (firstChild) studentIds = [firstChild.id];
+      return { role: 'PARENT', scope: 'MY_CHILDREN', totalChildren: 0, children: [] };
     }
 
     const children = await this.childRepo.find({
@@ -472,18 +330,18 @@ export class ChildAlertsService {
 
         const menuSafetyAlert = hasAllergy
           ? {
-              status: 'SAFE_SUBSTITUTED',
-              badgeColor: 'emerald',
-              title: 'Món ăn thay thế an toàn hôm nay',
-              content: `Thực đơn trưa nay trường có món Tôm rim thịt nạc (chứa ${allergenNames}), hệ thống đã tự động chuyển phần ăn của bé sang Thịt nạc xào hạt sen theo đúng hồ sơ dị ứng.`,
-              isSafe: true,
+              status: 'NOT_ASSESSED',
+              badgeColor: 'amber',
+              title: 'Hồ sơ dị ứng của bé',
+              content: `Dị ứng đã khai báo: ${allergenNames}. Chưa có kết quả đối chiếu với thực đơn hôm nay.`,
+              isSafe: false,
             }
           : {
-              status: 'NORMAL_MENU',
-              badgeColor: 'blue',
-              title: 'Thực đơn dinh dưỡng chuẩn hôm nay',
-              content: 'Bé không có tiền sử dị ứng, phần ăn trưa và xế được chuẩn bị theo định lượng tiêu chuẩn Thông tư 28.',
-              isSafe: true,
+              status: 'NOT_ASSESSED',
+              badgeColor: 'slate',
+              title: 'Hồ sơ dị ứng của bé',
+              content: 'Chưa có dị ứng được khai báo trong hồ sơ. Chưa có kết quả đối chiếu thực đơn hôm nay.',
+              isSafe: false,
             };
 
         // Lấy điểm danh và mức độ ăn hôm nay
@@ -493,9 +351,9 @@ export class ChildAlertsService {
 
         const dailyIntakeReport = {
           title: `Lượng ăn uống hôm nay (${today})`,
-          lunchStatus: att?.consumptionLevel === 'FULL' || !att ? 'Con ăn hết 100% suất ăn trưa' : 'Con ăn được 1/2 bát cơm',
-          snackStatus: 'Con uống hết 180ml sữa xế và ăn 1 quả chuối chín',
-          teacherNote: att?.note || 'Bé ăn ngoan, tự xúc ăn gọn gàng và ngủ đủ giấc trưa.',
+          lunchStatus: att?.consumptionLevel ? `Mức ăn trưa: ${att.consumptionLevel}` : 'Chưa ghi nhận mức ăn trưa',
+          snackStatus: 'Chưa ghi nhận mức ăn xế',
+          teacherNote: att?.note || '',
         };
 
         // Lấy Z-score gần nhất
@@ -506,23 +364,22 @@ export class ChildAlertsService {
           .orderBy('gr.measured_date', 'DESC')
           .getOne();
 
-        const waz = Number(latestRecord?.zscore?.waz) || 0.1;
-        const cls = latestRecord?.zscore?.classification || 'NORMAL';
+        const waz = latestRecord?.zscore?.waz == null ? null : Number(latestRecord.zscore.waz);
+        const cls = latestRecord?.zscore?.classification || '';
 
         const healthReminder = {
           title: 'Nhắc nhở y tế & Theo dõi thể lực',
-          nextMeasurementDate: '15/11/2026',
+          nextMeasurementDate: '',
           latestWaz: waz,
-          statusLabel: cls === 'NORMAL' ? 'Bình thường' : 'Cần theo dõi',
-          nutritionistAdvice:
-            'Chỉ số thể trạng của con phát triển rất tốt. Gia đình tiếp tục khuyến khích con uống đủ 1.2 lít nước/ngày và ngủ trước 21h30.',
+          statusLabel: cls || 'Chưa có kết quả đánh giá',
+          nutritionistAdvice: '',
         };
 
         return {
           childId: String(child.id),
           childName: child.fullName,
           studentCode: child.studentCode,
-          className: child.class?.name || 'Mầm 1',
+          className: child.class?.name || 'Chưa phân lớp',
           menuSafetyAlert,
           dailyIntakeReport,
           healthReminder,

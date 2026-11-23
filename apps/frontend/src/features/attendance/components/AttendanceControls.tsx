@@ -10,6 +10,8 @@ import {
   Sparkles,
   RefreshCw,
   GraduationCap,
+  FileText,
+  Send,
 } from 'lucide-react';
 import { ClassItem } from '../types';
 
@@ -26,6 +28,10 @@ interface AttendanceControlsProps {
   onMarkAllPresent: () => void;
   onSyncMorning: () => void;
   isSyncing?: boolean;
+  onExportReport?: () => void;
+  onLockAndSendKitchen?: () => void;
+  isLocked?: boolean;
+  cutoffTime?: string;
 }
 
 export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
@@ -41,6 +47,10 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
   onMarkAllPresent,
   onSyncMorning,
   isSyncing = false,
+  onExportReport,
+  onLockAndSendKitchen,
+  isLocked = false,
+  cutoffTime = '08:45',
 }) => {
   useLanguage();
   // Format date to "Hôm nay, Thứ Sáu 25/10/2024" format
@@ -154,7 +164,7 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={onMarkAllPresent}
             className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 active:scale-95 text-white rounded-2xl text-xs font-bold shadow-sm transition"
@@ -171,6 +181,31 @@ export const AttendanceControls: React.FC<AttendanceControlsProps> = ({
             <RefreshCw className={`w-4 h-4 text-teal-600 ${isSyncing ? 'animate-spin' : ''}`} />
             <span>{translateText("Lấy từ điểm danh đầu giờ")}</span>
           </button>
+
+          {onExportReport && (
+            <button
+              onClick={onExportReport}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-300 rounded-2xl text-xs font-bold shadow-sm transition cursor-pointer"
+            >
+              <FileText className="w-4 h-4 text-slate-500" />
+              <span>{translateText("Xuất phiếu báo ăn")}</span>
+            </button>
+          )}
+
+          {onLockAndSendKitchen && (
+            <button
+              onClick={onLockAndSendKitchen}
+              disabled={isLocked}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-bold text-white shadow-sm active:scale-95 transition cursor-pointer ${
+                isLocked
+                  ? 'bg-slate-400 cursor-not-allowed'
+                  : 'bg-teal-600 hover:bg-teal-700'
+              }`}
+            >
+              <Send className="w-4 h-4" />
+              <span>{translateText(isLocked ? 'Đã Chốt & Gửi Bếp' : `Chốt sĩ số & Gửi Bếp (${cutoffTime})`)}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

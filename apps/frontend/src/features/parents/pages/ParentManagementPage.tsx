@@ -23,7 +23,10 @@ import {
   ChevronRight,
   Eye,
   Lock,
+  FileSpreadsheet,
 } from "lucide-react";
+import { downloadExcel } from "../../../core/utils/excel-export";
+import { formatDateDMY, formatDateTimeDMY } from "../../../core/utils/date";
 import {
   parentsApi,
   ParentUser,
@@ -95,6 +98,7 @@ export const ParentManagementPage: React.FC = () => {
     null,
   );
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [formPasswordError, setFormPasswordError] = useState<string | null>(null);
 
   const showToast = (type: "success" | "error", text: string) => {
     setToastMessage({ type, text });
@@ -231,6 +235,37 @@ export const ParentManagementPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [formEmail, isCreateModalOpen, editingParent, parents]);
 
+  const handleExportExcel = async () => {
+    if (!parents.length) return;
+    const headers = [
+      'STT',
+      'Họ và tên phụ huynh',
+      'Email',
+      'Số điện thoại',
+      'Học sinh liên kết',
+      'Nghề nghiệp',
+      'Địa chỉ',
+      'Trạng thái',
+      'Ngày đăng ký',
+    ];
+    const dataRows = parents.map((p, idx) => [
+      idx + 1,
+      p.fullName,
+      p.email,
+      p.phone || 'Chưa cập nhật',
+      (p.children || []).map((c: any) => `${c.fullName || c.name || ''} (${c.className || ''})`).join('; ') || 'Chưa liên kết',
+      p.occupation || '',
+      p.address || '',
+      p.status === 'ACTIVE' ? 'Hoạt động' : 'Bị khóa',
+      p.createdAt ? formatDateDMY(p.createdAt) : '',
+    ]);
+    await downloadExcel(
+      `Danh_sach_phu_huynh_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [headers, ...dataRows],
+      'Danh sách phụ huynh'
+    );
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setAppliedSearch(search.trim());
@@ -253,6 +288,7 @@ export const ParentManagementPage: React.FC = () => {
     setIsDuplicateEmail(false);
     setEmailErrorMessage(null);
     setIsCheckingEmail(false);
+    setFormPasswordError(null);
     setIsCreateModalOpen(true);
   };
 
@@ -274,14 +310,17 @@ export const ParentManagementPage: React.FC = () => {
     setIsDuplicateEmail(false);
     setEmailErrorMessage(null);
     setIsCheckingEmail(false);
+    setFormPasswordError(null);
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formPassword.trim().length < 8) {
+      setFormPasswordError("Nhập mật khẩu ban đầu có ít nhất 8 ký tự.");
       showToast("error", "Nhập mật khẩu ban đầu có ít nhất 8 ký tự.");
       return;
     }
+    setFormPasswordError(null);
     if (!formEmail.trim() || !formFullName.trim()) {
       showToast("error", "Vui lòng nhập đầy đủ email và họ tên phụ huynh.");
       return;
@@ -440,55 +479,27 @@ export const ParentManagementPage: React.FC = () => {
       {/* Toast */}
       {toastMessage && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl border flex items-center gap-2 text-xs font-bold ${
+          className={`fixed top-6 right-6 z-[9999] px-4.5 py-3.5 rounded-2xl shadow-2xl border flex items-center gap-3 text-xs font-bold transition-all duration-300 animate-in fade-in slide-in-from-top-4 max-w-md ${
             toastMessage.type === "success"
-              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-              : "bg-rose-50 text-rose-800 border-rose-200"
+              ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-900/30"
+              : "bg-rose-600 text-white border-rose-500 shadow-rose-900/40"
           }`}
         >
           {toastMessage.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-rose-600" />
+            <AlertCircle className="w-5 h-5 text-white shrink-0" />
           )}
-          <span>{translateText(toastMessage.text)}</span>
+          <span className="text-xs font-semibold leading-relaxed">{translateText(toastMessage.text)}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors text-white/80 hover:text-white shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
-
-      {/* 1. Header & Breadcrumbs */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mb-1">
-            <span className="text-teal-600 font-semibold">{translateText("Quản trị người dùng")}</span>
-            <span>›</span>
-            <span className="text-slate-700 font-bold">{translateText("Tài khoản Phụ huynh")}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-600/20">
-              <Users className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">{translateText("Quản Lý Tài Khoản Phụ Huynh")}</h1>
-              <p className="text-xs text-slate-500 mt-0.5">{translateText("Quản lý danh sách, cấp tài khoản, thiết lập trạng thái và liên kết phụ huynh với hồ sơ học sinh mầm non.")}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={fetchParents}
-            className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${loading ? "animate-spin text-teal-600" : "text-slate-500"}`}
-            />{translateText("Làm mới")}</button>
-          <button
-            onClick={openCreateModal}
-            className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-600/20 flex items-center gap-2 transition"
-          >
-            <UserPlus className="w-4 h-4" />{translateText("Tạo tài khoản phụ huynh")}</button>
-        </div>
-      </div>
 
       {/* 2. Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -584,8 +595,38 @@ export const ParentManagementPage: React.FC = () => {
 
             <button
               type="submit"
-              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
+              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
             >{translateText("Tìm kiếm")}</button>
+
+            <button
+              type="button"
+              onClick={fetchParents}
+              className="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition cursor-pointer"
+              title={translateText("Làm mới")}
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${loading ? "animate-spin text-teal-600" : "text-slate-500"}`}
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
+              title={translateText("Xuất danh sách phụ huynh ra file Excel")}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{translateText("Xuất Excel")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>{translateText("Tạo tài khoản")}</span>
+            </button>
           </div>
         </form>
       </div>
@@ -594,14 +635,14 @@ export const ParentManagementPage: React.FC = () => {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
-              <tr>
-                <th className="px-4 py-3.5">{translateText("Phụ huynh")}</th>
-                <th className="px-4 py-3.5">{translateText("Email & Điện thoại")}</th>
-                <th className="px-4 py-3.5">{translateText("Học sinh liên kết")}</th>
-                <th className="px-4 py-3.5">{translateText("Trạng thái")}</th>
-                <th className="px-4 py-3.5">{translateText("Ngày đăng ký")}</th>
-                <th className="px-4 py-3.5 text-center w-28">{translateText("Thao tác")}</th>
+            <thead className="bg-teal-600 text-white border-b border-teal-700/60 font-bold">
+              <tr className="text-white text-[11px] uppercase tracking-wider">
+                <th className="px-4 py-3.5 text-white">{translateText("Phụ huynh")}</th>
+                <th className="px-4 py-3.5 text-white">{translateText("Email & Điện thoại")}</th>
+                <th className="px-4 py-3.5 text-white">{translateText("Học sinh liên kết")}</th>
+                <th className="px-4 py-3.5 text-white">{translateText("Trạng thái")}</th>
+                <th className="px-4 py-3.5 text-white">{translateText("Ngày đăng ký")}</th>
+                <th className="px-4 py-3.5 text-center w-28 text-white">{translateText("Thao tác")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -686,7 +727,7 @@ export const ParentManagementPage: React.FC = () => {
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-slate-500 font-mono text-[11px]">
-                      {translateText(new Date(p.createdAt).toLocaleDateString(getLocale()))}
+                      {translateText(formatDateDMY(p.createdAt))}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
@@ -844,16 +885,14 @@ export const ParentManagementPage: React.FC = () => {
                 <div>
                   <span className="text-slate-400 font-medium block text-[11px]">{translateText("Ngày khởi tạo tài khoản:")}</span>
                   <span className="text-slate-800 font-mono font-medium">
-                    {translateText(new Date(viewingParent.createdAt).toLocaleString(getLocale()))}
+                    {translateText(formatDateTimeDMY(viewingParent.createdAt))}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium block text-[11px]">{translateText("Đăng nhập lần cuối:")}</span>
                   <span className="text-slate-800 font-mono font-medium">
                     {translateText(viewingParent.lastLoginAt
-                      ? new Date(viewingParent.lastLoginAt).toLocaleString(
-                          getLocale(),
-                        )
+                      ? formatDateTimeDMY(viewingParent.lastLoginAt)
                       : "Chưa từng đăng nhập")}
                   </span>
                 </div>
@@ -1025,15 +1064,30 @@ export const ParentManagementPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-700 font-bold mb-1">
-                      {translateText("Mật khẩu ban đầu (ít nhất 8 ký tự)")}
+                      {translateText("Mật khẩu ban đầu (ít nhất 8 ký tự)")} <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="password"
                       placeholder={translateText("Mật khẩu ban đầu (ít nhất 8 ký tự)")}
                       value={formPassword}
-                      onChange={(e) => setFormPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
+                      onChange={(e) => {
+                        setFormPassword(e.target.value);
+                        if (formPasswordError && e.target.value.trim().length >= 8) {
+                          setFormPasswordError(null);
+                        }
+                      }}
+                      className={`w-full px-3.5 py-2.5 text-xs text-slate-800 rounded-xl border transition ${
+                        formPasswordError
+                          ? "border-rose-400 bg-rose-50 text-rose-900 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                          : "border-slate-200 bg-slate-50 focus:bg-white focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                      }`}
                     />
+                    {formPasswordError && (
+                      <p className="flex items-center gap-1 text-rose-500 text-[11px] font-semibold mt-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                        {translateText(formPasswordError)}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -1061,28 +1115,6 @@ export const ParentManagementPage: React.FC = () => {
                     className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">{translateText("Địa chỉ liên hệ")}</label>
-                <input
-                  type="text"
-                  placeholder={translateText("Ví dụ: 45 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM")}
-                  value={formAddress}
-                  onChange={(e) => setFormAddress(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-bold mb-1">{translateText("Ghi chú nội bộ")}</label>
-                <textarea
-                  rows={2}
-                  placeholder={translateText("Ghi chú về phụ huynh (người liên hệ chính, giờ đón bé...)")}
-                  value={formNote}
-                  onChange={(e) => setFormNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 focus:bg-white text-xs text-slate-800 rounded-xl border border-slate-200 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition resize-none"
-                />
               </div>
 
               {/* Children Selection */}

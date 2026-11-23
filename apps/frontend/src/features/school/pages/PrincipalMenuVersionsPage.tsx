@@ -61,8 +61,56 @@ export function PrincipalMenuVersionsPage() {
     <SchoolPage
       title={translateText("Lịch sử phiên bản thực đơn")}
       description={translateText("Tìm thực đơn, lọc lịch sử và xem nội dung của đúng phiên bản đã lưu. Phiên bản cũ chỉ được xem.")}
-      actions={
+    >
+      <div className="kp-filters flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <input
+            aria-label={translateText("Tìm thực đơn phiên bản")}
+            placeholder={translateText("Tên thực đơn...")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <select
+            aria-label={translateText("Trạng thái thực đơn phiên bản")}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="">{translateText("Tất cả trạng thái")}</option>
+            {[
+              "DRAFT",
+              "PENDING",
+              "APPROVED",
+              "PUBLISHED",
+              "ARCHIVED",
+              "REJECTED",
+            ].map((s) => (
+              <option key={s} value={s}>{translateText(s)}</option>
+            ))}
+          </select>
+          <select
+            aria-label={translateText("Nhóm tuổi thực đơn phiên bản")}
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+          >
+            <option value="">{translateText("Tất cả nhóm tuổi")}</option>
+            <option value="NHA_TRE">{translateText("Nhà trẻ")}</option>
+            <option value="MAU_GIAO">{translateText("Mẫu giáo")}</option>
+          </select>
+          <select
+            aria-label={translateText("Chọn thực đơn xem phiên bản")}
+            value={menuId}
+            onChange={(e) => choose(e.target.value)}
+          >
+            <option value="">{translateText("Chọn thực đơn")}</option>
+            {(menus.data || []).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
+          type="button"
           className="kp-button"
           disabled={menus.loading || versions.loading}
           onClick={() => {
@@ -70,53 +118,6 @@ export function PrincipalMenuVersionsPage() {
             versions.reload();
           }}
         >{translateText("Làm mới")}</button>
-      }
-    >
-      <div className="kp-filters">
-        <input
-          aria-label={translateText("Tìm thực đơn phiên bản")}
-          placeholder={translateText("Tên thực đơn...")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          aria-label={translateText("Trạng thái thực đơn phiên bản")}
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="">{translateText("Tất cả trạng thái")}</option>
-          {[
-            "DRAFT",
-            "PENDING",
-            "APPROVED",
-            "PUBLISHED",
-            "ARCHIVED",
-            "REJECTED",
-          ].map((s) => (
-            <option key={s} value={s}>{translateText(s)}</option>
-          ))}
-        </select>
-        <select
-          aria-label={translateText("Nhóm tuổi thực đơn phiên bản")}
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-        >
-          <option value="">{translateText("Tất cả nhóm tuổi")}</option>
-          <option value="NHA_TRE">{translateText("Nhà trẻ")}</option>
-          <option value="MAU_GIAO">{translateText("Mẫu giáo")}</option>
-        </select>
-        <select
-          aria-label={translateText("Chọn thực đơn xem phiên bản")}
-          value={menuId}
-          onChange={(e) => choose(e.target.value)}
-        >
-          <option value="">{translateText("Chọn thực đơn")}</option>
-          {(menus.data || []).map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.title} · {translateText(m.startDate || m.weekStartDate)}
-            </option>
-          ))}
-        </select>
       </div>
       <State resource={menus} empty={!menus.data?.length} />
       {menuId && (

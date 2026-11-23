@@ -197,11 +197,8 @@ export const RoleBasedGrowthNotificationsPage: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200">
-              UC85
-            </span>
-            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-              WHO LMS Standards & Role-Based Visibility
+            <span className="text-xs font-semibold text-rose-700 uppercase tracking-wider">
+              Tiêu Chuẩn WHO & Phân Loại Cảnh Báo
             </span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">

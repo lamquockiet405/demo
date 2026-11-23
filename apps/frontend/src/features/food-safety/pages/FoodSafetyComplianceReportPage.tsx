@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import {
+  FileSpreadsheet,
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
@@ -159,6 +161,24 @@ export const FoodSafetyComplianceReportPage: React.FC = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    if (!report) return alert("Chưa có dữ liệu báo cáo để xuất Excel.");
+    await downloadExcel(
+      `Bao_cao_an_toan_thuc_pham_${selectedDate}.xlsx`,
+      [
+        ["Chỉ tiêu kiểm định", "Kết quả", "Ngưỡng tiêu chuẩn", "Đánh giá tuân thủ"],
+        ["Tỷ lệ tuân thủ tổng thể", `${report.overallComplianceRate}%`, "100%", report.overallComplianceRate === 100 ? "Đạt chuẩn" : "Chưa đạt"],
+        ["Kiểm thực Bước 1 (Giao nhận nguyên liệu)", `${report.inspection3Step.step1Receiving.checkedCount}/${report.inspection3Step.step1Receiving.totalItems}`, "100%", "Đã hoàn thành"],
+        ["Tỷ lệ từ chối nguyên liệu (Reject rate)", `${report.inspection3Step.step1Receiving.rejectRate}%`, "< 2.0%", report.inspection3Step.step1Receiving.rejectRate <= 2 ? "An toàn" : "Nguy cơ cao"],
+        ["Kiểm thực Bước 2 (Chế biến bếp)", `${report.inspection3Step.step2Cooking.checkedCount}/${report.inspection3Step.step2Cooking.totalItems}`, "100%", "Đã hoàn thành"],
+        ["Kiểm thực Bước 3 (Chia ăn lớp)", `${report.inspection3Step.step3Serving.checkedCount}/${report.inspection3Step.step3Serving.totalItems}`, "100%", "Đã hoàn thành"],
+        ["Số mẫu lưu 24h", `${report.sampleRetention24h.totalSamplesStored} mẫu`, "Tất cả món ăn", "Đầy đủ"],
+        ["Nhiệt độ tủ lưu mẫu", `${report.sampleRetention24h.storageTempCelsius}°C`, "2°C - 8°C", (report.sampleRetention24h.storageTempCelsius >= 2 && report.sampleRetention24h.storageTempCelsius <= 8) ? "Đạt chuẩn" : "Vi phạm nhiệt độ"],
+      ],
+      `Hồ sơ ATTP ${selectedDate}`
+    );
+  };
+
   const handleExportDossier = async () => {
     try {
       await foodSafetyApi.exportComplianceDossier(selectedDate);
@@ -170,25 +190,9 @@ export const FoodSafetyComplianceReportPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-6 lg:p-8 space-y-6">
-      {/* Top Banner & Action Bar */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 rounded-full flex items-center gap-1">
-                <AlertOctagon className="w-3.5 h-3.5" /> UC95 • Zero-Defect Safety Standard
-              </span>
-              <span className="px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> QĐ 1246/QĐ-BYT & QCVN 01-1
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-2">
-              Báo Cáo Tuân Thủ An Toàn Thực Phẩm
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Giám sát thực thi quy chuẩn vệ sinh học đường, kiểm soát chuỗi cung ứng và hồ sơ thanh tra liên ngành.
-            </p>
-          </div>
+      {/* Top Action Bar */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-end gap-4">
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
@@ -223,6 +227,14 @@ export const FoodSafetyComplianceReportPage: React.FC = () => {
                 <PenTool className="w-3.5 h-3.5" /> Ký Duyệt Sổ Điện Tử
               </button>
             )}
+
+            <button
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 text-xs font-semibold rounded-xl shadow-2xs transition"
+              title="Xuất dữ liệu an toàn thực phẩm ra Excel"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Xuất Excel Kiểm Thực
+            </button>
 
             <button
               onClick={handleExportDossier}

@@ -107,26 +107,6 @@ export function NutritionOverviewPage() {
 
   return (
     <div className="space-y-6 w-full pb-12 font-sans">
-      {/* ─── 1. Header Banner ─── */}
-      <div className="bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-emerald-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Chuyên Gia Dinh Dưỡng • KidMeal")}</span>
-            <span className="text-xs text-emerald-200">{translateText("Giám sát lâm sàng & Thể trạng")}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <HeartPulse className="w-8 h-8 text-amber-300" />{translateText("Dashboard Dinh Dưỡng & Theo Dõi Thể Chất Trẻ")}</h1>
-          <p className="text-sm text-emerald-100 max-w-2xl leading-relaxed">{translateText("Tổng hợp dữ liệu cân đo, đánh giá nguy cơ phát triển theo chuẩn WHO, phân bổ năng lượng thực đơn và danh sách học sinh cần can thiệp.")}</p>
-        </div>
-
-        <button
-          onClick={() => void resource.reload()}
-          disabled={resource.loading}
-          className="self-start md:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2 shadow-xs cursor-pointer"
-        >
-          <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
-      </div>
-
       <State resource={resource} />
 
       {data && (
@@ -366,35 +346,26 @@ export function NutritionAlertsPage() {
 
   return (
     <div className="space-y-6 w-full pb-12 font-sans">
-      {/* ─── 1. Header Banner ─── */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Cảnh Báo Lâm Sàng • KidMeal")}</span>
-            <span className="text-xs text-teal-200">{translateText("Dị ứng thực phẩm & Thể lực WHO")}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <ShieldAlert className="w-8 h-8 text-rose-300" />{translateText("Tổng Hợp Cảnh Báo Trẻ & Nguy Cơ Dinh Dưỡng")}</h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Tự động rà soát xung đột thành phần thực đơn với hồ sơ dị ứng của trẻ và phát hiện các trường hợp lệch chuẩn thể lực Z-score để kịp thời tư vấn.")}</p>
-        </div>
-
-        <button
-          onClick={() => void resource.reload()}
-          disabled={resource.loading}
-          className="self-start md:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2 shadow-xs cursor-pointer"
-        >
-          <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
-      </div>
-
       <State resource={resource} empty={!rows.length} />
 
       {/* ─── 2. Danh Sách Cảnh Báo Trực Quan ─── */}
       <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-teal-600" />{translateText("Danh Sách Cảnh Báo Đang Hoạt Động (")}{totalAlerts})
-          </h3>
-          <span className="text-xs text-slate-500">{translateText("Cập nhật thời gian thực từ dữ liệu trường")}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-teal-600" />{translateText("Danh Sách Cảnh Báo Đang Hoạt Động (")}{totalAlerts})
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">{translateText("Cập nhật thời gian thực từ dữ liệu trường")}</p>
+          </div>
+          <button
+            onClick={() => void resource.reload()}
+            disabled={resource.loading}
+            className="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
+            title={translateText("Làm mới danh sách cảnh báo")}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${resource.loading ? "animate-spin" : ""}`} />
+            <span>{translateText("Làm mới")}</span>
+          </button>
         </div>
 
         {!rows.length ? (

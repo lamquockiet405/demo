@@ -45,6 +45,8 @@ export interface ElectronicReceiptData {
     serviceName: string;
     servingDays: number;
     unitPricePerDay: number;
+    servingWeeks?: number;
+    unitPricePerWeek?: number;
     totalAmount: number;
     amountInWords: string;
   };
@@ -74,8 +76,13 @@ export const vnpayApi = {
   },
 
   createPaymentUrl: async (payload: { registrationId: number; orderInfo?: string; returnUrl?: string }) => {
+    const cloudflareUrl = 'https://campaign-pants-villas-jerry.trycloudflare.com/payments/vnpay-return';
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+    const isLocal = !currentOrigin || currentOrigin.includes('localhost') || currentOrigin.includes('127.0.0.1');
+    const defaultReturnUrl = isLocal ? cloudflareUrl : `${currentOrigin}/payments/vnpay-return`;
+
     const finalPayload = {
-      returnUrl: typeof window !== 'undefined' ? `${window.location.origin}/payments/vnpay-return` : undefined,
+      returnUrl: defaultReturnUrl,
       ...payload,
     };
     const res = await apiClient.post<any>('/payments/create-url', finalPayload);
@@ -98,9 +105,26 @@ export const vnpayApi = {
       `/payments/receipt/${registrationId}`,
     );
     const raw = res.data;
-    if (raw && typeof raw === 'object' && 'receiptNumber' in raw) return raw;
-    if (raw?.data && typeof raw.data === 'object' && 'receiptNumber' in raw.data) return raw.data;
-    return raw;
+    const receipt = raw?.data && typeof raw.data === 'object' ? raw.data : raw;
+    if (
+      !receipt ||
+      typeof receipt.receiptNumber !== 'string' ||
+      !receipt.student ||
+      typeof receipt.student.fullName !== 'string' ||
+      !receipt.payer ||
+      typeof receipt.payer.fullName !== 'string' ||
+      !receipt.serviceDetails ||
+      typeof receipt.serviceDetails.totalAmount !== 'number' ||
+      !Number.isFinite(receipt.serviceDetails.totalAmount) ||
+      typeof receipt.serviceDetails.unitPricePerDay !== 'number' ||
+      !Number.isFinite(receipt.serviceDetails.unitPricePerDay) ||
+      !receipt.paymentInfo ||
+      !receipt.digitalSignature ||
+      typeof receipt.digitalSignature.verificationHash !== 'string'
+    ) {
+      throw new Error('Dữ liệu biên lai điện tử không hợp lệ.');
+    }
+    return receipt as ElectronicReceiptData;
   },
 };
 

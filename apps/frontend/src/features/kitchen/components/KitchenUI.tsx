@@ -84,27 +84,17 @@ export function useKitchenAction() {
 }
 
 export function PageTitle({
-  title,
-  description,
-  children,
-  eyebrow = "BẾP BÁN TRÚ",
+  title: _title,
+  description: _description,
+  children: _children,
+  eyebrow: _eyebrow = "BẾP BÁN TRÚ",
 }: {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   children?: React.ReactNode;
   eyebrow?: string;
 }) {
-  useLanguage();
-  return (
-    <div className="kp-page-title">
-      <div>
-        <span className="kp-eyebrow">{translateText(eyebrow)}</span>
-        <h1>{translateText(title)}</h1>
-        <p>{translateText(description)}</p>
-      </div>
-      <div className="kp-actions">{children}</div>
-    </div>
-  );
+  return null;
 }
 export function Notice({
   error,

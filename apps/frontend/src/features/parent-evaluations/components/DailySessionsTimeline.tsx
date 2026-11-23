@@ -13,6 +13,7 @@ import {
   User,
   MessageSquare,
   Sparkles,
+  Flame,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MealSessionRecord } from '../types';
@@ -32,15 +33,33 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
   date,
 }) => {
   useLanguage();
-  const [heartAttendanceIds, setHeartAttendanceIds] = useState<Set<string>>(new Set());
+  const [heartOverrides, setHeartOverrides] = useState<Record<string, boolean>>({});
   const [selectedDishName, setSelectedDishName] = useState<string | null>(null);
 
-  const handleHeartClick = async (attendanceId: string) => {
-    setHeartAttendanceIds((prev) => new Set(prev).add(attendanceId));
+  const isSessionHearted = (session: MealSessionRecord) => {
+    const key = session.attendanceId;
+    if (key in heartOverrides) {
+      return heartOverrides[key];
+    }
+    return Boolean(
+      (session as any).liked || session.parentStatusLabel?.includes('thả tim'),
+    );
+  };
+
+  const handleHeartClick = async (session: MealSessionRecord) => {
+    const attendanceId = session.attendanceId;
+    const current = isSessionHearted(session);
+    const next = !current;
+    setHeartOverrides((prev) => ({ ...prev, [attendanceId]: next }));
     try {
-      await onHeartReaction(attendanceId);
+      const res: any = await onHeartReaction(attendanceId);
+      const serverLiked = res?.data?.liked ?? res?.liked;
+      if (typeof serverLiked === 'boolean') {
+        setHeartOverrides((prev) => ({ ...prev, [attendanceId]: serverLiked }));
+      }
     } catch (err) {
       console.error(err);
+      setHeartOverrides((prev) => ({ ...prev, [attendanceId]: current }));
     }
   };
 
@@ -80,9 +99,7 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
       <div className="space-y-4">
         {sessions.map((session, index) => {
           const isLunch = session.mealType === 'LUNCH';
-          const hasHearted =
-            heartAttendanceIds.has(session.attendanceId) ||
-            session.parentStatusLabel?.includes('thả tim');
+          const hasHearted = isSessionHearted(session);
 
           return (
             <div
@@ -146,7 +163,7 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
                           type="button"
                           onClick={() => setSelectedDishName(trimmed)}
                           className="px-2.5 py-1 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-lg text-xs font-semibold text-slate-800 hover:text-teal-900 transition cursor-pointer text-left"
-                          title={translateText(`Bấm để xem chi tiết món ăn "${trimmed}" (UC41)`)}
+                          title={translateText(`Bấm để xem chi tiết món ăn "${trimmed}"`)}
                         >
                           {translateText(trimmed)}
                         </button>
@@ -172,11 +189,22 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
 
                 {/* Real Consumption & Water metrics */}
                 <div className={`${session.photoEvidenceUrl ? 'lg:col-span-5' : 'lg:col-span-6'} space-y-3`}>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {/* Portion consumed */}
                     <div className="bg-teal-50/70 border border-teal-100 p-2.5 rounded-xl">
                       <span className="text-[11px] font-bold text-teal-800 block">{translateText("Sức ăn thực tế:")}</span>
                       <span className="text-sm font-black text-teal-900">{translateText("Ăn hết ")}{session.consumptionPercentage}{translateText("% suất")}</span>
+                    </div>
+
+                    {/* Calories consumed */}
+                    <div className="bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl">
+                      <span className="text-[11px] font-bold text-amber-800 block">{translateText("Năng lượng bữa này:")}</span>
+                      <span className="text-sm font-black text-amber-900 flex items-center gap-1">
+                        <Flame className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        {session.mealCalories && session.mealCalories > 0
+                          ? `${Math.round(session.eatenCalories ?? 0)} / ${Math.round(session.mealCalories)} kcal`
+                          : translateText("Chưa có định lượng")}
+                      </span>
                     </div>
 
                     {/* Water intake */}
@@ -207,7 +235,17 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    <span>{translateText(hasHearted ? 'PH đã thả tim ❤️' : session.parentStatusLabel)}</span>
+                    <span>
+                      {translateText(
+                        hasHearted
+                          ? 'PH đã thả tim ❤️'
+                          : session.parentStatusLabel?.includes('thả tim')
+                            ? session.consumptionPercentage > 0
+                              ? 'Đã hoàn thành'
+                              : 'Nghỉ ca'
+                            : session.parentStatusLabel,
+                      )}
+                    </span>
                   </span>
                 </div>
 
@@ -215,7 +253,7 @@ export const DailySessionsTimeline: React.FC<DailySessionsTimelineProps> = ({
                   {/* Tap Heart Button */}
                   <button
                     type="button"
-                    onClick={() => handleHeartClick(session.attendanceId)}
+                    onClick={() => handleHeartClick(session)}
                     className={`px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 cursor-pointer text-xs ${
                       hasHearted
                         ? 'bg-rose-50 text-rose-600 border border-rose-200 shadow-2xs'

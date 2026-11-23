@@ -192,8 +192,8 @@ export const AllergyAndBmiAdvisorModal: React.FC<AllergyAndBmiAdvisorModalProps>
     BREAKFAST: 'Buổi Sáng (09:00)',
     MORNING_SNACK: 'Buổi Sáng (09:00)',
     LUNCH: 'Bữa Trưa (11:00)',
-    AFTERNOON_SNACK: 'Bữa Xế Chiều (14:30)',
-    LATE_SNACK: 'Bữa Xế Muộn (17:00)',
+    AFTERNOON_SNACK: 'Buổi Phụ - Nước / Trái cây (14:30)',
+    LATE_SNACK: 'Buổi Chiều Xế - Món ăn (17:00)',
   };
 
   // Filtered allergy conflicts

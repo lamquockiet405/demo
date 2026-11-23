@@ -2,7 +2,22 @@ import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, Shield, Phone } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Shield,
+  Phone,
+  UtensilsCrossed,
+  ShieldCheck,
+  HeartPulse,
+  ClipboardCheck,
+  ArrowRight,
+  Building2,
+  MapPin,
+  AlertCircle,
+} from "lucide-react";
 import { useAuthStore } from "../../../core/stores/auth.store";
 import {
   fetchTenants,
@@ -61,14 +76,12 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect nếu đã login
   useEffect(() => {
     if (isAuthenticated) {
       navigate(getPortalPath(user?.roles), { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Tự động gán tenant ngầm khi mount (Mặc định: Trường MN Hướng Dương)
   useEffect(() => {
     if (isAuthenticated) return;
     let cancelled = false;
@@ -87,7 +100,6 @@ export const LoginPage: React.FC = () => {
     };
   }, [setTenantId, isAuthenticated]);
 
-  // Xử lý đăng nhập
   const handleLogin = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -103,7 +115,6 @@ export const LoginPage: React.FC = () => {
 
         const payload: any = (rawResult as any)?.data || rawResult;
 
-        // Check if 2FA is required
         if (payload && "require2Fa" in payload && payload.require2Fa) {
           setShow2Fa(true);
           setLoading(false);
@@ -111,15 +122,20 @@ export const LoginPage: React.FC = () => {
         }
 
         const loginResult = payload as LoginResponse;
-        if (!loginResult || !loginResult.user || !loginResult.accessToken || !loginResult.refreshToken) {
+        if (
+          !loginResult ||
+          !loginResult.user ||
+          !loginResult.accessToken ||
+          !loginResult.refreshToken
+        ) {
           throw new Error("Dữ liệu người dùng phản hồi không hợp lệ.");
         }
 
         const rawRoles = loginResult.user.roles || [];
         const normalizedRoles = Array.isArray(rawRoles)
           ? rawRoles.map((r: any) =>
-              typeof r === "string" ? r : r?.code || r?.name,
-            )
+            typeof r === "string" ? r : r?.code || r?.name,
+          )
           : [];
 
         const sanitizedUser = {
@@ -133,7 +149,6 @@ export const LoginPage: React.FC = () => {
           loginResult.accessToken,
           loginResult.refreshToken,
         );
-        // Điều hướng chuyên biệt theo Role
         navigate(getPortalPath(normalizedRoles), { replace: true });
       } catch (err: any) {
         console.error("Login error:", err);
@@ -149,77 +164,191 @@ export const LoginPage: React.FC = () => {
     [email, password, twoFactorCode, show2Fa, setAuth, navigate],
   );
 
+  const features = [
+    {
+      icon: UtensilsCrossed,
+      title: "Thực đơn & Dinh dưỡng chuẩn Bộ Y tế",
+      desc: "Cân đối năng lượng, vi chất và khẩu phần theo từng lứa tuổi mầm non.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Kiểm soát Dị ứng & An toàn thực phẩm",
+      desc: "Cảnh báo dị nguyên tự động tới bếp, kiểm thực 3 bước và lưu mẫu 24 giờ.",
+    },
+    {
+      icon: HeartPulse,
+      title: "Theo dõi Thể chất & Sức ăn hằng ngày",
+      desc: "Cập nhật biểu đồ tăng trưởng, nhận xét bữa ăn và kết nối trực tiếp phụ huynh.",
+    },
+    {
+      icon: ClipboardCheck,
+      title: "Quản lý Suất ăn xế & Thanh toán điện tử",
+      desc: "Đối soát tự động qua VNPAY và xuất biên lai điện tử minh bạch.",
+    },
+  ];
+
   return (
-    <div className="login-page min-h-screen flex flex-col">
-      {/* ─── Header Bar ──────────────────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-6 py-3 bg-white/80 backdrop-blur-sm border-b border-slate-100 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md overflow-hidden shrink-0">
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:grid lg:grid-cols-12 font-sans text-slate-800">
+      {/* ─── CỘT TRÁI: BRANDING & GIỚI THIỆU HỆ THỐNG (6 COLS TRÊN DESKTOP) ─── */}
+      <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 bg-gradient-to-br from-[#064e3b] via-[#065f46] to-[#0f766e] text-white p-10 xl:p-14 flex-col justify-between relative overflow-hidden">
+        {/* Họa tiết nền tinh tế */}
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 2px 2px, rgba(255,255,255,0.35) 1px, transparent 0)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-teal-300/10 blur-3xl pointer-events-none" />
+
+        {/* Top: Logo & Tên Trường */}
+        <div className="relative z-10 flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-white/95 p-1 flex items-center justify-center shadow-lg shrink-0 overflow-hidden">
             {schoolBranding.logoUrl ? (
               <img
                 src={schoolBranding.logoUrl}
                 alt={schoolBranding.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain rounded-xl"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
               />
             ) : (
-              <span className="text-white font-black text-sm leading-none">{translateText("Kid")}<br />{translateText("Meal")}</span>
+              <UtensilsCrossed className="w-6 h-6 text-emerald-700" />
             )}
           </div>
-          <span className="hidden sm:inline text-sm font-semibold text-slate-700 truncate max-w-[240px]" title={schoolBranding.name}>
-            {schoolBranding.name || translateText("Bán trú yêu thương")}
-          </span>
-        </div>
-        <div className="flex items-center gap-6 text-xs text-slate-500">
-          <LanguageSwitcher />
-          {schoolBranding.phone && (
-            <div className="hidden lg:flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="font-semibold text-slate-700">
-                Hotline: {schoolBranding.phone}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-black tracking-tight text-white">
+                Kid<span className="text-emerald-300">Meal</span>
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-800/80 border border-emerald-600/60 text-[10px] font-bold uppercase tracking-wider text-emerald-200">
+                {translateText("Bán trú thông minh")}
               </span>
             </div>
-          )}
+            <p className="text-xs text-emerald-100/90 font-semibold mt-0.5">
+              {schoolBranding.name || translateText("KidMeal")}
+            </p>
+          </div>
         </div>
-      </header>
 
-      {/* ─── Main Content ────────────────────────────────────────────────────── */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8 login-bg relative overflow-hidden">
-        {/* Floating emoji decorations */}
-        <div className="login-emoji login-emoji-1">❗</div>
-        <div className="login-emoji login-emoji-2">🟡</div>
-        <div className="login-emoji login-emoji-3">❤️</div>
-        <div className="login-emoji login-emoji-4">✏️</div>
+        {/* Center: Logo Trường cỡ lớn ở chính giữa thay thế nội dung chữ */}
+        <div className="relative z-10 my-auto py-8 flex flex-col items-center justify-center text-center space-y-6">
+          <div className="w-56 h-56 xl:w-64 xl:h-64 rounded-[2.5rem] bg-white p-6 flex items-center justify-center shadow-2xl shadow-black/25 ring-8 ring-white/15 overflow-hidden">
+            {schoolBranding.logoUrl ? (
+              <img
+                src={schoolBranding.logoUrl}
+                alt={schoolBranding.name}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <UtensilsCrossed className="w-24 h-24 text-emerald-700" />
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="text-2xl xl:text-3xl font-black tracking-tight text-white">
+              {schoolBranding.name || translateText("KidMeal")}
+            </h2>
+            <p className="text-sm font-medium text-emerald-200/90">
+              {translateText("Hệ thống Quản lý Bán trú & Dinh dưỡng Học đường")}
+            </p>
+          </div>
+        </div>
 
-        {/* Login Card */}
-        <div className="w-full max-w-lg relative z-10">
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-900/5 border border-white/60 px-8 py-10 sm:px-10">
-            {/* Badge Bán trú */}
-            <div className="flex justify-center mb-4">
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
-                {schoolBranding.name ? `🏫 ${schoolBranding.name} • KidMeal` : translateText("🏫 Hệ thống Quản trị Bán trú Mầm non KidMeal")}
+        {/* Bottom: Thông tin liên hệ trường */}
+        <div className="relative z-10 pt-6 border-t border-white/15 flex flex-wrap items-center justify-between gap-4 text-xs text-emerald-100/80">
+          <div className="flex flex-wrap items-center gap-4">
+            {schoolBranding.address && (
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                <span>{schoolBranding.address}</span>
               </span>
-            </div>
+            )}
+            {schoolBranding.phone && (
+              <span className="inline-flex items-center gap-1.5 font-semibold text-white">
+                <Phone className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+                <span>Hotline: {schoolBranding.phone}</span>
+              </span>
+            )}
+          </div>
+          <span>© {new Date().getFullYear()} KidMeal</span>
+        </div>
+      </div>
 
-            {/* Heading */}
-            <h1 className="text-center text-3xl font-black text-slate-900 mb-2">{translateText("Chào mừng trở lại! 👋")}</h1>
-            <p className="text-center text-sm text-slate-500 mb-8">{translateText("Đăng nhập để quản lý thực đơn, dinh dưỡng và sĩ số học sinh.")}</p>
+      {/* ─── CỘT PHẢI: KHUNG ĐĂNG NHẬP SẠCH SẼ & HIỆN ĐẠI (6 COLS TRÊN DESKTOP) ─── */}
+      <div className="flex-1 lg:col-span-6 xl:col-span-5 flex flex-col justify-between bg-white min-h-screen">
+        {/* Top bar (Mobile logo + Language switcher) */}
+        <header className="px-6 py-4 flex items-center justify-between border-b border-slate-100 lg:border-b-0">
+          <div className="flex items-center gap-2.5 lg:invisible">
+            <div className="w-9 h-9 rounded-xl bg-teal-700 text-white flex items-center justify-center shadow-xs overflow-hidden shrink-0">
+              {schoolBranding.logoUrl ? (
+                <img
+                  src={schoolBranding.logoUrl}
+                  alt={schoolBranding.name}
+                  className="w-full h-full object-cover bg-white"
+                />
+              ) : (
+                <UtensilsCrossed className="w-4 h-4" />
+              )}
+            </div>
+            <span className="text-sm font-bold text-slate-900 truncate max-w-[200px]">
+              {schoolBranding.name || "KidMeal"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 ml-auto">
+            <LanguageSwitcher />
+          </div>
+        </header>
+
+        {/* Main Form Container */}
+        <main className="flex-1 flex items-center justify-center px-6 py-8 sm:px-10">
+          <div className="w-full max-w-md space-y-6">
+            {/* School & System Header */}
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-200/80 text-teal-800 text-xs font-bold">
+                <Building2 className="w-3.5 h-3.5 text-teal-600" />
+                <span>
+                  {schoolBranding.name || translateText("KidMeal")}
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {translateText("Đăng nhập hệ thống")}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500">
+                {translateText(
+                  "Nhập thông tin tài khoản để truy cập cổng quản lý và sổ theo dõi bán trú.",
+                )}
+              </p>
+            </div>
 
             {/* Error Alert */}
             {error && (
-              <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium animate-shake">
-                {translateText(error)}
+              <div
+                role="alert"
+                className="flex items-start gap-2.5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-700 animate-shake"
+              >
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <span>{translateText(error)}</span>
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleLogin} className="space-y-4">
               {/* Email Input */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Tên đăng nhập hoặc Email / SĐT")}</label>
+                <label
+                  htmlFor="login-email"
+                  className="block text-xs font-bold text-slate-700 mb-1.5"
+                >
+                  {translateText("Email")}
+                </label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   <input
                     id="login-email"
                     type="text"
@@ -228,38 +357,52 @@ export const LoginPage: React.FC = () => {
                     placeholder={translateText("hieutruong@huongduong.edu.vn")}
                     autoComplete="email"
                     required
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/10 transition outline-none"
                   />
                 </div>
               </div>
 
               {/* Password Input */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Mật khẩu")}</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="login-password"
+                    className="block text-xs font-bold text-slate-700"
+                  >
+                    {translateText("Mật khẩu")}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-xs text-teal-700 font-bold hover:text-teal-800 hover:underline transition cursor-pointer"
+                  >
+                    {translateText("Quên mật khẩu?")}
+                  </button>
+                </div>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   <input
                     id="login-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={"••••••••"}
+                    placeholder="••••••••"
                     autoComplete="current-password"
                     required
                     minLength={6}
-                    className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-200 outline-none"
+                    className="w-full pl-10 pr-11 py-2.5 bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-500/10 transition outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition cursor-pointer"
                     aria-label={translateText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu")}
                   >
                     {showPassword ? (
-                      <EyeOff className="w-4.5 h-4.5" />
+                      <EyeOff className="w-4 h-4" />
                     ) : (
-                      <Eye className="w-4.5 h-4.5" />
+                      <Eye className="w-4 h-4" />
                     )}
                   </button>
                 </div>
@@ -268,9 +411,14 @@ export const LoginPage: React.FC = () => {
               {/* 2FA Code (conditional) */}
               {show2Fa && (
                 <div className="animate-fadeIn">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{translateText("Mã xác thực 2FA")}</label>
+                  <label
+                    htmlFor="login-2fa"
+                    className="block text-xs font-bold text-slate-700 mb-1.5"
+                  >
+                    {translateText("Mã xác thực 2FA")}
+                  </label>
                   <div className="relative">
-                    <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                    <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     <input
                       id="login-2fa"
                       type="text"
@@ -280,32 +428,29 @@ export const LoginPage: React.FC = () => {
                           e.target.value.replace(/\D/g, "").slice(0, 6),
                         )
                       }
-                      placeholder={translateText("Nhập 6 chữ số từ app Authenticator")}
+                      placeholder={translateText("Nhập 6 chữ số từ ứng dụng xác thực")}
                       autoComplete="one-time-code"
                       inputMode="numeric"
                       maxLength={6}
-                      className="w-full pl-11 pr-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-amber-50/70 border border-amber-300 rounded-xl text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition outline-none"
                     />
                   </div>
                 </div>
               )}
 
-              {/* Remember Me + Forgot Password */}
-              <div className="flex items-center justify-between">
+              {/* Remember Me */}
+              <div className="flex items-center justify-between pt-0.5">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-400 cursor-pointer"
+                    className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 accent-teal-600 cursor-pointer"
                   />
-                  <span className="text-sm text-slate-600">{translateText("Ghi nhớ đăng nhập")}</span>
+                  <span className="text-xs font-semibold text-slate-600">
+                    {translateText("Duy trì trạng thái đăng nhập")}
+                  </span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
-                >{translateText("Quên mật khẩu?")}</button>
               </div>
 
               {/* Submit Button */}
@@ -313,11 +458,11 @@ export const LoginPage: React.FC = () => {
                 id="login-submit"
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-base rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 px-4 bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24">
+                  <>
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
                       <circle
                         className="opacity-25"
                         cx="12"
@@ -332,15 +477,34 @@ export const LoginPage: React.FC = () => {
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                       />
-                    </svg>{translateText("Đang xử lý...")}</span>
+                    </svg>
+                    <span>{translateText("Đang xác thực...")}</span>
+                  </>
                 ) : (
-                  translateText("Đăng nhập vào KidMeal 🎉")
+                  <>
+                    <span>{translateText("Đăng nhập")}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
               </button>
             </form>
           </div>
-        </div>
-      </main>
+        </main>
+
+        {/* Bottom Footer */}
+        <footer className="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
+          <span>
+            © {new Date().getFullYear()} {schoolBranding.name || "KidMeal"}
+          </span>
+          <div className="flex items-center gap-3">
+            {schoolBranding.phone && (
+              <span className="text-slate-600 font-semibold">
+                {translateText("Hỗ trợ:")} {schoolBranding.phone}
+              </span>
+            )}
+          </div>
+        </footer>
+      </div>
 
       {/* Modal Quên & Đặt lại mật khẩu (OTP Email) */}
       <ForgotPasswordModal
@@ -354,18 +518,6 @@ export const LoginPage: React.FC = () => {
           setShowForgotPassword(false);
         }}
       />
-
-      {/* ─── Footer ──────────────────────────────────────────────────────── */}
-      <footer className="px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 relative z-10">
-        <p>© {new Date().getFullYear()} {schoolBranding.name || "KidMeal"} - {translateText("Hệ sinh thái Bán trú Dinh dưỡng Học đường Mầm non. All rights reserved.")}</p>
-        <div className="flex items-center gap-4">
-          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Hướng dẫn bảo mật")}</a>
-          <span>•</span>
-          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Điều khoản sử dụng")}</a>
-          <span>•</span>
-          <a href="#" className="hover:text-slate-600 transition-colors">{translateText("Trung tâm trợ giúp")}</a>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -492,14 +492,7 @@ export const InspectionDetailPage: React.FC = () => {
             <div className="flex justify-between border-b border-slate-100 pb-2.5 text-xs">
               <span className="text-slate-400 font-medium">Giờ tiếp nhận</span>
               <span className="font-bold text-slate-800">
-                {record.step1Time ? formatTime(record.step1Time) : '06:30'}
-              </span>
-            </div>
-
-            <div className="flex justify-between border-b border-slate-100 pb-2.5 text-xs">
-              <span className="text-slate-400 font-medium">Đánh giá cảm quan</span>
-              <span className="font-bold text-emerald-600 flex items-center gap-1">
-                100% Đạt chuẩn <CheckCircle className="w-3.5 h-3.5" />
+                {record.step1Time ? formatTime(record.step1Time) : 'Chưa ghi nhận'}
               </span>
             </div>
 

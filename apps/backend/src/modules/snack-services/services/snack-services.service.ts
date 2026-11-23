@@ -34,30 +34,26 @@ export class SnackServicesService {
     const items = periods.map((p) => {
       const regCount = (p.registrations || []).length;
       const paidCount = (p.registrations || []).filter((r) => r.status === 'PAID').length;
-      const targetCount = 30;
-      const percentage = Math.min(100, Math.round((regCount / (targetCount || 1)) * 100));
-      const fee = Number(p.feeAmount) || 480000;
+      const fee = Number(p.feeAmount) || 0;
       const is5Meals = (p.name || '').toLowerCase().includes('5 bữa') || fee <= 150000;
       const pricePerUnit = is5Meals ? Math.round(fee / 5) : Math.round(fee / 22);
 
       return {
         id: String(p.id),
         name: p.name,
-        description: 'Suất ăn sáng mầm non lúc 07h15 - 08h00 - Đảm bảo năng lượng 295 kcal, canxi và vi chất',
-        serviceType: 'BREAKFAST',
+        startDate: p.startDate,
+        endDate: p.endDate,
+        registrationDeadline: p.registrationDeadline,
+        feeAmount: fee,
+        weekNumber: p.weekNumber ?? null,
+        isPaymentLocked: p.isPaymentLocked,
+        serviceType: 'AFTER_SCHOOL_SNACK',
         billingCycle: is5Meals ? 'WEEKLY' : 'MONTHLY',
         pricePerUnit,
-        monthlyEstimatedPrice: fee,
-        appliedGrade: 'Tất cả các khối',
         registrationPeriod: `${p.startDate} ~ ${p.endDate}`,
-        appliedMonth: p.startDate ? p.startDate.substring(0, 7) : '2026-11',
         registeredCount: regCount,
-        targetCount,
-        percentage,
-        progressNote: `Đã có ${regCount}/${targetCount} bé tham gia`,
         status: p.status as 'OPEN' | 'UPCOMING' | 'CLOSED',
         statusLabel: p.status === 'OPEN' ? 'Đang mở đăng ký' : 'Đã khóa đợt',
-        badges: ['Phở bò / Cháo gà', 'Súp dinh dưỡng', 'Sữa hạt tươi'],
         isActive: p.status === 'OPEN',
         enrolledCount: regCount,
         paidCount,
@@ -65,9 +61,10 @@ export class SnackServicesService {
       };
     });
 
-    const totalRegistered = items.reduce((acc, i) => acc + i.registeredCount, 0);
+    const totalRegistered = new Set(
+      periods.flatMap((p) => (p.registrations || []).map((r) => r.studentId)),
+    ).size;
     const totalCollected = items.reduce((acc, i) => acc + i.totalRevenue, 0);
-    const expectedMonthly = items.reduce((acc, i) => acc + i.targetCount * i.monthlyEstimatedPrice, 0);
 
     const summary = {
       activeBatches: {
@@ -78,19 +75,12 @@ export class SnackServicesService {
       },
       studentParticipation: {
         registered: totalRegistered,
-        total: totalStudents || 14,
+        total: totalStudents,
         percentage: totalStudents > 0 ? Math.min(100, Math.round((totalRegistered / totalStudents) * 100)) : 0,
-        remaining: Math.max(0, (totalStudents || 14) - totalRegistered),
+        remaining: Math.max(0, totalStudents - totalRegistered),
       },
       revenue: {
-        expectedMonthly: expectedMonthly || 15000000,
-        collected: totalCollected || 8500000,
-        collectedPercentage: expectedMonthly > 0 ? Math.round((totalCollected / expectedMonthly) * 100) : 56,
-      },
-      satisfaction: {
-        ratePercent: 98,
-        ratingScore: 4.9,
-        totalReviews: 24,
+        collected: totalCollected,
       },
     };
 

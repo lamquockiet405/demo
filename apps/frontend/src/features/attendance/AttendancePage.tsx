@@ -347,15 +347,6 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
 
       {/* 3. Main Content Container */}
       <main className="flex-1 w-full px-6 py-6 space-y-6">
-        {/* Header & Title */}
-        <AttendanceHeader
-          classNameTitle={attendanceData?.classInfo.name || 'Lớp Mầm 1 (3-4 tuổi)'}
-          cutoffTime={attendanceData?.kitchenConnection.cutoffTime || '08:45'}
-          onExportReport={() => setIsExportOpen(true)}
-          onLockAndSendKitchen={handleLockKitchen}
-          isLocked={isLocked}
-        />
-
         {/* Controls & Filter Toolbar */}
         <AttendanceControls
           selectedDate={selectedDate}
@@ -382,6 +373,10 @@ export const AttendancePage: React.FC<AttendancePageProps> = ({
           onMarkAllPresent={handleMarkAllPresent}
           onSyncMorning={handleSyncMorning}
           isSyncing={isSyncing}
+          onExportReport={() => setIsExportOpen(true)}
+          onLockAndSendKitchen={handleLockKitchen}
+          isLocked={isLocked}
+          cutoffTime={attendanceData?.kitchenConnection.cutoffTime || '08:45'}
         />
 
         {/* 4 Summary KPI Cards */}

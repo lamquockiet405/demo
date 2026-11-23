@@ -208,6 +208,9 @@ export class SnackRosterService {
             !item.blockName.toLowerCase().includes(grade)) return false;
       }
       if (query.paymentStatus && query.paymentStatus !== 'ALL') {
+        if (query.paymentStatus === 'UNPAID' || query.paymentStatus === 'PENDING') {
+          return item.paymentStatus === 'PENDING' || item.paymentStatus === 'UNPAID';
+        }
         return item.paymentStatus === query.paymentStatus;
       }
       return item.paymentStatus === 'PAID' || item.paymentStatus === 'PENDING';

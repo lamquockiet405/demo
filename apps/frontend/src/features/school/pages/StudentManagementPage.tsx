@@ -1,10 +1,11 @@
-import { downloadExcelSheets, studentHeaderRow } from '../../../core/utils/excel-export';
+import { downloadExcel, downloadExcelSheets, studentHeaderRow } from '../../../core/utils/excel-export';
+import { formatDateDMY } from '../../../core/utils/date';
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import * as XLSX from "xlsx";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload, FileSpreadsheet } from "lucide-react";
 import { childrenApi } from "../../children/api/children.api";
 import { fetchKitchenCollection } from "../../kitchen/api/kitchen.api";
 import { schoolDate } from "../../menus/utils/published-menus";
@@ -106,17 +107,18 @@ export function StudentManagementPage() {
       if (file.size > 5 * 1024 * 1024) throw new Error("Tệp tối đa 5 MB.");
       const workbook = XLSX.read(await file.arrayBuffer(), {
         type: "array",
-        raw: true,
+        cellDates: false,
       });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const headerRow = studentHeaderRow(XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, range: 0, defval: '' }));
       if (headerRow < 0) throw new Error('Không tìm thấy dòng tiêu đề họ tên và ngày sinh học sinh.');
-      const raw = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { range: headerRow, raw: false, defval: '' });
+      const raw = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { range: headerRow, raw: true, defval: '' });
       setImportRows(
         validateStudentRows(
           raw,
           (classes.data || []).map((c) => String(c.id)),
           schoolDate(),
+          headerRow + 2,
         ),
       );
     } catch (e) {
@@ -159,50 +161,50 @@ export function StudentManagementPage() {
 
     void downloadExcelSheets('Mau_Nhap_Danh_Sach_Hoc_Sinh.xlsx', 'Mẫu nhập danh sách học sinh', [
       { name: 'Danh_Sach_Hoc_Sinh', translateHeaders: false, rows: [headers, ...sampleRows] },
-      { name: 'Danh_Muc_Lop_Hoc', rows: [
-        ['Mã lớp', 'Tên lớp', 'Độ tuổi'],
-        ...sampleClasses.map((c: any) => [c.id, c.name, c.ageGroup || c.grade || '']),
-      ] },
+      {
+        name: 'Danh_Muc_Lop_Hoc', rows: [
+          ['Mã lớp', 'Tên lớp', 'Độ tuổi'],
+          ...sampleClasses.map((c: any) => [c.id, c.name, c.ageGroup || c.grade || '']),
+        ]
+      },
     ]);
+  };
+
+  const handleExportStudents = async () => {
+    if (!students.length) return;
+    const headers = [
+      'STT',
+      'Mã học sinh',
+      'Họ và tên',
+      'Lớp học',
+      'Ngày sinh',
+      'Giới tính',
+      'Ghi chú dị ứng',
+      'Phụ huynh',
+      'Số điện thoại',
+    ];
+    const rows = students.map((s, idx) => [
+      idx + 1,
+      s.code,
+      s.name,
+      s.className || 'Chưa phân lớp',
+      s.dateOfBirth ? formatDateDMY(s.dateOfBirth) : '',
+      s.gender === 'FEMALE' ? 'Nữ' : 'Nam',
+      s.allergies?.join('; ') || '',
+      s.parentName || '',
+      s.parentPhone || '',
+    ]);
+    await downloadExcel(
+      `Danh_sach_hoc_sinh_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [headers, ...rows],
+      'Danh sách học sinh'
+    );
   };
 
   return (
     <SchoolPage
       title={translateText(isTeacherPortal ? "Hồ sơ học sinh lớp phụ trách" : "Hồ sơ học sinh")}
       description={translateText("Quản lý danh sách học sinh thuộc lớp phụ trách và hồ sơ cá nhân của học sinh.")}
-      actions={
-        <>
-          <button
-            className="kp-button"
-            disabled={resource.loading}
-            onClick={resource.reload}
-          >{translateText("Làm mới")}</button>
-          <button
-            type="button"
-            className="kp-button inline-flex items-center gap-1.5"
-            onClick={handleDownloadTemplate}
-            title={translateText("Tải file Excel mẫu để nhập danh sách học sinh")}
-          >
-            <Download className="w-4 h-4 text-emerald-600" />
-            <span>{translateText("Tải file mẫu")}</span>
-          </button>
-          <button
-            className="kp-button inline-flex items-center gap-1.5"
-            disabled={classes.loading || !!classes.error}
-            onClick={() => input.current?.click()}
-          >
-            <Upload className="w-4 h-4 text-blue-600" />
-            <span>{translateText("Nhập Excel/CSV")}</span>
-          </button>
-          <button
-            className="kp-button primary"
-            disabled={classes.loading || !!classes.error || (isTeacherPortal && !classes.data?.length)}
-            onClick={() => openForm()}
-          >
-            {translateText(isTeacherPortal ? "Thêm học sinh vào lớp" : "Thêm học sinh")}
-          </button>
-        </>
-      }
     >
       <input
         ref={input}
@@ -218,41 +220,89 @@ export function StudentManagementPage() {
 
       {isTeacherPortal && <TeacherStatsOverview classes={classes.data} />}
 
-      <div className="kp-filters">
-        {!isTeacherPortal && <label className="flex items-center gap-2 text-sm text-slate-600">
-          Năm học
-          <select aria-label="Năm học" value={yearFilter.yearId} onChange={(e) => {
-            yearFilter.setYearId(e.target.value); setClassId(''); setPage(1);
-          }}>
-            <option value="">Tất cả năm học</option>
-            {yearFilter.years.map(year => <option key={year.id} value={year.id}>{year.name}{year.status === 'ACTIVE' ? ' (đang áp dụng)' : ''}</option>)}
+      <div className="kp-filters flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {!isTeacherPortal && (
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              Năm học
+              <select aria-label="Năm học" value={yearFilter.yearId} onChange={(e) => {
+                yearFilter.setYearId(e.target.value); setClassId(''); setPage(1);
+              }}>
+                <option value="">Tất cả năm học</option>
+                {yearFilter.years.map(year => <option key={year.id} value={year.id}>{year.name}{year.status === 'ACTIVE' ? ' (đang áp dụng)' : ''}</option>)}
+              </select>
+            </label>
+          )}
+          <input
+            type="search"
+            aria-label={translateText("Tìm học sinh")}
+            value={search}
+            placeholder={translateText("Tìm tên hoặc mã học sinh…")}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
+          <select
+            aria-label={translateText("Lớp học")}
+            value={classId}
+            onChange={(e) => {
+              setClassId(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">{translateText(isTeacherPortal ? "Tất cả lớp được phân công" : "Tất cả lớp")}</option>
+            {(classes.data || []).map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
           </select>
-        </label>}
-        <input
-          type="search"
-          aria-label={translateText("Tìm học sinh")}
-          value={search}
-          placeholder={translateText("Tìm tên hoặc mã học sinh…")}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-        <select
-          aria-label={translateText("Lớp học")}
-          value={classId}
-          onChange={(e) => {
-            setClassId(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">{translateText(isTeacherPortal ? "Tất cả lớp được phân công" : "Tất cả lớp")}</option>
-          {(classes.data || []).map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            className="kp-button"
+            disabled={resource.loading}
+            onClick={resource.reload}
+          >{translateText("Làm mới")}</button>
+          <button
+            type="button"
+            className="kp-button inline-flex items-center gap-1.5"
+            onClick={handleExportStudents}
+            title={translateText("Xuất toàn bộ danh sách học sinh ra file Excel")}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>{translateText("Xuất Excel")}</span>
+          </button>
+          <button
+            type="button"
+            className="kp-button inline-flex items-center gap-1.5"
+            onClick={handleDownloadTemplate}
+            title={translateText("Tải file Excel mẫu để nhập danh sách học sinh")}
+          >
+            <Download className="w-4 h-4 text-emerald-600" />
+            <span>{translateText("Tải file mẫu")}</span>
+          </button>
+          <button
+            type="button"
+            className="kp-button inline-flex items-center gap-1.5"
+            disabled={classes.loading || !!classes.error}
+            onClick={() => input.current?.click()}
+          >
+            <Upload className="w-4 h-4 text-blue-600" />
+            <span>{translateText("Nhập Excel/CSV")}</span>
+          </button>
+          <button
+            type="button"
+            className="kp-button primary"
+            disabled={classes.loading || !!classes.error || (isTeacherPortal && !classes.data?.length)}
+            onClick={() => openForm()}
+          >
+            {translateText(isTeacherPortal ? "Thêm học sinh vào lớp" : "Thêm học sinh")}
+          </button>
+        </div>
       </div>
 
       {isTeacherPortal && !classes.loading && !classes.error && classes.data?.length === 0 && (
@@ -264,7 +314,7 @@ export function StudentManagementPage() {
       {!resource.loading && !!rows.length && (
         <div className="overflow-auto bg-white border rounded-xl shadow-xs">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-teal-600 text-white border-b border-teal-700/60">
               <tr>
                 {[
                   translateText("Mã học sinh"),
@@ -275,7 +325,7 @@ export function StudentManagementPage() {
                   translateText("Phụ huynh liên kết"),
                   translateText("Thao tác"),
                 ].map((h) => (
-                  <th className="p-3 whitespace-nowrap font-bold text-slate-700" key={h}>
+                  <th className="p-3 whitespace-nowrap font-bold text-white text-xs uppercase tracking-wider" key={h}>
                     {translateText(h)}
                   </th>
                 ))}
@@ -287,7 +337,7 @@ export function StudentManagementPage() {
                   <td className="p-3 font-mono font-medium text-slate-700">{row.studentCode || "—"}</td>
                   <td className="p-3 font-semibold text-slate-900">{row.fullName}</td>
                   <td className="p-3 text-slate-600">
-                    {translateText(row.dateOfBirth?.slice(0, 10) || "—")}
+                    {translateText(formatDateDMY(row.dateOfBirth) || "—")}
                   </td>
                   <td className="p-3">
                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${row.gender === "FEMALE" ? "bg-pink-50 text-pink-700 border border-pink-200" : "bg-blue-50 text-blue-700 border border-blue-200"}`}>
@@ -510,7 +560,7 @@ export function StudentManagementPage() {
               <div className="border-b pb-3">
                 <h2 className="font-bold text-xl text-slate-900">{detail.data.fullName}</h2>
                 <p className="text-sm text-slate-500 mt-1">{translateText("Mã học sinh: ")}<b className="text-slate-800">{detail.data.studentCode || "—"}</b>{translateText(" · Ngày sinh:")}{" "}
-                  <b className="text-slate-800">{translateText(detail.data.dateOfBirth?.slice(0, 10) || "—")}</b>{translateText(" · Giới tính:")}{" "}
+                  <b className="text-slate-800">{translateText(formatDateDMY(detail.data.dateOfBirth) || "—")}</b>{translateText(" · Giới tính:")}{" "}
                   <b className="text-slate-800">{translateText(detail.data.gender === "MALE" ? "Nam" : "Nữ")}</b>
                 </p>
                 <p className="text-sm text-slate-500">{translateText("Lớp học: ")}<b className="text-slate-800">{detail.data.className || translateText("Chưa phân lớp")}</b>
@@ -568,7 +618,7 @@ export function StudentManagementPage() {
           <div className="max-h-72 overflow-auto text-xs space-y-1">
             {importRows.map((r, i) => (
               <p key={i} className="py-1.5 px-2 bg-slate-50 rounded border border-slate-100">
-                {i + 1}. <b>{r.fullName}</b>{translateText(" · Ngày sinh: ")}{translateText(r.dateOfBirth)}{translateText(" · Giới tính: ")}{translateText(r.gender === "FEMALE" ? "Nữ" : "Nam")}{translateText(" · Mã lớp: ")}{translateText(r.classId)}
+                {i + 1}. <b>{r.fullName}</b>{translateText(" · Ngày sinh: ")}{translateText(formatDateDMY(r.dateOfBirth))}{translateText(" · Giới tính: ")}{translateText(r.gender === "FEMALE" ? "Nữ" : "Nam")}{translateText(" · Mã lớp: ")}{translateText(r.classId)}
               </p>
             ))}
           </div>

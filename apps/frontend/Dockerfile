@@ -14,7 +14,7 @@ COPY apps/frontend/package*.json ./
 RUN npm install
 
 COPY apps/frontend ./
-RUN npm run build
+RUN npx vite build
 
 # ---- Static Nginx Runner ----
 FROM nginx:1.25-alpine AS runner

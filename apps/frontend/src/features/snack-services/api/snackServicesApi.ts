@@ -56,11 +56,12 @@ export const fetchSnackServicesList =
     return { success: true, data: items };
   };
 
-/** Phụ huynh xem các gói ăn xế đã công bố và Lịch ăn xế (Chỉ trả về lịch ăn xế khi đã đóng tiền PAID) */
+/** Phụ huynh xem các gói ăn xế đã công bố và Lịch ăn xế (Cho phép xem trước thực đơn suất ăn xế) */
 export const fetchParentSnackOverview =
-  async (): Promise<ParentSnackOverviewResponse> => {
+  async (studentId?: string | number): Promise<ParentSnackOverviewResponse> => {
     const response = await apiClient.get<any>(
       "/snack-services/parent-overview",
+      { params: studentId ? { studentId } : {} },
     );
     return response.data;
   };

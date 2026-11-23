@@ -10,8 +10,8 @@ export {
 import "../../kitchen/kitchen-portal.css";
 
 export function SchoolPage({
-  title,
-  description,
+  title: _title,
+  description: _description,
   actions,
   children,
 }: {
@@ -22,22 +22,10 @@ export function SchoolPage({
 }) {
   useLanguage();
   return (
-    <section
-      className="school-page space-y-5"
-      style={
-        {
-          "--kp-border": "#dfe7ed",
-          "--kp-green": "#157454",
-        } as React.CSSProperties
-      }
-    >
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{translateText(title)}</h1>
-          <p className="text-sm text-slate-500 mt-2">{translateText(description)}</p>
-        </div>
-        <div className="flex gap-2 flex-wrap">{translateText(actions)}</div>
-      </div>
+    <section className="school-page space-y-5">
+      {actions && (
+        <div className="flex justify-end gap-2 flex-wrap">{actions}</div>
+      )}
       {children}
     </section>
   );
@@ -69,7 +57,7 @@ export function Field({
   useLanguage();
   return (
     <label className="kp-field">
-      {translateText(label)}
+      <span className="kp-field-label">{translateText(label)}</span>
       {children}
     </label>
   );

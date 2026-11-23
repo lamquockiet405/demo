@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useMemo, useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Boxes, CircleCheck, ShieldAlert, Layers3 } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
 import { fetchKitchenCollection } from "../api/kitchen.api";
 import {
@@ -13,6 +13,7 @@ import {
   useKitchenResource,
 } from "../components/KitchenUI";
 import { formatNumber, rowsOf } from "../utils/kitchen-operations";
+import { KitchenSummaryCards } from "../components/KitchenSummaryCards";
 import { normalizeSearch } from "../utils/kds-data";
 
 const groupName = (item: any) =>
@@ -242,6 +243,7 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
     [kind],
   );
   const categories = [...new Set((resource.data || []).map(groupName))].sort();
+  const catalog = resource.data || [];
   const rows = useMemo(
     () =>
       (resource.data || []).filter(
@@ -269,16 +271,14 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
   };
   return (
     <>
-      <PageTitle
-        title={translateText(food ? "Nguyên liệu thực phẩm" : "Danh sách món ăn")}
-        description={
-          translateText(food
-            ? "Tra cứu thành phần dinh dưỡng, nhóm thực phẩm, dị nguyên và tỷ lệ hao hụt."
-            : "Xem thành phần công thức, định lượng và hướng dẫn chế biến; lọc theo nhóm, dị nguyên và trạng thái.")
-        }
-      >
-        <ReloadButton loading={resource.loading} reload={resource.reload} />
-      </PageTitle>
+      {resource.data && !resource.error && (
+        <KitchenSummaryCards metrics={[
+          { label: food ? 'Tổng nguyên liệu' : 'Tổng món ăn', value: catalog.length, icon: Boxes },
+          { label: 'Đang sử dụng', value: catalog.filter((item) => item.status === 'ACTIVE' || (!item.status && item.isActive !== false)).length, icon: CircleCheck, tone: 'success' },
+          { label: 'Có dị nguyên', value: catalog.filter((item) => allergyNames(item).length > 0).length, icon: ShieldAlert, tone: 'warning' },
+          { label: 'Nhóm danh mục', value: categories.length, icon: Layers3, tone: 'neutral' },
+        ]} />
+      )}
       <div className="kp-filters">
         <input
           type="search"
@@ -327,6 +327,7 @@ export function KitchenCatalogPage({ kind }: { kind: "foods" | "dishes" }) {
             setPage(1);
           }}
         >{translateText("Xóa bộ lọc")}</button>
+        <ReloadButton loading={resource.loading} reload={resource.reload} />
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       {resource.data && (

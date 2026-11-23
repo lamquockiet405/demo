@@ -3,6 +3,7 @@ import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { apiClient } from "../../../core/api/axios";
+import { downloadExcel } from '../../../core/utils/excel-export';
 import { childrenApi } from "../../children/api/children.api";
 import { fetchKitchenCollection } from "../../kitchen/api/kitchen.api";
 import { filterNutritionStudents } from '../utils/student-search';
@@ -26,6 +27,7 @@ import {
   Users,
   ShieldCheck,
   GraduationCap,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   Field,
@@ -299,32 +301,28 @@ export function NutritionStudentsPage() {
     setPage(1);
   };
 
+  const handleExportExcel = async () => {
+    if (!filteredRows.length) return alert(translateText("Chưa có danh sách hồ sơ dinh dưỡng để xuất Excel."));
+    await downloadExcel(
+      `Ho_so_dinh_duong_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [
+        ["Mã học sinh", "Họ và tên", "Lớp", "Tình trạng dị ứng", "Chất dị ứng", "Mức calo tiêu chuẩn", "Chế độ dinh dưỡng"],
+        ...filteredRows.map(c => [
+          c.studentCode || '',
+          c.fullName || '',
+          c.className || '',
+          c.allergies?.length ? 'Có dị ứng' : 'An toàn / Tiêu chuẩn',
+          (c.allergies || []).map((a: any) => a.allergenName || a.allergen?.name || '').filter(Boolean).join(', ') || 'Không',
+          c.standardCalories ? `${c.standardCalories} kcal` : 'Theo nhóm tuổi',
+          c.dietaryRegime || 'Chế độ ăn chuẩn',
+        ]),
+      ],
+      "Hồ sơ dinh dưỡng"
+    );
+  };
+
   return (
     <div className="space-y-6 w-full pb-12 font-sans">
-      {/* ─── 1. Header Banner ─── */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              {translateText(isTeacherPortal ? "Giáo viên • Lớp phụ trách" : "Chuyên Gia Dinh Dưỡng • KidMeal")}
-            </span>
-            <span className="text-xs text-teal-200">{translateText("Quản lý hồ sơ dinh dưỡng cá nhân")}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <Baby className="w-8 h-8 text-amber-300" />
-            {translateText(isTeacherPortal ? "Học sinh & Hồ sơ dinh dưỡng của lớp" : "Học Sinh & Hồ Sơ Dinh Dưỡng Cá Nhân")}
-          </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Tra cứu thông tin học sinh, kiểm soát tình trạng dị ứng thực phẩm và cập nhật chế độ ăn, mục tiêu dinh dưỡng cá nhân hoá cho từng bé.")}</p>
-        </div>
-
-        <button
-          onClick={() => void resource.reload()}
-          disabled={resource.loading}
-          className="self-start md:self-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2 shadow-xs cursor-pointer"
-        >
-          <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới")}</button>
-      </div>
-
       <Feedback error={classes.error} />
 
       {/* ─── 2. Thẻ Thống Kê Nhanh (KPI Cards) ─── */}
@@ -445,6 +443,26 @@ export function NutritionStudentsPage() {
             <option value="ALLERGIC">{translateText("Có khai báo dị ứng (")}{stats.allergic})</option>
             <option value="SAFE">{translateText("Chế độ ăn an toàn (")}{stats.safe})</option>
           </select>
+
+          <button
+            onClick={() => void resource.reload()}
+            disabled={resource.loading}
+            className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center cursor-pointer"
+            title={translateText("Làm mới")}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? "animate-spin" : "text-slate-500"}`} />
+          </button>
+
+          <button
+            type="button"
+            className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+            disabled={!filteredRows.length}
+            onClick={() => void handleExportExcel()}
+            title={translateText("Xuất danh sách hồ sơ dinh dưỡng ra Excel")}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>{translateText("Xuất Excel")}</span>
+          </button>
 
           {(search || classId || allergyFilter !== "ALL") && (
             <button

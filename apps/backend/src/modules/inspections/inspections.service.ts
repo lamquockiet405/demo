@@ -800,7 +800,7 @@ export class InspectionsService {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(mealDate) || !Number.isFinite(Date.parse(mealDate)) || new Date(mealDate).toISOString().slice(0, 10) !== mealDate)
       throw new BadRequestException("Ngày kiểm thực không hợp lệ.");
     const mealSession = ["ALL", "FULL_DAY", "3_MEALS"].includes(data.mealSession) ? "ALL_DAY" : data.mealSession || "LUNCH";
-    if (!["BREAKFAST", "MORNING_SNACK", "LUNCH", "AFTERNOON_SNACK", "ALL_DAY"].includes(mealSession))
+    if (!["BREAKFAST", "MORNING_SNACK", "LUNCH", "AFTERNOON_SNACK", "LATE_SNACK", "ALL_DAY"].includes(mealSession))
       throw new BadRequestException("Buổi ăn không hợp lệ.");
     data = { ...data, mealSession };
     const sameDay = await this.inspectionRepo.find({ where: { date: mealDate } });

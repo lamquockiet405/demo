@@ -1,5 +1,6 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import React, { useEffect, useState } from "react";
 import { apiClient } from "@/core/api/axios";
 import {
@@ -323,68 +324,31 @@ export const DishesPage: React.FC = () => {
 
   const totalPages = Math.ceil(total / limit) || 1;
 
+  const handleExportExcel = async () => {
+    if (!dishes.length) return alert(translateText("Chưa có danh sách món ăn để xuất Excel."));
+    await downloadExcel(
+      `Danh_sach_mon_an_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [
+        ["STT", "Tên món ăn", "Bữa ăn", "Nhóm tuổi", "Năng lượng (Kcal)", "Đạm (P)", "Béo (L)", "Tinh bột (G)", "Trạng thái phục vụ"],
+        ...dishes.map((d, idx) => [
+          idx + 1,
+          d.name,
+          d.mealType || "",
+          d.ageGroup || "",
+          d.energyKcal || 0,
+          d.proteinG || 0,
+          d.fatG || 0,
+          d.carbG || 0,
+          d.isActive ? "Đang phục vụ" : "Tạm ngưng",
+        ]),
+      ],
+      "Danh mục món ăn"
+    );
+  };
+
   return (
     <div className="bg-slate-50/70 min-h-screen pb-12 font-sans">
-      {/* Top Header */}
-      <div className="bg-white border-b border-slate-200/80 px-6 sm:px-8 py-5 shadow-2xs">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{translateText("Danh Mục Món Ăn Học Đường")}</h1>
-              <span className="bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide uppercase">{translateText("Thực đơn Mầm non")}</span>
-            </div>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1 leading-relaxed max-w-3xl">{translateText("Quản lý định lượng khẩu phần, năng lượng Kcal, cơ cấu dưỡng chất P:L:G và kiểm soát dị nguyên học đường theo tiêu chuẩn Quy chuẩn Dinh dưỡng Mầm non.")}</p>
-          </div>
-
-          {/* Action Tools */}
-          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
-            {/* View Switcher */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
-              <button
-                type="button"
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                  viewMode === "grid"
-                    ? "bg-white text-emerald-700 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-                title={translateText("Dạng lưới thẻ")}
-              >
-                <LayoutGrid className="w-4 h-4" />
-                <span className="hidden sm:inline">{translateText("Lưới thẻ")}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("table")}
-                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                  viewMode === "table"
-                    ? "bg-white text-emerald-700 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-                title={translateText("Dạng bảng danh sách")}
-              >
-                <ListOrdered className="w-4 h-4" />
-                <span className="hidden sm:inline">{translateText("Bảng chi tiết")}</span>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedDishId(null);
-                setModalMode("create");
-                setIsModalOpen(true);
-              }}
-              className="flex items-center gap-2 bg-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-emerald-600/25 transition active:scale-95 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{translateText("Thêm món ăn mới")}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 sm:px-6 lg:px-8 mt-6 w-full space-y-6">
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 w-full space-y-6">
         {/* Stats KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Tổng số món */}
@@ -555,6 +519,68 @@ export const DishesPage: React.FC = () => {
                 className="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-600 transition whitespace-nowrap self-end md:self-auto cursor-pointer"
               >{translateText("⟳ Xóa lọc")}</button>
             )}
+          </div>
+        </div>
+
+        {/* Actions Bar & View Switcher */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs font-bold text-slate-500">
+            {translateText("Danh sách:")} <strong className="text-slate-800">{displayedDishes.length}</strong> {translateText("món ăn")}
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {/* View Switcher */}
+            <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200/80 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                title={translateText("Dạng lưới thẻ")}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">{translateText("Lưới thẻ")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                  viewMode === "table"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                title={translateText("Dạng bảng danh sách")}
+              >
+                <ListOrdered className="w-4 h-4" />
+                <span className="hidden sm:inline">{translateText("Bảng chi tiết")}</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+              title={translateText("Xuất danh mục món ăn ra Excel")}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>{translateText("Xuất Excel")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDishId(null);
+                setModalMode("create");
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{translateText("Thêm món ăn mới")}</span>
+            </button>
           </div>
         </div>
 
@@ -795,20 +821,20 @@ export const DishesPage: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
-                    <th className="py-3 px-3 w-12 text-center">{translateText("STT")}</th>
-                    <th className="py-3 px-4">{translateText("Tên món ăn")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Loại bữa")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Khẩu phần")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Năng lượng")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Đạm (P)")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Béo (L)")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Carb (G)")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Vi chất (Ca / Fe / Zn / Xơ)")}</th>
-                    <th className="py-3 px-4 text-center">{translateText("Kiểm soát dị nguyên")}</th>
-                    <th className="py-3 px-3 text-center">{translateText("Trạng thái")}</th>
-                    <th className="py-3 px-4 text-right">{translateText("Thao tác")}</th>
+                <thead className="bg-lime-600 text-white">
+                  <tr className="bg-lime-600 text-white font-bold uppercase tracking-wider border-b border-lime-700/60">
+                    <th className="py-3 px-3 w-12 text-center text-white">{translateText("STT")}</th>
+                    <th className="py-3 px-4 text-white">{translateText("Tên món ăn")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Loại bữa")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Khẩu phần")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Năng lượng")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Đạm (P)")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Béo (L)")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Carb (G)")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Vi chất (Ca / Fe / Zn / Xơ)")}</th>
+                    <th className="py-3 px-4 text-center text-white">{translateText("Kiểm soát dị nguyên")}</th>
+                    <th className="py-3 px-3 text-center text-white">{translateText("Trạng thái")}</th>
+                    <th className="py-3 px-4 text-right text-white">{translateText("Thao tác")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-800">

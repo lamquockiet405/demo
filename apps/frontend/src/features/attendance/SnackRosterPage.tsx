@@ -101,9 +101,9 @@ export const SnackRosterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen min-w-0 max-w-full bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
       {/* 2. Main Content Container */}
-      <main className="flex-1 w-full px-6 py-6 space-y-5">
+      <main className="flex-1 min-w-0 w-full max-w-full px-4 sm:px-6 py-6 space-y-5">
         {/* Page Title & Breadcrumb */}
         <SnackRosterHeader onExport={handleExport} onPrint={handlePrint} />
 

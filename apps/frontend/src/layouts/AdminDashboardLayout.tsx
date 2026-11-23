@@ -81,14 +81,14 @@ export const AdminDashboardLayout: React.FC = () => {
   const userInitials = getInitials(user?.fullName);
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] font-sans antialiased text-slate-800">
-      {/* 1. Sidebar Trái */}
+    <div className="role-principal flex h-screen bg-[#f8fafc] font-sans antialiased text-slate-800">
+      {/* 1. Sidebar Trái - Tông màu Xanh Ngọc Sáng (Light Mint / Teal) riêng của Ban Giám Hiệu */}
       {sidebarOpen && <button type="button" aria-label={translateText("Đóng menu quản trị")} className="fixed !m-0 inset-0 bg-slate-900/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside id="admin-sidebar" className={`${sidebarOpen ? 'flex' : 'hidden'} fixed inset-y-0 left-0 lg:static lg:flex w-64 shrink-0 bg-white border-r border-slate-200/80 flex-col justify-between shadow-xs z-40`}>
+      <aside id="admin-sidebar" className={`${sidebarOpen ? 'flex' : 'hidden'} fixed inset-y-0 left-0 lg:static lg:flex w-64 shrink-0 bg-gradient-to-b from-[#ecfdf5] via-[#f0fdfa] to-[#ccfbf1]/70 border-r border-teal-200/90 flex-col justify-between shadow-sm z-40`}>
         <div className="flex-1 min-h-0 overflow-y-auto">
           {/* Header Sidebar: KidMeal BGH & Tên trường thực tế */}
-          <div className="p-5 border-b border-slate-100 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 shadow-inner shrink-0 overflow-hidden">
+          <div className="p-5 border-b border-teal-200/70 bg-white/50 backdrop-blur-xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-700 shadow-inner shrink-0 overflow-hidden">
               {schoolLogo ? (
                 <img
                   src={schoolLogo}
@@ -101,10 +101,10 @@ export const AdminDashboardLayout: React.FC = () => {
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm text-slate-900 tracking-tight">{translateText("KidMeal BGH")}</span>
+                <span className="font-extrabold text-sm text-teal-950 tracking-tight">{translateText("KidMeal BGH")}</span>
               </div>
               <p
-                className="text-[11px] text-slate-500 font-medium truncate"
+                className="text-[11px] text-teal-700 font-medium truncate"
                 title={schoolName}
               >
                 {schoolName}
@@ -114,7 +114,7 @@ export const AdminDashboardLayout: React.FC = () => {
 
           {/* Tag Cổng Ban Giám Hiệu */}
           <div className="px-4 pt-3.5 pb-1">
-            <div className="bg-teal-50/80 border border-teal-200/60 rounded-full py-1 px-3 flex items-center gap-2 text-[11px] font-bold text-teal-800">
+            <div className="bg-teal-100/90 border border-teal-300/80 rounded-full py-1 px-3 flex items-center gap-2 text-[11px] font-bold text-teal-900 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
               <span>{translateText("CỔNG BAN GIÁM HIỆU")}</span>
             </div>
@@ -135,7 +135,7 @@ export const AdminDashboardLayout: React.FC = () => {
                 <React.Fragment key={item.path}>
                   {(index === 0 ||
                     item.group !== navItems[index - 1].group) && (
-                    <p className="px-3 pt-4 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <p className="px-3 pt-4 pb-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-700/80">
                       {translateText(item.group)}
                     </p>
                   )}
@@ -145,11 +145,11 @@ export const AdminDashboardLayout: React.FC = () => {
                     className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
                       isActive
                         ? "bg-teal-600 text-white shadow-md shadow-teal-600/25 font-bold"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                        : "text-teal-950/80 hover:text-teal-950 hover:bg-teal-200/50"
                     }`}
                   >
                     <Icon
-                      className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`}
+                      className={`w-4 h-4 ${isActive ? "text-white" : "text-teal-600"}`}
                     />
                     <span>{translateText(item.label)}</span>
                   </Link>
@@ -160,41 +160,28 @@ export const AdminDashboardLayout: React.FC = () => {
         </div>
 
         {/* Chân Sidebar */}
-        <div className="p-3 border-t border-slate-100 space-y-2">
-          {/* Thẻ Hotline Nhà trường */}
-          <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-2.5 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
-              <Headphones className="w-4 h-4" />
-            </div>
-            <div className="overflow-hidden">
-              <p className="text-[10px] text-slate-400 leading-tight">{translateText("Hotline Nhà trường")}</p>
-              <p className="text-xs font-bold text-teal-800 tracking-tight truncate">
-                {translateText(schoolPhone || "Chưa cập nhật")}
-              </p>
-            </div>
-          </div>
-
+        <div className="p-3 border-t border-teal-200/70 bg-white/40">
           {/* Thẻ User BGH */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-2.5 flex items-center justify-between shadow-xs">
+          <div className="bg-white/90 border border-teal-200/90 rounded-2xl p-2.5 flex items-center justify-between shadow-xs">
             <div
               onClick={() => setIsProfileModalOpen(true)}
               className="flex items-center gap-2.5 cursor-pointer flex-1 overflow-hidden"
             >
-              <div className="w-8 h-8 rounded-full bg-teal-800 text-teal-50 font-bold text-xs flex items-center justify-center shadow-inner shrink-0">
+              <div className="w-8 h-8 rounded-full bg-teal-700 text-teal-50 font-bold text-xs flex items-center justify-center shadow-inner shrink-0">
                 {userInitials}
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-bold text-slate-800 leading-tight truncate">
+                <p className="text-xs font-bold text-teal-950 leading-tight truncate">
                   {user?.fullName || user?.email || translateText("Ban Giám Hiệu")}
                 </p>
-                <p className="text-[10px] text-slate-400">{translateText("Hiệu trưởng / Quản lý")}</p>
+                <p className="text-[10px] text-teal-600 font-medium">{translateText("Hiệu trưởng / Quản lý")}</p>
               </div>
             </div>
 
             <button
               onClick={() => setIsProfileModalOpen(true)}
               title={translateText("Xem & Cập nhật hồ sơ cá nhân")}
-              className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition shrink-0"
+              className="p-1.5 text-teal-600 hover:text-teal-900 hover:bg-teal-100 rounded-lg transition shrink-0"
             >
               <MoreVertical className="w-4 h-4" />
             </button>

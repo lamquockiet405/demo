@@ -28,7 +28,7 @@ export default () => ({
     tmnCode: process.env.VNPAY_TMN_CODE || '6JM89YDG',
     hashSecret: process.env.VNPAY_HASH_SECRET || 'JKWEQYXNYWCPECFMDZCBRUXSOOHSTXEL',
     url: process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
-    returnUrl: process.env.VNPAY_RETURN_URL || 'http://localhost:5173/payments/vnpay-return',
+    returnUrl: process.env.VNPAY_RETURN_URL || 'https://step-clerk-departure-chance.trycloudflare.com/payments/vnpay-return',
   },
 
   minio: {

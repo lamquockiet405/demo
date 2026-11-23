@@ -5,14 +5,14 @@ export type DishCategoryType = 'SOUP' | 'MAIN' | 'STAPLE' | 'DRINK' | 'DESSERT' 
 const CATEGORY_MAP: Record<string, { code: DishCategoryType; label: string }> = {
   MAIN: { code: 'MAIN', label: 'Món Mặn Chính' },
   SIDE: { code: 'MAIN', label: 'Món Mặn Chính' },
-  SOUP: { code: 'SOUP', label: 'Món Canh' },
+  SOUP: { code: 'SOUP', label: 'Món Canh / Súp Nước' },
   RICE: { code: 'STAPLE', label: 'Cơm / Tinh bột' },
   STAPLE: { code: 'STAPLE', label: 'Cơm / Tinh bột' },
-  SNACK_AFTERNOON: { code: 'SNACK_MEAL', label: 'Món Xế / Cháo / Súp' },
-  SNACK_MEAL: { code: 'SNACK_MEAL', label: 'Món Xế / Cháo / Súp' },
+  SNACK_AFTERNOON: { code: 'SNACK_MEAL', label: 'Món Chiều Xế / Cháo / Bánh' },
+  SNACK_MEAL: { code: 'SNACK_MEAL', label: 'Món Xế / Điểm Tâm' },
   DESSERT: { code: 'DESSERT', label: 'Món Tráng Miệng' },
   DRINK: { code: 'DRINK', label: 'Món Uống / Sữa' },
-  SNACK_MORNING: { code: 'DRINK', label: 'Món Uống / Sữa' },
+  SNACK_MORNING: { code: 'SNACK_MEAL', label: 'Món Nước Sáng / Điểm Tâm' },
 };
 
 export const detectDishCategory = (_name: string, dishType?: string): { code: DishCategoryType; label: string } => {
@@ -34,6 +34,29 @@ export interface SubstituteCandidate {
   conflictingChildrenCount?: number;
 }
 
+const isLiquidDish = (name: string) => {
+  const lower = (name || "").toLowerCase();
+  return (
+    lower.includes("cháo") ||
+    lower.includes("súp") ||
+    lower.includes("bún") ||
+    lower.includes("phở") ||
+    lower.includes("miến") ||
+    lower.includes("hủ tiếu") ||
+    lower.includes("bánh canh") ||
+    lower.includes("nui") ||
+    lower.includes("mì") ||
+    lower.includes("hoành thánh")
+  ) && !lower.includes("khô") && !lower.includes("xào") && !lower.includes("bánh bao") && !lower.includes("bánh bông lan");
+};
+
+const isAfternoonSnackDish = (name: string, dishType?: string) => {
+  const lower = (name || "").toLowerCase();
+  const dt = (dishType || "").toUpperCase();
+  if (isLiquidDish(name)) return false;
+  return dt === "DRINK" || dt === "DESSERT" || lower.includes("bánh") || lower.includes("chè") || lower.includes("sữa") || lower.includes("nước");
+};
+
 // Candidates come from the current database, after the server's allergy checks.
 export function buildSubstituteCandidates(
   dishes: DishItem[],
@@ -41,6 +64,8 @@ export function buildSubstituteCandidates(
   group: string,
   weekDishes: MenuDishItem[] = [],
 ): SubstituteCandidate[] {
+  const isAfternoon = original.mealTime === "AFTERNOON_SNACK";
+  const isLiquidSlot = original.mealTime === "BREAKFAST" || original.mealTime === "MORNING_SNACK" || original.mealTime === "LATE_SNACK";
   const category = detectDishCategory(original.dish?.name || '', original.dish?.dishType);
   const portion = Number(original.portionSizeG) || 100;
   const currentCalories = Number(original.plannedCalories) || 0;
@@ -53,7 +78,16 @@ export function buildSubstituteCandidates(
   const validDishes = dishes.filter(dish => {
     const id = Number(dish.id);
     if (!Number.isSafeInteger(id) || id <= 0 || String(dish.id) === String(original.dishId) || seen.has(String(id))) return false;
-    if (!dish.isActive || !dish.nutritionAvailable || detectDishCategory(dish.name, dish.dishType).code !== category.code) return false;
+    if (!dish.isActive || !dish.nutritionAvailable) return false;
+
+    if (isAfternoon) {
+      if (!isAfternoonSnackDish(dish.name, dish.dishType)) return false;
+    } else if (isLiquidSlot) {
+      if (!isLiquidDish(dish.name)) return false;
+    } else {
+      if (detectDishCategory(dish.name, dish.dishType).code !== category.code) return false;
+    }
+
     seen.add(String(id));
     return true;
   });

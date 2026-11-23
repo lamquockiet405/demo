@@ -181,16 +181,20 @@ export function normalizeKitchenData(
     list(raw.classes).forEach((item, index) => {
       if (!Array.isArray(item.allergies)) return;
       item.allergies.forEach((instruction: unknown, alertIndex: number) => {
-        if (!label(instruction)) return;
+        const text = label(instruction);
+        if (!text) return;
+        const match = text.match(/(?:1\s*suất\s*)?(?:không\s*)?([^(]+?)\s*\((?:Bé\s*)?([^)]+)\)/i);
+        const childName = match ? `Bé ${match[2].trim()}` : "Yêu cầu suất ăn riêng";
+        const allergenClean = match ? match[1].trim() : text;
         alerts.push({
           id: `class-${index}-${alertIndex}`,
-          childName: "Yêu cầu suất ăn riêng",
+          childName,
           className: label(item.className),
           severity: "Cần kiểm tra",
           urgent: true,
-          allergen: label(instruction),
+          allergen: text,
           replacementMeal: "",
-          notes: "",
+          notes: match ? `Kiêng: ${allergenClean}` : "",
         });
       });
     });

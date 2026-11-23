@@ -567,52 +567,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
       : 0;
 
   return (
-    <div className="w-full px-1 sm:px-2 py-3 space-y-6">
-      {/* ─── 1. TOP HEADER BANNER ─── */}
-      <div className="bg-gradient-to-r from-teal-950 via-emerald-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-teal-800/40">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-teal-500/20 border border-teal-400/30 text-teal-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />{translateText("Chuẩn Nhân Trắc Học WHO 2006")}</div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">{translateText("Theo Dõi Thể Lực & Tăng Trưởng Trẻ Mầm Non")}</h1>
-            <p className="text-teal-100 text-xs sm:text-sm leading-relaxed">{translateText("Tự động tính toán các chỉ số Z-Score theo phương pháp LMS: Cân nặng theo tuổi (WAZ), Chiều cao theo tuổi (HAZ) và BMI theo tuổi (BAZ).")}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button
-              onClick={handleExportReport}
-              disabled={exporting}
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-              title={translateText("Xuất file Excel báo cáo thể lực học sinh")}
-            >
-              <Download
-                className={`w-4 h-4 ${exporting ? "animate-bounce" : ""}`}
-              />
-              <span>{translateText(exporting ? "Đang xuất..." : "Xuất Báo Cáo")}</span>
-            </button>
-            <button
-              onClick={() => {
-                setImportText("");
-                setImportResult(null);
-                setImportWarning(null);
-                setIsImportModalOpen(true);
-              }}
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-              title={translateText("Nhập hàng loạt số liệu cân đo từ bảng tính")}
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>{translateText("Nhập Excel / CSV")}</span>
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-3 rounded-2xl bg-teal-400 hover:bg-teal-300 text-teal-950 font-bold text-xs shadow-lg transition flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{translateText("Ghi Nhận Mới")}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div className="w-full min-w-0 py-3 space-y-6">
       {/* ─── SUCCESS TOAST NOTIFICATION ─── */}
       {successNotification && (
         <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-3 rounded-2xl flex items-center justify-between shadow-md animate-in fade-in slide-in-from-top-2 duration-200">
@@ -630,59 +585,157 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
       )}
 
       {/* ─── 2. SUMMARY KPI STATS (TOÀN TRƯỜNG / THEO LỚP) ─── */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
-          <span>{translateText("Thống kê dinh dưỡng:")}{" "}
-            <strong className="text-teal-800">{translateText(selectedClassName)}</strong>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-slate-500">
+          <h2 className="inline-flex flex-wrap items-center gap-1.5 text-sm font-bold text-slate-800">
+            <span>{translateText("Thống kê dinh dưỡng:")}</span>
+            <strong className="text-teal-800 bg-teal-50 border border-teal-200/80 px-2.5 py-0.5 rounded-lg">
+              {translateText(selectedClassName.replace(/\s*\([^)]*\)/g, ""))}
+            </strong>
+          </h2>
+          <span className="text-[11px] font-medium text-slate-400">
+            {translateText("Tự động tính toán lại khi cập nhật số liệu cân đo")}
           </span>
-          <span className="text-[11px] font-normal text-slate-400">{translateText("Tự động tính toán lại khi cập nhật số liệu cân đo")}</span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{translateText("Đã Đánh Giá (")}{translateText(selectedClassName)})
-            </div>
-            <div className="text-2xl font-black text-slate-900">
-              {totalEvaluated}{" "}
-              <span className="text-xs font-semibold text-slate-400">{translateText("lượt")}</span>
-            </div>
-            <div className="text-[11px] text-slate-400">{translateText("Dữ liệu cân đo định kỳ")}</div>
-          </div>
 
-          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider">{translateText("Đạt Chuẩn WHO")}</div>
-            <div className="text-2xl font-black text-emerald-700">
-              {normalPercent}%
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 15rem), 1fr))' }}>
+          {/* Card 1: Đã đánh giá */}
+          <button
+            type="button"
+            aria-pressed={selectedStatus === "ALL"}
+            onClick={() => setSelectedStatus("ALL")}
+            className={`min-w-0 min-h-[132px] w-full bg-white p-5 rounded-2xl border transition cursor-pointer shadow-xs hover:shadow-md flex items-start justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+              selectedStatus === "ALL"
+                ? "border-teal-400 ring-2 ring-teal-500/15"
+                : "border-slate-200/80 hover:border-slate-300"
+            }`}
+          >
+            <div className="space-y-1 min-w-0">
+              <div className="text-xs font-bold text-slate-500">
+                {translateText("Đã đánh giá")}
+              </div>
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                {totalEvaluated}{" "}
+                <span className="text-xs font-semibold text-slate-400">
+                  {translateText("lượt")}
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                {translateText("Dữ liệu cân đo định kỳ")}
+              </div>
             </div>
-            <div className="text-[11px] text-emerald-600 font-semibold">
-              {normalCount}{translateText(" học sinh bình thường")}</div>
-          </div>
+            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <Activity className="w-4 h-4" />
+            </div>
+          </button>
 
-          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
-            <div className="text-xs font-bold text-amber-600 uppercase tracking-wider">{translateText("Thấp Còi (HAZ < -2)")}</div>
-            <div className="text-2xl font-black text-amber-700">
-              {stuntedPercent}%
+          {/* Card 2: Đạt chuẩn WHO */}
+          <button
+            type="button"
+            aria-pressed={selectedStatus === "NORMAL"}
+            onClick={() => setSelectedStatus("NORMAL")}
+            className={`min-w-0 min-h-[132px] w-full bg-white p-5 rounded-2xl border transition cursor-pointer shadow-xs hover:shadow-md flex items-start justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+              selectedStatus === "NORMAL"
+                ? "border-emerald-400 ring-2 ring-emerald-500/15"
+                : "border-slate-200/80 hover:border-emerald-200"
+            }`}
+          >
+            <div className="space-y-1 min-w-0">
+              <div className="text-xs font-bold text-emerald-700">
+                {translateText("Đạt chuẩn WHO")}
+              </div>
+              <div className="text-2xl font-black text-emerald-700 tracking-tight">
+                {normalPercent}%
+              </div>
+              <div className="text-[11px] text-emerald-600 font-semibold leading-relaxed">
+                {normalCount} {translateText("học sinh bình thường")}
+              </div>
             </div>
-            <div className="text-[11px] text-amber-600 font-semibold">
-              {stuntedCount}{translateText(" trẻ cần can thiệp")}</div>
-          </div>
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </button>
 
-          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
-            <div className="text-xs font-bold text-orange-600 uppercase tracking-wider">{translateText("Nhẹ Cân (WAZ < -2)")}</div>
-            <div className="text-2xl font-black text-orange-700">
-              {underweightPercent}%
+          {/* Card 3: Thấp còi */}
+          <button
+            type="button"
+            aria-pressed={selectedStatus === "STUNTED"}
+            onClick={() => setSelectedStatus("STUNTED")}
+            className={`min-w-0 min-h-[132px] w-full bg-white p-5 rounded-2xl border transition cursor-pointer shadow-xs hover:shadow-md flex items-start justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+              selectedStatus === "STUNTED"
+                ? "border-amber-400 ring-2 ring-amber-500/15"
+                : "border-slate-200/80 hover:border-amber-200"
+            }`}
+          >
+            <div className="space-y-1 min-w-0">
+              <div className="text-xs font-bold text-amber-700">
+                {translateText("Thấp còi")}
+              </div>
+              <div className="text-2xl font-black text-amber-700 tracking-tight">
+                {stuntedPercent}%
+              </div>
+              <div className="text-[11px] text-amber-600 font-semibold leading-relaxed">
+                {stuntedCount} {translateText("trẻ cần can thiệp")}
+              </div>
             </div>
-            <div className="text-[11px] text-orange-600 font-semibold">
-              {underweightCount}{translateText(" trẻ nhẹ cân/gầy còm")}</div>
-          </div>
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/70 text-amber-600 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </button>
 
-          <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
-            <div className="text-xs font-bold text-rose-600 uppercase tracking-wider">{translateText("Thừa Cân / Béo Phì")}</div>
-            <div className="text-2xl font-black text-rose-700">
-              {overweightPercent}%
+          {/* Card 4: Nhẹ cân */}
+          <button
+            type="button"
+            aria-pressed={selectedStatus === "UNDERWEIGHT"}
+            onClick={() => setSelectedStatus("UNDERWEIGHT")}
+            className={`min-w-0 min-h-[132px] w-full bg-white p-5 rounded-2xl border transition cursor-pointer shadow-xs hover:shadow-md flex items-start justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+              selectedStatus === "UNDERWEIGHT"
+                ? "border-orange-400 ring-2 ring-orange-500/15"
+                : "border-slate-200/80 hover:border-orange-200"
+            }`}
+          >
+            <div className="space-y-1 min-w-0">
+              <div className="text-xs font-bold text-orange-700">
+                {translateText("Nhẹ cân")}
+              </div>
+              <div className="text-2xl font-black text-orange-700 tracking-tight">
+                {underweightPercent}%
+              </div>
+              <div className="text-[11px] text-orange-600 font-semibold leading-relaxed">
+                {underweightCount} {translateText("trẻ nhẹ cân/gầy còm")}
+              </div>
             </div>
-            <div className="text-[11px] text-rose-600 font-semibold">
-              {overweightCount}{translateText(" trẻ vượt chuẩn")}</div>
-          </div>
+            <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center shrink-0">
+              <Scale className="w-4 h-4" />
+            </div>
+          </button>
+
+          {/* Card 5: Thừa cân / Béo phì */}
+          <button
+            type="button"
+            aria-pressed={selectedStatus === "OVERWEIGHT"}
+            onClick={() => setSelectedStatus("OVERWEIGHT")}
+            className={`min-w-0 min-h-[132px] w-full bg-white p-5 rounded-2xl border transition cursor-pointer shadow-xs hover:shadow-md flex items-start justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 ${
+              selectedStatus === "OVERWEIGHT"
+                ? "border-rose-400 ring-2 ring-rose-500/15"
+                : "border-slate-200/80 hover:border-rose-200"
+            }`}
+          >
+            <div className="space-y-1 min-w-0">
+              <div className="text-xs font-bold text-rose-700">
+                {translateText("Thừa cân / Béo phì")}
+              </div>
+              <div className="text-2xl font-black text-rose-700 tracking-tight">
+                {overweightPercent}%
+              </div>
+              <div className="text-[11px] text-rose-600 font-semibold leading-relaxed">
+                {overweightCount} {translateText("trẻ vượt chuẩn")}
+              </div>
+            </div>
+            <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200/70 text-rose-600 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </button>
         </div>
       </div>
 
@@ -758,6 +811,38 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
             <option value="OVERWEIGHT">{translateText("Thừa cân (OVERWEIGHT)")}</option>
             <option value="OBESE">{translateText("Béo phì (OBESE)")}</option>
           </select>
+
+          <button
+            onClick={handleExportReport}
+            disabled={exporting}
+            className="px-3 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+            title={translateText("Xuất file Excel báo cáo thể lực học sinh")}
+          >
+            <Download className={`w-3.5 h-3.5 ${exporting ? "animate-bounce" : "text-slate-500"}`} />
+            <span>{translateText(exporting ? "Đang xuất..." : "Xuất Báo Cáo")}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setImportText("");
+              setImportResult(null);
+              setImportWarning(null);
+              setIsImportModalOpen(true);
+            }}
+            className="px-3 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+            title={translateText("Nhập hàng loạt số liệu cân đo từ bảng tính")}
+          >
+            <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
+            <span>{translateText("Nhập Excel / CSV")}</span>
+          </button>
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-3.5 py-2 rounded-2xl bg-lime-600 hover:bg-lime-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{translateText("Ghi Nhận Mới")}</span>
+          </button>
         </div>
       </div>
 
@@ -1421,10 +1506,7 @@ export const ChildGrowthMonitoringPage: React.FC = () => {
                       <Edit3 className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full uppercase tracking-wider">{translateText("UC-74")}</span>
-                        <h3 className="font-black text-slate-900 text-sm">{translateText("Cập Nhật Chỉ Số Chiều Cao & Cân Nặng")}</h3>
-                      </div>
+                      <h3 className="font-black text-slate-900 text-sm">{translateText("Cập Nhật Chỉ Số Chiều Cao & Cân Nặng")}</h3>
                       <p className="text-[11px] text-slate-400">{translateText("Chỉnh sửa số liệu đo khi có sai sót & tự động tính toán lại BMI, Z-score (WHO)")}</p>
                     </div>
                   </div>

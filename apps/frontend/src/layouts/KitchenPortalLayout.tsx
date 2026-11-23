@@ -116,7 +116,7 @@ export const KitchenPortalLayout: React.FC = () => {
     return () => document.removeEventListener("keydown", onEscape);
   }, []);
   return (
-    <div className="kitchen-portal">
+    <div className="kitchen-portal kitchen-role">
       {open && (
         <button
           className="kp-sidebar-backdrop"
@@ -178,12 +178,6 @@ export const KitchenPortalLayout: React.FC = () => {
             </div>
           ))}
         </nav>
-        <div className="kp-sidebar-footer">
-          <ShieldCheck size={18} />
-          <span>{translateText("Chuẩn bị chu đáo")}<br />
-            <b>{translateText("An toàn mỗi bữa ăn")}</b>
-          </span>
-        </div>
       </aside>
       <div className="kp-workspace">
         <header className="kp-topbar">

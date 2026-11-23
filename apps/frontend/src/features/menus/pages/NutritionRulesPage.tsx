@@ -258,57 +258,59 @@ export const NutritionRulesPage: React.FC = () => {
         : "/menu-evaluation",
     );
 
+  const standardDayboarding = rules.find((r) => r.mealScope === "DAYBOARDING") || rules[0];
+  const standardFullDay = rules.find((r) => r.mealScope === "FULL_DAY");
+
+  const minCaloDisplay = standardDayboarding
+    ? (standardDayboarding.minCaloriesKcal ?? (standardDayboarding as any).minEnergyKcal ?? 615)
+    : 615;
+  const maxCaloDisplay = standardFullDay
+    ? (standardFullDay.maxCaloriesKcal ?? (standardFullDay as any).maxEnergyKcal ?? 926)
+    : (standardDayboarding ? (standardDayboarding.maxCaloriesKcal ?? (standardDayboarding as any).maxEnergyKcal ?? 726) : 726);
+
   const kpiCards = [
     {
       label: "Quy Chuẩn Áp Dụng",
-      val: stats?.activeRulesCount ?? 0,
-      unit: "chuẩn",
-      sub: "Quy chuẩn Dinh dưỡng & Chuẩn trường",
+      val: stats?.activeRulesCount ?? (rules.length || 2),
+      unit: "cấu hình",
+      sub: "Cấu hình 1 (Tiêu chuẩn) & Cấu hình 2 (Ăn xế)",
       icon: Scale,
       iconCls: "bg-teal-50 text-teal-600",
       valCls: "text-slate-900",
       subCls: "text-teal-700",
     },
     {
-      label: "Tỷ Lệ Tuân Thủ",
-      val: `${stats?.complianceRatePercent ?? "—"}%`,
-      unit: "",
-      sub: "Đạt cân đối Calo & P:L:G",
+      label: "Năng Lượng Bán Trú",
+      val: `${minCaloDisplay} – ${maxCaloDisplay}`,
+      unit: "Kcal",
+      sub: "CH1: 615–726 Kcal · CH2 (Ăn xế): 765–926 Kcal",
       icon: ShieldCheck,
       iconCls: "bg-emerald-50 text-emerald-600",
-      valCls: "text-emerald-600",
+      valCls: "text-emerald-700",
       subCls: "text-emerald-700",
       dot: true,
     },
     {
-      label: "Cảnh Báo Vi Phạm",
-      val: stats?.nutritionWarningsCount ?? 0,
-      unit: "mục",
-      sub: "Cần BGH xem xét điều chỉnh",
-      icon: AlertTriangle,
-      iconCls: "bg-amber-50 text-amber-600",
-      valCls: "text-amber-600",
-      subCls: "text-amber-700",
+      label: "Định Mức Nước Tại Trường",
+      val: standardFullDay?.waterMlMax
+        ? `${standardDayboarding?.waterMlMin || 800} – ${standardFullDay.waterMlMax}`
+        : "800 – 1350",
+      unit: "ml",
+      sub: "CH1: 800–1100 ml · CH2 (Ăn xế): 1000–1350 ml",
+      icon: Droplets,
+      iconCls: "bg-cyan-50 text-cyan-600",
+      valCls: "text-cyan-700",
+      subCls: "text-cyan-700",
     },
     {
       label: "Trẻ Có Hồ Sơ Dị Ứng",
       val: stats?.allergicChildrenCount ?? 0,
       unit: "bé",
-      sub: "Theo dõi cách ly thực phẩm",
+      sub: "Tự động kiểm soát thực đơn riêng",
       icon: HeartPulse,
       iconCls: "bg-rose-50 text-rose-600",
       valCls: "text-rose-600",
       subCls: "text-rose-700",
-    },
-    {
-      label: "Danh Mục Dị Ứng",
-      val: stats?.configuredAllergensCount ?? "—",
-      unit: "nhóm",
-      sub: "Codex & BYT chuẩn hóa",
-      icon: Salad,
-      iconCls: "bg-indigo-50 text-indigo-600",
-      valCls: "text-indigo-600",
-      subCls: "text-indigo-700",
     },
   ];
 
@@ -353,112 +355,37 @@ export const NutritionRulesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">{translateText("BAN GIÁM HIỆU & HIỆU TRƯỞNG")}</span>
-            <span className="text-xs text-slate-400">{translateText("• Quy chuẩn Dinh dưỡng Mầm non")}</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">
-            {translateText("Tiêu chuẩn dinh dưỡng & Phân bổ bữa ăn")}
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">{translateText("Cấu hình tỷ lệ P-L-G, định mức nước, phân bổ năng lượng các bữa ăn theo quy chuẩn của Bộ GD&ĐT.")}</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={refreshAll}
-            className="p-2.5 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl shadow-xs transition"
-            title={translateText("Làm mới dữ liệu từ Database")}
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-
-          {activeTab === "STANDARDS" && (
-            rules.length === 0 ? (
-              <button
-                onClick={() => {
-                  setEditingRule(null);
-                  setIsRuleDrawerOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
-              >
-                <Plus className="w-4 h-4" /> <span>{translateText("Thêm Tiêu Chuẩn Mới")}</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setEditingRule(rules[0]);
-                  setIsRuleDrawerOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-teal-600/25 transition"
-              >
-                <Edit3 className="w-4 h-4" /> <span>{translateText("Chỉnh Sửa Tiêu Chuẩn")}</span>
-              </button>
-            )
-          )}
-
-          {activeTab === "ALLERGENS" && (
-            <button
-              onClick={() => {
-                setEditingAllergen(null);
-                setIsAllergenDrawerOpen(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-rose-600/25 transition"
-            >
-              <Plus className="w-4 h-4" /> <span>{translateText("Thêm Nhóm Chuẩn Codex")}</span>
-            </button>
-          )}
-
-          {activeTab === "SCANNER" && (
-            <button
-              onClick={handleTriggerScan}
-              disabled={isScanning}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-indigo-600/25 transition"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>
-                {translateText(isScanning
-                  ? "Đang Quét Rule Engine..."
-                  : "Quét Kiểm Tra Tự Động")}
-              </span>
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Top KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiCards.map((c) => (
             <div
               key={c.label}
-              className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition"
+              className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500">
                   {translateText(c.label)}
                 </span>
                 <div
-                  className={`w-9 h-9 rounded-2xl flex items-center justify-center ${c.iconCls}`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.iconCls}`}
                 >
                   <c.icon className="w-4 h-4" />
                 </div>
               </div>
-              <div className="mt-3">
+              <div className="mt-2">
                 <span
                   className={`text-2xl font-black tracking-tight ${c.valCls}`}
                 >
                   {translateText(c.val)}
                 </span>
                 {c.unit && (
-                  <span className="text-xs text-slate-400 font-medium ml-1">
+                  <span className="text-xs text-slate-500 font-semibold ml-1">
                     {translateText(c.unit)}
                   </span>
                 )}
               </div>
               <div
-                className={`mt-2 text-[11px] font-semibold flex items-center gap-1 ${c.subCls}`}
+                className={`mt-1.5 text-[11px] font-semibold flex items-center gap-1 ${c.subCls}`}
               >
                 {c.dot && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -469,142 +396,190 @@ export const NutritionRulesPage: React.FC = () => {
           ))}
       </div>
 
-      {/* Banner hướng dẫn chuyển nhanh sang Bảng Phân Bổ Theo Bữa */}
-      <div className="bg-gradient-to-r from-sky-50 via-teal-50 to-white border border-sky-200/90 rounded-3xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-sky-500/25">
-            <PieChart className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-slate-900 text-sm">
-                {translateText("Bảng Phân Bổ % Calo, Dinh Dưỡng & Nước Theo Từng Bữa Ăn Trong Ngày")}
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                {translateText("Dữ liệu thật Database")}
-              </span>
-            </div>
-            <p className="text-slate-600 text-xs mt-0.5">
-              {translateText("Định mức Sáng / Trưa / Chiều, năng lượng Calo, đạm P, béo L, đường G và nước uống (ml) theo Quy chuẩn Dinh dưỡng Mầm non.")}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setActiveTab("MEAL_DISTRIBUTION")}
-          className="px-4 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold shrink-0 shadow-md shadow-sky-600/25 transition flex items-center gap-1.5"
-        >
-          <span>{translateText("Mở Bảng Phân Bổ Bữa Ăn")}</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
-
       {/* Segmented Tab Bar */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-        {[
-          {
-            id: "STANDARDS" as const,
-            label: translateText("Tiêu Chuẩn Dinh Dưỡng (Quy chuẩn Dinh dưỡng)"),
-            count: rules.length,
-            icon: Scale,
-            activeCls: "bg-teal-600 text-white shadow-md shadow-teal-600/25",
-            badgeCls: "bg-teal-700 text-teal-100",
-          },
-          {
-            id: "MEAL_DISTRIBUTION" as const,
-            label: translateText("Phân Bổ Calo & Nước Theo Bữa"),
-            count: "BẢNG MỚI",
-            icon: PieChart,
-            activeCls: "bg-sky-600 text-white shadow-md shadow-sky-600/25",
-            badgeCls: "bg-amber-400 text-slate-900",
-          },
-          {
-            id: "ALLERGENS" as const,
-            label: translateText("Quy Tắc & Danh Mục Dị Ứng"),
-            count: allergens.length,
-            icon: ShieldAlert,
-            activeCls: "bg-rose-600 text-white shadow-md shadow-rose-600/25",
-            badgeCls: "bg-rose-700 text-rose-100",
-          },
-          {
-            id: "SCANNER" as const,
-            label: translateText("Bộ Quét & Kiểm Tra Thực Đơn (Rule Engine)"),
-            count: null,
-            icon: Sparkles,
-            activeCls:
-              "bg-indigo-600 text-white shadow-md shadow-indigo-600/25",
-            badgeCls: "",
-          },
-        ]
-          .filter(
-            (t) =>
-              location.pathname.startsWith("/nutritionist") ||
-              t.id === "STANDARDS" ||
-              t.id === "MEAL_DISTRIBUTION",
-          )
-          .map((t) => (
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/80 rounded-2xl p-3 shadow-2xs">
+        <div className="inline-flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+          {[
+            {
+              id: "STANDARDS" as const,
+              label: translateText("Tiêu chuẩn dinh dưỡng"),
+              count: rules.length,
+              icon: Scale,
+              activeCls: "bg-teal-600 text-white shadow-2xs",
+              badgeCls: "bg-teal-700 text-teal-100",
+            },
+            {
+              id: "MEAL_DISTRIBUTION" as const,
+              label: translateText("Phân bổ năng lượng & nước theo bữa"),
+              count: null,
+              icon: PieChart,
+              activeCls: "bg-teal-600 text-white shadow-2xs",
+              badgeCls: "",
+            },
+            {
+              id: "ALLERGENS" as const,
+              label: translateText("Quy tắc & Danh mục dị ứng"),
+              count: allergens.length,
+              icon: ShieldAlert,
+              activeCls: "bg-rose-600 text-white shadow-2xs",
+              badgeCls: "bg-rose-700 text-rose-100",
+            },
+            {
+              id: "SCANNER" as const,
+              label: translateText("Kiểm tra thực đơn"),
+              count: null,
+              icon: Sparkles,
+              activeCls: "bg-indigo-600 text-white shadow-2xs",
+              badgeCls: "",
+            },
+          ]
+            .filter(
+              (t) =>
+                location.pathname.startsWith("/nutritionist") ||
+                t.id === "STANDARDS" ||
+                t.id === "MEAL_DISTRIBUTION",
+            )
+            .map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTab(t.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  activeTab === t.id
+                    ? t.activeCls
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <t.icon className="w-3.5 h-3.5" />
+                <span>{translateText(t.label)}</span>
+                {t.count !== null && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                      activeTab === t.id ? t.badgeCls : "bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    {translateText(t.count)}
+                  </span>
+                )}
+              </button>
+            ))}
+        </div>
+
+        {activeTab === "STANDARDS" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={ruleSearch}
+                onChange={(e) => setRuleSearch(e.target.value)}
+                placeholder={translateText("Tìm quy chuẩn...")}
+                className="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+
             <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all ${
-                activeTab === t.id
-                  ? t.activeCls
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
+              type="button"
+              onClick={refreshAll}
+              className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl shadow-2xs transition cursor-pointer"
+              title={translateText("Làm mới dữ liệu")}
             >
-              <t.icon className="w-4 h-4" />
-              <span>{translateText(t.label)}</span>
-              {t.count !== null && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === t.id ? t.badgeCls : "bg-slate-200 text-slate-700"}`}
-                >
-                  {translateText(t.count)}
-                </span>
-              )}
+              <RefreshCw className="w-3.5 h-3.5" />
             </button>
-          ))}
+
+            <button
+              type="button"
+              onClick={() => {
+                setEditingRule(null);
+                setIsRuleDrawerOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl shadow-2xs transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{translateText("Thêm cấu hình quy chuẩn")}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* TAB 1: STANDARDS */}
       {activeTab === "STANDARDS" && (
         <div className="space-y-4">
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={ruleSearch}
-                onChange={(e) => setRuleSearch(e.target.value)}
-                placeholder={translateText("Tìm quy chuẩn theo tên hoặc nhóm tuổi...")}
-                className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:ring-2 focus:ring-teal-500"
-              />
+          {/* Banner Đề xuất & Vận hành 2 Cấu hình Thực đơn */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white border-2 border-teal-200/90 rounded-2xl p-4 shadow-2xs relative overflow-hidden">
+              <div className="flex items-center justify-between mb-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-teal-100 text-teal-800">
+                  {translateText("CẤU HÌNH 1 · BÁN TRÚ TIÊU CHUẨN")}
+                </span>
+                <span className="text-[11px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-200">
+                  {translateText("3 bữa cơ bản")}
+                </span>
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900 mb-1">
+                {translateText("Quy chuẩn Bán trú Tiêu chuẩn (Không ăn xế)")}
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                {translateText("Áp dụng cho học sinh bán trú thông thường (chưa đăng ký ăn xế). Gồm 3 bữa tại trường:")}{" "}
+                <strong className="text-slate-800">{translateText("Buổi sáng (09:00), Bữa trưa chính (11:00), Buổi phụ (14:30)")}</strong>.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-700 pt-2 border-t border-slate-100">
+                <span className="text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-200">
+                  🔥 615 – 726 Kcal (50 – 55%)
+                </span>
+                <span className="text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-lg border border-cyan-200">
+                  💧 800 – 1.100 ml
+                </span>
+                <span className="text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg">
+                  P: 13-20% · L: 25-35% · G: 52-60%
+                </span>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5">
-              <select
-                value={ruleAgeFilter}
-                onChange={(e) => setRuleAgeFilter(e.target.value)}
-                className="px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
-              >
-                <option value="">{translateText("Mẫu giáo (3 - 6 tuổi)")}</option>
-                <option value="MAU_GIAO">{translateText("Mẫu giáo (3 - 6 tuổi) - Chuẩn chung")}</option>
-              </select>
+            <div className="bg-white border-2 border-amber-300/90 rounded-2xl p-4 shadow-2xs relative overflow-hidden bg-gradient-to-br from-white via-amber-50/20 to-orange-50/20">
+              <div className="flex items-center justify-between mb-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-100 text-amber-900">
+                  {translateText("CẤU HÌNH 2 · BÁN TRÚ TOÀN DIỆN")}
+                </span>
+                <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+                  {translateText("Có ăn xế chiều · 4 bữa")}
+                </span>
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900 mb-1">
+                {translateText("Quy chuẩn Bán trú Toàn diện (Có ăn xế chiều 17:00)")}
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                {translateText("Khi trẻ đóng tiền ăn xế bên Cổng phụ huynh, món ăn Buổi xế chiều (17:00: súp, cháo, bún, nui)")}{" "}
+                <strong className="text-amber-900">{translateText("sẽ tự động được tính vào Cấu hình thứ 2 này")}</strong>{" "}
+                {translateText("để đánh giá sức ăn & tổng calo cả ngày.")}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-700 pt-2 border-t border-amber-100">
+                <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+                  🔥 765 – 926 Kcal (60 – 70%)
+                </span>
+                <span className="text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-lg border border-cyan-200">
+                  💧 1.000 – 1.350 ml
+                </span>
+                <span className="text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded-lg">
+                  +150–200 Kcal món ăn xế
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
+          <div className="bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3.5 px-5">{translateText("Tên Quy Chuẩn")}</th>
-                    <th className="py-3.5 px-4">{translateText("Nhóm Tuổi")}</th>
-                    <th className="py-3.5 px-4">{translateText("Năng Lượng (Kcal)")}</th>
-                    <th className="py-3.5 px-4">{translateText("Cơ Cấu P : L : G (%)")}</th>
-                    <th className="py-3.5 px-4">{translateText("Nhu Cầu Nước (ml)")}</th>
-                    <th className="py-3.5 px-4">{translateText("Vi Chất Canxi / Ca:P")}</th>
-                    <th className="py-3.5 px-4">{translateText("Phân Loại")}</th>
-                    <th className="py-3.5 px-5 text-right">{translateText("Thao Tác")}</th>
+                  <tr className="border-b border-teal-700 bg-teal-600 text-[11px] font-bold text-white uppercase tracking-wider">
+                    <th className="py-3.5 px-5">{translateText("Tên quy chuẩn / Cấu hình")}</th>
+                    <th className="py-3.5 px-4">{translateText("Nhóm tuổi")}</th>
+                    <th className="py-3.5 px-4">{translateText("Năng lượng")}</th>
+                    <th className="py-3.5 px-4">{translateText("Cơ cấu Đạm · Béo · Bột đường")}</th>
+                    <th className="py-3.5 px-4">{translateText("Nhu cầu nước")}</th>
+                    <th className="py-3.5 px-4">{translateText("Vi chất Canxi")}</th>
+                    <th className="py-3.5 px-4">{translateText("Trạng thái")}</th>
+                    <th className="py-3.5 px-5 text-right">{translateText("Thao tác")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -619,11 +594,20 @@ export const NutritionRulesPage: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    rules.map((item) => {
+                    [...rules]
+                      .sort((a, b) => {
+                        if (a.mealScope === "DAYBOARDING" && b.mealScope !== "DAYBOARDING") return -1;
+                        if (a.mealScope !== "DAYBOARDING" && b.mealScope === "DAYBOARDING") return 1;
+                        return 0;
+                      })
+                      .map((item) => {
                       const isDeleted = item.isDeleted;
-                      const isToddler = ["TODDLER_18_36M", "NHA_TRE"].includes(
-                        item.targetAgeGroup || (item as any).ageGroup,
-                      );
+                      const isFullDayConfig = item.mealScope === "FULL_DAY";
+                      const configPrefix = isFullDayConfig ? "Cấu hình 2: " : "Cấu hình 1: ";
+                      const displayName = item.name.startsWith("Cấu hình")
+                        ? item.name
+                        : `${configPrefix}${item.name}`;
+
                       return (
                         <tr
                           key={item.id}
@@ -632,26 +616,33 @@ export const NutritionRulesPage: React.FC = () => {
                           <td className="py-3.5 px-5">
                             <div className="flex items-center gap-2.5">
                               <div
-                                className={`w-8 h-8 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs ${item.isSystemRule ? "bg-amber-100 text-amber-800" : "bg-teal-100 text-teal-800"}`}
+                                className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs ${
+                                  isFullDayConfig
+                                    ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                    : "bg-teal-100 text-teal-800 border border-teal-200"
+                                }`}
                               >
-                                {translateText(item.isSystemRule ? "BGD" : "TRƯỜNG")}
+                                {isFullDayConfig ? "CH 2" : "CH 1"}
                               </div>
                               <div>
                                 <span className="font-bold text-slate-900 block">
-                                  {item.name ||
-                                    `Quy chuẩn Chuẩn Dinh Dưỡng (${item.targetAgeGroup})`}
+                                  {displayName}
                                 </span>
-                                <span className="text-[11px] text-slate-400">{translateText("Phạm vi:")}{" "}
-                                  {translateText("Bán trú tại trường (50-70% Calo)")}
+                                <span className="text-[11px] text-slate-500">
+                                  {translateText(
+                                    isFullDayConfig
+                                      ? "Phạm vi: Bán trú toàn diện (4 bữa) · 60–70% năng lượng · Tự động tính món ăn xế (17:00) khi trẻ đóng tiền"
+                                      : "Phạm vi: Bán trú tiêu chuẩn (3 bữa) · 50–55% năng lượng · Áp dụng khi chưa đăng ký ăn xế"
+                                  )}
                                 </span>
                               </div>
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700">
                               {translateText(item.targetAgeGroup === "ALL_AGES"
                                 ? "Mọi lứa tuổi"
-                                : "Mẫu giáo (3-6 tuổi)")}
+                                : "Mẫu giáo")}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-bold text-slate-800">
@@ -697,8 +688,10 @@ export const NutritionRulesPage: React.FC = () => {
                             {isDeleted ? (
                               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                                 <Archive className="w-3 h-3" />{translateText(" Đã xóa mềm")}</span>
+                            ) : isFullDayConfig ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">{translateText("Chuẩn Ăn Xế (Đã đóng tiền)")}</span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">{translateText("Chuẩn Áp Dụng")}</span>
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">{translateText("Chuẩn Tiêu Chuẩn (Không ăn xế)")}</span>
                             )}
                           </td>
                           <td className="py-3.5 px-5 text-right">
@@ -743,17 +736,13 @@ export const NutritionRulesPage: React.FC = () => {
       {/* TAB 3: RULE ENGINE SCANNER */}
       {activeTab === "SCANNER" && (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-teal-800 text-white p-6 rounded-3xl shadow-lg">
-            <div className="max-w-2xl space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" />{translateText(" Hệ Thống Kiểm Duyệt Tự Động KidMeal Rule Engine")}</span>
-              <h2 className="text-xl font-black">{translateText("Quét & Thẩm Định Thực Đơn Theo Thông Tư 28 và Hồ Sơ Dị Ứng")}</h2>
-              <p className="text-xs text-indigo-200 leading-relaxed">{translateText("Tự động rà soát vi chất, năng lượng Calo, cơ cấu P:L:G, đối chiếu trực tiếp danh sách nguyên liệu thực đơn với cơ sở dữ liệu trẻ dị ứng toàn trường để phát hiện nguy cơ phản vệ.")}</p>
-              <div className="pt-2">
-                <button
+          <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-slate-900">{translateText("Quét thực đơn và dị ứng")}</h2>
+            <div>
+              <button
                   onClick={handleTriggerScan}
                   disabled={isScanning}
-                  className="px-5 py-2.5 rounded-2xl bg-teal-400 hover:bg-teal-300 text-slate-900 font-extrabold text-xs shadow-md transition flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition flex items-center gap-2"
                 >
                   <Play className="w-4 h-4 fill-current" />
                   <span>
@@ -761,8 +750,7 @@ export const NutritionRulesPage: React.FC = () => {
                       ? "Đang Phân Tích Thực Đơn..."
                       : "Bắt Đầu Quét Thực Đơn Tuần Hiện Tại")}
                   </span>
-                </button>
-              </div>
+              </button>
             </div>
           </div>
 

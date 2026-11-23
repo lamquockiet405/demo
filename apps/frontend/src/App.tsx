@@ -66,7 +66,6 @@ import {
   NutritionOverviewPage,
   NutritionAlertsPage,
 } from "./features/nutrition/pages/NutritionOverviewPage";
-import { NutritionReportsPage } from "./features/nutrition/pages/NutritionReportsPage";
 
 import { ProtectedRoute } from "./core/components/ProtectedRoute";
 import { useAuthStore } from "./core/stores/auth.store";
@@ -365,11 +364,11 @@ export const App: React.FC = () => {
           <Route path="/audit-logs" element={<AuditLogsPage />} />
           <Route
             path="/parent-evaluation-report"
-            element={<NutritionReportsPage kind="evaluations" />}
+            element={<Navigate to="/services" replace />}
           />
           <Route
             path="/parent-evaluations"
-            element={<NutritionReportsPage kind="evaluations" />}
+            element={<Navigate to="/services" replace />}
           />
           <Route
             path="/children"

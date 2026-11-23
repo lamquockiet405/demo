@@ -40,13 +40,13 @@ export interface ParentEvaluationItem {
 
 export interface ParentEvaluationSummaryStats {
   totalCount: number;
-  avgRating: number;
-  positiveRate: number;
+  avgRating: number | null;
+  positiveRate: number | null;
   pendingCount: number;
   respondedCount: number;
   photosCount: number;
   pendingClassesCount: number;
-  avgResponseTime: string;
+  avgResponseTime: string | null;
 }
 
 export interface ParentEvaluationResponse {
@@ -224,6 +224,19 @@ export interface MealSessionRecord {
   reactionDescription?: string;
   teacherFeedback?: string;
   photoEvidenceUrl?: string;
+  mealCalories?: number;
+  eatenCalories?: number;
+}
+
+export interface WeeklyConsumptionSession {
+  mealType: string;
+  mealLabel: string;
+  isRecorded: boolean;
+  isAttended: boolean;
+  consumptionLevel: string | null;
+  consumptionLabel: string;
+  percentage: number | null;
+  note: string;
 }
 
 export interface WeeklyConsumptionItem {
@@ -232,12 +245,16 @@ export interface WeeklyConsumptionItem {
   dateFormatted: string;
   dishes: string;
   badgeText: string;
-  percentage: number;
+  percentage: number | null;
+  isAllSessionsDone?: boolean;
+  recordedSessionsCount?: number;
+  totalSessionsCount?: number;
   portionLabel: string;
   waterIntake: string;
   teacherFeedback: string;
   photoUrl?: string;
   status: string;
+  sessions?: WeeklyConsumptionSession[];
 }
 
 export interface ChildMenuConsumptionData {

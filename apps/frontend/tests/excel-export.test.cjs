@@ -20,6 +20,7 @@ function loadTypeScript(relative, stubs = {}) {
   return loaded.exports;
 }
 const core = loadTypeScript('core/utils/excel-workbook.ts');
+const studentImport = loadTypeScript('features/school/utils/student-import.ts');
 const exporter = loadTypeScript('core/utils/excel-export.ts', {
   '../api/tenant.api': { tenantApi: { getProfile: async () => ({ name: 'Trường kiểm thử', branding: { logoUrl: 'https://school.example/logo.png' } }) } },
   '../i18n/language': { t: text => text },
@@ -78,6 +79,30 @@ test('branded student template round-trips through the existing SheetJS importer
   assert.equal(imported[0]['Họ và tên (*)'], 'Nguyễn "An", Bình');
   assert.equal(imported[0]['Ngày sinh (*)'], '12/04/2021');
   assert.equal(core.studentHeaderRow([fixture.sheets[0].rows[0]]), 0);
+});
+
+test('student template dates import as valid birthdays from Excel cells', async () => {
+  const workbook = await core.buildExcelWorkbook({ ...fixture, sheets: [{ name: 'Học sinh', rows: [
+    ['Họ và tên (*)', 'Ngày sinh (YYYY-MM-DD) (*)', 'Giới tính (Nam/Nữ) (*)', 'Mã lớp (*)'],
+    ['Nguyễn Hoàng Khang', '2021-04-12', 'Nam', 7],
+  ] }] });
+  const saved = XLSX.read(await workbook.xlsx.writeBuffer(), { type: 'buffer', cellDates: false });
+  const sheet = saved.Sheets[saved.SheetNames[0]];
+  const headerRow = core.studentHeaderRow(XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }));
+  const rows = XLSX.utils.sheet_to_json(sheet, { range: headerRow, raw: true, defval: '' });
+  const imported = studentImport.validateStudentRows(rows, ['7'], '2026-11-22', headerRow + 2);
+  assert.equal(imported[0].dateOfBirth, '2021-04-12');
+  assert.equal(imported[0].classId, 7);
+});
+
+test('student import accepts Excel serial and text dates but rejects invalid and future dates', () => {
+  const serial = (Date.UTC(2022, 7, 25) - Date.UTC(1899, 11, 30)) / 86400000;
+  const row = dateOfBirth => ({ fullName: 'Bùi Gia Kiệt', dateOfBirth, gender: 'Nam', classId: 7 });
+  for (const value of [serial, new Date('2022-08-25T00:00:00Z'), '25/08/2022', '2022-8-25']) {
+    assert.equal(studentImport.validateStudentRows([row(value)], ['7'], '2026-11-22')[0].dateOfBirth, '2022-08-25');
+  }
+  assert.throws(() => studentImport.validateStudentRows([row('31/02/2022')], ['7'], '2026-11-22', 10), /Dòng 10: Ngày sinh/);
+  assert.throws(() => studentImport.validateStudentRows([row('2027-01-01')], ['7'], '2026-11-22'), /không ở tương lai/);
 });
 
 test('keeps all data from structured reports, including heterogeneous and nested records', () => {

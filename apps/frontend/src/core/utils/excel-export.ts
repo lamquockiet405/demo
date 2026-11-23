@@ -80,6 +80,158 @@ export function downloadExcel(filename: string, rows: unknown[][], title?: strin
   return downloadExcelSheets(filename, title || inferred || filename.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '), [{ rows }]);
 }
 
+export interface WeeklyMenuExportWeek {
+  title: string;
+  dateRange: string;
+  ageGroupLabel: string;
+  days: {
+    day: string;
+    weekdayLabel: string;
+    dateLabel: string;
+  }[];
+  rows: {
+    mealLabel: string;
+    bgColor: string;
+    cells: string[];
+  }[];
+}
+
+export async function downloadWeeklyMenusMatrixExcel(
+  filename: string,
+  weeks: WeeklyMenuExportWeek[],
+): Promise<boolean> {
+  const name = excelFilename(filename);
+  if (exporting.has(name) || !weeks.length) return false;
+  exporting.add(name);
+  try {
+    const branding = await schoolBranding();
+    let logo: { base64: string; width: number; height: number } | undefined;
+    try {
+      if (branding.logoUrl) logo = await schoolLogo(branding.logoUrl);
+    } catch {
+      logo = undefined;
+    }
+
+    const ExcelJS = await import('exceljs');
+    const workbook = new (ExcelJS.default?.Workbook || ExcelJS.Workbook)();
+    workbook.creator = branding.name;
+    workbook.created = new Date();
+    workbook.title = weeks.length === 1 ? weeks[0].title : `Thực đơn ${weeks.length} tuần`;
+
+    let logoId: number | undefined;
+    if (logo) {
+      logoId = workbook.addImage({ base64: logo.base64, extension: 'png' });
+    }
+
+    const headerColors = ['FF538DD5', 'FF76933C', 'FFFABF8F', 'FF92CDDC', 'FF8064A2', 'FF4BACC6', 'FFF79646'];
+    const borderStyle = {
+      top: { style: 'thin' as const, color: { argb: 'FF334155' } },
+      left: { style: 'thin' as const, color: { argb: 'FF334155' } },
+      bottom: { style: 'thin' as const, color: { argb: 'FF334155' } },
+      right: { style: 'thin' as const, color: { argb: 'FF334155' } },
+    };
+
+    weeks.forEach((week, weekIdx) => {
+      const sheetTitle = `Tuần ${weekIdx + 1} (${week.dateRange.slice(0, 10)})`.replace(/[\\/?*\[\]:]/g, '-').slice(0, 31);
+      const sheet = workbook.addWorksheet(sheetTitle);
+      sheet.pageSetup = { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 1 };
+
+      // Column widths
+      sheet.getColumn(1).width = 20;
+      week.days.forEach((_, idx) => {
+        sheet.getColumn(idx + 2).width = 28;
+      });
+
+      // School branding header rows
+      if (logoId !== undefined) {
+        sheet.addImage(logoId, { tl: { col: 0.1, row: 0.1 }, ext: { width: 58, height: 58 } });
+      }
+      const totalCols = Math.max(2, week.days.length + 1);
+      sheet.mergeCells(1, 2, 1, totalCols);
+      sheet.mergeCells(2, 2, 2, totalCols);
+      sheet.mergeCells(3, 2, 3, totalCols);
+
+      const schoolCell = sheet.getCell(1, 2);
+      schoolCell.value = branding.name.toUpperCase();
+      schoolCell.font = { name: 'Segoe UI', size: 14, bold: true, color: { argb: 'FF0F172A' } };
+      schoolCell.alignment = { vertical: 'middle', horizontal: 'left' };
+      sheet.getRow(1).height = 24;
+
+      const contactCell = sheet.getCell(2, 2);
+      contactCell.value = [branding.address, branding.phone ? `ĐT: ${branding.phone}` : ''].filter(Boolean).join(' · ');
+      contactCell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF475569' } };
+      contactCell.alignment = { vertical: 'middle', horizontal: 'left' };
+      sheet.getRow(2).height = 18;
+
+      const titleCell = sheet.getCell(3, 2);
+      titleCell.value = `${week.title} (${week.dateRange}) · ${week.ageGroupLabel}`;
+      titleCell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFBE123C' } };
+      titleCell.alignment = { vertical: 'middle', horizontal: 'left' };
+      sheet.getRow(3).height = 22;
+
+      sheet.getRow(4).height = 8;
+
+      // Matrix Header Row (Row 5)
+      const headerRow = sheet.getRow(5);
+      headerRow.height = 36;
+      const firstHeader = headerRow.getCell(1);
+      firstHeader.value = 'Thứ\nBữa';
+      firstHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD99694' } };
+      firstHeader.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FF000000' } };
+      firstHeader.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      firstHeader.border = borderStyle;
+
+      week.days.forEach((d, dIdx) => {
+        const cell = headerRow.getCell(dIdx + 2);
+        cell.value = `${d.weekdayLabel}\n${d.dateLabel}`;
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: headerColors[dIdx % headerColors.length] } };
+        cell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FF000000' } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        cell.border = borderStyle;
+      });
+
+      // Meal Rows
+      week.rows.forEach((rowData, rIdx) => {
+        const row = sheet.getRow(6 + rIdx);
+        const mealCell = row.getCell(1);
+        mealCell.value = rowData.mealLabel;
+        mealCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowData.bgColor } };
+        mealCell.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FF000000' } };
+        mealCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        mealCell.border = borderStyle;
+
+        let maxLines = 2;
+        rowData.cells.forEach((text, cIdx) => {
+          const cell = row.getCell(cIdx + 2);
+          cell.value = text || '—';
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF0F172A' } };
+          cell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
+          cell.border = borderStyle;
+          const lines = (text || '').split('\n').reduce((acc, line) => acc + Math.max(1, Math.ceil(line.length / 26)), 0);
+          if (lines > maxLines) maxLines = lines;
+        });
+        row.height = Math.max(38, maxLines * 16 + 12);
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const url = URL.createObjectURL(new Blob([buffer as BlobPart], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    return true;
+  } catch (error) {
+    alert(t(error instanceof Error ? error.message : 'Không thể xuất Excel. Vui lòng thử lại.'));
+    return false;
+  } finally {
+    exporting.delete(name);
+  }
+}
+
 const labels: Record<string, string> = {
   schoolName: 'Tên trường', title: 'Tiêu đề', date: 'Ngày', month: 'Tháng', year: 'Năm', name: 'Tên', fullName: 'Họ và tên',
   studentName: 'Học sinh', childName: 'Học sinh', studentCode: 'Mã học sinh', className: 'Lớp', classId: 'Mã lớp',

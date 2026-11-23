@@ -22,7 +22,7 @@ export const SnackRosterSummaryCards: React.FC<
   const specialCount = stats?.specialDietPortions ?? 8;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 15rem), 1fr))' }}>
       {/* Card 1: Tổng học sinh ăn xế */}
       <div className="bg-[#f0f9f4] border border-[#d2edd9] rounded-2xl p-5 shadow-sm relative overflow-hidden transition hover:shadow-md">
         <div className="flex items-start justify-between">

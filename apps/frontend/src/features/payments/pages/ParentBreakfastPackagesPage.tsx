@@ -230,50 +230,28 @@ export const ParentBreakfastPackagesPage: React.FC = () => {
       {/* Header Parent Portal */}
       <ParentPortalTopNav activeTab="snacks" />
 
-      {/* Hero Banner Section */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 text-white py-10 px-4 sm:px-6 lg:px-8 shadow-md">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-900/60 border border-teal-500/40 text-teal-200 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-              <Coffee className="w-3.5 h-3.5 text-amber-300" />
-              Dịch Vụ Dinh Dưỡng Bữa Sáng (07:15 – 08:00)
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Đăng Ký & Mua Gói Ăn Sáng Dinh Dưỡng Cho Bé
-            </h1>
-            <p className="text-teal-100 text-sm max-w-2xl leading-relaxed">
-              Khởi đầu ngày mới tràn đầy năng lượng với thực đơn cháo súp hầm xương bổ dưỡng, phở gà ta mầm non và sữa hạt hữu cơ đạt chuẩn Bộ GD&ĐT. Thanh toán an toàn, minh bạch qua VNPAY QR.
-            </p>
-          </div>
-
-          {/* Student Selector Card */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:p-5 w-full md:w-80 shadow-lg text-white">
-            <span className="text-xs font-bold uppercase text-teal-200 tracking-wider flex items-center gap-1.5 mb-2">
-              <Baby className="w-4 h-4 text-amber-300" /> Chọn học sinh nhận suất ăn
-            </span>
+      {/* Student Selector Toolbar */}
+      {students.length > 1 && (
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-4 flex justify-end">
+          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-2xs">
+            <Baby className="w-4 h-4 text-rose-500" />
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(Number(e.target.value))}
-              className="w-full bg-teal-950/80 border border-teal-400/50 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="text-xs font-bold text-slate-800 bg-transparent outline-none cursor-pointer"
             >
               {students.map((stu) => (
-                <option key={stu.id} value={stu.id} className="bg-slate-900 text-white font-medium">
+                <option key={stu.id} value={stu.id}>
                   {stu.fullName} ({stu.studentCode || `HS-${stu.id}`}) — {stu.class?.name || 'Mầm'}
                 </option>
               ))}
             </select>
-            {currentStudent && (
-              <div className="mt-2.5 text-xs text-teal-200 flex items-center justify-between pt-2 border-t border-white/10">
-                <span>Lớp: <strong className="text-white">{currentStudent.class?.name || 'Mầm 1'}</strong></span>
-                <span>Mã số: <strong className="text-amber-300">{currentStudent.studentCode || `HS-${currentStudent.id}`}</strong></span>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content Area */}
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1">
+      <main className="w-full w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1">
         {/* Success Alert */}
         {successNotice && (
           <div className="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-4 text-emerald-900 flex items-start justify-between gap-3 shadow-md animate-fade-in">

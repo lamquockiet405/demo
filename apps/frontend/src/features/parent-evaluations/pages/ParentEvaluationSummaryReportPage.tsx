@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import {
   parentEvaluationSummaryApi,
   ParentEvaluationSummaryReport,
@@ -180,6 +181,24 @@ export const ParentEvaluationSummaryReportPage: React.FC = () => {
     }
   };
 
+  const handleDownloadExcel = async () => {
+    if (!report) return alert('Chưa có dữ liệu báo cáo để tải Excel');
+    await downloadExcel(
+      `Bao_cao_danh_gia_phu_huynh_T${month}_${year}.xlsx`,
+      [
+        ['Chỉ số đánh giá', 'Kết quả'],
+        ['Kỳ báo cáo', `Tháng ${month}/${year}`],
+        ['Điểm CSAT Tổng thể', `${report.overallCsat.averageRating} / 5.0 ⭐`],
+        ['Tỷ lệ hài lòng tích cực', `${report.overallCsat.positiveRate}%`],
+        ['Số phụ huynh tham gia', `${report.overallCsat.respondingParentsCount} phụ huynh (${report.overallCsat.participationRate}%)`],
+        ['Hiệu suất cam kết SLA', `${report.slaPerformance.responseRate}% (TB ${report.slaPerformance.averageResponseHours} giờ)`],
+        ['Tổng phản hồi cần xử lý', report.slaPerformance.totalFeedbacks],
+        ['Phản hồi xử lý quá hạn', report.slaPerformance.overdueCount],
+      ],
+      `Báo cáo đánh giá T${month}_${year}`
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 font-sans">
       {/* Toast Notification */}
@@ -190,52 +209,9 @@ export const ParentEvaluationSummaryReportPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header Container */}
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-full border border-amber-200 flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> UC97 – CSAT & FEEDBACK REPORT
-              </span>
-              <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
-                100% Real PostgreSQL Data
-              </span>
-            </div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">
-              Báo Cáo Tổng Hợp Đánh Giá Của Phụ Huynh & Chỉ Số CSAT
-            </h1>
-            <p className="text-sm text-slate-500">
-              Thước đo mức độ hài lòng khách hàng, quản trị khủng hoảng truyền thông học đường & cải tiến công thức chế biến
-            </p>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={() => handleOpenAddRecipeModal()}
-              className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition"
-            >
-              <ChefHat className="w-4 h-4" /> Sổ tay Bếp trưởng ({report?.recipeImprovements.length || 0})
-            </button>
-            <button
-              onClick={handleExport}
-              className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Xuất Báo Cáo
-            </button>
-            <button
-              onClick={fetchReport}
-              disabled={isLoading}
-              className="p-2 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-600 transition"
-              title="Tải lại dữ liệu"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
-
-        {/* Filter Bar & Role View Switcher */}
+      {/* Action Toolbar */}
+      <div className="w-full">
+        {/* Filter Bar, Actions & Role View Switcher */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
           {/* Month / Year / Grade Filters */}
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -273,53 +249,60 @@ export const ParentEvaluationSummaryReportPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Role Perspective Switcher */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 w-full lg:w-auto justify-center">
+          {/* Action buttons & Role Switcher */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                onClick={() => setActiveRoleView('SCHOOL_MANAGER')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                  activeRoleView === 'SCHOOL_MANAGER'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                <Building className="w-3.5 h-3.5 text-amber-600" /> BGH
+              </button>
+              <button
+                onClick={() => setActiveRoleView('NUTRITIONIST')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                  activeRoleView === 'NUTRITIONIST'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                <ChefHat className="w-3.5 h-3.5 text-emerald-600" /> Dinh dưỡng
+              </button>
+            </div>
+
             <button
-              onClick={() => setActiveRoleView('SCHOOL_MANAGER')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                activeRoleView === 'SCHOOL_MANAGER'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
+              onClick={() => handleOpenAddRecipeModal()}
+              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
             >
-              <Building className="w-3.5 h-3.5 text-amber-600" /> Góc nhìn School Manager (BGH)
+              <ChefHat className="w-3.5 h-3.5" /> Sổ tay Bếp trưởng ({report?.recipeImprovements.length || 0})
             </button>
             <button
-              onClick={() => setActiveRoleView('NUTRITIONIST')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                activeRoleView === 'NUTRITIONIST'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
+              onClick={handleExport}
+              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
             >
-              <ChefHat className="w-3.5 h-3.5 text-emerald-600" /> Góc nhìn Nutritionist (Dinh dưỡng)
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" /> Xuất Báo Cáo
+            </button>
+            <button
+              onClick={handleDownloadExcel}
+              className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
+              title="Tải nhanh dữ liệu đánh giá ra Excel"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" /> Xuất Excel
+            </button>
+            <button
+              onClick={fetchReport}
+              disabled={isLoading}
+              className="p-1.5 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-600 transition cursor-pointer"
+              title="Tải lại dữ liệu"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
-
-        {/* Role Highlight Banner */}
-        {activeRoleView === 'SCHOOL_MANAGER' ? (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1 text-xs text-amber-950">
-              <span className="font-bold text-sm text-amber-900">Nhiệm vụ trọng tâm của Ban Giám Hiệu:</span>
-              <p>
-                Giám sát chỉ số CSAT chung toàn trường và thi đua khối lớp; trực tiếp chỉ đạo xử lý các đánh giá 1-2 sao hoặc khiếu nại gay gắt liên quan đến vệ sinh/an toàn trong vòng <strong>4 giờ làm việc</strong> trước khi phụ huynh đưa lên mạng xã hội.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1 text-xs text-emerald-950">
-              <span className="font-bold text-sm text-emerald-900">Nhiệm vụ trọng tâm của Chuyên viên Dinh dưỡng:</span>
-              <p>
-                Phân tích cảm quan vị giác, độ mềm nhai nuốt, tình trạng tiêu hóa (đầy hơi, dị ứng); soạn thảo câu trả lời chuyên môn khoa học gửi phụ huynh và đưa các món bị chê vào <strong>Sổ tay cải tiến công thức nấu của Bếp trưởng</strong>.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* ─── BLOCK 1: OVERALL CSAT & SENTIMENT CARDS ─── */}
         {report && (
@@ -1078,6 +1061,12 @@ export const ParentEvaluationSummaryReportPage: React.FC = () => {
             </div>
 
             <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3">
+              <button
+                onClick={handleDownloadExcel}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
+              >
+                <FileSpreadsheet className="w-4 h-4" /> Tải file Excel (.xlsx)
+              </button>
               <button
                 onClick={() => window.print()}
                 className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition"

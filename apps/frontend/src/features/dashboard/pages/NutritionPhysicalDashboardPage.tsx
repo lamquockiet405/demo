@@ -206,7 +206,7 @@ export const NutritionPhysicalDashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+    <div className="w-full space-y-8 font-sans">
       {/* Toast Notification */}
       {feedbackToast && (
         <div
@@ -221,51 +221,46 @@ export const NutritionPhysicalDashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* Top Banner & Dual-View Role Switcher */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>UC92 – Trung Tâm Chỉ Huy Dinh Dưỡng & Thể Trạng Thể Chất</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Executive & Clinical Nutrition Command Center
+      {/* Top Header & Dual-View Role Switcher */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-200">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Trung Tâm Chỉ Huy Dinh Dưỡng & Thể Trạng Thể Chất
             </h1>
-            <p className="text-slate-300 text-sm max-w-2xl leading-relaxed">
-              Tích hợp 2 trục dữ liệu lớn: Nhân trắc học đối chiếu chuẩn tăng trưởng{' '}
-              <strong className="text-emerald-300 font-semibold">WHO Z-score</strong> và Đảm bảo khẩu phần bữa ăn bán trú theo quy chuẩn{' '}
-              <strong className="text-emerald-300 font-semibold">Thông tư 28/2016/TT-BGDĐT</strong>.
-            </p>
+            <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full uppercase">
+              WHO Z-Score & TT 28/2016
+            </span>
           </div>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Tích hợp nhân trắc học đối chiếu chuẩn tăng trưởng WHO và kiểm soát bữa ăn theo Thông tư 28/2016/TT-BGDĐT.
+          </p>
+        </div>
 
-          {/* DUAL-VIEW SWITCHER BUTTONS */}
-          <div className="bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700/80 flex items-center self-start md:self-auto shrink-0 shadow-inner">
-            <button
-              onClick={() => setActiveRoleView('SCHOOL_MANAGER')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeRoleView === 'SCHOOL_MANAGER'
-                  ? 'bg-emerald-500 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <Building2 className="w-4 h-4" />
-              <span>Góc nhìn Ban Giám Hiệu</span>
-            </button>
-            <button
-              onClick={() => setActiveRoleView('NUTRITIONIST')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeRoleView === 'NUTRITIONIST'
-                  ? 'bg-emerald-500 text-white shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
-            >
-              <UtensilsCrossed className="w-4 h-4" />
-              <span>Góc nhìn Chuyên Viên DD</span>
-            </button>
-          </div>
+        {/* DUAL-VIEW SWITCHER BUTTONS */}
+        <div className="bg-slate-100 p-1 rounded-2xl border border-slate-200 flex items-center self-start md:self-auto shrink-0">
+          <button
+            onClick={() => setActiveRoleView('SCHOOL_MANAGER')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeRoleView === 'SCHOOL_MANAGER'
+                ? 'bg-white text-emerald-800 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Góc nhìn BGH</span>
+          </button>
+          <button
+            onClick={() => setActiveRoleView('NUTRITIONIST')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeRoleView === 'NUTRITIONIST'
+                ? 'bg-white text-emerald-800 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
+          >
+            <UtensilsCrossed className="w-3.5 h-3.5" />
+            <span>Góc nhìn Chuyên Viên DD</span>
+          </button>
         </div>
       </div>
 
@@ -276,26 +271,17 @@ export const NutritionPhysicalDashboardPage: React.FC = () => {
         <div className="space-y-8 animate-fadeIn">
           {/* Executive KPI Summary Cards */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-emerald-600" />
-                  <span>Chỉ Số Trọng Yếu Năm Học (Executive Growth KPIs)</span>
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Đối chiếu chỉ tiêu Bộ GD&ĐT & Viện Dinh Dưỡng Quốc Gia ({smData.kpis.evaluatedStudents}/{smData.kpis.totalStudents} học sinh đã kiểm tra)
-                </p>
-              </div>
-              <button
-                onClick={handleExportReport}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-xs"
-              >
-                <Download className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Xuất Báo Cáo PGD&ĐT</span>
-              </button>
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Award className="w-5 h-5 text-emerald-600" />
+                <span>Chỉ Số Trọng Yếu Năm Học (Executive Growth KPIs)</span>
+              </h2>
+              <p className="text-xs text-slate-500">
+                Đối chiếu chỉ tiêu Bộ GD&ĐT & Viện Dinh Dưỡng Quốc Gia ({smData.kpis.evaluatedStudents}/{smData.kpis.totalStudents} học sinh đã kiểm tra)
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* KPI 1: Tỷ lệ phát triển bình thường */}
               <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-3 relative overflow-hidden">
                 <div className="flex items-center justify-between">
@@ -369,28 +355,6 @@ export const NutritionPhysicalDashboardPage: React.FC = () => {
                 </p>
               </div>
 
-              {/* KPI 4: Tỷ lệ tuân thủ thực đơn */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tuân thủ Thực Đơn</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-teal-100 text-teal-800">
-                    TT 28/2016
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-teal-700">{smData.kpis.menuComplianceRate}%</span>
-                  <span className="text-xs text-slate-500 font-medium">Đạt chuẩn Bộ</span>
-                </div>
-                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-teal-500 h-2 rounded-full transition-all duration-700"
-                    style={{ width: `${smData.kpis.menuComplianceRate}%` }}
-                  ></div>
-                </div>
-                <p className="text-[11px] text-teal-700 font-medium truncate">
-                  {smData.kpis.menuComplianceStatus}
-                </p>
-              </div>
             </div>
           </div>
 
@@ -398,14 +362,23 @@ export const NutritionPhysicalDashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Phân bổ theo 4 Khối lớp */}
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-base font-bold text-slate-800">Tổng Hợp Thể Trạng Theo Khối Lớp</h3>
                   <p className="text-xs text-slate-500">So sánh tỷ lệ phát triển thể lực giữa các khối</p>
                 </div>
-                <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
-                  Năm học 2026-2027
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                    Năm học 2026-2027
+                  </span>
+                  <button
+                    onClick={handleExportReport}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 transition shadow-2xs cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Xuất Báo Cáo PGD&ĐT</span>
+                  </button>
+                </div>
               </div>
 
               <div className="overflow-x-auto">

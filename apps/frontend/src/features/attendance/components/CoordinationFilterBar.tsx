@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React from 'react';
-import { Search, Filter, Calendar, Users, Utensils, AlertTriangle, CheckCircle, RotateCcw } from 'lucide-react';
+import { Search, Filter, Calendar, Users, Utensils, AlertTriangle, CheckCircle, RotateCcw, RotateCw, Plus } from 'lucide-react';
 import { CoordinationQueryParams } from '../types';
 
 interface CoordinationFilterBarProps {
@@ -14,6 +14,9 @@ interface CoordinationFilterBarProps {
     gradeLevel: string;
     totalStudents: number;
   }>;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+  onCreateNote?: () => void;
 }
 
 export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
@@ -21,6 +24,9 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
   onFilterChange,
   onResetFilters,
   availableClasses,
+  onRefresh,
+  isRefreshing,
+  onCreateNote,
 }) => {
   useLanguage();
   return (
@@ -47,8 +53,8 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           )}
         </div>
 
-        {/* Class Selector Dropdown */}
-        <div className="flex items-center gap-2">
+        {/* Class Selector Dropdown & Actions */}
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
             <Users className="w-4 h-4 text-teal-600 shrink-0" />
             <span className="text-xs font-bold text-slate-600 whitespace-nowrap">{translateText("Lớp:")}</span>
@@ -76,6 +82,28 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
               className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
             />
           </div>
+
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              title={translateText("Làm mới dữ liệu")}
+            >
+              <RotateCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? 'animate-spin text-teal-600' : ''}`} />
+              <span>{translateText("Làm mới")}</span>
+            </button>
+          )}
+
+          {onCreateNote && (
+            <button
+              onClick={onCreateNote}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{translateText("Tạo Ghi Chú")}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -91,9 +119,10 @@ export const CoordinationFilterBar: React.FC<CoordinationFilterBarProps> = ({
           className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer focus:outline-none"
         >
           <option value="ALL">{translateText("Tất cả bữa ăn")}</option>
-          <option value="BREAKFAST">{translateText("Bữa sáng")}</option>
-          <option value="LUNCH">{translateText("Bữa trưa chính")}</option>
-          <option value="AFTERNOON_SNACK">{translateText("Bữa xế chiều")}</option>
+          <option value="BREAKFAST">{translateText("Buổi sáng (09:00)")}</option>
+          <option value="LUNCH">{translateText("Bữa trưa chính (11:00)")}</option>
+          <option value="AFTERNOON_SNACK">{translateText("Buổi phụ (14:30)")}</option>
+          <option value="LATE_SNACK">{translateText("Buổi chiều xế (17:00)")}</option>
           <option value="ALL_DAY">{translateText("Cả ngày")}</option>
         </select>
 

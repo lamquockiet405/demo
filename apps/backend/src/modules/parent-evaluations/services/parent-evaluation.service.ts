@@ -8,8 +8,8 @@ import {
   Optional,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityManager, Repository } from "typeorm";
-import { schoolDate } from "../../../common/utils/persisted-state";
+import { EntityManager, Repository, In } from "typeorm";
+import { readState, writeState, schoolDate } from "../../../common/utils/persisted-state";
 import {
   ParentEvaluation,
   EvaluationReply,
@@ -180,7 +180,7 @@ export class ParentEvaluationService {
       evaluationType: evalEntity.evaluationType || "QUICK_EVALUATION",
       attributes: evalEntity.attributes || {},
       mealTitle: evalEntity.menu
-        ? `Thực đơn ${evalEntity.menu.ageGroup || "Mẫu giáo"}`
+        ? `Thực đơn ${evalEntity.menu.ageGroup === "NHA_TRE" ? "Nhà trẻ" : evalEntity.menu.ageGroup === "MAU_GIAO" ? "Mẫu giáo" : evalEntity.menu.ageGroup || "Mẫu giáo"}`
         : "Bữa trưa dinh dưỡng",
       rating: evalEntity.rating,
       title: `Đánh giá bữa ăn - ${student?.fullName || "Bé"}`,
@@ -342,13 +342,13 @@ export class ParentEvaluationService {
 
     const avgRating = allRatings?.avg
       ? Math.round(Number(allRatings.avg) * 10) / 10
-      : 5.0;
+      : null;
     const positiveCount = await this.evalRepo
       .createQueryBuilder("e")
       .where("e.rating >= 4")
       .getCount();
     const positiveRate =
-      allTotal > 0 ? Math.round((positiveCount / allTotal) * 100) : 100;
+      allTotal > 0 ? Math.round((positiveCount / allTotal) * 100) : null;
 
     const respondedCount = await this.replyRepo
       .createQueryBuilder("r")
@@ -375,12 +375,12 @@ export class ParentEvaluationService {
       FROM evaluation_replies r
       INNER JOIN parent_evaluations e ON e.id = r.evaluation_id
     `);
-    let avgResponseTime = "30 phút";
+    let avgResponseTime: string | null = null;
     if (avgResponseTimeRaw && avgResponseTimeRaw[0]?.avg_seconds != null) {
       const avgHours =
         Math.round((Number(avgResponseTimeRaw[0].avg_seconds) / 3600) * 10) /
         10;
-      avgResponseTime = avgHours < 1 ? "30 phút" : `${avgHours} giờ`;
+      avgResponseTime = avgHours < 1 ? `${Math.round(Number(avgResponseTimeRaw[0].avg_seconds) / 60)} phút` : `${avgHours} giờ`;
     }
 
     return {
@@ -987,9 +987,28 @@ export class ParentEvaluationService {
       ? getConsumptionPercent(snackAtt.consumptionLevel)
       : 0;
 
+    const heartsMap = await readState<Record<string, boolean>>(
+      this.evalRepo.manager,
+      "parent-meal-hearts",
+      {},
+    ).catch(() => ({} as Record<string, boolean>));
+
+    const lunchAttendanceId = lunchAtt
+      ? String(lunchAtt.id)
+      : `att-${sId}-${targetDate}-LUNCH`;
+    const snackAttendanceId = snackAtt
+      ? String(snackAtt.id)
+      : `att-${sId}-${targetDate}-SNACK`;
+    const lunchLiked = Boolean(
+      heartsMap[lunchAttendanceId] || (lunchAtt && heartsMap[`att-${sId}-${targetDate}-LUNCH`]),
+    );
+    const snackLiked = Boolean(
+      heartsMap[snackAttendanceId] || (snackAtt && heartsMap[`att-${sId}-${targetDate}-SNACK`]),
+    );
+
     const sessions = [
       {
-        attendanceId: lunchAtt ? String(lunchAtt.id) : "att-lunch",
+        attendanceId: lunchAttendanceId,
         mealType: "LUNCH",
         mealSession: "Bữa Trưa (10:45)",
         dishesServed:
@@ -1000,7 +1019,12 @@ export class ParentEvaluationService {
           : "Thực đơn tiêu chuẩn",
         dietaryBadgeType: allergyNames ? "ALLERGY" : "NORMAL",
         teacherName: "Giáo viên phụ trách lớp",
-        parentStatusLabel: lunchAtt?.isAttended ? "Đã hoàn thành" : "Nghỉ ca",
+        liked: lunchLiked,
+        parentStatusLabel: lunchLiked
+          ? "PH đã thả tim ❤️"
+          : lunchAtt?.isAttended
+            ? "Đã hoàn thành"
+            : "Nghỉ ca",
         portionConsumed: lunchAtt?.isAttended
           ? `Ăn ${lunchPercent}% khẩu phần`
           : "Nghỉ học",
@@ -1017,7 +1041,7 @@ export class ParentEvaluationService {
         photoEvidenceUrl: "",
       },
       {
-        attendanceId: snackAtt ? String(snackAtt.id) : "att-snack",
+        attendanceId: snackAttendanceId,
         mealType: "SNACK",
         mealSession: "Bữa Xế (14:30)",
         dishesServed:
@@ -1026,7 +1050,12 @@ export class ParentEvaluationService {
         dietaryBadgeText: "Bổ sung vi chất",
         dietaryBadgeType: "SNACK",
         teacherName: "Giáo viên phụ trách lớp",
-        parentStatusLabel: snackAtt?.isAttended ? "Đã hoàn thành" : "Nghỉ ca",
+        liked: snackLiked,
+        parentStatusLabel: snackLiked
+          ? "PH đã thả tim ❤️"
+          : snackAtt?.isAttended
+            ? "Đã hoàn thành"
+            : "Nghỉ ca",
         portionConsumed: snackAtt?.isAttended
           ? `Ăn ${snackPercent}% phần ăn`
           : "Nghỉ ca",
@@ -1055,7 +1084,7 @@ export class ParentEvaluationService {
           )
         : lunchAtt || snackAtt
           ? 0
-          : 95;
+          : 0;
 
     const metrics = {
       consumptionRate: avgConsumption,
@@ -1066,13 +1095,13 @@ export class ParentEvaluationService {
             ? "Bé ăn khá"
             : avgConsumption > 0
               ? "Bé ăn ít, cần hỗ trợ"
-              : "Nghỉ ăn ca này",
-      waterIntakeToday: avgConsumption > 0 ? "750 / 800 ml" : "0 / 800 ml",
-      waterPercentage: avgConsumption > 0 ? 94 : 0,
+          : "Chưa ghi nhận mức ăn",
+      waterIntakeToday: "Chưa ghi nhận",
+      waterPercentage: 0,
       allergyStatusText: child.allergyWarning
         ? `Kiểm soát: ${child.allergyWarning}`
-        : "An toàn, không dị ứng",
-      syncStatusText: "Đồng bộ trực tiếp từ giáo viên",
+        : "Chưa có hồ sơ dị ứng",
+      syncStatusText: "Dữ liệu đã ghi nhận",
     };
 
     // Tính dinh dưỡng tổng hợp thực tế từ database
@@ -1089,28 +1118,28 @@ export class ParentEvaluationService {
           (sum: number, d: any) => sum + Number(d.protein_g || 0),
           0,
         ) * 10,
-      ) / 10 || 28.5;
+      ) / 10;
     const totalFat =
       Math.round(
         allDishes.reduce(
           (sum: number, d: any) => sum + Number(d.fat_g || 0),
           0,
         ) * 10,
-      ) / 10 || 22.4;
+      ) / 10;
     const totalCarb =
       Math.round(
         allDishes.reduce(
           (sum: number, d: any) => sum + Number(d.carb_g || 0),
           0,
         ) * 10,
-      ) / 10 || 92.1;
+      ) / 10;
     const totalFiber =
       Math.round(
         allDishes.reduce(
           (sum: number, d: any) => sum + Number(d.fiber_g || 0),
           0,
         ) * 10,
-      ) / 10 || 5.8;
+      ) / 10;
 
     const nutritionSummaryToday = {
       calories: totalKcal,
@@ -1124,32 +1153,150 @@ export class ParentEvaluationService {
       ),
     };
 
-    // Lấy lịch sử cả tuần từ PostgreSQL
+    // Lấy lịch sử cả tuần từ PostgreSQL cho tất cả các bữa ăn
+    const weekDates = daysInWeek.map((d) => d.date);
     const weekAttendances = await this.attendanceRepo.find({
-      where: { studentId: sId, mealType: "LUNCH" },
+      where: { studentId: sId, date: In(weekDates) },
     });
 
+    let weekDishesMap: Record<string, string[]> = {};
+    try {
+      const weekDishesRows = await this.evalRepo.query(
+        `SELECT day.date::text as "date", d.name 
+         FROM menu_dishes md 
+         JOIN menu_meals mm ON md.menu_meal_id=mm.id 
+         JOIN menu_days day ON mm.menu_day_id=day.id 
+         JOIN menu_versions mv ON mv.id=day.menu_version_id 
+         JOIN menus m ON m.id=mv.menu_id 
+         JOIN dishes d ON md.dish_id=d.id 
+         WHERE day.date = ANY($1::date[]) AND mm.meal_type='LUNCH' 
+         ORDER BY day.date ASC, md.display_order ASC`,
+        [weekDates],
+      );
+      if (weekDishesRows && weekDishesRows.length > 0) {
+        weekDishesRows.forEach((r: any) => {
+          const dStr = r.date ? (typeof r.date === 'string' ? r.date.split('T')[0] : new Date(r.date).toISOString().split('T')[0]) : '';
+          if (dStr) {
+            if (!weekDishesMap[dStr]) weekDishesMap[dStr] = [];
+            weekDishesMap[dStr].push(r.name);
+          }
+        });
+      }
+    } catch {
+      // fallback
+    }
+
+    const MEAL_SESSIONS = [
+      { key: "BREAKFAST", label: "Buổi sáng (09:00)", legacyKeys: ["BREAKFAST", "MORNING_SNACK"] },
+      { key: "LUNCH", label: "Bữa trưa chính (11:00)", legacyKeys: ["LUNCH"] },
+      { key: "AFTERNOON_SNACK", label: "Buổi phụ (14:30)", legacyKeys: ["AFTERNOON_SNACK", "SNACK"] },
+      { key: "LATE_SNACK", label: "Buổi xế chiều (17:00)", legacyKeys: ["LATE_SNACK"] },
+    ];
+
     const weeklySummary = daysInWeek.map((d) => {
-      const att = weekAttendances.find((a) => a.date === d.date);
-      const percent = att
-        ? getConsumptionPercent(att.consumptionLevel)
-        : d.isCompleted
-          ? 95
-          : 0;
+      const dayAtts = weekAttendances.filter((a) => a.date === d.date);
+
+      const sessionResults = MEAL_SESSIONS.map((sess) => {
+        const att = dayAtts.find((a) => sess.legacyKeys.includes(a.mealType));
+        const isRecorded = !!att;
+        const isAttended = att?.isAttended ?? false;
+        const consumptionLevel = isRecorded && isAttended ? (att?.consumptionLevel || 'FULL') : null;
+        const percentage = isRecorded ? (isAttended ? getConsumptionPercent(consumptionLevel) : 0) : null;
+
+        let consumptionLabel = 'Chưa cập nhật';
+        if (isRecorded) {
+          if (!isAttended) {
+            consumptionLabel = 'Vắng mặt';
+          } else {
+            switch (consumptionLevel) {
+              case 'ALL':
+              case 'FULL':
+                consumptionLabel = 'Ăn hết (100%)';
+                break;
+              case 'MOST':
+                consumptionLabel = 'Ăn phần lớn (85%)';
+                break;
+              case 'HALF':
+              case 'PARTIAL':
+                consumptionLabel = 'Ăn một nửa (50%)';
+                break;
+              case 'LITTLE':
+              case 'FEW':
+                consumptionLabel = 'Ăn ít (25%)';
+                break;
+              case 'NONE':
+              case 'REFUSED':
+                consumptionLabel = 'Không ăn (0%)';
+                break;
+              default:
+                consumptionLabel = percentage !== null ? `Ăn ${percentage}%` : 'Đã ăn';
+            }
+          }
+        }
+
+        return {
+          mealType: sess.key,
+          mealLabel: sess.label,
+          isRecorded,
+          isAttended,
+          consumptionLevel,
+          consumptionLabel,
+          percentage,
+          note: att?.note || '',
+        };
+      });
+
+      const recordedCount = sessionResults.filter((s) => s.isRecorded).length;
+      const isAllSessionsDone = recordedCount >= MEAL_SESSIONS.length;
+
+      let dailyPercentage: number | null = null;
+      let portionLabel = 'Chờ cập nhật';
+      let status = 'PENDING';
+
+      if (isAllSessionsDone) {
+        const attendedSessions = sessionResults.filter((s) => s.isAttended);
+        if (attendedSessions.length > 0) {
+          dailyPercentage = Math.round(
+            attendedSessions.reduce((sum, s) => sum + (s.percentage ?? 0), 0) /
+              attendedSessions.length,
+          );
+          portionLabel = dailyPercentage >= 85 ? 'Hết suất' : `${dailyPercentage}%`;
+        } else {
+          dailyPercentage = 0;
+          portionLabel = 'Vắng cả ngày';
+        }
+        status = 'COMPLETED';
+      } else if (recordedCount > 0) {
+        status = 'IN_PROGRESS';
+        portionLabel = `Đang cập nhật (${recordedCount}/${MEAL_SESSIONS.length})`;
+      }
+
+      const notes = sessionResults
+        .filter((s) => s.note && s.note.trim())
+        .map((s) => `${s.mealLabel.split(' ')[0]}: ${s.note.trim()}`);
+      const teacherFeedback = notes.join('; ');
+
+      const dayDishes =
+        weekDishesMap[d.date]?.join(', ') ||
+        (d.isSelected ? lunchDishes.map((x: any) => x.name).join(', ') : '') ||
+        'Chưa có thực đơn đã công bố cho ngày này.';
+
       return {
         date: d.date,
         dayName: d.dayName,
         dateFormatted: d.dateFormatted,
-        dishes:
-          lunchDishes.map((x: any) => x.name).join(", ") ||
-          "Thực đơn tiêu chuẩn",
-        badgeText: allergyNames ? "Suất riêng dị ứng" : "Thực đơn chuẩn",
-        percentage: percent,
-        portionLabel: percent >= 85 ? "Hết suất" : `${percent}%`,
-        waterIntake: percent > 0 ? "750 ml" : "0 ml",
-        teacherFeedback: att?.note || "Bé ăn ngoan, tinh thần vui vẻ",
-        photoUrl: "",
-        status: d.isCompleted ? "COMPLETED" : "PENDING",
+        dishes: dayDishes,
+        badgeText: allergyNames ? 'Suất riêng dị ứng' : 'Thực đơn chuẩn',
+        percentage: dailyPercentage,
+        isAllSessionsDone,
+        recordedSessionsCount: recordedCount,
+        totalSessionsCount: MEAL_SESSIONS.length,
+        portionLabel,
+        waterIntake: isAllSessionsDone ? 'Đã ghi nhận' : 'Chưa ghi nhận',
+        teacherFeedback,
+        photoUrl: '',
+        status,
+        sessions: sessionResults,
       };
     });
 
@@ -1199,12 +1346,35 @@ export class ParentEvaluationService {
   }
 
   async toggleHeartReaction(attendanceId: string, userId?: number) {
+    const key = String(attendanceId || "").trim();
+    if (!key) {
+      throw new BadRequestException("Thiếu mã bữa ăn để thả tim.");
+    }
+    const heartsMap = await readState<Record<string, boolean>>(
+      this.evalRepo.manager,
+      "parent-meal-hearts",
+      {},
+    ).catch(() => ({} as Record<string, boolean>));
+
+    const nextLiked = !heartsMap[key];
+    if (nextLiked) {
+      heartsMap[key] = true;
+    } else {
+      delete heartsMap[key];
+    }
+
+    await writeState(this.evalRepo.manager, "parent-meal-hearts", heartsMap).catch(
+      () => {},
+    );
+
     return {
       success: true,
-      message: "Đã gửi lời cảm ơn / thả tim bữa ăn của bé tới giáo viên!",
+      message: nextLiked
+        ? "Đã gửi lời cảm ơn / thả tim bữa ăn của bé tới giáo viên!"
+        : "Đã hủy thả tim bữa ăn.",
       data: {
-        attendanceId,
-        liked: true,
+        attendanceId: key,
+        liked: nextLiked,
       },
     };
   }

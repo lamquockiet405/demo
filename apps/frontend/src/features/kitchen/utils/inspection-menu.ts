@@ -50,12 +50,14 @@ export function extractInspectionMenuDishes(
 
         const sessionLabel =
           meal.mealType === "BREAKFAST" || meal.mealType === "MORNING_SNACK"
-            ? "Bữa sáng"
+            ? "Buổi sáng"
             : meal.mealType === "LUNCH"
-              ? "Bữa trưa"
+              ? "Bữa trưa chính"
               : meal.mealType === "AFTERNOON_SNACK" || meal.mealType === "SNACK"
-                ? "Bữa xế"
-                : "Bữa ăn";
+                ? "Buổi phụ"
+                : meal.mealType === "LATE_SNACK"
+                  ? "Buổi xế chiều"
+                  : "Bữa ăn";
 
         for (const dish of Array.isArray(meal.dishes) ? meal.dishes : []) {
           const name =

@@ -374,34 +374,7 @@ export const PrincipalMenuApprovalPage: React.FC = () => {
         </div>
       )}
 
-      {/* ─── 1. TIÊU ĐỀ TRANG CỔNG BAN GIÁM HIỆU ─── */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-xs">
-              <FileCheck2 className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black text-slate-900 tracking-tight">{translateText("Phê duyệt & Công bố Thực đơn Tuần")}</h1>
-                <span className="bg-teal-100 text-teal-800 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">{translateText("CỔNG HIỆU TRƯỞNG")}</span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">{translateText("Danh sách thực đơn tuần do Chuyên viên Dinh dưỡng lập và gửi lên. Nhấp vào dòng để xem chi tiết ma trận 5 bữa ăn và tiến hành phê duyệt.")}</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Thông tin trực ban Hiệu trưởng */}
-        <div className="flex items-center gap-3 bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-teal-800 text-white font-bold text-xs flex items-center justify-center shadow-inner">{translateText("TT")}</div>
-          <div>
-            <p className="text-xs font-bold text-slate-800 leading-tight">
-              {user?.fullName || translateText("Cô Thu Thủy")}{translateText(" (Hiệu Trưởng)")}</p>
-            <p className="text-[10px] text-teal-700 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{translateText("Đang trực ban phê duyệt")}</p>
-          </div>
-        </div>
-      </div>
 
       {/* ─── 2. CÁC Ô THỐNG KÊ (5 KPI CARDS ĐẦU GIAO DIỆN) ─── */}
       <MenuStatsCards stats={stats} loading={loading} isPrincipal={true} />

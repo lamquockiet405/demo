@@ -8,7 +8,6 @@ import {
   Filter,
   AlertTriangle,
   HeartPulse,
-  Sparkles,
   RefreshCw,
   CheckCircle2,
   X,
@@ -23,7 +22,9 @@ import {
   Download,
   GraduationCap,
   Layers,
+  FileSpreadsheet,
 } from 'lucide-react';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import {
   childrenApi,
   ChildItem,
@@ -492,6 +493,40 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
     fetchData();
   }, []);
 
+  const handleExportExcel = async () => {
+    if (!children.length) {
+      alert('Chưa có danh sách học sinh để xuất file Excel');
+      return;
+    }
+    const headers = [
+      'Mã học sinh',
+      'Họ và tên',
+      'Lớp học',
+      'Ngày sinh',
+      'Giới tính',
+      'Tình trạng dị ứng',
+      'Dị nguyên & Triệu chứng',
+      'Phụ huynh đại diện',
+      'Số điện thoại phụ huynh',
+    ];
+    const rows = children.map((c) => [
+      c.studentCode,
+      c.fullName,
+      c.className || 'Chưa phân lớp',
+      c.dateOfBirth ? new Date(c.dateOfBirth).toLocaleDateString('vi-VN') : '',
+      c.gender === 'FEMALE' ? 'Nữ' : 'Nam',
+      c.allergies && c.allergies.length > 0 ? 'Có dị ứng' : 'Bình thường',
+      (c.allergies || []).map((a) => `${a.allergenName} (${a.severity || 'Nhẹ'})`).join('; '),
+      c.parentName || 'Chưa liên kết',
+      c.parentPhone || '',
+    ]);
+    await downloadExcel(
+      `Danh_Sach_Hoc_Sinh_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [headers, ...rows],
+      'Danh sách học sinh bán trú'
+    );
+  };
+
   const handleRescan = async () => {
     setRescanning(true);
     setRescanMessage(null);
@@ -613,54 +648,7 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* ─── 1. TOP HEADER BANNER ─── */}
-      <div className="bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-800/40">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              Hồ Sơ Trẻ & Kiểm Soát Dị Ứng
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Quản Lý Học Sinh & Dị Nguyên Thực Phẩm
-            </h1>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Khai báo tiền sử dị ứng, phác đồ cấp cứu khẩn cấp và tự động kết nối Rule Engine quét chéo thành phần món ăn theo thời gian thực.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={handleRescan}
-              disabled={rescanning}
-              className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${rescanning ? 'animate-spin' : ''}`} />
-              <span>{rescanning ? 'Đang quét...' : 'Quét Thực Đơn Dị Ứng'}</span>
-            </button>
-            <button
-              onClick={() => {
-                setImportText('');
-                setImportResult(null);
-                setIsImportModalOpen(true);
-              }}
-              className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>Nhập Excel / CSV</span>
-            </button>
-            <button
-              onClick={() => setIsChildModalOpen(true)}
-              className="px-5 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-bold text-xs shadow-lg transition flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm Học Sinh Mới</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div className="w-full space-y-6">
       {/* Rescan alert banner */}
       {rescanMessage && (
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between animate-in fade-in">
@@ -758,6 +746,43 @@ HS-2026-0093, Lê, Tuấn Kiệt, 2022-03-10, MALE, Dị ứng sữa tươi`;
             <option value="YES">Có tiền sử dị ứng</option>
             <option value="NO">Không dị ứng</option>
           </select>
+
+          <button
+            onClick={handleRescan}
+            disabled={rescanning}
+            className="px-3 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Quét thực đơn đối chiếu dị ứng"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${rescanning ? 'animate-spin' : 'text-slate-500'}`} />
+            <span>{rescanning ? 'Đang quét...' : 'Quét Dị Ứng'}</span>
+          </button>
+          <button
+            onClick={() => {
+              setImportText('');
+              setImportResult(null);
+              setIsImportModalOpen(true);
+            }}
+            className="px-3 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Nhập danh sách học sinh từ file Excel hoặc CSV"
+          >
+            <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
+            <span>Nhập Excel / CSV</span>
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className="px-3 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Xuất danh sách học sinh ra file Excel"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Xuất Excel</span>
+          </button>
+          <button
+            onClick={() => setIsChildModalOpen(true)}
+            className="px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Thêm Học Sinh</span>
+          </button>
         </div>
       </div>
 

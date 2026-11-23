@@ -65,8 +65,8 @@ export class ChildrenController {
    */
   @Get("stats")
   @ApiOperation({ summary: "Thống kê tổng số trẻ, giới tính, tỷ lệ có dị ứng" })
-  async getStats(@CurrentTenant() schoolId: number) {
-    return this.childrenService.getStats(schoolId);
+  async getStats(@CurrentTenant() schoolId: number, @Query() query: GetChildrenQueryDto) {
+    return this.childrenService.getStats(schoolId, query);
   }
 
   /**

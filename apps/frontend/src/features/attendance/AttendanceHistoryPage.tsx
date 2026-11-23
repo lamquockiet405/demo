@@ -240,15 +240,6 @@ export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ on
 
       {/* Main Content Container */}
       <main className="flex-1 w-full px-6 py-6 space-y-6">
-        {/* Header & Title */}
-        <HistoryHeader
-          classNameTitle={selectedClass?.name || historyData?.classInfo.name || 'Lớp Mầm 1 (3-4 tuổi)'}
-          academicYear={selectedClass?.academicYear || historyData?.classInfo.academicYear || '2026 - 2027'}
-          teachers={historyData?.classInfo.teachers || ['Cô Mai Anh', 'Cô Thu Hằng']}
-          onOpenTrend={() => setIsTrendOpen(true)}
-          onOpenExport={() => setIsExportOpen(true)}
-        />
-
         {/* Filter Controls Bar */}
         <HistoryControls
           classes={classes}
@@ -257,6 +248,8 @@ export const AttendanceHistoryPage: React.FC<AttendanceHistoryPageProps> = ({ on
             setSelectedClassId(id);
             setCurrentPage(1);
           }}
+          onOpenTrend={() => setIsTrendOpen(true)}
+          onOpenExport={() => setIsExportOpen(true)}
           dateRangeText={historyData?.period.displayRange || '21/09 - 25/09/2026'}
           weekLabel={historyData?.period.weekLabel || `Tuần ${weekNumber}`}
           onPrevWeek={handlePrevWeek}

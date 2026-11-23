@@ -35,7 +35,8 @@ import { EditSchoolInfoModal } from "../components/EditSchoolInfoModal";
 const MEAL_TIME_OPTIONS = [
   { code: "BREAKFAST", label: "Buổi sáng (09:00)" },
   { code: "LUNCH", label: "Bữa trưa chính (11:00)" },
-  { code: "AFTERNOON_SNACK", label: "Bữa xế chiều (14:30)" },
+  { code: "AFTERNOON_SNACK", label: "Buổi phụ (14:30)" },
+  { code: "LATE_SNACK", label: "Buổi xế chiều (17:00)" },
 ];
 
 const COLOR_OPTIONS: Array<{
@@ -43,13 +44,13 @@ const COLOR_OPTIONS: Array<{
   label: string;
   dot: string;
 }> = [
-  { code: "TEAL", label: "Xanh Ngọc", dot: "bg-teal-600" },
-  { code: "YELLOW", label: "Vàng Mật", dot: "bg-amber-500" },
-  { code: "ORANGE", label: "Cam San", dot: "bg-orange-500" },
-];
+    { code: "TEAL", label: "Xanh Ngọc", dot: "bg-teal-600" },
+    { code: "YELLOW", label: "Vàng Mật", dot: "bg-amber-500" },
+    { code: "ORANGE", label: "Cam San", dot: "bg-orange-500" },
+  ];
 
 const DEFAULT_OPERATIONAL: OperationalSettings = {
-  mealTimes: ["BREAKFAST", "LUNCH", "AFTERNOON_SNACK"],
+  mealTimes: ["BREAKFAST", "LUNCH", "AFTERNOON_SNACK", "LATE_SNACK"],
   standardWeeklyCycleLength: 2,
   foodRetentionHours: 24,
   whoZscoreAutoCalc: true,
@@ -61,10 +62,10 @@ function formatDateVi(dateStr?: string | null): string {
   return Number.isNaN(parsed.getTime())
     ? dateStr
     : parsed.toLocaleDateString(getLocale(), {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
 }
 
 export const SchoolSettingsPage: React.FC = () => {
@@ -169,18 +170,18 @@ export const SchoolSettingsPage: React.FC = () => {
       setProfile((prev) =>
         prev
           ? {
-              ...prev,
-              isEducationDbSynced: true,
-              syncedAt: res.syncedAt || new Date().toISOString(),
-            }
+            ...prev,
+            isEducationDbSynced: true,
+            syncedAt: res.syncedAt || new Date().toISOString(),
+          }
           : prev,
       );
       setLogoSuccessMessage(
-        res.message || "Đã đồng bộ dữ liệu với CSDL ngành GD&ĐT.",
+        res.message || "Đã đồng bộ dữ liệu.",
       );
     } catch (err: any) {
       setUploadError(
-        err?.response?.data?.message || "Không thể đồng bộ CSDL ngành.",
+        err?.response?.data?.message || "Không thể đồng bộ.",
       );
     } finally {
       setSyncingDb(false);
@@ -196,7 +197,7 @@ export const SchoolSettingsPage: React.FC = () => {
         branding: { ...profile.branding, primaryColor },
       });
       applyProfileState(updated);
-    } catch {}
+    } catch { }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -384,387 +385,351 @@ export const SchoolSettingsPage: React.FC = () => {
 
   return (
     <>
-    <div className="w-full space-y-6 pb-12">
-      {/* 1. Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-              <span className="w-2 h-2 rounded-full bg-teal-600" />
-              {translateText(profile.status === "ACTIVE" ? "ĐANG HOẠT ĐỘNG" : profile.status)}
-            </span>
-            <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">{translateText("Mã trường: ")}{translateText(profile.code)}
-            </span>
-            {profile.updatedAt && (
-              <span className="text-[11px] text-slate-400">{translateText("Cập nhật: ")}{translateText(formatDateVi(profile.updatedAt))}
-              </span>
-            )}
-          </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
-            {profile.name}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">{translateText("Cấu hình thông tin pháp lý nhà trường, logo nhận diện và thông số vận hành bán trú.")}</p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/25 transition"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>{translateText("Chỉnh sửa thông tin trường")}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2. KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpiCards.map((card, idx) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5"
-            >
+      <div className="w-full space-y-6 pb-12">
+        {/* 1. KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpiCards.map((card, idx) => {
+            const Icon = card.icon;
+            return (
               <div
-                className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 ${card.color}`}
+                key={idx}
+                className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5"
               >
-                <Icon className="w-5 h-5" />
+                <div
+                  className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 ${card.color}`}
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-[11px] text-slate-500 font-medium truncate">
+                    {translateText(card.label)}
+                  </p>
+                  <p className="text-base font-black text-slate-900 truncate">
+                    {translateText(card.value)}{" "}
+                    {card.suffix && (
+                      <span className="text-xs font-semibold text-slate-400">
+                        {translateText(card.suffix)}
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <p className="text-[11px] text-slate-500 font-medium truncate">
-                  {translateText(card.label)}
-                </p>
-                <p className="text-base font-black text-slate-900 truncate">
-                  {translateText(card.value)}{" "}
-                  {card.suffix && (
-                    <span className="text-xs font-semibold text-slate-400">
-                      {translateText(card.suffix)}
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      {/* 3. Main 2 Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (7/12): School Info & Legal */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 flex flex-col justify-between">
-          <div className="space-y-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100">
-                  <Building2 className="w-6 h-6" />
+        {/* 3. Main 2 Columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column (7/12): School Info & Legal */}
+          <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 flex flex-col justify-between">
+            <div className="space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100">
+                    <Building2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900">{translateText("Hồ sơ cơ sở giáo dục")}</h2>
+                    <p className="text-xs text-slate-500">{translateText("Thông tin chính thức hiển thị trên thực đơn tuần, sổ kiểm thực 3 bước và báo cáo dinh dưỡng")}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200 transition shrink-0"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>{translateText("Sửa hồ sơ")}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Tên trường mầm non")}</label>
+                  <div className="w-full text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900">
+                    {profile.name || translateText("Chưa cập nhật")}
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">{translateText("Hồ sơ cơ sở giáo dục")}</h2>
-                  <p className="text-xs text-slate-500">{translateText("Thông tin chính thức hiển thị trên thực đơn tuần, sổ kiểm thực 3 bước và báo cáo dinh dưỡng")}</p>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Mã trường trên hệ thống")}</label>
+                  <div className="w-full text-xs font-mono font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
+                    {translateText(profile.code || "Chưa cập nhật")}
+                  </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Địa chỉ cơ sở trường")}</label>
+                <div className="relative">
+                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
+                    {profile.address || translateText("Chưa cập nhật địa chỉ")}
+                  </div>
+                  <MapPin className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Số điện thoại / Hotline")}</label>
+                  <div className="relative">
+                    <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
+                      {profile.phone || translateText("Chưa cập nhật")}
+                    </div>
+                    <Phone className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Email liên hệ")}</label>
+                  <div className="relative">
+                    <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
+                      {profile.contactEmail || translateText("Chưa cập nhật")}
+                    </div>
+                    <Mail className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-5 mt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500">{translateText("Đại diện pháp lý ký duyệt thực đơn:")}</span>
+                <span className="font-bold text-slate-900">
+                  {translateText(profile.legalRepresentative?.title || "Hiệu trưởng")}{" "}
+                  {profile.legalRepresentative?.name || translateText("(Chưa cập nhật)")}
+                </span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200 transition shrink-0"
+                className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition"
               >
+                <span>{translateText("Chỉnh sửa thông tin")}</span>
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>{translateText("Sửa hồ sơ")}</span>
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Tên trường mầm non")}</label>
-                <div className="w-full text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900">
-                  {profile.name || translateText("Chưa cập nhật")}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Mã trường trên hệ thống")}</label>
-                <div className="w-full text-xs font-mono font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
-                  {translateText(profile.code || "Chưa cập nhật")}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Địa chỉ cơ sở trường")}</label>
-              <div className="relative">
-                <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800">
-                  {profile.address || translateText("Chưa cập nhật địa chỉ")}
-                </div>
-                <MapPin className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Số điện thoại / Hotline")}</label>
-                <div className="relative">
-                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
-                    {profile.phone || translateText("Chưa cập nhật")}
-                  </div>
-                  <Phone className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{translateText("Email liên hệ")}</label>
-                <div className="relative">
-                  <div className="w-full text-xs font-medium px-3.5 py-2.5 pl-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 truncate">
-                    {profile.contactEmail || translateText("Chưa cập nhật")}
-                  </div>
-                  <Mail className="w-4 h-4 text-teal-600 absolute left-3 top-2.5" />
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div className="pt-5 mt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500">{translateText("Đại diện pháp lý ký duyệt thực đơn:")}</span>
-              <span className="font-bold text-slate-900">
-                {translateText(profile.legalRepresentative?.title || "Hiệu trưởng")}{" "}
-                {profile.legalRepresentative?.name || translateText("(Chưa cập nhật)")}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:text-teal-800 hover:bg-teal-50 px-3 py-1.5 rounded-xl transition"
-            >
-              <span>{translateText("Chỉnh sửa thông tin")}</span>
-              <Edit3 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Right Column (5/12): Logo & Operational Settings */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-                  <ImageIcon className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">{translateText("Logo & Nhận diện trường học")}</h2>
-                  <p className="text-xs text-slate-500">{translateText("Hiển thị trên cổng thông tin, thực đơn và báo cáo")}</p>
-                </div>
-              </div>
-            </div>
-
-            {uploadError && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-red-800">
-                <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                <span>{translateText(uploadError)}</span>
-              </div>
-            )}
-
-            {logoSuccessMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2 text-xs text-emerald-800 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{translateText(logoSuccessMessage)}</span>
-              </div>
-            )}
-
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".png,.jpg,.jpeg,.svg,.webp"
-              className="hidden"
-            />
-
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5 overflow-hidden">
-                <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1.5 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
-                  {hasRealLogo ? (
-                    <img
-                      src={profile.branding.logoUrl}
-                      alt={translateText(profile.name)}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <span className="text-sm font-black text-teal-700">
-                      {(profile.name || "KM")
-                        .split(" ")
-                        .filter(Boolean)
-                        .slice(-2)
-                        .map((w) => w[0])
-                        .join("")
-                        .toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div className="overflow-hidden">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-800 truncate">
-                      {translateText(hasRealLogo
-                        ? "Logo trường học"
-                        : "Chưa tải lên logo trường")}
-                    </span>
+          {/* Right Column (5/12): Logo & Operational Settings */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                    <ImageIcon className="w-6 h-6" />
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                    {translateText("Hỗ trợ PNG, JPG, WEBP, SVG (≤ 2MB)")}
-                  </p>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900">{translateText("Logo & Nhận diện trường học")}</h2>
+                    <p className="text-xs text-slate-500">{translateText("Hiển thị trên cổng thông tin, thực đơn và báo cáo")}</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  disabled={uploadingLogo}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition disabled:opacity-60"
-                >
-                  {uploadingLogo ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <UploadCloud className="w-3.5 h-3.5" />
-                  )}
-                  <span>{translateText(hasRealLogo ? "Đổi logo" : "Tải logo lên")}</span>
-                </button>
-                {hasRealLogo && (
+              {uploadError && (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-red-800">
+                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>{translateText(uploadError)}</span>
+                </div>
+              )}
+
+              {logoSuccessMessage && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center gap-2 text-xs text-emerald-800 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{translateText(logoSuccessMessage)}</span>
+                </div>
+              )}
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".png,.jpg,.jpeg,.svg,.webp"
+                className="hidden"
+              />
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3.5 overflow-hidden">
+                  <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1.5 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+                    {hasRealLogo ? (
+                      <img
+                        src={profile.branding.logoUrl}
+                        alt={translateText(profile.name)}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-sm font-black text-teal-700">
+                        {(profile.name || "KM")
+                          .split(" ")
+                          .filter(Boolean)
+                          .slice(-2)
+                          .map((w) => w[0])
+                          .join("")
+                          .toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-800 truncate">
+                        {translateText(hasRealLogo
+                          ? "Logo trường học"
+                          : "Chưa tải lên logo trường")}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                      {translateText("Hỗ trợ PNG, JPG, WEBP, SVG (≤ 2MB)")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     disabled={uploadingLogo}
-                    onClick={handleRemoveLogo}
-                    title={translateText("Xóa logo hiện tại")}
-                    className="text-slate-400 hover:text-red-600 p-2 rounded-xl hover:bg-white border border-transparent hover:border-red-200 transition"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition disabled:opacity-60"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    {uploadingLogo ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <UploadCloud className="w-3.5 h-3.5" />
+                    )}
+                    <span>{translateText(hasRealLogo ? "Đổi logo" : "Tải logo lên")}</span>
                   </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <form
-            onSubmit={handleSaveOperationalSettings}
-            className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100">
-                <Settings className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">{translateText("Cấu hình vận hành bán trú")}</h2>
-                <p className="text-xs text-slate-500">{translateText("Thông số áp dụng cho lập thực đơn, lưu mẫu thức ăn và đánh giá dinh dưỡng")}</p>
-              </div>
-            </div>
-
-            {operationalFeedback && (
-              <div
-                className={`p-3 rounded-2xl text-xs font-medium flex items-center gap-2 border ${
-                  operationalFeedback.type === "success"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                    : "bg-red-50 text-red-800 border-red-200"
-                }`}
-              >
-                {operationalFeedback.type === "success" ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
-                )}
-                <span>{translateText(operationalFeedback.text)}</span>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-                <Utensils className="w-3.5 h-3.5 text-teal-600" />{translateText(" Các bữa ăn tổ chức tại trường")}</label>
-              <div className="grid grid-cols-2 gap-2">
-                {MEAL_TIME_OPTIONS.map((meal) => {
-                  const active = operational.mealTimes.includes(meal.code);
-                  return (
+                  {hasRealLogo && (
                     <button
-                      key={meal.code}
                       type="button"
-                      onClick={() => toggleMealTime(meal.code)}
-                      className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-between transition ${
-                        active
-                          ? "bg-teal-50/80 border-teal-600 text-teal-900"
-                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
-                      }`}
+                      disabled={uploadingLogo}
+                      onClick={handleRemoveLogo}
+                      title={translateText("Xóa logo hiện tại")}
+                      className="text-slate-400 hover:text-red-600 p-2 rounded-xl hover:bg-white border border-transparent hover:border-red-200 transition"
                     >
-                      <span>{translateText(meal.label)}</span>
-                      <span
-                        className={`w-4 h-4 rounded-md flex items-center justify-center text-[10px] ${
-                          active
-                            ? "bg-teal-600 text-white"
-                            : "bg-white border border-slate-300 text-transparent"
-                        }`}
-                      >
-                        ✓
-                      </span>
+                      <Trash2 className="w-4 h-4" />
                     </button>
-                  );
-                })}
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-teal-600" />{translateText(" Chu kỳ xoay vòng thực đơn")}</label>
-                <select
-                  value={operational.standardWeeklyCycleLength}
-                  onChange={(e) => {
-                    setOperationalFeedback(null);
-                    setOperational((p) => ({
-                      ...p,
-                      standardWeeklyCycleLength: Number(e.target.value),
-                    }));
-                  }}
-                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none"
-                >
-                  <option value={1}>{translateText("Chu kỳ 1 tuần")}</option>
-                  <option value={2}>{translateText("Chu kỳ 2 tuần (Khuyến nghị)")}</option>
-                  <option value={4}>{translateText("Chu kỳ 4 tuần (Theo tháng)")}</option>
-                </select>
+            <form
+              onSubmit={handleSaveOperationalSettings}
+              className="bg-white rounded-3xl p-6 shadow-xs border border-slate-200/80 space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100">
+                  <Settings className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">{translateText("Cấu hình vận hành bán trú")}</h2>
+                  <p className="text-xs text-slate-500">{translateText("Thông số áp dụng cho lập thực đơn, lưu mẫu thức ăn và đánh giá dinh dưỡng")}</p>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-teal-600" />{translateText(" Thời gian lưu mẫu thức ăn")}</label>
-                <select
-                  value={operational.foodRetentionHours}
-                  onChange={(e) => {
-                    setOperationalFeedback(null);
-                    setOperational((p) => ({
-                      ...p,
-                      foodRetentionHours: Number(e.target.value),
-                    }));
-                  }}
-                  className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none"
-                >
-                  <option value={24}>{translateText("24 giờ (QĐ 1246/QĐ-BYT)")}</option>
-                  <option value={48}>{translateText("48 giờ (Kiểm soát nâng cao)")}</option>
-                  <option value={72}>{translateText("72 giờ")}</option>
-                </select>
-              </div>
-            </div>
 
-            <div className="pt-2 flex justify-end">
-              <button
-                type="submit"
-                disabled={savingOperational}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition disabled:opacity-60"
-              >
-                {savingOperational ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Save className="w-3.5 h-3.5" />
-                )}
-                <span>{translateText("Lưu cấu hình vận hành")}</span>
-              </button>
-            </div>
-          </form>
+              {operationalFeedback && (
+                <div
+                  className={`p-3 rounded-2xl text-xs font-medium flex items-center gap-2 border ${operationalFeedback.type === "success"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-red-50 text-red-800 border-red-200"
+                    }`}
+                >
+                  {operationalFeedback.type === "success" ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                  )}
+                  <span>{translateText(operationalFeedback.text)}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                  <Utensils className="w-3.5 h-3.5 text-teal-600" />{translateText(" Các bữa ăn tổ chức tại trường")}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {MEAL_TIME_OPTIONS.map((meal) => {
+                    const active = operational.mealTimes.includes(meal.code);
+                    return (
+                      <button
+                        key={meal.code}
+                        type="button"
+                        onClick={() => toggleMealTime(meal.code)}
+                        className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-between transition ${active
+                            ? "bg-teal-50/80 border-teal-600 text-teal-900"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                          }`}
+                      >
+                        <span>{translateText(meal.label)}</span>
+                        <span
+                          className={`w-4 h-4 rounded-md flex items-center justify-center text-[10px] ${active
+                              ? "bg-teal-600 text-white"
+                              : "bg-white border border-slate-300 text-transparent"
+                            }`}
+                        >
+                          ✓
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-teal-600" />{translateText(" Chu kỳ xoay vòng thực đơn")}</label>
+                  <select
+                    value={operational.standardWeeklyCycleLength}
+                    onChange={(e) => {
+                      setOperationalFeedback(null);
+                      setOperational((p) => ({
+                        ...p,
+                        standardWeeklyCycleLength: Number(e.target.value),
+                      }));
+                    }}
+                    className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none"
+                  >
+                    <option value={1}>{translateText("Chu kỳ 1 tuần")}</option>
+                    <option value={2}>{translateText("Chu kỳ 2 tuần (Khuyến nghị)")}</option>
+                    <option value={4}>{translateText("Chu kỳ 4 tuần (Theo tháng)")}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-teal-600" />{translateText(" Thời gian lưu mẫu thức ăn")}</label>
+                  <select
+                    value={operational.foodRetentionHours}
+                    onChange={(e) => {
+                      setOperationalFeedback(null);
+                      setOperational((p) => ({
+                        ...p,
+                        foodRetentionHours: Number(e.target.value),
+                      }));
+                    }}
+                    className="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none"
+                  >
+                    <option value={24}>{translateText("24 giờ (QĐ 1246/QĐ-BYT)")}</option>
+                    <option value={48}>{translateText("48 giờ (Kiểm soát nâng cao)")}</option>
+                    <option value={72}>{translateText("72 giờ")}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={savingOperational}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition disabled:opacity-60"
+                >
+                  {savingOperational ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Save className="w-3.5 h-3.5" />
+                  )}
+                  <span>{translateText("Lưu cấu hình vận hành")}</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
 
       <EditSchoolInfoModal
         isOpen={isEditModalOpen}

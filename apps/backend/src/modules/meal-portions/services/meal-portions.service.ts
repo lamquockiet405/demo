@@ -57,6 +57,7 @@ export class MealPortionsService {
       const lunchPortion = portionMap.get(`${cls.id}_LUNCH`);
       const morningPortion = portionMap.get(`${cls.id}_MORNING_SNACK`);
       const snackPortion = portionMap.get(`${cls.id}_AFTERNOON_SNACK`);
+      const lateSnackPortion = portionMap.get(`${cls.id}_LATE_SNACK`);
 
       return {
         classId: String(cls.id),
@@ -67,6 +68,7 @@ export class MealPortionsService {
         morningSnack: value(morningPortion),
         lunch: value(lunchPortion),
         afternoonSnack: value(snackPortion),
+        lateSnack: value(lateSnackPortion),
       };
     });
 
@@ -76,12 +78,13 @@ export class MealPortionsService {
       totalBreakfast: items.reduce((total, item) => total + (item.breakfast.planned ?? 0), 0),
       totalLunch: items.reduce((total, item) => total + (item.lunch.planned ?? 0), 0),
       totalSnack: items.reduce((total, item) => total + (item.afternoonSnack.planned ?? 0), 0),
+      totalLateSnack: items.reduce((total, item) => total + (item.lateSnack.planned ?? 0), 0),
       totalPaidSnack: items.reduce((total, item) => total + item.paidSnackCount, 0),
     };
   }
 
   async updateActual(classId: number, date: string, mealType: string, actualQuantity: number, tenantId = 1) {
-    if (!Number.isSafeInteger(classId) || !Number.isSafeInteger(actualQuantity) || actualQuantity < 0 || !/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !['BREAKFAST','MORNING_SNACK','LUNCH','AFTERNOON_SNACK'].includes(mealType)) throw new BadRequestException('Ngày, bữa ăn hoặc số suất không hợp lệ.');
+    if (!Number.isSafeInteger(classId) || !Number.isSafeInteger(actualQuantity) || actualQuantity < 0 || !/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !['BREAKFAST','MORNING_SNACK','LUNCH','AFTERNOON_SNACK','LATE_SNACK'].includes(mealType)) throw new BadRequestException('Ngày, bữa ăn hoặc số suất không hợp lệ.');
     if (!await this.classRepo.findOne({ where: { id: classId, schoolId: tenantId, academicYearId: activeAcademicYear(tenantId) } })) throw new ForbiddenException('Lớp không thuộc năm học đang áp dụng của trường.');
     // A kitchen acknowledgement never overwrites the teacher's requested quantity.
     const result = await this.portionRepo.query(`UPDATE daily_meal_portions SET actual_quantity=$4

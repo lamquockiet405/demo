@@ -11,7 +11,6 @@ import {
   SavedMealEvaluation,
 } from "./types";
 import { ParentPortalTopNav } from "./components/ParentPortalTopNav";
-import { ChildInfoStrip } from "./components/ChildInfoStrip";
 import { PortalFooter } from "./components/PortalFooter";
 import {
   Star,
@@ -35,7 +34,6 @@ import {
   Headphones,
   Check,
   Loader2,
-  Quote,
   FileText,
 } from "lucide-react";
 import { useAuthStore } from "../../core/stores/auth.store";
@@ -73,7 +71,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
     useState<string>("Ăn hết sạch khay");
   const [portionFit, setPortionFit] = useState<string>("Vừa vặn thể trạng");
   const [allergySafe, setAllergySafe] = useState<string>(
-    "Tuyệt đối an tâm 100%",
+    "Yên tâm",
   );
   const [selectedQuickTags, setSelectedQuickTags] = useState<string[]>([]);
   const [evalMessage, setEvalMessage] = useState<string>("");
@@ -106,7 +104,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
     setTastePreference(attributes.taste || "Vừa miệng thanh đạm");
     setChildAppetite(attributes.appetite || "Ăn hết sạch khay");
     setPortionFit(attributes.portion || "Vừa vặn thể trạng");
-    setAllergySafe(attributes.allergy || "Tuyệt đối an tâm 100%");
+    setAllergySafe(attributes.allergy || "Yên tâm");
     setSelectedQuickTags(
       Array.isArray(attributes.tags)
         ? attributes.tags
@@ -355,70 +353,8 @@ export const SubmitMealEvaluationPage: React.FC = () => {
       {/* 1. Top Navigation Bar (Tuition Tab Removed) */}
       <ParentPortalTopNav child={child} activeTab="evaluation" />
 
-      {/* 2. Sub-Header Child Profile & Health Strip */}
-      <ChildInfoStrip child={child} />
-
       {/* Main Content Container with pb-32 to avoid floating bottom nav collision */}
       <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 pb-32">
-        {/* 3. Hero Header with Quote & KPI Highlights */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50 border border-teal-200 text-teal-800 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>{translateText("Lắng nghe & Đồng hành cùng Gia Đình")}</span>
-                <span className="text-teal-400">•</span>
-                <span className="normal-case font-medium">{translateText("Học kỳ I (2026 - 2027)")}</span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">{translateText("Đánh Giá & Góp Ý Suất Ăn Bán Trú")}</h1>
-              <p className="text-xs md:text-sm text-slate-600 mt-1">{translateText("Kênh kết nối trực tiếp hai chiều giữa Phụ huynh, Ban Giám Hiệu, Chuyên gia Dinh dưỡng & Tổ Bếp")}</p>
-            </div>
-
-
-          </div>
-
-          {/* Hero Quote & 2 KPI Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Left: Principal Quote Banner */}
-            <div className="lg:col-span-8 bg-gradient-to-r from-teal-50/80 via-emerald-50/50 to-white border border-teal-100 rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-center">
-              <div className="absolute top-2 right-4 text-teal-200/50 pointer-events-none select-none">
-                <Quote className="w-24 h-24 rotate-180" />
-              </div>
-
-              <div className="relative z-10 flex gap-4">
-                <span className="text-4xl font-serif text-teal-600 leading-none select-none">
-                  “
-                </span>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-700 leading-relaxed italic">{translateText("Mọi ý kiến đóng góp của Ba Mẹ đều là động lực quý giá để KidMeal không ngừng hoàn thiện từng bữa cơm dinh dưỡng, an toàn và ngập tràn niềm vui cho các thiên thần nhỏ.")}</p>
-                  <p className="text-xs font-bold text-teal-900">{translateText("Ban Giám Hiệu & Ban Điều hành Tổ Dinh dưỡng")}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: 2 KPI Highlight Cards */}
-            <div className="lg:col-span-4 grid grid-cols-2 gap-3">
-              <div className="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-4 flex flex-col justify-between shadow-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-amber-900">{translateText("Độ Hài Lòng")}</span>
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
-                </div>
-                <div className="my-1">
-                  <span className="text-2xl lg:text-3xl font-black text-slate-900">
-                    4.9
-                  </span>
-                  <span className="text-xs font-bold text-slate-500">
-                    {" "}
-                    / 5.0
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-600 font-medium">{translateText("Từ hơn 480 phụ huynh đánh giá tích cực")}</p>
-              </div>
-
-
-            </div>
-          </div>
-        </div>
 
         {/* 4. Segmented Control Switcher */}
         <div className="flex items-center gap-2 p-1.5 bg-slate-200/70 rounded-2xl mb-6 max-w-xl">
@@ -714,7 +650,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                       </div>
                       <div className="space-y-1 text-xs">
                         {[
-                          translateText("Tuyệt đối an tâm 100%"),
+                          translateText("Yên tâm"),
                           translateText("Đạt chuẩn tươi sạch"),
                           translateText("Cần lưu ý thêm"),
                         ].map((opt) => (
@@ -1042,7 +978,7 @@ export const SubmitMealEvaluationPage: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="text-base md:text-lg font-bold text-slate-900">{translateText("Nhật ký Góp ý & Câu trả lời từ Ban Giám Hiệu")}</h2>
-                    <p className="text-xs text-slate-500 font-medium">{translateText("Lịch sử tương tác và văn bản giải trình chính thức từ Trường Mẫu Giáo Hướng Dương")}</p>
+                    <p className="text-xs text-slate-500 font-medium">{translateText("Lịch sử tương tác và văn bản giải trình chính thức từ KidMeal")}</p>
                   </div>
                 </div>
 

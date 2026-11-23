@@ -118,34 +118,7 @@ export function PrincipalOverviewPage() {
     : 0;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* ─── 1. Header Banner & Actions ─── */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">{translateText("Ban Giám Hiệu • Báo Cáo Tổng Hợp")}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <BarChart3 className="w-8 h-8 text-amber-300" />{translateText("Dashboard Dinh Dưỡng & Thể Chất Trường Học")}</h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">{translateText("Giám sát trực quan phân bổ thể trạng học sinh, tỷ lệ tầm soát định kỳ, tiến độ can thiệp suy dinh dưỡng và chỉ số tuân thủ thực đơn toàn trường.")}</p>
-        </div>
-
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <button
-            onClick={() => void resource.reload()}
-            disabled={resource.loading}
-            className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Làm mới dữ liệu")}</button>
-          <button
-            onClick={() => report && exportDashboard(`dashboard-bgh-${new Date().toISOString().slice(0, 10)}.xlsx`, report)}
-            disabled={!report}
-            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />{translateText("Xuất dữ liệu")}</button>
-        </div>
-      </div>
-
+    <div className="space-y-6 w-full pb-12">
       <State resource={resource} />
 
       {k && (
@@ -346,10 +319,11 @@ export function PrincipalOverviewPage() {
                 )}
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>{translateText("Tuân thủ thực đơn trường: ")}<strong className="text-emerald-700">{k.menuComplianceRate || 95}%</strong></span>
-                <span className="text-teal-700 font-bold">{translateText("Khối có tỷ lệ đạt chuẩn cao nhất: ")}{translateText(barData[0]?.grade || "Mẫu giáo")} ({barData[0]?.normalRate || 85}%)</span>
-              </div>
+              {barData.length > 0 && (
+                <div className="pt-3 border-t border-slate-100 text-xs text-teal-700 font-bold">
+                  {translateText("Khối có tỷ lệ đạt chuẩn cao nhất: ")}{translateText(barData[0].grade)} ({barData[0].normalRate}%)
+                </div>
+              )}
             </div>
           </div>
 
@@ -440,7 +414,6 @@ export function PrincipalOverviewPage() {
               </div>
 
               <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs">
-                <span className="text-slate-400">{translateText("Tỷ lệ tuân thủ: ")}<strong className="text-emerald-400">{k.menuComplianceRate || 95}%</strong></span>
                 <Link to="/growth" className="text-teal-300 hover:text-white font-bold flex items-center gap-1">{translateText("Xem chi tiết ")}<ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -455,21 +428,41 @@ export function PrincipalOverviewPage() {
                   <Layers className="w-5 h-5 text-teal-600" />{translateText("Bảng Tổng Hợp Chi Tiết Theo Khối Lớp")}</h3>
                 <p className="text-xs text-slate-500 mt-0.5">{translateText("Dữ liệu số lượng và tỷ lệ % phân loại thể trạng của từng khối lớp mầm non.")}</p>
               </div>
-              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl self-start sm:self-auto">{translateText("Tổng số: ")}<strong>{report?.gradeBreakdown?.length || 0}</strong>{translateText(" khối lớp")}</span>
+              <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+                <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl">{translateText("Tổng số: ")}<strong>{report?.gradeBreakdown?.length || 0}</strong>{translateText(" khối lớp")}</span>
+                <button
+                  onClick={() => void resource.reload()}
+                  disabled={resource.loading}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                  title={translateText("Làm mới dữ liệu")}
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? "animate-spin" : "text-slate-500"}`} />
+                  <span>{translateText("Làm mới")}</span>
+                </button>
+                <button
+                  onClick={() => report && exportDashboard(`dashboard-bgh-${new Date().toISOString().slice(0, 10)}.xlsx`, report)}
+                  disabled={!report}
+                  className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  title={translateText("Xuất dữ liệu Excel")}
+                >
+                  <Download className="w-3.5 h-3.5 text-white" />
+                  <span>{translateText("Xuất dữ liệu")}</span>
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="bg-slate-50/80 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200/70">
-                  <tr>
-                    <th className="p-4">{translateText("Khối Lớp")}</th>
-                    <th className="p-4 text-center">{translateText("Tổng Học Sinh")}</th>
-                    <th className="p-4 text-center">{translateText("Đã Đánh Giá")}</th>
-                    <th className="p-4">{translateText("Bình Thường (Đạt Chuẩn)")}</th>
-                    <th className="p-4">{translateText("Nhẹ Cân")}</th>
-                    <th className="p-4">{translateText("Thấp Còi")}</th>
-                    <th className="p-4">{translateText("Thừa Cân / Béo Phì")}</th>
-                    <th className="p-4 text-center">{translateText("Tỷ Lệ Đạt")}</th>
+                <thead className="bg-teal-600 text-white font-bold uppercase tracking-wider border-b border-teal-700/60">
+                  <tr className="bg-teal-600 text-white">
+                    <th className="p-4 text-white">{translateText("Khối Lớp")}</th>
+                    <th className="p-4 text-center text-white">{translateText("Tổng Học Sinh")}</th>
+                    <th className="p-4 text-center text-white">{translateText("Đã Đánh Giá")}</th>
+                    <th className="p-4 text-white">{translateText("Bình Thường (Đạt Chuẩn)")}</th>
+                    <th className="p-4 text-white">{translateText("Nhẹ Cân")}</th>
+                    <th className="p-4 text-white">{translateText("Thấp Còi")}</th>
+                    <th className="p-4 text-white">{translateText("Thừa Cân / Béo Phì")}</th>
+                    <th className="p-4 text-center text-white">{translateText("Tỷ Lệ Đạt")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

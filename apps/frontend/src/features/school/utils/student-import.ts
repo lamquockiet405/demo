@@ -1,7 +1,35 @@
+export function normalizeStudentBirthDate(value: unknown): string {
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return "";
+    return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+  }
+
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+
+  // Excel stores unformatted dates as days since 1899-12-30.
+  if (/^\d{5}(?:\.\d+)?$/.test(text)) {
+    const serial = Number(text);
+    const date = new Date(Date.UTC(1899, 11, 30) + Math.floor(serial) * 86400000);
+    return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+  }
+
+  const iso = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(text);
+  if (iso) return `${iso[1]}-${iso[2].padStart(2, "0")}-${iso[3].padStart(2, "0")}`;
+
+  const dmy = /^(\d{1,2})[-/](\d{1,2})[-/](\d{2}|\d{4})$/.exec(text);
+  if (dmy) {
+    const year = dmy[3].length === 2 ? `20${dmy[3]}` : dmy[3];
+    return `${year}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}`;
+  }
+  return text;
+}
+
 export function validateStudentRows(
   rows: Record<string, any>[],
   classIds: string[],
   today: string,
+  firstDataRow = 2,
 ) {
   if (!rows.length) throw new Error("Tệp không có dữ liệu học sinh.");
   if (rows.length > 1000)
@@ -9,7 +37,7 @@ export function validateStudentRows(
   const codes = new Set<string>();
   return rows.map((row, i) => {
     const fail = (message: string) => {
-      throw new Error(`Dòng ${i + 2}: ${message}`);
+      throw new Error(`Dòng ${i + firstDataRow}: ${message}`);
     };
 
     const fullName = String(
@@ -21,19 +49,13 @@ export function validateStudentRows(
       ""
     ).trim();
 
-    let rawDob = String(
+    const rawDob = normalizeStudentBirthDate(
       row.dateOfBirth ||
       row["Ngày sinh (YYYY-MM-DD) (*)"] ||
       row["Ngày sinh (*)"] ||
       row["Ngày sinh"] ||
       ""
-    ).trim();
-
-    // Định dạng DD/MM/YYYY sang YYYY-MM-DD nếu cần
-    if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(rawDob)) {
-      const parts = rawDob.split(/[\/\-]/);
-      rawDob = `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
-    }
+    );
 
     let rawGender = String(
       row.gender ||
@@ -75,7 +97,7 @@ export function validateStudentRows(
       date.toISOString().slice(0, 10) !== rawDob ||
       rawDob > today
     )
-      fail("Ngày sinh phải hợp lệ, đúng định dạng YYYY-MM-DD (hoặc DD/MM/YYYY) và không ở tương lai.");
+      fail("Ngày sinh phải hợp lệ, đúng định dạng YYYY-MM-DD, DD/MM/YYYY hoặc ô ngày Excel và không ở tương lai.");
     if (!["MALE", "FEMALE"].includes(rawGender))
       fail("Giới tính phải là MALE (Nam) hoặc FEMALE (Nữ).");
     if (!classIds.includes(classId))

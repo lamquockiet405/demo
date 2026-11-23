@@ -211,6 +211,17 @@ export interface AutoGeneratePayload {
   dailyPlan?: any[];
 }
 
+export interface NutritionBreakdown {
+  calories: number;
+  proteinG: number;
+  fatG: number;
+  carbG: number;
+  proteinPct: number;
+  lipidPct: number;
+  glucidPct: number;
+  isCompliant?: boolean;
+}
+
 export interface AutoGeneratePreviewResponse {
   previewOnly: boolean;
   title: string;
@@ -228,6 +239,14 @@ export interface AutoGeneratePreviewResponse {
     proteinPct: number;
     lipidPct: number;
     glucidPct: number;
+    qd1Nutrition?: NutritionBreakdown;
+    qd2Nutrition?: NutritionBreakdown;
+    lateSnackNutrition?: {
+      calories: number;
+      proteinG: number;
+      fatG: number;
+      carbG: number;
+    };
     isCompliant: boolean;
     standardNote: string;
     dishes: Array<{
@@ -247,6 +266,8 @@ export interface AutoGeneratePreviewResponse {
   averageProteinG: number;
   averageFatG: number;
   averageCarbG: number;
+  qd1Averages?: NutritionBreakdown;
+  qd2Averages?: NutritionBreakdown;
   antiFatigueReport: {
     totalDishesUsed: number;
     uniqueDishesUsed: number;

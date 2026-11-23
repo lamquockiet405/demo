@@ -78,7 +78,9 @@ export class NutritionRulesService {
     next.ageGroup = dto.ageGroup || dto.targetAgeGroup || current.ageGroup;
     if (next.ageGroup?.includes("TODDLER")) next.ageGroup = "NHA_TRE";
     if (next.ageGroup?.includes("KINDERGARTEN")) next.ageGroup = "MAU_GIAO";
-    next.mealScope = "DAYBOARDING";
+    next.mealScope = dto.mealScope ?? current.mealScope ?? "DAYBOARDING";
+    if (!["DAYBOARDING", "FULL_DAY"].includes(next.mealScope))
+      throw new BadRequestException("Chọn cấu hình bán trú hoặc bán trú có ăn xế.");
     if (!next.ageGroup)
       throw new BadRequestException("Chọn nhóm tuổi cho quy chuẩn.");
     next.ruleName = dto.name ?? current.ruleName ?? null;
@@ -132,8 +134,9 @@ export class NutritionRulesService {
   }
 
   async getStats() {
-    const total = await this.ruleRepo.count(),
-      active = await this.ruleRepo.count({ where: { status: "ACTIVE" } });
+    const scoped = await this.ruleRepo.find();
+    const total = scoped.filter((rule) => ["DAYBOARDING", "FULL_DAY"].includes(rule.mealScope)).length;
+    const active = scoped.filter((rule) => ["DAYBOARDING", "FULL_DAY"].includes(rule.mealScope) && rule.status === "ACTIVE").length;
     const [allergic] = await this.ruleRepo.query(
       "SELECT count(DISTINCT student_id) AS count FROM student_allergies WHERE is_active=true",
     );
@@ -159,15 +162,15 @@ export class NutritionRulesService {
   }
 
   async create(dto: CreateNutritionRuleDto) {
+    const payload = this.applyInput(dto);
     const existingCount = await this.ruleRepo.count({
-      where: { status: "ACTIVE" },
+      where: { ageGroup: payload.ageGroup, mealScope: payload.mealScope, status: "ACTIVE" },
     });
     if (existingCount >= 1) {
       throw new BadRequestException(
-        "Hệ thống chỉ cho phép duy nhất một cấu hình tiêu chuẩn dinh dưỡng. Vui lòng chỉnh sửa cấu hình hiện có.",
+        "Nhóm tuổi này đã có cấu hình dinh dưỡng đang áp dụng cho phạm vi bữa ăn đã chọn.",
       );
     }
-    const payload = this.applyInput(dto);
     const saved = await this.ruleRepo.save(this.ruleRepo.create(payload));
     return this.serializeRule(saved);
   }
@@ -175,6 +178,8 @@ export class NutritionRulesService {
   async update(id: number, dto: UpdateNutritionRuleDto) {
     const current = await this.ruleRepo.findOne({ where: { id } });
     if (!current) throw new NotFoundException("Không tìm thấy tiêu chuẩn.");
+    if (dto.mealScope && dto.mealScope !== current.mealScope)
+      throw new BadRequestException("Không thể đổi phạm vi của cấu hình đã tạo.");
     return this.serializeRule(
       await this.ruleRepo.save(
         Object.assign(current, this.applyInput(dto, current)),

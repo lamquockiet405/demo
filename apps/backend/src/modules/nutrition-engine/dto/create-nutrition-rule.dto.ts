@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateNutritionRuleDto {
@@ -17,9 +17,10 @@ export class CreateNutritionRuleDto {
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ example: 'FULL_DAY' })
+  @ApiPropertyOptional({ example: 'FULL_DAY', enum: ['DAYBOARDING', 'FULL_DAY'] })
   @IsOptional()
   @IsString()
+  @IsIn(['DAYBOARDING', 'FULL_DAY'])
   mealScope?: string;
 
   @ApiPropertyOptional({ example: 615 })

@@ -133,25 +133,9 @@ export const MealOperationsReportPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-6 lg:p-8 space-y-6">
-      {/* Top Banner & Control Bar */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> UC94 • Vận Hành Chu Trình Khép Kín
-              </span>
-              <span className="px-2.5 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full">
-                QĐ 1246/QĐ-BYT
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-2">
-              Báo Cáo Vận Hành Bữa Ăn & Bán Trú
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Khớp nối quân số thực tế, biên bản kiểm thực 3 bước & quản trị thất thoát thức ăn (Plate Waste).
-            </p>
-          </div>
+      {/* Top Action Bar */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-end gap-4">
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-xl border border-slate-200 dark:border-slate-600">

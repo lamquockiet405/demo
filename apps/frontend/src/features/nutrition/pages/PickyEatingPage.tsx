@@ -2,6 +2,7 @@ import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { downloadExcel } from '../../../core/utils/excel-export';
 import {
   nutritionAdviceApi,
   PickyEatingChildItem,
@@ -29,6 +30,7 @@ import {
   ChevronRight,
   TrendingDown,
   Info,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   Feedback,
@@ -58,6 +60,12 @@ const TEMPLATE_SUGGESTIONS = [
     dishes: "Sữa hạt sen macca tự nấu\nBánh flan caramen ít đường\nCháo lươn khoai môn nghiền",
   },
 ];
+
+const stripParens = (text?: string | null) =>
+  String(text || "")
+    .replace(/\s*\([^)]*\)/g, "")
+    .replace(/\s*\[[^\]]*\]\s*/g, "")
+    .trim();
 
 export function PickyEatingPage() {
   useLanguage();
@@ -131,6 +139,26 @@ export function PickyEatingPage() {
     setDishes(tpl.dishes);
   };
 
+  const handleExportExcel = async () => {
+    if (!filteredRows.length) return alert(translateText("Chưa có danh sách trẻ kén ăn để xuất Excel."));
+    await downloadExcel(
+      `Theo_doi_tre_ken_an_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [
+        ["Mã học sinh", "Họ và tên", "Lớp", "Mức độ kén ăn", "Tỷ lệ ăn trung bình", "Nhóm thực phẩm từ chối", "Trạng thái tư vấn"],
+        ...filteredRows.map(c => [
+          c.studentCode || '',
+          c.fullName || '',
+          c.className || '',
+          c.severityLevel === 'SEVERE' ? 'Nghiêm trọng' : c.severityLevel === 'MODERATE' ? 'Trung bình' : 'Nhẹ',
+          `${c.averageConsumptionRate ?? 0}%`,
+          (c.rejectedFoodCategories || []).join(', ') || 'Chưa phân loại',
+          c.adviceStatus === 'PARENT_CONFIRMED' ? 'Phụ huynh đã xác nhận' : c.adviceStatus === 'SENT' ? 'Đã gửi tư vấn' : 'Chưa gửi tư vấn',
+        ]),
+      ],
+      "Trẻ kén ăn"
+    );
+  };
+
   const toggleMicronutrient = (nutrient: string) => {
     setMicronutrients((prev) =>
       prev.includes(nutrient)
@@ -168,26 +196,17 @@ export function PickyEatingPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Top Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-700 to-emerald-900 p-7 md:p-9 text-white shadow-xl">
-        <div className="absolute -top-12 -right-12 h-64 w-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-emerald-100">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />{translateText("Sàng lọc biếng ăn & Khẩu phần ăn")}</div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{translateText("Theo dõi Trẻ kén ăn & Tư vấn dinh dưỡng")}</h1>
-            <p className="text-emerald-100/90 text-sm md:text-base leading-relaxed">{translateText("Phát hiện sớm trẻ bỏ bữa, ăn ít rau, lượng calo nạp thấp qua nhật ký suất ăn lớp mầm non. Chuyên gia dinh dưỡng rà soát yếu tố dị ứng và đồng hành cùng phụ huynh xây dựng phác đồ bổ sung tại nhà.")}</p>
-          </div>
-          <div className="flex items-center gap-3 self-start md:self-auto">
-            <button
-              onClick={() => resource.reload()}
-              disabled={resource.loading}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-emerald-900 hover:bg-emerald-50 text-sm font-bold shadow-md transition-all active:scale-95 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${resource.loading ? "animate-spin" : ""}`} />{translateText("Phân tích lại")}</button>
-          </div>
-        </div>
-      </section>
+      {/* Action Toolbar */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => resource.reload()}
+          disabled={resource.loading}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 text-xs font-bold shadow-2xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? "animate-spin text-teal-600" : "text-slate-500"}`} />
+          {translateText("Phân tích lại")}
+        </button>
+      </div>
 
       {/* KPI Stats */}
       {isTeacherPortal ? (
@@ -267,12 +286,12 @@ export function PickyEatingPage() {
           <select
             value={classId}
             onChange={(e) => setClassId(e.target.value)}
-            className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
             <option value="">{translateText("Tất cả các lớp")}</option>
             {(resource.data?.classes || []).map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {stripParens(c.name)}
               </option>
             ))}
           </select>
@@ -280,154 +299,221 @@ export function PickyEatingPage() {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
             <option value="ALL">{translateText("Tất cả mức độ")}</option>
-            <option value="SEVERE">{translateText("Nghiêm trọng (SEVERE)")}</option>
-            <option value="MODERATE">{translateText("Trung bình (MODERATE)")}</option>
-            <option value="MILD">{translateText("Nhẹ (MILD)")}</option>
+            <option value="SEVERE">{translateText("Nguy cơ cao")}</option>
+            <option value="MODERATE">{translateText("Trung bình")}</option>
+            <option value="MILD">{translateText("Nhẹ")}</option>
           </select>
 
           <select
             value={adviceStatusFilter}
             onChange={(e) => setAdviceStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
             <option value="ALL">{translateText("Tất cả trạng thái tư vấn")}</option>
             <option value="NOT_SENT">{translateText("Chưa gửi tư vấn")}</option>
             <option value="SENT">{translateText("Đã gửi tư vấn")}</option>
             <option value="PARENT_CONFIRMED">{translateText("Phụ huynh đã xác nhận")}</option>
           </select>
+
+          <button
+            type="button"
+            className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold transition cursor-pointer flex items-center gap-1.5"
+            onClick={() => void resource.reload()}
+            disabled={resource.loading}
+            title={translateText("Làm mới danh sách")}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? "animate-spin" : "text-slate-500"}`} />
+            <span>{translateText("Làm mới")}</span>
+          </button>
+
+          <button
+            type="button"
+            className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold transition cursor-pointer flex items-center gap-1.5"
+            disabled={!filteredRows.length}
+            onClick={() => void handleExportExcel()}
+            title={translateText("Xuất danh sách trẻ kén ăn ra Excel")}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>{translateText("Xuất Excel")}</span>
+          </button>
         </div>
       </div>
 
       <State resource={resource} empty={!allRows.length} />
 
-      {/* Grid of Children */}
+      {/* Table List of Children */}
       {filteredRows.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredRows.map((child) => {
-            const isSevere = child.severityLevel === "SEVERE";
-            const isModerate = child.severityLevel === "MODERATE";
-            const consumption = child.averageConsumptionRate ?? 50;
+        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/95 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <th className="py-3 px-4 w-12 text-center">#</th>
+                  <th className="py-3 px-4">{translateText("Học sinh & Lớp")}</th>
+                  <th className="py-3 px-3 text-center">{translateText("Mức độ")}</th>
+                  <th className="py-3 px-4 min-w-[190px]">{translateText("Lượng ăn trung bình")}</th>
+                  <th className="py-3 px-4 min-w-[280px]">{translateText("Dấu hiệu kén ăn & Lưu ý")}</th>
+                  <th className="py-3 px-3 text-center">{translateText("Trạng thái tư vấn")}</th>
+                  <th className="py-3 px-4 text-right">{translateText("Thao tác")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs">
+                {filteredRows.map((child, idx) => {
+                  const isSevere = child.severityLevel === "SEVERE";
+                  const isModerate = child.severityLevel === "MODERATE";
+                  const consumption = child.averageConsumptionRate ?? 50;
+                  const cleanClass = stripParens(child.className);
+                  const cleanSeverity =
+                    stripParens(child.severityLabel) ||
+                    (isSevere ? "Nguy cơ cao" : isModerate ? "Trung bình" : "Nhẹ");
 
-            return (
-              <div
-                key={child.studentId}
-                className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
-              >
-                {/* Header */}
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                        {child.fullName.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-800 group-hover:text-teal-700 transition-colors">
-                          {child.fullName}
-                        </h3>
-                        <p className="text-xs text-slate-400">
-                          {child.studentCode} · {child.className}
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                        isSevere
-                          ? "bg-rose-50 text-rose-600 border border-rose-100"
-                          : isModerate
-                          ? "bg-amber-50 text-amber-700 border border-amber-100"
-                          : "bg-blue-50 text-blue-700 border border-blue-100"
-                      }`}
+                  return (
+                    <tr
+                      key={child.studentId}
+                      className="hover:bg-slate-50/80 transition align-middle"
                     >
-                      {translateText(child.severityLabel || child.severityLevel)}
-                    </span>
-                  </div>
+                      <td className="py-3.5 px-4 text-center font-bold text-slate-400">
+                        {idx + 1}
+                      </td>
 
-                  {/* Consumption Progress */}
-                  <div className="p-3 rounded-2xl bg-slate-50 space-y-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500 font-medium">{translateText("Lượng ăn trung bình:")}</span>
-                      <span className="font-bold text-slate-700">{consumption}%</span>
-                    </div>
-                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          consumption < 40
-                            ? "bg-rose-500"
-                            : consumption < 70
-                            ? "bg-amber-500"
-                            : "bg-emerald-500"
-                        }`}
-                        style={{ width: `${Math.min(100, Math.max(5, consumption))}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between items-center text-[11px] text-slate-400 pt-1">
-                      <span>{translateText("Theo dõi: ")}{child.totalMealsTracked}{translateText(" bữa")}</span>
-                      <span className="text-rose-600 font-medium">
-                        {child.lowIntakeMealsCount}{translateText(" bữa ăn ít / bỏ")}</span>
-                    </div>
-                  </div>
+                      {/* Học sinh & Lớp */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                            {child.fullName.charAt(0)}
+                          </div>
+                          <div>
+                            <strong className="font-bold text-slate-900 block text-xs">
+                              {child.fullName}
+                            </strong>
+                            <span className="text-slate-500 font-medium text-[11px] block mt-0.5">
+                              {child.studentCode}
+                              {cleanClass ? ` · ${cleanClass}` : ""}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
 
-                  {/* Picky Symptoms */}
-                  {child.pickySymptoms?.length > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{translateText("Dấu hiệu kén ăn")}</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {child.pickySymptoms.map((sym, i) => (
+                      {/* Mức độ */}
+                      <td className="py-3.5 px-3 text-center whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            isSevere
+                              ? "bg-rose-50 text-rose-700 border border-rose-200"
+                              : isModerate
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-blue-50 text-blue-700 border border-blue-200"
+                          }`}
+                        >
+                          {translateText(cleanSeverity)}
+                        </span>
+                      </td>
+
+                      {/* Lượng ăn trung bình */}
+                      <td className="py-3.5 px-4">
+                        <div className="space-y-1.5 max-w-[180px]">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <strong className="text-slate-800 font-black">{consumption}%</strong>
+                            <span className="text-rose-600 font-semibold">
+                              {child.lowIntakeMealsCount}/{child.totalMealsTracked}{" "}
+                              {translateText("bữa ăn ít")}
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${
+                                consumption < 40
+                                  ? "bg-rose-500"
+                                  : consumption < 70
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500"
+                              }`}
+                              style={{ width: `${Math.min(100, Math.max(5, consumption))}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Dấu hiệu kén ăn & Lưu ý */}
+                      <td className="py-3.5 px-4 max-w-sm">
+                        <div className="space-y-1">
+                          {child.pickySymptoms?.length > 0 ? (
+                            child.pickySymptoms.map((sym, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-1.5 text-[11.5px] text-slate-700 leading-snug"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 mt-1.5" />
+                                <span className="line-clamp-1">{translateText(stripParens(sym))}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">
+                              {translateText("Chưa có ghi nhận chi tiết")}
+                            </span>
+                          )}
+
+                          {child.allergies?.length > 0 && (
+                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-[10.5px] font-bold">
+                              <ShieldAlert className="w-3 h-3 text-rose-600 shrink-0" />
+                              <span>
+                                {translateText("Dị ứng:")} {child.allergies.join(", ")}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Trạng thái tư vấn */}
+                      <td className="py-3.5 px-3 text-center whitespace-nowrap">
+                        <div className="inline-flex flex-col items-center gap-0.5">
                           <span
-                            key={i}
-                            className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-lg bg-orange-50 text-orange-700 font-medium border border-orange-100"
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              child.adviceStatus === "PARENT_CONFIRMED"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : child.adviceStatus === "SENT"
+                                  ? "bg-teal-50 text-teal-700 border border-teal-200"
+                                  : "bg-slate-100 text-slate-600 border border-slate-200"
+                            }`}
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                            {translateText(sym)}
+                            {translateText(child.adviceStatusLabel || "Chưa gửi tư vấn")}
                           </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          {child.latestAdvice?.adviceDate && (
+                            <span className="text-[10.5px] text-slate-400">
+                              {child.latestAdvice.adviceDate}
+                            </span>
+                          )}
+                        </div>
+                      </td>
 
-                  {/* Allergies Warning */}
-                  {child.allergies?.length > 0 && (
-                    <div className="p-2.5 rounded-xl bg-rose-50/80 border border-rose-100 flex items-start gap-2 text-xs text-rose-700 font-medium">
-                      <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                      <span>{translateText("Dị ứng đã ghi nhận: ")}<strong>{translateText(child.allergies.join(", "))}</strong>
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Latest Advice Status */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      {translateText(child.latestAdvice?.adviceDate || "Chưa có phác đồ")}
-                    </span>
-                    <span
-                      className={`font-semibold ${
-                        child.adviceStatus === "PARENT_CONFIRMED"
-                          ? "text-emerald-600"
-                          : child.adviceStatus === "SENT"
-                          ? "text-teal-600"
-                          : "text-slate-400"
-                      }`}
-                    >
-                      {translateText(child.adviceStatusLabel || "Chưa gửi tư vấn")}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Action button */}
-                <button
-                  onClick={() => openModal(child)}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-teal-700 text-white font-medium text-xs tracking-wide shadow-sm transition-all"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  {translateText(child.latestAdvice ? "Xem & Cập nhật tư vấn" : "Soạn tư vấn dinh dưỡng")}
-                </button>
-              </div>
-            );
-          })}
+                      {/* Thao tác */}
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => openModal(child)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            child.latestAdvice
+                              ? "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                              : "bg-teal-600 hover:bg-teal-700 text-white shadow-2xs"
+                          }`}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>
+                            {translateText(
+                              child.latestAdvice ? "Cập nhật tư vấn" : "Soạn tư vấn",
+                            )}
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center max-w-xl mx-auto shadow-sm">
@@ -435,7 +521,7 @@ export function PickyEatingPage() {
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-800">{translateText("Không có trẻ nào có biểu hiện kén ăn cần can thiệp")}</h3>
-          <p className="text-sm text-slate-500 mt-2 leading-relaxed">{translateText("Hệ thống đối soát tự động nhật ký hoàn thành suất ăn do giáo viên cập nhật hàng ngày. Hiện tại các lớp học sinh đều đạt tỷ lệ tiêu thụ dinh dưỡng an toàn theo quy chuẩn.")}</p>
+          <p className="text-sm text-slate-500 mt-2 leading-relaxed">{translateText("Chưa có hồ sơ cần tư vấn trong bộ lọc hiện tại.")}</p>
         </div>
       )}
 

@@ -72,6 +72,32 @@ export class PaymentsController {
     });
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Post("vnpay/register-and-pay")
+  @ApiOperation({
+    summary: "Đăng ký gói ăn xế mới và khởi tạo ngay link thanh toán VNPAY cho Phụ huynh",
+  })
+  @Roles("PARENT", "SUPER_ADMIN", "SCHOOL_MANAGEMENT", "PRINCIPAL")
+  async registerAndPay(
+    @Body() body: { periodId: number; childId?: number; studentId?: number; returnUrl?: string },
+    @Req() req: Request,
+    @CurrentUser() user: any,
+  ) {
+    const ipAddr =
+      (req.headers["x-forwarded-for"] as string) ||
+      req.socket.remoteAddress ||
+      "127.0.0.1";
+    const parentId = Number(user?.sub ?? user?.id);
+    return this.vnpayService.registerAndPay({
+      periodId: Number(body.periodId),
+      studentId: Number(body.studentId || body.childId || 0) || undefined,
+      parentId,
+      ipAddr,
+      returnUrl: body.returnUrl,
+    });
+  }
+
   /**
    * GET /payments/vnpay-ipn: KÊNH 1: Server-to-Server IPN Webhook từ máy chủ VNPAY (Ngầm, Bảo mật & Idempotent).
    * @param query Bộ lọc trong query string.

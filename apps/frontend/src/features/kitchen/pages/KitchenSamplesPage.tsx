@@ -1,7 +1,7 @@
 import { t as translateText } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
 import React, { useEffect, useState } from "react";
-import { Download, Eye, Camera, Image as ImageIcon, X } from "lucide-react";
+import { Download, Eye, Camera, Image as ImageIcon, X, Archive, Clock3, CircleCheck, Trash2 } from "lucide-react";
 import { apiClient } from "../../../core/api/axios";
 import { useAuthStore } from "../../../core/stores/auth.store";
 import { useSchoolBranding } from "../../../core/hooks/useSchoolBranding";
@@ -62,7 +62,17 @@ export function KitchenSamplesPage({
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
   const [meal, setMeal] = useState("");
-  const mealLabels: Record<string, string> = { BREAKFAST: "Bữa sáng", MORNING_SNACK: "Bữa phụ sáng", LUNCH: "Bữa trưa", AFTERNOON_SNACK: "Bữa xế", ALL_DAY: "Cả ngày", ALL: "Cả ngày", FULL_DAY: "Cả ngày", "3_MEALS": "Cả ngày" };
+  const mealLabels: Record<string, string> = {
+    BREAKFAST: "Buổi sáng",
+    LUNCH: "Bữa trưa chính",
+    AFTERNOON_SNACK: "Buổi phụ",
+    LATE_SNACK: "Buổi xế chiều",
+    ALL_DAY: "Cả ngày",
+    ALL: "Cả ngày",
+    FULL_DAY: "Cả ngày",
+    "3_MEALS": "Cả ngày",
+    MORNING_SNACK: "Buổi sáng",
+  };
   const [status, setStatus] = useState("");
   const [create, setCreate] = useState(false);
   const [detail, setDetail] = useState<any>(null);
@@ -94,6 +104,8 @@ export function KitchenSamplesPage({
   const now = resource.data?.loadedAt ?? Date.now();
   const all = resource.data?.items || [];
   const due = all.filter((r) => getSampleState(r, now, retentionHours) === "DUE");
+  const storedCount = all.filter((r) => getSampleState(r, now, retentionHours) === "STORED").length;
+  const disposedCount = all.filter((r) => getSampleState(r, now, retentionHours) === "DISPOSED").length;
   const rows = all.filter(
     (r) =>
       (!date || (r.mealDate || r.date) === date) &&
@@ -145,17 +157,79 @@ export function KitchenSamplesPage({
   };
   return (
     <>
-      <PageTitle
-        eyebrow={
-          translateText(audience === "principal"
-            ? "BAN GIÁM HIỆU"
-            : audience === "nutritionist"
-              ? "CHUYÊN GIA DINH DƯỠNG"
-              : undefined)
-        }
-        title={translateText(`Lưu mẫu thực phẩm ${retentionHours} giờ`)}
-        description={translateText(`Quản lý mẫu niêm phong, tra cứu thời gian lưu và xác nhận hủy khi đủ ${retentionHours} giờ. Thời hạn được kiểm tra khi tải dữ liệu.`)}
-      >
+      <Notice error={action.error} message={action.message || "Mẫu lưu được tạo tự động khi hoàn tất Bước 3 của biên bản kiểm thực."} />
+      {resource.data && !resource.error && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 mb-4" aria-label={translateText("Thống kê mẫu lưu")}>
+          {[
+            { label: "Tổng mẫu lưu", value: all.length, icon: Archive, color: "text-[var(--kp-accent)] bg-[var(--kp-accent-soft)]" },
+            { label: "Đang lưu", value: storedCount, icon: CircleCheck, color: "text-[var(--kp-accent)] bg-[var(--kp-accent-soft)]" },
+            { label: "Chờ hủy", value: due.length, icon: Clock3, color: "text-amber-700 bg-amber-50" },
+            { label: "Đã hủy", value: disposedCount, icon: Trash2, color: "text-slate-700 bg-slate-100" },
+          ].map(({ label, value, icon: Icon, color }) => (
+            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex items-center gap-3">
+              <span className={`rounded-xl p-3 ${color}`}><Icon size={22} aria-hidden="true" /></span>
+              <div><div className="text-xs font-medium text-slate-500">{translateText(label)}</div><div className="text-2xl font-bold text-slate-900 tabular-nums">{value}</div></div>
+            </div>
+          ))}
+        </div>
+      )}
+      {due.length > 0 && (
+        <div className="kp-notice error" role="status">
+          <span>
+            <b>{due.length}{translateText(` mẫu đã đủ ${retentionHours} giờ, cần kiểm tra trước khi hủy.`)}</b>{" "}
+            <button
+              className="underline"
+              onClick={() => {
+                setStatus("DUE");
+                setDate("");
+                setMeal("");
+                setSearch("");
+              }}
+            >{translateText("Xem mẫu chờ hủy")}</button>
+          </span>
+        </div>
+      )}
+      <div className="kp-filters">
+        <input
+          type="search"
+          aria-label={translateText("Tìm mẫu lưu")}
+          placeholder={translateText("Tìm mã mẫu, món, người lấy…")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <label>{translateText("Ngày phục vụ")}<input
+            type="date"
+            aria-label={translateText("Ngày mẫu lưu")}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </label>
+        <select aria-label={translateText("Buổi ăn của mẫu lưu")} value={meal} onChange={(e) => setMeal(e.target.value)}>
+          <option value="">{translateText("Tất cả buổi ăn")}</option>
+          {["BREAKFAST", "LUNCH", "AFTERNOON_SNACK", "LATE_SNACK", "ALL_DAY"].map((value) => <option key={value} value={value}>{translateText(mealLabels[value])}</option>)}
+          <option value="UNKNOWN">{translateText("Chưa xác định")}</option>
+        </select>
+        <select
+          aria-label={translateText("Trạng thái mẫu lưu")}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="">{translateText("Tất cả trạng thái")}</option>
+          {Object.entries(labels).map(([id, label]) => (
+            <option key={id} value={id}>
+              {translateText(label)}
+            </option>
+          ))}
+        </select>
+        <button
+          className="kp-button"
+          onClick={() => {
+            setSearch("");
+            setDate("");
+            setMeal("");
+            setStatus("");
+          }}
+        >{translateText("Xóa bộ lọc")}</button>
         <ReloadButton loading={resource.loading} reload={resource.reload} />
         <button
           className="kp-button"
@@ -192,65 +266,6 @@ export function KitchenSamplesPage({
           }
         >
           <Download size={15} />{translateText("Xuất báo cáo an toàn")}</button>
-      </PageTitle>
-      <Notice error={action.error} message={action.message || "Mẫu lưu được tạo tự động khi hoàn tất Bước 3 của biên bản kiểm thực."} />
-      {due.length > 0 && (
-        <div className="kp-notice error" role="status">
-          <span>
-            <b>{due.length}{translateText(` mẫu đã đủ ${retentionHours} giờ, cần kiểm tra trước khi hủy.`)}</b>{" "}
-            <button
-              className="underline"
-              onClick={() => {
-                setStatus("DUE");
-                setDate("");
-                setMeal("");
-                setSearch("");
-              }}
-            >{translateText("Xem mẫu chờ hủy")}</button>
-          </span>
-        </div>
-      )}
-      <div className="kp-filters">
-        <input
-          type="search"
-          aria-label={translateText("Tìm mẫu lưu")}
-          placeholder={translateText("Tìm mã mẫu, món, người lấy…")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <label>{translateText("Ngày phục vụ")}<input
-            type="date"
-            aria-label={translateText("Ngày mẫu lưu")}
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </label>
-        <select aria-label={translateText("Buổi ăn của mẫu lưu")} value={meal} onChange={(e) => setMeal(e.target.value)}>
-          <option value="">{translateText("Tất cả buổi ăn")}</option>
-          {["BREAKFAST", "MORNING_SNACK", "LUNCH", "AFTERNOON_SNACK", "ALL_DAY"].map((value) => <option key={value} value={value}>{translateText(mealLabels[value])}</option>)}
-          <option value="UNKNOWN">{translateText("Chưa xác định")}</option>
-        </select>
-        <select
-          aria-label={translateText("Trạng thái mẫu lưu")}
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="">{translateText("Tất cả trạng thái")}</option>
-          {Object.entries(labels).map(([id, label]) => (
-            <option key={id} value={id}>
-              {translateText(label)}
-            </option>
-          ))}
-        </select>
-        <button
-          className="kp-button"
-          onClick={() => {
-            setSearch("");
-            setDate("");
-            setMeal("");
-            setStatus("");
-          }}
-        >{translateText("Xóa bộ lọc")}</button>
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       <div className="kp-table-wrap">
@@ -261,14 +276,14 @@ export function KitchenSamplesPage({
               <th>{translateText("Ngày / buổi ăn")}</th>
               <th>{translateText("Khối lượng / nhiệt độ")}</th>
               <th>{translateText("Thời điểm lưu")}</th>
-              <th>{translateText("Đủ 24 giờ")}</th>
+              <th>{translateText(`Đủ ${retentionHours} giờ`)}</th>
               <th>{translateText("Trạng thái")}</th>
               <th>{translateText("Thao tác")}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => {
-              const state = getSampleState(r, now);
+              const state = getSampleState(r, now, retentionHours);
               return (
                 <tr key={r.id}>
                   <td>

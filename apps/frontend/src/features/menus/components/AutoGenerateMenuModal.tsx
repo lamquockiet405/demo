@@ -23,6 +23,10 @@ import {
   AutoGeneratePreviewResponse,
   WeeklyMenu,
 } from "../api/weekly-menus.api";
+import {
+  nutritionEngineApi,
+  MealDistributionOverview,
+} from "../api/nutrition-rule-engine.api";
 import { useSchoolBranding } from "../../../core/hooks/useSchoolBranding";
 
 interface AutoGenerateMenuModalProps {
@@ -46,10 +50,12 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
     "BREAKFAST",
     "LUNCH",
     "AFTERNOON_SNACK",
+    "LATE_SNACK",
   ];
   const schoolHasBreakfast = schoolMealTimes.includes("BREAKFAST");
   const schoolHasLunch = schoolMealTimes.includes("LUNCH");
   const schoolHasAfternoonSnack = schoolMealTimes.includes("AFTERNOON_SNACK");
+  const schoolHasLateSnack = schoolMealTimes.includes("LATE_SNACK");
   const cycleWeeks =
     Number(schoolBranding.operationalSettings?.standardWeeklyCycleLength) || 2;
   const defaultExcludeDays = cycleWeeks * 7;
@@ -71,6 +77,26 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
     useState<number>(defaultExcludeDays);
   const [academicYear, setAcademicYear] = useState<Awaited<ReturnType<typeof weeklyMenusApi.getAcademicYearContext>>>(null);
   const [yearLoading, setYearLoading] = useState(true);
+  const [mealDistributionOverview, setMealDistributionOverview] =
+    useState<MealDistributionOverview | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    const dbAgeGroup = targetAgeGroup === "TODDLER_18_36M" ? "NHA_TRE" : "MAU_GIAO";
+    nutritionEngineApi
+      .getMealDistributionOverview(dbAgeGroup)
+      .then((data) => {
+        if (!cancelled) setMealDistributionOverview(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMealDistributionOverview(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, targetAgeGroup]);
+
   useEffect(() => {
     if (!isOpen) return;
     let cancelled = false;
@@ -409,12 +435,16 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                     const val = e.target.value as any;
                     setTargetAgeGroup(val);
                     setTitle(
-                      `Thực đơn Bán trú Tuần ${cycleWeekNumber} (${val === "KINDERGARTEN_3_5Y" ? "Mẫu giáo" : "Nhà trẻ"})`,
+                      `Thực đơn Bán trú Tuần ${cycleWeekNumber} · ${val === "KINDERGARTEN_3_5Y" ? "Mẫu giáo" : "Nhà trẻ"}`,
                     );
                   }}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 >
-                  <option value="KINDERGARTEN_3_5Y">{translateText("Mẫu giáo (3 - 6 tuổi: 615 - 726 Kcal)")}</option>
+                  <option value="KINDERGARTEN_3_5Y">
+                    {mealDistributionOverview?.totals?.atSchool?.energyKcal
+                      ? `Mẫu giáo 3–6 tuổi · ${Math.round(mealDistributionOverview.totals.atSchool.energyKcal.min)}–${Math.round(mealDistributionOverview.totals.atSchool.energyKcal.max)} Kcal`
+                      : translateText("Mẫu giáo 3–6 tuổi · 615–726 Kcal")}
+                  </option>
                 </select>
               </div>
 
@@ -460,10 +490,10 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
 
               {/* Quy tắc chống ngán */}
               <div className="sm:col-span-2">
-                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Quy tắc chống ngán (Từ cấu hình trường)")}</label>
+                <label className="text-[11px] font-bold text-slate-600 block mb-1">{translateText("Quy tắc chống ngán theo cấu hình trường")}</label>
                 <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold h-[38px]">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{translateText(`Cách ly ${cycleWeeks} tuần (`)}{excludePreviousDays}{translateText(" ngày - không lặp món tuần trước)")}</span>
+                  <span>{translateText(`Cách ly ${cycleWeeks} tuần · `)}{excludePreviousDays}{translateText(" ngày không lặp món tuần trước")}</span>
                 </div>
               </div>
 
@@ -509,8 +539,8 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                 onClick={handleGeneratePreview}
                 disabled={yearLoading || loadingPreview || Boolean(conflictingMenu)}
                 className={`px-5 py-2.5 rounded-2xl text-white text-xs font-bold shadow-md flex items-center gap-2 transition cursor-pointer ${conflictingMenu
-                    ? "bg-slate-400 opacity-60 cursor-not-allowed"
-                    : "bg-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-emerald-600/25"
+                  ? "bg-slate-400 opacity-60 cursor-not-allowed"
+                  : "bg-emerald-600 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-emerald-600/25"
                   }`}
               >
                 {loadingPreview ? (
@@ -539,17 +569,62 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-emerald-50/70 bg-gradient-to-br from-emerald-50/70 via-teal-50/40 to-white p-4 rounded-2xl border border-emerald-200/90 shadow-xs">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500 block">{translateText("Năng lượng TB / ngày")}</span>
-                  <span className="text-xl font-black text-slate-900">
-                    {previewData.averageCalories}{translateText(" Kcal")}</span>
-                  <span className="text-[10px] text-emerald-700 font-bold block mt-0.5">
-                    {translateText(previewData.antiFatigueReport.standardEvaluation)}
-                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-0.5">
+                    <span className="text-xl font-black text-slate-900">
+                      {previewData.averageCalories}{translateText(" Kcal")}
+                    </span>
+                    <span className="text-[9.5px] font-extrabold text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
+                      QĐ 1
+                    </span>
+                  </div>
+                  <div className="text-[10.5px] font-bold text-amber-800 mt-1 flex items-center gap-1">
+                    <span>QĐ 2 (khi thêm ăn xế):</span>
+                    <strong className="text-amber-950 font-black">
+                      {previewData.averageCalories +
+                        Math.round(
+                          previewData.dailySummary.reduce((sum, d) => {
+                            const sc = d.dishes
+                              .filter((x) => x.mealTime === "LATE_SNACK")
+                              .reduce((s, x) => s + (Number(x.plannedCalories) || 0), 0);
+                            return sum + sc;
+                          }, 0) / (previewData.dailySummary.length || 1),
+                        )}{" "}
+                      Kcal
+                    </strong>
+                  </div>
                 </div>
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500 block">{translateText("Cơ cấu P : L : G trung bình")}</span>
-                  <span className="text-base font-extrabold text-slate-800">{translateText("P: ")}{previewData.averageProteinG}{translateText("g • L:")}{" "}
-                    {previewData.averageFatG}{translateText("g • G: ")}{previewData.averageCarbG}{translateText("g")}</span>
-                  <span className="text-[10px] text-teal-700 font-bold block mt-0.5">{translateText("Cân đối RDA 2024")}</span>
+                  {previewData.qd1Averages && previewData.qd2Averages ? (
+                    <div className="space-y-1 mt-0.5">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-extrabold text-teal-800">QĐ 1:</span>
+                        <span className="font-black text-slate-800">
+                          {previewData.qd1Averages.proteinPct}% : {previewData.qd1Averages.lipidPct}% : {previewData.qd1Averages.glucidPct}%
+                        </span>
+                      </div>
+                      <div className="text-[9.5px] text-slate-500 font-medium leading-none">
+                        {previewData.qd1Averages.proteinG}g Đ • {previewData.qd1Averages.fatG}g B • {previewData.qd1Averages.carbG}g G
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/80">
+                        <span className="font-extrabold text-amber-900">QĐ 2 (+xế):</span>
+                        <span className="font-black text-slate-800">
+                          {previewData.qd2Averages.proteinPct}% : {previewData.qd2Averages.lipidPct}% : {previewData.qd2Averages.glucidPct}%
+                        </span>
+                      </div>
+                      <div className="text-[9.5px] text-slate-500 font-medium leading-none">
+                        {previewData.qd2Averages.proteinG}g Đ • {previewData.qd2Averages.fatG}g B • {previewData.qd2Averages.carbG}g G
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-base font-extrabold text-slate-800">
+                        {translateText("P: ")}{previewData.averageProteinG}{translateText("g • L:")}{" "}
+                        {previewData.averageFatG}{translateText("g • G: ")}{previewData.averageCarbG}{translateText("g")}
+                      </span>
+                      <span className="text-[10px] text-teal-700 font-bold block mt-0.5">{translateText("Cân đối RDA 2024")}</span>
+                    </>
+                  )}
                 </div>
                 <div>
                   <span className="text-[11px] font-semibold text-slate-500 block">{translateText("Độ đa dạng món ăn")}</span>
@@ -566,144 +641,348 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                 </div>
               </div>
 
+              {/* Thanh chỉ dẫn 2 Quy định Thực đơn Calo */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-extrabold text-slate-800 text-[11px]">{translateText("So sánh 2 Quy định:")}</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-50 border border-teal-200 text-teal-800 font-bold text-[10.5px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+                    {translateText("Quy định 1: Thực đơn bán trú tiêu chuẩn (50–55% Kcal)")}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-300 text-amber-900 font-bold text-[10.5px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                    {translateText("Quy định 2: Tự động cộng món ăn xế khi phụ huynh đóng tiền (60–70% Kcal)")}
+                  </span>
+                </div>
+              </div>
+
               {/* Bảng Ma Trận Các Ngày Trong Tuần */}
               <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
                 <div
                   className={`grid grid-cols-1 ${daysCount === 6 ? "sm:grid-cols-6" : "sm:grid-cols-5"} divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-white`}
                 >
-                  {previewData.dailySummary.map((day) => (
-                    <div
-                      key={day.dayOfWeek}
-                      className="flex flex-col justify-between p-3.5 space-y-3"
-                    >
-                      {/* Tiêu đề ngày */}
-                      <div className="border-b border-slate-100 pb-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-slate-900">
-                            {day.dayName}
+                  {previewData.dailySummary.map((day) => {
+                    const qd1Dishes = day.dishes.filter((d) => d.mealTime !== "LATE_SNACK");
+                    const dayQd1Calo = day.qd1Nutrition?.calories ?? Math.round(
+                      qd1Dishes.reduce((sum, d) => sum + (Number(d.plannedCalories) || 0), 0) * 10,
+                    ) / 10;
+                    const dayQd1Prot = day.qd1Nutrition?.proteinG ?? Math.round(
+                      qd1Dishes.reduce((sum, d) => sum + (Number(d.proteinG) || 0), 0) * 10,
+                    ) / 10;
+                    const dayQd1Fat = day.qd1Nutrition?.fatG ?? Math.round(
+                      qd1Dishes.reduce((sum, d) => sum + (Number(d.fatG) || 0), 0) * 10,
+                    ) / 10;
+                    const dayQd1Carb = day.qd1Nutrition?.carbG ?? Math.round(
+                      qd1Dishes.reduce((sum, d) => sum + (Number(d.carbG) || 0), 0) * 10,
+                    ) / 10;
+                    const qd1MacroSum = dayQd1Prot * 4 + dayQd1Fat * 9 + dayQd1Carb * 4 || dayQd1Calo || 1;
+                    const dayQd1PPct = day.qd1Nutrition?.proteinPct ?? Math.round(((dayQd1Prot * 4) / qd1MacroSum) * 1000) / 10;
+                    const dayQd1LPct = day.qd1Nutrition?.lipidPct ?? Math.round(((dayQd1Fat * 9) / qd1MacroSum) * 1000) / 10;
+                    const dayQd1CPct = day.qd1Nutrition?.glucidPct ?? Math.max(0, Math.round((100 - dayQd1PPct - dayQd1LPct) * 10) / 10);
+
+                    const lateSnackDishes = day.dishes.filter((d) => d.mealTime === "LATE_SNACK");
+                    const dayLateSnackCalo = day.lateSnackNutrition?.calories ?? Math.round(
+                      lateSnackDishes.reduce((sum, d) => sum + (Number(d.plannedCalories) || 0), 0) * 10,
+                    ) / 10;
+                    const dayLateSnackProt = day.lateSnackNutrition?.proteinG ?? Math.round(
+                      lateSnackDishes.reduce((sum, d) => sum + (Number(d.proteinG) || 0), 0) * 10,
+                    ) / 10;
+                    const dayLateSnackFat = day.lateSnackNutrition?.fatG ?? Math.round(
+                      lateSnackDishes.reduce((sum, d) => sum + (Number(d.fatG) || 0), 0) * 10,
+                    ) / 10;
+                    const dayLateSnackCarb = day.lateSnackNutrition?.carbG ?? Math.round(
+                      lateSnackDishes.reduce((sum, d) => sum + (Number(d.carbG) || 0), 0) * 10,
+                    ) / 10;
+
+                    const dayQd2Calo = day.qd2Nutrition?.calories ?? Math.round((dayQd1Calo + dayLateSnackCalo) * 10) / 10;
+                    const dayQd2Prot = day.qd2Nutrition?.proteinG ?? Math.round((dayQd1Prot + dayLateSnackProt) * 10) / 10;
+                    const dayQd2Fat = day.qd2Nutrition?.fatG ?? Math.round((dayQd1Fat + dayLateSnackFat) * 10) / 10;
+                    const dayQd2Carb = day.qd2Nutrition?.carbG ?? Math.round((dayQd1Carb + dayLateSnackCarb) * 10) / 10;
+                    const qd2MacroSum = dayQd2Prot * 4 + dayQd2Fat * 9 + dayQd2Carb * 4 || dayQd2Calo || 1;
+                    const dayQd2PPct = day.qd2Nutrition?.proteinPct ?? Math.round(((dayQd2Prot * 4) / qd2MacroSum) * 1000) / 10;
+                    const dayQd2LPct = day.qd2Nutrition?.lipidPct ?? Math.round(((dayQd2Fat * 9) / qd2MacroSum) * 1000) / 10;
+                    const dayQd2CPct = day.qd2Nutrition?.glucidPct ?? Math.max(0, Math.round((100 - dayQd2PPct - dayQd2LPct) * 10) / 10);
+
+                    const isQd1Compliant = dayQd1Calo >= 615 && dayQd1Calo <= 726;
+                    const isQd2Compliant = dayQd2Calo >= 765 && dayQd2Calo <= 926;
+
+                    return (
+                      <div
+                        key={day.dayOfWeek}
+                        className="flex flex-col justify-between p-3.5 space-y-3"
+                      >
+                        {/* Tiêu đề ngày & 2 Chỗ hiển thị Calo Quy định 1 & Quy định 2 */}
+                        <div className="border-b border-slate-100 pb-2.5 space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-slate-900">
+                              {day.dayName}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400">
+                              {day.dishes.length} món
+                            </span>
+                          </div>
+
+                          {/* 2 Chỗ hiển thị Calo */}
+                          <div className="space-y-1">
+                            {/* Chỗ 1: Quy định 1 (Bán trú tiêu chuẩn) */}
+                            <div
+                              className={`flex items-center justify-between px-2 py-1 rounded-lg border text-[10px] ${isQd1Compliant
+                                ? "bg-teal-50 border-teal-200/90 text-teal-950"
+                                : dayQd1Calo < 615
+                                  ? "bg-amber-50 border-amber-300 text-amber-950"
+                                  : "bg-rose-50 border-rose-300 text-rose-950"
+                                }`}
+                            >
+                              <span className="font-bold flex items-center gap-1">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${isQd1Compliant ? "bg-teal-600" : "bg-amber-500"
+                                    }`}
+                                ></span>
+                                {translateText("Quy định 1:")}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-black">
+                                  {dayQd1Calo} Kcal
+                                </span>
+                                {isQd1Compliant ? (
+                                  <span className="text-[8.5px] px-1 py-0.2 rounded bg-teal-100/80 text-teal-800 font-bold">
+                                    {translateText("Đạt")}
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="text-[8.5px] px-1 py-0.2 rounded bg-amber-200 text-amber-900 font-bold"
+                                    title={translateText("Chuẩn 615–726 Kcal")}
+                                  >
+                                    {dayQd1Calo < 615 ? translateText("Thiếu") : translateText("Vượt")}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Chỗ 2: Quy định 2 khi thêm ăn xế */}
+                            <div
+                              className={`flex items-center justify-between px-2 py-1 rounded-lg border text-[10px] ${isQd2Compliant
+                                ? "bg-emerald-50 border-emerald-300 text-emerald-950"
+                                : dayQd2Calo < 765
+                                  ? "bg-orange-50 border-orange-300 text-orange-950"
+                                  : "bg-rose-50 border-rose-300 text-rose-950"
+                                }`}
+                            >
+                              <span className="font-bold flex items-center gap-1">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${isQd2Compliant ? "bg-emerald-600" : "bg-orange-500 animate-pulse"
+                                    }`}
+                                ></span>
+                                {translateText("QĐ 2 (+Ăn xế):")}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                {dayLateSnackCalo > 0 && (
+                                  <span className="text-[9px] font-semibold text-orange-700">
+                                    (+{dayLateSnackCalo})
+                                  </span>
+                                )}
+                                <span className="font-black">
+                                  {dayQd2Calo} Kcal
+                                </span>
+                                {isQd2Compliant ? (
+                                  <span className="text-[8.5px] px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
+                                    {translateText("Đạt")}
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="text-[8.5px] px-1 py-0.2 rounded bg-orange-200 text-orange-900 font-bold"
+                                    title={translateText("Chuẩn 765–926 Kcal")}
+                                  >
+                                    {dayQd2Calo < 765 ? translateText("Thiếu") : translateText("Vượt")}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <span
+                            className={`text-[9.5px] font-bold block mt-0.5 truncate ${day.isCompliant ? "text-emerald-600" : "text-amber-700"
+                              }`}
+                            title={day.standardNote}
+                          >
+                            {translateText(
+                              day.standardNote
+                                .replace(/^[✅⚠️\s]+/, "")
+                                .replace(/[A-Z_]+:\s*/g, "")
+                                .replace(/\s*\([^)]*\)/g, ""),
+                            )}
                           </span>
-                          <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
-                            {day.totalCalories}{translateText(" Kcal")}</span>
                         </div>
-                        <span className="text-[9px] font-bold text-emerald-600 block mt-0.5 truncate">
-                          {translateText(day.standardNote)}
-                        </span>
+
+                        {/* Buổi Sáng · 09:00 */}
+                        {day.dishes.some((d) => d.mealTime === "BREAKFAST" || d.mealTime === "MORNING_SNACK") && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1 text-[10px] font-black text-amber-800">
+                              <Sun className="w-3 h-3 text-amber-600" />
+                              <span>{translateText("BUỔI SÁNG · 09:00 (MÓN NƯỚC)")}</span>
+                            </div>
+                            <div className="space-y-1 text-[11px]">
+                              {day.dishes
+                                .filter((d) => d.mealTime === "BREAKFAST" || d.mealTime === "MORNING_SNACK")
+                                .map((dish, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-1.5 rounded-lg bg-amber-50/70 border border-amber-200/70 text-slate-800 text-[10.5px]"
+                                  >
+                                    <span className="font-semibold block leading-tight">
+                                      {dish.dishName}
+                                    </span>
+                                    <span className="text-[9.5px] text-amber-700 font-medium">
+                                      {dish.portionSizeG}{translateText("g •")}{" "}
+                                      {dish.plannedCalories}{translateText(" Kcal")}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bữa Trưa Chính · 11:00 */}
+                        {day.dishes.some((d) => d.mealTime === "LUNCH") && (
+                          <div className="space-y-1.5 border-t border-slate-100 pt-2 flex-1">
+                            <div className="flex items-center gap-1 text-[10px] font-black text-teal-800">
+                              <Utensils className="w-3 h-3 text-teal-600" />
+                              <span>{translateText("BỮA TRƯA CHÍNH · 11:00")}</span>
+                            </div>
+                            <div className="space-y-1 text-[11px]">
+                              {day.dishes
+                                .filter((d) => d.mealTime === "LUNCH")
+                                .map((dish, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-1.5 rounded-lg bg-slate-50 border border-slate-100/90 text-slate-800 text-[10.5px]"
+                                  >
+                                    <span className="font-semibold block leading-tight">
+                                      {dish.dishName}
+                                    </span>
+                                    <span className="text-[9.5px] text-slate-400 font-medium">
+                                      {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Buổi Phụ · 14:30 */}
+                        {day.dishes.some((d) => d.mealTime === "AFTERNOON_SNACK") && (
+                          <div className="space-y-1.5 border-t border-slate-100 pt-2">
+                            <div className="flex items-center gap-1 text-[10px] font-black text-purple-800">
+                              <Coffee className="w-3 h-3 text-purple-600" />
+                              <span>{translateText("BUỔI PHỤ · 14:30")}</span>
+                            </div>
+                            <div className="space-y-1 text-[11px]">
+                              {day.dishes
+                                .filter((d) => d.mealTime === "AFTERNOON_SNACK")
+                                .map((dish, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-1.5 rounded-lg bg-purple-50/50 border border-purple-100/80 text-slate-800 text-[10.5px]"
+                                  >
+                                    <span className="font-semibold block leading-tight">
+                                      {dish.dishName}
+                                    </span>
+                                    <span className="text-[9.5px] text-slate-400 font-medium">
+                                      {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Buổi Chiều Xế · 17:00 */}
+                        {day.dishes.some((d) => d.mealTime === "LATE_SNACK") && (
+                          <div className="space-y-1.5 border-t border-slate-100 pt-2">
+                            <div className="flex items-center justify-between text-[10px] font-black text-orange-800">
+                              <div className="flex items-center gap-1">
+                                <Flame className="w-3 h-3 text-orange-600" />
+                                <span>{translateText("BUỔI CHIỀU XẾ · 17:00 (MÓN NƯỚC)")}</span>
+                              </div>
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-900 border border-orange-200">
+                                {translateText("QĐ 2 (Ăn xế)")}
+                              </span>
+                            </div>
+                            <div className="space-y-1 text-[11px]">
+                              {day.dishes
+                                .filter((d) => d.mealTime === "LATE_SNACK")
+                                .map((dish, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="p-1.5 rounded-lg bg-orange-50/60 border border-orange-200/70 text-slate-800 text-[10.5px]"
+                                  >
+                                    <span className="font-semibold block leading-tight">
+                                      {dish.dishName}
+                                    </span>
+                                    <span className="text-[9.5px] text-orange-700 font-medium">
+                                      {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Dinh Dưỡng Cuối Cột Của Ngày - Tách bạch rõ ràng 2 Quy định */}
+                        <div className="pt-2 border-t border-slate-200 text-[10px] space-y-2 bg-slate-50/90 -mx-3.5 -mb-3.5 p-2.5">
+                          {/* Khối QĐ 1: Bán trú tiêu chuẩn không xế */}
+                          <div className="p-2 rounded-xl bg-white border border-teal-200/90 shadow-2xs space-y-1">
+                            <div className="flex items-center justify-between text-[10px] font-black text-teal-950">
+                              <span className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+                                {translateText("QĐ 1 (Tiêu chuẩn):")}
+                              </span>
+                              <span className="bg-teal-50 text-teal-800 px-1 py-0.2 rounded border border-teal-200 text-[9.5px]">
+                                {dayQd1Calo} Kcal
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[9.5px] font-bold text-slate-600">
+                              <span>{translateText("Đạm:")} <strong className="text-blue-900">{dayQd1Prot}g</strong></span>
+                              <span>{translateText("Béo:")} <strong className="text-amber-900">{dayQd1Fat}g</strong></span>
+                              <span>{translateText("Đường:")} <strong className="text-purple-900">{dayQd1Carb}g</strong></span>
+                            </div>
+                            <div className="text-[9px] font-black text-slate-700 flex justify-between pt-0.5">
+                              <span>{translateText("P:L:G")}</span>
+                              <span>{dayQd1PPct}% : {dayQd1LPct}% : {dayQd1CPct}%</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-200">
+                              <div style={{ width: `${dayQd1PPct}%` }} className="bg-blue-500 h-full" title={`Protein ${dayQd1PPct}%`} />
+                              <div style={{ width: `${dayQd1LPct}%` }} className="bg-amber-500 h-full" title={`Lipid ${dayQd1LPct}%`} />
+                              <div style={{ width: `${dayQd1CPct}%` }} className="bg-purple-500 h-full" title={`Glucid ${dayQd1CPct}%`} />
+                            </div>
+                          </div>
+
+                          {/* Khối QĐ 2: Có thêm ăn xế chiều */}
+                          <div className="p-2 rounded-xl bg-amber-50/50 border border-amber-200/90 shadow-2xs space-y-1">
+                            <div className="flex items-center justify-between text-[10px] font-black text-amber-950">
+                              <span className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                                {translateText("QĐ 2 (+Ăn xế):")}
+                              </span>
+                              <span className="bg-amber-100/70 text-amber-900 px-1 py-0.2 rounded border border-amber-300 text-[9.5px]">
+                                {dayQd2Calo} Kcal
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[9.5px] font-bold text-slate-600">
+                              <span>{translateText("Đạm:")} <strong className="text-blue-900">{dayQd2Prot}g</strong></span>
+                              <span>{translateText("Béo:")} <strong className="text-amber-900">{dayQd2Fat}g</strong></span>
+                              <span>{translateText("Đường:")} <strong className="text-purple-900">{dayQd2Carb}g</strong></span>
+                            </div>
+                            <div className="text-[9px] font-black text-slate-700 flex justify-between pt-0.5">
+                              <span>{translateText("P:L:G")}</span>
+                              <span>{dayQd2PPct}% : {dayQd2LPct}% : {dayQd2CPct}%</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-200">
+                              <div style={{ width: `${dayQd2PPct}%` }} className="bg-blue-500 h-full" title={`Protein ${dayQd2PPct}%`} />
+                              <div style={{ width: `${dayQd2LPct}%` }} className="bg-amber-500 h-full" title={`Lipid ${dayQd2LPct}%`} />
+                              <div style={{ width: `${dayQd2CPct}%` }} className="bg-purple-500 h-full" title={`Glucid ${dayQd2CPct}%`} />
+                            </div>
+                          </div>
+                        </div>
                       </div>
-
-                      {/* Buổi Sáng (09:00) */}
-                      {day.dishes.some((d) => d.mealTime === "BREAKFAST" || d.mealTime === "MORNING_SNACK") && (
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-1 text-[10px] font-black text-amber-800">
-                            <Sun className="w-3 h-3 text-amber-600" />
-                            <span>{translateText("BUỔI SÁNG (09:00)")}</span>
-                          </div>
-                          <div className="space-y-1 text-[11px]">
-                            {day.dishes
-                              .filter((d) => d.mealTime === "BREAKFAST" || d.mealTime === "MORNING_SNACK")
-                              .map((dish, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-1.5 rounded-lg bg-amber-50/70 border border-amber-200/70 text-slate-800 text-[10.5px]"
-                                >
-                                  <span className="font-semibold block leading-tight">
-                                    {dish.dishName}
-                                  </span>
-                                  <span className="text-[9.5px] text-amber-700 font-medium">
-                                    {dish.portionSizeG}{translateText("g •")}{" "}
-                                    {dish.plannedCalories}{translateText(" Kcal")}</span>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Bữa Trưa */}
-                      {day.dishes.some((d) => d.mealTime === "LUNCH") && (
-                        <div className="space-y-1.5 border-t border-slate-100 pt-2 flex-1">
-                          <div className="flex items-center gap-1 text-[10px] font-black text-teal-800">
-                            <Utensils className="w-3 h-3 text-teal-600" />
-                            <span>{translateText("BỮA TRƯA (11:00)")}</span>
-                          </div>
-                          <div className="space-y-1 text-[11px]">
-                            {day.dishes
-                              .filter((d) => d.mealTime === "LUNCH")
-                              .map((dish, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-1.5 rounded-lg bg-slate-50 border border-slate-100/90 text-slate-800 text-[10.5px]"
-                                >
-                                  <span className="font-semibold block leading-tight">
-                                    {dish.dishName}
-                                  </span>
-                                  <span className="text-[9.5px] text-slate-400 font-medium">
-                                    {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Bữa Xế Chiều */}
-                      {day.dishes.some((d) => d.mealTime === "AFTERNOON_SNACK") && (
-                        <div className="space-y-1.5 border-t border-slate-100 pt-2">
-                          <div className="flex items-center gap-1 text-[10px] font-black text-purple-800">
-                            <Coffee className="w-3 h-3 text-purple-600" />
-                            <span>{translateText("XẾ CHIỀU (14:30)")}</span>
-                          </div>
-                          <div className="space-y-1 text-[11px]">
-                            {day.dishes
-                              .filter((d) => d.mealTime === "AFTERNOON_SNACK")
-                              .map((dish, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-1.5 rounded-lg bg-purple-50/50 border border-purple-100/80 text-slate-800 text-[10.5px]"
-                                >
-                                  <span className="font-semibold block leading-tight">
-                                    {dish.dishName}
-                                  </span>
-                                  <span className="text-[9.5px] text-slate-400 font-medium">
-                                    {dish.portionSizeG}{translateText("g • ")}{dish.plannedCalories}{" "}{translateText("Kcal")}</span>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Dinh Dưỡng Cuối Cột Của Ngày */}
-                      <div className="pt-2 border-t border-slate-100 text-[10px] space-y-1 bg-slate-50/80 -mx-3.5 -mb-3.5 p-2.5">
-                        <div className="flex items-center justify-between text-slate-600 font-bold">
-                          <span>{translateText("Đạm: ")}{day.totalProteinG}{translateText("g")}</span>
-                          <span>{translateText("Béo: ")}{day.totalFatG}{translateText("g")}</span>
-                          <span>{translateText("G: ")}{day.totalCarbG}{translateText("g")}</span>
-                        </div>
-                        <div className="text-[9.5px] font-black text-slate-700 flex justify-between">
-                          <span>{translateText("P:L:G")}</span>
-                          <span>
-                            {day.proteinPct}% : {day.lipidPct}% :{" "}
-                            {day.glucidPct}%
-                          </span>
-                        </div>
-                        {/* Thanh 3 màu tỷ lệ */}
-                        <div className="w-full h-1.5 rounded-full overflow-hidden flex bg-slate-200">
-                          <div
-                            style={{ width: `${day.proteinPct}%` }}
-                            className="bg-blue-500 h-full"
-                            title={translateText("Protein")}
-                          />
-                          <div
-                            style={{ width: `${day.lipidPct}%` }}
-                            className="bg-amber-500 h-full"
-                            title={translateText("Lipid")}
-                          />
-                          <div
-                            style={{ width: `${day.glucidPct}%` }}
-                            className="bg-purple-500 h-full"
-                            title={translateText("Glucid")}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

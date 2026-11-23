@@ -12,6 +12,8 @@ import {
   CalendarRange,
   RotateCcw,
   Sparkles,
+  TrendingUp,
+  Download,
 } from 'lucide-react';
 import { ClassItem } from '../types';
 
@@ -34,6 +36,8 @@ interface HistoryControlsProps {
   totalFilteredItems?: number;
   totalWeekMeals?: number;
   onResetFilters?: () => void;
+  onOpenTrend?: () => void;
+  onOpenExport?: () => void;
 }
 
 export const HistoryControls: React.FC<HistoryControlsProps> = ({
@@ -55,6 +59,8 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
   totalFilteredItems,
   totalWeekMeals,
   onResetFilters,
+  onOpenTrend,
+  onOpenExport,
 }) => {
   useLanguage();
   const currentClass = classes.find((c) => c.id === selectedClassId);
@@ -159,6 +165,30 @@ export const HistoryControls: React.FC<HistoryControlsProps> = ({
             <CalendarRange className="w-3.5 h-3.5" />
             <span>{translateText("Tùy chọn ngày")}</span>
           </button>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {onOpenTrend && (
+            <button
+              type="button"
+              onClick={onOpenTrend}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition active:scale-95 cursor-pointer"
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-slate-600" />
+              <span>{translateText("So sánh xu hướng")}</span>
+            </button>
+          )}
+          {onOpenExport && (
+            <button
+              type="button"
+              onClick={onOpenExport}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-white" />
+              <span>{translateText("Xuất báo cáo")}</span>
+            </button>
+          )}
         </div>
       </div>
 

@@ -224,9 +224,10 @@ export const CreateEditCoordinationNoteModal: React.FC<CreateEditCoordinationNot
                   onChange={(e) => setMealSession(e.target.value)}
                   className="w-full py-1.5 px-2.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800 focus:outline-none focus:border-teal-500 text-xs"
                 >
-                  <option value="LUNCH">{translateText("Bữa trưa chính (10:30)")}</option>
-                  <option value="BREAKFAST">{translateText("Bữa sáng (07:30)")}</option>
-                  <option value="AFTERNOON_SNACK">{translateText("Bữa xế chiều (14:30)")}</option>
+                  <option value="BREAKFAST">{translateText("Buổi sáng (09:00)")}</option>
+                  <option value="LUNCH">{translateText("Bữa trưa chính (11:00)")}</option>
+                  <option value="AFTERNOON_SNACK">{translateText("Buổi phụ (14:30)")}</option>
+                  <option value="LATE_SNACK">{translateText("Buổi chiều xế (17:00)")}</option>
                   <option value="ALL_DAY">{translateText("Cả ngày (Tất cả bữa)")}</option>
                 </select>
               </div>

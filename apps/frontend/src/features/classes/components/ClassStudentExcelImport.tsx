@@ -271,7 +271,7 @@ export const ClassStudentExcelImport: React.FC<ClassStudentExcelImportProps> = (
   return (
     <div className="space-y-4 overflow-y-auto flex-1 pr-1 flex flex-col animate-in fade-in">
       {/* 1. Hướng dẫn & Nút tải mẫu */}
-      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-white p-4.5 rounded-2xl border border-emerald-100/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-white p-4 rounded-2xl border border-emerald-100/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-600/30">
             <FileSpreadsheet className="w-5 h-5" />

@@ -1,5 +1,6 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { formatDateDMY } from '../../../core/utils/date';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, XCircle, AlertCircle, ShieldAlert, Sparkles } from 'lucide-react';
@@ -136,7 +137,7 @@ export const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <div className="flex justify-between">
               <span className="text-slate-500">{translateText("Chu kỳ áp dụng:")}</span>
               <span className="font-semibold text-slate-900">
-                {translateText(menu.startDate?.split('T')[0])}{translateText(" đến ")}{translateText(menu.endDate?.split('T')[0])}{translateText(" (Tuần ")}{menu.cycleWeekNumber})
+                {formatDateDMY(menu.startDate)}{translateText(" đến ")}{formatDateDMY(menu.endDate)}{translateText(" (Tuần ")}{menu.cycleWeekNumber})
               </span>
             </div>
             <div className="flex justify-between">

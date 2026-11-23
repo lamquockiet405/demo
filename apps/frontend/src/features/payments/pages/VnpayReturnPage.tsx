@@ -111,12 +111,14 @@ export const VnpayReturnPage: React.FC = () => {
           relation: 'Phụ huynh học sinh',
         },
         serviceDetails: {
-          periodName: 'Gói Năng Lượng Chiều 17h (Tháng 11/2026)',
+          periodName: 'Gói Dịch Vụ Ăn Xế Tuần (Chiều 17h00)',
           serviceName: 'Dịch vụ suất ăn xế dinh dưỡng bán trú ngoài giờ',
-          servingDays: 22,
-          unitPricePerDay: 20000,
-          totalAmount: result?.amount || 440000,
-          amountInWords: 'Bốn trăm bốn mươi nghìn đồng chẵn',
+          servingWeeks: 1,
+          unitPricePerWeek: result?.amount || 85000,
+          servingDays: 5,
+          unitPricePerDay: 17000,
+          totalAmount: result?.amount || 85000,
+          amountInWords: 'Tám mươi lăm nghìn đồng chẵn',
         },
         paymentInfo: {
           paymentMethod: 'VNPAY_QR / Mobile Banking',
@@ -161,7 +163,7 @@ export const VnpayReturnPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-black uppercase text-emerald-600 tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">{translateText("Giao Dịch Hợp Lệ • Ký Số HMAC-SHA512 Thành Công")}</span>
+              <span className="text-xs font-black uppercase text-emerald-600 tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">{translateText("Giao Dịch Thành Công")}</span>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 pt-2">{translateText("Thanh Toán Ăn Xế Thành Công!")}</h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">{translateText("Suất ăn xế chiều 17h00 của bé đã được ghi danh chính thức vào ")}<strong>{translateText("Snack Service Roster")}</strong>{translateText(" (Danh sách chuẩn bị suất ăn của nhà bếp).")}</p>
             </div>

@@ -1,5 +1,6 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { formatDateDMY } from '../../../core/utils/date';
 import React, { useState } from "react";
 import { apiClient } from "../../../core/api/axios";
 import { useAcademicYearFilter } from "../../academic-years/useAcademicYearFilter";
@@ -24,16 +25,24 @@ import {
   Trash2,
   Lock,
   Unlock,
-  CalendarDays,
   CalendarRange,
   ShieldAlert,
 } from "lucide-react";
 
-const getToday = () => new Date().toISOString().slice(0, 10);
+// Không dùng toISOString() cho input date: nó chuyển ngày local sang UTC và
+// có thể làm Thứ Hai thành Chủ Nhật tại múi giờ Việt Nam.
+const formatLocalDate = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getToday = () => formatLocalDate(new Date());
 const getNextMonth = () => {
   const d = new Date();
   d.setDate(d.getDate() + 30);
-  return d.toISOString().slice(0, 10);
+  return formatLocalDate(d);
 };
 
 // Helper: Tìm Thứ Hai đầu tiên tính từ một mốc ngày
@@ -50,7 +59,7 @@ const calcDeadlineBefore2Days = (startDateStr: string) => {
   if (!startDateStr) return "";
   const d = new Date(`${startDateStr}T12:00:00`);
   d.setDate(d.getDate() - 2);
-  return d.toISOString().slice(0, 10);
+  return formatLocalDate(d);
 };
 
 // Helper: Tính khoảng ngày Thứ Hai -> Thứ Sáu của một tuần dựa trên mốc Thứ Hai cơ sở
@@ -66,9 +75,9 @@ const getWeekRangeFromBase = (weekNum: number, baseMonday: Date) => {
   const friStr = `${fri.getDate().toString().padStart(2, "0")}/${(fri.getMonth() + 1).toString().padStart(2, "0")}`;
 
   return {
-    startDate: mon.toISOString().slice(0, 10),
-    endDate: fri.toISOString().slice(0, 10),
-    registrationDeadline: dead.toISOString().slice(0, 10),
+    startDate: formatLocalDate(mon),
+    endDate: formatLocalDate(fri),
+    registrationDeadline: formatLocalDate(dead),
     label: `Tuần ${weekNum} (${monStr} → ${friStr})`,
   };
 };
@@ -121,9 +130,9 @@ const getNextWeekRange = (
 
   return {
     weekNumber: nextWeekNumber,
-    startDate: nextMon.toISOString().slice(0, 10),
-    endDate: fri.toISOString().slice(0, 10),
-    registrationDeadline: dead.toISOString().slice(0, 10),
+    startDate: formatLocalDate(nextMon),
+    endDate: formatLocalDate(fri),
+    registrationDeadline: formatLocalDate(dead),
     label: `Tuần ${nextWeekNumber} (${monStr} → ${friStr})`,
   };
 };
@@ -146,11 +155,10 @@ const getEmptyForm = (
   const startShort = `${defWeek.startDate.slice(8, 10)}/${defWeek.startDate.slice(5, 7)}`;
   const endShort = `${defWeek.endDate.slice(8, 10)}/${defWeek.endDate.slice(5, 7)}`;
   return {
-    name: `Thực đơn ăn xế Tuần ${defWeek.weekNumber} (${startShort} – ${endShort}) - Trường MG Hướng Dương`,
+    name: `Thực đơn ăn xế (${startShort} – ${endShort}) - KidMeal`,
     startDate: defWeek.startDate,
     endDate: defWeek.endDate,
     registrationDeadline: defWeek.registrationDeadline,
-    weekNumber: defWeek.weekNumber,
     feeAmount: "75000",
     description: "Khẩu phần ăn xế chiều gồm súp/bánh dinh dưỡng, sữa hạt và trái cây tươi theo chuẩn thực đơn tuần.",
     status: "OPEN",
@@ -167,7 +175,6 @@ export function PrincipalSnackServicesPage() {
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [weekFilter, setWeekFilter] = useState("ALL");
   const [editing, setEditing] = useState<any>(null);
   const [detail, setDetail] = useState<any>(null);
   const [form, setForm] = useState(getEmptyForm([], selectedYear));
@@ -212,14 +219,7 @@ export function PrincipalSnackServicesPage() {
 
   const rawRows = Array.isArray(data) ? data : data.items || [];
 
-  // Lọc theo tuần nếu có
-  const rows = rawRows.filter((r: any) => {
-    if (weekFilter !== "ALL") {
-      const wk = getPackageWeek(r);
-      if (String(wk.weekNumber) !== String(weekFilter)) return false;
-    }
-    return true;
-  });
+  const rows = rawRows;
 
   // Thống kê nhanh toàn trường
   const openCount = rawRows.filter((r) => r.status === "OPEN" && !r.isPaymentLocked).length;
@@ -239,7 +239,6 @@ export function PrincipalSnackServicesPage() {
           startDate: d.startDate || getToday(),
           endDate: d.endDate || getNextMonth(),
           registrationDeadline: d.registrationDeadline || getToday(),
-          weekNumber: d.weekNumber ?? wk.weekNumber,
           feeAmount: String(d.feeAmount ?? ""),
           description: d.description || "",
           status: d.status || "OPEN",
@@ -252,7 +251,6 @@ export function PrincipalSnackServicesPage() {
           startDate: row.startDate || getToday(),
           endDate: row.endDate || getNextMonth(),
           registrationDeadline: row.registrationDeadline || getToday(),
-          weekNumber: row.weekNumber ?? wk.weekNumber,
           feeAmount: String(row.feeAmount ?? ""),
           description: row.description || "",
           status: row.status || "OPEN",
@@ -263,24 +261,6 @@ export function PrincipalSnackServicesPage() {
       setForm(getEmptyForm(rawRows, selectedYear));
     }
     setEditing(row || {});
-  };
-
-  const applyWeekSelection = (weekNum: number) => {
-    const yearStart = selectedYear?.startDate
-      ? new Date(`${selectedYear.startDate}T12:00:00`)
-      : new Date();
-    const baseMonday = getFirstMonday(yearStart);
-    const range = getWeekRangeFromBase(weekNum, baseMonday);
-    const startShort = `${range.startDate.slice(8, 10)}/${range.startDate.slice(5, 7)}`;
-    const endShort = `${range.endDate.slice(8, 10)}/${range.endDate.slice(5, 7)}`;
-    setForm((prev) => ({
-      ...prev,
-      startDate: range.startDate,
-      endDate: range.endDate,
-      registrationDeadline: range.registrationDeadline,
-      weekNumber: weekNum,
-      name: `Thực đơn ăn xế Tuần ${weekNum} (${startShort} – ${endShort}) - Trường MG Hướng Dương`,
-    }));
   };
 
   const saveService = async (e: React.FormEvent) => {
@@ -307,6 +287,11 @@ export function PrincipalSnackServicesPage() {
       return;
     }
 
+    if (startD.getDay() !== 1 || new Date(`${form.endDate}T00:00:00`).getDay() !== 5) {
+      setError("Ngày phục vụ phải bắt đầu vào Thứ Hai và kết thúc vào Thứ Sáu.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -314,7 +299,7 @@ export function PrincipalSnackServicesPage() {
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '-')
         .slice(0, 15);
-      const periodCode = `PKG-XE-${form.startDate}-T${form.weekNumber || 1}-${Date.now().toString().slice(-4)}`;
+      const periodCode = `PKG-XE-${form.startDate}-${Date.now().toString().slice(-4)}`;
 
       const finalStatus = form.status === "LOCKED" ? "OPEN" : form.status;
 
@@ -328,7 +313,6 @@ export function PrincipalSnackServicesPage() {
         nutritionNotes: form.description?.trim() || "",
         description: form.description?.trim() || "",
         status: finalStatus,
-        weekNumber: form.weekNumber ? Number(form.weekNumber) : undefined,
         isPaymentLocked: false,
         capacityMode: "UNLIMITED",
       };
@@ -403,43 +387,6 @@ export function PrincipalSnackServicesPage() {
 
   return (
     <div className="space-y-6 w-full pb-12">
-      {/* ─── 1. Header Banner ─── */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-white/20 text-teal-100 uppercase tracking-wider backdrop-blur-sm">
-              {translateText("Ban Giám Hiệu • Thực Đơn Ăn Xế")}
-            </span>
-            <span className="text-xs text-teal-200">{translateText("Suất ăn xế chiều dinh dưỡng phân theo tuần")}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
-            <Coffee className="w-8 h-8 text-amber-300" />
-            {translateText("Quản Lý Thực Đơn Ăn Xế")}
-          </h1>
-          <p className="text-sm text-teal-100 max-w-2xl leading-relaxed">
-            {translateText("Thiết lập các kỳ thực đơn ăn xế chiều dinh dưỡng phân theo tuần, cấu hình mức phí và quản lý khóa/mở cổng đóng tiền trực tuyến cho Phụ huynh toàn trường.")}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold backdrop-blur-sm transition flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            {translateText("Làm mới")}
-          </button>
-          <button
-            onClick={() => void openModal()}
-            className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-2xl text-xs font-black shadow-md transition flex items-center gap-2"
-          >
-            <PlusCircle className="w-4 h-4" />
-            {translateText("Tạo Thực Đơn Ăn Xế")}
-          </button>
-        </div>
-      </div>
-
       {/* Thông báo Toast */}
       {toast && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center gap-3 shadow-sm animate-in fade-in">
@@ -521,7 +468,6 @@ export function PrincipalSnackServicesPage() {
               value={yearFilter.yearId}
               onChange={(e) => {
                 yearFilter.setYearId(e.target.value);
-                setWeekFilter("ALL");
               }}
               className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer shadow-xs"
             >
@@ -531,23 +477,6 @@ export function PrincipalSnackServicesPage() {
                   {year.status === "ACTIVE" ? " (đang áp dụng)" : ""}
                 </option>
               ))}
-            </select>
-          </div>
-
-          {/* Lọc theo tuần */}
-          <div className="flex items-center gap-1.5">
-            <CalendarDays className="w-4 h-4 text-teal-600 shrink-0" />
-            <select
-              value={weekFilter}
-              onChange={(e) => setWeekFilter(e.target.value)}
-              className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="ALL">{translateText("Tất cả các tuần")}</option>
-              <option value="1">{translateText("Tuần 1")}</option>
-              <option value="2">{translateText("Tuần 2")}</option>
-              <option value="3">{translateText("Tuần 3")}</option>
-              <option value="4">{translateText("Tuần 4")}</option>
-              <option value="5">{translateText("Tuần 5")}</option>
             </select>
           </div>
 
@@ -565,6 +494,24 @@ export function PrincipalSnackServicesPage() {
               <option value="CLOSED">{translateText("Đã kết thúc (CLOSED)")}</option>
             </select>
           </div>
+
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            title={translateText("Làm mới danh sách")}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin" : ""}`} />
+            <span>{translateText("Làm mới")}</span>
+          </button>
+
+          <button
+            onClick={() => void openModal()}
+            className="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>{translateText("Tạo Thực Đơn Ăn Xế")}</span>
+          </button>
         </div>
       </div>
 
@@ -582,11 +529,11 @@ export function PrincipalSnackServicesPage() {
             </div>
             <h3 className="text-base font-bold text-slate-800">{translateText("Không tìm thấy thực đơn ăn xế nào")}</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              {translateText(search || status || weekFilter !== "ALL"
-                ? "Thử thay đổi từ khóa tìm kiếm hoặc bỏ lọc tuần để xem các thực đơn khác."
+              {translateText(search || status
+                ? "Thử thay đổi từ khóa tìm kiếm để xem các thực đơn khác."
                 : "Chưa có thực đơn ăn xế nào được tạo. Hãy bấm 'Tạo Thực Đơn Ăn Xế' để công bố cho phụ huynh.")}
             </p>
-            {!search && !status && weekFilter === "ALL" && (
+            {!search && !status && (
               <button
                 onClick={() => void openModal()}
                 className="mt-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 shadow-sm transition"
@@ -633,7 +580,7 @@ export function PrincipalSnackServicesPage() {
                         <div className="flex flex-col gap-0.5">
                           <span className="flex items-center gap-1.5 font-bold text-slate-900">
                             <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                            {translateText(r.startDate)} → {translateText(r.endDate)}
+                            {formatDateDMY(r.startDate)} → {formatDateDMY(r.endDate)}
                           </span>
                           <span className="text-[11px] text-slate-400">
                             {translateText("Phục vụ 5 ngày (Thứ 2 - Thứ 6)")}
@@ -695,8 +642,8 @@ export function PrincipalSnackServicesPage() {
                             onClick={() => void togglePeriodLock(r)}
                             title={translateText(isLocked ? "Mở lại cổng đóng tiền" : "Khóa dịch vụ (Không thể đóng tiền nữa)")}
                             className={`p-2 rounded-xl font-bold transition inline-flex items-center border ${isLocked
-                                ? "border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                                : "border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100"
+                              ? "border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                              : "border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100"
                               }`}
                           >
                             {isLocked ? (
@@ -711,8 +658,8 @@ export function PrincipalSnackServicesPage() {
                             onClick={() => void togglePeriodStatus(r.id)}
                             title={translateText(r.status === "CLOSED" ? "Kích hoạt lại gói" : "Kết thúc đợt phục vụ")}
                             className={`p-2 rounded-xl font-bold transition inline-flex items-center border ${r.status === "CLOSED"
-                                ? "border-slate-300 text-slate-600 hover:bg-slate-100"
-                                : "border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50"
+                              ? "border-slate-300 text-slate-600 hover:bg-slate-100"
+                              : "border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50"
                               }`}
                           >
                             <Power className="w-3.5 h-3.5" />
@@ -774,53 +721,6 @@ export function PrincipalSnackServicesPage() {
                 </div>
               )}
 
-              {/* Phân theo tuần: Bộ trợ lý chọn nhanh tuần */}
-              <div className="bg-teal-50/70 border border-teal-200/90 rounded-2xl p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-teal-900 flex items-center gap-1.5">
-                    <CalendarDays className="w-4 h-4 text-teal-700" />
-                    {translateText("Chọn nhanh tuần áp dụng (Phân theo tuần):")}
-                  </span>
-                  <span className="text-[11px] font-bold text-teal-700">
-                    {translateText("Thứ 2 → Thứ 6")}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {[1, 2, 3, 4, 5].map((w) => (
-                    <button
-                      key={w}
-                      type="button"
-                      onClick={() => applyWeekSelection(w)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${Number(form.weekNumber) === w
-                          ? "bg-teal-700 text-white shadow-xs"
-                          : "bg-white text-teal-800 border border-teal-200 hover:bg-teal-100/70"
-                        }`}
-                    >
-                      {translateText(`Tuần ${w}`)}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = getNextWeekRange(rawRows, selectedYear);
-                      const startShort = `${next.startDate.slice(8, 10)}/${next.startDate.slice(5, 7)}`;
-                      const endShort = `${next.endDate.slice(8, 10)}/${next.endDate.slice(5, 7)}`;
-                      setForm((prev) => ({
-                        ...prev,
-                        startDate: next.startDate,
-                        endDate: next.endDate,
-                        registrationDeadline: next.registrationDeadline,
-                        weekNumber: next.weekNumber,
-                        name: `Thực đơn ăn xế Tuần ${next.weekNumber} (${startShort} – ${endShort}) - Trường MG Hướng Dương`,
-                      }));
-                    }}
-                    className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-400 text-slate-900 hover:bg-amber-300 transition shadow-xs sm:ml-auto"
-                  >
-                    {translateText(`Tuần mới nhất: Tuần ${getNextWeekRange(rawRows, selectedYear).weekNumber}`)}
-                  </button>
-                </div>
-              </div>
-
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">
                   {translateText("Tên thực đơn ăn xế ")}<span className="text-rose-500">*</span>
@@ -828,7 +728,7 @@ export function PrincipalSnackServicesPage() {
                 <input
                   type="text"
                   required
-                  placeholder={translateText("Ví dụ: Thực đơn ăn xế Tuần 1 - Trường MG Hướng Dương")}
+                  placeholder={translateText("Ví dụ: Thực đơn ăn xế Tuần 1 - KidMeal")}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -852,7 +752,7 @@ export function PrincipalSnackServicesPage() {
                         if (s.getDay() === 1) {
                           const eDate = new Date(s);
                           eDate.setDate(s.getDate() + 4);
-                          newEnd = eDate.toISOString().slice(0, 10);
+                          newEnd = formatLocalDate(eDate);
                         }
                       }
                       setForm({
@@ -996,11 +896,11 @@ export function PrincipalSnackServicesPage() {
               <div className="bg-slate-50 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div>
                   <span className="text-slate-400 block text-[11px]">{translateText("Thời gian phục vụ")}</span>
-                  <strong className="text-slate-800">{translateText(detail.startDate)} ~ {translateText(detail.endDate)}</strong>
+                  <strong className="text-slate-800">{formatDateDMY(detail.startDate)} ~ {formatDateDMY(detail.endDate)}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px]">{translateText("Hạn đóng tiền")}</span>
-                  <strong className="text-slate-800">{translateText(detail.registrationDeadline || "Không giới hạn")}</strong>
+                  <strong className="text-slate-800">{detail.registrationDeadline ? formatDateDMY(detail.registrationDeadline) : translateText("Không giới hạn")}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px]">{translateText("Mức phí / tuần")}</span>
@@ -1033,7 +933,7 @@ export function PrincipalSnackServicesPage() {
                       <div key={i} className="border border-slate-200 rounded-xl p-3 bg-slate-50/50 text-xs space-y-1">
                         <span className="font-bold text-teal-800">{translateText(m.dayLabel)}</span>
                         <p className="text-slate-600">
-                          {translateText([m.mainDish, m.drinkItem, m.fruitOrSide].filter(Boolean).join(" · "))}
+                          {translateText(m.mainDish || "")}
                         </p>
                       </div>
                     ))}

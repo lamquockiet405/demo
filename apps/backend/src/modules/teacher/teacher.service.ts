@@ -10,7 +10,7 @@ import {COORDINATION_MEAL_LABELS,MealCoordinationService} from '../attendance/se
 import {schoolDate} from '../../common/utils/persisted-state';
 
 export const MEAL_STATES=['FULL','MOST','HALF','LITTLE','NONE'];
-export const MEALS=['BREAKFAST','MORNING_SNACK','LUNCH','AFTERNOON_SNACK'];
+export const MEALS=['BREAKFAST','MORNING_SNACK','LUNCH','AFTERNOON_SNACK','LATE_SNACK'];
 @Injectable()
 export class TeacherService {
  constructor(private readonly db:DataSource,private readonly classes:ClassesService,private readonly children:ChildrenService,private readonly growth:GrowthService,private readonly dispatch:GrowthDispatchService,private readonly advice:NutritionAdviceService,private readonly notes:MealCoordinationService){}
@@ -45,7 +45,7 @@ export class TeacherService {
  async growthHistory(actor:any,id:any){await this.childAccess(actor,id);return this.growth.getChildHistory(Number(id));}
  async growthWrite(actor:any,dto:any,id?:any){if(id){const current=await this.db.query('SELECT student_id FROM physical_measurements WHERE id=$1',[Number(id)]);if(!current[0])throw new NotFoundException();await this.childAccess(actor,current[0].student_id);}let studentId=dto.studentId||dto.childId;if(!studentId&&dto.studentCode){const rows=await this.db.query('SELECT id FROM students WHERE student_code=$1',[dto.studentCode]);studentId=rows[0]?.id;}if(studentId)await this.childAccess(actor,studentId);else if(!id)throw new BadRequestException('Chọn học sinh hợp lệ.');const body={...dto,...(studentId?{studentId:Number(studentId),childId:String(studentId)}:{})};return id?this.growth.updateRecord(Number(id),body):this.growth.createRecord(body,Number(actor.sub));}
  async growthImport(actor:any,items:any[]){if(!Array.isArray(items)||!items.length||items.length>1000)throw new BadRequestException('Nhập từ 1 đến 1000 dòng cân đo.');const checked=[];for(const item of items){let id=item.studentId||item.childId;if(!id&&item.studentCode){const rows=await this.db.query('SELECT id FROM students WHERE student_code=$1',[String(item.studentCode)]);id=rows[0]?.id;}if(!id)throw new BadRequestException('Không tìm thấy mã học sinh.');await this.childAccess(actor,id);checked.push({...item,studentId:Number(id),childId:String(id)});}return this.growth.importRecords(checked,Number(actor.sub));}
- async mealList(actor:any,q:any){const ids=await this.allowedIds(actor,q.classId);const date=this.date(q.date),meal=this.meal(q.mealType);return this.db.query(`SELECT s.id AS "studentId",s.full_name AS "fullName",s.student_code AS "studentCode",s.class_id AS "classId",c.name AS "className",a.id AS "recordId",a.is_attended AS "isAttended",a.consumption_level AS "consumptionLevel",a.note FROM students s JOIN classes c ON c.id=s.class_id LEFT JOIN meal_attendances a ON a.student_id=s.id AND a.date=$2 AND a.meal_type=$3 WHERE s.class_id=ANY($1::bigint[]) AND (${searchSql("s.full_name")} LIKE ${searchLikeSql("$4")} OR ${searchSql("s.student_code")} LIKE ${searchLikeSql("$4")}) ORDER BY c.name,s.full_name`,[ids,date,meal,'%'+(q.search||'')+'%']);}
+ async mealList(actor:any,q:any){const ids=await this.allowedIds(actor,q.classId);const date=this.date(q.date),meal=this.meal(q.mealType);return this.db.query(`SELECT s.id AS "studentId",s.full_name AS "fullName",s.student_code AS "studentCode",s.class_id AS "classId",c.name AS "className",a.id AS "recordId",a.is_attended AS "isAttended",a.consumption_level AS "consumptionLevel",a.note FROM students s JOIN classes c ON c.id=s.class_id LEFT JOIN meal_attendances a ON a.student_id=s.id AND a.date=$2 AND (a.meal_type=$3 OR ($3='BREAKFAST' AND a.meal_type='MORNING_SNACK')) WHERE s.class_id=ANY($1::bigint[]) AND (${searchSql("s.full_name")} LIKE ${searchLikeSql("$4")} OR ${searchSql("s.student_code")} LIKE ${searchLikeSql("$4")}) ORDER BY c.name,s.full_name`,[ids,date,meal,'%'+(q.search||'')+'%']);}
  validateMealItem(data:any){
   if(typeof data.isAttended!=='boolean')throw new BadRequestException('Chọn có mặt hoặc vắng mặt cho từng học sinh.');
   if(data.consumptionLevel && !MEAL_STATES.includes(data.consumptionLevel) && !['PARTIAL','ALL','FEW'].includes(data.consumptionLevel))throw new BadRequestException('Mức ăn không hợp lệ.');
@@ -74,7 +74,7 @@ export class TeacherService {
   const ids=await this.allowedIds(actor,q.classId);
   return this.db.query(`SELECT class_id AS "classId",planned_quantity AS quantity,
    attendance_submitted_at AS "submittedAt",attendance_snapshot AS snapshot
-   FROM daily_meal_portions WHERE class_id=ANY($1::bigint[]) AND date=$2 AND meal_type=$3 AND attendance_submitted_at IS NOT NULL`,
+   FROM daily_meal_portions WHERE class_id=ANY($1::bigint[]) AND date=$2 AND (meal_type=$3 OR ($3='BREAKFAST' AND meal_type='MORNING_SNACK')) AND attendance_submitted_at IS NOT NULL`,
    [ids,this.date(q.date),this.meal(q.mealType)]);
  }
  async submitMeals(actor:any,data:any){
@@ -114,7 +114,7 @@ export class TeacherService {
  async adviceHistory(actor:any,id?:any){const ids=await this.allowedIds(actor);if(id)await this.childAccess(actor,id);const rows=await this.db.query('SELECT a.* FROM picky_eating_advices a JOIN students s ON s.id=a.student_id WHERE s.class_id=ANY($1::bigint[]) AND ($2::bigint IS NULL OR a.student_id=$2) ORDER BY a.created_at DESC',[ids,id?Number(id):null]);return rows.map(r=>({...r,studentId:r.student_id,adviceTitle:r.advice_title,homeSupplementAdvice:r.home_supplement_advice,createdAt:r.created_at}));}
  async sendAdvice(actor:any,dto:any){await this.childAccess(actor,dto.studentId);return this.advice.sendAdvice(dto,Number(actor.sub));}
  async notifications(actor:any,q:any){const data=await this.dispatch.getNotificationsByRole('TEACHER',Number(actor.sub),q);return {data,total:data.length};}
- async scan(actor:any){const ids=await this.allowedIds(actor);return this.dispatch.scanAndDispatchNotifications(Number(actor.tenantId)||1,ids);}
+ async scan(actor:any){return this.dispatch.scanAndDispatchNotifications(Number(actor.tenantId)||1);}
  async alerts(actor:any,q:any){const children=(await this.childList(actor,{classId:q.classId,limit:1000})).items;const records=(await this.growthList(actor,{classId:q.classId})).items;const latest=new Map();for(const r of records)if(!latest.has(r.childId))latest.set(r.childId,r);return {allergies:children.filter((c:any)=>c.allergies?.length),growth:[...latest.values()].filter(r=>r.overallNutritionalStatus&&r.overallNutritionalStatus!=='NORMAL')};}
  async report(actor:any,q:any){const date=this.date(q.date);const rows=await this.history(actor,{...q,startDate:date,endDate:date});return {date,recorded:rows.length,present:rows.filter(r=>r.isAttended).length,absent:rows.filter(r=>!r.isAttended).length,consumption:MEAL_STATES.map(status=>({status,count:rows.filter(r=>r.isAttended&&r.consumptionLevel===status).length})),classes:await this.scope(actor),rows};}
 }

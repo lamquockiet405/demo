@@ -273,7 +273,7 @@ export const EditSchoolInfoModal: React.FC<EditSchoolInfoModalProps> = ({
               disabled={saving}
               className="px-5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-1.5"
             >
-              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}{translateText("Lưu thay đổi vào CSDL")}</button>
+              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}{translateText("Lưu")}</button>
           </div>
         </form>
       </div>

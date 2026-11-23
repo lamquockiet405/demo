@@ -408,58 +408,8 @@ export function KitchenInspectionsPage({
   return (
     <>
       <Notice error={sendAction.error} message={sendAction.message} />
-      <PageTitle
-        eyebrow={
-          translateText(reviewer
-            ? audience === "principal"
-              ? "BAN GIÁM HIỆU"
-              : "CHUYÊN GIA DINH DƯỠNG"
-            : undefined)
-        }
-        title={translateText(reviewer ? "Phê duyệt kiểm thực 3 bước" : "Kiểm thực 3 bước")}
-        description={
-          translateText(reviewer
-            ? "Kiểm tra minh chứng bếp gửi, phê duyệt hoặc yêu cầu bổ sung; tra cứu người duyệt và thời điểm duyệt."
-            : "Tạo biên bản, xem kết quả kiểm tra và gửi ảnh minh chứng trước chế biến, trong chế biến, trước khi ăn.")
-        }
-      >
-        <ReloadButton loading={resource.loading} reload={resource.reload} />
-        <button
-          className="kp-button"
-          disabled={!rows.length}
-          onClick={() =>
-            downloadExcel("nhat-ky-kiem-thuc.xlsx", [
-              [
-                "Mã",
-                "Ngày",
-                "Bữa",
-                "Người kiểm",
-                "Bước 1",
-                "Bước 2",
-                "Bước 3",
-                "Duyệt",
-              ],
-              ...rows.map((r) => [
-                r.code,
-                r.mealDate || r.date,
-                r.mealTime,
-                r.performerName,
-                r.step1Status,
-                r.step2Status,
-                r.step3Status,
-                r.approvalStatusLabel || r.status,
-              ]),
-            ])
-          }
-        >
-          <Download size={15} />{translateText("Xuất nhật ký")}</button>
-        {audience === "kitchen" && (
-          <button className="kp-button primary" onClick={() => setCreate(true)}>
-            <Plus size={16} />{translateText("Tạo biên bản")}</button>
-        )}
-      </PageTitle>
 
-      <div className="grid grid-cols-1 gap-4 mb-5 sm:grid-cols-2 xl:grid-cols-4">
+      {resource.data && !resource.error && <div className="grid grid-cols-2 gap-3 mb-5 xl:grid-cols-4">
         {[
           { label: "Tổng biên bản", value: totalRecords, icon: FileText, tone: "text-slate-700 bg-slate-100" },
           { label: "Đã duyệt", value: approvedRecords, icon: CheckCircle2, tone: "text-emerald-700 bg-emerald-100" },
@@ -474,7 +424,7 @@ export function KitchenInspectionsPage({
             </div>
           </div>
         ))}
-      </div>
+      </div>}
 
       {audience === "nutritionist" && (
         <div
@@ -536,6 +486,40 @@ export function KitchenInspectionsPage({
             setStatus("");
           }}
         >{translateText("Xóa bộ lọc")}</button>
+        <ReloadButton loading={resource.loading} reload={resource.reload} />
+        <button
+          className="kp-button"
+          disabled={!rows.length}
+          onClick={() =>
+            downloadExcel("nhat-ky-kiem-thuc.xlsx", [
+              [
+                "Mã",
+                "Ngày",
+                "Bữa",
+                "Người kiểm",
+                "Bước 1",
+                "Bước 2",
+                "Bước 3",
+                "Duyệt",
+              ],
+              ...rows.map((r) => [
+                r.code,
+                r.mealDate || r.date,
+                r.mealTime,
+                r.performerName,
+                r.step1Status,
+                r.step2Status,
+                r.step3Status,
+                r.approvalStatusLabel || r.status,
+              ]),
+            ])
+          }
+        >
+          <Download size={15} />{translateText("Xuất nhật ký")}</button>
+        {audience === "kitchen" && (
+          <button className="kp-button primary" onClick={() => setCreate(true)}>
+            <Plus size={16} />{translateText("Tạo biên bản")}</button>
+        )}
       </div>
       <ResourceState resource={resource} empty={!rows.length} />
       <div className="kp-table-wrap">

@@ -12,6 +12,8 @@ import {
   Copy,
   Search,
   ChevronDown,
+  FileText,
+  Send,
 } from 'lucide-react';
 import { ClassItem } from '../types';
 
@@ -28,6 +30,10 @@ interface EvaluationControlsProps {
   onMarkAllAteAll: () => void;
   onCopyMenu?: () => void;
   totalStudents?: number;
+  isSavingDraft?: boolean;
+  isSubmitting?: boolean;
+  onSaveDraft?: () => void;
+  onSubmitReport?: () => void;
 }
 
 export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
@@ -43,6 +49,10 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
   onMarkAllAteAll,
   onCopyMenu,
   totalStudents = 30,
+  isSavingDraft = false,
+  isSubmitting = false,
+  onSaveDraft,
+  onSubmitReport,
 }) => {
   useLanguage();
   const handlePrevDay = () => {
@@ -168,6 +178,28 @@ export const EvaluationControls: React.FC<EvaluationControlsProps> = ({
               className="w-full bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 text-xs pl-8 pr-3 py-2 rounded-xl text-slate-800 placeholder:text-slate-400 transition focus:outline-none"
             />
           </div>
+
+          {onSaveDraft && (
+            <button
+              onClick={onSaveDraft}
+              disabled={isSavingDraft}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition disabled:opacity-50 cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-slate-500" />
+              <span>{translateText(isSavingDraft ? 'Đang lưu...' : 'Lưu nháp')}</span>
+            </button>
+          )}
+
+          {onSubmitReport && (
+            <button
+              onClick={onSubmitReport}
+              disabled={isSubmitting}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{translateText(isSubmitting ? 'Đang gửi...' : 'Gửi đánh giá')}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

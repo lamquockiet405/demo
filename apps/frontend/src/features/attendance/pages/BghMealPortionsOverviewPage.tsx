@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import {
   UtensilsCrossed,
   ChefHat,
@@ -128,8 +129,8 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
     }
   };
 
-  // Export to CSV for kitchen warehouse
-  const handleExportCsv = () => {
+  // Export to Excel for kitchen warehouse
+  const handleExportCsv = async () => {
     if (!data?.classes || data.classes.length === 0) return;
     const headers = [
       'STT',
@@ -147,32 +148,27 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
 
     const rows = data.classes.map((c, idx) => [
       idx + 1,
-      `"${c.name}"`,
-      `"${c.gradeName}"`,
-      `"${c.homeroomTeacher}"`,
+      c.name,
+      c.gradeName,
+      c.homeroomTeacher,
       c.enrolled,
       c.lunchCount,
       c.standardPortions,
       c.allergicCount,
       c.snackCount,
       c.absentToday,
-      c.isKitchenLocked ? '"Đã khóa gửi Bếp"' : '"Chưa khóa"',
+      c.isKitchenLocked ? 'Đã khóa gửi Bếp' : 'Chưa khóa',
     ]);
 
-    const csvContent =
-      '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `Ke_Hoach_Suat_An_Toan_Truong_${selectedDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    await downloadExcel(
+      `Ke_Hoach_Suat_An_Toan_Truong_${selectedDate}.xlsx`,
+      [headers, ...rows],
+      `Suất ăn ${selectedDate}`
+    );
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans antialiased text-slate-800">
+    <div className="space-y-6 w-full pb-12 font-sans antialiased text-slate-800">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 font-semibold text-xs border border-emerald-500">
@@ -180,56 +176,6 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
           <span>{toastMessage}</span>
         </div>
       )}
-
-      {/* 1. Header Toolbar */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-              <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse" />
-              CỔNG BAN GIÁM HIỆU • ĐIỀU HÀNH BÁN TRÚ
-            </span>
-            <span className="text-xs text-slate-500 font-medium">Hạn chốt gửi Bếp: 08:45 hàng ngày</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Kế hoạch Định lượng Suất ăn Bán trú Toàn trường
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Tổng hợp dữ liệu báo suất ăn từ Giáo viên các lớp gửi xuống Bếp trung tâm • Giám sát tiến độ chốt sổ chuẩn ATTP.
-          </p>
-        </div>
-
-        {/* Date Selector & Actions */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 shadow-inner">
-            <Calendar className="w-4 h-4 text-teal-700" />
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer"
-            />
-          </div>
-
-          <button
-            onClick={loadSummary}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs transition"
-            title="Làm mới dữ liệu từ cơ sở dữ liệu"
-          >
-            <RotateCcw className={`w-3.5 h-3.5 text-teal-600 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Làm mới</span>
-          </button>
-
-          <button
-            onClick={handleExportCsv}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/25 transition"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>Xuất báo cáo Bếp</span>
-          </button>
-        </div>
-      </div>
 
       {/* 2. Top 5 KPI Cards (Toàn trường) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -336,7 +282,7 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
 
       {/* 3. Main Table: Ma Trận Giám Sát Suất Ăn 6 Lớp Học */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-black text-slate-900">
               Bảng Tổng Hợp Kế Hoạch Suất Ăn Theo Lớp
@@ -345,9 +291,36 @@ export const BghMealPortionsOverviewPage: React.FC = () => {
               Theo dõi dữ liệu thực tế từ cơ sở dữ liệu PostgreSQL • Bấm nút thao tác để xem chi tiết học sinh hoặc mở khóa điều chỉnh.
             </p>
           </div>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-            Tổng cộng: {data?.classes?.length ?? 6} lớp học
-          </span>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs">
+              <Calendar className="w-3.5 h-3.5 text-teal-700" />
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer"
+              />
+            </div>
+
+            <button
+              onClick={loadSummary}
+              disabled={isLoading}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-2xs transition cursor-pointer"
+              title="Làm mới dữ liệu từ cơ sở dữ liệu"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 text-teal-600 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Làm mới</span>
+            </button>
+
+            <button
+              onClick={handleExportCsv}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition cursor-pointer"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Xuất báo cáo Bếp</span>
+            </button>
+          </div>
         </div>
 
         {isLoading ? (

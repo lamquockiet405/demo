@@ -23,6 +23,8 @@ export interface ElectronicReceiptDto {
     serviceName: string;
     servingDays: number;
     unitPricePerDay: number;
+    servingWeeks?: number;
+    unitPricePerWeek?: number;
     totalAmount: number;
     amountInWords: string;
   };

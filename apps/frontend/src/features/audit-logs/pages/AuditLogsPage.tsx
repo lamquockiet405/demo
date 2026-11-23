@@ -1,5 +1,6 @@
 import { t as translateText, getLocale } from '../../../core/i18n/language';
 import { useLanguage } from '../../../core/i18n/useLanguage';
+import { formatDateTimeDMY } from '../../../core/utils/date';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   ShieldAlert,
@@ -18,7 +19,9 @@ import {
   Lock,
   Layers,
   RefreshCw,
+  FileSpreadsheet,
 } from 'lucide-react';
+import { downloadExcel } from '../../../core/utils/excel-export';
 import { auditLogsApi } from '../api/audit-logs.api';
 import {
   AuditLogItem,
@@ -155,6 +158,35 @@ export const AuditLogsPage: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handleExportExcel = async () => {
+    if (!logs.length) return;
+    const headers = [
+      'STT',
+      'Thời gian',
+      'Người thực hiện',
+      'Vai trò',
+      'Hành động',
+      'Thực thể',
+      'Địa chỉ IP',
+      'Chi tiết / Ghi chú',
+    ];
+    const dataRows = logs.map((l, idx) => [
+      idx + 1,
+      l.timestamp ? new Date(l.timestamp).toLocaleString('vi-VN') : '',
+      l.user?.name || l.user?.email || 'Hệ thống',
+      l.user?.role || '',
+      l.action || '',
+      l.targetEntity ? `${l.targetEntity} (#${l.targetId || ''})` : '',
+      l.ipAddress || '',
+      l.description || l.metadata?.note || '',
+    ]);
+    await downloadExcel(
+      `Nhat_ky_he_thong_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      [headers, ...dataRows],
+      'Nhật ký kiểm toán hệ thống'
+    );
+  };
+
   const formatRelativeTime = (isoString: string) => {
     try {
       const diffMs = Date.now() - new Date(isoString).getTime();
@@ -204,28 +236,6 @@ export const AuditLogsPage: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full space-y-6">
-      {/* 1. Header & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 shadow-inner">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{translateText("Nhật ký Kiểm toán & Truy vết Hệ thống")}</h1>
-          </div>
-          <p className="text-sm text-slate-500 mt-1">{translateText("Theo dõi, giám sát các hoạt động nhạy cảm (dị ứng, thể lực WHO, thực đơn, kiểm thực bếp) theo chuẩn an toàn thông tin")}</p>
-        </div>
-
-        <button
-          onClick={() => {
-            fetchLogs();
-            auditLogsApi.getStats().then((s) => setStats(s));
-          }}
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-xs"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />{translateText("Làm mới")}</button>
-      </div>
-
       {/* 2. Thống kê nhanh (Stats Cards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
@@ -278,11 +288,31 @@ export const AuditLogsPage: React.FC = () => {
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
             <Filter className="w-4 h-4 text-teal-600" />{translateText(" Bộ lọc kiểm toán đa chiều")}</div>
-          <button
-            onClick={handleResetFilters}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-teal-600 transition"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />{translateText(" Đặt lại mặc định")}</button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                fetchLogs();
+                auditLogsApi.getStats().then((s) => setStats(s));
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />{translateText("Làm mới")}
+            </button>
+            <button
+              onClick={handleResetFilters}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-teal-600 transition cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />{translateText(" Đặt lại")}</button>
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer shadow-2xs"
+              title={translateText("Xuất nhật ký kiểm toán ra Excel")}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{translateText("Xuất Excel")}</span>
+            </button>
+          </div>
         </div>
 
         {/* Cảnh báo khoảng ngày không hợp lệ (EX-01) */}
@@ -419,7 +449,7 @@ export const AuditLogsPage: React.FC = () => {
                         {translateText(formatRelativeTime(log.createdAt))}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-                        {translateText(new Date(log.createdAt).toLocaleDateString(getLocale()))} {translateText(new Date(log.createdAt).toLocaleTimeString(getLocale()))}
+                        {translateText(formatDateTimeDMY(log.createdAt))}
                       </div>
                     </td>
 

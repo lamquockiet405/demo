@@ -20,7 +20,6 @@ import {
   Check,
   X,
   Sparkles,
-  Salad,
   Layers,
   RotateCcw,
   Archive,
@@ -484,46 +483,9 @@ export const NutritionistAllergyManagementPage: React.FC<
         </div>
       )}
 
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#0d3429] via-[#114b3b] to-[#1c382f] rounded-3xl p-6 text-white shadow-xl border border-emerald-800/40 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="space-y-1.5 max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />{translateText("Quy Tắc An Toàn Thực Phẩm & Kiểm Soát Dị Ứng")}</div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">{translateText("Cấu Hình Quy Tắc Dị Ứng & Hồ Sơ Cách Ly Khẩu Phần Mầm Non")}</h2>
-          <p className="text-emerald-100 text-xs leading-relaxed">{translateText("Quản trị danh mục dị ứng chuẩn, phân tầng 3 mức độ phản vệ (Nhẹ • Trung bình • Phản vệ cấp tính), chống nhiễm chéo dụng cụ nấu và in thẻ cảnh báo bàn ăn.")}</p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          <button
-            onClick={handleExportExcel}
-            className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition flex items-center gap-2"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
-            <span>{translateText("Xuất Excel")}</span>
-          </button>
-          {canManage && (<button
-            onClick={() => {
-              setEditingCatalogItem(null);
-              setIsAllergenDrawerOpen(true);
-            }}
-            className="px-4 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs shadow-lg transition flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{translateText("Thêm Nhóm Dị Ứng")}</span>
-          </button>)}
-          {canManage && (<button
-            onClick={() => setIsDeclareModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-black text-xs shadow-lg transition flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{translateText("Khai Báo Hồ Sơ Trẻ")}</span>
-          </button>)}
-        </div>
-      </div>
-
-      {/* KPI Cards (chỉ hiện đầy đủ khi chạy độc lập để tránh trùng lặp với NutritionRulesPage) */}
+      {/* KPI Cards (chỉ hiện khi chạy độc lập để tránh trùng lặp với NutritionRulesPage) */}
       {!embedded && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
               title: translateText("Trẻ Có Hồ Sơ Dị Ứng"),
@@ -560,15 +522,6 @@ export const NutritionistAllergyManagementPage: React.FC<
               icon: GraduationCap,
               color: "bg-teal-50 text-teal-600",
               text: "text-teal-800 text-base truncate block",
-            },
-            {
-              title: translateText("Món Ăn Thay Thế"),
-              val: "100%",
-              unit: "",
-              sub: translateText("Đảm bảo tương đương dinh dưỡng"),
-              icon: Salad,
-              color: "bg-emerald-50 text-emerald-600",
-              text: "text-emerald-600",
             },
           ].map((k) => (
             <div
@@ -659,11 +612,42 @@ export const NutritionistAllergyManagementPage: React.FC<
 
               <button
                 onClick={fetchData}
-                className="p-2 rounded-2xl border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition"
+                className="p-2 rounded-2xl border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition cursor-pointer"
                 title={translateText("Làm mới dữ liệu")}
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
+
+              <button
+                onClick={handleExportExcel}
+                className="px-3.5 py-2 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                title={translateText("Xuất danh sách học sinh dị ứng ra Excel")}
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <span>{translateText("Xuất Excel")}</span>
+              </button>
+
+              {canManage && (
+                <button
+                  onClick={() => {
+                    setEditingCatalogItem(null);
+                    setIsAllergenDrawerOpen(true);
+                  }}
+                  className="px-3.5 py-2 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{translateText("Thêm Nhóm Dị Ứng")}</span>
+                </button>
+              )}
+              {canManage && (
+                <button
+                  onClick={() => setIsDeclareModalOpen(true)}
+                  className="px-3.5 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{translateText("Khai Báo Trẻ")}</span>
+                </button>
+              )}
 
 
             </div>

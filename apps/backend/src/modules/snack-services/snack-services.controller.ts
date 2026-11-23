@@ -94,10 +94,16 @@ export class SnackServicesController {
   )
   @ApiOperation({
     summary:
-      "Phụ huynh xem các gói ăn xế đã công bố và Lịch ăn xế (Chỉ trả về lịch ăn xế khi đã đóng tiền PAID)",
+      "Phụ huynh xem các gói ăn xế đã công bố và Lịch ăn xế (Cho phép xem trước thực đơn)",
   })
-  async getParentOverview(@CurrentUser("sub") userId: number) {
-    return this.snackService.getParentSnackOverview(userId);
+  async getParentOverview(
+    @CurrentUser("sub") userId: number,
+    @Query("studentId") studentId?: string,
+  ) {
+    return this.snackService.getParentSnackOverview(
+      userId,
+      studentId ? Number(studentId) : undefined,
+    );
   }
 
   /**

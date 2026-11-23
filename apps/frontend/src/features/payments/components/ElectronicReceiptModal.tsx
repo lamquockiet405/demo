@@ -1,13 +1,11 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { ElectronicReceiptData } from '../api/vnpay.api';
 import {
   X,
   Printer,
-  Download,
   CheckCircle2,
   Building,
-  ShieldCheck,
-  QrCode,
 } from 'lucide-react';
 
 interface ElectronicReceiptModalProps {
@@ -19,17 +17,79 @@ export const ElectronicReceiptModal: React.FC<ElectronicReceiptModalProps> = ({
   receipt,
   onClose,
 }) => {
-  if (!receipt) return null;
+  if (!receipt || typeof document === 'undefined') return null;
 
   const handlePrint = () => {
     window.print();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 my-8">
+  const weeks = (receipt.serviceDetails as any)?.servingWeeks || 1;
+  const unitPricePerWeek =
+    (receipt.serviceDetails as any)?.unitPricePerWeek ||
+    (receipt.serviceDetails.totalAmount
+      ? Math.round(receipt.serviceDetails.totalAmount / weeks)
+      : receipt.serviceDetails.totalAmount);
+
+  return createPortal(
+    <div
+      id="electronic-receipt-portal"
+      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 8mm 12mm;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+          }
+          #root {
+            display: none !important;
+          }
+          #electronic-receipt-portal {
+            position: static !important;
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            overflow: visible !important;
+            inset: auto !important;
+          }
+          #electronic-receipt-portal .receipt-card {
+            position: static !important;
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #ffffff !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-inside: avoid !important;
+            break-after: avoid !important;
+          }
+          .print-hide {
+            display: none !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        }
+      `}</style>
+      <div className="receipt-card bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 my-8">
         {/* Modal Top Bar (Hidden during print) */}
-        <div className="flex items-center justify-between border-b pb-4 print:hidden">
+        <div className="print-hide flex items-center justify-between border-b pb-4 print:hidden">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
               Biên Lai Điện Tử Chính Thức
@@ -42,14 +102,14 @@ export const ElectronicReceiptModal: React.FC<ElectronicReceiptModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               In biên lai
             </button>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition"
+              className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -126,8 +186,8 @@ export const ElectronicReceiptModal: React.FC<ElectronicReceiptModalProps> = ({
               <thead className="bg-slate-100 text-slate-700 uppercase font-semibold">
                 <tr>
                   <th className="py-2.5 px-3">Khoản thu dịch vụ</th>
-                  <th className="py-2.5 px-3 text-center">Số ngày</th>
-                  <th className="py-2.5 px-3 text-right">Đơn giá / ngày</th>
+                  <th className="py-2.5 px-3 text-center">Số tuần</th>
+                  <th className="py-2.5 px-3 text-right">Đơn giá / tuần</th>
                   <th className="py-2.5 px-3 text-right">Thành tiền</th>
                 </tr>
               </thead>
@@ -142,10 +202,10 @@ export const ElectronicReceiptModal: React.FC<ElectronicReceiptModalProps> = ({
                     </span>
                   </td>
                   <td className="py-3 px-3 text-center font-bold text-slate-800">
-                    {receipt.serviceDetails.servingDays} ngày
+                    {weeks} tuần
                   </td>
                   <td className="py-3 px-3 text-right font-medium text-slate-700">
-                    {receipt.serviceDetails.unitPricePerDay.toLocaleString('vi-VN')} đ
+                    {unitPricePerWeek.toLocaleString('vi-VN')} đ
                   </td>
                   <td className="py-3 px-3 text-right font-black text-slate-900">
                     {receipt.serviceDetails.totalAmount.toLocaleString('vi-VN')} đ
@@ -209,23 +269,24 @@ export const ElectronicReceiptModal: React.FC<ElectronicReceiptModalProps> = ({
         </div>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t print:hidden">
+        <div className="print-hide flex items-center justify-end gap-3 pt-4 border-t print:hidden">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition"
+            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition cursor-pointer"
           >
             Đóng
           </button>
           <button
             onClick={handlePrint}
-            className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center gap-2"
+            className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             In & Tải Biên Lai PDF
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

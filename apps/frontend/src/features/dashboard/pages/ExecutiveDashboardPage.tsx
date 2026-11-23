@@ -91,43 +91,41 @@ export const ExecutiveDashboardPage: React.FC = () => {
   const safety = data?.foodSafetyStatus;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* ─── 1. TOP HEADER BANNER ─── */}
-      <div className="bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-800/40">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              Bảng Điều Hành Ban Giám Hiệu & Dinh Dưỡng
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+    <div className="w-full space-y-6">
+      {/* ─── 1. CLEAN COMPACT HEADER ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Hệ Thống Quản Lý Dinh Dưỡng & Bán Trú Mầm Non
             </h1>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Tích hợp Chuẩn Dinh Dưỡng Bộ GD&ĐT, Kiểm thực 3 bước chuẩn Bộ Y Tế, Chuẩn tăng trưởng thể lực WHO & Thanh toán VNPAY Dịch vụ ăn xế.
-            </p>
+            <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-teal-800 bg-teal-100 border border-teal-300 px-2.5 py-0.5 rounded-full uppercase">
+              <Sparkles className="w-3 h-3 text-teal-700" />
+              BGH & Quản Trị
+            </span>
           </div>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Chuẩn Dinh Dưỡng Bộ GD&ĐT, Kiểm thực 3 bước chuẩn Bộ Y Tế, Chuẩn thể lực WHO & Thanh toán VNPAY.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 transition flex items-center gap-2 text-xs font-bold"
-              title="Làm mới dữ liệu"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Cập nhật</span>
-            </button>
-            <Link
-              to="/menu-approval"
-              className="px-5 py-2.5 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-bold text-xs shadow-lg transition flex items-center gap-2"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Duyệt Thực Đơn Tuần</span>
-            </Link>
-          </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+            title="Làm mới dữ liệu"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : 'text-slate-500'}`} />
+            <span>Cập nhật</span>
+          </button>
+          <Link
+            to="/menu-approval"
+            className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Duyệt Thực Đơn</span>
+          </Link>
         </div>
       </div>
 
@@ -441,7 +439,7 @@ export const ExecutiveDashboardPage: React.FC = () => {
                           </span>
                         ) : (
                           <span className="text-emerald-600 font-medium text-[11px] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Đủ 100%
+                            <CheckCircle2 className="w-3 h-3" /> Chưa ghi nhận vắng
                           </span>
                         )}
                       </td>
@@ -493,8 +491,8 @@ export const ExecutiveDashboardPage: React.FC = () => {
                   <UtensilsCrossed className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">{menu?.title || 'Thực đơn tuần hiện tại'}</h3>
-                  <p className="text-xs text-slate-500">Đối tượng: {menu?.targetAgeGroup} • Trạng thái: Đang áp dụng</p>
+                  <h3 className="text-base font-bold text-slate-900">{menu?.title || 'Chưa có thực đơn hiện hành'}</h3>
+                  {menu && <p className="text-xs text-slate-500">Đối tượng: {menu.targetAgeGroup}</p>}
                 </div>
               </div>
               <Link
@@ -504,31 +502,6 @@ export const ExecutiveDashboardPage: React.FC = () => {
                 <span>Chi tiết</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
-            </div>
-
-            {/* P:L:G Breakdown Meters */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                <span>Cân đối cơ cấu năng lượng (Chuẩn Dinh Dưỡng Học Đường)</span>
-                <span className="text-emerald-600">Đạt chuẩn 100%</span>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/60">
-                  <div className="text-xs font-bold text-slate-500">Protein (Đạm)</div>
-                  <div className="text-lg font-black text-emerald-700">15%</div>
-                  <div className="text-[11px] text-slate-400">Chuẩn 13 - 20%</div>
-                </div>
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/60">
-                  <div className="text-xs font-bold text-slate-500">Lipid (Chất béo)</div>
-                  <div className="text-lg font-black text-amber-700">28%</div>
-                  <div className="text-[11px] text-slate-400">Chuẩn 25 - 35%</div>
-                </div>
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/60">
-                  <div className="text-xs font-bold text-slate-500">Glucid (Tinh bột)</div>
-                  <div className="text-lg font-black text-teal-700">57%</div>
-                  <div className="text-[11px] text-slate-400">Chuẩn 52 - 60%</div>
-                </div>
-              </div>
             </div>
 
             {/* Attendance Session Snapshot */}
@@ -598,7 +571,7 @@ export const ExecutiveDashboardPage: React.FC = () => {
             ) : (
               <div className="p-6 text-center text-slate-400 text-xs">
                 <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 mb-2" />
-                Không có xung đột dị ứng nào trên thực đơn hôm nay.
+                Chưa có cảnh báo xung đột dị ứng được ghi nhận.
               </div>
             )}
           </div>

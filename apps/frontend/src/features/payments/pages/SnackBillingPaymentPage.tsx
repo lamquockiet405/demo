@@ -142,49 +142,32 @@ export const SnackBillingPaymentPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* ─── 1. TOP HEADER BANNER ─── */}
-      <div className="bg-gradient-to-r from-blue-950 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-blue-800/40">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              Cổng Thanh Toán Trực Tuyến VNPAY
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Dịch Vụ Ăn Xế 17:00 & Thanh Toán Bán Trú
-            </h1>
-            <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
-              Tích hợp trực tiếp cổng VNPAY Sandbox HMAC-SHA512. Dữ liệu hóa đơn và giao dịch được lưu trữ và truy vấn thời gian thực từ cơ sở dữ liệu.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={fetchInvoices}
-              className="p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 transition flex items-center gap-2 text-xs font-bold"
-              title="Làm mới danh sách"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Làm mới</span>
-            </button>
-            <button
-              onClick={handleBatchRemind}
-              className="px-4 py-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 transition flex items-center gap-2 text-xs font-bold"
-              title="Gửi nhắc nhở tự động đến tất cả phụ huynh có hóa đơn chưa thanh toán"
-            >
-              <BellRing className="w-4 h-4 text-amber-400" />
-              <span>Nhắc Phí Toàn Bộ ({invoices.filter((i) => i.status === 'PENDING').length})</span>
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 rounded-2xl bg-blue-400 hover:bg-blue-300 text-blue-950 font-bold text-xs shadow-lg transition flex items-center gap-2 shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tạo Đăng Ký Ăn Xế Mới</span>
-            </button>
-          </div>
-        </div>
+    <div className="w-full space-y-6">
+      {/* ─── ACTION TOOLBAR ─── */}
+      <div className="flex items-center justify-end gap-3 flex-wrap">
+        <button
+          onClick={fetchInvoices}
+          className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-2 text-xs font-bold shadow-2xs"
+          title="Làm mới danh sách"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
+          <span>Làm mới</span>
+        </button>
+        <button
+          onClick={handleBatchRemind}
+          className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center gap-2 text-xs font-bold shadow-2xs"
+          title="Gửi nhắc nhở tự động đến tất cả phụ huynh có hóa đơn chưa thanh toán"
+        >
+          <BellRing className="w-3.5 h-3.5 text-amber-600" />
+          <span>Nhắc Phí Toàn Bộ ({invoices.filter((i) => i.status === 'PENDING').length})</span>
+        </button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-2 shrink-0 cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tạo Đăng Ký Ăn Xế Mới</span>
+        </button>
       </div>
 
       {/* ─── 2. VNPAY SANDBOX TEST CARD CALLOUT ─── */}
