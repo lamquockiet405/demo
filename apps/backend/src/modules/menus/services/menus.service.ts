@@ -475,15 +475,15 @@ export class MenusService implements OnModuleInit {
     return this.menuDishRepo.manager.query(`
       SELECT s.id as student_id, s.full_name, c.id as class_id, c.name as class_name,
         sa.allergen_id as allergen_id,
-        a.name as allergen_name,
+        COALESCE(a.name, sa.custom_allergen_name) as allergen_name,
         a.code as allergen_code,
         a.description as allergen_description,
         sa.severity, sa.note as reaction_treatment, 'FOOD' as allergy_type
       FROM student_allergies sa
       JOIN students s ON sa.student_id = s.id
       LEFT JOIN classes c ON s.class_id = c.id
-      JOIN allergens a ON sa.allergen_id = a.id
-      WHERE s.status = 'ACTIVE'
+      LEFT JOIN allergens a ON sa.allergen_id = a.id
+      WHERE s.status = 'ACTIVE' AND sa.is_active = TRUE
       ORDER BY s.full_name ASC
     `);
   }

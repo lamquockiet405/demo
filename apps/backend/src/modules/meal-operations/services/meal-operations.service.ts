@@ -190,6 +190,7 @@ export class MealOperationsService {
 
     // 4. Fetch Allergies
     const allergies = await this.allergyRepo.find({
+      where: { isActive: true },
       relations: ['child', 'allergen'],
     });
 

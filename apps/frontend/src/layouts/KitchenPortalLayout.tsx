@@ -46,7 +46,7 @@ const groups = [
         label: "Thực đơn đã công bố",
         icon: CalendarDays,
       },
-      { to: "/kitchen/snack-roster", label: "Danh sách ăn sáng", icon: Users },
+      { to: "/kitchen/snack-roster", label: "Danh sách ăn xế", icon: Users },
       { to: "/kitchen/notes", label: "Ghi chú phối hợp", icon: MessageSquare },
     ],
   },

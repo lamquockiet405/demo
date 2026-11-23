@@ -21,7 +21,7 @@ export function KitchenSnackRosterPage() {
   const [date, setDate] = useState(getSchoolDate);
   const [search, setSearch] = useState("");
   const [classId, setClassId] = useState("");
-  const [payment, setPayment] = useState("");
+  const [payment, setPayment] = useState("PAID");
   const [page, setPage] = useState(1);
   const [detail, setDetail] = useState<SnackRosterItem | null>(null);
   const resource = useKitchenResource(
@@ -49,20 +49,20 @@ export function KitchenSnackRosterPage() {
       )}
       <div className="kp-filters">
         <label>{translateText("Ngày")}<input
-            type="date"
-            aria-label={translateText("Ngày ăn sáng")}
-            value={date}
-            onChange={(e) => {
-              if (e.target.value) {
-                setDate(e.target.value);
-                setPage(1);
-              }
-            }}
-          />
+          type="date"
+          aria-label={translateText("Ngày ăn xế")}
+          value={date}
+          onChange={(e) => {
+            if (e.target.value) {
+              setDate(e.target.value);
+              setPage(1);
+            }
+          }}
+        />
         </label>
         <input
           type="search"
-          aria-label={translateText("Tìm đăng ký ăn sáng")}
+          aria-label={translateText("Tìm đăng ký ăn xế")}
           placeholder={translateText("Tìm học sinh hoặc mã…")}
           value={search}
           onChange={(e) => {
@@ -71,7 +71,7 @@ export function KitchenSnackRosterPage() {
           }}
         />
         <select
-          aria-label={translateText("Lớp ăn sáng")}
+          aria-label={translateText("Lớp ăn xế")}
           value={classId}
           onChange={(e) => {
             setClassId(e.target.value);
@@ -86,23 +86,23 @@ export function KitchenSnackRosterPage() {
           ))}
         </select>
         <select
-          aria-label={translateText("Trạng thái phí ăn sáng")}
+          aria-label={translateText("Trạng thái phí ăn xế")}
           value={payment}
           onChange={(e) => {
             setPayment(e.target.value);
             setPage(1);
           }}
         >
-          <option value="">{translateText("Tất cả tình trạng phí")}</option>
-          <option value="PAID">{translateText("Đã thanh toán")}</option>
-          <option value="PENDING">{translateText("Chưa thanh toán")}</option>
+          <option value="PAID">{translateText("Đã đóng tiền ăn xế")}</option>
+          <option value="ALL">{translateText("Tất cả tình trạng phí")}</option>
+          <option value="PENDING">{translateText("Chờ phụ huynh đóng tiền")}</option>
         </select>
         <button
           className="kp-button"
           onClick={() => {
             setSearch("");
             setClassId("");
-            setPayment("");
+            setPayment("PAID");
             setPage(1);
           }}
         >{translateText("Xóa bộ lọc")}</button>
@@ -146,7 +146,7 @@ export function KitchenSnackRosterPage() {
                   <th>{translateText("Học sinh")}</th>
                   <th>{translateText("Lớp")}</th>
                   <th>{translateText("Tình trạng phí")}</th>
-                  <th>{translateText("Suất ăn sáng")}</th>
+                  <th>{translateText("Suất ăn xế")}</th>
                   <th>{translateText("Ghi chú bếp")}</th>
                   <th>{translateText("Chi tiết")}</th>
                 </tr>

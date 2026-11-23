@@ -256,10 +256,10 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
   ];
 
   const allMealSlots = [
-    { key: 'BREAKFAST', name: 'Buổi sáng (Món nước)', time: '09:00', iconColor: 'text-amber-600', bgColor: 'bg-amber-50/60' },
+    { key: 'BREAKFAST', name: 'Buổi sáng', time: '09:00', iconColor: 'text-amber-600', bgColor: 'bg-amber-50/60' },
     { key: 'LUNCH', name: 'Bữa trưa chính', time: '11:00', iconColor: 'text-emerald-700', bgColor: 'bg-emerald-50/60' },
     { key: 'AFTERNOON_SNACK', name: 'Buổi phụ', time: '14:30', iconColor: 'text-purple-600', bgColor: 'bg-purple-50/60' },
-    { key: 'LATE_SNACK', name: 'Buổi chiều xế (Món nước)', time: '17:00', iconColor: 'text-orange-600', bgColor: 'bg-orange-50/60' },
+    { key: 'LATE_SNACK', name: 'Buổi chiều xế', time: '17:00', iconColor: 'text-orange-600', bgColor: 'bg-orange-50/60' },
   ];
 
   // Helper: Nhận diện món ăn suất riêng / món thay thế (Loại 1, Loại 2, Loại 3, Suất riêng)

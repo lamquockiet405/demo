@@ -819,7 +819,7 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                           <div className="space-y-1.5">
                             <div className="flex items-center gap-1 text-[10px] font-black text-amber-800">
                               <Sun className="w-3 h-3 text-amber-600" />
-                              <span>{translateText("BUỔI SÁNG · 09:00 (MÓN NƯỚC)")}</span>
+                              <span>{translateText("BUỔI SÁNG · 09:00")}</span>
                             </div>
                             <div className="space-y-1 text-[11px]">
                               {day.dishes
@@ -899,7 +899,7 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                             <div className="flex items-center justify-between text-[10px] font-black text-orange-800">
                               <div className="flex items-center gap-1">
                                 <Flame className="w-3 h-3 text-orange-600" />
-                                <span>{translateText("BUỔI CHIỀU XẾ · 17:00 (MÓN NƯỚC)")}</span>
+                                <span>{translateText("BUỔI CHIỀU XẾ · 17:00")}</span>
                               </div>
                               <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-900 border border-orange-200">
                                 {translateText("QĐ 2 (Ăn xế)")}

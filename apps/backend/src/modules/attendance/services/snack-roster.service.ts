@@ -70,7 +70,7 @@ export class SnackRosterService {
     let classes: ClassEntity[] = [];
     try {
       if (this.classRepo) {
-        classes = await this.classRepo.find({ where: { academicYearId: activeAcademicYear() }, order: { name: 'ASC' } });
+        classes = await this.classRepo.find({ order: { name: 'ASC' } });
       }
     } catch {
       classes = [];
@@ -213,7 +213,11 @@ export class SnackRosterService {
         }
         return item.paymentStatus === query.paymentStatus;
       }
-      return item.paymentStatus === 'PAID' || item.paymentStatus === 'PENDING';
+      if (query.paymentStatus === 'ALL') {
+        return item.paymentStatus === 'PAID' || item.paymentStatus === 'PENDING';
+      }
+      // Mặc định chỉ hiển thị học sinh ĐÃ ĐÓNG TIỀN dịch vụ ăn xế (PAID) để Bếp chuẩn bị suất ăn
+      return item.paymentStatus === 'PAID';
     });
 
     const total = filteredItems.length;
@@ -226,7 +230,12 @@ export class SnackRosterService {
     const standardPaidCount = Math.max(0, presentPaidItems.length - specialDietPaidCount);
 
     const stats = {
-      totalRegistered: mappedItems.filter((i) => i.paymentStatus !== 'NOT_REGISTERED').length,
+      totalRegistered:
+        query.paymentStatus === 'ALL'
+          ? mappedItems.filter((i) => i.paymentStatus !== 'NOT_REGISTERED').length
+          : query.paymentStatus === 'PENDING'
+          ? mappedItems.filter((i) => i.paymentStatus === 'PENDING').length
+          : paidItems.length,
       registeredMonthLabel: 'Đợt thực đơn ăn xế hiện tại',
       paidCount: paidItems.length,
       totalEligible: allChildren.length,

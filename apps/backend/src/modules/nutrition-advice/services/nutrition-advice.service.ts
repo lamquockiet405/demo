@@ -45,7 +45,8 @@ export class NutritionAdviceService {
     const allergyRows = await this.childRepo.query(`
       SELECT sa.student_id, a.name as allergen_name, a.code as allergen_code, sa.severity, sa.note
       FROM student_allergies sa
-      JOIN allergens a ON a.id = sa.allergen_id;
+      JOIN allergens a ON a.id = sa.allergen_id
+      WHERE sa.is_active = TRUE;
     `);
     const allergyMap = new Map<number, any[]>();
     allergyRows.forEach((a: any) => {

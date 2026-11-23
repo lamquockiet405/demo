@@ -301,7 +301,7 @@ export class ChildrenService {
         ageGroup: c.class?.ageGroup || "MAU_GIAO",
         status: c.status,
         allergies: (c.allergies || []).map((a) => this.mapChildAllergy(a)),
-        hasAllergy: (c.allergies || []).length > 0,
+        hasAllergy: (c.allergies || []).some((a) => a.isActive !== false),
         parentId: p?.parentId || null,
         parentName: p?.parentName || null,
         parentEmail: p?.parentEmail || null,

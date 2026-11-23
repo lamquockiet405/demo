@@ -216,11 +216,11 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
   };
 
   const mealTimeNames: Record<string, string> = {
-    BREAKFAST: "Buổi sáng - Món nước (09h00)",
-    MORNING_SNACK: "Buổi sáng - Món nước (09h00)",
+    BREAKFAST: "Buổi sáng (09h00)",
+    MORNING_SNACK: "Buổi sáng (09h00)",
     LUNCH: "Bữa trưa chính (11h00)",
     AFTERNOON_SNACK: "Buổi phụ (14h30)",
-    LATE_SNACK: "Buổi chiều xế - Món nước (17h00)",
+    LATE_SNACK: "Buổi chiều xế (17h00)",
   };
 
   const isLiquidDish = (name: string) => {
@@ -427,9 +427,9 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
   // Tính calo dự kiến dựa trên định lượng gram
   const calculatedCalories = currentDish
     ? Math.round(
-        Number(currentDish.totalCalories) *
-          (portionSizeG / Number(currentDish.standardServingSizeG || 100)),
-      )
+      Number(currentDish.totalCalories) *
+      (portionSizeG / Number(currentDish.standardServingSizeG || 100)),
+    )
     : 0;
 
   const isExistingSlot = !!initialSlot?.existingDish;
@@ -513,8 +513,8 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
-          err?.message ||
-          "Có lỗi khi tinh chỉnh món ăn.",
+        err?.message ||
+        "Có lỗi khi tinh chỉnh món ăn.",
       );
     } finally {
       setIsSubmitting(false);
@@ -637,11 +637,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                       }
                     }
                   }}
-                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${
-                    targetChildType === "STANDARD"
-                      ? "bg-white border-slate-700 ring-2 ring-slate-700 shadow-2xs font-bold text-slate-900"
-                      : "bg-white/80 border-slate-200 text-slate-600 hover:bg-white"
-                  }`}
+                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${targetChildType === "STANDARD"
+                    ? "bg-white border-slate-700 ring-2 ring-slate-700 shadow-2xs font-bold text-slate-900"
+                    : "bg-white/80 border-slate-200 text-slate-600 hover:bg-white"
+                    }`}
                 >
                   <Users className="w-3.5 h-3.5 text-slate-600 shrink-0" />
                   <span className="truncate">{translateText("🌟 Gán cho cả lớp")}</span>
@@ -650,11 +649,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setTargetChildType("ALLERGIES")}
-                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${
-                    targetChildType === "ALLERGIES"
-                      ? "bg-rose-50 border-rose-600 ring-2 ring-rose-600 shadow-2xs font-bold text-rose-950"
-                      : "bg-white/80 border-rose-200 text-rose-800 hover:bg-rose-50"
-                  }`}
+                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${targetChildType === "ALLERGIES"
+                    ? "bg-rose-50 border-rose-600 ring-2 ring-rose-600 shadow-2xs font-bold text-rose-950"
+                    : "bg-white/80 border-rose-200 text-rose-800 hover:bg-rose-50"
+                    }`}
                 >
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                   <span className="truncate">{translateText("🚨 Loại 3: Dị ứng")}</span>
@@ -663,11 +661,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setTargetChildType("OBESE")}
-                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${
-                    targetChildType === "OBESE"
-                      ? "bg-purple-50 border-purple-600 ring-2 ring-purple-600 shadow-2xs font-bold text-purple-950"
-                      : "bg-white/80 border-purple-200 text-purple-800 hover:bg-purple-50"
-                  }`}
+                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${targetChildType === "OBESE"
+                    ? "bg-purple-50 border-purple-600 ring-2 ring-purple-600 shadow-2xs font-bold text-purple-950"
+                    : "bg-white/80 border-purple-200 text-purple-800 hover:bg-purple-50"
+                    }`}
                 >
                   <Scale className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                   <span className="truncate">{translateText("⚖️ Loại 2: Thừa cân")}</span>
@@ -676,11 +673,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setTargetChildType("STUNTED")}
-                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${
-                    targetChildType === "STUNTED"
-                      ? "bg-amber-50 border-amber-600 ring-2 ring-amber-600 shadow-2xs font-bold text-amber-950"
-                      : "bg-white/80 border-amber-200 text-amber-800 hover:bg-amber-50"
-                  }`}
+                  className={`p-2.5 rounded-xl border text-left transition flex items-center gap-2 cursor-pointer ${targetChildType === "STUNTED"
+                    ? "bg-amber-50 border-amber-600 ring-2 ring-amber-600 shadow-2xs font-bold text-amber-950"
+                    : "bg-white/80 border-amber-200 text-amber-800 hover:bg-amber-50"
+                    }`}
                 >
                   <Baby className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                   <span className="truncate">{translateText("👶 Loại 1: Thấp còi/SDD")}</span>
@@ -690,11 +686,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
               <button
                 type="button"
                 onClick={() => setTargetChildType("COMMON")}
-                className={`w-full p-2 rounded-xl border text-center transition flex items-center justify-center gap-2 text-xs cursor-pointer ${
-                  targetChildType === "COMMON"
-                    ? "bg-emerald-50 border-emerald-600 ring-2 ring-emerald-600 shadow-2xs font-bold text-emerald-950"
-                    : "bg-white/80 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
-                }`}
+                className={`w-full p-2 rounded-xl border text-center transition flex items-center justify-center gap-2 text-xs cursor-pointer ${targetChildType === "COMMON"
+                  ? "bg-emerald-50 border-emerald-600 ring-2 ring-emerald-600 shadow-2xs font-bold text-emerald-950"
+                  : "bg-white/80 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                  }`}
               >
                 <ChefHat className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{translateText("⭐ Món thay thế phù hợp chung cho Bếp")}</span>
@@ -869,8 +864,8 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                         {mealTime === "AFTERNOON_SNACK"
                           ? translateText("Món phụ 14h30: Bánh ngọt, Trái cây tươi, Sữa / Yaourt dinh dưỡng sau giờ ngủ trưa.")
                           : (mealTime === "BREAKFAST" || mealTime === "LATE_SNACK")
-                          ? translateText("Món nước là món nước: Khóa chuẩn 100%, chỉ hiển thị các món bún, phở, miến, cháo, súp, bánh canh đúng chuẩn.")
-                          : translateText(`Món nước là món nước, món mặn là món mặn. Khóa chuẩn 100%, chỉ hiển thị các món "${CATEGORY_INFO[targetCategory]?.shortName}" (tuyệt đối không cho phép chọn món khác loại).`)}
+                            ? translateText("Món nước là món nước: Khóa chuẩn 100%, chỉ hiển thị các món bún, phở, miến, cháo, súp, bánh canh đúng chuẩn.")
+                            : translateText(`Món nước là món nước, món mặn là món mặn. Khóa chuẩn 100%, chỉ hiển thị các món "${CATEGORY_INFO[targetCategory]?.shortName}" (tuyệt đối không cho phép chọn món khác loại).`)}
                       </p>
                     </div>
                   </div>
@@ -895,11 +890,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                       key={cat.key}
                       type="button"
                       onClick={() => setCategoryFilter(cat.key)}
-                      className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold transition cursor-pointer flex items-center gap-1 ${
-                        categoryFilter === cat.key
-                          ? "bg-slate-900 text-white shadow-3xs"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
+                      className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold transition cursor-pointer flex items-center gap-1 ${categoryFilter === cat.key
+                        ? "bg-slate-900 text-white shadow-3xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
                     >
                       <span>{cat.icon}</span>
                       <span>{translateText(cat.label)}</span>
@@ -932,11 +926,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                             setSelectedDishId(String(dish.id));
                             setPortionSizeG(Number(dish.standardServingSizeG) || 100);
                           }}
-                          className={`p-2 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                            isSelected
-                              ? "bg-teal-50 border-teal-500 ring-2 ring-teal-500/30 shadow-2xs font-bold text-teal-950"
-                              : "bg-white border-slate-200 hover:border-teal-300 hover:bg-slate-50 text-slate-800"
-                          }`}
+                          className={`p-2 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${isSelected
+                            ? "bg-teal-50 border-teal-500 ring-2 ring-teal-500/30 shadow-2xs font-bold text-teal-950"
+                            : "bg-white border-slate-200 hover:border-teal-300 hover:bg-slate-50 text-slate-800"
+                            }`}
                         >
                           <div className="flex items-start justify-between gap-1">
                             <span className="text-[11px] font-bold leading-tight line-clamp-1">
@@ -1101,10 +1094,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                           ).toFixed(1);
                           const foodKcal = food
                             ? (
-                                (Number(ri.netWeightPerPortionG) / 100) *
-                                Number(food.energyKcal) *
-                                ratio
-                              ).toFixed(1)
+                              (Number(ri.netWeightPerPortionG) / 100) *
+                              Number(food.energyKcal) *
+                              ratio
+                            ).toFixed(1)
                             : "-";
                           return (
                             <div
@@ -1193,11 +1186,10 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
               type="submit"
               form="dish-form"
               disabled={isSubmitting || isUnchangedForWholeClass}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition ${
-                isUnchangedForWholeClass
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                  : "bg-teal-600 hover:bg-teal-700 text-white shadow-teal-600/25 cursor-pointer"
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition ${isUnchangedForWholeClass
+                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                : "bg-teal-600 hover:bg-teal-700 text-white shadow-teal-600/25 cursor-pointer"
+                }`}
             >
               {isSubmitting ? (
                 <>

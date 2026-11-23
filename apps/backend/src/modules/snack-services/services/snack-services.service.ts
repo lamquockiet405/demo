@@ -394,7 +394,7 @@ export class SnackServicesService {
       LEFT JOIN (
         SELECT DISTINCT student_id FROM snack_registrations WHERE status = 'PAID'
       ) sr ON sr.student_id = s.id
-      LEFT JOIN student_allergies sa ON sa.student_id = s.id
+      LEFT JOIN student_allergies sa ON sa.student_id = s.id AND sa.is_active = TRUE
       GROUP BY c.id, c.name, c.age_group, c.school_year, u.full_name, u.phone
       ORDER BY c.id ASC;
     `;
@@ -418,7 +418,7 @@ export class SnackServicesService {
       LEFT JOIN classes c ON c.id = s.class_id
       LEFT JOIN student_parents sp ON sp.student_id = s.id AND sp.is_primary = true
       LEFT JOIN users pu ON pu.id = sp.parent_id
-      LEFT JOIN student_allergies sa ON sa.student_id = s.id
+      LEFT JOIN student_allergies sa ON sa.student_id = s.id AND sa.is_active = TRUE
       LEFT JOIN allergens a ON a.id = sa.allergen_id
       LEFT JOIN snack_registrations sr ON sr.student_id = s.id
       GROUP BY s.id, s.student_code, s.full_name, s.gender, s.date_of_birth, s.class_id, c.name, c.age_group, pu.full_name, pu.phone

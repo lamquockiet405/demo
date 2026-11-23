@@ -334,19 +334,38 @@ export function NutritionOverviewPage() {
 
 export function NutritionAlertsPage() {
   useLanguage();
+  const [filterType, setFilterType] = useState<string>("ALL");
   const resource = useSchoolResource(
     () => childAlertsApi.getNutritionistAlerts(),
     [],
   );
-  const rows: any[] = resource.error
-    ? []
-    : (Object.values(resource.data?.categories || {}).flat() as any[]);
 
-  const totalAlerts = rows.length;
+  const categories = resource.data?.categories || {
+    allergenCrossMatchingAlerts: [],
+    growthRiskAlerts: [],
+    micronutrientDeficitAlerts: [],
+  };
+
+  const allergyList = categories.allergenCrossMatchingAlerts || [];
+  const growthList = categories.growthRiskAlerts || [];
+  const microList = categories.micronutrientDeficitAlerts || [];
+
+  const allRows: any[] = resource.error
+    ? []
+    : [...allergyList, ...growthList, ...microList];
+
+  const filteredRows = useMemo(() => {
+    if (filterType === "ALLERGY") return allergyList;
+    if (filterType === "GROWTH") return growthList;
+    if (filterType === "MICRO") return microList;
+    return allRows;
+  }, [filterType, allRows, allergyList, growthList, microList]);
+
+  const totalAlerts = allRows.length;
 
   return (
     <div className="space-y-6 w-full pb-12 font-sans">
-      <State resource={resource} empty={!rows.length} />
+      <State resource={resource} empty={!allRows.length} />
 
       {/* ─── 2. Danh Sách Cảnh Báo Trực Quan ─── */}
       <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
@@ -368,67 +387,227 @@ export function NutritionAlertsPage() {
           </button>
         </div>
 
-        {!rows.length ? (
-          <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-500 text-xs">{translateText("Hiện tại không có cảnh báo nguy cơ nào cần xử lý.")}</div>
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+          <button
+            type="button"
+            onClick={() => setFilterType("ALL")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              filterType === "ALL"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {translateText("Tất cả")} ({totalAlerts})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("ALLERGY")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              filterType === "ALLERGY"
+                ? "bg-rose-600 text-white shadow-xs"
+                : "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>{translateText("Xung đột dị ứng")} ({allergyList.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("GROWTH")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              filterType === "GROWTH"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>{translateText("Nguy cơ thể lực WHO")} ({growthList.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilterType("MICRO")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              filterType === "MICRO"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+            }`}
+          >
+            <Scale className="w-3.5 h-3.5" />
+            <span>{translateText("Cân đối thực đơn")} ({microList.length})</span>
+          </button>
+        </div>
+
+        {!filteredRows.length ? (
+          <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-500 text-xs">
+            {translateText("Hiện tại không có cảnh báo nguy cơ nào thuộc nhóm này.")}
+          </div>
         ) : (
           <div className="space-y-3.5">
-            {rows.map((r, i) => {
+            {filteredRows.map((r, i) => {
               const isAllergy =
                 (r.type || "").toUpperCase().includes("ALLERGY") ||
-                Boolean(r.menuDishName);
+                (r.type || "").toUpperCase().includes("ALG");
+              const isGrowth = (r.type || "").toUpperCase().includes("GROWTH");
+              const isMicro =
+                (r.type || "").toUpperCase().includes("MICRO") ||
+                (!r.studentName && !isAllergy && !isGrowth);
 
+              if (isMicro) {
+                return (
+                  <div
+                    key={r.id || i}
+                    className="p-5 rounded-2xl border border-indigo-200 bg-indigo-50/25 hover:border-indigo-300 transition space-y-3"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-indigo-100 text-indigo-700">
+                          <Scale className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-900 text-sm">
+                            {r.nutrientName ? `${translateText("Cảnh báo vi chất: ")}${r.nutrientName}` : translateText("Cảnh báo cân đối thực đơn")}
+                          </h4>
+                          <span className="text-xs text-slate-500">
+                            {translateText("Phạm vi: ")}<strong className="text-slate-700">{r.menuPeriod || translateText("Thực đơn toàn trường")}</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-black self-start sm:self-auto bg-indigo-100 text-indigo-800 border border-indigo-200">
+                        {translateText("Cân Đối Dinh Dưỡng Thực Đơn")}
+                      </span>
+                    </div>
+
+                    <p className="text-xs font-medium text-slate-700 leading-relaxed pl-11">
+                      {translateText(r.message || r.recommendedAction || r.title)}
+                    </p>
+
+                    {r.recommendedAction && (
+                      <div className="ml-11 text-xs text-indigo-800 bg-white/80 border border-indigo-200 p-2.5 rounded-xl font-medium flex items-center gap-2">
+                        <Info className="w-4 h-4 text-indigo-600 shrink-0" />
+                        <span><strong>{translateText("Khuyến nghị điều chỉnh: ")}</strong>{r.recommendedAction}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 pt-2 border-t border-slate-200/60 pl-11 text-xs">
+                      <Link
+                        to="/nutritionist/menu-evaluation"
+                        className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-indigo-400 text-indigo-800 rounded-xl font-bold transition shadow-xs"
+                      >
+                        {translateText("Kiểm tra thực đơn tuần")}
+                      </Link>
+                      <Link
+                        to="/nutritionist/menus"
+                        className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-teal-400 text-teal-800 rounded-xl font-bold transition shadow-xs"
+                      >
+                        {translateText("Điều chỉnh món ăn")}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
+
+              if (isGrowth) {
+                return (
+                  <div
+                    key={r.id || i}
+                    className="p-5 rounded-2xl border border-amber-200 bg-amber-50/20 hover:border-amber-300 transition space-y-3"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-100 text-amber-700">
+                          <Activity className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-900 text-sm">
+                            {r.studentName}
+                          </h4>
+                          <span className="text-xs text-slate-500">
+                            {translateText("Lớp: ")}<strong className="text-slate-700">{r.className}</strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-black self-start sm:self-auto bg-amber-100 text-amber-800 border border-amber-200">
+                        {translateText("Nguy Cơ Thể Lực WHO")}
+                      </span>
+                    </div>
+
+                    <p className="text-xs font-medium text-slate-700 leading-relaxed pl-11">
+                      {translateText(r.diagnosis || r.message || r.title)}
+                    </p>
+
+                    {r.recommendedAction && (
+                      <div className="ml-11 text-xs text-amber-900 bg-white/80 border border-amber-200 p-2.5 rounded-xl font-medium flex items-center gap-2">
+                        <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span><strong>{translateText("Hướng can thiệp: ")}</strong>{r.recommendedAction}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 pt-2 border-t border-slate-200/60 pl-11 text-xs">
+                      <Link
+                        to="/nutritionist/growth"
+                        className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-amber-400 text-amber-800 rounded-xl font-bold transition shadow-xs"
+                      >
+                        {translateText("Xem biểu đồ số đo")}
+                      </Link>
+                      <Link
+                        to="/nutritionist/children"
+                        className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-teal-400 text-teal-800 rounded-xl font-bold transition shadow-xs"
+                      >
+                        {translateText("Hồ sơ học sinh")}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
+
+              // isAllergy
               return (
                 <div
                   key={r.id || i}
-                  className={`p-5 rounded-2xl border transition space-y-3 ${
-                    isAllergy
-                      ? "border-rose-200 bg-rose-50/20 hover:border-rose-300"
-                      : "border-amber-200 bg-amber-50/20 hover:border-amber-300"
-                  }`}
+                  className="p-5 rounded-2xl border border-rose-200 bg-rose-50/20 hover:border-rose-300 transition space-y-3"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                          isAllergy
-                            ? "bg-rose-100 text-rose-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {isAllergy ? (
-                          <ShieldAlert className="w-5 h-5" />
-                        ) : (
-                          <Activity className="w-5 h-5" />
-                        )}
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-rose-100 text-rose-700">
+                        <ShieldAlert className="w-5 h-5" />
                       </div>
                       <div>
                         <h4 className="font-black text-slate-900 text-sm">
                           {r.studentName}
                         </h4>
-                        <span className="text-xs text-slate-500">{translateText("Lớp: ")}<strong className="text-slate-700">{r.className}</strong>
+                        <span className="text-xs text-slate-500">
+                          {translateText("Lớp: ")}<strong className="text-slate-700">{r.className}</strong>
+                          {r.allergenName && (
+                            <span className="ml-2 px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-700">
+                              {r.allergenName}
+                            </span>
+                          )}
                         </span>
                       </div>
                     </div>
 
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-black self-start sm:self-auto ${
-                        isAllergy
-                          ? "bg-rose-100 text-rose-800 border border-rose-200"
-                          : "bg-amber-100 text-amber-800 border border-amber-200"
-                      }`}
-                    >
-                      {translateText(isAllergy ? "Xung Đột Dị Ứng" : "Nguy Cơ Thể Lực WHO")}
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-black self-start sm:self-auto bg-rose-100 text-rose-800 border border-rose-200">
+                      {translateText("Xung Đột Dị Ứng")}
                     </span>
                   </div>
 
                   <p className="text-xs font-medium text-slate-700 leading-relaxed pl-11">
-                    {translateText(r.message || r.diagnosis || r.title)}
+                    {translateText(r.message || r.title)}
                   </p>
 
                   {r.menuDishName && (
                     <div className="ml-11 text-xs text-rose-800 bg-white/80 border border-rose-200 p-2.5 rounded-xl font-semibold flex items-center gap-2">
                       <UtensilsCrossed className="w-4 h-4 text-rose-600 shrink-0" />
-                      <span>{translateText("Món ăn trong thực đơn bị ảnh hưởng: ")}<strong>{r.menuDishName}</strong>
+                      <span>
+                        {translateText("Món ăn trong thực đơn bị ảnh hưởng: ")}<strong>{r.menuDishName}</strong>
+                        {r.proposedSubstitute && (
+                          <span className="text-emerald-700 ml-2">
+                            → {translateText("Gợi ý thay thế: ")}<strong>{r.proposedSubstitute}</strong>
+                          </span>
+                        )}
                       </span>
                     </div>
                   )}
@@ -436,12 +615,16 @@ export function NutritionAlertsPage() {
                   <div className="flex items-center gap-3 pt-2 border-t border-slate-200/60 pl-11 text-xs">
                     <Link
                       to="/nutritionist/allergens"
-                      className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-teal-400 text-teal-800 rounded-xl font-bold transition shadow-xs"
-                    >{translateText("Xem hồ sơ dị ứng")}</Link>
+                      className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-rose-400 text-rose-800 rounded-xl font-bold transition shadow-xs"
+                    >
+                      {translateText("Xem hồ sơ dị ứng")}
+                    </Link>
                     <Link
-                      to="/nutritionist/growth"
+                      to="/nutritionist/menus"
                       className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-teal-400 text-teal-800 rounded-xl font-bold transition shadow-xs"
-                    >{translateText("Xem biểu đồ số đo")}</Link>
+                    >
+                      {translateText("Đổi món an toàn")}
+                    </Link>
                   </div>
                 </div>
               );

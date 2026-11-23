@@ -42,6 +42,7 @@ export interface ChildAllergyRecord {
   severity: string;
   note?: string;
   declaredAt?: string;
+  isActive?: boolean;
 }
 
 export interface ChildWithAllergy {
@@ -197,9 +198,12 @@ export const NutritionistAllergyManagementPage: React.FC<
 
   const allergicChildren = useMemo(
     () =>
-      allChildren.filter(
-        (c) => Array.isArray(c.allergies) && c.allergies.length > 0,
-      ),
+      allChildren
+        .map((c) => ({
+          ...c,
+          allergies: (c.allergies || []).filter((a) => a.isActive !== false),
+        }))
+        .filter((c) => c.allergies.length > 0),
     [allChildren],
   );
 
