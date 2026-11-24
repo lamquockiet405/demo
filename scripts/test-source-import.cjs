@@ -73,9 +73,9 @@ const withoutTransaction = (sql) => sql.replace(/^BEGIN;\s*$/gm, '').replace(/^C
     for (const dish of (await client.query('SELECT name FROM dishes')).rows) {
       assert.ok(sourceKeys.has(normalizeName(dish.name)), `Dish not found in DOC source: ${dish.name}`);
     }
-    assert.equal(Number((await client.query('SELECT count(*) FROM dish_recipes')).rows[0].count), 177);
+    assert.equal(Number((await client.query('SELECT count(*) FROM dish_recipes')).rows[0].count), 571);
     assert.equal(Number((await client.query('SELECT count(*) FROM source_catalog_legacy_recipes')).rows[0].count), isFresh ? 0 : legacy.rows.length);
-    assert.equal(Number((await client.query('SELECT count(*) FROM dish_nutrition')).rows[0].count), 59);
+    assert.equal(Number((await client.query('SELECT count(*) FROM dish_nutrition')).rows[0].count), 172);
     const papaya = (await client.query("SELECT n.energy_kcal,n.protein_g,n.calcium_mg,n.source_metadata FROM dish_nutrition n JOIN dishes d ON d.id=n.dish_id WHERE d.name='Đu đủ chín'")).rows[0];
     assert.equal(Number(papaya.energy_kcal), 22.8); // 60 g * 38 kcal / 100 g
     assert.equal(Number(papaya.protein_g), 0.6);
@@ -99,8 +99,9 @@ const withoutTransaction = (sql) => sql.replace(/^BEGIN;\s*$/gm, '').replace(/^C
     const missing = (await client.query("SELECT count(*)::int AS count FROM dishes WHERE status='ACTIVE' AND nutrition_verified=FALSE")).rows[0].count;
     assert.equal(missing, catalog.dishes.length);
     const referenceAfterRepeat = (await client.query("SELECT count(*) FROM dishes WHERE source_metadata->>'recipeStatus'='REFERENCE_RESTORED'")).rows[0];
-    assert.equal(Number(referenceAfterRepeat.count), 59, 'Reimport reset reference provenance');
-    const preservedId = (await client.query("SELECT id FROM dishes WHERE status='ACTIVE' AND NOT EXISTS (SELECT 1 FROM dish_recipes r WHERE r.dish_id=dishes.id) ORDER BY id LIMIT 1")).rows[0].id;
+    assert.equal(Number(referenceAfterRepeat.count), 172, 'Reimport reset reference provenance');
+    const preservedId = (await client.query("SELECT id FROM dishes WHERE status='ACTIVE' ORDER BY id LIMIT 1")).rows[0].id;
+    await client.query("DELETE FROM dish_recipes WHERE dish_id=$1", [preservedId]);
     await client.query("UPDATE dishes SET status='INACTIVE', nutrition_verified=TRUE WHERE id=$1", [preservedId]);
     await client.query('DROP TABLE source_dish_ids');
     await client.query(sql);
@@ -119,7 +120,7 @@ const withoutTransaction = (sql) => sql.replace(/^BEGIN;\s*$/gm, '').replace(/^C
     assert.equal(Number(cache.energy_kcal), 200);
     console.log(JSON.stringify({ passed: true, scenario: isFresh ? 'fresh-database' : 'existing-volume', activeDishes: active,
       removedNonSourceDishes: outsideIds.length, archivedMenuLinks: linkedMenuCount,
-      restoredRecipeRows: 177, calculatedNutritionRows: 59, papaya60gKcal: Number(papaya.energy_kcal),
+      restoredRecipeRows: 571, calculatedNutritionRows: 172, papaya60gKcal: Number(papaya.energy_kcal),
       archivedSeedRecipes: isFresh ? 0 : legacy.rows.length, configuration: await configCounts(), legacyConfigMigrated: legacyConfig,
       idempotent: true, manualRecipePreserved: true, ingredientCacheRefresh: true, rolledBack: true }));
   } finally {

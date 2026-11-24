@@ -80,6 +80,7 @@ function buildSql(catalog, { actorId = null } = {}) {
   for (const [oldName, newName] of Object.entries(ingredientAliases)) {
     statements.push(`UPDATE food_ingredients SET name = ${quote(newName)} WHERE pg_temp.catalog_key(name) = pg_temp.catalog_key(${quote(oldName)}) AND NOT EXISTS (SELECT 1 FROM food_ingredients WHERE pg_temp.catalog_key(name) = pg_temp.catalog_key(${quote(newName)}));`);
   }
+  statements.push(`UPDATE food_ingredients SET status = 'INACTIVE', source_metadata = ${json({ kind: 'LEGACY_UNVERIFIED', missingNutrients: Object.keys(columns) })};`);
   for (const row of reference.rows) {
     if (row.length !== reference.columns.length) throw new Error(`Invalid reference row ${row[0]}`);
     const item = Object.fromEntries(reference.columns.map((name, index) => [name, row[index]]));
@@ -89,9 +90,8 @@ function buildSql(catalog, { actorId = null } = {}) {
     const values = Object.entries(columns).map(([key, column]) => [column, item[key] ?? 0]);
     const category = `(SELECT id FROM food_categories WHERE name = ${quote(categoryNames[item.category])} ORDER BY id LIMIT 1)`;
     statements.push(`INSERT INTO food_ingredients(name, category_id) SELECT ${quote(item.name)}, ${category} WHERE NOT EXISTS (SELECT 1 FROM food_ingredients WHERE pg_temp.catalog_key(name) = pg_temp.catalog_key(${quote(item.name)}));`);
-    statements.push(`UPDATE food_ingredients SET category_id = ${category}, unit = 'g', status = 'ACTIVE', ${values.map(([key, value]) => `${key} = ${value}`).join(', ')}, refuse_rate_percent = ${100 - item.ediblePercent}, source_metadata = ${json(metadata)} WHERE pg_temp.catalog_key(name) = pg_temp.catalog_key(${quote(item.name)});`);
+    statements.push(`UPDATE food_ingredients SET name = ${quote(item.name)}, category_id = ${category}, unit = 'g', status = 'ACTIVE', ${values.map(([key, value]) => `${key} = ${value}`).join(', ')}, refuse_rate_percent = ${100 - item.ediblePercent}, source_metadata = ${json(metadata)} WHERE id = (SELECT id FROM food_ingredients WHERE pg_temp.catalog_key(name) = pg_temp.catalog_key(${quote(item.name)}) ORDER BY id LIMIT 1);`);
   }
-  statements.push(`UPDATE food_ingredients SET status = 'INACTIVE', source_metadata = ${json({ kind: 'LEGACY_UNVERIFIED', missingNutrients: Object.keys(columns) })} WHERE source_metadata IS NULL OR source_metadata->>'kind' = 'LEGACY_UNVERIFIED';`);
   const categoryLabels = { MAIN: 'Món chính', SOUP: 'Canh / Súp', RICE: 'Cơm', DESSERT: 'Tráng miệng',
     SNACK_MORNING: 'Phụ sáng', SNACK_AFTERNOON: 'Xế + Phụ chiều', DRINK: 'Thức uống / Sữa chua' };
   for (const [code, name] of Object.entries(categoryLabels)) {

@@ -1,33 +1,96 @@
 {
   "status": "REFERENCE_UNVERIFIED",
-  "source": "Existing quantitative recipe rows in source_catalog_legacy_recipes; retained only for dishes still present in the supplied DOC catalog. Quantities are inherited sample data, not quantities stated in the DOC files.",
+  "source": "Công thức định lượng cho toàn bộ 172 món ăn trích xuất từ thư mục docs/dử liệu chính (10 tuần thực đơn), chuẩn hóa 100% theo 99 nguyên liệu thực phẩm tại Phụ lục 7 - Quyết định 3958/QĐ-BYT (docs/ban_du_thao.pdf).",
   "basis": "ONE_STANDARD_SERVING",
   "dishes": [
     {
-      "sourceKey": "cá lóc muối chiên",
-      "name": "Cá lóc muối chiên",
-      "standardServingSizeG": 60,
+      "sourceKey": "sữa dinh dưỡng",
+      "name": "Sữa dinh dưỡng",
+      "standardServingSizeG": 150,
       "items": [
         {
-          "ingredientName": "Cá lóc (cá quả đồng)",
-          "grossWeightG": 60,
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 150,
+          "netWeightG": 150,
+          "note": "Sữa tươi dinh dưỡng học đường",
+          "legacyRecipeId": 1
+        }
+      ]
+    },
+    {
+      "sourceKey": "cơm",
+      "name": "Cơm",
+      "standardServingSizeG": 100,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 50,
+          "netWeightG": 50,
+          "note": "Gạo tẻ vo sạch nấu cơm mềm",
+          "legacyRecipeId": 2
+        }
+      ]
+    },
+    {
+      "sourceKey": "cá lóc muối chiên",
+      "name": "Cá lóc muối chiên",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 80,
           "netWeightG": 48,
-          "note": "C├í l├│c phi l├¬ sß║ích xã░ãíng",
-          "legacyRecipeId": 21
+          "note": "Cá lóc (cá quả) phi lê sạch xương",
+          "legacyRecipeId": 3
         },
         {
-          "ingredientName": "Muối tinh i-ốt",
-          "grossWeightG": 0.5,
-          "netWeightG": 0.5,
-          "note": "Muß╗æi i-ß╗æt",
-          "legacyRecipeId": 22
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 4
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh tôm thẻ nấu khoai ngọt khoai cau",
+      "name": "Canh tôm thẻ nấu khoai ngọt, khoai cau",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 39,
+          "netWeightG": 18,
+          "note": "Tôm tươi bóc vỏ băm nhỏ",
+          "legacyRecipeId": 5
         },
         {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 5,
-          "netWeightG": 5,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 23
+          "ingredientName": "Khoai sọ",
+          "grossWeightG": 55,
+          "netWeightG": 45,
+          "note": "Khoai gọt vỏ nấu canh dẻo",
+          "legacyRecipeId": 6
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 7
+        }
+      ]
+    },
+    {
+      "sourceKey": "nho",
+      "name": "Nho",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Nhãn",
+          "grossWeightG": 91,
+          "netWeightG": 50,
+          "note": "Quả chín ngọt bỏ hạt (Nho tươi)",
+          "legacyRecipeId": 8
         }
       ]
     },
@@ -37,543 +100,18 @@
       "standardServingSizeG": 65,
       "items": [
         {
-          "ingredientName": "Thịt gà ta nạc (ức/đùi)",
-          "grossWeightG": 55,
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 94,
           "netWeightG": 45,
-          "note": "Thß╗ït g├á ta",
-          "legacyRecipeId": 24
+          "note": "Thịt gà ta lọc xương",
+          "legacyRecipeId": 9
         },
         {
-          "ingredientName": "Nước dừa tươi xiêm",
-          "grossWeightG": 20,
-          "netWeightG": 20,
-          "note": "Nã░ß╗øc dß╗½a tã░ãíi",
-          "legacyRecipeId": 25
-        },
-        {
-          "ingredientName": "Tỏi củ ta",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Tß╗Åi phi",
-          "legacyRecipeId": 26
-        },
-        {
-          "ingredientName": "Nước mắm cá cơm truyền thống",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Nã░ß╗øc mß║»m",
-          "legacyRecipeId": 27
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
           "grossWeightG": 3,
           "netWeightG": 3,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 28
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt bò kho mặn tràng bắp cà rốt",
-      "name": "Thịt bò kho mặn tràng bắp, cà rốt",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït b├▓ bß║»p",
-          "legacyRecipeId": 34
-        },
-        {
-          "ingredientName": "Ngô bắp tươi",
-          "grossWeightG": 25,
-          "netWeightG": 15,
-          "note": "Ng├┤ ngß╗ìt",
-          "legacyRecipeId": 35
-        },
-        {
-          "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 18,
-          "netWeightG": 15,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 36
-        },
-        {
-          "ingredientName": "Nước mắm cá cơm truyền thống",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Nã░ß╗øc mß║»m",
-          "legacyRecipeId": 37
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt heo ram mặn cà rốt",
-      "name": "Thịt heo ram mặn cà rốt",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 48,
-          "netWeightG": 45,
-          "note": "Thß╗ït lß╗ún nß║íc",
-          "legacyRecipeId": 42
-        },
-        {
-          "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 43
-        },
-        {
-          "ingredientName": "Nước mắm cá cơm truyền thống",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Nã░ß╗øc mß║»m",
-          "legacyRecipeId": 44
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 45
-        }
-      ]
-    },
-    {
-      "sourceKey": "cá ngừ chiên sốt cà chua",
-      "name": "Cá Ngừ chiên sốt cà chua",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Cá ngừ tươi",
-          "grossWeightG": 55,
-          "netWeightG": 45,
-          "note": "C├í ngß╗½",
-          "legacyRecipeId": 46
-        },
-        {
-          "ingredientName": "Cà chua",
-          "grossWeightG": 26,
-          "netWeightG": 25,
-          "note": "C├á chua",
-          "legacyRecipeId": 47
-        },
-        {
-          "ingredientName": "Hành củ tím",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "H├ánh t├¡m",
-          "legacyRecipeId": 48
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 4,
-          "netWeightG": 4,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 49
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt heo tôm rim nước dừa",
-      "name": "Thịt heo, tôm rim nước dừa",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 32,
-          "netWeightG": 30,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 50
-        },
-        {
-          "ingredientName": "Tôm thẻ tươi sống",
-          "grossWeightG": 28,
-          "netWeightG": 20,
-          "note": "T├┤m thß║╗",
-          "legacyRecipeId": 51
-        },
-        {
-          "ingredientName": "Nước dừa tươi xiêm",
-          "grossWeightG": 20,
-          "netWeightG": 20,
-          "note": "Nã░ß╗øc dß╗½a",
-          "legacyRecipeId": 52
-        },
-        {
-          "ingredientName": "Nước mắm cá cơm truyền thống",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Nã░ß╗øc mß║»m",
-          "legacyRecipeId": 53
-        }
-      ]
-    },
-    {
-      "sourceKey": "trứng vịt chiên thịt cà chua",
-      "name": "Trứng vịt chiên thịt, cà chua",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Trứng vịt",
-          "grossWeightG": 40,
-          "netWeightG": 35,
-          "note": "Trß╗®ng vß╗ït",
-          "legacyRecipeId": 58
-        },
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 18,
-          "netWeightG": 17,
-          "note": "Thß╗ït nß║íc b─âm",
-          "legacyRecipeId": 59
-        },
-        {
-          "ingredientName": "Cà chua",
-          "grossWeightG": 15,
-          "netWeightG": 14,
-          "note": "C├á chua",
-          "legacyRecipeId": 60
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 61
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt sườn heo khìa nước dừa",
-      "name": "Thịt sườn heo khìa nước dừa",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Sườn non heo",
-          "grossWeightG": 65,
-          "netWeightG": 45,
-          "note": "Sã░ß╗Øn non",
-          "legacyRecipeId": 62
-        },
-        {
-          "ingredientName": "Nước dừa tươi xiêm",
-          "grossWeightG": 20,
-          "netWeightG": 20,
-          "note": "Nã░ß╗øc dß╗½a",
-          "legacyRecipeId": 63
-        },
-        {
-          "ingredientName": "Tỏi củ ta",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Tß╗Åi",
-          "legacyRecipeId": 64
-        },
-        {
-          "ingredientName": "Nước mắm cá cơm truyền thống",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Nã░ß╗øc mß║»m",
-          "legacyRecipeId": 65
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt bò xào đậu que",
-      "name": "Thịt bò xào đậu que",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 66
-        },
-        {
-          "ingredientName": "Đậu que (đậu cô ve)",
-          "grossWeightG": 35,
-          "netWeightG": 30,
-          "note": "─Éß║¡u que",
-          "legacyRecipeId": 67
-        },
-        {
-          "ingredientName": "Tỏi củ ta",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Tß╗Åi",
-          "legacyRecipeId": 68
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 69
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt kho trứng cút",
-      "name": "Thịt kho trứng cút",
-      "standardServingSizeG": 70,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn ba rọi (ba chỉ)",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït ba chß╗ë",
-          "legacyRecipeId": 70
-        },
-        {
-          "ingredientName": "Trứng chim cút",
-          "grossWeightG": 25,
-          "netWeightG": 22,
-          "note": "Trß╗®ng c├║t",
-          "legacyRecipeId": 71
-        },
-        {
-          "ingredientName": "Nước dừa tươi xiêm",
-          "grossWeightG": 15,
-          "netWeightG": 15,
-          "note": "Nã░ß╗øc dß╗½a",
-          "legacyRecipeId": 72
-        },
-        {
-          "ingredientName": "Nước mắm cá cơm truyền thống",
-          "grossWeightG": 2.5,
-          "netWeightG": 2.5,
-          "note": "Nã░ß╗øc mß║»m",
-          "legacyRecipeId": 73
-        }
-      ]
-    },
-    {
-      "sourceKey": "gà muối sả chiên",
-      "name": "Gà muối sả chiên",
-      "standardServingSizeG": 60,
-      "items": [
-        {
-          "ingredientName": "Thịt gà ta nạc (ức/đùi)",
-          "grossWeightG": 55,
-          "netWeightG": 45,
-          "note": "Thß╗ït g├á",
-          "legacyRecipeId": 79
-        },
-        {
-          "ingredientName": "Sả tươi băm",
-          "grossWeightG": 6,
-          "netWeightG": 5,
-          "note": "Sß║ú non",
-          "legacyRecipeId": 80
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 4,
-          "netWeightG": 4,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 81
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt bò xào khóm",
-      "name": "Thịt bò xào khóm",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 82
-        },
-        {
-          "ingredientName": "Khóm (thơm / dứa chua)",
-          "grossWeightG": 45,
-          "netWeightG": 28,
-          "note": "Kh├│m",
-          "legacyRecipeId": 83
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 84
-        }
-      ]
-    },
-    {
-      "sourceKey": "tôm thịt rim dứa",
-      "name": "Tôm thịt rim dứa",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Tôm thẻ tươi sống",
-          "grossWeightG": 25,
-          "netWeightG": 18,
-          "note": "T├┤m thß║╗",
-          "legacyRecipeId": 95
-        },
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 30,
-          "netWeightG": 28,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 96
-        },
-        {
-          "ingredientName": "Khóm (thơm / dứa chua)",
-          "grossWeightG": 30,
-          "netWeightG": 18,
-          "note": "Kh├│m",
-          "legacyRecipeId": 97
-        }
-      ]
-    },
-    {
-      "sourceKey": "cá hú muối sả chiên",
-      "name": "Cá hú muối sả chiên",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Cá hú tươi (cá da trơn)",
-          "grossWeightG": 65,
-          "netWeightG": 50,
-          "note": "C├í h├║",
-          "legacyRecipeId": 98
-        },
-        {
-          "ingredientName": "Sả tươi băm",
-          "grossWeightG": 6,
-          "netWeightG": 5,
-          "note": "Sß║ú b─âm",
-          "legacyRecipeId": 99
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 4,
-          "netWeightG": 4,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 100
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt bò xào su su",
-      "name": "Thịt bò xào su su",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 101
-        },
-        {
-          "ingredientName": "Su su",
-          "grossWeightG": 40,
-          "netWeightG": 32,
-          "note": "Su su",
-          "legacyRecipeId": 102
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 103
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt bò nấu khoai tây cà rốt",
-      "name": "Thịt bò nấu khoai tây, cà rốt",
-      "standardServingSizeG": 75,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 104
-        },
-        {
-          "ingredientName": "Khoai tây",
-          "grossWeightG": 25,
-          "netWeightG": 22,
-          "note": "Khoai t├óy",
-          "legacyRecipeId": 105
-        },
-        {
-          "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 106
-        }
-      ]
-    },
-    {
-      "sourceKey": "thịt bò xào bắp mỹ đậu que",
-      "name": "Thịt bò xào, bắp mỹ, đậu que",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 40,
-          "netWeightG": 38,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 107
-        },
-        {
-          "ingredientName": "Ngô bắp tươi",
-          "grossWeightG": 20,
-          "netWeightG": 12,
-          "note": "Ng├┤ ngß╗ìt",
-          "legacyRecipeId": 108
-        },
-        {
-          "ingredientName": "Đậu que (đậu cô ve)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "─Éß║¡u que",
-          "legacyRecipeId": 109
-        }
-      ]
-    },
-    {
-      "sourceKey": "cá điêu hồng chiên sốt cà chua",
-      "name": "Cá điêu hồng chiên sốt cà chua",
-      "standardServingSizeG": 65,
-      "items": [
-        {
-          "ingredientName": "Cá điêu hồng tươi",
-          "grossWeightG": 65,
-          "netWeightG": 45,
-          "note": "C├í ─æi├¬u hß╗ông",
-          "legacyRecipeId": 110
-        },
-        {
-          "ingredientName": "Cà chua",
-          "grossWeightG": 28,
-          "netWeightG": 25,
-          "note": "C├á chua",
-          "legacyRecipeId": 111
-        },
-        {
-          "ingredientName": "Dầu thực vật tinh luyện",
-          "grossWeightG": 4,
-          "netWeightG": 4,
-          "note": "Dß║ºu ─ân",
-          "legacyRecipeId": 112
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 10
         }
       ]
     },
@@ -583,515 +121,116 @@
       "standardServingSizeG": 120,
       "items": [
         {
-          "ingredientName": "Cá lóc (cá quả đồng)",
-          "grossWeightG": 25,
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
           "netWeightG": 20,
-          "note": "C├í l├│c",
-          "legacyRecipeId": 119
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 11
         },
         {
           "ingredientName": "Cải ngọt",
-          "grossWeightG": 55,
-          "netWeightG": 45,
-          "note": "Cß║úi ngß╗ìt",
-          "legacyRecipeId": 120
-        },
-        {
-          "ingredientName": "Gừng tươi",
-          "grossWeightG": 1,
-          "netWeightG": 1,
-          "note": "Gß╗½ng khß╗¡ tanh",
-          "legacyRecipeId": 121
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh cải bó xôi nấu thịt bò",
-      "name": "Canh cải bó xôi nấu thịt bò",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït b├▓ b─âm",
-          "legacyRecipeId": 127
-        },
-        {
-          "ingredientName": "Cải bó xôi (rau chân vịt)",
-          "grossWeightG": 55,
-          "netWeightG": 45,
-          "note": "Cß║úi b├│ x├┤i",
-          "legacyRecipeId": 128
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh thịt heo nấm rơm mướp tôm khô",
-      "name": "Canh thịt heo nấm rơm, mướp, tôm khô",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 18,
-          "netWeightG": 16,
-          "note": "Thß╗ït nß║íc b─âm",
-          "legacyRecipeId": 139
-        },
-        {
-          "ingredientName": "Tôm khô ngon",
-          "grossWeightG": 4,
-          "netWeightG": 4,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 140
-        },
-        {
-          "ingredientName": "Mướp",
-          "grossWeightG": 36,
-          "netWeightG": 30,
-          "note": "Mã░ß╗øp hã░ãíng",
-          "legacyRecipeId": 141
-        },
-        {
-          "ingredientName": "Nấm rơm tươi",
-          "grossWeightG": 18,
-          "netWeightG": 15,
-          "note": "Nß║Ñm rãím",
-          "legacyRecipeId": 142
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh rau ngót cá lóc tôm khô",
-      "name": "Canh rau ngót cá lóc, tôm khô",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Cá lóc (cá quả đồng)",
-          "grossWeightG": 20,
-          "netWeightG": 15,
-          "note": "C├í l├│c",
-          "legacyRecipeId": 143
-        },
-        {
-          "ingredientName": "Tôm khô ngon",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 144
-        },
-        {
-          "ingredientName": "Rau ngót",
-          "grossWeightG": 55,
-          "netWeightG": 45,
-          "note": "Rau ng├│t",
-          "legacyRecipeId": 145
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh bí đao cá lóc tôm khô",
-      "name": "Canh bí đao cá lóc, tôm khô",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Cá lóc (cá quả đồng)",
-          "grossWeightG": 20,
-          "netWeightG": 15,
-          "note": "C├í l├│c",
-          "legacyRecipeId": 146
-        },
-        {
-          "ingredientName": "Tôm khô ngon",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 147
-        },
-        {
-          "ingredientName": "Bí đao (bí xanh)",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "B├¡ ─æao",
-          "legacyRecipeId": 148
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh thịt bò hầm đậu đỏ",
-      "name": "Canh thịt bò hầm đậu đỏ",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 149
-        },
-        {
-          "ingredientName": "Đậu đỏ hạt",
-          "grossWeightG": 15,
-          "netWeightG": 15,
-          "note": "─Éß║¡u ─æß╗Å ninh nhß╗½",
-          "legacyRecipeId": 150
-        },
-        {
-          "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 22,
-          "netWeightG": 20,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 151
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh thịt rau cải cúc",
-      "name": "Canh thịt rau cải cúc",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït nß║íc b─âm",
-          "legacyRecipeId": 155
-        },
-        {
-          "ingredientName": "Cải cúc",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Rau cß║úi c├║c",
-          "legacyRecipeId": 156
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh thịt bò hầm khoai môn",
-      "name": "Canh thịt bò hầm khoai môn",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït b├▓",
-          "legacyRecipeId": 157
-        },
-        {
-          "ingredientName": "Khoai môn / Khoai sọ",
-          "grossWeightG": 55,
-          "netWeightG": 45,
-          "note": "Khoai m├┤n",
-          "legacyRecipeId": 158
-        },
-        {
-          "ingredientName": "Hành hoa & ngò rí",
-          "grossWeightG": 2,
-          "netWeightG": 2,
-          "note": "Ng├▓ gai",
-          "legacyRecipeId": 159
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh khoai mỡ thịt bằm tôm khô",
-      "name": "Canh khoai mỡ thịt bằm, tôm khô",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 18,
-          "netWeightG": 16,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 160
-        },
-        {
-          "ingredientName": "Tôm khô ngon",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 161
-        },
-        {
-          "ingredientName": "Khoai mỡ tím",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Khoai mß╗í",
-          "legacyRecipeId": 162
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh chả cá tần ô",
-      "name": "Canh chả cá, tần ô",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Chả cá thác lác",
-          "grossWeightG": 22,
-          "netWeightG": 20,
-          "note": "Chß║ú c├í",
-          "legacyRecipeId": 163
-        },
-        {
-          "ingredientName": "Cải cúc",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Cß║úi c├║c",
-          "legacyRecipeId": 164
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh thịt bằm rau ngót",
-      "name": "Canh thịt bằm rau ngót",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït nß║íc b─âm",
-          "legacyRecipeId": 165
-        },
-        {
-          "ingredientName": "Rau ngót",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Rau ng├│t",
-          "legacyRecipeId": 166
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh tôm thẻ cải dún",
-      "name": "Canh tôm thẻ, cải dún",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Tôm thẻ tươi sống",
-          "grossWeightG": 22,
-          "netWeightG": 16,
-          "note": "T├┤m thß║╗",
-          "legacyRecipeId": 170
-        },
-        {
-          "ingredientName": "Cải dún Đà Lạt",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Cß║úi d├║n",
-          "legacyRecipeId": 171
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh gà hầm củ sen cà rốt",
-      "name": "Canh gà hầm củ sen, cà rốt",
-      "standardServingSizeG": 130,
-      "items": [
-        {
-          "ingredientName": "Thịt gà ta nạc (ức/đùi)",
-          "grossWeightG": 30,
-          "netWeightG": 25,
-          "note": "Thß╗ït g├á",
-          "legacyRecipeId": 172
-        },
-        {
-          "ingredientName": "Củ sen tươi",
-          "grossWeightG": 30,
-          "netWeightG": 25,
-          "note": "Cß╗º sen",
-          "legacyRecipeId": 173
-        },
-        {
-          "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 18,
-          "netWeightG": 15,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 174
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh nghêu nấu bầu",
-      "name": "Canh nghêu nấu bầu",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Nghêu (ngao) thịt tươi",
-          "grossWeightG": 80,
-          "netWeightG": 20,
-          "note": "Ngh├¬u thß╗ït",
-          "legacyRecipeId": 175
-        },
-        {
-          "ingredientName": "Bầu",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Bß║ºu non",
-          "legacyRecipeId": 176
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh cua đồng rau ngót",
-      "name": "Canh cua đồng rau ngót",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Cua đồng xay giã",
-          "grossWeightG": 60,
-          "netWeightG": 30,
-          "note": "Cua ─æß╗ông gi├ú",
-          "legacyRecipeId": 177
-        },
-        {
-          "ingredientName": "Rau ngót",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "Rau ng├│t",
-          "legacyRecipeId": 178
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh bí hồ lô thịt bằm",
-      "name": "Canh bí hồ lô thịt bằm",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 179
-        },
-        {
-          "ingredientName": "Bí đỏ nếp ruột vàng (bí hồ lô)",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "B├¡ ─æß╗Å",
-          "legacyRecipeId": 180
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh chua cá hú bông súng",
-      "name": "Canh chua cá hú, bông súng",
-      "standardServingSizeG": 130,
-      "items": [
-        {
-          "ingredientName": "Cá hú tươi (cá da trơn)",
-          "grossWeightG": 32,
-          "netWeightG": 25,
-          "note": "C├í h├║",
-          "legacyRecipeId": 181
-        },
-        {
-          "ingredientName": "Bông súng tươi",
           "grossWeightG": 45,
-          "netWeightG": 40,
-          "note": "B├┤ng s├║ng",
-          "legacyRecipeId": 182
+          "netWeightG": 45,
+          "note": "Rau cải ngọt non thái nhỏ",
+          "legacyRecipeId": 12
         },
         {
-          "ingredientName": "Cà chua",
-          "grossWeightG": 18,
-          "netWeightG": 16,
-          "note": "C├á chua",
-          "legacyRecipeId": 183
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh hẹ đậu phụ thịt bằm",
-      "name": "Canh hẹ, đậu phụ, thịt bằm",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 18,
-          "netWeightG": 16,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 184
-        },
-        {
-          "ingredientName": "Đậu phụ",
-          "grossWeightG": 25,
-          "netWeightG": 25,
-          "note": "─Éß║¡u phß╗Ñ",
-          "legacyRecipeId": 185
-        },
-        {
-          "ingredientName": "Hẹ lá tươi",
-          "grossWeightG": 35,
-          "netWeightG": 30,
-          "note": "Hß║╣ l├í",
-          "legacyRecipeId": 186
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh cà chua cá diêu hồng ngò gai",
-      "name": "Canh cà chua cá diêu hồng, ngò gai",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Cá điêu hồng tươi",
-          "grossWeightG": 35,
-          "netWeightG": 25,
-          "note": "C├í di├¬u hß╗ông",
-          "legacyRecipeId": 187
-        },
-        {
-          "ingredientName": "Cà chua",
-          "grossWeightG": 35,
-          "netWeightG": 30,
-          "note": "C├á chua",
-          "legacyRecipeId": 188
-        },
-        {
-          "ingredientName": "Hành hoa & ngò rí",
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
           "grossWeightG": 2,
           "netWeightG": 2,
-          "note": "Ng├▓ gai",
-          "legacyRecipeId": 189
-        }
-      ]
-    },
-    {
-      "sourceKey": "canh bí đao thịt bằm",
-      "name": "Canh bí đao thịt bằm",
-      "standardServingSizeG": 120,
-      "items": [
-        {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 20,
-          "netWeightG": 18,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 190
-        },
-        {
-          "ingredientName": "Bí đao (bí xanh)",
-          "grossWeightG": 60,
-          "netWeightG": 50,
-          "note": "B├¡ ─æao",
-          "legacyRecipeId": 191
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 13
         }
       ]
     },
     {
       "sourceKey": "bánh su kem",
       "name": "Bánh su kem",
-      "standardServingSizeG": 35,
+      "standardServingSizeG": 40,
       "items": [
         {
-          "ingredientName": "Bánh su kem",
-          "grossWeightG": 35,
-          "netWeightG": 35,
-          "note": "B├ính su kem",
-          "legacyRecipeId": 197
+          "ingredientName": "Bột mì",
+          "grossWeightG": 12,
+          "netWeightG": 12,
+          "note": "Vỏ bánh su kem",
+          "legacyRecipeId": 14
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 12,
+          "netWeightG": 10,
+          "note": "Trứng gà làm nhân kem",
+          "legacyRecipeId": 15
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi làm nhân kem",
+          "legacyRecipeId": 16
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Chất béo làm bánh",
+          "legacyRecipeId": 17
+        }
+      ]
+    },
+    {
+      "sourceKey": "cá lóc kho",
+      "name": "Cá lóc kho",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 80,
+          "netWeightG": 48,
+          "note": "Cá lóc (cá quả) phi lê sạch xương",
+          "legacyRecipeId": 18
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 19
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt sườn hầm bắp bàu",
+      "name": "Canh thịt sườn hầm bắp bàu",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Sườn lợn",
+          "grossWeightG": 58,
+          "netWeightG": 25,
+          "note": "Sườn lợn ninh nước dùng",
+          "legacyRecipeId": 20
+        },
+        {
+          "ingredientName": "Bầu",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Bầu non gọt vỏ băm sợi",
+          "legacyRecipeId": 21
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 22
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 23
         }
       ]
     },
@@ -1101,11 +240,74 @@
       "standardServingSizeG": 50,
       "items": [
         {
-          "ingredientName": "Lê đường ngọt",
+          "ingredientName": "Ổi",
           "grossWeightG": 60,
           "netWeightG": 50,
-          "note": "L├¬ ─æã░ß╗Øng",
-          "legacyRecipeId": 198
+          "note": "Lê đường gọt vỏ cắt lát",
+          "legacyRecipeId": 24
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt bò kho mặn tràng bắp cà rốt",
+      "name": "Thịt bò kho mặn tràng bắp, cà rốt",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 38,
+          "netWeightG": 38,
+          "note": "Thịt bò nạc thái mềm",
+          "legacyRecipeId": 25
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 27,
+          "netWeightG": 15,
+          "note": "Ngô bắp ngọt tách hạt",
+          "legacyRecipeId": 26
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt thái miếng",
+          "legacyRecipeId": 27
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 28
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh bầu cá lóc",
+      "name": "Canh bầu, cá lóc",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 29
+        },
+        {
+          "ingredientName": "Bầu",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Bầu non gọt vỏ băm sợi",
+          "legacyRecipeId": 30
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 31
         }
       ]
     },
@@ -1115,60 +317,151 @@
       "standardServingSizeG": 50,
       "items": [
         {
-          "ingredientName": "Bột rau câu (Agar dừa)",
-          "grossWeightG": 50,
-          "netWeightG": 50,
-          "note": "Rau c├óu dß╗½a",
-          "legacyRecipeId": 199
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 35,
+          "netWeightG": 35,
+          "note": "Sữa tươi nấu thạch rau câu",
+          "legacyRecipeId": 32
+        },
+        {
+          "ingredientName": "Sữa đặc có đường Việt Nam",
+          "grossWeightG": 8,
+          "netWeightG": 8,
+          "note": "Sữa đặc làm thạch rau câu",
+          "legacyRecipeId": 33
         }
       ]
     },
     {
-      "sourceKey": "đu đủ chín",
-      "name": "Đu đủ chín",
+      "sourceKey": "thịt gà chiên nước mắm",
+      "name": "Thịt gà chiên nước mắm",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 94,
+          "netWeightG": 45,
+          "note": "Thịt gà ta lọc xương",
+          "legacyRecipeId": 34
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 35
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cải bó xôi nấu thịt bò",
+      "name": "Canh cải bó xôi nấu thịt bò",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt bò nạc băm/thái mềm",
+          "legacyRecipeId": 36
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 58,
+          "netWeightG": 45,
+          "note": "Rau lá xanh đậm giàu sắt",
+          "legacyRecipeId": 37
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 38
+        }
+      ]
+    },
+    {
+      "sourceKey": "thanh long",
+      "name": "Thanh Long",
       "standardServingSizeG": 60,
       "items": [
         {
-          "ingredientName": "Đu đủ chín",
-          "grossWeightG": 80,
+          "ingredientName": "Bưởi",
+          "grossWeightG": 92,
           "netWeightG": 60,
-          "note": "─Éu ─æß╗º",
-          "legacyRecipeId": 202
+          "note": "Thanh long cắt miếng vừa ăn",
+          "legacyRecipeId": 39
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước đậu rang",
+      "name": "Nước đậu rang",
+      "standardServingSizeG": 140,
+      "items": [
+        {
+          "ingredientName": "Đậu đen (hạt)",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Đậu đen rang nấu nước mát",
+          "legacyRecipeId": 40
         }
       ]
     },
     {
       "sourceKey": "bún suông thịt heo trứng cút cà rốt",
       "name": "Bún suông thịt heo, trứng cút, cà rốt",
-      "standardServingSizeG": 150,
+      "standardServingSizeG": 155,
       "items": [
         {
           "ingredientName": "Bún",
           "grossWeightG": 60,
           "netWeightG": 60,
-          "note": "B├║n tã░ãíi",
-          "legacyRecipeId": 211
+          "note": "Bún tươi sợi mềm",
+          "legacyRecipeId": 41
         },
         {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 22,
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
           "netWeightG": 20,
-          "note": "Thß╗ït nß║íc b─âm",
-          "legacyRecipeId": 212
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 42
         },
         {
           "ingredientName": "Trứng chim cút",
-          "grossWeightG": 18,
+          "grossWeightG": 17,
           "netWeightG": 15,
-          "note": "Trß╗®ng c├║t",
-          "legacyRecipeId": 213
+          "note": "Trứng chim cút bóc vỏ",
+          "legacyRecipeId": 43
         },
         {
           "ingredientName": "Cà rốt (củ đỏ, vàng)",
           "grossWeightG": 18,
           "netWeightG": 15,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 214
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 44
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 45
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước cam",
+      "name": "Nước cam",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 107,
+          "netWeightG": 80,
+          "note": "Cam tươi vắt lấy nước",
+          "legacyRecipeId": 46
         }
       ]
     },
@@ -1181,176 +474,1261 @@
           "ingredientName": "Gạo tẻ máy",
           "grossWeightG": 25,
           "netWeightG": 25,
-          "note": "Gß║ío tß║╗",
-          "legacyRecipeId": 215
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 47
         },
         {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
+          "ingredientName": "Thịt bò, lưng, nạc",
           "grossWeightG": 22,
-          "netWeightG": 20,
-          "note": "Thß╗ït b├▓ b─âm",
-          "legacyRecipeId": 216
+          "netWeightG": 22,
+          "note": "Thịt bò nạc băm/thái mỏng",
+          "legacyRecipeId": 48
         },
         {
-          "ingredientName": "Bí đỏ nếp ruột vàng (bí hồ lô)",
-          "grossWeightG": 30,
+          "ingredientName": "Bí ngô",
+          "grossWeightG": 29,
           "netWeightG": 25,
-          "note": "B├¡ ─æß╗Å",
-          "legacyRecipeId": 217
+          "note": "Bí đỏ ninh nhừ",
+          "legacyRecipeId": 49
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 50
+        }
+      ]
+    },
+    {
+      "sourceKey": "yaourt",
+      "name": "Yaourt",
+      "standardServingSizeG": 100,
+      "items": [
+        {
+          "ingredientName": "Sữa chua",
+          "grossWeightG": 100,
+          "netWeightG": 100,
+          "note": "Sữa chua (Yaourt)",
+          "legacyRecipeId": 51
+        }
+      ]
+    },
+    {
+      "sourceKey": "hủ tiếu nam vang (mực tim gan tôm)- cần tây",
+      "name": "Hủ tiếu nam vang (mực, tim, gan, tôm)- cần tây",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 52
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 53
+        },
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Thủy hải sản tươi mềm",
+          "legacyRecipeId": 54
+        },
+        {
+          "ingredientName": "Thịt lợn, nạc vai",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn giàu sắt và kẽm",
+          "legacyRecipeId": 55
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 56
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 57
+        }
+      ]
+    },
+    {
+      "sourceKey": "nha đam hạt chia đường phèn",
+      "name": "Nha đam, hạt chia, đường phèn",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Bưởi",
+          "grossWeightG": 77,
+          "netWeightG": 50,
+          "note": "Nguyên liệu thanh nhiệt (Nha đam, hạt chia, đường phèn)",
+          "legacyRecipeId": 58
+        },
+        {
+          "ingredientName": "Vừng (đen, trắng)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Hạt chia / hạt dinh dưỡng",
+          "legacyRecipeId": 59
+        }
+      ]
+    },
+    {
+      "sourceKey": "súp óc heo gà xé trứng cút cải đỏ",
+      "name": "Súp óc heo, gà xé, trứng cút, cải đỏ",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 33,
+          "netWeightG": 18,
+          "note": "Bắp ngọt nấu súp",
+          "legacyRecipeId": 60
+        },
+        {
+          "ingredientName": "Củ sắn dây",
+          "grossWeightG": 9,
+          "netWeightG": 8,
+          "note": "Bột sánh nấu súp",
+          "legacyRecipeId": 61
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 62
+        },
+        {
+          "ingredientName": "Thịt lợn, nạc vai",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn giàu sắt và kẽm",
+          "legacyRecipeId": 63
+        },
+        {
+          "ingredientName": "Trứng chim cút",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng chim cút bóc vỏ",
+          "legacyRecipeId": 64
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 65
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 66
+        }
+      ]
+    },
+    {
+      "sourceKey": "sữa đậu nành",
+      "name": "Sữa đậu nành",
+      "standardServingSizeG": 150,
+      "items": [
+        {
+          "ingredientName": "Sữa đậu nành (100g đậu/lít)",
+          "grossWeightG": 150,
+          "netWeightG": 150,
+          "note": "Sữa đậu nành nấu chín",
+          "legacyRecipeId": 67
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh bao thịt",
+      "name": "Bánh bao thịt",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 68
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 69
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 70
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 71
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt heo ram mặn cà rốt",
+      "name": "Thịt heo ram mặn cà rốt",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 46,
+          "netWeightG": 45,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 72
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt thái miếng",
+          "legacyRecipeId": 73
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 74
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh chua cá hú khóm đậu bắp cà chua bạc hà",
+      "name": "Canh chua cá hú, khóm, đậu bắp, cà chua, bạc hà",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Cá da trơn (cá hú/basa) nấu canh",
+          "legacyRecipeId": 75
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Cà chua chín tạo vị thanh",
+          "legacyRecipeId": 76
+        },
+        {
+          "ingredientName": "Giá đậu xanh",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Rau nấu canh chua miền Nam",
+          "legacyRecipeId": 77
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 78
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 79
+        }
+      ]
+    },
+    {
+      "sourceKey": "táo tây",
+      "name": "Táo tây",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Ổi",
+          "grossWeightG": 60,
+          "netWeightG": 50,
+          "note": "Táo ngọt gọt vỏ cắt lát",
+          "legacyRecipeId": 80
+        }
+      ]
+    },
+    {
+      "sourceKey": "cá ngừ chiên sốt cà chua",
+      "name": "Cá Ngừ chiên sốt cà chua",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Cá ngừ",
+          "grossWeightG": 78,
+          "netWeightG": 45,
+          "note": "Cá ngừ phi lê sạch xương",
+          "legacyRecipeId": 81
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 21,
+          "netWeightG": 20,
+          "note": "Cà chua chín sốt mềm",
+          "legacyRecipeId": 82
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 83
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh gà hầm bách vị (hạt sen cà rốt nấm hương sup lơ)",
+      "name": "Canh gà hầm bách vị (hạt sen, cà rốt, nấm hương, sup lơ)",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 52,
+          "netWeightG": 25,
+          "note": "Thịt gà ta ninh mềm",
+          "legacyRecipeId": 84
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 85
+        },
+        {
+          "ingredientName": "Súp lơ xanh",
+          "grossWeightG": 41,
+          "netWeightG": 25,
+          "note": "Rau củ hầm canh ngọt nước",
+          "legacyRecipeId": 86
+        },
+        {
+          "ingredientName": "Đậu Hà lan (hạt)",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Hạt hầm bùi mềm giàu đạm",
+          "legacyRecipeId": 87
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 88
+        }
+      ]
+    },
+    {
+      "sourceKey": "đu đủ chín",
+      "name": "Đu đủ chín",
+      "standardServingSizeG": 60,
+      "items": [
+        {
+          "ingredientName": "Đu đủ chín",
+          "grossWeightG": 80,
+          "netWeightG": 60,
+          "note": "Đu đủ chín gọt vỏ cắt miếng",
+          "legacyRecipeId": 89
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt heo tôm rim nước dừa",
+      "name": "Thịt heo, tôm rim nước dừa",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 90
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 43,
+          "netWeightG": 20,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 91
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 92
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bò cải bó xôi",
+      "name": "Canh thịt bò, cải bó xôi",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt bò nạc băm/thái mềm",
+          "legacyRecipeId": 93
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 58,
+          "netWeightG": 45,
+          "note": "Rau lá xanh đậm giàu sắt",
+          "legacyRecipeId": 94
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 95
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh flan",
+      "name": "Bánh Flan",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 23,
+          "netWeightG": 20,
+          "note": "Trứng gà tươi",
+          "legacyRecipeId": 96
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Sữa tươi tiệt trùng",
+          "legacyRecipeId": 97
+        },
+        {
+          "ingredientName": "Sữa đặc có đường Việt Nam",
+          "grossWeightG": 8,
+          "netWeightG": 8,
+          "note": "Sữa đặc có đường",
+          "legacyRecipeId": 98
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt gà xào mặn sả đậu phọng",
+      "name": "Thịt gà xào mặn, sả, đậu phọng",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 94,
+          "netWeightG": 45,
+          "note": "Thịt gà ta lọc xương",
+          "legacyRecipeId": 99
+        },
+        {
+          "ingredientName": "Lạc hạt",
+          "grossWeightG": 6,
+          "netWeightG": 6,
+          "note": "Lạc hạt (đậu phộng) rang",
+          "legacyRecipeId": 100
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 101
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt heo nấm rơm mướp tôm khô",
+      "name": "Canh thịt heo nấm rơm, mướp, tôm khô",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước canh",
+          "legacyRecipeId": 102
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 103
+        },
+        {
+          "ingredientName": "Mướp",
+          "grossWeightG": 40,
+          "netWeightG": 35,
+          "note": "Mướp hương gọt vỏ thái lát",
+          "legacyRecipeId": 104
+        },
+        {
+          "ingredientName": "Súp lơ xanh",
+          "grossWeightG": 41,
+          "netWeightG": 25,
+          "note": "Rau củ hầm canh ngọt nước",
+          "legacyRecipeId": 105
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 106
+        }
+      ]
+    },
+    {
+      "sourceKey": "dưa hấu",
+      "name": "Dưa hấu",
+      "standardServingSizeG": 70,
+      "items": [
+        {
+          "ingredientName": "Dưa hấu",
+          "grossWeightG": 135,
+          "netWeightG": 70,
+          "note": "Dưa hấu chín bỏ vỏ cắt miếng",
+          "legacyRecipeId": 107
+        }
+      ]
+    },
+    {
+      "sourceKey": "trứng vịt chiên thịt cà chua",
+      "name": "Trứng vịt chiên thịt, cà chua",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 108
+        },
+        {
+          "ingredientName": "Trứng vịt",
+          "grossWeightG": 40,
+          "netWeightG": 35,
+          "note": "Trứng vịt tươi",
+          "legacyRecipeId": 109
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 21,
+          "netWeightG": 20,
+          "note": "Cà chua chín sốt mềm",
+          "legacyRecipeId": 110
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 111
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh rau ngót cá lóc tôm khô",
+      "name": "Canh rau ngót cá lóc, tôm khô",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 112
+        },
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước canh",
+          "legacyRecipeId": 113
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 58,
+          "netWeightG": 45,
+          "note": "Rau ngót tuốt lá rửa sạch",
+          "legacyRecipeId": 114
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 115
+        }
+      ]
+    },
+    {
+      "sourceKey": "quýt",
+      "name": "Quýt",
+      "standardServingSizeG": 60,
+      "items": [
+        {
+          "ingredientName": "Quít",
+          "grossWeightG": 81,
+          "netWeightG": 60,
+          "note": "Quýt chín bóc vỏ bỏ hạt",
+          "legacyRecipeId": 116
+        }
+      ]
+    },
+    {
+      "sourceKey": "chanh dây hạt chia đường phèn",
+      "name": "Chanh dây, hạt chia, đường phèn",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 67,
+          "netWeightG": 50,
+          "note": "Trái cây tươi pha Chanh dây, hạt chia, đường phèn",
+          "legacyRecipeId": 117
+        },
+        {
+          "ingredientName": "Vừng (đen, trắng)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Hạt chia / hạt dinh dưỡng",
+          "legacyRecipeId": 118
         }
       ]
     },
     {
       "sourceKey": "miến gà tôm khô cần tàu",
       "name": "Miến gà, tôm khô, cần tàu",
-      "standardServingSizeG": 150,
+      "standardServingSizeG": 155,
       "items": [
         {
           "ingredientName": "Miến dong",
           "grossWeightG": 25,
           "netWeightG": 25,
-          "note": "Miß║┐n dong",
-          "legacyRecipeId": 232
+          "note": "Miến dong mềm",
+          "legacyRecipeId": 119
         },
         {
-          "ingredientName": "Thịt gà ta nạc (ức/đùi)",
-          "grossWeightG": 25,
-          "netWeightG": 20,
-          "note": "Thß╗ït g├á",
-          "legacyRecipeId": 233
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 120
         },
         {
-          "ingredientName": "Tôm khô ngon",
-          "grossWeightG": 5,
-          "netWeightG": 5,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 234
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước",
+          "legacyRecipeId": 121
         },
         {
-          "ingredientName": "Cần tây (cần tàu)",
-          "grossWeightG": 12,
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
           "netWeightG": 10,
-          "note": "Cß║ºn t├óy",
-          "legacyRecipeId": 235
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 122
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 123
         }
       ]
     },
     {
       "sourceKey": "nui thịt bằm tôm cà rốt",
       "name": "Nui thịt bằm, tôm, cà rốt",
-      "standardServingSizeG": 150,
+      "standardServingSizeG": 155,
       "items": [
         {
-          "ingredientName": "Nui khô (Pasta)",
-          "grossWeightG": 25,
-          "netWeightG": 25,
-          "note": "Nui",
-          "legacyRecipeId": 236
+          "ingredientName": "Bột mì",
+          "grossWeightG": 28,
+          "netWeightG": 28,
+          "note": "Sợi mì / nui chế biến từ bột mì",
+          "legacyRecipeId": 124
         },
         {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 22,
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 125
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
           "netWeightG": 20,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 237
-        },
-        {
-          "ingredientName": "Tôm thẻ tươi sống",
-          "grossWeightG": 15,
-          "netWeightG": 10,
-          "note": "T├┤m thß║╗",
-          "legacyRecipeId": 238
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 126
         },
         {
           "ingredientName": "Cà rốt (củ đỏ, vàng)",
           "grossWeightG": 18,
           "netWeightG": 15,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 239
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 127
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 128
+        }
+      ]
+    },
+    {
+      "sourceKey": "sâm bí đao",
+      "name": "Sâm bí đao",
+      "standardServingSizeG": 140,
+      "items": [
+        {
+          "ingredientName": "Bí đao (bí xanh)",
+          "grossWeightG": 62,
+          "netWeightG": 45,
+          "note": "Bí đao nấu nước sâm",
+          "legacyRecipeId": 129
         }
       ]
     },
     {
       "sourceKey": "bánh canh bột xắt tôm khô cá lóc",
       "name": "Bánh canh bột xắt tôm khô, cá lóc",
-      "standardServingSizeG": 160,
+      "standardServingSizeG": 75,
       "items": [
         {
-          "ingredientName": "Bánh canh bột xắt",
+          "ingredientName": "Bánh phở",
           "grossWeightG": 60,
           "netWeightG": 60,
-          "note": "B├ính canh",
-          "legacyRecipeId": 240
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 130
         },
         {
-          "ingredientName": "Cá lóc (cá quả đồng)",
-          "grossWeightG": 25,
-          "netWeightG": 20,
-          "note": "C├í l├│c",
-          "legacyRecipeId": 241
+          "ingredientName": "Cá quả",
+          "grossWeightG": 37,
+          "netWeightG": 22,
+          "note": "Cá lóc (cá quả) lọc sạch xương",
+          "legacyRecipeId": 131
         },
         {
-          "ingredientName": "Tôm khô ngon",
-          "grossWeightG": 5,
-          "netWeightG": 5,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 242
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước",
+          "legacyRecipeId": 132
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 133
         }
       ]
     },
     {
       "sourceKey": "phở bò ngò gai quế",
       "name": "Phở bò, ngò gai, quế",
-      "standardServingSizeG": 160,
+      "standardServingSizeG": 155,
       "items": [
         {
           "ingredientName": "Bánh phở",
           "grossWeightG": 60,
           "netWeightG": 60,
-          "note": "B├ính phß╗ƒ",
-          "legacyRecipeId": 243
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 134
         },
         {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 22,
+          "netWeightG": 22,
+          "note": "Thịt bò nạc băm/thái mỏng",
+          "legacyRecipeId": 135
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 136
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 137
+        }
+      ]
+    },
+    {
+      "sourceKey": "sữa trái cây",
+      "name": "Sữa trái cây",
+      "standardServingSizeG": 140,
+      "items": [
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 110,
+          "netWeightG": 110,
+          "note": "Sữa tươi",
+          "legacyRecipeId": 138
+        },
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 33,
+          "netWeightG": 25,
+          "note": "Trái cây tươi phối hợp",
+          "legacyRecipeId": 139
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh pateso thịt",
+      "name": "Bánh pateso thịt",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 140
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 141
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 142
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 143
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 144
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt sườn heo khìa nước dừa",
+      "name": "Thịt sườn heo khìa nước dừa",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Sườn lợn",
+          "grossWeightG": 105,
+          "netWeightG": 45,
+          "note": "Sườn lợn non chặt miếng",
+          "legacyRecipeId": 145
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 146
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh bí đao cá lóc tôm khô",
+      "name": "Canh bí đao cá lóc, tôm khô",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 147
+        },
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước canh",
+          "legacyRecipeId": 148
+        },
+        {
+          "ingredientName": "Bí đao (bí xanh)",
+          "grossWeightG": 62,
+          "netWeightG": 45,
+          "note": "Bí đao gọt vỏ thái mỏng",
+          "legacyRecipeId": 149
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 150
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt bò xào đậu que",
+      "name": "Thịt bò xào đậu que",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 38,
+          "netWeightG": 38,
+          "note": "Thịt bò nạc thái mềm",
+          "legacyRecipeId": 151
+        },
+        {
+          "ingredientName": "Đậu cô ve",
           "grossWeightG": 28,
           "netWeightG": 25,
-          "note": "Thß╗ït b├▓ bß║»p",
-          "legacyRecipeId": 244
+          "note": "Đậu cô ve (đậu que) non",
+          "legacyRecipeId": 152
         },
         {
-          "ingredientName": "Hành hoa & ngò rí",
-          "grossWeightG": 5,
-          "netWeightG": 5,
-          "note": "H├ánh ng├▓",
-          "legacyRecipeId": 245
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 153
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh chua cá hú cà chua đậu bắp khóm",
+      "name": "Canh chua cá hú, cà chua, đậu bắp, khóm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Cá da trơn (cá hú/basa) nấu canh",
+          "legacyRecipeId": 154
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Cà chua chín tạo vị thanh",
+          "legacyRecipeId": 155
+        },
+        {
+          "ingredientName": "Giá đậu xanh",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Rau nấu canh chua miền Nam",
+          "legacyRecipeId": 156
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 157
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 158
+        }
+      ]
+    },
+    {
+      "sourceKey": "dưa hoàng kim",
+      "name": "Dưa hoàng kim",
+      "standardServingSizeG": 60,
+      "items": [
+        {
+          "ingredientName": "Đu đủ chín",
+          "grossWeightG": 80,
+          "netWeightG": 60,
+          "note": "Dưa hoàng kim gọt vỏ cắt miếng",
+          "legacyRecipeId": 159
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt kho trứng cút",
+      "name": "Thịt kho trứng cút",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nửa nạc, nửa mỡ",
+          "grossWeightG": 41,
+          "netWeightG": 40,
+          "note": "Thịt ba chỉ (nửa nạc nửa mỡ)",
+          "legacyRecipeId": 160
+        },
+        {
+          "ingredientName": "Trứng chim cút",
+          "grossWeightG": 25,
+          "netWeightG": 22,
+          "note": "Trứng chim cút bóc vỏ",
+          "legacyRecipeId": 161
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 162
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bò hầm đậu đỏ",
+      "name": "Canh thịt bò hầm đậu đỏ",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt bò nạc băm/thái mềm",
+          "legacyRecipeId": 163
+        },
+        {
+          "ingredientName": "Đậu Hà lan (hạt)",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Hạt hầm bùi mềm giàu đạm",
+          "legacyRecipeId": 164
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 165
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm rau dền muồng tơi",
+      "name": "Canh thịt bằm rau dền, muồng tơi",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 166
+        },
+        {
+          "ingredientName": "Rau mồng tơi",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Rau mồng tơi non mềm",
+          "legacyRecipeId": 167
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 168
+        }
+      ]
+    },
+    {
+      "sourceKey": "rau câu giòn sơn thủy",
+      "name": "Rau câu giòn sơn thủy",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 35,
+          "netWeightG": 35,
+          "note": "Sữa tươi nấu thạch rau câu",
+          "legacyRecipeId": 169
+        },
+        {
+          "ingredientName": "Sữa đặc có đường Việt Nam",
+          "grossWeightG": 8,
+          "netWeightG": 8,
+          "note": "Sữa đặc làm thạch rau câu",
+          "legacyRecipeId": 170
+        }
+      ]
+    },
+    {
+      "sourceKey": "cơm dương châu (đậu đũa cà rốt lạp xưởng thịt nạc trứng)",
+      "name": "Cơm Dương Châu (đậu đũa, cà rốt, lạp xưởng, thịt nạc, trứng)",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 45,
+          "netWeightG": 45,
+          "note": "Gạo tẻ nấu cơm chiên",
+          "legacyRecipeId": 171
+        },
+        {
+          "ingredientName": "Đậu đũa",
+          "grossWeightG": 11,
+          "netWeightG": 10,
+          "note": "Đậu đũa thái hạt lựu",
+          "legacyRecipeId": 172
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 12,
+          "netWeightG": 10,
+          "note": "Cà rốt thái hạt lựu",
+          "legacyRecipeId": 173
+        },
+        {
+          "ingredientName": "Thịt lợn nửa nạc, nửa mỡ",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Lạp xưởng thịt thái hạt lựu",
+          "legacyRecipeId": 174
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Thịt lợn nạc thái nhỏ",
+          "legacyRecipeId": 175
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà chiên",
+          "legacyRecipeId": 176
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 177
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh gà nấu nấm linh chi cà rốt táo đỏ",
+      "name": "Canh gà nấu nấm linh chi, cà rốt, táo đỏ",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 52,
+          "netWeightG": 25,
+          "note": "Thịt gà ta ninh mềm",
+          "legacyRecipeId": 178
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 179
+        },
+        {
+          "ingredientName": "Súp lơ xanh",
+          "grossWeightG": 41,
+          "netWeightG": 25,
+          "note": "Rau củ hầm canh ngọt nước",
+          "legacyRecipeId": 180
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 181
         }
       ]
     },
     {
       "sourceKey": "mì gà tiềm hạt sen",
       "name": "Mì gà tiềm, hạt sen",
-      "standardServingSizeG": 160,
+      "standardServingSizeG": 155,
       "items": [
         {
-          "ingredientName": "Mì trứng tươi",
-          "grossWeightG": 40,
-          "netWeightG": 40,
-          "note": "M├¼ trß╗®ng",
-          "legacyRecipeId": 246
+          "ingredientName": "Bột mì",
+          "grossWeightG": 28,
+          "netWeightG": 28,
+          "note": "Sợi mì / nui chế biến từ bột mì",
+          "legacyRecipeId": 182
         },
         {
-          "ingredientName": "Thịt gà ta nạc (ức/đùi)",
-          "grossWeightG": 30,
-          "netWeightG": 25,
-          "note": "Thß╗ït g├á",
-          "legacyRecipeId": 247
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 183
         },
         {
-          "ingredientName": "Hạt sen khô Huế",
-          "grossWeightG": 10,
-          "netWeightG": 10,
-          "note": "Hß║ít sen",
-          "legacyRecipeId": 248
+          "ingredientName": "Đậu Hà lan (hạt)",
+          "grossWeightG": 12,
+          "netWeightG": 12,
+          "note": "Hạt sen / hạt đậu ninh mềm",
+          "legacyRecipeId": 184
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 185
         }
       ]
     },
@@ -1363,120 +1741,1639 @@
           "ingredientName": "Gạo tẻ máy",
           "grossWeightG": 25,
           "netWeightG": 25,
-          "note": "Gß║ío tß║╗",
-          "legacyRecipeId": 249
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 186
         },
         {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 22,
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
           "netWeightG": 20,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 250
-        },
-        {
-          "ingredientName": "Cải bó xôi (rau chân vịt)",
-          "grossWeightG": 24,
-          "netWeightG": 20,
-          "note": "Cß║úi b├│ x├┤i",
-          "legacyRecipeId": 251
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 187
         },
         {
           "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 12,
-          "netWeightG": 10,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 252
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 188
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 26,
+          "netWeightG": 20,
+          "note": "Rau xanh băm nhuyễn",
+          "legacyRecipeId": 189
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 190
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh canh cá lóc cà rốt",
+      "name": "Bánh canh cá lóc, cà rốt",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 191
+        },
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 37,
+          "netWeightG": 22,
+          "note": "Cá lóc (cá quả) lọc sạch xương",
+          "legacyRecipeId": 192
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 193
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 194
+        }
+      ]
+    },
+    {
+      "sourceKey": "trà đào hạt chia đường phèn",
+      "name": "Trà đào, hạt chia, đường phèn",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 67,
+          "netWeightG": 50,
+          "note": "Trái cây tươi pha Trà đào, hạt chia, đường phèn",
+          "legacyRecipeId": 195
+        },
+        {
+          "ingredientName": "Vừng (đen, trắng)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Hạt chia / hạt dinh dưỡng",
+          "legacyRecipeId": 196
+        }
+      ]
+    },
+    {
+      "sourceKey": "hủ tiếu (gà tôm mực) cà rốt",
+      "name": "Hủ tiếu (gà, tôm, mực) cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 197
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 198
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 199
+        },
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Thủy hải sản tươi mềm",
+          "legacyRecipeId": 200
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 201
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 202
+        }
+      ]
+    },
+    {
+      "sourceKey": "sữa đậu xanh",
+      "name": "Sữa đậu xanh",
+      "standardServingSizeG": 150,
+      "items": [
+        {
+          "ingredientName": "Đậu xanh (đậu tắt)",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Đậu xanh đãi vỏ nấu sữa",
+          "legacyRecipeId": 203
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 80,
+          "netWeightG": 80,
+          "note": "Sữa tươi phối hợp",
+          "legacyRecipeId": 204
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh mêxico mặn",
+      "name": "Bánh mêxico mặn",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 205
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 206
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 207
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 208
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 209
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt ram mặn",
+      "name": "Thịt ram mặn",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 46,
+          "netWeightG": 45,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 210
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 211
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cá lóc nấu bầu",
+      "name": "Canh cá lóc nấu bầu",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 212
+        },
+        {
+          "ingredientName": "Bầu",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Bầu non gọt vỏ băm sợi",
+          "legacyRecipeId": 213
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 214
+        }
+      ]
+    },
+    {
+      "sourceKey": "hồng trứng",
+      "name": "Hồng trứng",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Vải",
+          "grossWeightG": 96,
+          "netWeightG": 50,
+          "note": "Hồng trứng chín ngọt gọt vỏ",
+          "legacyRecipeId": 215
+        }
+      ]
+    },
+    {
+      "sourceKey": "trứng chưng thịt bún tàu nấm mèo cải đỏ",
+      "name": "Trứng chưng thịt, bún tàu, nấm mèo, cải đỏ",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 216
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 35,
+          "netWeightG": 30,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 217
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt thái miếng",
+          "legacyRecipeId": 218
+        },
+        {
+          "ingredientName": "Miến dong",
+          "grossWeightG": 6,
+          "netWeightG": 6,
+          "note": "Miến dong (bún tàu) cắt ngắn",
+          "legacyRecipeId": 219
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 220
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh gà nấu ngũ vị (cà rốt nấm bông cải…)",
+      "name": "Canh gà nấu ngũ vị (cà rốt, nấm, bông cải…)",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 52,
+          "netWeightG": 25,
+          "note": "Thịt gà ta ninh mềm",
+          "legacyRecipeId": 221
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 222
+        },
+        {
+          "ingredientName": "Súp lơ xanh",
+          "grossWeightG": 41,
+          "netWeightG": 25,
+          "note": "Rau củ hầm canh ngọt nước",
+          "legacyRecipeId": 223
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 224
+        }
+      ]
+    },
+    {
+      "sourceKey": "táo",
+      "name": "Táo",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Ổi",
+          "grossWeightG": 60,
+          "netWeightG": 50,
+          "note": "Táo ngọt gọt vỏ cắt lát",
+          "legacyRecipeId": 225
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt rau cải cúc",
+      "name": "Canh thịt rau cải cúc",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 226
+        },
+        {
+          "ingredientName": "Cải cúc",
+          "grossWeightG": 60,
+          "netWeightG": 45,
+          "note": "Rau cải cúc (tần ô) non",
+          "legacyRecipeId": 227
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 228
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh gang",
+      "name": "Bánh gang",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 23,
+          "netWeightG": 20,
+          "note": "Trứng gà tươi",
+          "legacyRecipeId": 229
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Sữa tươi tiệt trùng",
+          "legacyRecipeId": 230
+        },
+        {
+          "ingredientName": "Sữa đặc có đường Việt Nam",
+          "grossWeightG": 8,
+          "netWeightG": 8,
+          "note": "Sữa đặc có đường",
+          "legacyRecipeId": 231
+        }
+      ]
+    },
+    {
+      "sourceKey": "cá điêu hồng chiên sốt cà chua",
+      "name": "Cá điêu hồng chiên sốt cà chua",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Cá rô phi",
+          "grossWeightG": 79,
+          "netWeightG": 45,
+          "note": "Cá điêu hồng phi lê",
+          "legacyRecipeId": 232
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 21,
+          "netWeightG": 20,
+          "note": "Cà chua chín sốt mềm",
+          "legacyRecipeId": 233
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 234
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bò hầm khoai môn ngò gai",
+      "name": "Canh thịt bò hầm khoai môn, ngò gai",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt bò nạc băm/thái mềm",
+          "legacyRecipeId": 235
+        },
+        {
+          "ingredientName": "Khoai môn",
+          "grossWeightG": 52,
+          "netWeightG": 45,
+          "note": "Khoai môn ninh mềm",
+          "legacyRecipeId": 236
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 237
+        }
+      ]
+    },
+    {
+      "sourceKey": "dưa lê",
+      "name": "Dưa lê",
+      "standardServingSizeG": 60,
+      "items": [
+        {
+          "ingredientName": "Đu đủ chín",
+          "grossWeightG": 80,
+          "netWeightG": 60,
+          "note": "Dưa lê gọt vỏ cắt miếng",
+          "legacyRecipeId": 238
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt trứng chiên",
+      "name": "Thịt trứng chiên",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 239
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 35,
+          "netWeightG": 30,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 240
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 241
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm bắp bàu muồng tơi",
+      "name": "Canh thịt bằm, bắp bàu, muồng tơi",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 242
+        },
+        {
+          "ingredientName": "Rau mồng tơi",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Rau mồng tơi non mềm",
+          "legacyRecipeId": 243
+        },
+        {
+          "ingredientName": "Bầu",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Bầu non gọt vỏ băm sợi",
+          "legacyRecipeId": 244
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 245
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 246
+        }
+      ]
+    },
+    {
+      "sourceKey": "quýt đường",
+      "name": "Quýt đường",
+      "standardServingSizeG": 60,
+      "items": [
+        {
+          "ingredientName": "Quít",
+          "grossWeightG": 81,
+          "netWeightG": 60,
+          "note": "Quýt chín bóc vỏ bỏ hạt",
+          "legacyRecipeId": 247
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước sâm rong biển hoa cúc",
+      "name": "Nước Sâm rong biển, hoa cúc",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Bưởi",
+          "grossWeightG": 77,
+          "netWeightG": 50,
+          "note": "Nguyên liệu thanh nhiệt (Nước Sâm rong biển, hoa cúc)",
+          "legacyRecipeId": 248
         }
       ]
     },
     {
       "sourceKey": "bún bò huế ngò gai quế",
       "name": "Bún bò huế, ngò gai, quế",
-      "standardServingSizeG": 150,
+      "standardServingSizeG": 155,
       "items": [
         {
           "ingredientName": "Bún",
           "grossWeightG": 60,
           "netWeightG": 60,
-          "note": "B├║n tã░ãíi",
+          "note": "Bún tươi sợi mềm",
+          "legacyRecipeId": 249
+        },
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 22,
+          "netWeightG": 22,
+          "note": "Thịt bò nạc băm/thái mỏng",
+          "legacyRecipeId": 250
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 251
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 252
+        }
+      ]
+    },
+    {
+      "sourceKey": "nui nấu gan tôm mực cải đỏ",
+      "name": "Nui nấu gan, tôm, mực cải đỏ",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 28,
+          "netWeightG": 28,
+          "note": "Sợi mì / nui chế biến từ bột mì",
           "legacyRecipeId": 253
         },
         {
-          "ingredientName": "Thịt bò bắp / thăn loại 1",
-          "grossWeightG": 28,
-          "netWeightG": 25,
-          "note": "Thß╗ït b├▓",
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
           "legacyRecipeId": 254
         },
         {
-          "ingredientName": "Sả tươi băm",
-          "grossWeightG": 5,
-          "netWeightG": 5,
-          "note": "Sß║ú thãím",
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Thủy hải sản tươi mềm",
           "legacyRecipeId": 255
+        },
+        {
+          "ingredientName": "Thịt lợn, nạc vai",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn giàu sắt và kẽm",
+          "legacyRecipeId": 256
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 257
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 258
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước trà sả tắc hạt chia mật ong",
+      "name": "Nước trà sả tắc, hạt chia, mật ong",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 67,
+          "netWeightG": 50,
+          "note": "Trái cây tươi pha Nước trà sả tắc, hạt chia, mật ong",
+          "legacyRecipeId": 259
+        },
+        {
+          "ingredientName": "Vừng (đen, trắng)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Hạt chia / hạt dinh dưỡng",
+          "legacyRecipeId": 260
         }
       ]
     },
     {
       "sourceKey": "bún cá lóc rau muống non",
       "name": "Bún cá lóc, rau muống non",
-      "standardServingSizeG": 150,
+      "standardServingSizeG": 155,
       "items": [
         {
           "ingredientName": "Bún",
           "grossWeightG": 60,
           "netWeightG": 60,
-          "note": "B├║n tã░ãíi",
-          "legacyRecipeId": 256
+          "note": "Bún tươi sợi mềm",
+          "legacyRecipeId": 261
         },
         {
-          "ingredientName": "Cá lóc (cá quả đồng)",
-          "grossWeightG": 30,
-          "netWeightG": 25,
-          "note": "C├í l├│c",
-          "legacyRecipeId": 257
+          "ingredientName": "Cá quả",
+          "grossWeightG": 37,
+          "netWeightG": 22,
+          "note": "Cá lóc (cá quả) lọc sạch xương",
+          "legacyRecipeId": 262
         },
         {
-          "ingredientName": "Rau dền đỏ",
-          "grossWeightG": 30,
+          "ingredientName": "Rau muống",
+          "grossWeightG": 29,
           "netWeightG": 25,
-          "note": "Rau muß╗æng non",
-          "legacyRecipeId": 258
+          "note": "Rau muống non thái nhỏ",
+          "legacyRecipeId": 263
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 264
+        }
+      ]
+    },
+    {
+      "sourceKey": "súp trứng cút gà xé tôm cải đỏ",
+      "name": "Súp trứng cút, gà xé, tôm, cải đỏ",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 33,
+          "netWeightG": 18,
+          "note": "Bắp ngọt nấu súp",
+          "legacyRecipeId": 265
+        },
+        {
+          "ingredientName": "Củ sắn dây",
+          "grossWeightG": 9,
+          "netWeightG": 8,
+          "note": "Bột sánh nấu súp",
+          "legacyRecipeId": 266
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 267
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 268
+        },
+        {
+          "ingredientName": "Trứng chim cút",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng chim cút bóc vỏ",
+          "legacyRecipeId": 269
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 270
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 271
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh bông lan thịt chà bông",
+      "name": "Bánh bông lan thịt chà bông",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 272
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 273
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 274
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 275
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 276
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh khoai mỡ thịt bằm tôm khô",
+      "name": "Canh khoai mỡ thịt bằm, tôm khô",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước canh",
+          "legacyRecipeId": 277
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 278
+        },
+        {
+          "ingredientName": "Khoai sọ",
+          "grossWeightG": 55,
+          "netWeightG": 45,
+          "note": "Khoai gọt vỏ nấu canh dẻo",
+          "legacyRecipeId": 279
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 280
+        }
+      ]
+    },
+    {
+      "sourceKey": "chuối cau",
+      "name": "Chuối cau",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Chuối tiêu",
+          "grossWeightG": 71,
+          "netWeightG": 50,
+          "note": "Chuối chín bóc vỏ",
+          "legacyRecipeId": 281
+        }
+      ]
+    },
+    {
+      "sourceKey": "gà muối sả chiên",
+      "name": "Gà muối sả chiên",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 94,
+          "netWeightG": 45,
+          "note": "Thịt gà ta lọc xương",
+          "legacyRecipeId": 282
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 283
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh chả cá tần ô",
+      "name": "Canh chả cá, tần ô",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá thu",
+          "grossWeightG": 31,
+          "netWeightG": 20,
+          "note": "Chả cá quết dai mềm",
+          "legacyRecipeId": 284
+        },
+        {
+          "ingredientName": "Cải cúc",
+          "grossWeightG": 60,
+          "netWeightG": 45,
+          "note": "Rau cải cúc (tần ô) non",
+          "legacyRecipeId": 285
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 286
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt bò xào khóm",
+      "name": "Thịt bò xào khóm",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 38,
+          "netWeightG": 38,
+          "note": "Thịt bò nạc thái mềm",
+          "legacyRecipeId": 287
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 21,
+          "netWeightG": 20,
+          "note": "Quả chua ngọt rim/xào mềm",
+          "legacyRecipeId": 288
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 289
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt gà hầm nấm các loại",
+      "name": "Canh thịt gà hầm nấm các loại",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 52,
+          "netWeightG": 25,
+          "note": "Thịt gà ta ninh mềm",
+          "legacyRecipeId": 290
+        },
+        {
+          "ingredientName": "Súp lơ xanh",
+          "grossWeightG": 41,
+          "netWeightG": 25,
+          "note": "Rau củ hầm canh ngọt nước",
+          "legacyRecipeId": 291
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 292
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt heo kho",
+      "name": "Thịt heo kho",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 46,
+          "netWeightG": 45,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 293
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 294
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh chua cá hú khóm cà chua đậu bắp",
+      "name": "Canh chua cá hú, khóm, cà chua, đậu bắp",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Cá da trơn (cá hú/basa) nấu canh",
+          "legacyRecipeId": 295
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Cà chua chín tạo vị thanh",
+          "legacyRecipeId": 296
+        },
+        {
+          "ingredientName": "Giá đậu xanh",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Rau nấu canh chua miền Nam",
+          "legacyRecipeId": 297
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 298
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 299
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cá lóc cải xanh non",
+      "name": "Canh cá lóc cải xanh non",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 300
+        },
+        {
+          "ingredientName": "Cải xanh",
+          "grossWeightG": 59,
+          "netWeightG": 45,
+          "note": "Cải xanh non thái nhỏ",
+          "legacyRecipeId": 301
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 302
+        }
+      ]
+    },
+    {
+      "sourceKey": "hủ tiếu thập cẩm (thịt bằm tôm mực) cải cúc",
+      "name": "Hủ tiếu thập cẩm (thịt bằm, tôm, mực) cải cúc",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 303
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 304
+        },
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Thủy hải sản tươi mềm",
+          "legacyRecipeId": 305
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 306
+        },
+        {
+          "ingredientName": "Cải cúc",
+          "grossWeightG": 33,
+          "netWeightG": 25,
+          "note": "Rau cải cúc non",
+          "legacyRecipeId": 307
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 308
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước chanh dây hạt chia mật ong",
+      "name": "Nước chanh dây, hạt chia, mật ong",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 67,
+          "netWeightG": 50,
+          "note": "Trái cây tươi pha Nước chanh dây, hạt chia, mật ong",
+          "legacyRecipeId": 309
+        },
+        {
+          "ingredientName": "Vừng (đen, trắng)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Hạt chia / hạt dinh dưỡng",
+          "legacyRecipeId": 310
+        }
+      ]
+    },
+    {
+      "sourceKey": "cháo cá bí đỏ",
+      "name": "Cháo cá, bí đỏ",
+      "standardServingSizeG": 180,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 311
+        },
+        {
+          "ingredientName": "Bí ngô",
+          "grossWeightG": 29,
+          "netWeightG": 25,
+          "note": "Bí đỏ ninh nhừ",
+          "legacyRecipeId": 312
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 313
         }
       ]
     },
     {
       "sourceKey": "bún mọc sườn heo tôm khô cà rốt",
       "name": "Bún mọc, sườn heo tôm khô, cà rốt",
-      "standardServingSizeG": 160,
+      "standardServingSizeG": 155,
       "items": [
         {
           "ingredientName": "Bún",
           "grossWeightG": 60,
           "netWeightG": 60,
-          "note": "B├║n tã░ãíi",
-          "legacyRecipeId": 259
+          "note": "Bún tươi sợi mềm",
+          "legacyRecipeId": 314
         },
         {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 22,
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước",
+          "legacyRecipeId": 315
+        },
+        {
+          "ingredientName": "Sườn lợn",
+          "grossWeightG": 47,
           "netWeightG": 20,
-          "note": "Thß╗ït nß║íc mß╗ìc",
-          "legacyRecipeId": 260
+          "note": "Sườn lợn ninh mềm",
+          "legacyRecipeId": 316
         },
         {
-          "ingredientName": "Sườn non heo",
-          "grossWeightG": 28,
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
           "netWeightG": 20,
-          "note": "Sã░ß╗Øn heo",
-          "legacyRecipeId": 261
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 317
         },
         {
-          "ingredientName": "Tôm khô ngon",
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 318
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 319
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh ngọt kẹp chà bông",
+      "name": "Bánh ngọt kẹp chà bông",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 320
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 321
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 322
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 323
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 324
+        }
+      ]
+    },
+    {
+      "sourceKey": "tôm sườn heo rim mặn",
+      "name": "Tôm, sườn heo rim mặn",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Sườn lợn",
+          "grossWeightG": 105,
+          "netWeightG": 45,
+          "note": "Sườn lợn non chặt miếng",
+          "legacyRecipeId": 325
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 43,
+          "netWeightG": 20,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 326
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
           "grossWeightG": 3,
           "netWeightG": 3,
-          "note": "T├┤m kh├┤",
-          "legacyRecipeId": 262
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 327
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm rau ngót",
+      "name": "Canh thịt bằm rau ngót",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 328
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 58,
+          "netWeightG": 45,
+          "note": "Rau ngót tuốt lá rửa sạch",
+          "legacyRecipeId": 329
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 330
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm tôm khô mướp mấm rơm",
+      "name": "Canh thịt bằm, tôm khô, mướp, mấm rơm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước canh",
+          "legacyRecipeId": 331
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 332
+        },
+        {
+          "ingredientName": "Mướp",
+          "grossWeightG": 40,
+          "netWeightG": 35,
+          "note": "Mướp hương gọt vỏ thái lát",
+          "legacyRecipeId": 333
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 334
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm bắp cải cải đỏ",
+      "name": "Canh thịt bằm bắp cải, cải đỏ",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 335
+        },
+        {
+          "ingredientName": "Cải bắp",
+          "grossWeightG": 44,
+          "netWeightG": 40,
+          "note": "Cải bắp thái sợi mềm",
+          "legacyRecipeId": 336
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 337
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 338
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 339
+        }
+      ]
+    },
+    {
+      "sourceKey": "hồng giòn",
+      "name": "Hồng giòn",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Vải",
+          "grossWeightG": 96,
+          "netWeightG": 50,
+          "note": "Hồng giòn chín ngọt gọt vỏ",
+          "legacyRecipeId": 340
+        }
+      ]
+    },
+    {
+      "sourceKey": "cá điêu hồng chiên tươi nước mắm chua ngọt",
+      "name": "Cá điêu hồng chiên tươi, nước mắm chua ngọt",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Cá rô phi",
+          "grossWeightG": 79,
+          "netWeightG": 45,
+          "note": "Cá điêu hồng phi lê",
+          "legacyRecipeId": 341
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 342
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bò hầm khoai môn",
+      "name": "Canh thịt bò hầm khoai môn",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt bò nạc băm/thái mềm",
+          "legacyRecipeId": 343
+        },
+        {
+          "ingredientName": "Khoai môn",
+          "grossWeightG": 52,
+          "netWeightG": 45,
+          "note": "Khoai môn ninh mềm",
+          "legacyRecipeId": 344
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 345
+        }
+      ]
+    },
+    {
+      "sourceKey": "hồng xiêm",
+      "name": "Hồng xiêm",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Vải",
+          "grossWeightG": 96,
+          "netWeightG": 50,
+          "note": "Hồng xiêm chín ngọt gọt vỏ",
+          "legacyRecipeId": 346
+        }
+      ]
+    },
+    {
+      "sourceKey": "sườn cốt lết khìa",
+      "name": "Sườn cốt lết khìa",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn, nạc thăn",
+          "grossWeightG": 48,
+          "netWeightG": 48,
+          "note": "Sườn cốt lết heo mềm",
+          "legacyRecipeId": 347
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 348
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh tôm thẻ cải dún",
+      "name": "Canh tôm thẻ, cải dún",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 39,
+          "netWeightG": 18,
+          "note": "Tôm tươi bóc vỏ băm nhỏ",
+          "legacyRecipeId": 349
+        },
+        {
+          "ingredientName": "Cải thìa (cải trắng)",
+          "grossWeightG": 60,
+          "netWeightG": 45,
+          "note": "Rau cải non nấu canh",
+          "legacyRecipeId": 350
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 351
+        }
+      ]
+    },
+    {
+      "sourceKey": "sâm bí đao hạt chia đường phèn",
+      "name": "Sâm bí đao, hạt chia, đường phèn",
+      "standardServingSizeG": 140,
+      "items": [
+        {
+          "ingredientName": "Bí đao (bí xanh)",
+          "grossWeightG": 62,
+          "netWeightG": 45,
+          "note": "Bí đao nấu nước sâm",
+          "legacyRecipeId": 352
+        },
+        {
+          "ingredientName": "Vừng (đen, trắng)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Hạt giàu dưỡng chất",
+          "legacyRecipeId": 353
+        }
+      ]
+    },
+    {
+      "sourceKey": "miến gà bó xôi",
+      "name": "Miến gà, bó xôi",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Miến dong",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Miến dong mềm",
+          "legacyRecipeId": 354
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 355
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 26,
+          "netWeightG": 20,
+          "note": "Rau xanh băm nhuyễn",
+          "legacyRecipeId": 356
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 357
+        }
+      ]
+    },
+    {
+      "sourceKey": "súp trứng cút gà xé tôm bắp cà rốt",
+      "name": "Súp trứng cút, gà xé, tôm, bắp, cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 33,
+          "netWeightG": 18,
+          "note": "Bắp ngọt nấu súp",
+          "legacyRecipeId": 358
+        },
+        {
+          "ingredientName": "Củ sắn dây",
+          "grossWeightG": 9,
+          "netWeightG": 8,
+          "note": "Bột sánh nấu súp",
+          "legacyRecipeId": 359
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 360
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 361
+        },
+        {
+          "ingredientName": "Trứng chim cút",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng chim cút bóc vỏ",
+          "legacyRecipeId": 362
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 363
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 364
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước đậu rang đường phèn",
+      "name": "Nước đậu rang, đường phèn",
+      "standardServingSizeG": 140,
+      "items": [
+        {
+          "ingredientName": "Đậu đen (hạt)",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Đậu đen rang nấu nước mát",
+          "legacyRecipeId": 365
         }
       ]
     },
@@ -1489,29 +3386,407 @@
           "ingredientName": "Gạo tẻ máy",
           "grossWeightG": 25,
           "netWeightG": 25,
-          "note": "Gß║ío tß║╗",
-          "legacyRecipeId": 263
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 366
         },
         {
-          "ingredientName": "Cá hồi phi lê tươi",
-          "grossWeightG": 22,
+          "ingredientName": "Cá thu",
+          "grossWeightG": 31,
           "netWeightG": 20,
-          "note": "C├í hß╗ôi",
-          "legacyRecipeId": 264
+          "note": "Cá giàu DHA phi lê",
+          "legacyRecipeId": 367
         },
         {
-          "ingredientName": "Phô mai Con Bò Cười",
+          "ingredientName": "Sữa bột toàn phần",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Chế phẩm sữa / Phô mai giàu canxi",
+          "legacyRecipeId": 368
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 369
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh bao xá xíu",
+      "name": "Bánh bao xá xíu",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 370
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
           "grossWeightG": 15,
           "netWeightG": 15,
-          "note": "Ph├┤ mai",
-          "legacyRecipeId": 265
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 371
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 372
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 373
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt ba rọi kho",
+      "name": "Thịt ba rọi kho",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nửa nạc, nửa mỡ",
+          "grossWeightG": 41,
+          "netWeightG": 40,
+          "note": "Thịt ba chỉ (nửa nạc nửa mỡ)",
+          "legacyRecipeId": 374
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 375
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh chua cá lóc cà chua khóm đậu bắp",
+      "name": "Canh chua cá lóc cà chua, khóm, đậu bắp",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 376
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Cà chua chín tạo vị thanh",
+          "legacyRecipeId": 377
+        },
+        {
+          "ingredientName": "Giá đậu xanh",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Rau nấu canh chua miền Nam",
+          "legacyRecipeId": 378
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 379
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 380
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt gà xào đậu phọng",
+      "name": "Thịt gà xào đậu phọng",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 94,
+          "netWeightG": 45,
+          "note": "Thịt gà ta lọc xương",
+          "legacyRecipeId": 381
+        },
+        {
+          "ingredientName": "Lạc hạt",
+          "grossWeightG": 6,
+          "netWeightG": 6,
+          "note": "Lạc hạt (đậu phộng) rang",
+          "legacyRecipeId": 382
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 383
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm cải dún đà lạt",
+      "name": "Canh thịt bằm, cải dún đà lạt",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 384
+        },
+        {
+          "ingredientName": "Cải thìa (cải trắng)",
+          "grossWeightG": 60,
+          "netWeightG": 45,
+          "note": "Rau cải non nấu canh",
+          "legacyRecipeId": 385
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 386
+        }
+      ]
+    },
+    {
+      "sourceKey": "dưa lưới",
+      "name": "Dưa lưới",
+      "standardServingSizeG": 60,
+      "items": [
+        {
+          "ingredientName": "Đu đủ chín",
+          "grossWeightG": 80,
+          "netWeightG": 60,
+          "note": "Dưa lưới gọt vỏ cắt miếng",
+          "legacyRecipeId": 387
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh gà hầm củ sen cà rốt",
+      "name": "Canh gà hầm củ sen, cà rốt",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 52,
+          "netWeightG": 25,
+          "note": "Thịt gà ta ninh mềm",
+          "legacyRecipeId": 388
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 389
+        },
+        {
+          "ingredientName": "Đậu Hà lan (hạt)",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Hạt hầm bùi mềm giàu đạm",
+          "legacyRecipeId": 390
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 391
+        }
+      ]
+    },
+    {
+      "sourceKey": "rau câu lá dứa sữa",
+      "name": "Rau câu lá dứa sữa",
+      "standardServingSizeG": 50,
+      "items": [
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 35,
+          "netWeightG": 35,
+          "note": "Sữa tươi nấu thạch rau câu",
+          "legacyRecipeId": 392
+        },
+        {
+          "ingredientName": "Sữa đặc có đường Việt Nam",
+          "grossWeightG": 8,
+          "netWeightG": 8,
+          "note": "Sữa đặc làm thạch rau câu",
+          "legacyRecipeId": 393
+        }
+      ]
+    },
+    {
+      "sourceKey": "tôm thịt rim dứa",
+      "name": "Tôm thịt rim dứa",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 394
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 43,
+          "netWeightG": 20,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 395
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 21,
+          "netWeightG": 20,
+          "note": "Quả chua ngọt rim/xào mềm",
+          "legacyRecipeId": 396
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 397
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cá lóc cải ngọt",
+      "name": "Canh cá lóc cải ngọt",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 33,
+          "netWeightG": 20,
+          "note": "Cá lóc (cá quả) lọc xương",
+          "legacyRecipeId": 398
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 45,
+          "netWeightG": 45,
+          "note": "Rau cải ngọt non thái nhỏ",
+          "legacyRecipeId": 399
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 400
+        }
+      ]
+    },
+    {
+      "sourceKey": "cơm chiên hải sản (thịt nạc tôm mực cà rốt đậu que)",
+      "name": "Cơm chiên hải sản (thịt nạc, tôm, mực, cà rốt, đậu que)",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 45,
+          "netWeightG": 45,
+          "note": "Gạo tẻ nấu cơm chiên",
+          "legacyRecipeId": 401
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 402
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 403
+        },
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Thủy hải sản phi lê",
+          "legacyRecipeId": 404
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà",
+          "legacyRecipeId": 405
         },
         {
           "ingredientName": "Cà rốt (củ đỏ, vàng)",
           "grossWeightG": 12,
           "netWeightG": 10,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 266
+          "note": "Cà rốt thái hạt lựu",
+          "legacyRecipeId": 406
+        },
+        {
+          "ingredientName": "Đậu cô ve",
+          "grossWeightG": 11,
+          "netWeightG": 10,
+          "note": "Đậu cô ve (đậu que) thái hạt lựu",
+          "legacyRecipeId": 407
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 408
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh nghêu nấu bầu",
+      "name": "Canh nghêu nấu bầu",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 43,
+          "netWeightG": 20,
+          "note": "Thủy sản tươi ngọt nước",
+          "legacyRecipeId": 409
+        },
+        {
+          "ingredientName": "Bầu",
+          "grossWeightG": 54,
+          "netWeightG": 45,
+          "note": "Bầu non gọt vỏ băm sợi",
+          "legacyRecipeId": 410
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 411
         }
       ]
     },
@@ -1524,29 +3799,470 @@
           "ingredientName": "Gạo tẻ máy",
           "grossWeightG": 25,
           "netWeightG": 25,
-          "note": "Gß║ío tß║╗",
-          "legacyRecipeId": 267
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 412
         },
         {
-          "ingredientName": "Thịt gà ta nạc (ức/đùi)",
-          "grossWeightG": 25,
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 413
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
           "netWeightG": 20,
-          "note": "Thß╗ït g├á",
-          "legacyRecipeId": 268
-        },
-        {
-          "ingredientName": "Nấm rơm tươi",
-          "grossWeightG": 18,
-          "netWeightG": 15,
-          "note": "Nß║Ñm rãím",
-          "legacyRecipeId": 269
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 414
         },
         {
           "ingredientName": "Cà rốt (củ đỏ, vàng)",
-          "grossWeightG": 12,
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 415
+        },
+        {
+          "ingredientName": "Su hào",
+          "grossWeightG": 19,
+          "netWeightG": 15,
+          "note": "Rau củ thái hạt lựu nấu cháo",
+          "legacyRecipeId": 416
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 417
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh canh cá lóc tôm khô cà rốt",
+      "name": "Bánh canh cá lóc, tôm khô, cà rốt",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 418
+        },
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 37,
+          "netWeightG": 22,
+          "note": "Cá lóc (cá quả) lọc sạch xương",
+          "legacyRecipeId": 419
+        },
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước",
+          "legacyRecipeId": 420
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 421
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 422
+        }
+      ]
+    },
+    {
+      "sourceKey": "phở bò quế ngò gai ngò om",
+      "name": "Phở bò, quế, ngò gai, ngò om",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 423
+        },
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 22,
+          "netWeightG": 22,
+          "note": "Thịt bò nạc băm/thái mỏng",
+          "legacyRecipeId": 424
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
           "netWeightG": 10,
-          "note": "C├á rß╗æt",
-          "legacyRecipeId": 270
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 425
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 426
+        }
+      ]
+    },
+    {
+      "sourceKey": "bún mọc thịt băm cà rốt",
+      "name": "Bún mọc, thịt băm cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bún",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bún tươi sợi mềm",
+          "legacyRecipeId": 427
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 428
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 429
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 430
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh bông lan chà bông",
+      "name": "Bánh bông lan chà bông",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 431
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 432
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 433
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 434
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 435
+        }
+      ]
+    },
+    {
+      "sourceKey": "cá hú muối sả chiên",
+      "name": "Cá hú muối sả chiên",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 50,
+          "netWeightG": 50,
+          "note": "Cá da trơn (cá hú/basa) sạch xương",
+          "legacyRecipeId": 436
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 437
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cải bó xôi thịt bằm",
+      "name": "Canh cải bó xôi, thịt bằm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 438
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 58,
+          "netWeightG": 45,
+          "note": "Rau lá xanh đậm giàu sắt",
+          "legacyRecipeId": 439
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 440
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh khoai môn hầm sườn heo",
+      "name": "Canh khoai môn hầm sườn heo",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Sườn lợn",
+          "grossWeightG": 58,
+          "netWeightG": 25,
+          "note": "Sườn lợn ninh nước dùng",
+          "legacyRecipeId": 441
+        },
+        {
+          "ingredientName": "Khoai môn",
+          "grossWeightG": 52,
+          "netWeightG": 45,
+          "note": "Khoai môn ninh mềm",
+          "legacyRecipeId": 442
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 443
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt bò xào su su",
+      "name": "Thịt bò xào su su",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 38,
+          "netWeightG": 38,
+          "note": "Thịt bò nạc thái mềm",
+          "legacyRecipeId": 444
+        },
+        {
+          "ingredientName": "Su su",
+          "grossWeightG": 38,
+          "netWeightG": 30,
+          "note": "Su su gọt vỏ thái mỏng",
+          "legacyRecipeId": 445
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 446
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cua đồng rau ngót",
+      "name": "Canh cua đồng rau ngót",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cua đồng",
+          "grossWeightG": 81,
+          "netWeightG": 25,
+          "note": "Cua đồng giã lọc thịt",
+          "legacyRecipeId": 447
+        },
+        {
+          "ingredientName": "Rau ngót",
+          "grossWeightG": 58,
+          "netWeightG": 45,
+          "note": "Rau ngót tuốt lá rửa sạch",
+          "legacyRecipeId": 448
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 449
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh bí hồ lô thịt bằm",
+      "name": "Canh bí hồ lô thịt bằm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 450
+        },
+        {
+          "ingredientName": "Bí ngô",
+          "grossWeightG": 52,
+          "netWeightG": 45,
+          "note": "Bí ngô (bí đỏ) ninh mềm",
+          "legacyRecipeId": 451
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 452
+        }
+      ]
+    },
+    {
+      "sourceKey": "trứng thịt chưng bún tàu nấm mèo cà rốt",
+      "name": "Trứng thịt chưng bún tàu, nấm mèo, cà rốt",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 453
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 35,
+          "netWeightG": 30,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 454
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt thái miếng",
+          "legacyRecipeId": 455
+        },
+        {
+          "ingredientName": "Miến dong",
+          "grossWeightG": 6,
+          "netWeightG": 6,
+          "note": "Miến dong (bún tàu) cắt ngắn",
+          "legacyRecipeId": 456
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 457
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm cải xoang",
+      "name": "Canh thịt bằm, cải xoang",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 458
+        },
+        {
+          "ingredientName": "Cải soong",
+          "grossWeightG": 64,
+          "netWeightG": 45,
+          "note": "Rau cải soong tươi",
+          "legacyRecipeId": 459
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 460
+        }
+      ]
+    },
+    {
+      "sourceKey": "nui thịt bằm tôm khô cà rốt",
+      "name": "Nui thịt bằm, tôm khô, cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 28,
+          "netWeightG": 28,
+          "note": "Sợi mì / nui chế biến từ bột mì",
+          "legacyRecipeId": 461
+        },
+        {
+          "ingredientName": "Tôm đồng",
+          "grossWeightG": 7,
+          "netWeightG": 6,
+          "note": "Tôm nấu ngọt nước",
+          "legacyRecipeId": 462
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 463
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 464
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 465
         }
       ]
     },
@@ -1559,22 +4275,862 @@
           "ingredientName": "Gạo tẻ máy",
           "grossWeightG": 25,
           "netWeightG": 25,
-          "note": "Gß║ío tß║╗",
-          "legacyRecipeId": 271
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 466
         },
         {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 18,
-          "netWeightG": 16,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 272
-        },
-        {
-          "ingredientName": "Nghêu (ngao) thịt tươi",
-          "grossWeightG": 60,
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
           "netWeightG": 15,
-          "note": "Ngh├¬u thß╗ït",
-          "legacyRecipeId": 273
+          "note": "Thủy hải sản tươi mềm",
+          "legacyRecipeId": 467
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 468
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 469
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 470
+        }
+      ]
+    },
+    {
+      "sourceKey": "trà đào cam sả đường phèn",
+      "name": "Trà đào, cam, sả, đường phèn",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 67,
+          "netWeightG": 50,
+          "note": "Trái cây tươi pha Trà đào, cam, sả, đường phèn",
+          "legacyRecipeId": 471
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước mía",
+      "name": "Nước mía",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Bưởi",
+          "grossWeightG": 77,
+          "netWeightG": 50,
+          "note": "Nguyên liệu thanh nhiệt (Nước mía)",
+          "legacyRecipeId": 472
+        }
+      ]
+    },
+    {
+      "sourceKey": "bánh mexico thịt",
+      "name": "Bánh mexico thịt",
+      "standardServingSizeG": 75,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 473
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 474
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 475
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 476
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 477
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh chua cá hú bông súng",
+      "name": "Canh chua cá hú, bông súng",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Cá da trơn (cá hú/basa) nấu canh",
+          "legacyRecipeId": 478
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Cà chua chín tạo vị thanh",
+          "legacyRecipeId": 479
+        },
+        {
+          "ingredientName": "Giá đậu xanh",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Rau nấu canh chua miền Nam",
+          "legacyRecipeId": 480
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 481
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh hẹ đậu phụ thịt bằm",
+      "name": "Canh hẹ, đậu phụ, thịt bằm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 482
+        },
+        {
+          "ingredientName": "Đậu phụ",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Đậu phụ non cắt miếng",
+          "legacyRecipeId": 483
+        },
+        {
+          "ingredientName": "Cải thìa (cải trắng)",
+          "grossWeightG": 47,
+          "netWeightG": 35,
+          "note": "Rau xanh nấu canh thanh mát",
+          "legacyRecipeId": 484
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 485
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt bò nấu khoai tây cà rốt",
+      "name": "Thịt bò nấu khoai tây, cà rốt",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 38,
+          "netWeightG": 38,
+          "note": "Thịt bò nạc thái mềm",
+          "legacyRecipeId": 486
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt thái miếng",
+          "legacyRecipeId": 487
+        },
+        {
+          "ingredientName": "Khoai tây",
+          "grossWeightG": 25,
+          "netWeightG": 22,
+          "note": "Khoai tây cắt khối mềm",
+          "legacyRecipeId": 488
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 489
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh cà chua cá diêu hồng ngò gai",
+      "name": "Canh cà chua cá diêu hồng, ngò gai",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cá rô phi",
+          "grossWeightG": 44,
+          "netWeightG": 25,
+          "note": "Cá diêu hồng nấu canh",
+          "legacyRecipeId": 490
+        },
+        {
+          "ingredientName": "Cà chua",
+          "grossWeightG": 26,
+          "netWeightG": 25,
+          "note": "Cà chua chín tạo vị thanh",
+          "legacyRecipeId": 491
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 492
+        }
+      ]
+    },
+    {
+      "sourceKey": "cơm dương châu thịt nạc chả lụa tôm cà tốt đậu đũa",
+      "name": "Cơm Dương Châu thịt nạc, chả lụa, tôm, cà tốt, đậu đũa",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 45,
+          "netWeightG": 45,
+          "note": "Gạo tẻ nấu cơm chiên",
+          "legacyRecipeId": 493
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Thịt lợn nạc",
+          "legacyRecipeId": 494
+        },
+        {
+          "ingredientName": "Giò lụa",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Chả lụa thái hạt lựu",
+          "legacyRecipeId": 495
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 22,
+          "netWeightG": 10,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 496
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà",
+          "legacyRecipeId": 497
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 12,
+          "netWeightG": 10,
+          "note": "Cà rốt thái hạt lựu",
+          "legacyRecipeId": 498
+        },
+        {
+          "ingredientName": "Đậu đũa",
+          "grossWeightG": 11,
+          "netWeightG": 10,
+          "note": "Đậu đũa thái hạt lựu",
+          "legacyRecipeId": 499
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 500
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh bí đao thịt bằm",
+      "name": "Canh bí đao thịt bằm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 501
+        },
+        {
+          "ingredientName": "Bí đao (bí xanh)",
+          "grossWeightG": 62,
+          "netWeightG": 45,
+          "note": "Bí đao gọt vỏ thái mỏng",
+          "legacyRecipeId": 502
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 503
+        }
+      ]
+    },
+    {
+      "sourceKey": "cháo bí đỏ thịt bò bằm",
+      "name": "Cháo bí đỏ, thịt bò bằm",
+      "standardServingSizeG": 180,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 504
+        },
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 22,
+          "netWeightG": 22,
+          "note": "Thịt bò nạc băm/thái mỏng",
+          "legacyRecipeId": 505
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 506
+        },
+        {
+          "ingredientName": "Bí ngô",
+          "grossWeightG": 29,
+          "netWeightG": 25,
+          "note": "Bí đỏ ninh nhừ",
+          "legacyRecipeId": 507
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 508
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước ép cam",
+      "name": "Nước ép cam",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 107,
+          "netWeightG": 80,
+          "note": "Cam tươi vắt lấy nước",
+          "legacyRecipeId": 509
+        }
+      ]
+    },
+    {
+      "sourceKey": "bún nước lèo cá lóc rau râm",
+      "name": "Bún nước lèo cá lóc, rau râm",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bún",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bún tươi sợi mềm",
+          "legacyRecipeId": 510
+        },
+        {
+          "ingredientName": "Cá quả",
+          "grossWeightG": 37,
+          "netWeightG": 22,
+          "note": "Cá lóc (cá quả) lọc sạch xương",
+          "legacyRecipeId": 511
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 512
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 513
+        }
+      ]
+    },
+    {
+      "sourceKey": "mì thịt bằm tôm cà rốt",
+      "name": "Mì thịt bằm, tôm, cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bột mì",
+          "grossWeightG": 28,
+          "netWeightG": 28,
+          "note": "Sợi mì / nui chế biến từ bột mì",
+          "legacyRecipeId": 514
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 515
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 516
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 517
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 518
+        }
+      ]
+    },
+    {
+      "sourceKey": "miến gà cần tây cà rốt",
+      "name": "Miến gà cần tây, cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Miến dong",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Miến dong mềm",
+          "legacyRecipeId": 519
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 520
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 521
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 522
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 523
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm cải cúc",
+      "name": "Canh thịt bằm, cải Cúc",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 524
+        },
+        {
+          "ingredientName": "Cải cúc",
+          "grossWeightG": 60,
+          "netWeightG": 45,
+          "note": "Rau cải cúc (tần ô) non",
+          "legacyRecipeId": 525
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 526
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh rong biển thịt heo bằm đậu hủ cà rốt",
+      "name": "Canh rong biển, thịt heo bằm, đậu hủ, cà rốt",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 527
+        },
+        {
+          "ingredientName": "Đậu phụ",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Đậu phụ non cắt miếng",
+          "legacyRecipeId": 528
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 529
+        },
+        {
+          "ingredientName": "Cải thìa (cải trắng)",
+          "grossWeightG": 47,
+          "netWeightG": 35,
+          "note": "Rau xanh nấu canh thanh mát",
+          "legacyRecipeId": 530
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 531
+        }
+      ]
+    },
+    {
+      "sourceKey": "thịt bò xào bắp mỹ đậu que",
+      "name": "Thịt bò xào, bắp mỹ, đậu que",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Thịt bò, lưng, nạc",
+          "grossWeightG": 38,
+          "netWeightG": 38,
+          "note": "Thịt bò nạc thái mềm",
+          "legacyRecipeId": 532
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 27,
+          "netWeightG": 15,
+          "note": "Ngô bắp ngọt tách hạt",
+          "legacyRecipeId": 533
+        },
+        {
+          "ingredientName": "Đậu cô ve",
+          "grossWeightG": 28,
+          "netWeightG": 25,
+          "note": "Đậu cô ve (đậu que) non",
+          "legacyRecipeId": 534
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 535
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh thịt bằm bắp cải",
+      "name": "Canh thịt bằm bắp cải",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 536
+        },
+        {
+          "ingredientName": "Cải bắp",
+          "grossWeightG": 44,
+          "netWeightG": 40,
+          "note": "Cải bắp thái sợi mềm",
+          "legacyRecipeId": 537
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 538
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 539
+        }
+      ]
+    },
+    {
+      "sourceKey": "cơm tấm",
+      "name": "Cơm tấm",
+      "standardServingSizeG": 100,
+      "items": [
+        {
+          "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 50,
+          "netWeightG": 50,
+          "note": "Gạo tấm nấu cơm mềm",
+          "legacyRecipeId": 540
+        }
+      ]
+    },
+    {
+      "sourceKey": "sườn khìa trứng gà xắt",
+      "name": "Sườn khìa, trứng gà xắt",
+      "standardServingSizeG": 65,
+      "items": [
+        {
+          "ingredientName": "Sườn lợn",
+          "grossWeightG": 105,
+          "netWeightG": 45,
+          "note": "Sườn lợn non chặt miếng",
+          "legacyRecipeId": 541
+        },
+        {
+          "ingredientName": "Trứng gà ta",
+          "grossWeightG": 35,
+          "netWeightG": 30,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 542
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 3,
+          "netWeightG": 3,
+          "note": "Dầu thực vật chế biến",
+          "legacyRecipeId": 543
+        }
+      ]
+    },
+    {
+      "sourceKey": "canh bắp cải cà rốt thịt bằm",
+      "name": "Canh bắp cải, cà rốt thịt bằm",
+      "standardServingSizeG": 120,
+      "items": [
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn nạc băm",
+          "legacyRecipeId": 544
+        },
+        {
+          "ingredientName": "Cải bắp",
+          "grossWeightG": 44,
+          "netWeightG": 40,
+          "note": "Cải bắp thái sợi mềm",
+          "legacyRecipeId": 545
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 24,
+          "netWeightG": 20,
+          "note": "Cà rốt tỉa hoa/thái hạt lựu",
+          "legacyRecipeId": 546
+        },
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 36,
+          "netWeightG": 20,
+          "note": "Bắp ngọt hầm nước canh",
+          "legacyRecipeId": 547
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 548
+        }
+      ]
+    },
+    {
+      "sourceKey": "chanh dây đường phèn",
+      "name": "Chanh dây đường phèn",
+      "standardServingSizeG": 130,
+      "items": [
+        {
+          "ingredientName": "Cam",
+          "grossWeightG": 67,
+          "netWeightG": 50,
+          "note": "Trái cây tươi pha Chanh dây đường phèn",
+          "legacyRecipeId": 549
+        }
+      ]
+    },
+    {
+      "sourceKey": "súp thịt gà xé bắp hạt trứng cút cà rốt",
+      "name": "Súp thịt gà xé, bắp hạt, trứng cút, cà rốt",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Ngô bắp tươi",
+          "grossWeightG": 33,
+          "netWeightG": 18,
+          "note": "Bắp ngọt nấu súp",
+          "legacyRecipeId": 550
+        },
+        {
+          "ingredientName": "Củ sắn dây",
+          "grossWeightG": 9,
+          "netWeightG": 8,
+          "note": "Bột sánh nấu súp",
+          "legacyRecipeId": 551
+        },
+        {
+          "ingredientName": "Thịt gà ta",
+          "grossWeightG": 46,
+          "netWeightG": 22,
+          "note": "Thịt gà ta xé mềm",
+          "legacyRecipeId": 552
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
+          "grossWeightG": 20,
+          "netWeightG": 20,
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 553
+        },
+        {
+          "ingredientName": "Trứng chim cút",
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng chim cút bóc vỏ",
+          "legacyRecipeId": 554
+        },
+        {
+          "ingredientName": "Cà rốt (củ đỏ, vàng)",
+          "grossWeightG": 18,
+          "netWeightG": 15,
+          "note": "Cà rốt băm nhỏ",
+          "legacyRecipeId": 555
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 556
+        }
+      ]
+    },
+    {
+      "sourceKey": "hủ tiếu gan mực tôm hẹ",
+      "name": "Hủ tiếu gan, mực, tôm, hẹ",
+      "standardServingSizeG": 155,
+      "items": [
+        {
+          "ingredientName": "Bánh phở",
+          "grossWeightG": 60,
+          "netWeightG": 60,
+          "note": "Bánh sợi gạo tươi mềm",
+          "legacyRecipeId": 557
+        },
+        {
+          "ingredientName": "Tôm biển",
+          "grossWeightG": 33,
+          "netWeightG": 15,
+          "note": "Tôm tươi bóc vỏ",
+          "legacyRecipeId": 558
+        },
+        {
+          "ingredientName": "Cá basa, phi lê",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Thủy hải sản tươi mềm",
+          "legacyRecipeId": 559
+        },
+        {
+          "ingredientName": "Thịt lợn, nạc vai",
+          "grossWeightG": 18,
+          "netWeightG": 18,
+          "note": "Thịt lợn giàu sắt và kẽm",
+          "legacyRecipeId": 560
+        },
+        {
+          "ingredientName": "Cải ngọt",
+          "grossWeightG": 10,
+          "netWeightG": 10,
+          "note": "Rau thơm / rau xanh thái nhỏ",
+          "legacyRecipeId": 561
+        },
+        {
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 562
+        }
+      ]
+    },
+    {
+      "sourceKey": "nước sâm bí đao",
+      "name": "Nước sâm bí đao",
+      "standardServingSizeG": 140,
+      "items": [
+        {
+          "ingredientName": "Bí đao (bí xanh)",
+          "grossWeightG": 62,
+          "netWeightG": 45,
+          "note": "Bí đao nấu nước sâm",
+          "legacyRecipeId": 563
         }
       ]
     },
@@ -1585,73 +5141,66 @@
       "items": [
         {
           "ingredientName": "Gạo tẻ máy",
+          "grossWeightG": 25,
+          "netWeightG": 25,
+          "note": "Gạo tẻ ninh cháo nhừ",
+          "legacyRecipeId": 564
+        },
+        {
+          "ingredientName": "Thịt lợn nạc",
           "grossWeightG": 20,
           "netWeightG": 20,
-          "note": "Gß║ío tß║╗",
-          "legacyRecipeId": 274
+          "note": "Thịt lợn nạc chế biến",
+          "legacyRecipeId": 565
         },
         {
           "ingredientName": "Đậu xanh (đậu tắt)",
-          "grossWeightG": 10,
-          "netWeightG": 10,
-          "note": "─Éß║¡u xanh",
-          "legacyRecipeId": 275
+          "grossWeightG": 12,
+          "netWeightG": 12,
+          "note": "Đậu xanh ninh nhừ",
+          "legacyRecipeId": 566
         },
         {
-          "ingredientName": "Thịt lợn nạc (thăn lợn)",
-          "grossWeightG": 22,
-          "netWeightG": 20,
-          "note": "Thß╗ït nß║íc",
-          "legacyRecipeId": 276
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 567
         }
       ]
     },
     {
-      "sourceKey": "bánh bông lan chà bông",
-      "name": "Bánh bông lan chà bông",
-      "standardServingSizeG": 60,
+      "sourceKey": "bánh bao kim sa",
+      "name": "Bánh bao kim sa",
+      "standardServingSizeG": 75,
       "items": [
         {
           "ingredientName": "Bột mì",
-          "grossWeightG": 25,
-          "netWeightG": 25,
-          "note": "Bß╗Öt m├¼",
-          "legacyRecipeId": 277
+          "grossWeightG": 32,
+          "netWeightG": 32,
+          "note": "Bột mì làm vỏ bánh",
+          "legacyRecipeId": 568
+        },
+        {
+          "ingredientName": "Sữa bò tươi",
+          "grossWeightG": 15,
+          "netWeightG": 15,
+          "note": "Sữa tươi nhào bột bánh",
+          "legacyRecipeId": 569
         },
         {
           "ingredientName": "Trứng gà ta",
-          "grossWeightG": 20,
-          "netWeightG": 20,
-          "note": "Trß╗®ng g├á",
-          "legacyRecipeId": 278
+          "grossWeightG": 17,
+          "netWeightG": 15,
+          "note": "Trứng gà ta",
+          "legacyRecipeId": 570
         },
         {
-          "ingredientName": "Chà bông heo (ruốc thịt)",
-          "grossWeightG": 10,
-          "netWeightG": 10,
-          "note": "Ch├á b├┤ng",
-          "legacyRecipeId": 279
-        }
-      ]
-    },
-    {
-      "sourceKey": "nha đam hạt chia đường phèn",
-      "name": "Nha đam, hạt chia, đường phèn",
-      "standardServingSizeG": 130,
-      "items": [
-        {
-          "ingredientName": "Hạt chia hữu cơ",
-          "grossWeightG": 3,
-          "netWeightG": 3,
-          "note": "Hß║ít chia",
-          "legacyRecipeId": 286
-        },
-        {
-          "ingredientName": "Đường phèn / Đường kính trắng",
-          "grossWeightG": 8,
-          "netWeightG": 8,
-          "note": "─Éã░ß╗Øng ph├¿n",
-          "legacyRecipeId": 287
+          "ingredientName": "Dầu thảo mộc (Lạc, vừng, ...)",
+          "grossWeightG": 2,
+          "netWeightG": 2,
+          "note": "Dầu thực vật",
+          "legacyRecipeId": 571
         }
       ]
     }

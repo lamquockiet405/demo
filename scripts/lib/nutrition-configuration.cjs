@@ -44,8 +44,8 @@ function configurationData(catalog) {
 function configurationSql(catalog) {
   const data = configurationData(catalog);
   const sql = ['CREATE TEMP TABLE config_import_changes(table_name TEXT, inserted_count INT) ON COMMIT DROP;'];
-  const insert = (table, cols, values) => sql.push(`WITH added AS (
-    INSERT INTO ${table} (${cols.join(',')}) VALUES (${values.join(',')}) ON CONFLICT DO NOTHING RETURNING id
+  const insert = (table, cols, values, extraCondition = 'TRUE') => sql.push(`WITH added AS (
+    INSERT INTO ${table} (${cols.join(',')}) SELECT ${values.join(',')} WHERE ${extraCondition} ON CONFLICT DO NOTHING RETURNING id
     ) INSERT INTO config_import_changes SELECT ${quote(table)}, count(*)::int FROM added;`);
   for (const rule of data.frequency) {
     insert('dish_frequency_rules', ['school_id','rule_name','meal_slot','target_type','target_id','target_code',
@@ -74,7 +74,8 @@ function configurationSql(catalog) {
       quote('Năng lượng và tỷ lệ P:L:G theo Chương trình Giáo dục mầm non. Vi chất và chất xơ chưa có nguồn đối chiếu trong phần trích, để NULL; không suy ra từ năng lượng.'),
       json({ seedKey: `PRESCHOOL_2021_${group.ageGroup}_${scope}_V1`, kind: 'OFFICIAL_PRESCHOOL_PROGRAM', source: intake.source,
         ageMonthsMin: group.ageMonthsMin, ageMonthsMax: group.ageMonthsMax,
-        missingNutrients: ['fiberGMin','fiberGMax','calciumMgMin','ironMgMin','zincMgMin','vitaminARaeMcgMin'] })]);
+        missingNutrients: ['fiberGMin','fiberGMax','calciumMgMin','ironMgMin','zincMgMin','vitaminARaeMcgMin'] })],
+      group.ageGroup === 'MAU_GIAO' ? 'TRUE' : `NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'nutrition_intake_standards'::regclass AND conname = 'nutrition_intake_standards_age_group_check' AND pg_get_constraintdef(oid) NOT LIKE '%NHA_TRE%')`);
   }
   sql.push(`INSERT INTO audit_logs(school_id,user_id,user_name,user_role,action,target_entity,details)
     SELECT 1,NULL,'Source data import','SYSTEM','INITIALIZE_NUTRITION_CONFIGURATION','NUTRITION_CONFIGURATION',

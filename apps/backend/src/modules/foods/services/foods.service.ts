@@ -148,6 +148,8 @@ export class FoodsService {
 
     if (query.status) {
       qb.andWhere('f.status = :status', { status: query.status });
+    } else {
+      qb.andWhere("f.status = 'ACTIVE'");
     }
 
     const declarations = await this.getActiveStudentAllergies();
@@ -198,11 +200,11 @@ export class FoodsService {
   }
 
   async getStats() {
-    const allFoods = await this.foodRepo.find();
+    const allFoods = await this.foodRepo.find({ where: { status: 'ACTIVE' } });
     const declarations = await this.getActiveStudentAllergies();
     const total = allFoods.length;
-    const active = allFoods.filter((f) => f.status === 'ACTIVE').length;
-    const categoriesCount = await this.catRepo.count();
+    const active = total;
+    const categoriesCount = new Set(allFoods.map((f) => f.categoryId).filter(Boolean)).size || await this.catRepo.count();
     const allergenCount = allFoods.filter((f) => this.detectFoodAllergens(f, declarations).length > 0).length;
 
     return {
@@ -217,7 +219,11 @@ export class FoodsService {
   }
 
   async getCategories() {
-    const cats = await this.catRepo.find({ order: { id: 'ASC' } });
+    const cats = await this.catRepo
+      .createQueryBuilder('c')
+      .where("EXISTS (SELECT 1 FROM food_ingredients f WHERE f.category_id = c.id AND f.status = 'ACTIVE')")
+      .orderBy('c.id', 'ASC')
+      .getMany();
     return cats.map((c) => ({
       id: String(c.id),
       name: c.name,
