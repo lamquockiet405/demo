@@ -69,12 +69,8 @@ docs/*.zip
 
 
 
-# Exclude documentation, tooling scripts and database references
-docs/
-scripts/
-database/migrations/
-database/generated/
-database/reference/
+# Exclude temporary scratch files
+step838.txt
 contributors-checker.html
 populate_missing_nutrition.sql
 populate_nutrition.py

@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12800 8200" width="12800" height="8200" style="background-color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1E293B" />
+  </marker>
+</defs>
+  <ellipse cx="6400.0" cy="4000.0" rx="1800.0" ry="1500.0" fill="#FFF2CC" stroke="#D6B656" stroke-width="6" />
+  <text x="6400.0" y="3970.0" font-size="64" font-weight="bold" fill="#0F172A" text-anchor="middle">KidMeal (KMS)</text>
+  <text x="6400.0" y="4050.0" font-size="38" fill="#475569" text-anchor="middle">Preschool Nutrition & Meal Management System</text>
+  <rect x="600.0" y="500.0" width="900.0" height="1950.0" rx="20" ry="20" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="4" />
+  <text x="1050.0" y="1440.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">School Management</text>
+  <text x="1050.0" y="1500.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Ban Giám Hiệu)</text>
+  <rect x="11300.0" y="500.0" width="900.0" height="1950.0" rx="20" ry="20" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="4" />
+  <text x="11750.0" y="1440.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">Nutritionist</text>
+  <text x="11750.0" y="1500.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Chuyên Gia Dinh Dưỡng)</text>
+  <rect x="600.0" y="3100.0" width="900.0" height="1650.0" rx="20" ry="20" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="4" />
+  <text x="1050.0" y="3890.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">Kitchen Staff</text>
+  <text x="1050.0" y="3950.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Nhân Viên Bếp)</text>
+  <rect x="11300.0" y="3100.0" width="900.0" height="1650.0" rx="20" ry="20" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="4" />
+  <text x="11750.0" y="3890.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">Classroom Teacher</text>
+  <text x="11750.0" y="3950.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Giáo Viên Lớp)</text>
+  <rect x="600.0" y="5250.0" width="900.0" height="1950.0" rx="20" ry="20" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="4" />
+  <text x="1050.0" y="6190.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">Parent</text>
+  <text x="1050.0" y="6250.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Phụ Huynh Học Sinh)</text>
+  <rect x="11300.0" y="5250.0" width="900.0" height="1350.0" rx="20" ry="20" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="4" />
+  <text x="11750.0" y="5890.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">Administrator</text>
+  <text x="11750.0" y="5950.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Quản Trị Hệ Thống)</text>
+  <rect x="5850.0" y="7400.0" width="750.0" height="300.0" rx="20" ry="20" fill="#FFE6CC" stroke="#D79B00" stroke-width="4" />
+  <text x="6225.0" y="7515.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">VNPAY Gateway</text>
+  <text x="6225.0" y="7575.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Cổng Thanh Toán Online)</text>
+  <rect x="6900.0" y="7400.0" width="750.0" height="300.0" rx="20" ry="20" fill="#FFE6CC" stroke="#D79B00" stroke-width="4" />
+  <text x="7275.0" y="7515.0" font-size="48" font-weight="bold" fill="#0F172A" text-anchor="middle">Gmail Service / SMTP</text>
+  <text x="7275.0" y="7575.0" font-size="36" font-weight="normal" fill="#475569" text-anchor="middle">(Dịch Vụ Gửi Email)</text>
+  <path d="M 1500.0 579.95 L 5100.0 580.0 L 5100.04 2962.6" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2958.0" y="526.95" width="684" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3300.0" y="564.95" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">School Configuration Request</text>
+  <path d="M 5179.96 2897.2 L 5180.0 735.0 L 1500.0 734.975" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2986.5" y="681.975" width="707" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3340.0" y="719.975" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">School Configuration Response</text>
+  <path d="M 1500.0 890.0 L 5260.0 890.0 L 5259.88 2839.3" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3084.0" y="837.0" width="592" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3380.0" y="875.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Staff Management Request</text>
+  <path d="M 5340.16 2787.7 L 5340.0 1045.0 L 1500.0 1045.025" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3112.5" y="992.0250000000001" width="615" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3420.0" y="1030.025" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Staff Management Response</text>
+  <path d="M 1500.0 1200.05 L 5420.0 1200.0 L 5420.08 2741.8" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3129.5" y="1147.05" width="661" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3460.0" y="1185.05" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Snack Service Setup Request</text>
+  <path d="M 5500.0 2701.0 L 5500.0 1355.0 L 1500.0 1355.075" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3158.0" y="1302.075" width="684" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3500.0" y="1340.075" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Snack Service Setup Response</text>
+  <path d="M 1500.0 1509.9050000000002 L 5580.0 1510.0 L 5579.92 2664.7" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3278.5" y="1456.9050000000002" width="523" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3540.0" y="1494.9050000000002" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Menu Approval Request</text>
+  <path d="M 5659.84 2632.6 L 5660.0 1665.0 L 1500.0 1664.93" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3307.0" y="1611.93" width="546" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3580.0" y="1649.93" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Menu Approval Response</text>
+  <path d="M 1500.0 1819.955 L 5740.0 1820.0 L 5740.12 2604.4" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3209.0" y="1766.955" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3620.0" y="1804.955" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Inspection Step-3 Approval Request</text>
+  <path d="M 5820.04 2580.1 L 5820.0 1975.0 L 1500.0 1974.98" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3237.5" y="1921.98" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3660.0" y="1959.98" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Inspection Step-3 Approval Response</text>
+  <path d="M 1500.0 2130.005 L 5900.0 2130.0 L 5899.96 2559.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3289.0" y="2077.005" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3700.0" y="2115.005" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Statistical & Audit Report Request</text>
+  <path d="M 5979.88 2541.4 L 5980.0 2285.0 L 1500.0 2285.0299999999997" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3317.5" y="2232.0299999999997" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3740.0" y="2270.0299999999997" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Statistical & Audit Report Response</text>
+  <path d="M 11300.0 579.95 L 7700.0 580.0 L 7699.96 2962.6" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9112.0" y="526.95" width="776" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9500.0" y="564.95" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Food & Recipe Management Request</text>
+  <path d="M 7620.04 2897.2 L 7620.0 735.0 L 11300.0 734.975" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9060.5" y="681.975" width="799" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9460.0" y="719.975" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Food & Recipe Management Response</text>
+  <path d="M 11300.0 890.0 L 7540.0 890.0 L 7540.12 2839.3" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9089.5" y="837.0" width="661" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9420.0" y="875.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Nutrition Standards Request</text>
+  <path d="M 7459.84 2787.7 L 7460.0 1045.0 L 11300.0 1045.025" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9038.0" y="992.0250000000001" width="684" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9380.0" y="1030.025" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Nutrition Standards Response</text>
+  <path d="M 11300.0 1200.05 L 7380.0 1200.0 L 7379.92 2741.8" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8952.0" y="1147.05" width="776" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9340.0" y="1185.05" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Allergy Rules Management Request</text>
+  <path d="M 7300.0 2701.0 L 7300.0 1355.0 L 11300.0 1355.075" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8900.5" y="1302.075" width="799" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9300.0" y="1340.075" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Allergy Rules Management Response</text>
+  <path d="M 11300.0 1509.9050000000002 L 7220.0 1510.0 L 7220.08 2664.7" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8849.0" y="1456.9050000000002" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9260.0" y="1494.9050000000002" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Menu Planning & Validation Request</text>
+  <path d="M 7140.16 2632.6 L 7140.0 1665.0 L 11300.0 1664.93" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8797.5" y="1611.93" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9220.0" y="1649.93" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Menu Planning & Validation Response</text>
+  <path d="M 11300.0 1819.955 L 7060.0 1820.0 L 7059.88 2604.4" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8780.5" y="1766.955" width="799" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9180.0" y="1804.955" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Menu Commitment & Publish Request</text>
+  <path d="M 6979.96 2580.1 L 6980.0 1975.0 L 11300.0 1974.98" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8729.0" y="1921.98" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9140.0" y="1959.98" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Menu Commitment & Publish Response</text>
+  <path d="M 11300.0 2130.005 L 6900.0 2130.0 L 6900.04 2559.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8700.5" y="2077.005" width="799" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9100.0" y="2115.005" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Growth & Z-Score Analysis Request</text>
+  <path d="M 6820.12 2541.4 L 6820.0 2285.0 L 11300.0 2285.0299999999997" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8649.0" y="2232.0299999999997" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9060.0" y="2270.0299999999997" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Growth & Z-Score Analysis Response</text>
+  <path d="M 1500.0 3180.025 L 4892.68 3180.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2773.84" y="3127.025" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3196.34" y="3165.025" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Daily Portions Confirmation Request</text>
+  <path d="M 4783.6 3340.0 L 1500.0 3340.075" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2707.8" y="3287.0" width="868" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3141.8" y="3325.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Daily Portions Confirmation Response</text>
+  <path d="M 1500.0 3499.96 L 4702.96 3499.9" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2736.48" y="3446.96" width="730" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3101.48" y="3484.96" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">3-Step Food Inspection Request</text>
+  <path d="M 4646.8 3660.1 L 1500.0 3660.01" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2696.9" y="3607.1" width="753" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3073.4" y="3645.1" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">3-Step Food Inspection Response</text>
+  <path d="M 1500.0 3820.06 L 4612.96 3820.0" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2656.98" y="3767.06" width="799" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3056.48" y="3805.06" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">24h Food Sample Retention Request</text>
+  <path d="M 4600.0 3979.9 L 1500.0 3979.945" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2639.0" y="3926.9" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3050.0" y="3964.9" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">24h Food Sample Retention Response</text>
+  <path d="M 1500.0 4139.995 L 4607.92 4140.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2677.46" y="4086.995" width="753" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3053.96" y="4124.995" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Gross Weight Purchasing Request</text>
+  <path d="M 4636.36 4300.0 L 1500.0 4300.045" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2680.18" y="4247.0" width="776" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3068.18" y="4285.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Gross Weight Purchasing Response</text>
+  <path d="M 1500.0 4459.93 L 4686.76 4459.9" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2693.88" y="4406.93" width="799" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3093.38" y="4444.93" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Kitchen Coordination Note Request</text>
+  <path d="M 4760.92 4620.1 L 1500.0 4619.98" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2719.46" y="4567.1" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3130.46" y="4605.1" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Kitchen Coordination Note Response</text>
+  <path d="M 11300.0 3180.025 L 7907.32 3180.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9319.16" y="3127.025" width="569" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9603.66" y="3165.025" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Meal Attendance Request</text>
+  <path d="M 8016.4 3340.0 L 11300.0 3340.075" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9362.2" y="3287.0" width="592" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9658.2" y="3325.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Meal Attendance Response</text>
+  <path d="M 11300.0 3499.96 L 8097.04 3499.9" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9322.02" y="3446.96" width="753" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9698.52" y="3484.96" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Meal Consumption Status Request</text>
+  <path d="M 8153.2 3660.1 L 11300.0 3660.01" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9338.6" y="3607.1" width="776" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9726.6" y="3645.1" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Meal Consumption Status Response</text>
+  <path d="M 11300.0 3820.06 L 8187.04 3820.0" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9436.02" y="3767.06" width="615" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9743.52" y="3805.06" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Teacher Meal Note Request</text>
+  <path d="M 8200.0 3979.9 L 11300.0 3979.945" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9431.0" y="3926.9" width="638" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9750.0" y="3964.9" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Teacher Meal Note Response</text>
+  <path d="M 11300.0 4139.995 L 8192.08 4140.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9335.04" y="4086.995" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9746.04" y="4124.995" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Physical Measurement Input Request</text>
+  <path d="M 8163.639999999999 4300.0 L 11300.0 4300.045" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9309.32" y="4247.0" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9731.82" y="4285.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Physical Measurement Input Response</text>
+  <path d="M 11300.0 4459.93 L 8113.24 4459.9" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9341.619999999999" y="4406.93" width="730" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9706.619999999999" y="4444.93" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Class Allergen Warning Request</text>
+  <path d="M 8039.08 4620.1 L 11300.0 4619.98" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9293.04" y="4567.1" width="753" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9669.54" y="4605.1" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Class Allergen Warning Response</text>
+  <path d="M 1500.0 5329.95 L 5100.0 5330.0 L 5100.04 5037.4" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2946.5" y="5276.95" width="707" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3300.0" y="5314.95" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Parent Authentication Request</text>
+  <path d="M 5179.96 5102.8 L 5180.0 5485.0 L 1500.0 5484.975" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="2975.0" y="5431.975" width="730" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3340.0" y="5469.975" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Parent Authentication Response</text>
+  <path d="M 1500.0 5640.0 L 5260.0 5640.0 L 5259.88 5160.700000000001" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3049.5" y="5587.0" width="661" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3380.0" y="5625.0" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Allergy Declaration Request</text>
+  <path d="M 5340.16 5212.3 L 5340.0 5795.0 L 1500.0 5795.025" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3078.0" y="5742.025" width="684" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3420.0" y="5780.025" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Allergy Declaration Response</text>
+  <path d="M 1500.0 5950.05 L 5420.0 5950.0 L 5420.08 5258.2" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3049.0" y="5897.05" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3460.0" y="5935.05" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Snack Service Registration Request</text>
+  <path d="M 5500.0 5299.0 L 5500.0 6105.0 L 1500.0 6105.075" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3077.5" y="6052.075" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3500.0" y="6090.075" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Snack Service Registration Response</text>
+  <path d="M 1500.0 6259.905 L 5580.0 6260.0 L 5579.92 5335.3" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3198.0" y="6206.905" width="684" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3540.0" y="6244.905" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Snack Online Payment Request</text>
+  <path d="M 5659.84 5367.4 L 5660.0 6415.0 L 1500.0 6414.93" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3226.5" y="6361.93" width="707" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3580.0" y="6399.93" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Snack Online Payment Response</text>
+  <path d="M 1500.0 6569.955 L 5740.0 6570.0 L 5740.12 5395.6" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3209.0" y="6516.955" width="822" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3620.0" y="6554.955" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Meal Evaluation & Feedback Request</text>
+  <path d="M 5820.04 5419.9 L 5820.0 6725.0 L 1500.0 6724.98" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3237.5" y="6671.98" width="845" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3660.0" y="6709.98" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Meal Evaluation & Feedback Response</text>
+  <path d="M 1500.0 6880.005 L 5900.0 6880.0 L 5899.96 5440.9" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3346.5" y="6827.005" width="707" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3700.0" y="6865.005" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Growth Chart & Advice Request</text>
+  <path d="M 5979.88 5458.6 L 5980.0 7035.0 L 1500.0 7035.03" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="3375.0" y="6982.03" width="730" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="3740.0" y="7020.03" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Growth Chart & Advice Response</text>
+  <path d="M 11300.0 5330.055 L 7700.0 5330.0 L 7699.96 5037.4" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9135.0" y="5277.055" width="730" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9500.0" y="5315.055" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">User & Role Management Request</text>
+  <path d="M 7620.04 5102.8 L 7620.0 5485.0 L 11300.0 5485.035" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9083.5" y="5432.035" width="753" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9460.0" y="5470.035" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">User & Role Management Response</text>
+  <path d="M 11300.0 5640.015 L 7540.0 5640.0 L 7540.12 5160.700000000001" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9101.0" y="5587.015" width="638" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9420.0" y="5625.015" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Security Audit Log Request</text>
+  <path d="M 7459.84 5212.3 L 7460.0 5795.0 L 11300.0 5794.995" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="9049.5" y="5741.995" width="661" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9380.0" y="5779.995" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Security Audit Log Response</text>
+  <path d="M 11300.0 5949.975 L 7380.0 5950.0 L 7379.92 5258.2" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8998.0" y="5896.975" width="684" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9340.0" y="5934.975" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">System Configuration Request</text>
+  <path d="M 7300.0 5299.0 L 7300.0 6105.0 L 11300.0 6104.955" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8946.5" y="6051.955" width="707" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9300.0" y="6089.955" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">System Configuration Response</text>
+  <path d="M 11300.0 6259.9349999999995 L 7220.0 6260.0 L 7220.08 5335.3" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8826.0" y="6206.9349999999995" width="868" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9260.0" y="6244.9349999999995" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Policy & Template Management Request</text>
+  <path d="M 7140.16 5367.4 L 7140.0 6415.0 L 11300.0 6415.05" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="8774.5" y="6362.05" width="891" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="9220.0" y="6400.05" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Policy & Template Management Response</text>
+  <path d="M 6150.16 5485.6 L 6150.0 7400.0" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="5449.16" y="6117.64" width="661" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="5779.66" y="6155.64" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Payment Transaction Request</text>
+  <path d="M 6350.025 7400.0 L 6349.96 5499.4" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="6390.025" y="6031.58" width="753" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="6766.525" y="6069.58" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Payment Callback & IPN Response</text>
+  <path d="M 7149.88 5363.5 L 7149.975 7400.0" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="6241.88" y="6038.275" width="868" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="6675.88" y="6076.275" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Email Delivery Request (OTP/Receipt)</text>
+  <path d="M 7350.0 7400.0 L 7350.04 5274.1" fill="none" stroke="#1E293B" stroke-width="3" marker-end="url(#arrow)" />
+  <rect x="7390.0" y="5873.870000000001" width="730" height="52" rx="6" ry="6" fill="#FFFFFF" fill-opacity="0.95" />
+  <text x="7755.0" y="5911.870000000001" font-size="40" font-weight="bold" fill="#0F172A" text-anchor="middle">Email Delivery Status Response</text>
+</svg>

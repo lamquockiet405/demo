@@ -1,0 +1,2196 @@
+{
+  "academic-years": [
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "GET",
+      "path": "/academic-years",
+      "function": "list"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "GET",
+      "path": "/academic-years/:id/available-students",
+      "function": "availableStudents"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "GET",
+      "path": "/academic-years/:id",
+      "function": "detail"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "POST",
+      "path": "/academic-years",
+      "function": "create"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "PATCH",
+      "path": "/academic-years/:id",
+      "function": "update"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "DELETE",
+      "path": "/academic-years/:id",
+      "function": "delete"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "POST",
+      "path": "/academic-years/:id/activate",
+      "function": "activate"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "POST",
+      "path": "/academic-years/:id/complete",
+      "function": "complete"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "POST",
+      "path": "/academic-years/:id/classes",
+      "function": "addClass"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "PATCH",
+      "path": "/academic-years/:id/classes/:classId",
+      "function": "updateClass"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "POST",
+      "path": "/academic-years/:id/enrollments",
+      "function": "addEnrollment"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "POST",
+      "path": "/academic-years/:id/students",
+      "function": "createStudent"
+    },
+    {
+      "controller": "academic-years.controller.ts",
+      "method": "PATCH",
+      "path": "/academic-years/:id/enrollments/:enrollmentId",
+      "function": "updateEnrollment"
+    }
+  ],
+  "attendance": [
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance/classes",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance/school-summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "PUT",
+      "path": "/attendance/child/:childId",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/mark-all",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/sync-morning",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/lock-kitchen",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/kitchen/status",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance/evaluation",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "PUT",
+      "path": "/attendance/evaluation/child/:childId",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/evaluation/batch",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "PUT",
+      "path": "/attendance/evaluation/sensory",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/evaluation/lock",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance/history",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance/kitchen-kds",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/attendance/coordination-notes",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/coordination-notes",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "PUT",
+      "path": "/attendance/coordination-notes/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/coordination-notes/:id/acknowledge",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/attendance/coordination-notes/:id/resolve",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "DELETE",
+      "path": "/attendance/coordination-notes/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/snack-roster",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "PUT",
+      "path": "/snack-roster/:studentId/attendance",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "POST",
+      "path": "/snack-roster/dispatch-kitchen",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "attendance.controller.ts",
+      "method": "GET",
+      "path": "/snack-roster/kitchen-portions",
+      "function": "ApiOperation"
+    }
+  ],
+  "audit-logs": [
+    {
+      "controller": "audit-logs.controller.ts",
+      "method": "GET",
+      "path": "/audit-logs",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "audit-logs.controller.ts",
+      "method": "GET",
+      "path": "/audit-logs/filters",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "audit-logs.controller.ts",
+      "method": "GET",
+      "path": "/audit-logs/stats",
+      "function": "ApiOperation"
+    }
+  ],
+  "auth": [
+    {
+      "controller": "auth.controller.ts",
+      "method": "GET",
+      "path": "/auth/tenants",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/login",
+      "function": "HttpCode"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/quick-login",
+      "function": "HttpCode"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/refresh",
+      "function": "HttpCode"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "GET",
+      "path": "/auth/me",
+      "function": "ApiBearerAuth"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/change-password",
+      "function": "HttpCode"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "function": "HttpCode"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/verify-reset-otp",
+      "function": "HttpCode"
+    },
+    {
+      "controller": "auth.controller.ts",
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "function": "HttpCode"
+    }
+  ],
+  "child-alerts": [
+    {
+      "controller": "child-alerts.controller.ts",
+      "method": "GET",
+      "path": "/child-alerts/summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "child-alerts.controller.ts",
+      "method": "GET",
+      "path": "/child-alerts/school-manager",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "child-alerts.controller.ts",
+      "method": "GET",
+      "path": "/child-alerts/nutritionist",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "child-alerts.controller.ts",
+      "method": "GET",
+      "path": "/child-alerts/teacher",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "child-alerts.controller.ts",
+      "method": "GET",
+      "path": "/child-alerts/parent",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "child-alerts.controller.ts",
+      "method": "POST",
+      "path": "/child-alerts/resolve",
+      "function": "ApiOperation"
+    }
+  ],
+  "children": [
+    {
+      "controller": "children.controller.ts",
+      "method": "GET",
+      "path": "/children",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "GET",
+      "path": "/children/stats",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "GET",
+      "path": "/children/allergen-catalogs",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "POST",
+      "path": "/children/rescan-allergies",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "POST",
+      "path": "/children/import",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "GET",
+      "path": "/children/:id/allergy-history",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "GET",
+      "path": "/children/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "GET",
+      "path": "/children/:id/nutrition-profile",
+      "function": "getNutritionProfile"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "PATCH",
+      "path": "/children/:id/nutrition-profile",
+      "function": "updateNutritionProfile"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "POST",
+      "path": "/children",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "PATCH",
+      "path": "/children/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "POST",
+      "path": "/children/:childId/allergies",
+      "function": "UseGuards"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "PUT",
+      "path": "/children/allergies/:allergyId",
+      "function": "UseGuards"
+    },
+    {
+      "controller": "children.controller.ts",
+      "method": "DELETE",
+      "path": "/children/allergies/:allergyId",
+      "function": "UseGuards"
+    }
+  ],
+  "classes": [
+    {
+      "controller": "classes.controller.ts",
+      "method": "GET",
+      "path": "/classes",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "GET",
+      "path": "/classes/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "POST",
+      "path": "/classes",
+      "function": "Roles"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "PATCH",
+      "path": "/classes/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "DELETE",
+      "path": "/classes/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "GET",
+      "path": "/classes/:classId/students",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "POST",
+      "path": "/classes/:classId/students",
+      "function": "Roles"
+    },
+    {
+      "controller": "classes.controller.ts",
+      "method": "DELETE",
+      "path": "/classes/:classId/students/:childId",
+      "function": "Roles"
+    }
+  ],
+  "dashboard": [
+    {
+      "controller": "dashboard.controller.ts",
+      "method": "GET",
+      "path": "/dashboard/summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-physical-dashboard.controller.ts",
+      "method": "GET",
+      "path": "/dashboard/nutrition-physical/school-manager",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-physical-dashboard.controller.ts",
+      "method": "GET",
+      "path": "/dashboard/nutrition-physical/nutritionist",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-physical-dashboard.controller.ts",
+      "method": "POST",
+      "path": "/dashboard/nutrition-physical/action/budget",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-physical-dashboard.controller.ts",
+      "method": "POST",
+      "path": "/dashboard/nutrition-physical/action/diet",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-physical-dashboard.controller.ts",
+      "method": "POST",
+      "path": "/dashboard/nutrition-physical/action/consult",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-physical-dashboard.controller.ts",
+      "method": "GET",
+      "path": "/dashboard/nutrition-physical/export-report",
+      "function": "ApiOperation"
+    }
+  ],
+  "dishes": [
+    {
+      "controller": "dishes.controller.ts",
+      "method": "GET",
+      "path": "/dishes",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "dishes.controller.ts",
+      "method": "GET",
+      "path": "/dishes/categories",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "dishes.controller.ts",
+      "method": "GET",
+      "path": "/dishes/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "dishes.controller.ts",
+      "method": "POST",
+      "path": "/dishes",
+      "function": "Roles"
+    },
+    {
+      "controller": "dishes.controller.ts",
+      "method": "PUT",
+      "path": "/dishes/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "dishes.controller.ts",
+      "method": "DELETE",
+      "path": "/dishes/:id",
+      "function": "Roles"
+    }
+  ],
+  "food-safety": [
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "GET",
+      "path": "/food-safety/compliance-report",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "GET",
+      "path": "/food-safety/inspections/3-step",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "GET",
+      "path": "/food-safety/samples/retention-log",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "GET",
+      "path": "/food-safety/legal-compliance",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "POST",
+      "path": "/food-safety/sign-monthly-log",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "POST",
+      "path": "/food-safety/nutritionist-review",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "POST",
+      "path": "/food-safety/suspend-supplier",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "food-safety.controller.ts",
+      "method": "GET",
+      "path": "/food-safety/export-compliance-dossier",
+      "function": "ApiOperation"
+    }
+  ],
+  "foods": [
+    {
+      "controller": "foods.controller.ts",
+      "method": "GET",
+      "path": "/foods",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "GET",
+      "path": "/foods/stats",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "GET",
+      "path": "/foods/categories",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "GET",
+      "path": "/foods/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "POST",
+      "path": "/foods",
+      "function": "Roles"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "PUT",
+      "path": "/foods/:id",
+      "function": "Patch"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "DELETE",
+      "path": "/foods/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "foods.controller.ts",
+      "method": "POST",
+      "path": "/foods/upload",
+      "function": "ApiOperation"
+    }
+  ],
+  "growth": [
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "POST",
+      "path": "/growth-notifications/scan-dispatch",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "GET",
+      "path": "/growth-notifications",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "GET",
+      "path": "/growth-notifications/executive-summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "PUT",
+      "path": "/growth-notifications/:id/acknowledge",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "POST",
+      "path": "/growth-notifications/assign-intervention",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "POST",
+      "path": "/growth-notifications/request-consultation",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth-dispatch.controller.ts",
+      "method": "POST",
+      "path": "/growth-notifications/approve-budget",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "GET",
+      "path": "/growth",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "GET",
+      "path": "/growth/child/:childId",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "GET",
+      "path": "/growth/class/:classId/overview",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "POST",
+      "path": "/growth",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "PUT",
+      "path": "/growth/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "DELETE",
+      "path": "/growth/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "POST",
+      "path": "/growth/import",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "growth.controller.ts",
+      "method": "GET",
+      "path": "/growth/export",
+      "function": "ApiOperation"
+    }
+  ],
+  "inspections": [
+    {
+      "controller": "inspections.controller.ts",
+      "method": "GET",
+      "path": "/inspections",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "GET",
+      "path": "/inspections/meal-ingredients",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "GET",
+      "path": "/inspections/samples",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "GET",
+      "path": "/inspections/samples/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "PATCH",
+      "path": "/inspections/samples/:id/dispose",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/samples/:id/dispose",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "PATCH",
+      "path": "/inspections/samples/:id/photo",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/samples/:id/photo",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/samples",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/step1",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "PATCH",
+      "path": "/inspections/:id/step2",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "PATCH",
+      "path": "/inspections/:id/step3",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "GET",
+      "path": "/inspections/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/create-session",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/:id/kitchen-submit",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/:id/kitchen-save",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/:id/approve",
+      "function": "Roles"
+    },
+    {
+      "controller": "inspections.controller.ts",
+      "method": "POST",
+      "path": "/inspections/:id/reject",
+      "function": "Roles"
+    }
+  ],
+  "meal-operations": [
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "GET",
+      "path": "/meal-operations/report",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "GET",
+      "path": "/meal-operations/reconciliation",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "GET",
+      "path": "/meal-operations/food-safety",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "GET",
+      "path": "/meal-operations/plate-waste",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "POST",
+      "path": "/meal-operations/sign-inspection",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "POST",
+      "path": "/meal-operations/teacher-sensory",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-operations.controller.ts",
+      "method": "GET",
+      "path": "/meal-operations/export-report",
+      "function": "ApiOperation"
+    }
+  ],
+  "meal-portions": [
+    {
+      "controller": "meal-portions.controller.ts",
+      "method": "GET",
+      "path": "/meal-portions",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-portions.controller.ts",
+      "method": "PUT",
+      "path": "/meal-portions",
+      "function": "Roles"
+    }
+  ],
+  "menus": [
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/statistics",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/academic-year-context",
+      "function": "academicYearContext"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/available-dishes",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:id/versions",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:id/advisory",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "PUT",
+      "path": "/menus/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/create-version",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:menuId/adjust-dish",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "DELETE",
+      "path": "/menus/:menuId/dishes/:menuDishId",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/submit",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/approve",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/reject",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/publish",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/auto-generate",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/emergency-rotate-dish",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/apply-substitute-dish",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:menuId/dishes/:menuDishId/substitute-candidates",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:menuId/dishes/:menuDishId/apply-substitute",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/request-edit",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/approve-edit-request",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/reject-edit-request",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "POST",
+      "path": "/menus/:id/cancel-edit-request",
+      "function": "Roles"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:id/export/data",
+      "function": "exportData"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:id/export/excel",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menus.controller.ts",
+      "method": "GET",
+      "path": "/menus/:id/export/pdf",
+      "function": "ApiOperation"
+    }
+  ],
+  "nutrition-advice": [
+    {
+      "controller": "nutrition-advice.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-advice/detect",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-advice.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-advice/send",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-advice.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-advice/child-advice",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-advice.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-advice/:id/confirm",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-advice.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-advice/history",
+      "function": "ApiOperation"
+    }
+  ],
+  "nutrition-engine": [
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "GET",
+      "path": "/allergens",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "GET",
+      "path": "/allergens/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "POST",
+      "path": "/allergens",
+      "function": "Roles"
+    },
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "PUT",
+      "path": "/allergens/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "PATCH",
+      "path": "/allergens/:id/status",
+      "function": "Roles"
+    },
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "PATCH",
+      "path": "/allergens/:id/restore",
+      "function": "Roles"
+    },
+    {
+      "controller": "allergen-rules.controller.ts",
+      "method": "DELETE",
+      "path": "/allergens/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/frequency-rules",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/frequency-rules/summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/frequency-rules/food-groups-catalog",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/frequency-rules/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules/frequency-rules",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "PUT",
+      "path": "/nutrition-rules/frequency-rules/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "PATCH",
+      "path": "/nutrition-rules/frequency-rules/:id/toggle",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "frequency-rules.controller.ts",
+      "method": "DELETE",
+      "path": "/nutrition-rules/frequency-rules/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/intake-standards",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/intake-standards/summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/intake-standards/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules/intake-standards",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "PUT",
+      "path": "/nutrition-rules/intake-standards/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "PATCH",
+      "path": "/nutrition-rules/intake-standards/:id/toggle",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "intake-standards.controller.ts",
+      "method": "DELETE",
+      "path": "/nutrition-rules/intake-standards/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-distributions.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/meal-distributions",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-distributions.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/meal-distributions/overview",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-distributions.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules/meal-distributions",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-distributions.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules/meal-distributions/reset",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-distributions.controller.ts",
+      "method": "PUT",
+      "path": "/nutrition-rules/meal-distributions/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "meal-distributions.controller.ts",
+      "method": "DELETE",
+      "path": "/nutrition-rules/meal-distributions/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "menu-scanner.controller.ts",
+      "method": "POST",
+      "path": "/rule-engine/evaluate-menu",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/stats",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules/sync-rda",
+      "function": "Roles"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules",
+      "function": "Roles"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "PUT",
+      "path": "/nutrition-rules/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "PATCH",
+      "path": "/nutrition-rules/:id/status",
+      "function": "Roles"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "PATCH",
+      "path": "/nutrition-rules/:id/restore",
+      "function": "Roles"
+    },
+    {
+      "controller": "nutrition-standards.controller.ts",
+      "method": "DELETE",
+      "path": "/nutrition-rules/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/spacing-rules",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/spacing-rules/summary",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/spacing-rules/dishes-catalog",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "GET",
+      "path": "/nutrition-rules/spacing-rules/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "POST",
+      "path": "/nutrition-rules/spacing-rules",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "PUT",
+      "path": "/nutrition-rules/spacing-rules/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "PATCH",
+      "path": "/nutrition-rules/spacing-rules/:id/toggle",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "spacing-rules.controller.ts",
+      "method": "DELETE",
+      "path": "/nutrition-rules/spacing-rules/:id",
+      "function": "ApiOperation"
+    }
+  ],
+  "parent-evaluations": [
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "GET",
+      "path": "/parent-evaluations/portal-data",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "POST",
+      "path": "/parent-evaluations/submit",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "PUT",
+      "path": "/parent-evaluations/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "GET",
+      "path": "/parent-evaluations/child-menu-consumption",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "POST",
+      "path": "/parent-evaluations/child-consumption/heart",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "GET",
+      "path": "/parent-evaluations",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "POST",
+      "path": "/parent-evaluations/:id/respond",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "PUT",
+      "path": "/parent-evaluations/:id/respond",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "PUT",
+      "path": "/parent-evaluations/:id/draft",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "GET",
+      "path": "/parent-evaluations/summary-report",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "POST",
+      "path": "/parent-evaluations/:id/respond-specialist",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "POST",
+      "path": "/parent-evaluations/recipe-improvement-log",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "GET",
+      "path": "/parent-evaluations/recipe-improvement-logs",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-evaluations.controller.ts",
+      "method": "GET",
+      "path": "/parent-evaluations/summary-report/export",
+      "function": "ApiOperation"
+    }
+  ],
+  "payments": [
+    {
+      "controller": "payments.controller.ts",
+      "method": "POST",
+      "path": "/payments/create-url",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "POST",
+      "path": "/payments/vnpay/register-and-pay",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "GET",
+      "path": "/payments/vnpay-ipn",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "GET",
+      "path": "/payments/vnpay-return",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "GET",
+      "path": "/payments/my-invoices",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "GET",
+      "path": "/payments/receipt/:registrationId",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "GET",
+      "path": "/payments/invoices",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "POST",
+      "path": "/payments/invoices",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "POST",
+      "path": "/payments/invoices/:id/remind",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "POST",
+      "path": "/payments/invoices/batch-remind",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "GET",
+      "path": "/payments/notifications",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "PUT",
+      "path": "/payments/notifications/:id/read",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "payments.controller.ts",
+      "method": "PUT",
+      "path": "/payments/notifications/read-all",
+      "function": "ApiOperation"
+    }
+  ],
+  "purchasing": [
+    {
+      "controller": "purchasing.controller.ts",
+      "method": "GET",
+      "path": "/menus/purchasing/daily-suggestion",
+      "function": "Roles"
+    },
+    {
+      "controller": "purchasing.controller.ts",
+      "method": "GET",
+      "path": "/menus/purchasing/available-days",
+      "function": "Roles"
+    }
+  ],
+  "snack-revenue": [
+    {
+      "controller": "snack-revenue.controller.ts",
+      "method": "GET",
+      "path": "/snack-revenue/report",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-revenue.controller.ts",
+      "method": "GET",
+      "path": "/snack-revenue/aging-debts",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-revenue.controller.ts",
+      "method": "POST",
+      "path": "/snack-revenue/send-debt-reminder",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-revenue.controller.ts",
+      "method": "GET",
+      "path": "/snack-revenue/reconciliation-details",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-revenue.controller.ts",
+      "method": "GET",
+      "path": "/snack-revenue/vnpay-reconciliation",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-revenue.controller.ts",
+      "method": "GET",
+      "path": "/snack-revenue/export-financial-report",
+      "function": "ApiOperation"
+    }
+  ],
+  "snack-services": [
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/list",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/dayboarding",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/roster",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "POST",
+      "path": "/snack-services/periods",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "POST",
+      "path": "/snack-services/enrollment",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "POST",
+      "path": "/snack-services",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/close",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/open",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/toggle",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "DELETE",
+      "path": "/snack-services/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/list",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/parent-overview",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/dayboarding",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/check-allergy",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/students-available",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "GET",
+      "path": "/snack-services/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "POST",
+      "path": "/snack-services/periods",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/:id/menu-schedule",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "POST",
+      "path": "/snack-services/enrollment",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/registrations/:id/confirm-payment",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "POST",
+      "path": "/snack-services",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/close",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/open",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/toggle",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/periods/:id/toggle-lock",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "PUT",
+      "path": "/snack-services/:id/toggle-lock",
+      "function": "Roles"
+    },
+    {
+      "controller": "snack-services.controller.ts",
+      "method": "DELETE",
+      "path": "/snack-services/:id",
+      "function": "Roles"
+    }
+  ],
+  "teacher": [
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/classes",
+      "function": "classes"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/classes/:id",
+      "function": "classDetail"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PATCH",
+      "path": "/teacher/classes/:id",
+      "function": "updateClass"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/children",
+      "function": "children"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/children/import",
+      "function": "importChildren"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/children/:id/nutrition-profile",
+      "function": "profile"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PATCH",
+      "path": "/teacher/children/:id/nutrition-profile",
+      "function": "saveProfile"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/children/:id",
+      "function": "child"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/children",
+      "function": "createChild"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PATCH",
+      "path": "/teacher/children/:id",
+      "function": "saveChild"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/growth",
+      "function": "growth"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/growth/child/:id",
+      "function": "history"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/growth/import",
+      "function": "importGrowth"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/growth",
+      "function": "createGrowth"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PUT",
+      "path": "/teacher/growth/:id",
+      "function": "saveGrowth"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/meal-attendance",
+      "function": "meals"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/meal-submissions",
+      "function": "mealSubmissions"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/meal-submissions",
+      "function": "submitMeals"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PUT",
+      "path": "/teacher/meal-attendance/:id",
+      "function": "saveMeal"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/meal-history",
+      "function": "mealHistory"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/snack-roster",
+      "function": "roster"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/portions",
+      "function": "portions"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PUT",
+      "path": "/teacher/portions",
+      "function": "savePortions"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/notes",
+      "function": "notes"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/notes",
+      "function": "createNote"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "PUT",
+      "path": "/teacher/notes/:id",
+      "function": "saveNote"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "DELETE",
+      "path": "/teacher/notes/:id",
+      "function": "deleteNote"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/nutrition-advice/detect",
+      "function": "detect"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/nutrition-advice/history",
+      "function": "adviceHistory"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/nutrition-advice/send",
+      "function": "sendAdvice"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/growth-notifications",
+      "function": "notifications"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "POST",
+      "path": "/teacher/growth-notifications/scan-dispatch",
+      "function": "scan"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/alerts",
+      "function": "alerts"
+    },
+    {
+      "controller": "teacher.controller.ts",
+      "method": "GET",
+      "path": "/teacher/meal-report",
+      "function": "report"
+    }
+  ],
+  "tenant": [
+    {
+      "controller": "tenant.controller.ts",
+      "method": "GET",
+      "path": "/tenant/profile",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "tenant.controller.ts",
+      "method": "PATCH",
+      "path": "/tenant/profile",
+      "function": "UseGuards"
+    },
+    {
+      "controller": "tenant.controller.ts",
+      "method": "POST",
+      "path": "/tenant/upload-logo",
+      "function": "UseGuards"
+    },
+    {
+      "controller": "tenant.controller.ts",
+      "method": "POST",
+      "path": "/tenant/sync-education-db",
+      "function": "UseGuards"
+    },
+    {
+      "controller": "tenant.controller.ts",
+      "method": "GET",
+      "path": "/tenant/languages",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "tenant.controller.ts",
+      "method": "GET",
+      "path": "/tenant/translations/:langCode",
+      "function": "ApiOperation"
+    }
+  ],
+  "users": [
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "GET",
+      "path": "/users/parents",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "GET",
+      "path": "/users/parents/stats",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "GET",
+      "path": "/users/parents/check-email",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "GET",
+      "path": "/users/parents/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "POST",
+      "path": "/users/parents",
+      "function": "Roles"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "PATCH",
+      "path": "/users/parents/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "PUT",
+      "path": "/users/parents/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "POST",
+      "path": "/users/parents/:id/restore",
+      "function": "Roles"
+    },
+    {
+      "controller": "parent-management.controller.ts",
+      "method": "DELETE",
+      "path": "/users/parents/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "GET",
+      "path": "/users/staff",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "GET",
+      "path": "/users/staff/stats",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "GET",
+      "path": "/users/staff/roles",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "GET",
+      "path": "/users/staff/:id",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "POST",
+      "path": "/users/staff",
+      "function": "Roles"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "PATCH",
+      "path": "/users/staff/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "PUT",
+      "path": "/users/staff/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "PATCH",
+      "path": "/users/staff/:id/restore",
+      "function": "Roles"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "PATCH",
+      "path": "/users/staff/:id/status",
+      "function": "Roles"
+    },
+    {
+      "controller": "staff-management.controller.ts",
+      "method": "DELETE",
+      "path": "/users/staff/:id",
+      "function": "Roles"
+    },
+    {
+      "controller": "user-profile.controller.ts",
+      "method": "GET",
+      "path": "/users/profile",
+      "function": "ApiOperation"
+    },
+    {
+      "controller": "user-profile.controller.ts",
+      "method": "PATCH",
+      "path": "/users/profile",
+      "function": "ApiOperation"
+    }
+  ]
+}

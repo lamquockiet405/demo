@@ -1,0 +1,11 @@
+{$PUBLIC_HOSTNAME} {
+    encode zstd gzip
+
+    basic_auth {
+        demo {$DEMO_PASSWORD_HASH}
+    }
+
+    @api path /api/* /api-docs* /swagger* /socket.io/*
+    reverse_proxy @api backend:3000
+    reverse_proxy frontend:80
+}

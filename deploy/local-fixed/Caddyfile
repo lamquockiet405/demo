@@ -1,0 +1,9 @@
+{$PUBLIC_HOSTNAME} {
+    encode zstd gzip
+
+    basic_auth {
+        demo {$DEMO_PASSWORD_HASH}
+    }
+
+    reverse_proxy frontend:80
+}

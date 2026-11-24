@@ -1,0 +1,131 @@
+name: kidmeal-oracle-test
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: kidmeal_test
+      POSTGRES_USER: kidmeal_test
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD:?Run node deploy/oracle-test/prepare.cjs}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./.oracle-test/full.sql:/docker-entrypoint-initdb.d/01-full.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kidmeal_test -d kidmeal_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "${TEST_REDIS_PASSWORD:?Run node deploy/oracle-test/prepare.cjs}", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  minio:
+    image: elestio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: kidmeal_test
+      MINIO_ROOT_PASSWORD: ${TEST_MINIO_PASSWORD:?Run node deploy/oracle-test/prepare.cjs}
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: Asia/Ho_Chi_Minh
+      CORS_ORIGIN: https://${PUBLIC_HOSTNAME:?Set PUBLIC_HOSTNAME in .oracle-test/deploy.env}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: kidmeal_test
+      POSTGRES_USER: kidmeal_test
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${TEST_REDIS_PASSWORD}
+      JWT_SECRET: ${TEST_JWT_SECRET:?Run node deploy/oracle-test/prepare.cjs}
+      JWT_REFRESH_SECRET: ${TEST_JWT_REFRESH_SECRET:?Run node deploy/oracle-test/prepare.cjs}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: kidmeal_test
+      MINIO_SECRET_KEY: ${TEST_MINIO_PASSWORD}
+      MAIL_HOST: 127.0.0.1
+      MAIL_PORT: 1025
+      MAIL_USER: test-disabled
+      MAIL_PASS: test-disabled
+      MAIL_FROM: test-disabled@example.invalid
+      VNPAY_TMN_CODE: test-disabled
+      VNPAY_HASH_SECRET: test-disabled
+      VNPAY_URL: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      VNPAY_RETURN_URL: https://${PUBLIC_HOSTNAME}/payments/vnpay-return
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/auth/tenants').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    image: caddy:2-alpine
+    environment:
+      PUBLIC_HOSTNAME: ${PUBLIC_HOSTNAME}
+      DEMO_PASSWORD_HASH: ${DEMO_PASSWORD_HASH:?Run node deploy/oracle-test/prepare.cjs}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/oracle-test/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+    restart: unless-stopped
+
+  duckdns:
+    image: alpine:3.20
+    environment:
+      DUCKDNS_SUBDOMAIN: ${DUCKDNS_SUBDOMAIN:?Set DUCKDNS_SUBDOMAIN in .oracle-test/deploy.env}
+      DUCKDNS_TOKEN: ${DUCKDNS_TOKEN:?Set DUCKDNS_TOKEN in .oracle-test/deploy.env}
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          response=$$(wget -qO- "https://www.duckdns.org/update?domains=$$DUCKDNS_SUBDOMAIN&token=$$DUCKDNS_TOKEN&ip=")
+          if [ "$$response" != "OK" ]; then echo "DuckDNS update failed" >&2; fi
+          sleep 300
+        done
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  caddy_data:
+  caddy_config:

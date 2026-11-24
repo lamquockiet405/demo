@@ -1,0 +1,661 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Antigravity Senior Architect" version="24.0.0" type="device">
+  <diagram id="page-1" name="Class Diagram">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1200" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="p1_0" />
+        <mxCell id="p1_1" parent="p1_0" />
+        <mxCell id="p1_title" value="UML Class Diagram: View Snack Services (KidMeal Architecture)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontFamily=Arial;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="40" y="20" width="1800" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_PrincipalSnackServicesPage" value="&amp;lt;b&amp;gt;PrincipalSnackServicesPage&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="40" y="80" width="280" height="216" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_PrincipalSnackServicesPage_attrs" value="- search: string&lt;br/&gt;- status: string&lt;br/&gt;- data: { items: any[]; total?: number }&lt;br/&gt;- loading: boolean&lt;br/&gt;- error: string | null&lt;br/&gt;- detail: any&lt;br/&gt;- form: any" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_PrincipalSnackServicesPage">
+          <mxGeometry y="28" width="280" height="122" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_PrincipalSnackServicesPage_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_PrincipalSnackServicesPage">
+          <mxGeometry y="150" width="280" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_PrincipalSnackServicesPage_methods" value="+ fetchData(): Promise&amp;lt;void&amp;gt;&lt;br/&gt;+ openModal(row?: any): Promise&amp;lt;void&amp;gt;&lt;br/&gt;+ render(): JSX.Element" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_PrincipalSnackServicesPage">
+          <mxGeometry y="158" width="280" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackPaymentPage" value="&amp;lt;b&amp;gt;ParentSnackPaymentPage&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="40" y="390" width="280" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackPaymentPage_attrs" value="- invoices: SnackInvoiceItem[]&lt;br/&gt;- overview: ParentSnackOverviewResponse | null&lt;br/&gt;- loading: boolean&lt;br/&gt;- selectedSchedulePeriodId: number | null&lt;br/&gt;- historySearch: string&lt;br/&gt;- onlyActive: boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_ParentSnackPaymentPage">
+          <mxGeometry y="28" width="280" height="106" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackPaymentPage_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_ParentSnackPaymentPage">
+          <mxGeometry y="134" width="280" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackPaymentPage_methods" value="+ fetchAllData(): Promise&amp;lt;void&amp;gt;&lt;br/&gt;+ isLateSnackPaidForWeek(): boolean&lt;br/&gt;+ render(): JSX.Element" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_ParentSnackPaymentPage">
+          <mxGeometry y="142" width="280" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_snackServicesApi" value="&amp;lt;b&amp;gt;snackServicesApi&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="370" y="240" width="320" height="136" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_snackServicesApi_attrs" value="- apiClient: AxiosInstance" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_snackServicesApi">
+          <mxGeometry y="28" width="320" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_snackServicesApi_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_snackServicesApi">
+          <mxGeometry y="54" width="320" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_snackServicesApi_methods" value="+ fetchSnackServices(search?, status?, grade?): Promise&amp;lt;SnackServicesResponse&amp;gt;&lt;br/&gt;+ fetchSnackServicesList(): Promise&amp;lt;SnackServiceListResponse&amp;gt;&lt;br/&gt;+ fetchParentSnackOverview(studentId?): Promise&amp;lt;ParentSnackOverviewResponse&amp;gt;&lt;br/&gt;+ fetchSnackServiceById(id): Promise&amp;lt;SnackServiceDetailResponse&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_snackServicesApi">
+          <mxGeometry y="62" width="320" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesController" value="&amp;lt;b&amp;gt;SnackServicesController&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="740" y="240" width="340" height="152" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesController_attrs" value="- snackService: SnackServicesService" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicesController">
+          <mxGeometry y="28" width="340" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesController_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackServicesController">
+          <mxGeometry y="54" width="340" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesController_methods" value="+ findAll(req, search?, status?, grade?, academicYearId?, allAcademicYears?): Promise&amp;lt;any&amp;gt;&lt;br/&gt;+ getList(req): Promise&amp;lt;any&amp;gt;&lt;br/&gt;+ getParentOverview(userId, studentId?): Promise&amp;lt;ParentSnackOverviewResponse&amp;gt;&lt;br/&gt;+ getDayboarding(): Promise&amp;lt;any&amp;gt;&lt;br/&gt;+ findOne(id, req): Promise&amp;lt;any&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicesController">
+          <mxGeometry y="62" width="340" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesService" value="&amp;lt;b&amp;gt;SnackServicesService&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="1140" y="220" width="350" height="216" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesService_attrs" value="- periodRepo: Repository&amp;lt;SnackServicePeriod&amp;gt;&lt;br/&gt;- regRepo: Repository&amp;lt;SnackRegistration&amp;gt;&lt;br/&gt;- childRepo: Repository&amp;lt;Child&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicesService">
+          <mxGeometry y="28" width="350" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesService_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackServicesService">
+          <mxGeometry y="86" width="350" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesService_methods" value="+ findAll(currentUser?, query?): Promise&amp;lt;any&amp;gt;&lt;br/&gt;+ findOne(id, currentUser?): Promise&amp;lt;any&amp;gt;&lt;br/&gt;+ getParentSnackOverview(parentId, studentId?): Promise&amp;lt;ParentSnackOverviewResponse&amp;gt;&lt;br/&gt;+ getMenuScheduleForPeriod(periodId, periodName?): Promise&amp;lt;SnackMenuDayItem[]&amp;gt;&lt;br/&gt;+ getDefaultSnackMenuSchedule(periodName?): SnackMenuDayItem[]&lt;br/&gt;+ isNutritionistOnly(user?): boolean&lt;br/&gt;- options(id): Promise&amp;lt;any&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicesService">
+          <mxGeometry y="94" width="350" height="122" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_IRepository" value="&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;b&amp;gt;IRepository&amp;lt;T&amp;gt;&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="1170" y="60" width="280" height="146" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_IRepository_attrs" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_IRepository">
+          <mxGeometry y="40" width="280" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_IRepository_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_IRepository">
+          <mxGeometry y="64" width="280" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_IRepository_methods" value="+ find(options?): Promise&amp;lt;T[]&amp;gt;&lt;br/&gt;+ findOne(options?): Promise&amp;lt;T | null&amp;gt;&lt;br/&gt;+ count(options?): Promise&amp;lt;number&amp;gt;&lt;br/&gt;+ query(query: string, parameters?): Promise&amp;lt;any&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_IRepository">
+          <mxGeometry y="72" width="280" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicePeriod" value="&amp;lt;b&amp;gt;SnackServicePeriod&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="1560" y="100" width="270" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicePeriod_attrs" value="+ id: number&lt;br/&gt;+ name: string&lt;br/&gt;+ startDate: string&lt;br/&gt;+ endDate: string&lt;br/&gt;+ registrationDeadline: string&lt;br/&gt;+ feeAmount: number&lt;br/&gt;+ status: string&lt;br/&gt;+ weekNumber?: number&lt;br/&gt;+ isPaymentLocked: boolean&lt;br/&gt;+ registrations: SnackRegistration[]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicePeriod">
+          <mxGeometry y="28" width="270" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicePeriod_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackServicePeriod">
+          <mxGeometry y="198" width="270" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicePeriod_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicePeriod">
+          <mxGeometry y="206" width="270" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackRegistration" value="&amp;lt;b&amp;gt;SnackRegistration&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="1560" y="420" width="270" height="246" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackRegistration_attrs" value="+ id: number&lt;br/&gt;+ periodId: number&lt;br/&gt;+ studentId: number&lt;br/&gt;+ parentId: number&lt;br/&gt;+ status: string&lt;br/&gt;+ registeredAt: Date&lt;br/&gt;+ lastRemindedAt?: Date&lt;br/&gt;+ reminderCount: number&lt;br/&gt;+ period: SnackServicePeriod&lt;br/&gt;+ student: Child&lt;br/&gt;+ parent: User" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackRegistration">
+          <mxGeometry y="28" width="270" height="186" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackRegistration_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackRegistration">
+          <mxGeometry y="214" width="270" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackRegistration_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackRegistration">
+          <mxGeometry y="222" width="270" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_Child" value="&amp;lt;b&amp;gt;Child&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="1560" y="750" width="270" height="246" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_Child_attrs" value="+ id: number&lt;br/&gt;+ classId: number&lt;br/&gt;+ studentCode: string&lt;br/&gt;+ fullName: string&lt;br/&gt;+ dateOfBirth: string&lt;br/&gt;+ gender: string&lt;br/&gt;+ avatar: string&lt;br/&gt;+ status: string&lt;br/&gt;+ createdAt: Date&lt;br/&gt;+ class: ClassEntity&lt;br/&gt;+ allergies: ChildAllergy[]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_Child">
+          <mxGeometry y="28" width="270" height="186" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_Child_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_Child">
+          <mxGeometry y="214" width="270" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_Child_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_Child">
+          <mxGeometry y="222" width="270" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesResponse" value="&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;b&amp;gt;SnackServicesResponse&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="370" y="70" width="260" height="162" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesResponse_attrs" value="+ success: boolean&lt;br/&gt;+ totalCount: number&lt;br/&gt;+ data: SnackServiceItem[]&lt;br/&gt;+ summary: SnackServicesSummary&lt;br/&gt;+ hidePaymentInfo?: boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicesResponse">
+          <mxGeometry y="40" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesResponse_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackServicesResponse">
+          <mxGeometry y="130" width="260" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServicesResponse_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServicesResponse">
+          <mxGeometry y="138" width="260" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServiceItem" value="&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;b&amp;gt;SnackServiceItem&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="40" y="680" width="280" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServiceItem_attrs" value="+ id: string&lt;br/&gt;+ name: string&lt;br/&gt;+ serviceType: string&lt;br/&gt;+ billingCycle: string&lt;br/&gt;+ pricePerUnit: number&lt;br/&gt;+ weeklyPrice?: number&lt;br/&gt;+ feeAmount?: number&lt;br/&gt;+ weekNumber?: number | null&lt;br/&gt;+ startDate?: string&lt;br/&gt;+ endDate?: string&lt;br/&gt;+ registrationPeriod: string&lt;br/&gt;+ registeredCount: number&lt;br/&gt;+ status: string&lt;br/&gt;+ statusLabel: string&lt;br/&gt;+ isActive: boolean&lt;br/&gt;+ paidCount?: number&lt;br/&gt;+ totalRevenue?: number&lt;br/&gt;+ menuSchedule?: SnackMenuDayItem[]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServiceItem">
+          <mxGeometry y="40" width="280" height="298" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServiceItem_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackServiceItem">
+          <mxGeometry y="338" width="280" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackServiceItem_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackServiceItem">
+          <mxGeometry y="346" width="280" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackOverviewResponse" value="&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;b&amp;gt;ParentSnackOverviewResponse&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="370" y="490" width="290" height="178" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackOverviewResponse_attrs" value="+ success: boolean&lt;br/&gt;+ student: object | null&lt;br/&gt;+ hasPaidAnyPackage: boolean&lt;br/&gt;+ activeSchedule: SnackMenuDayItem[]&lt;br/&gt;+ paidPackageName: string | null&lt;br/&gt;+ publishedPackages: ParentSnackPackageItem[]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_ParentSnackOverviewResponse">
+          <mxGeometry y="40" width="290" height="106" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackOverviewResponse_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_ParentSnackOverviewResponse">
+          <mxGeometry y="146" width="290" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_ParentSnackOverviewResponse_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_ParentSnackOverviewResponse">
+          <mxGeometry y="154" width="290" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackMenuDayItem" value="&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;b&amp;gt;SnackMenuDayItem&amp;lt;/b&amp;gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontFamily=Arial;fontSize=12;fontColor=#000000;" vertex="1" parent="p1_1">
+          <mxGeometry x="370" y="710" width="290" height="258" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackMenuDayItem_attrs" value="+ dayOfWeek: number&lt;br/&gt;+ dayLabel: string&lt;br/&gt;+ servingTime: string&lt;br/&gt;+ mainDish: string&lt;br/&gt;+ drinkItem: string&lt;br/&gt;+ fruitOrSide: string&lt;br/&gt;+ caloriesKcal: number&lt;br/&gt;+ proteinG: number&lt;br/&gt;+ calciumMg: number&lt;br/&gt;+ allergenTags: string[]&lt;br/&gt;+ nutritionNote?: string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackMenuDayItem">
+          <mxGeometry y="40" width="290" height="186" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackMenuDayItem_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" vertex="1" parent="cls_SnackMenuDayItem">
+          <mxGeometry y="226" width="290" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_SnackMenuDayItem_methods" value="&amp;nbsp;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;spacingTop=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Arial;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_SnackMenuDayItem">
+          <mxGeometry y="234" width="290" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_1" value="uses" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_PrincipalSnackServicesPage" target="cls_snackServicesApi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_2" value="uses" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_ParentSnackPaymentPage" target="cls_snackServicesApi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_3" value="HTTP REST /snack-services" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_snackServicesApi" target="cls_SnackServicesController">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_4" value="delegates to" style="dashed=0;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicesController" target="cls_SnackServicesService">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_5" value="injects TypeORM repos" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicesService" target="cls_IRepository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_6" value="queries" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicesService" target="cls_SnackServicePeriod">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_7" value="queries" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicesService" target="cls_SnackRegistration">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_8" value="queries" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicesService" target="cls_Child">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_period_reg" value="1       0..*" style="startArrow=diamond;startFill=1;startSize=14;endArrow=open;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicePeriod" target="cls_SnackRegistration">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_reg_child" value="0..*       1" style="dashed=0;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackRegistration" target="cls_Child">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dto_1" value="returns" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_snackServicesApi" target="cls_SnackServicesResponse">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dto_2" value="returns" style="dashed=1;endArrow=open;endFill=0;endSize=8;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_snackServicesApi" target="cls_ParentSnackOverviewResponse">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dto_3" value="has 1..*" style="startArrow=diamond;startFill=0;startSize=14;endArrow=open;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_ParentSnackOverviewResponse" target="cls_SnackMenuDayItem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dto_4" value="has 0..*" style="startArrow=diamond;startFill=0;startSize=14;endArrow=open;strokeColor=#000000;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p1_1" source="cls_SnackServicesResponse" target="cls_SnackServiceItem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-2" name="Sequence Diagram">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="2350" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="p2_0" />
+        <mxCell id="p2_1" parent="p2_0" />
+        <mxCell id="p2_title" value="UML Sequence Diagram: View Snack Services (School Manager &amp;amp; Parent Unified Flow)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;fontFamily=Arial;fontColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="50" y="20" width="2000" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="part_sm" value="School Manager" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;participant=umlActor;" vertex="1" parent="p2_1">
+          <mxGeometry x="60" y="70" width="100" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_parent" value="Parent" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;participant=umlActor;" vertex="1" parent="p2_1">
+          <mxGeometry x="210" y="70" width="100" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_page_sm" value=":PrincipalSnackServicesPage" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="360" y="70" width="170" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_page_parent" value=":ParentSnackPaymentPage" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="560" y="70" width="170" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_api" value=":snackServicesApi" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="760" y="70" width="140" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_ctrl" value=":SnackServicesController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="930" y="70" width="170" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_svc" value=":SnackServicesService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="1130" y="70" width="170" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_repo_period" value=":SnackServicePeriodRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="1330" y="70" width="190" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_repo_reg" value=":SnackRegistrationRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="1550" y="70" width="180" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_repo_child" value=":ChildRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="1760" y="70" width="140" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="part_db" value="database PostgreSQL" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Arial;fontSize=12;fontColor=#000000;fillColor=#FFFFFF;strokeColor=#000000;participant=umlDatabase;" vertex="1" parent="p2_1">
+          <mxGeometry x="1930" y="70" width="140" height="2180" as="geometry" />
+        </mxCell>
+        <mxCell id="sec_sm" value="[PART 1: SCHOOL MANAGER - VIEW SNACK SERVICES &amp;amp; DETAILS]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Arial;fontColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="60" y="120" width="500" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="act_page_sm1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_page_sm">
+          <mxGeometry x="80" y="90" width="10" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="act_api1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_api">
+          <mxGeometry x="65" y="130" width="10" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_ctrl">
+          <mxGeometry x="80" y="170" width="10" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="act_svc1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_svc">
+          <mxGeometry x="80" y="210" width="10" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="act_r_p1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_repo_period">
+          <mxGeometry x="90" y="250" width="10" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_db">
+          <mxGeometry x="65" y="290" width="10" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="act_r_c1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_repo_child">
+          <mxGeometry x="65" y="410" width="10" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_db">
+          <mxGeometry x="65" y="450" width="10" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="m1" value="1: Open /snack-services page / Trigger fetchData()" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="160" as="sourcePoint" />
+            <mxPoint x="445" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="2: fetchSnackServices(search, status, grade)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="445" y="200" as="sourcePoint" />
+            <mxPoint x="830" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" value="3: GET /snack-services?search=&amp;amp;status=&amp;amp;academicYearId=" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="240" as="sourcePoint" />
+            <mxPoint x="1015" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" value="4: findAll(currentUser, query)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="280" as="sourcePoint" />
+            <mxPoint x="1215" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5" value="5: periodRepo.find({ where, relations: ['registrations'], order: { startDate: 'DESC' } })" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="320" as="sourcePoint" />
+            <mxPoint x="1425" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" value="6: Execute query (SELECT * FROM snack_service_periods ...)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1425" y="360" as="sourcePoint" />
+            <mxPoint x="2000" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" value="7: Return snack service period records &amp;amp; registrations" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2000" y="410" as="sourcePoint" />
+            <mxPoint x="1425" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" value="8: Return periods array" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1425" y="440" as="sourcePoint" />
+            <mxPoint x="1215" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" value="9: childRepo.count({ where: { id: currentStudent(schoolId) } })" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="480" as="sourcePoint" />
+            <mxPoint x="1830" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10" value="10: Execute query (SELECT COUNT(*) FROM students ...)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1830" y="520" as="sourcePoint" />
+            <mxPoint x="2000" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m11" value="11: Return total active students count" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2000" y="570" as="sourcePoint" />
+            <mxPoint x="1830" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m12" value="12: Return totalStudents" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1830" y="600" as="sourcePoint" />
+            <mxPoint x="1215" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13" value="13: Map items, calculate statistics (activeBatches, studentParticipation, revenue)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="640" as="sourcePoint" />
+            <mxPoint x="1215" y="665" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1250" y="640" />
+              <mxPoint x="1250" y="665" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m14" value="14: Return { success: true, data: items, summary, totalCount }" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="710" as="sourcePoint" />
+            <mxPoint x="1015" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m15" value="15: HTTP 200 OK (SnackServicesResponse JSON)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="750" as="sourcePoint" />
+            <mxPoint x="830" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m16" value="16: Return SnackServicesResponse" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="790" as="sourcePoint" />
+            <mxPoint x="445" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m17" value="17: Display snack service periods, KPI summary cards &amp;amp; status tags" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="445" y="830" as="sourcePoint" />
+            <mxPoint x="110" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="frame_opt_detail" value="opt [School Manager views package detail modal]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=70;height=22;fontFamily=Arial;fontSize=11;fontColor=#000000;fillColor=none;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="50" y="870" width="1960" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="act_page_sm2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_page_sm">
+          <mxGeometry x="80" y="840" width="10" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="act_api2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_api">
+          <mxGeometry x="65" y="880" width="10" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_ctrl">
+          <mxGeometry x="80" y="920" width="10" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="act_svc2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_svc">
+          <mxGeometry x="80" y="960" width="10" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="act_r_p2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_repo_period">
+          <mxGeometry x="90" y="1000" width="10" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_db">
+          <mxGeometry x="65" y="1030" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m18" value="18: Click view detail icon (openModal(row))" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="910" as="sourcePoint" />
+            <mxPoint x="445" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m19" value="19: fetchSnackServiceById(id)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="445" y="950" as="sourcePoint" />
+            <mxPoint x="830" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m20" value="20: GET /snack-services/:id" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="990" as="sourcePoint" />
+            <mxPoint x="1015" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m21" value="21: findOne(id, currentUser)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="1030" as="sourcePoint" />
+            <mxPoint x="1215" y="1030" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m22" value="22: periodRepo.findOne({ where: { id }, relations: ['registrations.student.allergies', ...] })" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="1070" as="sourcePoint" />
+            <mxPoint x="1425" y="1070" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m23" value="23: Execute query (SELECT period &amp;amp; registered students with allergens)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1425" y="1100" as="sourcePoint" />
+            <mxPoint x="2000" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m24" value="24: Return period &amp;amp; registration data" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2000" y="1130" as="sourcePoint" />
+            <mxPoint x="1425" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m25" value="25: Return period entity" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1425" y="1150" as="sourcePoint" />
+            <mxPoint x="1215" y="1150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m26" value="26: Return { success: true, ...periodData }" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="1170" as="sourcePoint" />
+            <mxPoint x="1015" y="1170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m27" value="27: HTTP 200 OK (SnackServiceDetailResponse)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="1210" as="sourcePoint" />
+            <mxPoint x="830" y="1210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m28" value="28: Return detail payload" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1250" as="sourcePoint" />
+            <mxPoint x="445" y="1250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m29" value="29: Display Detail Modal (enrolled students, payment status, allergy warnings)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="445" y="1280" as="sourcePoint" />
+            <mxPoint x="110" y="1280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sec_parent" value="[PART 2: PARENT - VIEW PUBLISHED SNACK SERVICES &amp;amp; WEEKLY MENU OVERVIEW]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontFamily=Arial;fontColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="60" y="1340" width="600" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="act_page_p1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_page_parent">
+          <mxGeometry x="80" y="1310" width="10" height="810" as="geometry" />
+        </mxCell>
+        <mxCell id="act_api3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_api">
+          <mxGeometry x="65" y="1350" width="10" height="730" as="geometry" />
+        </mxCell>
+        <mxCell id="act_ctrl3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_ctrl">
+          <mxGeometry x="80" y="1390" width="10" height="650" as="geometry" />
+        </mxCell>
+        <mxCell id="act_svc3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_svc">
+          <mxGeometry x="80" y="1430" width="10" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="act_r_p3" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_repo_period">
+          <mxGeometry x="90" y="1470" width="10" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db4" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_db">
+          <mxGeometry x="65" y="1500" width="10" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="act_r_c2" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_repo_child">
+          <mxGeometry x="65" y="1600" width="10" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db5" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_db">
+          <mxGeometry x="65" y="1630" width="10" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="m30" value="30: Navigate to Parent Snack Portal / Payment Overview (fetchAllData())" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="1380" as="sourcePoint" />
+            <mxPoint x="645" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m31" value="31: fetchParentSnackOverview(effectiveChildId)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="1420" as="sourcePoint" />
+            <mxPoint x="830" y="1420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m32" value="32: GET /snack-services/parent-overview?studentId=" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1460" as="sourcePoint" />
+            <mxPoint x="1015" y="1460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m33" value="33: getParentSnackOverview(userId, studentId)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="1500" as="sourcePoint" />
+            <mxPoint x="1215" y="1500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m34" value="34: periodRepo.find({ order: { id: 'DESC' } })" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="1540" as="sourcePoint" />
+            <mxPoint x="1425" y="1540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m35" value="35: Execute query (SELECT * FROM snack_service_periods ORDER BY id DESC)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1425" y="1570" as="sourcePoint" />
+            <mxPoint x="2000" y="1570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m36" value="36: Return all snack periods" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2000" y="1610" as="sourcePoint" />
+            <mxPoint x="1425" y="1610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m37" value="37: Return allPeriods" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1425" y="1630" as="sourcePoint" />
+            <mxPoint x="1215" y="1630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m38" value="38: childRepo.findOne({ where: { id: studentId }, relations: ['class'] })" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="1670" as="sourcePoint" />
+            <mxPoint x="1830" y="1670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m39" value="39: Execute query (SELECT student info with class)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1830" y="1700" as="sourcePoint" />
+            <mxPoint x="2000" y="1700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m40" value="40: Return child entity" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2000" y="1730" as="sourcePoint" />
+            <mxPoint x="1830" y="1730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m41" value="41: Return child" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1830" y="1750" as="sourcePoint" />
+            <mxPoint x="1215" y="1750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="frame_alt_child" value="alt [Child found &amp;amp; registered]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=70;height=22;fontFamily=Arial;fontSize=11;fontColor=#000000;fillColor=none;strokeColor=#000000;" vertex="1" parent="p2_1">
+          <mxGeometry x="50" y="1780" width="1960" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="div_alt_child" value="[else: Child not found / Parent has no child]" style="line;strokeWidth=1;dashed=1;labelPosition=center;verticalLabelPosition=top;align=left;spacingLeft=10;fontFamily=Arial;fontSize=11;fontColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="frame_alt_child">
+          <mxGeometry y="160" width="1960" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="act_r_reg1" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_repo_reg">
+          <mxGeometry x="85" y="1750" width="10" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="act_db6" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="part_db">
+          <mxGeometry x="65" y="1780" width="10" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="m42" value="42: regRepo.find({ where: { studentId: child.id }, relations: ['period', 'student'] })" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="1820" as="sourcePoint" />
+            <mxPoint x="1640" y="1820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m43" value="43: Execute query (SELECT registrations for child)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1640" y="1850" as="sourcePoint" />
+            <mxPoint x="2000" y="1850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m44" value="44: Return snack registrations" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2000" y="1880" as="sourcePoint" />
+            <mxPoint x="1640" y="1880" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m45" value="45: Return registrations array" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1640" y="1900" as="sourcePoint" />
+            <mxPoint x="1215" y="1900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m46" value="46: Verify hasPaidAnyPackage, load menu schedule (getMenuScheduleForPeriod)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="1920" as="sourcePoint" />
+            <mxPoint x="1215" y="1945" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1250" y="1920" />
+              <mxPoint x="1250" y="1945" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m47" value="47: Load default preview menu schedule, student: null, hasPaidAnyPackage: false" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;endFill=1;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="2000" as="sourcePoint" />
+            <mxPoint x="1215" y="2025" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1250" y="2000" />
+              <mxPoint x="1250" y="2025" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m48" value="48: Return ParentSnackOverviewResponse payload" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="2070" as="sourcePoint" />
+            <mxPoint x="1015" y="2070" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m49" value="49: HTTP 200 OK (ParentSnackOverviewResponse JSON)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="2100" as="sourcePoint" />
+            <mxPoint x="830" y="2100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m50" value="50: Return ParentSnackOverviewResponse" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="2130" as="sourcePoint" />
+            <mxPoint x="645" y="2130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m51" value="51: Display published snack packages, payment fee status &amp;amp; weekly snack menu schedule" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;edgeStyle=straight;curved=0;rounded=0;strokeColor=#000000;fontFamily=Arial;fontSize=11;fontColor=#000000;" edge="1" parent="p2_1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="2160" as="sourcePoint" />
+            <mxPoint x="260" y="2160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

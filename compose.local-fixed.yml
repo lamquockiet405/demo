@@ -1,0 +1,45 @@
+name: kidmeal-local-fixed
+
+services:
+  web:
+    image: caddy:2-alpine
+    environment:
+      PUBLIC_HOSTNAME: ${PUBLIC_HOSTNAME:?Set PUBLIC_HOSTNAME in .local-fixed/deploy.env}
+      DEMO_PASSWORD_HASH: ${DEMO_PASSWORD_HASH:?Run node deploy/local-fixed/prepare.cjs}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/local-fixed/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - application
+    restart: unless-stopped
+
+  duckdns:
+    image: alpine:3.20
+    environment:
+      DUCKDNS_SUBDOMAIN: ${DUCKDNS_SUBDOMAIN:?Set DUCKDNS_SUBDOMAIN in .local-fixed/deploy.env}
+      DUCKDNS_TOKEN: ${DUCKDNS_TOKEN:?Set DUCKDNS_TOKEN in .local-fixed/deploy.env}
+      DUCKDNS_IPV4: ${DUCKDNS_IPV4:?Set DUCKDNS_IPV4 to the router WAN IPv4}
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          response=$$(wget -qO- "https://www.duckdns.org/update?domains=$$DUCKDNS_SUBDOMAIN&token=$$DUCKDNS_TOKEN&ip=$$DUCKDNS_IPV4")
+          if [ "$$response" != "OK" ]; then echo "DuckDNS update failed" >&2; fi
+          sleep 300
+        done
+    restart: unless-stopped
+
+networks:
+  application:
+    external: true
+    name: kidmeal-test_default
+
+volumes:
+  caddy_data:
+  caddy_config:

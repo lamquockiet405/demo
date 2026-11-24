@@ -1,0 +1,19 @@
+name: kidmeal-local-demo
+
+services:
+  web:
+    image: caddy:2-alpine
+    environment:
+      DEMO_PASSWORD_HASH: ${DEMO_PASSWORD_HASH:?Run node deploy/oracle-test/prepare.cjs}
+    volumes:
+      - ./deploy/local-demo/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "127.0.0.1:5180:80"
+    networks:
+      - application
+    restart: unless-stopped
+
+networks:
+  application:
+    external: true
+    name: kidmeal-oracle-test_default

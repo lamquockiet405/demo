@@ -1,4 +1,4 @@
-{
+  {
   "source": "Quyết định số 3958/QĐ-BYT ngày 25/12/2025 của Bộ Y tế — Phụ lục 7: Thành phần dinh dưỡng của một số thực phẩm thông dụng (trong 100g thực phẩm ăn được), trang 11–14 (docs/ban_du_thao.pdf).",
   "basis": "100g edible portion",
   "nullMeaning": "Empty nutrient cells in the source table are stored as null in this file so unknown values are distinguishable from measured 0.",
