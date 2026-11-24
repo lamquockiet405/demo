@@ -23,8 +23,8 @@ export function validateLunchRice(
   const rice = lunch.filter(dish => dish?.category?.code === 'RICE');
   const mains = lunch.filter(dish => dish?.category?.code === 'MAIN');
   if (rice.length !== 1) throw new BadRequestException('Mỗi bữa trưa phải có đúng một món cơm.');
-  if (friday && !isFriedRice(rice[0].name)) {
-    throw new BadRequestException('Bữa trưa thứ Sáu phải có cơm chiên.');
+  if (friday && (!isFriedRice(rice[0].name) || mains.length > 0)) {
+    throw new BadRequestException('Bữa trưa thứ Sáu phải có cơm chiên và không kèm món mặn.');
   }
   if (!friday && (isFriedRice(rice[0].name) || mains.length === 0)) {
     throw new BadRequestException('Bữa trưa các ngày khác phải có cơm thường và món mặn.');

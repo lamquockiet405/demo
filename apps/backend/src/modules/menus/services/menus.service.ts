@@ -2004,21 +2004,8 @@ export class MenusService implements OnModuleInit {
       );
     }
 
-    const isPlainRice = (name: string) => {
-      const lower = name.toLowerCase();
-      return (
-        lower.includes("cơm trắng") ||
-        (lower.includes("cơm") &&
-          !lower.includes("chiên") &&
-          !lower.includes("sườn") &&
-          !lower.includes("tấm") &&
-          !lower.includes("thịt") &&
-          !lower.includes("hải sản") &&
-          !lower.includes("dương châu"))
-      );
-    };
-    const plainRicePool = dishPool.RICE.filter((dish) => isPlainRice(dish.name));
-    const friedRicePool = dishPool.RICE.filter((dish) => !isPlainRice(dish.name));
+    const plainRicePool = dishPool.RICE.filter((dish) => !isFriedRice(dish.name));
+    const friedRicePool = dishPool.RICE.filter((dish) => isFriedRice(dish.name));
     for (let index = 0; index < daysCount; index++) {
       if (isFriday(weekStartDate, index)) {
         if (!friedRicePool.length)
@@ -2244,8 +2231,8 @@ export class MenusService implements OnModuleInit {
             attempt > 20,
           );
           if (riceDish) {
-            // Định lượng cơm mầm non chuẩn: 110g (ngày thường) hoặc 120g (thứ 6 cơm chiên)
-            const riceServing = fridayLunch ? 120 : 110;
+            // Định lượng cơm mầm non chuẩn: 110g (ngày thường) hoặc 165g (thứ 6 cơm chiên đầy đủ đạm/rau, không kèm món mặn)
+            const riceServing = fridayLunch ? 165 : 110;
             const riceRatio = riceServing / (riceDish.portionSizeG || 100);
             dayDishes.push({
               dishId: String(riceDish.id),
@@ -2261,44 +2248,45 @@ export class MenusService implements OnModuleInit {
             });
           }
 
-          // Món chính (MAIN) ~60-144 Kcal (tuyệt đối không lặp lại trong tuần & không vượt chu kỳ 4 tuần)
-          // Ưu tiên các món có chất béo lành mạnh (món xào, chiên, rim, kho trứng... có fatG >= 4.8g và tỷ lệ béo/đạm tốt) để đảm bảo L: 25–35%
-          // Thứ Sáu: dùng khẩu phần nhẹ 40g phối hợp cùng cơm chiên để vừa bổ sung chất béo tốt mà không bị dư đạm
-          const tier1Mains = dishPool.MAIN.filter(
-            (d) => (d.fatG || 0) >= 5.5 && ((d.fatG || 0) / Math.max(0.1, d.proteinG || 0)) >= 0.60,
-          );
-          const tier2Mains = dishPool.MAIN.filter(
-            (d) => (d.fatG || 0) >= 4.8,
-          );
-          const effectiveMainPool =
-            tier1Mains.length >= 5
-              ? tier1Mains
-              : tier2Mains.length > 0
-                ? tier2Mains
-                : dishPool.MAIN;
-          const mainServing = fridayLunch ? 40 : 95;
-          mainDish = this.pickDish(
-            shuffleArray(effectiveMainPool),
-            usedDishIdsThisWeek,
-            previousDayDishIds,
-            recentDishIds,
-            cycleExclusionDishIds,
-            attempt > 35,
-          );
-          if (mainDish) {
-            const mainRatio = mainServing / (mainDish.portionSizeG || 100);
-            dayDishes.push({
-              dishId: String(mainDish.id),
-              dishName: mainDish.name,
-              dishType: "MAIN",
-              mealTime: "LUNCH",
-              servingOrder: 3,
-              portionSizeG: mainServing,
-              plannedCalories: Math.round(mainDish.energyKcal * mainRatio * 10) / 10,
-              proteinG: Math.round(mainDish.proteinG * mainRatio * 10) / 10,
-              fatG: Math.round(mainDish.fatG * mainRatio * 10) / 10,
-              carbG: Math.round(mainDish.carbG * mainRatio * 10) / 10,
-            });
+          // Món chính (MAIN) ~60-144 Kcal: Chỉ áp dụng từ Thứ Hai đến Thứ Năm.
+          // Thứ Sáu ăn Cơm chiên (đã có đủ thịt, tôm, trứng, chả lụa/lạp xưởng, rau củ) + Canh + Tráng miệng, KHÔNG có món mặn.
+          if (!fridayLunch) {
+            const tier1Mains = dishPool.MAIN.filter(
+              (d) => (d.fatG || 0) >= 5.5 && ((d.fatG || 0) / Math.max(0.1, d.proteinG || 0)) >= 0.60,
+            );
+            const tier2Mains = dishPool.MAIN.filter(
+              (d) => (d.fatG || 0) >= 4.8,
+            );
+            const effectiveMainPool =
+              tier1Mains.length >= 5
+                ? tier1Mains
+                : tier2Mains.length > 0
+                  ? tier2Mains
+                  : dishPool.MAIN;
+            const mainServing = 95;
+            mainDish = this.pickDish(
+              shuffleArray(effectiveMainPool),
+              usedDishIdsThisWeek,
+              previousDayDishIds,
+              recentDishIds,
+              cycleExclusionDishIds,
+              attempt > 35,
+            );
+            if (mainDish) {
+              const mainRatio = mainServing / (mainDish.portionSizeG || 100);
+              dayDishes.push({
+                dishId: String(mainDish.id),
+                dishName: mainDish.name,
+                dishType: "MAIN",
+                mealTime: "LUNCH",
+                servingOrder: 3,
+                portionSizeG: mainServing,
+                plannedCalories: Math.round(mainDish.energyKcal * mainRatio * 10) / 10,
+                proteinG: Math.round(mainDish.proteinG * mainRatio * 10) / 10,
+                fatG: Math.round(mainDish.fatG * mainRatio * 10) / 10,
+                carbG: Math.round(mainDish.carbG * mainRatio * 10) / 10,
+              });
+            }
           }
 
           // Canh súp (SOUP) ~25-105 Kcal
@@ -2904,11 +2892,11 @@ export class MenusService implements OnModuleInit {
         let bestFallbackCombo: [number, number, number, number, number] | null = null;
         let minViolation = Infinity;
 
-        const mainRange = fridayLunch
-          ? [15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
-          : (mainLunchDish ? [25, 35, 45, 55, 65, 75, 85, 95, 105, 115] : [0]);
+        const mainRange = !fridayLunch && mainLunchDish
+          ? [25, 35, 45, 55, 65, 75, 85, 95, 105, 115]
+          : [0];
         const riceRange = fridayLunch
-          ? [110, 115, 120, 125, 130, 135, 140, 145, 150]
+          ? [120, 135, 150, 165, 180, 195, 210, 225]
           : [75, 85, 95, 105, 115, 125, 135];
         const soupRange = soupLunchDish ? [70, 85, 100, 115] : [0];
         const snackRange = snackSolidDish ? [30, 40, 50] : [0];
