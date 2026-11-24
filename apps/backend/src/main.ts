@@ -8,8 +8,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { existsSync, statSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 
-async function bootstrap() {
-  const logger = new Logger('Bootstrap');
+export async function createConfiguredNestApp() {
   const app = await NestFactory.create(AppModule);
 
   // Global prefix
@@ -23,7 +22,7 @@ async function bootstrap() {
   app.enableCors({
     origin: (origin, callback) => {
       // Requests from mobile apps and command-line clients may have no Origin.
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
         callback(null, true);
       } else {
         callback(null, false);
@@ -102,10 +101,18 @@ async function bootstrap() {
     });
   }
 
+  return app;
+}
+
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  const app = await createConfiguredNestApp();
   const port = process.env.PORT || 3000;
   await app.listen(port);
   logger.log(`🚀 KidMeal Backend Server is running on: http://localhost:${port}/api/v1`);
   logger.log(`📚 Swagger API Docs available at: http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+if (!process.env.VERCEL) {
+  bootstrap();
+}
