@@ -50,6 +50,8 @@ tmp/
 Thumbs.db
 
 .docker-test/
+.oracle-test/
+.local-fixed/
 .vercel/
 database/backups/
 docs/database-snapshot/
@@ -85,6 +87,7 @@ nginx/ssl/*.pem
 /database.zip
 /database*.zip
 /kidmeal_full_*.sql
+/kidmeal_neon.sql
 /dishes_*.csv
 /dishes_*.tsv
 /check_fail.py

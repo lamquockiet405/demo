@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: kidmeal
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/auth/tenants
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '10000'
+      - key: POSTGRES_HOST
+        sync: false
+      - key: POSTGRES_PORT
+        value: '5432'
+      - key: POSTGRES_DB
+        value: kidmeal_prod
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: POSTGRES_SSL
+        value: 'true'
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true

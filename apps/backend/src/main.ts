@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { existsSync, statSync } from 'node:fs';
+import { join, resolve, sep } from 'node:path';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -14,13 +16,17 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   // Enable CORS
+  const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, postman) or any localhost/docker origin
-      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      // Requests from mobile apps and command-line clients may have no Origin.
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true);
+        callback(null, false);
       }
     },
     credentials: true,
@@ -78,6 +84,23 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
   SwaggerModule.setup('api-docs', app, document);
+
+  // The single-container Render image also serves the Vite build on this port.
+  if (process.env.FRONTEND_DIST_DIR) {
+    const frontendDir = resolve(process.env.FRONTEND_DIST_DIR);
+    const indexFile = join(frontendDir, 'index.html');
+    if (!existsSync(indexFile)) throw new Error(`Frontend build not found: ${indexFile}`);
+    app.use((req: any, res: any, next: () => void) => {
+      if (req.method !== 'GET' || /^\/(api(?:\/|$)|api-docs(?:\/|$)|socket\.io(?:\/|$))/.test(req.path)) {
+        return next();
+      }
+      const requestedFile = resolve(frontendDir, `.${req.path}`);
+      const isAsset = requestedFile.startsWith(`${frontendDir}${sep}`) &&
+        existsSync(requestedFile) && statSync(requestedFile).isFile();
+      res.setHeader('Cache-Control', isAsset ? 'public, max-age=3600' : 'no-store');
+      return res.sendFile(isAsset ? requestedFile : indexFile);
+    });
+  }
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

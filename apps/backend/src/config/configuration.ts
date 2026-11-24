@@ -1,4 +1,18 @@
-export default () => ({
+export default () => {
+  if (process.env.NODE_ENV === 'production') {
+    for (const name of [
+      'POSTGRES_HOST',
+      'POSTGRES_DB',
+      'POSTGRES_USER',
+      'POSTGRES_PASSWORD',
+      'JWT_SECRET',
+      'JWT_REFRESH_SECRET',
+    ]) {
+      if (!process.env[name]) throw new Error(`Missing required production setting: ${name}`);
+    }
+  }
+
+  return ({
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 3000,
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
@@ -43,8 +57,9 @@ export default () => ({
     host: process.env.MAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.MAIL_PORT, 10) || 587,
     secure: process.env.MAIL_SECURE === 'true',
-    user: process.env.MAIL_USER || 'lamquockiet240321@gmail.com',
-    pass: process.env.MAIL_PASS || 'twtyxprdxlkrjpye',
+    user: process.env.MAIL_USER || (process.env.NODE_ENV === 'production' ? '' : 'lamquockiet240321@gmail.com'),
+    pass: process.env.MAIL_PASS || (process.env.NODE_ENV === 'production' ? '' : 'twtyxprdxlkrjpye'),
     from: process.env.MAIL_FROM || 'KidMeal <lamquockiet240321@gmail.com>',
   },
-});
+  });
+};

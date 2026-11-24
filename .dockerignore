@@ -17,6 +17,7 @@ tmp
 .vscode
 .idea
 .docker-test
+.oracle-test
 *-test-results.json
 TEST-REPORT.md
 database/backups

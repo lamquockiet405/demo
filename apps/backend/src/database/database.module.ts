@@ -28,7 +28,7 @@ pg.types.setTypeParser(1082, (val: string) => val);
           options: '-c timezone=Asia/Ho_Chi_Minh',
         },
         logging: configService.get<string>('nodeEnv') === 'development' ? ['error', 'warn'] : false,
-        ssl: false,
+        ssl: process.env.POSTGRES_SSL === 'true',
       }),
     }),
   ],
