@@ -522,7 +522,7 @@ export const ParentPortalTopNav: React.FC<ParentPortalTopNavProps> = ({
                 )}
               </div>
 
-              <UserHeaderDropdown customSubtitle="Phụ huynh" />
+              <UserHeaderDropdown customSubtitle={translateText("Phụ huynh")} />
             </div>
           </div>
         </div>

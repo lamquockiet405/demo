@@ -1,3 +1,4 @@
+import { useLanguage } from '../../../core/i18n/useLanguage';
 import type { LucideIcon } from 'lucide-react';
 import { t as translateText } from '../../../core/i18n/language';
 
@@ -17,6 +18,7 @@ const tones = {
 };
 
 export function KitchenSummaryCards({ metrics }: { metrics: KitchenSummaryMetric[] }) {
+  useLanguage();
   return (
     <div className="grid grid-cols-2 gap-3 mb-5 xl:grid-cols-4" aria-label={translateText('Thống kê tổng quan')}>
       {metrics.map(({ label, value, icon: Icon, tone = 'accent' }) => (

@@ -337,9 +337,7 @@ export const DishDetailModal: React.FC<DishDetailModalProps> = ({
                                     ⚠ {rcAllergens.join(", ")}
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                                    An toàn
-                                  </span>
+                                  <span className="inline-flex items-center rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">{translateText("An toàn")}</span>
                                 )}
                               </td>
                               <td className="py-2 px-4 text-right font-medium text-slate-600">

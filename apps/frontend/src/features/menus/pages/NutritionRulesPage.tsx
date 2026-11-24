@@ -560,9 +560,7 @@ export const NutritionRulesPage: React.FC = () => {
                 <span className="text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-lg border border-cyan-200">
                   💧 1.000 – 1.350 ml
                 </span>
-                <span className="text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded-lg">
-                  +150–200 Kcal món ăn xế
-                </span>
+                <span className="text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded-lg">{translateText("+150–200 Kcal món ăn xế")}</span>
               </div>
             </div>
           </div>

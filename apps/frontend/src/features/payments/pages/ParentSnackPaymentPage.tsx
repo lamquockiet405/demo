@@ -1,3 +1,5 @@
+import { useLanguage } from '../../../core/i18n/useLanguage';
+import { t as translateText } from '../../../core/i18n/language';
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { formatDateDMY, formatDateRangeDMY } from '../../../core/utils/date';
@@ -66,6 +68,7 @@ const toSnackText = (text?: string) => {
 };
 
 export const ParentSnackPaymentPage: React.FC = () => {
+  useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -450,30 +453,26 @@ export const ParentSnackPaymentPage: React.FC = () => {
                 type="button"
                 onClick={() => navigate('/parent-snack-payment')}
                 className="hover:text-emerald-700 transition cursor-pointer"
-              >
-                Cổng Phụ Huynh
-              </button>
+              >{translateText("Cổng Phụ Huynh")}</button>
               <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               <button
                 type="button"
                 onClick={() => navigate('/parent-snack-payment')}
                 className={`transition cursor-pointer ${!isReceiptsOnly ? 'text-slate-900 font-bold' : 'text-slate-500 hover:text-emerald-700'
                   }`}
-              >
-                Thực đơn ăn xế & Thanh toán
-              </button>
+              >{translateText("Thực đơn ăn xế & Thanh toán")}</button>
               {isReceiptsOnly && (
                 <>
                   <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-emerald-700 font-bold">Lịch sử giao dịch & Biên lai</span>
+                  <span className="text-emerald-700 font-bold">{translateText("Lịch sử giao dịch & Biên lai")}</span>
                 </>
               )}
             </nav>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-black text-slate-900">
-                {isReceiptsOnly
+                {translateText(isReceiptsOnly
                   ? 'Lịch Sử Giao Dịch & Biên Lai Điện Tử'
-                  : 'Thực Đơn Suất Ăn Xế & Thanh Toán Dịch Vụ'}
+                  : 'Thực Đơn Suất Ăn Xế & Thanh Toán Dịch Vụ')}
               </h1>
             </div>
           </div>
@@ -489,7 +488,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                 }`}
             >
               <Coffee className="w-3.5 h-3.5" />
-              <span>Gói dịch vụ & Đăng ký ăn xế</span>
+              <span>{translateText("Gói dịch vụ & Đăng ký ăn xế")}</span>
               {pendingCount > 0 && (
                 <span
                   className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${!isReceiptsOnly ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-800'
@@ -508,7 +507,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                 }`}
             >
               <Receipt className="w-3.5 h-3.5" />
-              <span>Lịch sử biên lai</span>
+              <span>{translateText("Lịch sử biên lai")}</span>
               {paidInvoicesCount > 0 && (
                 <span
                   className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${isReceiptsOnly ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-800'
@@ -527,34 +526,24 @@ export const ParentSnackPaymentPage: React.FC = () => {
             {/* KPI Cards: Thống kê nhanh chi phí & biên lai */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-2xl border border-emerald-100 p-4 shadow-2xs">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Tổng tiền đã thanh toán
-                </span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("Tổng tiền đã thanh toán")}</span>
                 <div className="text-xl font-black text-emerald-700 mt-1">
                   {formatNumber(totalPaidAmount, 'VNĐ')}
                 </div>
                 <div className="text-[11px] text-emerald-600 mt-0.5 font-medium flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Đã thanh toán qua VNPAY
-                </div>
+                  <CheckCircle2 className="w-3.5 h-3.5" />{translateText("Đã thanh toán qua VNPAY")}</div>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Biên lai điện tử hợp lệ
-                </span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("Biên lai điện tử hợp lệ")}</span>
                 <div className="text-xl font-black text-slate-900 mt-1">
-                  {paidInvoices.length} <span className="text-xs font-normal text-slate-500">biên lai</span>
+                  {paidInvoices.length} <span className="text-xs font-normal text-slate-500">{translateText("biên lai")}</span>
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">
-                  Sẵn sàng tải PDF & xem mã QR
-                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">{translateText("Sẵn sàng tải PDF & xem mã QR")}</div>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Học sinh thụ hưởng
-                </span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("Học sinh thụ hưởng")}</span>
                 <div className="text-sm font-bold text-slate-900 mt-1 truncate">
                   {overview?.student?.fullName || invoices[0]?.childName || 'Trần Minh Khang'}
                 </div>
@@ -564,15 +553,9 @@ export const ParentSnackPaymentPage: React.FC = () => {
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Cổng giao dịch
-                </span>
-                <div className="text-sm font-bold text-slate-900 mt-1">
-                  Cổng VNPAY Quốc Gia
-                </div>
-                <div className="text-[11px] text-slate-500 mt-0.5">
-                  Bảo mật • Đối soát tức thì
-                </div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">{translateText("Cổng giao dịch")}</span>
+                <div className="text-sm font-bold text-slate-900 mt-1">{translateText("Cổng VNPAY Quốc Gia")}</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">{translateText("Bảo mật • Đối soát tức thì")}</div>
               </div>
             </div>
 
@@ -582,7 +565,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Tìm theo mã hóa đơn, tên gói suất ăn xế..."
+                  placeholder={translateText("Tìm theo mã hóa đơn, tên gói suất ăn xế...")}
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
@@ -590,9 +573,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between sm:justify-end gap-3">
-                <span className="text-xs text-slate-500">
-                  Hiển thị <strong>{filteredHistoryInvoices.length}</strong> / {paidInvoices.length} biên lai
-                </span>
+                <span className="text-xs text-slate-500">{translateText("Hiển thị")} <strong>{filteredHistoryInvoices.length}</strong> / {paidInvoices.length} {translateText("biên lai")}</span>
               </div>
             </div>
 
@@ -600,7 +581,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
             {loading ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-3">
                 <RefreshCw className="w-8 h-8 text-teal-600 animate-spin mx-auto" />
-                <p className="text-sm font-medium text-slate-600">Đang tải lịch sử giao dịch & biên lai...</p>
+                <p className="text-sm font-medium text-slate-600">{translateText("Đang tải lịch sử giao dịch & biên lai...")}</p>
               </div>
             ) : filteredHistoryInvoices.length === 0 ? (
               <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-4">
@@ -609,12 +590,12 @@ export const ParentSnackPaymentPage: React.FC = () => {
                 </div>
                 <div className="space-y-1 max-w-md mx-auto">
                   <h3 className="text-base font-bold text-slate-800">
-                    {historySearch.trim() ? 'Không tìm thấy biên lai phù hợp' : 'Chưa có biên lai thanh toán nào'}
+                    {translateText(historySearch.trim() ? 'Không tìm thấy biên lai phù hợp' : 'Chưa có biên lai thanh toán nào')}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {historySearch.trim()
+                    {translateText(historySearch.trim()
                       ? 'Thử tìm với từ khóa khác hoặc xóa bộ lọc để hiển thị tất cả biên lai.'
-                      : 'Khi hoàn tất thanh toán các gói dịch vụ qua VNPAY, biên lai điện tử sẽ được lưu tại đây.'}
+                      : 'Khi hoàn tất thanh toán các gói dịch vụ qua VNPAY, biên lai điện tử sẽ được lưu tại đây.')}
                   </p>
                 </div>
                 <button
@@ -623,7 +604,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                   className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer inline-flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Quay lại trang Gói dịch vụ ăn xế</span>
+                  <span>{translateText("Quay lại trang Gói dịch vụ ăn xế")}</span>
                 </button>
               </div>
             ) : (
@@ -640,15 +621,12 @@ export const ParentSnackPaymentPage: React.FC = () => {
                         <div className="space-y-1.5 min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              Đã thanh toán
-                            </span>
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />{translateText("Đã thanh toán")}</span>
                             <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
                               {inv.invoiceCode}
                             </span>
                             {inv.dueDate && (
-                              <span className="text-xs text-slate-500">
-                                · Hạn đóng: <strong className="text-slate-700">{formatDateDMY(inv.dueDate)}</strong>
+                              <span className="text-xs text-slate-500">{translateText("· Hạn đóng:")} <strong className="text-slate-700">{formatDateDMY(inv.dueDate)}</strong>
                               </span>
                             )}
                           </div>
@@ -673,7 +651,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                         {/* Right: Số tiền & Nút Xem Biên Lai */}
                         <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                           <div className="text-left sm:text-right">
-                            <span className="text-[11px] text-slate-400 font-medium block">Số tiền</span>
+                            <span className="text-[11px] text-slate-400 font-medium block">{translateText("Số tiền")}</span>
                             <strong className="text-emerald-700 text-base font-black">
                               {formatNumber(inv.amount, 'VNĐ')}
                             </strong>
@@ -684,9 +662,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                             disabled={loadingReceipt}
                             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                           >
-                            <FileText className="w-3.5 h-3.5" />
-                            Xem & Tải Biên Lai Điện Tử
-                          </button>
+                            <FileText className="w-3.5 h-3.5" />{translateText("Xem & Tải Biên Lai Điện Tử")}</button>
                         </div>
                       </div>
                     </div>
@@ -702,19 +678,13 @@ export const ParentSnackPaymentPage: React.FC = () => {
             <section className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-teal-600" />
-                  Lịch Ăn Xế & Thực Đơn Bữa Phụ Xế 16h30 - 17h00 Của Bé
-                </h2>
+                  <Calendar className="w-5 h-5 text-teal-600" />{translateText("Lịch Ăn Xế & Thực Đơn Bữa Phụ Xế 16h30 - 17h00 Của Bé")}</h2>
                 {isCurrentPkgPaid ? (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    <Unlock className="w-3.5 h-3.5 text-emerald-600" />
-                    Đã đóng tiền • Đã mở khóa lịch ăn xế
-                  </span>
+                    <Unlock className="w-3.5 h-3.5 text-emerald-600" />{translateText("Đã đóng tiền • Đã mở khóa lịch ăn xế")}</span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                    <Eye className="w-3.5 h-3.5 text-amber-600" />
-                    Chưa đăng ký • Xem trước thực đơn ăn xế
-                  </span>
+                    <Eye className="w-3.5 h-3.5 text-amber-600" />{translateText("Chưa đăng ký • Xem trước thực đơn ăn xế")}</span>
                 )}
               </div>
 
@@ -736,14 +706,14 @@ export const ParentSnackPaymentPage: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-[11px] font-bold tracking-wider uppercase text-amber-200 block">
-                        {isCurrentPkgPaid
+                        {translateText(isCurrentPkgPaid
                           ? 'Lịch thực đơn suất ăn xế hàng tuần'
-                          : 'Xem trước thực đơn suất ăn xế chiều (16h30 - 17h00)'}
+                          : 'Xem trước thực đơn suất ăn xế chiều (16h30 - 17h00)')}
                       </span>
                       <h3 className="text-base font-extrabold text-white">
-                        {currentPeriodPkg
+                        {translateText(currentPeriodPkg
                           ? toSnackText(currentPeriodPkg.periodName)
-                          : 'Thực đơn suất ăn xế'}
+                          : 'Thực đơn suất ăn xế')}
                       </h3>
                     </div>
                   </div>
@@ -752,7 +722,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                     {overview?.publishedPackages && overview.publishedPackages.length > 1 && (
                       <div className="flex items-center gap-2">
                         <select
-                          aria-label="Chọn gói suất ăn xế để xem thực đơn"
+                          aria-label={translateText("Chọn gói suất ăn xế để xem thực đơn")}
                           value={selectedSchedulePeriodId || ''}
                           onChange={(e) => setSelectedSchedulePeriodId(Number(e.target.value))}
                           className="bg-slate-900/80 text-white text-xs font-bold rounded-xl px-3 py-2 border border-white/30 focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer"
@@ -791,7 +761,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
                           <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
-                            {day.dayLabel}
+                            {translateText(day.dayLabel)}
                           </span>
                           <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
                             {day.servingTime || '16:30 - 17:00'}
@@ -800,11 +770,9 @@ export const ParentSnackPaymentPage: React.FC = () => {
 
                         <div className="space-y-1.5 flex-1 text-xs">
                           <div>
-                            <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
-                              Món chính ăn xế:
-                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">{translateText("Món chính ăn xế:")}</span>
                             <strong className="text-slate-900 text-sm font-extrabold leading-snug block mt-1">
-                              {day.mainDish}
+                              {translateText(day.mainDish)}
                             </strong>
                           </div>
                         </div>
@@ -814,7 +782,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                             <Flame className="w-3.5 h-3.5" />
                             {day.caloriesKcal} Kcal
                           </span>
-                          {day.proteinG != null && <span>Đạm: {day.proteinG}g</span>}
+                          {day.proteinG != null && <span>{translateText("Đạm:")} {day.proteinG}g</span>}
                         </div>
                       </div>
                     ))}
@@ -826,9 +794,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-teal-600" />
-                  Gói Dịch Vụ Suất Ăn Xế Chờ Đóng Tiền Của Bé
-                </h2>
+                  <FileText className="w-5 h-5 text-teal-600" />{translateText("Gói Dịch Vụ Suất Ăn Xế Chờ Đóng Tiền Của Bé")}</h2>
                 <div className="flex flex-wrap items-center gap-2.5">
                   <div className="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200/80">
                     <button
@@ -838,9 +804,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                         ? 'bg-white text-emerald-800 shadow-2xs'
                         : 'text-slate-500 hover:text-slate-900'
                         }`}
-                    >
-                      ✓ Chỉ dịch vụ chưa đóng tiền
-                    </button>
+                    >{translateText("✓ Chỉ dịch vụ chưa đóng tiền")}</button>
                     {paidInvoicesCount > 0 && (
                       <button
                         type="button"
@@ -850,7 +814,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                           : 'text-slate-500 hover:text-slate-900'
                           }`}
                       >
-                        <span>Tất cả</span>
+                        <span>{translateText("Tất cả")}</span>
                         <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700">{invoices.length + visiblePublishedPackages.length}</span>
                       </button>
                     )}
@@ -863,12 +827,10 @@ export const ParentSnackPaymentPage: React.FC = () => {
                       className="px-3.5 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-emerald-800 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <Receipt className="w-4 h-4 text-emerald-600" />
-                      <span>Xem lịch sử biên lai →</span>
+                      <span>{translateText("Xem lịch sử biên lai →")}</span>
                     </button>
                   )}
-                  <span className="text-xs text-slate-500">
-                    Tổng số: <strong>{displayedInvoices.length + visiblePublishedPackages.length}</strong> gói dịch vụ
-                  </span>
+                  <span className="text-xs text-slate-500">{translateText("Tổng số:")} <strong>{displayedInvoices.length + visiblePublishedPackages.length}</strong> {translateText("gói dịch vụ")}</span>
                 </div>
               </div>
 
@@ -876,17 +838,13 @@ export const ParentSnackPaymentPage: React.FC = () => {
                 <div className="bg-emerald-50/60 border border-emerald-200/60 rounded-2xl px-4 py-2 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>
-                      Đang chỉ hiển thị các gói <strong>còn hiệu lực</strong>. Đã ẩn {expiredInvoicesCount} gói cũ từ các kỳ trước.
-                    </span>
+                    <span>{translateText("Đang chỉ hiển thị các gói")} <strong>{translateText("còn hiệu lực")}</strong>{translateText(". Đã ẩn")} {expiredInvoicesCount} {translateText("gói cũ từ các kỳ trước.")}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => navigate('/parent-snack-payment?view=receipts')}
                     className="text-emerald-700 font-bold hover:underline cursor-pointer text-left sm:text-right shrink-0"
-                  >
-                    Xem trong Lịch sử biên lai →
-                  </button>
+                  >{translateText("Xem trong Lịch sử biên lai →")}</button>
                 </div>
               )}
 
@@ -897,13 +855,10 @@ export const ParentSnackPaymentPage: React.FC = () => {
                   className="bg-white rounded-3xl border border-teal-200 p-6 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
                 >
                   <div className="space-y-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-100 text-teal-800 border border-teal-200">
-                      ✨ Gói Suất Ăn Xế Mới Công Bố Từ Nhà Trường
-                    </span>
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-100 text-teal-800 border border-teal-200">{translateText("✨ Gói Suất Ăn Xế Mới Công Bố Từ Nhà Trường")}</span>
                     <h3 className="text-lg font-black text-slate-900">{toSnackText(pkg.periodName)}</h3>
                     <p className="text-xs text-slate-600">{toSnackText(pkg.description)}</p>
-                    <p className="text-xs text-slate-500">
-                      Thời gian phục vụ: <strong>{formatDateRangeDMY(pkg.startDate, pkg.endDate, ' ~ ')}</strong> • Mức phí:{' '}
+                    <p className="text-xs text-slate-500">{translateText("Thời gian phục vụ:")} <strong>{formatDateRangeDMY(pkg.startDate, pkg.endDate, ' ~ ')}</strong> {translateText("• Mức phí:")}{' '}
                       <strong className="text-emerald-700 font-black">
                         {formatNumber(pkg.feeAmount, 'VNĐ')}
                       </strong>
@@ -919,15 +874,14 @@ export const ParentSnackPaymentPage: React.FC = () => {
                       className="px-4 py-3.5 rounded-2xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                     >
                       <Eye className="w-4 h-4 text-teal-600" />
-                      <span>Xem trước thực đơn</span>
+                      <span>{translateText("Xem trước thực đơn")}</span>
                     </button>
                     <button
                       onClick={() => handleEnrollAndPayPackage(pkg.periodId)}
                       disabled={processingId === pkg.periodId || pkg.feeAmount == null}
                       className="px-6 py-3.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-black rounded-2xl shadow-md transition flex items-center justify-center gap-2 shrink-0 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <PlusCircle className="w-4 h-4" />
-                      Đăng ký & Thanh toán VNPAY · {formatNumber(pkg.feeAmount, 'đ')}
+                      <PlusCircle className="w-4 h-4" />{translateText("Đăng ký & Thanh toán VNPAY ·")} {formatNumber(pkg.feeAmount, 'đ')}
                     </button>
                   </div>
                 </div>
@@ -936,19 +890,15 @@ export const ParentSnackPaymentPage: React.FC = () => {
               {loading ? (
                 <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-3">
                   <RefreshCw className="w-8 h-8 text-teal-600 animate-spin mx-auto" />
-                  <p className="text-sm font-medium text-slate-600">Đang tải gói dịch vụ & phiếu thu tiền suất ăn xế...</p>
+                  <p className="text-sm font-medium text-slate-600">{translateText("Đang tải gói dịch vụ & phiếu thu tiền suất ăn xế...")}</p>
                 </div>
               ) : displayedInvoices.length === 0 && visiblePublishedPackages.length === 0 ? (
                 <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-xs space-y-3">
                   <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-600 border border-emerald-100">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-800">
-                    Bé đã hoàn tất thanh toán tất cả các gói dịch vụ ăn xế hiện hành!
-                  </h3>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    Hiện không có gói suất ăn xế nào chờ thanh toán. Các hóa đơn &amp; biên lai điện tử đã thanh toán được lưu trữ đầy đủ trong mục Lịch sử biên lai.
-                  </p>
+                  <h3 className="text-base font-bold text-slate-800">{translateText("Bé đã hoàn tất thanh toán tất cả các gói dịch vụ ăn xế hiện hành!")}</h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">{translateText("Hiện không có gói suất ăn xế nào chờ thanh toán. Các hóa đơn & biên lai điện tử đã thanh toán được lưu trữ đầy đủ trong mục Lịch sử biên lai.")}</p>
                   {paidInvoicesCount > 0 && (
                     <button
                       type="button"
@@ -956,7 +906,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
                     >
                       <Receipt className="w-4 h-4" />
-                      <span>Xem &amp; Tải Biên Lai Điện Tử →</span>
+                      <span>{translateText("Xem & Tải Biên Lai Điện Tử →")}</span>
                     </button>
                   )}
                 </div>
@@ -991,8 +941,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                             </span>
 
                             {inv.dueDate && inv.status !== 'PAID' && (
-                              <span className="text-xs text-slate-500">
-                                · Hạn đóng: <strong className="text-slate-700">{formatDateDMY(inv.dueDate)}</strong>
+                              <span className="text-xs text-slate-500">{translateText("· Hạn đóng:")} <strong className="text-slate-700">{formatDateDMY(inv.dueDate)}</strong>
                               </span>
                             )}
                           </div>
@@ -1017,7 +966,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                         {/* Right: Actions */}
                         <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                           <div className="text-left sm:text-right">
-                            <span className="text-[11px] text-slate-400 font-medium block">Tổng số tiền</span>
+                            <span className="text-[11px] text-slate-400 font-medium block">{translateText("Tổng số tiền")}</span>
                             <strong className="text-emerald-700 text-base font-black">
                               {formatNumber(inv.amount, 'VNĐ')}
                             </strong>
@@ -1029,9 +978,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                               disabled={loadingReceipt}
                               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                             >
-                              <FileText className="w-3.5 h-3.5" />
-                              Xem & Tải Biên Lai Điện Tử
-                            </button>
+                              <FileText className="w-3.5 h-3.5" />{translateText("Xem & Tải Biên Lai Điện Tử")}</button>
                           ) : (
                             <div className="flex flex-wrap items-center gap-2">
                               {inv.periodId && (
@@ -1044,7 +991,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                                   className="px-3.5 py-2.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                                 >
                                   <Eye className="w-3.5 h-3.5 text-teal-600" />
-                                  <span>Xem trước thực đơn</span>
+                                  <span>{translateText("Xem trước thực đơn")}</span>
                                 </button>
                               )}
                               <button
@@ -1056,8 +1003,7 @@ export const ParentSnackPaymentPage: React.FC = () => {
                                   <RefreshCw className="w-4 h-4 animate-spin" />
                                 ) : (
                                   <CreditCard className="w-4 h-4" />
-                                )}
-                                Thanh toán qua VNPAY QR · {formatNumber(inv.amount, 'đ')}
+                                )}{translateText("Thanh toán qua VNPAY QR ·")} {formatNumber(inv.amount, 'đ')}
                               </button>
                             </div>
                           )}

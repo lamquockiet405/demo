@@ -758,10 +758,10 @@ export const DailyMealBreakdownModal: React.FC<DailyMealBreakdownModalProps> = (
                 {hasLateSnack ? (
                   <>
                     <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-900 border border-teal-200 px-2 py-0.5 rounded-lg text-[10.5px]">
-                      <strong className="font-black">QĐ 1:</strong> {qd1Calo} Kcal ({qd1PctOfAllDay}%) • P:L:G {qd1PPct}:{qd1LPct}:{qd1GPct}%
+                      <strong className="font-black">{translateText("QĐ 1:")}</strong> {qd1Calo} Kcal ({qd1PctOfAllDay}%) • P:L:G {qd1PPct}:{qd1LPct}:{qd1GPct}%
                     </span>
                     <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-lg text-[10.5px]">
-                      <strong className="font-black">QĐ 2 (+xế):</strong> {qd2Calo} Kcal ({qd2PctOfAllDay}%) • P:L:G {qd2PPct}:{qd2LPct}:{qd2GPct}%
+                      <strong className="font-black">{translateText("QĐ 2 (+xế):")}</strong> {qd2Calo} Kcal ({qd2PctOfAllDay}%) • P:L:G {qd2PPct}:{qd2LPct}:{qd2GPct}%
                     </span>
                   </>
                 ) : (

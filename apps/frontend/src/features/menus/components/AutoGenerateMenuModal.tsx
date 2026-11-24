@@ -409,9 +409,7 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
             </div>
 
             {academicYear && (
-              <p className="text-xs text-slate-600">
-                Năm học {academicYear.name} (đang áp dụng) · Gợi ý tuần phục vụ theo năm học.
-              </p>
+              <p className="text-xs text-slate-600">{translateText("Năm học")} {academicYear.name} {translateText("(đang áp dụng) · Gợi ý tuần phục vụ theo năm học.")}</p>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Tên thực đơn */}
@@ -573,12 +571,10 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                     <span className="text-xl font-black text-slate-900">
                       {previewData.averageCalories}{translateText(" Kcal")}
                     </span>
-                    <span className="text-[9.5px] font-extrabold text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
-                      QĐ 1
-                    </span>
+                    <span className="text-[9.5px] font-extrabold text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">{translateText("QĐ 1")}</span>
                   </div>
                   <div className="text-[10.5px] font-bold text-amber-800 mt-1 flex items-center gap-1">
-                    <span>QĐ 2 (khi thêm ăn xế):</span>
+                    <span>{translateText("QĐ 2 (khi thêm ăn xế):")}</span>
                     <strong className="text-amber-950 font-black">
                       {previewData.averageCalories +
                         Math.round(
@@ -598,22 +594,22 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                   {previewData.qd1Averages && previewData.qd2Averages ? (
                     <div className="space-y-1 mt-0.5">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-extrabold text-teal-800">QĐ 1:</span>
+                        <span className="font-extrabold text-teal-800">{translateText("QĐ 1:")}</span>
                         <span className="font-black text-slate-800">
                           {previewData.qd1Averages.proteinPct}% : {previewData.qd1Averages.lipidPct}% : {previewData.qd1Averages.glucidPct}%
                         </span>
                       </div>
                       <div className="text-[9.5px] text-slate-500 font-medium leading-none">
-                        {previewData.qd1Averages.proteinG}g Đ • {previewData.qd1Averages.fatG}g B • {previewData.qd1Averages.carbG}g G
+                        {previewData.qd1Averages.proteinG}{translateText("g Đ •")} {previewData.qd1Averages.fatG}g B • {previewData.qd1Averages.carbG}g G
                       </div>
                       <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/80">
-                        <span className="font-extrabold text-amber-900">QĐ 2 (+xế):</span>
+                        <span className="font-extrabold text-amber-900">{translateText("QĐ 2 (+xế):")}</span>
                         <span className="font-black text-slate-800">
                           {previewData.qd2Averages.proteinPct}% : {previewData.qd2Averages.lipidPct}% : {previewData.qd2Averages.glucidPct}%
                         </span>
                       </div>
                       <div className="text-[9.5px] text-slate-500 font-medium leading-none">
-                        {previewData.qd2Averages.proteinG}g Đ • {previewData.qd2Averages.fatG}g B • {previewData.qd2Averages.carbG}g G
+                        {previewData.qd2Averages.proteinG}{translateText("g Đ •")} {previewData.qd2Averages.fatG}g B • {previewData.qd2Averages.carbG}g G
                       </div>
                     </div>
                   ) : (
@@ -718,8 +714,7 @@ export const AutoGenerateMenuModal: React.FC<AutoGenerateMenuModalProps> = ({
                               {day.dayName}
                             </span>
                             <span className="text-[10px] font-bold text-slate-400">
-                              {day.dishes.length} món
-                            </span>
+                              {day.dishes.length} {translateText("món")}</span>
                           </div>
 
                           {/* 2 Chỗ hiển thị Calo */}

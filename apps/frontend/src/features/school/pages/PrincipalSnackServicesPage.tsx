@@ -464,7 +464,7 @@ export function PrincipalSnackServicesPage() {
           <div className="flex items-center gap-1.5">
             <CalendarRange className="w-4 h-4 text-teal-600 shrink-0" />
             <select
-              aria-label="Năm học"
+              aria-label={translateText("Năm học")}
               value={yearFilter.yearId}
               onChange={(e) => {
                 yearFilter.setYearId(e.target.value);

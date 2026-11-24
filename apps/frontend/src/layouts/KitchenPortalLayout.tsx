@@ -195,7 +195,7 @@ export const KitchenPortalLayout: React.FC = () => {
             </span>
           </div>
           <div className="kp-topbar-actions">
-            <UserHeaderDropdown customSubtitle="Nhân viên bếp" />
+            <UserHeaderDropdown customSubtitle={translateText("Nhân viên bếp")} />
           </div>
         </header>
         <div className="kp-content">

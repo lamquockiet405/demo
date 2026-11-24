@@ -778,9 +778,7 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                     {translateText("1. Món hiện tại trên thực đơn:")}
                   </span>
                   {hasAllergyConflict && (
-                    <span className="text-[9.5px] font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md border border-rose-300">
-                      ⚠ Có cảnh báo dị ứng ({currentConflicts.length} bé)
-                    </span>
+                    <span className="text-[9.5px] font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md border border-rose-300">{translateText("⚠ Có cảnh báo dị ứng (")}{currentConflicts.length} {translateText("bé)")}</span>
                   )}
                 </div>
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs">
@@ -847,13 +845,9 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                           {translateText("BẮT BUỘC ĐÚNG LOẠI MÓN:")}
                         </span>
                         {mealTime === "AFTERNOON_SNACK" ? (
-                          <span className="px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border bg-purple-50 text-purple-800 border-purple-200">
-                            🧁 Món Phụ
-                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border bg-purple-50 text-purple-800 border-purple-200">{translateText("🧁 Món Phụ")}</span>
                         ) : mealTime === "BREAKFAST" || mealTime === "MORNING_SNACK" || mealTime === "LATE_SNACK" ? (
-                          <span className="px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border bg-orange-50 text-orange-800 border-orange-200">
-                            🍜 Món Nước (Bún / Phở / Miến / Cháo / Súp)
-                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border bg-orange-50 text-orange-800 border-orange-200">{translateText("🍜 Món Nước (Bún / Phở / Miến / Cháo / Súp)")}</span>
                         ) : (
                           <span className={`px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border ${CATEGORY_INFO[targetCategory]?.badgeColor}`}>
                             {CATEGORY_INFO[targetCategory]?.icon} {translateText(CATEGORY_INFO[targetCategory]?.shortName)}
@@ -945,7 +939,7 @@ export const DishAdjustmentDrawer: React.FC<DishAdjustmentDrawerProps> = ({
                           </div>
                           <div className="flex items-center justify-between text-[9.5px] text-slate-500 mt-1 font-semibold">
                             <span className="text-amber-700 font-bold">{dish.totalCalories} Kcal</span>
-                            <span>Đạm: {dish.totalProteinG}g</span>
+                            <span>{translateText("Đạm:")} {dish.totalProteinG}g</span>
                           </div>
                         </div>
                       );

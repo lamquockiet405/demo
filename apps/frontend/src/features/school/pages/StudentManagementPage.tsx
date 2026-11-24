@@ -223,12 +223,10 @@ export function StudentManagementPage() {
       <div className="kp-filters flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2.5">
           {!isTeacherPortal && (
-            <label className="flex items-center gap-2 text-sm text-slate-600">
-              Năm học
-              <select aria-label="Năm học" value={yearFilter.yearId} onChange={(e) => {
+            <label className="flex items-center gap-2 text-sm text-slate-600">{translateText("Năm học")}<select aria-label={translateText("Năm học")} value={yearFilter.yearId} onChange={(e) => {
                 yearFilter.setYearId(e.target.value); setClassId(''); setPage(1);
               }}>
-                <option value="">Tất cả năm học</option>
+                <option value="">{translateText("Tất cả năm học")}</option>
                 {yearFilter.years.map(year => <option key={year.id} value={year.id}>{year.name}{year.status === 'ACTIVE' ? ' (đang áp dụng)' : ''}</option>)}
               </select>
             </label>

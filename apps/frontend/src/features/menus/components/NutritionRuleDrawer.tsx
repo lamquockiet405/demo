@@ -312,7 +312,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-extrabold text-xs text-teal-900">{translateText("Cấu hình 1: Bán trú tiêu chuẩn (Không ăn xế)")}</p>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">3 bữa</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">{translateText("3 bữa")}</span>
                   </div>
                   <p className="text-[11px] text-teal-700 font-normal mt-0.5">
                     {translateText("615 – 726 Kcal · 50–55% cả ngày · Nước 800–1.100 ml · P:13-20% L:25-35% G:52-60%")}
@@ -331,7 +331,7 @@ export const NutritionRuleDrawer: React.FC<NutritionRuleDrawerProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-extrabold text-xs text-amber-900">{translateText("Cấu hình 2: Bán trú toàn diện (Có ăn xế chiều)")}</p>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">4 bữa · Đóng tiền xế</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">{translateText("4 bữa · Đóng tiền xế")}</span>
                   </div>
                   <p className="text-[11px] text-amber-800 font-normal mt-0.5">
                     {translateText("765 – 926 Kcal (+150-200 Kcal xế) · 60–70% cả ngày · Nước 1.000–1.350 ml")}

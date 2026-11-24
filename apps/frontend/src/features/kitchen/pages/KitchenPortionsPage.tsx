@@ -97,7 +97,7 @@ export function KitchenPortionsPage() {
   return (
     <>
       {showNotes && (
-        <Modal title="Tất cả ghi chú" onClose={() => setShowNotes(false)}>
+        <Modal title={translateText("Tất cả ghi chú")} onClose={() => setShowNotes(false)}>
           <p className="mb-4 text-sm text-slate-500">{date} · {translateText(mealLabels[meal])} · {allNotes.length} {translateText("ghi chú")}</p>
           <p className="mb-4 text-xs text-slate-500">{translateText("Ghi chú của tất cả các lớp theo ngày và bữa ăn đang chọn.")}</p>
           {allNotes.length ? (
@@ -224,10 +224,10 @@ export function KitchenPortionsPage() {
                       <button
                         type="button"
                         className="kp-button mr-2"
-                        title="Xem ghi chú của lớp"
+                        title={translateText("Xem ghi chú của lớp")}
                         onClick={() => setShowNotes(true)}
                       >
-                        <StickyNote size={14} />Ghi chú ({r[field].notes.length})
+                        <StickyNote size={14} />{translateText("Ghi chú (")}{r[field].notes.length})
                       </button>
                     )}
                     <button

@@ -1,3 +1,5 @@
+import { useLanguage } from '../../core/i18n/useLanguage';
+import { t as translateText } from '../../core/i18n/language';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -20,8 +22,10 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../core/stores/auth.store';
 import { useSchoolBranding } from '../../core/hooks/useSchoolBranding';
+import { LanguageSwitcher } from '../../core/components/LanguageSwitcher';
 
 export const HomePage: React.FC = () => {
+  useLanguage();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
   const schoolBranding = useSchoolBranding();
@@ -80,9 +84,7 @@ export const HomePage: React.FC = () => {
                 <span className="text-xl font-black tracking-tight text-slate-900">
                   Kid<span className="text-teal-600">Meal</span>
                 </span>
-                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-teal-800 rounded-md border border-teal-200/80">
-                  Bán trú học đường
-                </span>
+                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-teal-800 rounded-md border border-teal-200/80">{translateText("Bán trú học đường")}</span>
               </div>
               <p className="text-xs font-semibold text-slate-500 truncate">{schoolName}</p>
             </div>
@@ -90,31 +92,26 @@ export const HomePage: React.FC = () => {
 
           {/* Navigation Links */}
           <nav className="hidden lg:flex items-center gap-7 text-xs font-bold text-slate-600">
-            <a href="#standards" className="hover:text-teal-700 transition">
-              Quy chuẩn chuyên môn
-            </a>
-            <a href="#workflow" className="hover:text-teal-700 transition">
-              Quy trình vận hành
-            </a>
-            <a href="#contact" className="hover:text-teal-700 transition">
-              Thông tin liên hệ
-            </a>
+            <a href="#standards" className="hover:text-teal-700 transition">{translateText("Quy chuẩn chuyên môn")}</a>
+            <a href="#workflow" className="hover:text-teal-700 transition">{translateText("Quy trình vận hành")}</a>
+            <a href="#contact" className="hover:text-teal-700 transition">{translateText("Thông tin liên hệ")}</a>
           </nav>
 
           {/* User Auth Action Buttons */}
           <div className="flex items-center gap-2.5 shrink-0">
+            <LanguageSwitcher />
             {isAuthenticated ? (
               <div className="flex items-center gap-2.5">
                 <div className="hidden sm:flex flex-col text-right">
                   <span className="text-xs font-bold text-slate-900">{user?.fullName}</span>
-                  <span className="text-[10px] font-semibold text-teal-700">{roleLabel}</span>
+                  <span className="text-[10px] font-semibold text-teal-700">{translateText(roleLabel)}</span>
                 </div>
                 <Link
                   to={getMyPortalPath()}
                   className="px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs flex items-center gap-2 transition"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Vào cổng làm việc</span>
+                  <span>{translateText("Vào cổng làm việc")}</span>
                 </Link>
                 <button
                   onClick={() => {
@@ -122,7 +119,7 @@ export const HomePage: React.FC = () => {
                     navigate('/');
                   }}
                   className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
-                  title="Đăng xuất"
+                  title={translateText("Đăng xuất")}
                 >
                   <Lock className="w-4 h-4" />
                 </button>
@@ -132,7 +129,7 @@ export const HomePage: React.FC = () => {
                 to="/login"
                 className="px-5 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs flex items-center gap-2 transition group"
               >
-                <span>Đăng nhập hệ thống</span>
+                <span>{translateText("Đăng nhập hệ thống")}</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             )}
@@ -150,19 +147,14 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-6 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-bold">
                 <Building2 className="w-3.5 h-3.5 text-teal-600" />
-                <span>{schoolName} · Hệ sinh thái Bán trú Số</span>
+                <span>{schoolName} {translateText("· Hệ sinh thái Bán trú Số")}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl xl:text-5xl font-black text-slate-900 tracking-tight leading-[1.18]">
-                Quản Lý Thực Đơn, Dinh Dưỡng &{' '}
-                <span className="text-teal-700">An Toàn Bữa Ăn Mầm Non</span>
+              <h1 className="text-3xl sm:text-4xl xl:text-5xl font-black text-slate-900 tracking-tight leading-[1.18]">{translateText("Quản Lý Thực Đơn, Dinh Dưỡng &")}{' '}
+                <span className="text-teal-700">{translateText("An Toàn Bữa Ăn Mầm Non")}</span>
               </h1>
 
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                Nền tảng điều phối bữa ăn bán trú khép kín: kết nối đồng bộ từ khâu thiết kế thực đơn
-                cân đối năng lượng, kiểm soát khay ăn dị ứng tại bếp, lưu mẫu kiểm thực 3 bước đến sổ
-                theo dõi sức ăn và thanh toán trực tuyến cho phụ huynh.
-              </p>
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">{translateText("Nền tảng điều phối bữa ăn bán trú khép kín: kết nối đồng bộ từ khâu thiết kế thực đơn cân đối năng lượng, kiểm soát khay ăn dị ứng tại bếp, lưu mẫu kiểm thực 3 bước đến sổ theo dõi sức ăn và thanh toán trực tuyến cho phụ huynh.")}</p>
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -171,7 +163,7 @@ export const HomePage: React.FC = () => {
                   className="px-6 py-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-sm flex items-center gap-2 transition"
                 >
                   <span>
-                    {isAuthenticated ? 'Vào bàn làm việc của bạn' : 'Đăng nhập cổng nhà trường'}
+                    {translateText(isAuthenticated ? 'Vào bàn làm việc của bạn' : 'Đăng nhập cổng nhà trường')}
                   </span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -180,24 +172,16 @@ export const HomePage: React.FC = () => {
               {/* Quick Trust Metrics Strip */}
               <div className="pt-4 border-t border-slate-200/80 grid grid-cols-3 gap-4">
                 <div>
-                  <span className="text-xl sm:text-2xl font-black text-slate-900 block">
-                    5 Phân hệ
-                  </span>
-                  <span className="text-xs text-slate-500 font-medium">
-                    Đồng bộ dữ liệu thời gian thực
-                  </span>
+                  <span className="text-xl sm:text-2xl font-black text-slate-900 block">{translateText("5 Phân hệ")}</span>
+                  <span className="text-xs text-slate-500 font-medium">{translateText("Đồng bộ dữ liệu thời gian thực")}</span>
                 </div>
                 <div>
                   <span className="text-xl sm:text-2xl font-black text-teal-700 block">100%</span>
-                  <span className="text-xs text-slate-500 font-medium">
-                    Chuẩn dinh dưỡng & kiểm thực
-                  </span>
+                  <span className="text-xs text-slate-500 font-medium">{translateText("Chuẩn dinh dưỡng & kiểm thực")}</span>
                 </div>
                 <div>
-                  <span className="text-xl sm:text-2xl font-black text-slate-900 block">24 Giờ</span>
-                  <span className="text-xs text-slate-500 font-medium">
-                    Giám sát lưu mẫu thực phẩm
-                  </span>
+                  <span className="text-xl sm:text-2xl font-black text-slate-900 block">{translateText("24 Giờ")}</span>
+                  <span className="text-xs text-slate-500 font-medium">{translateText("Giám sát lưu mẫu thực phẩm")}</span>
                 </div>
               </div>
             </div>
@@ -212,74 +196,64 @@ export const HomePage: React.FC = () => {
                       <UtensilsCrossed className="w-4 h-4" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-900 block">
-                        Bảng Điều Phối Bán Trú Hôm Nay
-                      </span>
+                      <span className="text-xs font-bold text-slate-900 block">{translateText("Bảng Điều Phối Bán Trú Hôm Nay")}</span>
                       <span className="text-[11px] text-slate-500 block">{schoolName}</span>
                     </div>
                   </div>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Đang vận hành
-                  </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{translateText("Đang vận hành")}</span>
                 </div>
 
                 {/* Top 2 Metric Mini-Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-600">Năng lượng thực đơn</span>
+                      <span className="text-xs font-bold text-slate-600">{translateText("Năng lượng thực đơn")}</span>
                       <Flame className="w-4 h-4 text-amber-500" />
                     </div>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-2xl font-black text-slate-900">735</span>
-                      <span className="text-xs font-bold text-slate-500">kcal / ngày</span>
+                      <span className="text-xs font-bold text-slate-500">{translateText("kcal / ngày")}</span>
                     </div>
-                    <span className="inline-block text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                      Đạt chuẩn khuyến nghị mẫu giáo
-                    </span>
+                    <span className="inline-block text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">{translateText("Đạt chuẩn khuyến nghị mẫu giáo")}</span>
                   </div>
 
                   <div className="p-3.5 rounded-2xl bg-rose-50/50 border border-rose-200/70 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-rose-900">Cảnh báo khay dị ứng</span>
+                      <span className="text-xs font-bold text-rose-900">{translateText("Cảnh báo khay dị ứng")}</span>
                       <BellRing className="w-4 h-4 text-rose-600" />
                     </div>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-2xl font-black text-rose-600">13</span>
-                      <span className="text-xs font-bold text-rose-800">khay suất riêng</span>
+                      <span className="text-xs font-bold text-rose-800">{translateText("khay suất riêng")}</span>
                     </div>
-                    <span className="inline-block text-[11px] font-semibold text-rose-700 bg-white px-2 py-0.5 rounded-md border border-rose-200">
-                      Đã tách món thay thế an toàn
-                    </span>
+                    <span className="inline-block text-[11px] font-semibold text-rose-700 bg-white px-2 py-0.5 rounded-md border border-rose-200">{translateText("Đã tách món thay thế an toàn")}</span>
                   </div>
                 </div>
 
                 {/* Nutrition Balance Bar Card */}
                 <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-800">
-                      Cơ cấu Đạm · Chất béo · Bột đường
-                    </span>
-                    <span className="text-teal-700 font-bold">Cân đối chuẩn</span>
+                    <span className="font-bold text-slate-800">{translateText("Cơ cấu Đạm · Chất béo · Bột đường")}</span>
+                    <span className="text-teal-700 font-bold">{translateText("Cân đối chuẩn")}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2.5 text-xs">
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
-                      <span className="text-[11px] text-slate-500 block">Chất đạm</span>
+                      <span className="text-[11px] text-slate-500 block">{translateText("Chất đạm")}</span>
                       <strong className="text-sm font-black text-emerald-700">15.2%</strong>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
                         <div className="bg-emerald-500 h-full w-3/4" />
                       </div>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
-                      <span className="text-[11px] text-slate-500 block">Chất béo</span>
+                      <span className="text-[11px] text-slate-500 block">{translateText("Chất béo")}</span>
                       <strong className="text-sm font-black text-amber-600">26.4%</strong>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
                         <div className="bg-amber-500 h-full w-4/5" />
                       </div>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-slate-200/70">
-                      <span className="text-[11px] text-slate-500 block">Bột đường</span>
+                      <span className="text-[11px] text-slate-500 block">{translateText("Bột đường")}</span>
                       <strong className="text-sm font-black text-blue-600">58.4%</strong>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
                         <div className="bg-blue-500 h-full w-5/6" />
@@ -291,12 +265,8 @@ export const HomePage: React.FC = () => {
                 {/* Live Status Footer */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-slate-600">
                   <span className="inline-flex items-center gap-1.5 font-semibold text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-teal-600" />
-                    Kiểm thực 3 bước & Lưu mẫu 24 giờ hoàn tất
-                  </span>
-                  <span className="text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg">
-                    Đồng bộ cổng Phụ huynh
-                  </span>
+                    <CheckCircle2 className="w-4 h-4 text-teal-600" />{translateText("Kiểm thực 3 bước & Lưu mẫu 24 giờ hoàn tất")}</span>
+                  <span className="text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg">{translateText("Đồng bộ cổng Phụ huynh")}</span>
                 </div>
               </div>
             </div>
@@ -310,12 +280,8 @@ export const HomePage: React.FC = () => {
       <section id="standards" className="py-16 bg-[#f8fafc]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold text-teal-700 uppercase tracking-wider">
-              Quy chuẩn vận hành
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Chuẩn Hóa Toàn Bộ Quy Trình Dinh Dưỡng & An Toàn Thực Phẩm
-            </h2>
+            <span className="text-xs font-bold text-teal-700 uppercase tracking-wider">{translateText("Quy chuẩn vận hành")}</span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{translateText("Chuẩn Hóa Toàn Bộ Quy Trình Dinh Dưỡng & An Toàn Thực Phẩm")}</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -356,8 +322,8 @@ export const HomePage: React.FC = () => {
                   >
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">{item.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
+                  <h3 className="text-base font-bold text-slate-900">{translateText(item.title)}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">{translateText(item.desc)}</p>
                 </div>
               );
             })}
@@ -371,12 +337,8 @@ export const HomePage: React.FC = () => {
       <section id="workflow" className="py-16 bg-white border-t border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold text-teal-700 uppercase tracking-wider">
-              Luồng dữ liệu liên thông
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              6 Bước Vận Hành Bán Trú Khép Kín Hằng Ngày
-            </h2>
+            <span className="text-xs font-bold text-teal-700 uppercase tracking-wider">{translateText("Luồng dữ liệu liên thông")}</span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{translateText("6 Bước Vận Hành Bán Trú Khép Kín Hằng Ngày")}</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
@@ -419,8 +381,8 @@ export const HomePage: React.FC = () => {
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-teal-700 text-white font-black text-xs">
                   {w.step}
                 </span>
-                <h4 className="text-xs font-bold text-slate-900">{w.title}</h4>
-                <p className="text-[11px] text-slate-500 leading-relaxed">{w.desc}</p>
+                <h4 className="text-xs font-bold text-slate-900">{translateText(w.title)}</h4>
+                <p className="text-[11px] text-slate-500 leading-relaxed">{translateText(w.desc)}</p>
               </div>
             ))}
           </div>
@@ -442,16 +404,11 @@ export const HomePage: React.FC = () => {
                   KidMeal · {schoolName}
                 </span>
               </div>
-              <p className="text-slate-400 text-xs leading-relaxed max-w-md">
-                Hệ thống quản lý thực đơn, dinh dưỡng, an toàn thực phẩm bán trú và sổ liên lạc bữa
-                ăn dành cho trường mầm non.
-              </p>
+              <p className="text-slate-400 text-xs leading-relaxed max-w-md">{translateText("Hệ thống quản lý thực đơn, dinh dưỡng, an toàn thực phẩm bán trú và sổ liên lạc bữa ăn dành cho trường mầm non.")}</p>
             </div>
 
             <div className="md:col-span-6 space-y-2.5">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Thông Tin Liên Hệ Trường
-              </h4>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">{translateText("Thông Tin Liên Hệ Trường")}</h4>
               <div className="space-y-2 text-xs">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" />
@@ -466,7 +423,7 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarCheck className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span>Hoạt động: Thứ Hai – Thứ Sáu hằng tuần</span>
+                  <span>{translateText("Hoạt động: Thứ Hai – Thứ Sáu hằng tuần")}</span>
                 </div>
               </div>
             </div>
@@ -474,9 +431,8 @@ export const HomePage: React.FC = () => {
 
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
             <span>
-              © {new Date().getFullYear()} {schoolName} · Hệ thống KidMeal.
-            </span>
-            <span>Bảo mật dữ liệu học sinh & an toàn thực phẩm học đường</span>
+              © {new Date().getFullYear()} {schoolName} {translateText("· Hệ thống KidMeal.")}</span>
+            <span>{translateText("Bảo mật dữ liệu học sinh & an toàn thực phẩm học đường")}</span>
           </div>
         </div>
       </footer>

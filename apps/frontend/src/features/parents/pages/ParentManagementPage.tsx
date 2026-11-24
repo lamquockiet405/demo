@@ -571,12 +571,10 @@ export const ParentManagementPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-xs text-slate-600">
-              Năm học
-              <select aria-label="Năm học" value={yearFilter.yearId} onChange={e => {
+            <label className="flex items-center gap-2 text-xs text-slate-600">{translateText("Năm học")}<select aria-label={translateText("Năm học")} value={yearFilter.yearId} onChange={e => {
                 yearFilter.setYearId(e.target.value); setCurrentPage(1);
               }} className="px-3.5 py-2.5 bg-slate-50 text-xs text-slate-800 rounded-xl border border-slate-200">
-                <option value="">Tất cả năm học</option>
+                <option value="">{translateText("Tất cả năm học")}</option>
                 {yearFilter.years.map(year => <option key={year.id} value={year.id}>{year.name}{year.status === 'ACTIVE' ? ' (đang áp dụng)' : ''}</option>)}
               </select>
             </label>

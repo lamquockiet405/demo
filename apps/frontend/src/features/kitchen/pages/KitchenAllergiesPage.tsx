@@ -612,13 +612,9 @@ export function KitchenAllergyAlertsPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
-              Bếp Bán Trú • KDS
-            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">{translateText("Bếp Bán Trú • KDS")}</span>
             <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs font-semibold text-slate-500">
-              Kiểm tra định lượng & tem dán khay ăn riêng
-            </span>
+            <span className="text-xs font-semibold text-slate-500">{translateText("Kiểm tra định lượng & tem dán khay ăn riêng")}</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
             <ShieldAlert className="w-6 h-6 text-rose-600 shrink-0" />
@@ -832,23 +828,15 @@ export function KitchenAllergyAlertsPage() {
       {viewMode === "STUDENT" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-            <span>
-              Hiển thị <strong>{filteredChildTrays.length}</strong> học sinh có chế độ ăn kiêng cữ
-            </span>
-            <span>
-              Tiến độ: <strong>{preparedCount}</strong> / <strong>{childTrays.length}</strong> khay đã chuẩn bị
-            </span>
+            <span>{translateText("Hiển thị")} <strong>{filteredChildTrays.length}</strong> {translateText("học sinh có chế độ ăn kiêng cữ")}</span>
+            <span>{translateText("Tiến độ:")} <strong>{preparedCount}</strong> / <strong>{childTrays.length}</strong> {translateText("khay đã chuẩn bị")}</span>
           </div>
 
           {!filteredChildTrays.length ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-2">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-              <h3 className="text-base font-bold text-slate-800">
-                Không tìm thấy cảnh báo dị ứng phù hợp
-              </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Không có học sinh nào trùng khớp với bộ lọc đã chọn. Hãy thử xóa bớt điều kiện lọc hoặc chọn ngày khác.
-              </p>
+              <h3 className="text-base font-bold text-slate-800">{translateText("Không tìm thấy cảnh báo dị ứng phù hợp")}</h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">{translateText("Không có học sinh nào trùng khớp với bộ lọc đã chọn. Hãy thử xóa bớt điều kiện lọc hoặc chọn ngày khác.")}</p>
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
@@ -949,7 +937,7 @@ export function KitchenAllergyAlertsPage() {
                                 type="button"
                                 onClick={() => handlePrintStickers([tray])}
                                 className="p-1.5 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200 cursor-pointer"
-                                title="In tem dán khay ăn riêng cho bé này"
+                                title={translateText("In tem dán khay ăn riêng cho bé này")}
                               >
                                 <Printer className="w-3.5 h-3.5" />
                               </button>
@@ -993,7 +981,7 @@ export function KitchenAllergyAlertsPage() {
           {!classGroups.length ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-2">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-              <h3 className="text-base font-bold text-slate-800">Không có lớp nào có cảnh báo</h3>
+              <h3 className="text-base font-bold text-slate-800">{translateText("Không có lớp nào có cảnh báo")}</h3>
             </div>
           ) : (
             classGroups.map((group) => (
@@ -1009,8 +997,7 @@ export function KitchenAllergyAlertsPage() {
                     </div>
                     <div>
                       <h3 className="font-extrabold text-base text-slate-900">{group.className.replace(/\s*\([^)]*\)/g, '').trim()}</h3>
-                      <p className="text-xs text-slate-500 font-medium">
-                        Có <strong>{group.trays.length}</strong> học sinh ăn riêng • Đã chuẩn bị:{" "}
+                      <p className="text-xs text-slate-500 font-medium">{translateText("Có")} <strong>{group.trays.length}</strong> {translateText("học sinh ăn riêng • Đã chuẩn bị:")}{" "}
                         <strong>{group.preparedCount}</strong> / {group.trays.length} khay
                       </p>
                     </div>
@@ -1021,16 +1008,14 @@ export function KitchenAllergyAlertsPage() {
                       type="button"
                       onClick={() => markAllPreparedInClass(group.className, true)}
                       className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition cursor-pointer"
-                    >
-                      Đánh dấu xong cả lớp
-                    </button>
+                    >{translateText("Đánh dấu xong cả lớp")}</button>
                     <button
                       type="button"
                       onClick={() => handlePrintStickers(group.trays)}
                       className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                     >
                       <Printer className="w-3.5 h-3.5" />
-                      <span>In tem lớp này</span>
+                      <span>{translateText("In tem lớp này")}</span>
                     </button>
                   </div>
                 </div>
@@ -1083,7 +1068,7 @@ export function KitchenAllergyAlertsPage() {
           {!filteredAlerts.length ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-xs space-y-2">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-              <h3 className="text-base font-bold text-slate-800">Không có cảnh báo nào</h3>
+              <h3 className="text-base font-bold text-slate-800">{translateText("Không có cảnh báo nào")}</h3>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -1102,18 +1087,17 @@ export function KitchenAllergyAlertsPage() {
                     </span>
                   </div>
 
-                  <div className="text-xs text-slate-500 font-medium">
-                    Lớp: <span className="font-bold text-slate-700">{alert.className.replace(/\s*\([^)]*\)/g, '').trim()}</span>
+                  <div className="text-xs text-slate-500 font-medium">{translateText("Lớp:")} <span className="font-bold text-slate-700">{alert.className.replace(/\s*\([^)]*\)/g, '').trim()}</span>
                   </div>
 
                   <div className="text-xs text-slate-800 bg-rose-50/70 border border-rose-200/70 rounded-xl p-2.5">
-                    <span className="font-bold text-rose-900">Nội dung yêu cầu: </span>
+                    <span className="font-bold text-rose-900">{translateText("Nội dung yêu cầu:")} </span>
                     <span>{(alert.allergen || "Đối chiếu hồ sơ trước khi chế biến.").replace(/\s*\([^)]*\)/g, '').trim()}</span>
                   </div>
 
                   {alert.replacementMeal && (
                     <div className="text-xs text-emerald-800 bg-emerald-50/70 border border-emerald-200/70 rounded-xl p-2">
-                      <span className="font-bold">Suất thay thế: </span>
+                      <span className="font-bold">{translateText("Suất thay thế:")} </span>
                       <span>{alert.replacementMeal}</span>
                     </div>
                   )}

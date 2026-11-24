@@ -1445,8 +1445,7 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                                         </div>
                                         {subAffected.length > 0 && (
                                           <div className="mt-1 px-1.5 py-1 rounded bg-rose-100/90 border border-rose-300 text-[9px] text-rose-900 font-bold flex items-center justify-between gap-1">
-                                            <span className="truncate" title={subAffected.map(c => `${c.childName} (${c.allergen})`).join(', ')}>
-                                              ⚠ Trùng dị ứng ({subAffected.length} bé): {subAffected.map(c => `${c.childName} (${c.allergen})`).join(', ')}
+                                            <span className="truncate" title={subAffected.map(c => `${c.childName} (${c.allergen})`).join(', ')}>{translateText("⚠ Trùng dị ứng (")}{subAffected.length} {translateText("bé):")} {subAffected.map(c => `${c.childName} (${c.allergen})`).join(', ')}
                                             </span>
                                             {!readOnly && (
                                               <button
@@ -2380,13 +2379,9 @@ export const WeeklyGridTable: React.FC<WeeklyGridTableProps> = ({
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-bold text-slate-900 text-xs sm:text-sm">{dish.name}</p>
                                 {dish.hasAllergyConflict ? (
-                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                    ⚠ Dị nguyên: {(dish.conflictingAllergens || []).join(', ')} ({dish.conflictingChildrenCount || 1} bé)
-                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">{translateText("⚠ Dị nguyên:")} {(dish.conflictingAllergens || []).join(', ')} ({dish.conflictingChildrenCount || 1} {translateText("bé)")}</span>
                                 ) : (
-                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    ✓ Không chứa dị nguyên
-                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">{translateText("✓ Không chứa dị nguyên")}</span>
                                 )}
                               </div>
                               <p className="text-[11px] text-slate-500 mt-0.5">{translateText(dish.suitabilityReason)}</p>

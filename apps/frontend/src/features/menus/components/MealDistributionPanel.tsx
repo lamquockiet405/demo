@@ -248,8 +248,7 @@ export const MealDistributionPanel: React.FC<{ canEdit?: boolean }> = ({ canEdit
                   {translateText('Nước:')}{' '}
                   {daily.water ? fmtRange(daily.water, 0) : '1.600 – 2.000'} ml
                 </span>
-                <span className="font-semibold text-slate-600">
-                  · Đạm {fmtRange(daily.protein, 0)}% · Béo {fmtRange(daily.lipid, 0)}% · Bột đường{' '}
+                <span className="font-semibold text-slate-600">{translateText("· Đạm")} {fmtRange(daily.protein, 0)}{translateText("% · Béo")} {fmtRange(daily.lipid, 0)}{translateText("% · Bột đường")}{' '}
                   {fmtRange(daily.carbohydrate, 0)}%
                 </span>
               </div>

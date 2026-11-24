@@ -280,9 +280,7 @@ export function ClassManagementPage() {
       )}
 
       {!academicYears.loading && !academicYears.data?.length && (
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-          Chưa có năm học. Hãy tạo hoặc chọn năm học trong <Link className="font-bold underline" to="/academic-years">Quản lý năm học</Link> trước khi thêm lớp.
-        </p>
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">{translateText("Chưa có năm học. Hãy tạo hoặc chọn năm học trong")} <Link className="font-bold underline" to="/academic-years">{translateText("Quản lý năm học")}</Link> {translateText("trước khi thêm lớp.")}</p>
       )}
 
       {/* 1. KPI Cards */}
@@ -449,8 +447,7 @@ export function ClassManagementPage() {
                           <span className="font-bold text-slate-900 group-hover:text-teal-700 truncate transition block">
                             {row.name}
                           </span>
-                          <span className="text-[11px] text-slate-400 block">
-                            Mã: #{row.id}
+                          <span className="text-[11px] text-slate-400 block">{translateText("Mã: #")}{row.id}
                           </span>
                         </div>
                       </Link>

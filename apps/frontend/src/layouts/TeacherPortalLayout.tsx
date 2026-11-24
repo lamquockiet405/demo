@@ -209,7 +209,7 @@ export function TeacherPortalLayout() {
           </div>
 
           <div className="kp-topbar-actions ml-auto shrink-0">
-            <UserHeaderDropdown customSubtitle="Giáo viên mầm non" />
+            <UserHeaderDropdown customSubtitle={translateText("Giáo viên mầm non")} />
           </div>
         </header>
 
